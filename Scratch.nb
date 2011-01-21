@@ -1,0 +1,665 @@
+(* Content-type: application/mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 7.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       145,          7]
+NotebookDataLength[     23775,        656]
+NotebookOptionsPosition[     21801,        586]
+NotebookOutlinePosition[     22601,        614]
+CellTagsIndexPosition[     22516,        609]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[
+ RowBox[{"<<", "Theorema`"}]], "Input",
+ CellChangeTimes->{{3.502705291591924*^9, 3.502705295397482*^9}, {
+   3.503390440609775*^9, 3.503390443695853*^9}, 3.503826212153389*^9}],
+
+Cell[BoxData[
+ RowBox[{"<<", "Theorema`GUI`GUI`"}]], "Input",
+ CellChangeTimes->{{3.503386923896156*^9, 3.503386948108444*^9}, {
+  3.503826551527658*^9, 3.503826557787854*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"CreatePalette", "[", 
+  RowBox[{
+   RowBox[{"Dynamic", "[", 
+    RowBox[{"displayKBBrowser", "[", "]"}], "]"}], ",", 
+   RowBox[{"StyleDefinitions", "\[Rule]", 
+    RowBox[{"ToFileName", "[", 
+     RowBox[{
+      RowBox[{"{", "\"\<Theorema\>\"", "}"}], ",", "\"\<GUI.nb\>\""}], 
+     "]"}]}], ",", 
+   RowBox[{"WindowTitle", "\[Rule]", "\"\<Theorema Commander\>\""}], ",", 
+   "\[IndentingNewLine]", 
+   RowBox[{"ScreenStyleEnvironment", "\[Rule]", "\"\<Presentation\>\""}], ",", 
+   RowBox[{"WindowElements", "\[Rule]", 
+    RowBox[{"{", "\"\<StatusArea\>\"", "}"}]}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.503814840461077*^9, 3.503814880150161*^9}, {
+   3.503814924356093*^9, 3.503814941402585*^9}, 3.50382446501951*^9, {
+   3.50382624412669*^9, 3.50382624939572*^9}, {3.503827008463263*^9, 
+   3.503827125653559*^9}, {3.503827167773854*^9, 3.503827195542178*^9}, {
+   3.503828887548912*^9, 3.503828888625658*^9}, {3.503831793082784*^9, 
+   3.503831807146972*^9}, {3.503833008246133*^9, 3.503833021868029*^9}, {
+   3.503833120286258*^9, 3.503833121124778*^9}, {3.50383344660002*^9, 
+   3.503833471378213*^9}, {3.50383384471722*^9, 3.503833846237763*^9}, {
+   3.503834558692237*^9, 3.503834560619807*^9}}],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"NotebookObject", "[", 
+   PanelBox[GridBox[{
+      {
+       TooltipBox[
+        ButtonBox[
+         StyleBox[
+          
+          DynamicBox[FEPrivate`FrontEndResource[
+           "FEBitmaps", "ManipulatePasteIcon"],
+           ImageSizeCache->{13., {4., 9.}}],
+          DynamicUpdating->True],
+         Appearance->{Automatic, None},
+         BaseStyle->{},
+         ButtonFunction:>FrontEndExecute[{
+            FrontEnd`SetSelectedNotebook[
+             NotebookObject[
+              FrontEndObject[
+               LinkObject["j97_shm", 1, 1]], 57]]}],
+         Evaluator->None,
+         Method->"Queued"],
+        DynamicBox[
+         FEPrivate`FrontEndResource[
+         "FEStrings", "NotebookObjectToTheFront"]]], 
+       StyleBox["\<\"Theorema Commander\"\>",
+        StripOnInput->False,
+        FontColor->GrayLevel[0.5]]}
+     },
+     GridBoxAlignment->{
+      "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+       "RowsIndexed" -> {}}],
+    FrameMargins->{{4, 5}, {4, 4}}], "]"}],
+  NotebookObject[
+   FrontEndObject[
+    LinkObject["j97_shm", 1, 1]], 57],
+  Editable->False]], "Output",
+ CellChangeTimes->{3.503815000420645*^9, 3.503817712244838*^9, 
+  3.503817891771496*^9, 3.503817974682768*^9, 3.50382446594324*^9, 
+  3.503826250324265*^9, 3.503826309786873*^9, 3.503827130478277*^9, 
+  3.503827197765681*^9, 3.503829935969373*^9, 3.50383180963667*^9, 
+  3.503832094651896*^9, 3.503833023394414*^9, 3.50383312287622*^9, 
+  3.503833473625178*^9, 3.503833590766725*^9, 3.50383368308497*^9, 
+  3.503833848113721*^9, 3.503834108350863*^9, 3.503834358199408*^9, 
+  3.503834562562984*^9, 3.503835028368955*^9, 3.503835075421909*^9, 
+  3.503835129648883*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"CreatePalette", "[", 
+  RowBox[{
+   RowBox[{"Dynamic", "[", 
+    RowBox[{"displayKBBrowser", "[", "]"}], "]"}], ",", 
+   RowBox[{"StyleDefinitions", "\[Rule]", 
+    RowBox[{"ToFileName", "[", 
+     RowBox[{
+      RowBox[{"{", "\"\<Theorema\>\"", "}"}], ",", "\"\<GUI.nb\>\""}], 
+     "]"}]}], ",", 
+   RowBox[{"WindowTitle", "\[Rule]", "\"\<Theorema Commander\>\""}], ",", 
+   "\[IndentingNewLine]", 
+   RowBox[{"ScreenStyleEnvironment", "\[Rule]", "\"\<Working\>\""}], ",", 
+   RowBox[{"WindowElements", "\[Rule]", 
+    RowBox[{"{", "\"\<StatusArea\>\"", "}"}]}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.503814840461077*^9, 3.503814880150161*^9}, {
+   3.503814924356093*^9, 3.503814941402585*^9}, 3.50382446501951*^9, {
+   3.50382624412669*^9, 3.50382624939572*^9}, {3.503827008463263*^9, 
+   3.503827125653559*^9}, {3.503827167773854*^9, 3.503827195542178*^9}, {
+   3.503828887548912*^9, 3.503828888625658*^9}, {3.503831793082784*^9, 
+   3.503831807146972*^9}, {3.503833008246133*^9, 3.503833021868029*^9}, {
+   3.503833120286258*^9, 3.503833121124778*^9}, {3.50383344660002*^9, 
+   3.503833471378213*^9}, {3.50383384471722*^9, 3.503833846237763*^9}, {
+   3.503834558692237*^9, 3.503834560619807*^9}, {3.503835098338119*^9, 
+   3.503835102857578*^9}}],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"NotebookObject", "[", 
+   PanelBox[GridBox[{
+      {
+       TooltipBox[
+        ButtonBox[
+         StyleBox[
+          
+          DynamicBox[FEPrivate`FrontEndResource[
+           "FEBitmaps", "ManipulatePasteIcon"],
+           ImageSizeCache->{13., {4., 9.}}],
+          DynamicUpdating->True],
+         Appearance->{Automatic, None},
+         BaseStyle->{},
+         ButtonFunction:>FrontEndExecute[{
+            FrontEnd`SetSelectedNotebook[
+             NotebookObject[
+              FrontEndObject[
+               LinkObject["j97_shm", 1, 1]], 59]]}],
+         Evaluator->None,
+         Method->"Queued"],
+        DynamicBox[
+         FEPrivate`FrontEndResource[
+         "FEStrings", "NotebookObjectToTheFront"]]], 
+       StyleBox["\<\"Theorema Commander\"\>",
+        StripOnInput->False,
+        FontColor->GrayLevel[0.5]]}
+     },
+     GridBoxAlignment->{
+      "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+       "RowsIndexed" -> {}}],
+    FrameMargins->{{4, 5}, {4, 4}}], "]"}],
+  NotebookObject[
+   FrontEndObject[
+    LinkObject["j97_shm", 1, 1]], 59],
+  Editable->False]], "Output",
+ CellChangeTimes->{3.50383510434907*^9, 3.503835150430834*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"SetOptions", "[", 
+  RowBox[{
+   RowBox[{"InputNotebook", "[", "]"}], ",", 
+   RowBox[{"StyleDefinitions", "\[Rule]", 
+    RowBox[{"ToFileName", "[", 
+     RowBox[{
+      RowBox[{"{", "\"\<Theorema\>\"", "}"}], ",", 
+      "\"\<TheoremaNotebook.nb\>\""}], "]"}]}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.503827721953604*^9, 3.50382774187351*^9}, {
+  3.503827799347222*^9, 3.503827812884209*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"ToFileName", "[", 
+  RowBox[{
+   RowBox[{"{", "\"\<Theorema\>\"", "}"}], ",", "\"\<GUIStyles.nb\>\""}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.503827606280257*^9, 3.503827612982772*^9}}],
+
+Cell[BoxData["\<\"Theorema/GUIStyles.nb\"\>"], "Output",
+ CellChangeTimes->{{3.503827608097124*^9, 3.503827613800855*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Attributes", "[", "CreatePalette", "]"}]], "Input",
+ CellChangeTimes->{{3.503827560716659*^9, 3.503827588331814*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"Protected", ",", "ReadProtected"}], "}"}]], "Output",
+ CellChangeTimes->{{3.503827569019143*^9, 3.503827589136289*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Checkbox", "[", 
+  RowBox[{"False", ",", 
+   RowBox[{"Appearance", "\[Rule]", "None"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.503834901556879*^9, 3.50383499242183*^9}}],
+
+Cell[BoxData[
+ CheckboxBox[False,
+  Appearance->None]], "Output",
+ CellChangeTimes->{{3.503834908060015*^9, 3.503834951131207*^9}, {
+  3.503834982654485*^9, 3.503834999673135*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Column", "[", 
+  RowBox[{"{", 
+   RowBox[{"a", ",", "b"}], "}"}], "]"}]], "Input",
+ CellChangeTimes->{{3.503834021550752*^9, 3.503834029147585*^9}}],
+
+Cell[BoxData[
+ TagBox[GridBox[{
+    {"a"},
+    {"b"}
+   },
+   GridBoxAlignment->{"Columns" -> {{Left}}},
+   GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+  "Column"]], "Output",
+ CellChangeTimes->{3.503834029926686*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NotebookGet", "[", "%", "]"}]], "Input",
+ CellChangeTimes->{{3.503827388226173*^9, 3.503827394830251*^9}}],
+
+Cell[BoxData[
+ RowBox[{"Notebook", "[", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{"Cell", "[", 
+     RowBox[{
+      RowBox[{"BoxData", "[", 
+       RowBox[{"DynamicBox", "[", 
+        RowBox[{
+         RowBox[{"ToBoxes", "[", 
+          RowBox[{
+           RowBox[{"displayKBBrowser", "[", "]"}], ",", "StandardForm"}], 
+          "]"}], ",", 
+         RowBox[{"ImageSizeCache", "\[Rule]", 
+          RowBox[{"{", 
+           RowBox[{"616.`", ",", 
+            RowBox[{"{", 
+             RowBox[{"120.5`", ",", "127.5`"}], "}"}]}], "}"}]}]}], "]"}], 
+       "]"}], ",", 
+      RowBox[{"CellMargins", "\[Rule]", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"{", 
+          RowBox[{"0", ",", "0"}], "}"}], ",", 
+         RowBox[{"{", 
+          RowBox[{"0", ",", "0"}], "}"}]}], "}"}]}], ",", 
+      RowBox[{"CellBracketOptions", "\[Rule]", 
+       RowBox[{"{", 
+        RowBox[{"\<\"Color\"\>", "\[Rule]", 
+         RowBox[{"RGBColor", "[", 
+          RowBox[{"0.269993`", ",", "0.308507`", ",", "0.6`"}], "]"}]}], 
+        "}"}]}], ",", 
+      RowBox[{"CellHorizontalScrolling", "\[Rule]", "True"}], ",", 
+      RowBox[{"PageBreakAbove", "\[Rule]", "True"}], ",", 
+      RowBox[{"PageBreakWithin", "\[Rule]", "False"}], ",", 
+      RowBox[{"ShowAutoStyles", "\[Rule]", "True"}], ",", 
+      RowBox[{"LineSpacing", "\[Rule]", 
+       RowBox[{"{", 
+        RowBox[{"1.25`", ",", "0"}], "}"}]}], ",", 
+      RowBox[{"AutoItalicWords", "\[Rule]", 
+       RowBox[{"{", "}"}]}], ",", 
+      RowBox[{"ScriptMinSize", "\[Rule]", "9"}], ",", 
+      RowBox[{"ShowStringCharacters", "\[Rule]", "False"}], ",", 
+      RowBox[{"FontFamily", "\[RuleDelayed]", 
+       RowBox[{"CurrentValue", "[", "\<\"PanelFontFamily\"\>", "]"}]}], ",", 
+      RowBox[{"FontSize", "\[RuleDelayed]", 
+       RowBox[{"CurrentValue", "[", "\<\"PanelFontSize\"\>", "]"}]}]}], "]"}],
+     "}"}], ",", 
+   RowBox[{"WindowSize", "\[Rule]", "All"}], ",", 
+   RowBox[{"WindowMargins", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"247", ",", "Automatic"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"Automatic", ",", "100"}], "}"}]}], "}"}]}], ",", 
+   RowBox[{"WindowElements", "\[Rule]", 
+    RowBox[{"{", "}"}]}], ",", 
+   RowBox[{"WindowTitle", "\[Rule]", "\<\"Theorema Commander\"\>"}], ",", 
+   RowBox[{
+   "FrontEndVersion", 
+    "\[Rule]", "\<\"7.0 for Linux x86 (32-bit) (November 10, 2008)\"\>"}], 
+   ",", 
+   RowBox[{"StyleDefinitions", "\[Rule]", 
+    RowBox[{"FrontEnd`FileName", "[", 
+     RowBox[{
+      RowBox[{"{", "\<\"Theorema\"\>", "}"}], ",", "\<\"GUIStyles.nb\"\>", 
+      ",", 
+      RowBox[{"CharacterEncoding", "\[Rule]", "\<\"iso8859-1\"\>"}]}], 
+     "]"}]}]}], "]"}]], "Output",
+ CellChangeTimes->{3.503827395404909*^9}]
+}, Open  ]],
+
+Cell[BoxData["Palette"], "Input",
+ CellChangeTimes->{{3.503826863475573*^9, 3.50382687646093*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"??", "displayKBBrowser"}]], "Input",
+ CellChangeTimes->{{3.503826425439481*^9, 3.503826426386926*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ StyleBox["\<\"\"\>", "MSG"]], "Print", "PrintUsage",
+ CellChangeTimes->{3.503826427431285*^9},
+ CellTags->"Info3503830027-2852806"],
+
+Cell[BoxData[
+ InterpretationBox[GridBox[{
+    {GridBox[{
+       {
+        RowBox[{
+         RowBox[{"displayKBBrowser", "[", "]"}], ":=", 
+         RowBox[{"TabView", "[", 
+          RowBox[{
+           RowBox[{
+            RowBox[{"(", 
+             RowBox[{
+              RowBox[{
+               RowBox[{"Tooltip", "[", 
+                RowBox[{
+                 RowBox[{"FileBaseName", "[", "#1", "]"}], ",", "#1"}], "]"}],
+                "\[Rule]", 
+               RowBox[{"Pane", "[", 
+                RowBox[{
+                 RowBox[{
+                  RowBox[{"Theorema`GUI`GUI`Private`structView", "[", 
+                   RowBox[{"#1", ",", 
+                    RowBox[{
+                    "Theorema`GUI`GUI`Private`kbStruct", "[", "#1", "]"}], 
+                    ",", 
+                    RowBox[{"{", "}"}]}], "]"}], "\[LeftDoubleBracket]", "1", 
+                  "\[RightDoubleBracket]"}], ",", 
+                 RowBox[{"{", 
+                  RowBox[{"600", ",", "200"}], "}"}], ",", 
+                 RowBox[{"ImageSizeAction", "\[Rule]", "\<\"Scrollable\"\>"}],
+                  ",", 
+                 RowBox[{"Scrollbars", "\[Rule]", "Automatic"}]}], "]"}]}], 
+              "&"}], ")"}], "/@", 
+            RowBox[{
+             RowBox[{"(", 
+              RowBox[{
+               RowBox[{"#1", "\[LeftDoubleBracket]", 
+                RowBox[{"1", ",", "1", ",", "1"}], "\[RightDoubleBracket]"}], 
+               "&"}], ")"}], "/@", 
+             RowBox[{
+             "DownValues", "[", "Theorema`GUI`GUI`Private`kbStruct", 
+              "]"}]}]}], ",", 
+           RowBox[{"Appearance", "\[Rule]", 
+            RowBox[{"{", 
+             RowBox[{"\<\"Limited\"\>", ",", "10"}], "}"}]}]}], "]"}]}]}
+      },
+      BaselinePosition->{Baseline, {1, 1}},
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxItemSize->{"Columns" -> {{
+           Scaled[0.999]}}, "ColumnsIndexed" -> {}, "Rows" -> {{1.}}, 
+        "RowsIndexed" -> {}}]}
+   },
+   BaselinePosition->{Baseline, {1, 1}},
+   GridBoxAlignment->{
+    "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+     "RowsIndexed" -> {}}],
+  Definition[Theorema`GUI`GUI`displayKBBrowser],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.503826427500526*^9},
+ CellTags->"Info3503830027-2852806"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"DownValues", "[", "Theorema`GUI`GUI`Private`kbStruct", 
+  "]"}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"HoldPattern", "[", 
+    RowBox[{
+    "Theorema`GUI`GUI`Private`kbStruct", 
+     "[", "\<\"/home/wwindste/Theorema.2/Theorema/Theorema/Prototypes/\
+FormalTextLanguage.nb\"\>", "]"}], "]"}], "\[RuleDelayed]", 
+   RowBox[{"{", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"Cell", "[", 
+       RowBox[{"\<\"Some new theory\"\>", ",", "\<\"Title\"\>", ",", 
+        RowBox[{"CellChangeTimes", "\[Rule]", 
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"{", 
+            RowBox[{"3.50339075482284`*^9", ",", "3.503390756238768`*^9"}], 
+            "}"}], ",", 
+           RowBox[{"{", 
+            RowBox[{"3.503390801438`*^9", ",", "3.50339080500271`*^9"}], 
+            "}"}]}], "}"}]}]}], "]"}], ",", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"Cell", "[", 
+         RowBox[{"\<\"The basics\"\>", ",", "\<\"Section\"\>", ",", 
+          RowBox[{"CellChangeTimes", "\[Rule]", 
+           RowBox[{"{", 
+            RowBox[{"{", 
+             RowBox[{"3.503826749172506`*^9", ",", "3.503826758494762`*^9"}], 
+             "}"}], "}"}]}]}], "]"}], ",", 
+        RowBox[{"Cell", "[", 
+         RowBox[{
+          RowBox[{"BoxData", "[", 
+           RowBox[{"RowBox", "[", 
+            RowBox[{"{", 
+             RowBox[{
+              RowBox[{"RowBox", "[", 
+               RowBox[{"{", 
+                
+                RowBox[{"\<\"any\"\>", ",", "\<\"[\"\>", ",", "\<\"x\"\>", 
+                 ",", "\<\"]\"\>"}], "}"}], "]"}], ",", "\<\";\"\>", ",", 
+              RowBox[{"RowBox", "[", 
+               RowBox[{"{", 
+                RowBox[{"\<\"where\"\>", ",", "\<\"[\"\>", ",", 
+                 RowBox[{"RowBox", "[", 
+                  RowBox[{"{", 
+                   RowBox[{"\<\"x\"\>", ",", "\<\">\"\>", ",", "\<\"1\"\>"}], 
+                   "}"}], "]"}], ",", "\<\"]\"\>"}], "}"}], "]"}]}], "}"}], 
+            "]"}], "]"}], ",", "\<\"FormalTextInputFormula\"\>", ",", 
+          RowBox[{"CellChangeTimes", "\[Rule]", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{"3.487399806994706`*^9", ",", "3.487399809939315`*^9"}],
+               "}"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"3.487399893580513`*^9", ",", "3.487399894708127`*^9"}],
+               "}"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"3.487500864673231`*^9", ",", "3.487500871254677`*^9"}],
+               "}"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"3.487500916449393`*^9", ",", "3.487500947628265`*^9"}],
+               "}"}]}], "}"}]}]}], "]"}], ",", 
+        RowBox[{"Cell", "[", 
+         RowBox[{
+          RowBox[{"BoxData", "[", 
+           RowBox[{"RowBox", "[", 
+            RowBox[{"{", 
+             RowBox[{
+              RowBox[{"RowBox", "[", 
+               RowBox[{"{", 
+                
+                RowBox[{"\<\"f\"\>", ",", "\<\"[\"\>", ",", "\<\"0\"\>", 
+                 ",", "\<\"]\"\>"}], "}"}], "]"}], ",", "\<\":=\"\>", 
+              ",", "\<\"2\"\>"}], "}"}], "]"}], "]"}], 
+          ",", "\<\"FormalTextInputFormula\"\>", ",", 
+          RowBox[{"CellChangeTimes", "\[Rule]", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{"3.487399806994706`*^9", ",", "3.487399809939315`*^9"}],
+               "}"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"3.487399893580513`*^9", ",", "3.487399894708127`*^9"}],
+               "}"}], ",", "3.487500828938187`*^9", ",", 
+             RowBox[{"{", 
+              RowBox[{"3.487500950885909`*^9", ",", "3.48750095509603`*^9"}], 
+              "}"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"3.489892595556296`*^9", ",", "3.48989259614421`*^9"}], 
+              "}"}]}], "}"}]}], ",", 
+          RowBox[{"CellTags", "\[Rule]", 
+           RowBox[{"{", 
+            RowBox[{"\<\"f base case\"\>", ",", "\<\"function\"\>"}], 
+            "}"}]}]}], "]"}], ",", 
+        RowBox[{"Cell", "[", 
+         RowBox[{
+          RowBox[{"BoxData", "[", 
+           RowBox[{"RowBox", "[", 
+            RowBox[{"{", 
+             RowBox[{
+              RowBox[{"RowBox", "[", 
+               RowBox[{"{", 
+                
+                RowBox[{"\<\"f\"\>", ",", "\<\"[\"\>", ",", "\<\"x\"\>", 
+                 ",", "\<\"]\"\>"}], "}"}], "]"}], ",", "\<\":=\"\>", ",", 
+              RowBox[{"RowBox", "[", 
+               RowBox[{"{", 
+                RowBox[{
+                 RowBox[{"RowBox", "[", 
+                  RowBox[{"{", 
+                   RowBox[{"\<\"f\"\>", ",", "\<\"[\"\>", ",", 
+                    RowBox[{"RowBox", "[", 
+                    RowBox[{"{", 
+                    RowBox[{"\<\"x\"\>", ",", "\<\"-\"\>", ",", "\<\"1\"\>"}],
+                     "}"}], "]"}], ",", "\<\"]\"\>"}], "}"}], "]"}], 
+                 ",", "\<\"+\"\>", ",", "\<\"2\"\>"}], "}"}], "]"}]}], "}"}], 
+            "]"}], "]"}], ",", "\<\"FormalTextInputFormula\"\>", ",", 
+          RowBox[{"CellChangeTimes", "\[Rule]", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"{", 
+              RowBox[{"3.487399806994706`*^9", ",", "3.487399809939315`*^9"}],
+               "}"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"3.487399893580513`*^9", ",", "3.487399894708127`*^9"}],
+               "}"}], ",", "3.487400317196357`*^9", ",", 
+             RowBox[{"{", 
+              RowBox[{"3.487500930382718`*^9", ",", "3.487500935837146`*^9"}],
+               "}"}], ",", 
+             RowBox[{"{", 
+              RowBox[{"3.487501015993545`*^9", ",", "3.487501017403637`*^9"}],
+               "}"}], ",", "3.487501700423713`*^9"}], "}"}]}], ",", 
+          RowBox[{"CellTags", "\[Rule]", 
+           RowBox[{"{", 
+            RowBox[{"\<\"f general case\"\>", ",", "\<\"function\"\>"}], 
+            "}"}]}]}], "]"}]}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{
+        RowBox[{"Cell", "[", 
+         RowBox[{"\<\"Advanced concepts\"\>", ",", "\<\"Section\"\>", ",", 
+          RowBox[{"CellChangeTimes", "\[Rule]", 
+           RowBox[{"{", 
+            RowBox[{"{", 
+             RowBox[{"3.503826771660811`*^9", ",", "3.503826788089397`*^9"}], 
+             "}"}], "}"}]}]}], "]"}], ",", 
+        RowBox[{"{", 
+         RowBox[{
+          RowBox[{"Cell", "[", 
+           RowBox[{"\<\"Button\"\>", ",", "\<\"Subsection\"\>", ",", 
+            RowBox[{"CellChangeTimes", "\[Rule]", 
+             RowBox[{"{", 
+              RowBox[{"{", 
+               RowBox[{
+               "3.503831701742369`*^9", ",", "3.503831703116275`*^9"}], "}"}],
+               "}"}]}]}], "]"}], ",", 
+          RowBox[{"{", 
+           RowBox[{
+            RowBox[{"Cell", "[", 
+             RowBox[{"\<\"Environment\"\>", ",", "\<\"Subsubsection\"\>", ",", 
+              RowBox[{"CellChangeTimes", "\[Rule]", 
+               RowBox[{"{", 
+                RowBox[{"{", 
+                 RowBox[{
+                 "3.503831712987698`*^9", ",", "3.503831715152389`*^9"}], 
+                 "}"}], "}"}]}]}], "]"}], ",", 
+            RowBox[{"Cell", "[", 
+             
+             RowBox[{"\<\"\[SelectionPlaceholder]\"\>", 
+              ",", "\<\"FormalTextInputFormula\"\>", ",", 
+              RowBox[{"CellTags", "\[Rule]", "\<\"def:WW\"\>"}]}], "]"}]}], 
+           "}"}]}], "}"}]}], "}"}]}], "}"}], "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{3.503826442475606*^9, 3.5038351815832*^9}]
+}, Open  ]]
+},
+WindowSize->{872, 750},
+WindowMargins->{{Automatic, 80}, {132, Automatic}},
+ShowSelection->True,
+FrontEndVersion->"7.0 for Linux x86 (32-bit) (November 10, 2008)",
+StyleDefinitions->Notebook[{
+   Cell[
+    StyleData[StyleDefinitions -> "Default.nb"]]}, Visible -> False, 
+  FrontEndVersion -> "7.0 for Linux x86 (32-bit) (November 10, 2008)", 
+  StyleDefinitions -> "PrivateStylesheetFormatting.nb"]
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{
+ "Info3503830027-2852806"->{
+  Cell[11696, 334, 146, 3, 43, "Print",
+   CellTags->"Info3503830027-2852806"],
+  Cell[11845, 339, 2389, 60, 125, "Print",
+   CellTags->"Info3503830027-2852806"]}
+ }
+*)
+(*CellTagsIndex
+CellTagsIndex->{
+ {"Info3503830027-2852806", 22329, 601}
+ }
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[545, 20, 191, 3, 32, "Input"],
+Cell[739, 25, 176, 3, 32, "Input"],
+Cell[CellGroupData[{
+Cell[940, 32, 1233, 23, 77, "Input"],
+Cell[2176, 57, 1738, 45, 47, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[3951, 107, 1278, 24, 77, "Input"],
+Cell[5232, 133, 1233, 37, 47, "Output"]
+}, Open  ]],
+Cell[6480, 173, 421, 10, 32, "Input"],
+Cell[CellGroupData[{
+Cell[6926, 187, 213, 5, 32, "Input"],
+Cell[7142, 194, 122, 1, 31, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[7301, 200, 141, 2, 32, "Input"],
+Cell[7445, 204, 159, 3, 31, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[7641, 212, 195, 4, 32, "Input"],
+Cell[7839, 218, 180, 4, 31, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[8056, 227, 172, 4, 32, "Input"],
+Cell[8231, 233, 246, 8, 44, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[8514, 246, 130, 2, 32, "Input"],
+Cell[8647, 250, 2760, 70, 252, "Output"]
+}, Open  ]],
+Cell[11422, 323, 98, 1, 32, "Input"],
+Cell[CellGroupData[{
+Cell[11545, 328, 126, 2, 32, "Input"],
+Cell[CellGroupData[{
+Cell[11696, 334, 146, 3, 43, "Print",
+ CellTags->"Info3503830027-2852806"],
+Cell[11845, 339, 2389, 60, 125, "Print",
+ CellTags->"Info3503830027-2852806"]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[14283, 405, 98, 2, 32, "Input"],
+Cell[14384, 409, 7401, 174, 449, "Output"]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)

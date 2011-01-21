@@ -1,0 +1,462 @@
+(* Content-type: application/mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 7.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       145,          7]
+NotebookDataLength[     16494,        453]
+NotebookOptionsPosition[     10894,        309]
+NotebookOutlinePosition[     15184,        411]
+CellTagsIndexPosition[     15025,        403]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Some new theory", "Title",
+ CellChangeTimes->{{3.50339075482284*^9, 3.503390756238768*^9}, {
+  3.503390801438*^9, 3.50339080500271*^9}}],
+
+Cell[CellGroupData[{
+
+Cell["The basics", "Section",
+ CellChangeTimes->{{3.503826749172506*^9, 3.503826758494762*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"DEF", "[", "\"\<function\>\"", "]"}]], "Input",
+ CellChangeTimes->{{3.487399259462319*^9, 3.487399281340689*^9}, {
+  3.487493813187067*^9, 3.487493813412025*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"any", "[", "x", "]"}], ";", 
+  RowBox[{"where", "[", 
+   RowBox[{"x", ">", "1"}], "]"}]}]], "FormalTextInputFormula",
+ CellChangeTimes->{{3.487399806994706*^9, 3.487399809939315*^9}, {
+  3.487399893580513*^9, 3.487399894708127*^9}, {3.487500864673231*^9, 
+  3.487500871254677*^9}, {3.487500916449393*^9, 3.487500947628265*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"f", "[", "0", "]"}], ":=", "2"}]], "FormalTextInputFormula",
+ CellChangeTimes->{{3.487399806994706*^9, 3.487399809939315*^9}, {
+   3.487399893580513*^9, 3.487399894708127*^9}, 3.487500828938187*^9, {
+   3.487500950885909*^9, 3.48750095509603*^9}, {3.489892595556296*^9, 
+   3.48989259614421*^9}},
+ CellTags->{"f base case", "function"}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"f", "[", "x", "]"}], ":=", 
+  RowBox[{
+   RowBox[{"f", "[", 
+    RowBox[{"x", "-", "1"}], "]"}], "+", "2"}]}]], "FormalTextInputFormula",
+ CellChangeTimes->{{3.487399806994706*^9, 3.487399809939315*^9}, {
+   3.487399893580513*^9, 3.487399894708127*^9}, 3.487400317196357*^9, {
+   3.487500930382718*^9, 3.487500935837146*^9}, {3.487501015993545*^9, 
+   3.487501017403637*^9}, 3.487501700423713*^9},
+ CellTags->{"f general case", "function"}],
+
+Cell[BoxData["\[GraySquare]"], "Input",
+ CellGroupingRules->"OutputGrouping",
+ CellChangeTimes->{3.487501703751003*^9},
+ TextAlignment->Right]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"$Pre", "=", 
+   RowBox[{"(", 
+    RowBox[{
+     RowBox[{"SelectionMove", "[", 
+      RowBox[{
+       RowBox[{"InputNotebook", "[", "]"}], ",", "Previous", ",", 
+       "CellGroup"}], "]"}], ";", "#"}], ")"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.492496115714064*^9, 3.492496164781286*^9}, {
+   3.492496204497104*^9, 3.492496221384272*^9}, {3.492496301801885*^9, 
+   3.49249630444994*^9}, 3.492503314864147*^9}],
+
+Cell[BoxData[
+ RowBox[{"$Pre", "=."}]], "Input",
+ CellChangeTimes->{{3.492496378300539*^9, 3.492496380193603*^9}}],
+
+Cell[BoxData[
+ RowBox[{"\[GraySquare]", ":=", 
+  RowBox[{"(", 
+   RowBox[{
+    RowBox[{"EndEnv", "[", "]"}], ";"}], ")"}]}]], "Input",
+ CellChangeTimes->{{3.487399454923599*^9, 3.487399467692246*^9}, {
+   3.487399513804052*^9, 3.487399517480365*^9}, 3.487501707703334*^9}],
+
+Cell[BoxData[
+ RowBox[{"NotebookLocate", "[", 
+  RowBox[{"{", 
+   RowBox[{
+    RowBox[{"InputNotebook", "[", "]"}], ",", "\"\<function\>\""}], "}"}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.487497878141187*^9, 3.487497914009573*^9}, {
+   3.487498016546544*^9, 3.487498060287542*^9}, 3.487498135612484*^9, {
+   3.487500042351808*^9, 3.487500058804573*^9}, {3.487500099519701*^9, 
+   3.487500104490601*^9}, {3.487500149975026*^9, 3.487500155308191*^9}, {
+   3.487500255367069*^9, 3.487500295739911*^9}, {3.492501839487224*^9, 
+   3.492501840673581*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"newDef", "[", "name_String", "]"}], ":=", 
+  RowBox[{"Module", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{"nb", "=", 
+      RowBox[{"InputNotebook", "[", "]"}]}], "}"}], ",", 
+    "\[IndentingNewLine]", 
+    RowBox[{
+     RowBox[{"SelectionMove", "[", 
+      RowBox[{"nb", ",", "Previous", ",", "Cell"}], "]"}], ";", 
+     "\[IndentingNewLine]", 
+     RowBox[{"NotebookDelete", "[", "nb", "]"}], ";", "\[IndentingNewLine]", 
+     RowBox[{"NotebookWrite", "[", 
+      RowBox[{"nb", ",", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"Cell", "[", 
+          RowBox[{
+           RowBox[{"BoxData", "[", 
+            RowBox[{"RowBox", "[", 
+             RowBox[{"{", 
+              RowBox[{"\"\<DEF\>\"", ",", "\"\<[\>\"", ",", 
+               RowBox[{"\"\<\\\"\>\"", "<>", "name", "<>", "\"\<\\\"\>\""}], 
+               ",", "\"\<]\>\""}], "}"}], "]"}], "]"}], ",", 
+           "\"\<Input\>\""}], "]"}], ",", 
+         RowBox[{"Cell", "[", 
+          RowBox[{
+          "\"\<\[SelectionPlaceholder]\>\"", ",", 
+           "\"\<FormalTextInputFormula\>\"", ",", 
+           RowBox[{"CellTags", "\[Rule]", 
+            RowBox[{"{", 
+             RowBox[{"\"\<def:\>\"", "<>", "name"}], "}"}]}]}], "]"}], ",", 
+         "\[IndentingNewLine]", 
+         RowBox[{"Cell", "[", 
+          RowBox[{
+           RowBox[{"BoxData", "[", "\"\<\[GraySquare]\>\"", "]"}], ",", 
+           "\"\<Input\>\"", ",", 
+           RowBox[{"CellGroupingRules", "\[Rule]", "\"\<OutputGrouping\>\""}],
+            ",", 
+           RowBox[{"TextAlignment", "\[Rule]", "Right"}]}], "]"}]}], "}"}], 
+       ",", "All"}], "]"}]}]}], "\[IndentingNewLine]", "]"}]}]], "Input",
+ CellChangeTimes->{{3.487570963231097*^9, 3.487570966732056*^9}, {
+   3.487571089557782*^9, 3.487571146641566*^9}, {3.487571198011404*^9, 
+   3.48757123093359*^9}, {3.487571314430034*^9, 3.487571370298745*^9}, {
+   3.487571401401389*^9, 3.487571557059698*^9}, {3.48757169677002*^9, 
+   3.487571705525325*^9}, {3.487571813871524*^9, 3.487571822655422*^9}, {
+   3.487571913548588*^9, 3.487571980321835*^9}, {3.48757201802146*^9, 
+   3.487572032597283*^9}, {3.487572127066679*^9, 3.487572135898113*^9}, {
+   3.48765611907016*^9, 3.487656120028989*^9}, {3.487656226007315*^9, 
+   3.487656253826403*^9}, {3.487656349769598*^9, 3.48765641976739*^9}, {
+   3.487656461952736*^9, 3.487656474516987*^9}, {3.487656507872806*^9, 
+   3.487656512369646*^9}, {3.492501868314218*^9, 3.492501898784855*^9}, {
+   3.492502022629389*^9, 3.492502065056872*^9}, {3.492502100689406*^9, 
+   3.492502103559672*^9}, 3.492503535940289*^9, {3.492503576909353*^9, 
+   3.492503578037269*^9}, {3.492503777805806*^9, 3.492503779411209*^9}, {
+   3.492505902115066*^9, 3.49250598301952*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"newDef", "[", "]"}], ":=", 
+  RowBox[{"Module", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{"label", "=", 
+      RowBox[{"Input", "[", "\"\<Label\>\"", "]"}]}], "}"}], ",", 
+    RowBox[{
+     RowBox[{"Print", "[", 
+      RowBox[{"\"\<Label=\>\"", ",", "label"}], "]"}], ";", 
+     RowBox[{"newDef", "[", "label", "]"}]}]}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.4925036811135*^9, 3.492503690027096*^9}, {
+  3.492504011313254*^9, 3.492504049832701*^9}, {3.492504213637023*^9, 
+  3.492504224065283*^9}, {3.49250427226706*^9, 3.492504273433021*^9}}],
+
+Cell[BoxData[
+ RowBox[{"Button", "[", 
+  RowBox[{
+  "\"\<DEF[\[SelectionPlaceholder]]\>\"", ",", "\[IndentingNewLine]", 
+   RowBox[{"With", "[", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{"nb", "=", 
+       RowBox[{"InputNotebook", "[", "]"}]}], "}"}], ",", 
+     "\[IndentingNewLine]", 
+     RowBox[{
+      RowBox[{"NotebookApply", "[", 
+       RowBox[{
+       "nb", ",", "\"\<newDef[\\\"\[SelectionPlaceholder]\\\"]\>\"", ",", 
+        "All"}], "]"}], ";", "\[IndentingNewLine]", 
+      RowBox[{"SelectionMove", "[", 
+       RowBox[{"nb", ",", "All", ",", "Cell"}], "]"}], ";", 
+      "\[IndentingNewLine]", 
+      RowBox[{"SelectionEvaluate", "[", "nb", "]"}]}]}], "]"}]}], 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.492503590192051*^9, 3.492503656107654*^9}, {
+  3.49250461542338*^9, 3.492504654289337*^9}, {3.492504735808728*^9, 
+  3.492504737470378*^9}, {3.492505547596885*^9, 3.492505559646652*^9}, {
+  3.492505744690711*^9, 3.492505838030662*^9}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Advanced concepts", "Section",
+ CellChangeTimes->{{3.503826771660811*^9, 3.503826788089397*^9}}],
+
+Cell[CellGroupData[{
+
+Cell["Button", "Subsection",
+ CellChangeTimes->{{3.503831701742369*^9, 3.503831703116275*^9}}],
+
+Cell[BoxData[
+ ButtonBox["\<\"DEF[\[SelectionPlaceholder]]\"\>",
+  Appearance->Automatic,
+  ButtonFunction:>
+   With[{$CellContext`nb = InputNotebook[]}, 
+    NotebookApply[$CellContext`nb, "newDef[\"\[SelectionPlaceholder]\"]", 
+      All]; SelectionMove[$CellContext`nb, All, Cell]; 
+    SelectionEvaluate[$CellContext`nb]],
+  Evaluator->Automatic,
+  Method->"Preemptive"]], "Output",
+ CellChangeTimes->{3.492503694561556*^9, 3.492504659025767*^9, 
+  3.492504739507053*^9, 3.492505748561554*^9, 3.492505840174538*^9}],
+
+Cell[CellGroupData[{
+
+Cell["Environment", "Subsubsection",
+ CellChangeTimes->{{3.503831712987698*^9, 3.503831715152389*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"DEF", "[", "\"\<WW\>\"", "]"}]], "Input"],
+
+Cell["\[SelectionPlaceholder]", "FormalTextInputFormula",
+ CellTags->"def:WW"],
+
+Cell[BoxData["\[GraySquare]"], "Input",
+ CellGroupingRules->"OutputGrouping",
+ TextAlignment->Right]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"nb", "=", 
+  RowBox[{"NotebookCreate", "[", "]"}]}]], "Input",
+ CellChangeTimes->{{3.49250564708301*^9, 3.492505656789084*^9}}],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"NotebookObject", "[", 
+   PanelBox[GridBox[{
+      {
+       TooltipBox[
+        ButtonBox[
+         StyleBox[
+          
+          DynamicBox[FEPrivate`FrontEndResource[
+           "FEBitmaps", "ManipulatePasteIcon"],
+           ImageSizeCache->{13., {4., 9.}}],
+          DynamicUpdating->True],
+         Appearance->{Automatic, None},
+         BaseStyle->{},
+         ButtonFunction:>FrontEndExecute[{
+            FrontEnd`SetSelectedNotebook[
+             NotebookObject[
+              FrontEndObject[
+               LinkObject["cuj_shm", 1, 1]], 19]]}],
+         Evaluator->None,
+         Method->"Queued"],
+        DynamicBox[
+         FEPrivate`FrontEndResource[
+         "FEStrings", "NotebookObjectToTheFront"]]], 
+       StyleBox["\<\"Untitled-2\"\>",
+        StripOnInput->False,
+        FontColor->GrayLevel[0.5]]}
+     },
+     GridBoxAlignment->{
+      "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+       "RowsIndexed" -> {}}],
+    FrameMargins->{{4, 5}, {4, 4}}], "]"}],
+  NotebookObject[
+   FrontEndObject[
+    LinkObject["cuj_shm", 1, 1]], 19],
+  Editable->False]], "Output",
+ CellChangeTimes->{3.492505658804475*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"updateKBBrowser", "[", "]"}]], "Input",
+ CellChangeTimes->{{3.503386872842574*^9, 3.503386883175851*^9}}]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{895, 750},
+WindowMargins->{{23, Automatic}, {115, Automatic}},
+ShowSelection->True,
+FrontEndVersion->"7.0 for Linux x86 (32-bit) (November 10, 2008)",
+StyleDefinitions->Notebook[{
+   Cell[
+    StyleData[
+    StyleDefinitions -> 
+     FrontEnd`FileName[{"Report"}, "ConfidentialReport.nb", CharacterEncoding -> 
+       "iso8859-1"]]], 
+   Cell[
+    StyleData[All, "Working"], DockedCells -> {
+      Cell[
+      "T h e o r e m a . 2", "SBO", CellMargins -> {{0, 0}, {0, 0}}, 
+       CellFrame -> {{0, 0}, {0, 0}}, CellFrameMargins -> {{0, 50}, {0, 0}}, 
+       FontSize -> 28, FontSlant -> "Plain", FontColor -> 
+       RGBColor[0, 0.32549, 0.47451], TextAlignment -> Right, CellFrameColor -> 
+       RGBColor[0, 0.482353, 0.482353], Background -> 
+       RGBColor[0, 0.396078, 0.580392]]}], 
+   Cell[
+    StyleData[All, "Presentation"], DockedCells -> {
+      Cell[
+      "T h e o r e m a . 2", "SBO", CellMargins -> {{0, 0}, {0, 0}}, 
+       CellFrame -> {{0, 0}, {0, 3}}, FontSize -> 18, FontSlant -> "Plain", 
+       FontColor -> RGBColor[0.988235, 0.882353, 0.266667], TextAlignment -> 
+       Center, CellFrameColor -> RGBColor[0.00392157, 0.580392, 0.435294], 
+       Background -> RGBColor[0, 0.32549, 0.47451]]}, ShowGroupOpener -> 
+    True], 
+   Cell[
+    StyleData[
+    All, "SlideShow", StyleDefinitions -> StyleData[All, "Presentation"]], 
+    PageWidth -> WindowWidth, DockedCells -> {
+      FEPrivate`FrontEndResource["FEExpressions", "SlideshowToolbar"], 
+      Cell[
+      "T h e o r e m a . 2", "SBO", CellMargins -> {{0, 0}, {0, 0}}, 
+       CellFrame -> {{0, 0}, {0, 3}}, FontSize -> 12, FontSlant -> "Plain", 
+       FontColor -> RGBColor[0.988235, 0.882353, 0.266667], TextAlignment -> 
+       Center, CellFrameColor -> RGBColor[0.00392157, 0.580392, 0.435294], 
+       Background -> RGBColor[0, 0.32549, 0.47451]]}, 
+    ScrollingOptions -> {
+     "PagewiseDisplay" -> True, "VerticalScrollRange" -> Fit}, MenuPosition -> 
+    1300], 
+   Cell[
+    StyleData[All, "Condensed"], DockedCells -> {
+      Cell[
+      "T h e o r e m a . 2", "SBO", CellMargins -> {{0, 0}, {0, 0}}, 
+       CellFrame -> {{0, 0}, {0, 3}}, FontSize -> 12, FontSlant -> "Plain", 
+       FontColor -> RGBColor[0.988235, 0.882353, 0.266667], TextAlignment -> 
+       Center, CellFrameColor -> RGBColor[0.00392157, 0.580392, 0.435294], 
+       Background -> RGBColor[0, 0.32549, 0.47451]]}], 
+   Cell[
+    StyleData[All, "Printout"], DockedCells -> {
+      Cell[
+      "T h e o r e m a . 2", "SBO", CellMargins -> {{0, 0}, {0, 0}}, 
+       CellFrame -> {{0, 0}, {0, 3}}, FontSize -> 12, FontSlant -> "Plain", 
+       FontColor -> RGBColor[0.988235, 0.882353, 0.266667], TextAlignment -> 
+       Center, CellFrameColor -> RGBColor[0.00392157, 0.580392, 0.435294], 
+       Background -> RGBColor[0, 0.32549, 0.47451]]}], 
+   Cell[
+    StyleData["Input"], ShowAutoStyles -> False, FontWeight -> "Bold"], 
+   Cell[
+    StyleData[
+    "FormalTextInputFormula", StyleDefinitions -> StyleData["Input"]], 
+    CellMargins -> {{86, 10}, {2, 2}}, CellGroupingRules -> "OutputGrouping", 
+    CreateCellID -> True, ShowCellTags -> True, MenuPosition -> 1501, 
+    MenuCommandKey -> "6", FontWeight -> "Bold", FontColor -> 
+    RGBColor[0.25, 0.25, 0.35]], 
+   Cell[
+    StyleData["CellLabel"], MenuPosition -> 10000]}, Visible -> False, 
+  FrontEndVersion -> "7.0 for Linux x86 (32-bit) (November 10, 2008)", 
+  StyleDefinitions -> "PrivateStylesheetFormatting.nb"]
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{
+ "def:WW"->{
+  Cell[9122, 246, 78, 1, 36, "FormalTextInputFormula",
+   CellTags->"def:WW"]},
+ "f base case"->{
+  Cell[1408, 47, 371, 7, 36, "FormalTextInputFormula",
+   CellTags->{"f base case", "function"}]},
+ "f general case"->{
+  Cell[1782, 56, 475, 10, 36, "FormalTextInputFormula",
+   CellTags->{"f general case", "function"}]},
+ "function"->{
+  Cell[1408, 47, 371, 7, 36, "FormalTextInputFormula",
+   CellTags->{"f base case", "function"}],
+  Cell[1782, 56, 475, 10, 36, "FormalTextInputFormula",
+   CellTags->{"f general case", "function"}]}
+ }
+*)
+(*CellTagsIndex
+CellTagsIndex->{
+ {"def:WW", 14465, 386},
+ {"f base case", 14563, 389},
+ {"f general case", 14683, 392},
+ {"function", 14801, 395}
+ }
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[567, 22, 142, 2, 75, "Title"],
+Cell[CellGroupData[{
+Cell[734, 28, 95, 1, 73, "Section"],
+Cell[CellGroupData[{
+Cell[854, 33, 186, 3, 32, "Input"],
+Cell[1043, 38, 362, 7, 21, "FormalTextInputFormula"],
+Cell[1408, 47, 371, 7, 36, "FormalTextInputFormula",
+ CellTags->{"f base case", "function"}],
+Cell[1782, 56, 475, 10, 36, "FormalTextInputFormula",
+ CellTags->{"f general case", "function"}],
+Cell[2260, 68, 142, 3, 32, "Input",
+ CellGroupingRules->"OutputGrouping"]
+}, Open  ]],
+Cell[2417, 74, 449, 11, 32, "Input"],
+Cell[2869, 87, 114, 2, 32, "Input"],
+Cell[2986, 91, 272, 6, 32, "Input"],
+Cell[3261, 99, 553, 11, 32, "Input"],
+Cell[3817, 112, 2752, 57, 187, "Input"],
+Cell[6572, 171, 589, 14, 32, "Input"],
+Cell[7164, 187, 958, 23, 121, "Input"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[8159, 215, 102, 1, 73, "Section"],
+Cell[CellGroupData[{
+Cell[8286, 220, 94, 1, 39, "Subsection"],
+Cell[8383, 223, 519, 11, 45, "Output"],
+Cell[CellGroupData[{
+Cell[8927, 238, 102, 1, 29, "Subsubsection"],
+Cell[CellGroupData[{
+Cell[9054, 243, 65, 1, 32, "Input"],
+Cell[9122, 246, 78, 1, 36, "FormalTextInputFormula",
+ CellTags->"def:WW"],
+Cell[9203, 249, 100, 2, 32, "Input",
+ CellGroupingRules->"OutputGrouping"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[9340, 256, 151, 3, 32, "Input"],
+Cell[9494, 261, 1204, 37, 47, "Output"]
+}, Open  ]],
+Cell[10713, 301, 129, 2, 32, "Input"]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)

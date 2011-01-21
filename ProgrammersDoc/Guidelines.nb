@@ -1,0 +1,86 @@
+(* Content-type: application/mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 7.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       145,          7]
+NotebookDataLength[      2126,         77]
+NotebookOptionsPosition[      1596,         52]
+NotebookOutlinePosition[      1954,         68]
+CellTagsIndexPosition[      1911,         65]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Programmer's Guidelines", "Title",
+ CellChangeTimes->{{3.503903921841095*^9, 3.503903933944887*^9}},
+ CellID->882976022],
+
+Cell["Theorema.2", "Subtitle",
+ CellChangeTimes->{{3.503903939431836*^9, 3.503903942638564*^9}},
+ CellID->1025677832],
+
+Cell[CellGroupData[{
+
+Cell["Theorema editor", "Section",
+ CellChangeTimes->{{3.503903952396789*^9, 3.503903956456551*^9}, {
+  3.503904034455522*^9, 3.503904041702376*^9}},
+ CellID->1871658360],
+
+Cell[TextData[{
+ "Every file names a ",
+ StyleBox["Theorema editor",
+  FontSlant->"Italic"],
+ " (TE) in the file's header. The TE is the person through which \
+modifications to that file can go into the common repository. Technically, \
+this means that changes to a file, which is not edited by yourself, should be \
+made in a separate branch in the revision control system, from which the TE \
+can pull the changes and merge them into the common repository."
+}], "Text",
+ CellChangeTimes->{{3.50390398570317*^9, 3.503904290955221*^9}},
+ CellID->1469832235]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{640, 750},
+WindowMargins->{{Automatic, 367}, {32, Automatic}},
+CreateCellID->True,
+FrontEndVersion->"7.0 for Linux x86 (32-bit) (November 10, 2008)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[567, 22, 126, 2, 85, "Title",
+ CellID->882976022],
+Cell[696, 26, 117, 2, 53, "Subtitle",
+ CellID->1025677832],
+Cell[CellGroupData[{
+Cell[838, 32, 170, 3, 73, "Section",
+ CellID->1871658360],
+Cell[1011, 37, 557, 11, 111, "Text",
+ CellID->1469832235]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)

@@ -1,0 +1,214 @@
+(* Content-type: application/mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 7.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       145,          7]
+NotebookDataLength[      7128,        205]
+NotebookOptionsPosition[      6511,        180]
+NotebookOutlinePosition[      6850,        195]
+CellTagsIndexPosition[      6807,        192]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"PaletteAppear", "[", 
+   RowBox[{
+    RowBox[{"\[SelectionPlaceholder]", "\[Implies]", "\[Placeholder]"}], ",", 
+    "True"}], "]"}], ":=", 
+  "\"\<if \[SelectionPlaceholder] then \[Placeholder]\>\""}]], "Input",
+ CellChangeTimes->{{3.482134342990299*^9, 3.482134375833842*^9}, 
+   3.482134418326609*^9, {3.48213458685258*^9, 3.482134588307854*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"PaletteAppear", "[", 
+   RowBox[{"expr_", ",", "False"}], "]"}], ":=", 
+  RowBox[{"Tooltip", "[", 
+   RowBox[{"expr", ",", 
+    RowBox[{"PaletteAppear", "[", 
+     RowBox[{"expr", ",", "True"}], "]"}]}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.482134342990299*^9, 3.482134375833842*^9}, {
+  3.482134418326609*^9, 3.48213443604569*^9}, {3.482134591849184*^9, 
+  3.482134593175976*^9}, {3.482134867479256*^9, 3.482134892606676*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Checkbox", "[", 
+  RowBox[{"Dynamic", "[", "lit", "]"}], "]"}]], "Input",
+ CellChangeTimes->{{3.482134530858211*^9, 3.482134569595495*^9}}],
+
+Cell[BoxData[
+ CheckboxBox[Dynamic[$CellContext`lit]]], "Output",
+ CellChangeTimes->{{3.482134533248137*^9, 3.482134538503138*^9}, 
+   3.482134570508229*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Dynamic", "[", 
+  RowBox[{"PasteButton", "[", 
+   RowBox[{
+    RowBox[{"PaletteAppear", "[", 
+     RowBox[{
+      RowBox[{"\[SelectionPlaceholder]", "\[Implies]", "\[Placeholder]"}], 
+      ",", "lit"}], "]"}], ",", 
+    RowBox[{"\[SelectionPlaceholder]", "\[Implies]", "\[Placeholder]"}]}], 
+   "]"}], "]"}]], "Input",
+ CellChangeTimes->{{3.482133649206424*^9, 3.482133650342157*^9}, {
+   3.482134193017709*^9, 3.482134257134588*^9}, {3.482134457644961*^9, 
+   3.4821344845165*^9}, 3.48213452051775*^9}],
+
+Cell[BoxData[
+ DynamicBox[ToBoxes[
+   PasteButton[
+    $CellContext`PaletteAppear[
+     Implies[$CellContext` \[SelectionPlaceholder], $CellContext` \
+\[Placeholder]], $CellContext`lit], 
+    Implies[$CellContext` \[SelectionPlaceholder], $CellContext` \
+\[Placeholder]]], StandardForm],
+  ImageSizeCache->{366., {9., 19.}}]], "Output",
+ CellChangeTimes->{{3.482134234596611*^9, 3.482134258128678*^9}, 
+   3.482134526271396*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"P", "[", "x", "]"}], "\[Implies]", 
+  RowBox[{"\[Placeholder]", "\[Implies]", 
+   RowBox[{"\[Placeholder]", "\[Implies]", "\[Placeholder]"}]}]}]], "Input",
+ CellChangeTimes->{{3.482134271933135*^9, 3.482134278888892*^9}, {
+  3.482134606618716*^9, 3.482134613194394*^9}}],
+
+Cell[BoxData[
+ RowBox[{"CellPrint", "[", 
+  RowBox[{"Cell", "[", 
+   RowBox[{
+    RowBox[{"TextData", "[", 
+     RowBox[{"{", 
+      RowBox[{"\"\<From \>\"", ",", 
+       RowBox[{"Cell", "[", 
+        RowBox[{
+         RowBox[{"BoxData", "[", 
+          RowBox[{"ToBoxes", "[", 
+           RowBox[{
+            RowBox[{"Graphics", "[", 
+             RowBox[{
+              RowBox[{"Tooltip", "[", 
+               RowBox[{
+                RowBox[{"Text", "[", 
+                 RowBox[{
+                  RowBox[{"StyleForm", "[", 
+                   RowBox[{"\"\<(2355)\>\"", ",", 
+                    RowBox[{"FontFamily", "\[Rule]", "\"\<Courier\>\""}], ",", 
+                    RowBox[{"FontSize", "\[Rule]", "16"}]}], "]"}], ",", 
+                  RowBox[{"{", 
+                   RowBox[{"0", ",", "0"}], "}"}]}], "]"}], ",", 
+                RowBox[{"StyleForm", "[", 
+                 RowBox[{
+                  RowBox[{
+                   RowBox[{
+                    SubscriptBox["\[ForAll]", "x"], 
+                    SubscriptBox["P", "x"]}], "\[Implies]", 
+                   SubscriptBox["Q", "x"]}], ",", 
+                  RowBox[{"FontSize", "\[Rule]", "48"}]}], "]"}]}], "]"}], 
+              ",", 
+              RowBox[{"ImageSize", "\[Rule]", 
+               RowBox[{"{", 
+                RowBox[{"10", "+", 
+                 RowBox[{"4", "*", "12"}]}], "}"}]}]}], "]"}], ",", 
+            "TraditionalForm"}], "]"}], "]"}], ",", "\"\<Output\>\""}], "]"}],
+        ",", "\"\< we prove\>\""}], "}"}], "]"}], ",", "\"\<Text\>\""}], 
+   "]"}], "]"}]], "Input",
+ CellChangeTimes->{{3.482205453261987*^9, 3.482205578268768*^9}, {
+   3.482205691107273*^9, 3.482205718627735*^9}, {3.482205753877831*^9, 
+   3.482205855800386*^9}, {3.482205894889922*^9, 3.482205950968403*^9}, {
+   3.482205990634046*^9, 3.482206039522277*^9}, {3.482206168705304*^9, 
+   3.482206170122224*^9}, {3.482206206073528*^9, 3.482206209915136*^9}, {
+   3.482206350890315*^9, 3.482206357206763*^9}, {3.482206420363708*^9, 
+   3.482206537033741*^9}, {3.482206674702271*^9, 3.482206717819122*^9}, {
+   3.482206898570932*^9, 3.482206944822178*^9}, {3.482207059840456*^9, 
+   3.482207064480335*^9}, {3.482207532566222*^9, 3.482207543823017*^9}, {
+   3.482207578089905*^9, 3.482207591853624*^9}, {3.48220763182051*^9, 
+   3.482207679659529*^9}, 3.482207738142001*^9, {3.482207768786406*^9, 
+   3.482207829209062*^9}, {3.482207979399644*^9, 3.482208024038269*^9}, {
+   3.482208058917304*^9, 3.482208075170166*^9}}],
+
+Cell[TextData[{
+ "From ",
+ Cell[BoxData[
+  FormBox[
+   GraphicsBox[
+    TagBox[
+     TooltipBox[InsetBox[
+       TagBox[
+        StyleBox["\<\"(2355)\"\>",
+         FontFamily->"Courier",
+         FontSize->16],
+        StyleForm[#, FontFamily -> "Courier", FontSize -> 16]& ], {0, 0}],
+      TagBox[
+       StyleBox[
+        RowBox[{
+          RowBox[{
+            SubscriptBox["\[ForAll]", "x"], 
+            SubscriptBox["P", "x"]}], "\[Implies]", 
+          SubscriptBox["Q", "x"]}], FontSize -> 48], 
+       StyleForm[#, FontSize -> 48]& ]],
+     Annotation[#, 
+      StyleForm[
+       Implies[
+        ForAll[$CellContext`x, 
+         Subscript[$CellContext`P, $CellContext`x]], 
+        Subscript[$CellContext`Q, $CellContext`x]], FontSize -> 48], 
+      "Tooltip"]& ],
+    ImageSize->{58}], TraditionalForm]], "Output"],
+ " we prove"
+}], "Text",
+ GeneratedCell->True,
+ CellAutoOverwrite->True,
+ CellChangeTimes->{3.482208076123291*^9}]
+},
+WindowSize->{640, 750},
+WindowMargins->{{421, Automatic}, {144, Automatic}},
+FrontEndVersion->"7.0 for Linux x86 (32-bit) (November 10, 2008)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[545, 20, 384, 8, 32, "Input"],
+Cell[932, 30, 466, 10, 55, "Input"],
+Cell[CellGroupData[{
+Cell[1423, 44, 163, 3, 32, "Input"],
+Cell[1589, 49, 157, 3, 31, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[1783, 57, 528, 12, 32, "Input"],
+Cell[2314, 71, 428, 10, 45, "Output"]
+}, Open  ]],
+Cell[2757, 84, 305, 6, 32, "Input"],
+Cell[3065, 92, 2496, 52, 297, "Input"],
+Cell[5564, 146, 943, 32, 72, "Text"]
+}
+]
+*)
+
+(* End of internal cache information *)
