@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       145,          7]
-NotebookDataLength[      2126,         77]
-NotebookOptionsPosition[      1596,         52]
-NotebookOutlinePosition[      1954,         68]
-CellTagsIndexPosition[      1911,         65]
+NotebookDataLength[      2177,         78]
+NotebookOptionsPosition[      1647,         53]
+NotebookOutlinePosition[      2005,         69]
+CellTagsIndexPosition[      1962,         66]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -43,9 +43,10 @@ Cell[TextData[{
 modifications to that file can go into the common repository. Technically, \
 this means that changes to a file, which is not edited by yourself, should be \
 made in a separate branch in the revision control system, from which the TE \
-can pull the changes and merge them into the common repository."
+can pull the changes and forward them into the common repository."
 }], "Text",
- CellChangeTimes->{{3.50390398570317*^9, 3.503904290955221*^9}},
+ CellChangeTimes->{{3.50390398570317*^9, 3.503904290955221*^9}, {
+  3.505113941000962*^9, 3.505113942682419*^9}},
  CellID->1469832235]
 }, Open  ]]
 }, Open  ]]
@@ -75,7 +76,7 @@ Cell[696, 26, 117, 2, 53, "Subtitle",
 Cell[CellGroupData[{
 Cell[838, 32, 170, 3, 73, "Section",
  CellID->1871658360],
-Cell[1011, 37, 557, 11, 111, "Text",
+Cell[1011, 37, 608, 12, 111, "Text",
  CellID->1469832235]
 }, Open  ]]
 }, Open  ]]

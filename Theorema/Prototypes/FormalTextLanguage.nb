@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       145,          7]
-NotebookDataLength[     16494,        453]
-NotebookOptionsPosition[     10894,        309]
-NotebookOutlinePosition[     15184,        411]
-CellTagsIndexPosition[     15025,        403]
+NotebookDataLength[     43255,       1178]
+NotebookOptionsPosition[     33838,        914]
+NotebookOutlinePosition[     39262,       1050]
+CellTagsIndexPosition[     38840,       1034]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -52,7 +52,7 @@ Cell[BoxData[
    3.487399893580513*^9, 3.487399894708127*^9}, 3.487500828938187*^9, {
    3.487500950885909*^9, 3.48750095509603*^9}, {3.489892595556296*^9, 
    3.48989259614421*^9}},
- CellTags->{"f base case", "function"}],
+ CellTags->"f base case"],
 
 Cell[BoxData[
  RowBox[{
@@ -88,14 +88,6 @@ Cell[BoxData[
 Cell[BoxData[
  RowBox[{"$Pre", "=."}]], "Input",
  CellChangeTimes->{{3.492496378300539*^9, 3.492496380193603*^9}}],
-
-Cell[BoxData[
- RowBox[{"\[GraySquare]", ":=", 
-  RowBox[{"(", 
-   RowBox[{
-    RowBox[{"EndEnv", "[", "]"}], ";"}], ")"}]}]], "Input",
- CellChangeTimes->{{3.487399454923599*^9, 3.487399467692246*^9}, {
-   3.487399513804052*^9, 3.487399517480365*^9}, 3.487501707703334*^9}],
 
 Cell[BoxData[
  RowBox[{"NotebookLocate", "[", 
@@ -183,38 +175,17 @@ Cell[BoxData[
      RowBox[{"newDef", "[", "label", "]"}]}]}], "]"}]}]], "Input",
  CellChangeTimes->{{3.4925036811135*^9, 3.492503690027096*^9}, {
   3.492504011313254*^9, 3.492504049832701*^9}, {3.492504213637023*^9, 
-  3.492504224065283*^9}, {3.49250427226706*^9, 3.492504273433021*^9}}],
-
-Cell[BoxData[
- RowBox[{"Button", "[", 
-  RowBox[{
-  "\"\<DEF[\[SelectionPlaceholder]]\>\"", ",", "\[IndentingNewLine]", 
-   RowBox[{"With", "[", 
-    RowBox[{
-     RowBox[{"{", 
-      RowBox[{"nb", "=", 
-       RowBox[{"InputNotebook", "[", "]"}]}], "}"}], ",", 
-     "\[IndentingNewLine]", 
-     RowBox[{
-      RowBox[{"NotebookApply", "[", 
-       RowBox[{
-       "nb", ",", "\"\<newDef[\\\"\[SelectionPlaceholder]\\\"]\>\"", ",", 
-        "All"}], "]"}], ";", "\[IndentingNewLine]", 
-      RowBox[{"SelectionMove", "[", 
-       RowBox[{"nb", ",", "All", ",", "Cell"}], "]"}], ";", 
-      "\[IndentingNewLine]", 
-      RowBox[{"SelectionEvaluate", "[", "nb", "]"}]}]}], "]"}]}], 
-  "]"}]], "Input",
- CellChangeTimes->{{3.492503590192051*^9, 3.492503656107654*^9}, {
-  3.49250461542338*^9, 3.492504654289337*^9}, {3.492504735808728*^9, 
-  3.492504737470378*^9}, {3.492505547596885*^9, 3.492505559646652*^9}, {
-  3.492505744690711*^9, 3.492505838030662*^9}}]
-}, Open  ]],
+  3.492504224065283*^9}, {3.49250427226706*^9, 3.492504273433021*^9}}]
+}, Closed]],
 
 Cell[CellGroupData[{
 
 Cell["Advanced concepts", "Section",
  CellChangeTimes->{{3.503826771660811*^9, 3.503826788089397*^9}}],
+
+Cell[BoxData[
+ RowBox[{"<<", "Theorema`Language`Parser`"}]], "Input",
+ CellChangeTimes->{{3.505742707444762*^9, 3.505742723423977*^9}}],
 
 Cell[CellGroupData[{
 
@@ -222,17 +193,649 @@ Cell["Button", "Subsection",
  CellChangeTimes->{{3.503831701742369*^9, 3.503831703116275*^9}}],
 
 Cell[BoxData[
- ButtonBox["\<\"DEF[\[SelectionPlaceholder]]\"\>",
+ RowBox[{"Button", "[", 
+  RowBox[{
+  "\"\<New Definition \[Ellipsis]\>\"", " ", ",", "\[IndentingNewLine]", 
+   RowBox[{"NotebookWrite", "[", 
+    RowBox[{
+     RowBox[{"InputNotebook", "[", "]"}], ",", 
+     RowBox[{"Cell", "[", 
+      RowBox[{
+       RowBox[{"BoxData", "[", 
+        RowBox[{"RowBox", "[", 
+         RowBox[{"{", 
+          RowBox[{
+          "\"\<newDef\>\"", ",", "\"\<[\>\"", ",", 
+           "\"\<\\\"\[SelectionPlaceholder]\\\"\>\"", ",", "\"\<]\>\""}], 
+          "}"}], "]"}], "]"}], ",", "\"\<Input\>\""}], "]"}], ",", 
+     "Placeholder"}], "]"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.492503590192051*^9, 3.492503656107654*^9}, {
+   3.49250461542338*^9, 3.492504654289337*^9}, {3.492504735808728*^9, 
+   3.492504737470378*^9}, {3.492505547596885*^9, 3.492505559646652*^9}, {
+   3.492505744690711*^9, 3.492505838030662*^9}, {3.504960524554377*^9, 
+   3.504960530396979*^9}, {3.504960562034923*^9, 3.504960615277131*^9}, {
+   3.504960713675007*^9, 3.504960720565872*^9}, {3.504960772413094*^9, 
+   3.504960775733782*^9}, {3.504960892460121*^9, 3.504960895922889*^9}, {
+   3.504961161126662*^9, 3.504961220901964*^9}, {3.504961511567554*^9, 
+   3.50496152279727*^9}, {3.504961613207559*^9, 3.50496161852353*^9}, {
+   3.504961707489009*^9, 3.504961713549154*^9}, {3.504962133373155*^9, 
+   3.504962142268692*^9}, {3.50496227089127*^9, 3.504962299819891*^9}, {
+   3.504962367074244*^9, 3.50496236969143*^9}, 3.505038375153042*^9}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Button", "[", 
+  RowBox[{"\"\<New Definition\>\"", ",", "\[IndentingNewLine]", 
+   RowBox[{"NotebookWrite", "[", 
+    RowBox[{
+     RowBox[{"InputNotebook", "[", "]"}], ",", 
+     "\"\<newDef[\\\"\[SelectionPlaceholder]\\\"]\>\"", ",", "Placeholder"}], 
+    "]"}]}], "]"}]], "Input",
+ CellChangeTimes->CompressedData["
+1:eJxTTMoPSmViYGAQAWIQ7aF6jCWH9ZXj80JmXhAd0vO2BUQ7OJ3sBNFSD39O
+BtFhvPpTQPR6yeKfIDph45dfINpPSkwoF0jr/z4gC6JL905s1JN95ci7xacJ
+RIvLObaBaKd7L3pA9IqZpjNB9AJpoVkgWtCidwGIVqn+DqYDdvatB9H+HX/B
+9FxelYsg+smdOTdAdLrmpz8g2qY58h+IDl6yjFMfSB86EMAFor8tzRcF0asn
+GYqB6McfVnuBaIWZJ7xBtGfrnWgQ3WNTFQ+iTRMepYNoIwWzDBCt/PNuHojW
+X7GqAET/C/5XAqJ13/0vBdFn97XPMADS2mW9YBoAnjWM+Q==
+  "]],
+
+Cell[BoxData[
+ ButtonBox["\<\"New Definition\"\>",
   Appearance->Automatic,
-  ButtonFunction:>
-   With[{$CellContext`nb = InputNotebook[]}, 
-    NotebookApply[$CellContext`nb, "newDef[\"\[SelectionPlaceholder]\"]", 
-      All]; SelectionMove[$CellContext`nb, All, Cell]; 
-    SelectionEvaluate[$CellContext`nb]],
+  ButtonFunction:>NotebookWrite[
+    InputNotebook[], "newDef[\"\[SelectionPlaceholder]\"]", Placeholder],
   Evaluator->Automatic,
   Method->"Preemptive"]], "Output",
- CellChangeTimes->{3.492503694561556*^9, 3.492504659025767*^9, 
-  3.492504739507053*^9, 3.492505748561554*^9, 3.492505840174538*^9}],
+ CellChangeTimes->{3.504961221974896*^9, 3.504961303613013*^9, 
+  3.504961358217352*^9, 3.504961444282839*^9, 3.504961530625445*^9, 
+  3.504961624162689*^9, 3.504961714224718*^9, 3.504962301370638*^9, 
+  3.504962371438924*^9, 3.504962440719767*^9, 3.504962482629267*^9, 
+  3.504964806822497*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"newDef", "[", "name_String", "]"}], ":=", 
+  RowBox[{"With", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{"nb", "=", 
+      RowBox[{"InputNotebook", "[", "]"}]}], "}"}], ",", 
+    "\[IndentingNewLine]", 
+    RowBox[{
+     RowBox[{"SelectionMove", "[", 
+      RowBox[{"nb", ",", "Previous", ",", "Cell"}], "]"}], ";", 
+     "\[IndentingNewLine]", 
+     RowBox[{"NotebookWrite", "[", 
+      RowBox[{"nb", ",", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"Cell", "[", 
+          RowBox[{
+           RowBox[{"BoxData", "[", 
+            RowBox[{"RowBox", "[", 
+             RowBox[{"{", 
+              RowBox[{"\"\<DEFINITION\>\"", ",", "\"\<[\>\"", ",", 
+               RowBox[{"\"\<\\\"\>\"", "<>", "name", "<>", "\"\<\\\"\>\""}], 
+               ",", "\"\<]\>\""}], "}"}], "]"}], "]"}], ",", "\"\<Input\>\"", 
+           ",", 
+           RowBox[{"CellTags", "\[Rule]", 
+            RowBox[{"\"\<DEF:\>\"", "<>", "name"}]}]}], "]"}], ",", 
+         RowBox[{"Cell", "[", 
+          RowBox[{
+           RowBox[{"BoxData", "[", "\"\<\>\"", "]"}], ",", 
+           "\"\<FormalTextInputFormula\>\"", ",", 
+           RowBox[{"CellTags", "\[Rule]", 
+            RowBox[{"{", 
+             RowBox[{"\"\<WW\>\"", ",", "\"\<???\>\""}], "}"}]}]}], "]"}], 
+         ",", "\[IndentingNewLine]", 
+         RowBox[{"Cell", "[", 
+          RowBox[{
+           RowBox[{"BoxData", "[", "\"\<\[GraySquare]\>\"", "]"}], ",", 
+           "\"\<Input\>\"", ",", 
+           RowBox[{"CellGroupingRules", "\[Rule]", "\"\<OutputGrouping\>\""}],
+            ",", 
+           RowBox[{"TextAlignment", "\[Rule]", "Right"}]}], "]"}]}], "}"}]}], 
+      "]"}], ";"}]}], "\[IndentingNewLine]", "]"}]}]], "Input",
+ CellChangeTimes->{{3.50496083338875*^9, 3.504960877785347*^9}, {
+  3.504960955271528*^9, 3.504960967413972*^9}, {3.504961008864147*^9, 
+  3.504961009506002*^9}, {3.504961541723635*^9, 3.504961550121272*^9}, {
+  3.504962073073504*^9, 3.504962113282147*^9}, {3.504962556743036*^9, 
+  3.504962561987119*^9}, {3.50496466619864*^9, 3.504964721630869*^9}, {
+  3.504964761516577*^9, 3.5049647897781*^9}, {3.504964843720557*^9, 
+  3.504964853963314*^9}, {3.504964901473817*^9, 3.504964905648604*^9}, {
+  3.505741179485746*^9, 3.505741179666659*^9}, {3.505741315585479*^9, 
+  3.505741319875735*^9}, {3.50574135179885*^9, 3.505741382191649*^9}, {
+  3.505742082214724*^9, 3.505742084493359*^9}, {3.505742139610852*^9, 
+  3.505742142766476*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"DEFINITION", "[", "\"\<Test\>\"", "]"}]], "Input",
+ CellTags->"DEF:Test"],
+
+Cell[BoxData[
+ RowBox[{"f", "[", "x", "]"}]], "FormalTextInputFormula",
+ CellChangeTimes->{{3.505742165743949*^9, 3.505742168762853*^9}},
+ CellTags->"DEF:Test_MyLab"],
+
+Cell[BoxData[
+ RowBox[{"g", "[", "x", "]"}]], "FormalTextInputFormula",
+ CellChangeTimes->{{3.505742165743949*^9, 3.505742168762853*^9}, 
+   3.505811397499606*^9, {3.505811468841391*^9, 3.505811469337495*^9}},
+ CellTags->"DEF:Test_1"],
+
+Cell[BoxData[
+ RowBox[{"h", "[", "x", "]"}]], "FormalTextInputFormula",
+ CellChangeTimes->{{3.505811950598509*^9, 3.505811953324526*^9}},
+ CellTags->"DEF:Test_2"],
+
+Cell[BoxData["\[GraySquare]"], "Input",
+ CellGroupingRules->"OutputGrouping",
+ TextAlignment->Right]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"$Pre", "=."}]], "Input",
+ CellChangeTimes->{{3.505742943491675*^9, 3.505742945667379*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Names", "[", "\"\<Theorema`Language`Parser`Private`*\>\"", 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.505811997940427*^9, 3.505812012641989*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"\<\"Theorema`Language`Parser`Private`adjustFormulaLabel\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`appendEnvironmentFormula\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`args\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`cl\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`closeEnvironment\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`cl$\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`currentCounter\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`currentCounterLabel\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`currentEnvironment\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`currentFormulae\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`env\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`expr\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`form\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`freshNames\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`globalTyping\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`incrementCurrentCounter\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`inEnvironment\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`initSession\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`lab\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`label\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`markVariables\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`nb\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`nb$\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`newFormulaLabel\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`newLab\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`newLab$\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`openEnvironment\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`\
+preprocessTheoremaExpressionHold\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`processEnvironment\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`tmaEnv\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`type\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`unexpected\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`x\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`$environmentFormulaCounter\"\>",
+    ",", "\<\"Theorema`Language`Parser`Private`$environmentFormulaCounters\"\>\
+", ",", "\<\"Theorema`Language`Parser`Private`$environmentFormulae\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`$environmentLabels\"\>", 
+   ",", "\<\"Theorema`Language`Parser`Private`\[GraySquare]\"\>"}], 
+  "}"}]], "Output",
+ CellChangeTimes->{3.505812177898249*^9}]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"??", "Theorema`Language`Parser`Private`tmaEnv"}]], "Input",
+ CellChangeTimes->{{3.505811997940427*^9, 3.505812012641989*^9}, {
+  3.505812873447418*^9, 3.505812890648296*^9}}],
+
+Cell[CellGroupData[{
+
+Cell["Theorema`Language`Parser`Private`tmaEnv", "Print", "PrintUsage",
+ CellChangeTimes->{3.505821515968636*^9},
+ CellTags->"Info3505825115-8215813"],
+
+Cell[BoxData[
+ InterpretationBox[GridBox[{
+    {GridBox[{
+       {
+        RowBox[{
+         RowBox[{"Theorema`Language`Parser`Private`tmaEnv", "[", 
+          RowBox[{"\<\"DEF\"\>", ",", "\<\"DEF:Test\"\>"}], "]"}], "=", 
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"f", "[", "x", "]"}], ",", 
+             RowBox[{"{", "}"}]}], "}"}], ",", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"g", "[", "x", "]"}], ",", 
+             RowBox[{"{", "}"}]}], "}"}], ",", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"h", "[", "x", "]"}], ",", 
+             RowBox[{"{", "}"}]}], "}"}]}], "}"}]}]}
+      },
+      BaselinePosition->{Baseline, {1, 1}},
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxItemSize->{"Columns" -> {{
+           Scaled[0.999]}}, "ColumnsIndexed" -> {}, "Rows" -> {{1.}}, 
+        "RowsIndexed" -> {}}]}
+   },
+   BaselinePosition->{Baseline, {1, 1}},
+   GridBoxAlignment->{
+    "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+     "RowsIndexed" -> {}}],
+  Definition[Theorema`Language`Parser`Private`tmaEnv],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.505821515978281*^9},
+ CellTags->"Info3505825115-8215813"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData["x"], "Input",
+ CellChangeTimes->{3.505821102654508*^9}],
+
+Cell[BoxData["x"], "Output",
+ CellChangeTimes->{3.505821525099123*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"??", 
+  "Theorema`Language`Parser`Private`processEnvironment"}]], "Input",
+ CellChangeTimes->{{3.505811997940427*^9, 3.505812012641989*^9}, {
+  3.505812873447418*^9, 3.505812890648296*^9}, {3.505818097119387*^9, 
+  3.505818129208323*^9}, {3.505821493868675*^9, 3.505821497905257*^9}}],
+
+Cell[CellGroupData[{
+
+Cell["Theorema`Language`Parser`Private`processEnvironment", "Print", "PrintUsage",
+ CellChangeTimes->{3.505821499917404*^9},
+ CellTags->"Info3505825099-5732760"],
+
+Cell[BoxData[
+ InterpretationBox[GridBox[{
+    {GridBox[{
+       {
+        RowBox[{
+         RowBox[{
+         "Theorema`Language`Parser`Private`processEnvironment", "[", 
+          "\[GraySquare]", "]"}], ":=", 
+         RowBox[{
+         "Theorema`Language`Parser`Private`closeEnvironment", "[", "]"}]}]},
+       {" "},
+       {
+        RowBox[{
+         RowBox[{
+         "Theorema`Language`Parser`Private`processEnvironment", "[", 
+          "Theorema`Language`Parser`Private`x_", "]"}], ":=", 
+         RowBox[{"Module", "[", 
+          RowBox[{
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"Theorema`Language`Parser`Private`nb", "=", 
+              RowBox[{"InputNotebook", "[", "]"}]}], ",", 
+             "Theorema`Language`Parser`Private`newLab"}], "}"}], ",", 
+           RowBox[{
+            RowBox[{"Theorema`Language`Parser`Private`newLab", "=", 
+             RowBox[{
+             "Theorema`Language`Parser`Private`adjustFormulaLabel", "[", 
+              "Theorema`Language`Parser`Private`nb", "]"}]}], ";", 
+            RowBox[{
+            "Theorema`Language`Parser`Private`appendEnvironmentFormula", "[", 
+             
+             RowBox[{
+             "Theorema`Language`Parser`Private`x", ",", 
+              "Theorema`Language`Parser`Private`newLab"}], "]"}], ";"}]}], 
+          "]"}]}]}
+      },
+      BaselinePosition->{Baseline, {1, 1}},
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxItemSize->{"Columns" -> {{
+           Scaled[0.999]}}, "ColumnsIndexed" -> {}, "Rows" -> {{1.}}, 
+        "RowsIndexed" -> {}}]}
+   },
+   BaselinePosition->{Baseline, {1, 1}},
+   GridBoxAlignment->{
+    "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+     "RowsIndexed" -> {}}],
+  Definition[Theorema`Language`Parser`Private`processEnvironment],
+  Editable->False]], "Print",
+ CellChangeTimes->{3.505821499956867*^9},
+ CellTags->"Info3505825099-5732760"]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData["Theorema`Language`Parser`Private`$environmentLabels"], "Input"],
+
+Cell[BoxData[
+ RowBox[{"{", "}"}]], "Output",
+ CellChangeTimes->{3.505818139713551*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData["Theorema`Language`Parser`Private`$environmentFormulae"], "Input",
+ CellChangeTimes->{{3.505818160502047*^9, 3.505818165689871*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", "}"}]], "Output",
+ CellChangeTimes->{3.505818166463418*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Theorema`Language`Parser`Private`inEnvironment", "[", 
+  "]"}]], "Input",
+ CellChangeTimes->{{3.505818152565507*^9, 3.505818152622237*^9}}],
+
+Cell[BoxData["False"], "Output",
+ CellChangeTimes->{3.505818153325944*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"DEFINITION", "[", "\"\<WW\>\"", "]"}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"f", "[", 
+  RowBox[{"x", ",", 
+   RowBox[{"x", "+", "1"}]}], "]"}]], "FormalTextInputFormula",
+ CellChangeTimes->{{3.504964918033465*^9, 3.504964919534386*^9}, 
+   3.504965325939976*^9, {3.504965495108832*^9, 3.504965510083283*^9}, {
+   3.504965552556996*^9, 3.504965555537879*^9}, {3.504965621837939*^9, 
+   3.5049656731218*^9}, {3.504965724220757*^9, 3.504965749603646*^9}, 
+   3.504966514602233*^9, {3.50496926258768*^9, 3.504969274012744*^9}},
+ CellTags->"def:WW_1"],
+
+Cell[BoxData[
+ RowBox[{"g", "[", 
+  RowBox[{"y", ",", "z"}], "]"}]], "FormalTextInputFormula",
+ CellChangeTimes->{{3.504970101184841*^9, 3.50497010581067*^9}},
+ CellTags->"def:WW_g"],
+
+Cell[BoxData["\[GraySquare]"], "Input",
+ CellGroupingRules->"OutputGrouping",
+ TextAlignment->Right]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"$insideEnv", "=", "False"}]], "Input",
+ CellChangeTimes->{{3.504968820765637*^9, 3.504968827624355*^9}}],
+
+Cell[BoxData["False"], "Output",
+ CellChangeTimes->{3.505038402670947*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData["$environmentFormulae"], "Input"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"f", "[", 
+        RowBox[{"x", ",", 
+         RowBox[{"1", "+", "x"}]}], "]"}], ",", "\<\"def:WW_1\"\>"}], "}"}], 
+     ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"g", "[", 
+        RowBox[{"y", ",", "z"}], "]"}], ",", "\<\"def:WW_g\"\>"}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{"False", ",", 
+       RowBox[{"{", "}"}]}], "}"}]}], "}"}], ",", 
+   RowBox[{"{", 
+    RowBox[{
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", "\<\"def:WW\"\>", "}"}], ",", 
+       RowBox[{"{", "}"}]}], "}"}], ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"f", "[", 
+        RowBox[{"x", ",", 
+         RowBox[{"1", "+", "x"}]}], "]"}], ",", "\<\"def:WW_1\"\>"}], "}"}], 
+     ",", 
+     RowBox[{"{", 
+      RowBox[{"False", ",", 
+       RowBox[{"{", "}"}]}], "}"}]}], "}"}]}], "}"}]], "Output",
+ CellChangeTimes->{3.504968850445879*^9, 3.504969307755468*^9, 
+  3.504969501340968*^9, 3.504969590780431*^9, 3.504969826310342*^9, 
+  3.504969902237765*^9, 3.504969947012853*^9, 3.504970145830551*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"$labels", "=", 
+   RowBox[{"{", "}"}]}], ";", 
+  RowBox[{"$environmentFormulaCounter", "=", 
+   RowBox[{"{", "}"}]}], ";", 
+  RowBox[{"$environmentFormulae", "=", 
+   RowBox[{"{", "}"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.504966415744898*^9, 3.504966417438445*^9}, {
+  3.504967759221666*^9, 3.504967764129336*^9}, {3.504967832715906*^9, 
+  3.504967834073444*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"DEFINITION", "[", "label_", "]"}], ":=", 
+  RowBox[{"Block", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{"envLabel", "=", 
+      RowBox[{"\"\<def:\>\"", "<>", "label"}]}], "}"}], ",", 
+    "\[IndentingNewLine]", 
+    RowBox[{
+     RowBox[{"PrependTo", "[", 
+      RowBox[{"$environmentFormulaCounter", ",", "1"}], "]"}], ";", 
+     "\[IndentingNewLine]", 
+     RowBox[{"PrependTo", "[", 
+      RowBox[{"$environmentFormulae", ",", 
+       RowBox[{"{", "}"}]}], "]"}], ";", "\[IndentingNewLine]", 
+     RowBox[{"PrependTo", "[", 
+      RowBox[{"$labels", ",", "envLabel"}], "]"}], ";", "\[IndentingNewLine]", 
+     RowBox[{"$insideEnv", "=", "True"}], ";"}]}], "\[IndentingNewLine]", 
+   "]"}]}]], "Input",
+ CellChangeTimes->{{3.504966180827117*^9, 3.504966184227244*^9}, {
+   3.504966280811014*^9, 3.504966519501307*^9}, {3.5049666033463*^9, 
+   3.504966640486933*^9}, {3.504966677311094*^9, 3.504966723259471*^9}, {
+   3.504966765850323*^9, 3.504967058630261*^9}, 3.504967093454026*^9, 
+   3.504967526066193*^9, {3.504967612956145*^9, 3.504967613387124*^9}, {
+   3.504967648414875*^9, 3.504967689280055*^9}, {3.504967792522937*^9, 
+   3.504967808158786*^9}, {3.504967840987908*^9, 3.504967854729462*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"SetAttributes", "[", 
+   RowBox[{"preprocess", ",", "HoldFirst"}], "]"}], ";"}]], "Input",
+ CellChangeTimes->{{3.504967939430982*^9, 3.504967951652806*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"preprocess", "[", "x_", "]"}], "/;", "$insideEnv"}], ":=", 
+  RowBox[{"Module", "[", 
+   RowBox[{
+    RowBox[{"{", 
+     RowBox[{"cl", ",", 
+      RowBox[{"nb", "=", 
+       RowBox[{"InputNotebook", "[", "]"}]}], ",", "newLab"}], "}"}], ",", 
+    "\[IndentingNewLine]", 
+    RowBox[{
+     RowBox[{"SelectionMove", "[", 
+      RowBox[{"nb", ",", "Previous", ",", "Cell"}], "]"}], ";", 
+     "\[IndentingNewLine]", 
+     RowBox[{"cl", "=", 
+      RowBox[{"CellTags", "/.", 
+       RowBox[{"Options", "[", 
+        RowBox[{
+         RowBox[{"NotebookSelection", "[", "nb", "]"}], ",", "CellTags"}], 
+        "]"}]}]}], ";", "\[IndentingNewLine]", 
+     RowBox[{"If", "[", 
+      RowBox[{
+       RowBox[{"cl", "===", 
+        RowBox[{"First", "[", "$labels", "]"}]}], ",", "\[IndentingNewLine]", 
+       
+       RowBox[{
+        RowBox[{"newLab", "=", 
+         RowBox[{"cl", "<>", "\"\<_\>\"", "<>", 
+          RowBox[{"ToString", "[", 
+           RowBox[{"First", "[", "$environmentFormulaCounter", "]"}], 
+           "]"}]}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"$environmentFormulaCounter", "=", 
+         RowBox[{"ReplacePart", "[", 
+          RowBox[{"$environmentFormulaCounter", ",", 
+           RowBox[{"1", "->", 
+            RowBox[{
+             RowBox[{"First", "[", "$environmentFormulaCounter", "]"}], "+", 
+             "1"}]}]}], "]"}]}], ";", "\[IndentingNewLine]", 
+        RowBox[{"SetOptions", "[", 
+         RowBox[{
+          RowBox[{"NotebookSelection", "[", "nb", "]"}], ",", 
+          RowBox[{"CellTags", "\[Rule]", "newLab"}]}], "]"}]}], ",", 
+       "\[IndentingNewLine]", 
+       RowBox[{"newLab", "=", "cl"}]}], "]"}], ";", "\[IndentingNewLine]", 
+     RowBox[{"SelectionMove", "[", 
+      RowBox[{"nb", ",", "After", ",", "Cell"}], "]"}], ";", 
+     "\[IndentingNewLine]", 
+     RowBox[{"$environmentFormulae", "=", 
+      RowBox[{"ReplacePart", "[", 
+       RowBox[{"$environmentFormulae", ",", 
+        RowBox[{"1", "\[Rule]", 
+         RowBox[{"Append", "[", 
+          RowBox[{
+           RowBox[{"First", "[", "$environmentFormulae", "]"}], ",", 
+           RowBox[{"{", 
+            RowBox[{"x", ",", "newLab"}], "}"}]}], "]"}]}]}], "]"}]}], 
+     ";"}]}], "\[IndentingNewLine]", "]"}]}]], "Input",
+ CellChangeTimes->{{3.504968079498208*^9, 3.504968523155075*^9}, {
+   3.504968559587241*^9, 3.504968652004001*^9}, {3.504968901982812*^9, 
+   3.504968915653732*^9}, {3.504969065090668*^9, 3.504969078116848*^9}, {
+   3.504969148885341*^9, 3.504969188229644*^9}, {3.504969377382444*^9, 
+   3.504969460226622*^9}, {3.50496962504851*^9, 3.50496962781732*^9}, 
+   3.504969838606738*^9, {3.504970004997045*^9, 3.50497000777597*^9}, {
+   3.505040174182299*^9, 3.505040174745896*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"preprocess", "[", "x_", "]"}], ":=", "x"}]], "Input",
+ CellChangeTimes->{{3.504968003114376*^9, 3.504968015374549*^9}}],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"$Pre", "=", "preprocess"}], ";"}]], "Input",
+ CellChangeTimes->{{3.504967895496405*^9, 3.504967936667014*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"new", "=", 
+  RowBox[{"CreateDocument", "[", "\"\<Test\>\"", "]"}]}]], "Input",
+ CellChangeTimes->{{3.504970299478345*^9, 3.504970363774166*^9}}],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"NotebookObject", "[", 
+   PanelBox[GridBox[{
+      {
+       TooltipBox[
+        ButtonBox[
+         StyleBox[
+          
+          DynamicBox[FEPrivate`FrontEndResource[
+           "FEBitmaps", "ManipulatePasteIcon"],
+           ImageSizeCache->{13., {4., 9.}}],
+          DynamicUpdating->True],
+         Appearance->{Automatic, None},
+         BaseStyle->{},
+         ButtonFunction:>FrontEndExecute[{
+            FrontEnd`SetSelectedNotebook[
+             NotebookObject[
+              FrontEndObject[
+               LinkObject["ksc_shm", 1, 1]], 50]]}],
+         Evaluator->None,
+         Method->"Queued"],
+        DynamicBox[
+         FEPrivate`FrontEndResource[
+         "FEStrings", "NotebookObjectToTheFront"]]], 
+       StyleBox["\<\"Untitled-5\"\>",
+        StripOnInput->False,
+        FontColor->GrayLevel[0.5]]}
+     },
+     GridBoxAlignment->{
+      "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+       "RowsIndexed" -> {}}],
+    FrameMargins->{{4, 5}, {4, 4}}], "]"}],
+  NotebookObject[
+   FrontEndObject[
+    LinkObject["ksc_shm", 1, 1]], 50],
+  Editable->False]], "Output",
+ CellChangeTimes->{{3.504970317667152*^9, 3.504970366975307*^9}}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"SelectionMove", "[", 
+  RowBox[{"new", ",", "Next", ",", "Character"}], "]"}]], "Input",
+ CellChangeTimes->{{3.504970381681063*^9, 3.504970390959529*^9}, {
+  3.50497053901966*^9, 3.504970539689765*^9}, {3.504970618916179*^9, 
+  3.504970620031949*^9}, {3.504970698104771*^9, 3.504970698717039*^9}, {
+  3.50497081714668*^9, 3.504970821752483*^9}}],
+
+Cell[BoxData[
+ RowBox[{"SelectionMove", "[", 
+  RowBox[{"new", ",", "All", ",", "CellContents"}], "]"}]], "Input",
+ CellChangeTimes->{{3.504970381681063*^9, 3.504970480392736*^9}, {
+  3.504970513207323*^9, 3.504970549537637*^9}, {3.504970589576391*^9, 
+  3.504970590279091*^9}, {3.504970624423005*^9, 3.504970625024811*^9}, {
+  3.504970661000077*^9, 3.50497075156948*^9}}],
+
+Cell[BoxData[
+ RowBox[{"SelectionMove", "[", 
+  RowBox[{"new", ",", "Previous", ",", "CellContents"}], "]"}]], "Input",
+ CellChangeTimes->{{3.504970381681063*^9, 3.504970480392736*^9}, {
+  3.504970513207323*^9, 3.504970549537637*^9}, {3.504970589576391*^9, 
+  3.504970590279091*^9}, {3.504970624423005*^9, 3.504970625024811*^9}, {
+  3.504970661000077*^9, 3.504970781343845*^9}}],
+
+Cell[BoxData[
+ RowBox[{"SelectionMove", "[", 
+  RowBox[{"new", ",", "After", ",", "CellContents"}], "]"}]], "Input",
+ CellChangeTimes->{{3.504970381681063*^9, 3.504970480392736*^9}, {
+  3.504970513207323*^9, 3.504970549537637*^9}, {3.504970589576391*^9, 
+  3.504970590279091*^9}, {3.504970624423005*^9, 3.504970625024811*^9}, {
+  3.504970661000077*^9, 3.504970800210301*^9}}],
 
 Cell[CellGroupData[{
 
@@ -242,9 +845,11 @@ Cell["Environment", "Subsubsection",
 Cell[CellGroupData[{
 
 Cell[BoxData[
- RowBox[{"DEF", "[", "\"\<WW\>\"", "]"}]], "Input"],
+ RowBox[{"DEFINITION", "[", "\"\<WW\>\"", "]"}]], "Input",
+ CellChangeTimes->{{3.504960933328351*^9, 3.504960934852151*^9}}],
 
-Cell["\[SelectionPlaceholder]", "FormalTextInputFormula",
+Cell["", "FormalTextInputFormula",
+ CellChangeTimes->{{3.504961074220162*^9, 3.504961081970512*^9}},
  CellTags->"def:WW"],
 
 Cell[BoxData["\[GraySquare]"], "Input",
@@ -308,7 +913,7 @@ Cell[BoxData[
 }, Open  ]]
 },
 WindowSize->{895, 750},
-WindowMargins->{{23, Automatic}, {115, Automatic}},
+WindowMargins->{{Automatic, 78}, {105, Automatic}},
 ShowSelection->True,
 FrontEndVersion->"7.0 for Linux x86 (32-bit) (November 10, 2008)",
 StyleDefinitions->Notebook[{
@@ -384,28 +989,62 @@ StyleDefinitions->Notebook[{
 (* Internal cache information *)
 (*CellTagsOutline
 CellTagsIndex->{
- "def:WW"->{
-  Cell[9122, 246, 78, 1, 36, "FormalTextInputFormula",
-   CellTags->"def:WW"]},
  "f base case"->{
-  Cell[1408, 47, 371, 7, 36, "FormalTextInputFormula",
-   CellTags->{"f base case", "function"}]},
+  Cell[1408, 47, 357, 7, 36, "FormalTextInputFormula",
+   CellTags->"f base case"]},
  "f general case"->{
-  Cell[1782, 56, 475, 10, 36, "FormalTextInputFormula",
+  Cell[1768, 56, 475, 10, 36, "FormalTextInputFormula",
    CellTags->{"f general case", "function"}]},
  "function"->{
-  Cell[1408, 47, 371, 7, 36, "FormalTextInputFormula",
-   CellTags->{"f base case", "function"}],
-  Cell[1782, 56, 475, 10, 36, "FormalTextInputFormula",
-   CellTags->{"f general case", "function"}]}
+  Cell[1768, 56, 475, 10, 36, "FormalTextInputFormula",
+   CellTags->{"f general case", "function"}]},
+ "DEF:Test"->{
+  Cell[12517, 315, 97, 2, 32, "Input",
+   CellTags->"DEF:Test"]},
+ "DEF:Test_MyLab"->{
+  Cell[12617, 319, 166, 3, 36, "FormalTextInputFormula",
+   CellTags->"DEF:Test_MyLab"]},
+ "DEF:Test_1"->{
+  Cell[12786, 324, 234, 4, 36, "FormalTextInputFormula",
+   CellTags->"DEF:Test_1"]},
+ "DEF:Test_2"->{
+  Cell[13023, 330, 162, 3, 36, "FormalTextInputFormula",
+   CellTags->"DEF:Test_2"]},
+ "Info3505825115-8215813"->{
+  Cell[16476, 405, 149, 2, 43, "Print",
+   CellTags->"Info3505825115-8215813"],
+  Cell[16628, 409, 1366, 37, 24, "Print",
+   CellTags->"Info3505825115-8215813"]},
+ "Info3505825099-5732760"->{
+  Cell[18555, 470, 161, 2, 43, "Print",
+   CellTags->"Info3505825099-5732760"],
+  Cell[18719, 474, 2013, 51, 182, "Print",
+   CellTags->"Info3505825099-5732760"]},
+ "def:WW_1"->{
+  Cell[21609, 564, 494, 9, 36, "FormalTextInputFormula",
+   CellTags->"def:WW_1"]},
+ "def:WW_g"->{
+  Cell[22106, 575, 182, 4, 36, "FormalTextInputFormula",
+   CellTags->"def:WW_g"]},
+ "def:WW"->{
+  Cell[32023, 850, 121, 2, 36, "FormalTextInputFormula",
+   CellTags->"def:WW"]}
  }
 *)
 (*CellTagsIndex
 CellTagsIndex->{
- {"def:WW", 14465, 386},
- {"f base case", 14563, 389},
- {"f general case", 14683, 392},
- {"function", 14801, 395}
+ {"f base case", 37414, 991},
+ {"f general case", 37520, 994},
+ {"function", 37638, 997},
+ {"DEF:Test", 37756, 1000},
+ {"DEF:Test_MyLab", 37843, 1003},
+ {"DEF:Test_1", 37950, 1006},
+ {"DEF:Test_2", 38053, 1009},
+ {"Info3505825115-8215813", 38168, 1012},
+ {"Info3505825099-5732760", 38360, 1017},
+ {"def:WW_1", 38539, 1022},
+ {"def:WW_g", 38638, 1025},
+ {"def:WW", 38735, 1028}
  }
 *)
 (*NotebookFileOutline
@@ -417,40 +1056,126 @@ Cell[734, 28, 95, 1, 73, "Section"],
 Cell[CellGroupData[{
 Cell[854, 33, 186, 3, 32, "Input"],
 Cell[1043, 38, 362, 7, 21, "FormalTextInputFormula"],
-Cell[1408, 47, 371, 7, 36, "FormalTextInputFormula",
- CellTags->{"f base case", "function"}],
-Cell[1782, 56, 475, 10, 36, "FormalTextInputFormula",
+Cell[1408, 47, 357, 7, 36, "FormalTextInputFormula",
+ CellTags->"f base case"],
+Cell[1768, 56, 475, 10, 36, "FormalTextInputFormula",
  CellTags->{"f general case", "function"}],
-Cell[2260, 68, 142, 3, 32, "Input",
+Cell[2246, 68, 142, 3, 32, "Input",
  CellGroupingRules->"OutputGrouping"]
 }, Open  ]],
-Cell[2417, 74, 449, 11, 32, "Input"],
-Cell[2869, 87, 114, 2, 32, "Input"],
-Cell[2986, 91, 272, 6, 32, "Input"],
-Cell[3261, 99, 553, 11, 32, "Input"],
-Cell[3817, 112, 2752, 57, 187, "Input"],
-Cell[6572, 171, 589, 14, 32, "Input"],
-Cell[7164, 187, 958, 23, 121, "Input"]
+Cell[2403, 74, 449, 11, 32, "Input"],
+Cell[2855, 87, 114, 2, 32, "Input"],
+Cell[2972, 91, 553, 11, 32, "Input"],
+Cell[3528, 104, 2752, 57, 187, "Input"],
+Cell[6283, 163, 589, 14, 32, "Input"]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[6909, 182, 102, 1, 43, "Section"],
+Cell[7014, 185, 135, 2, 32, "Input"],
+Cell[CellGroupData[{
+Cell[7174, 191, 94, 1, 39, "Subsection"],
+Cell[7271, 194, 1472, 28, 77, "Input"],
+Cell[CellGroupData[{
+Cell[8768, 226, 704, 15, 55, "Input"],
+Cell[9475, 243, 538, 11, 45, "Output"]
+}, Open  ]],
+Cell[10028, 257, 2464, 54, 187, "Input"],
+Cell[CellGroupData[{
+Cell[12517, 315, 97, 2, 32, "Input",
+ CellTags->"DEF:Test"],
+Cell[12617, 319, 166, 3, 36, "FormalTextInputFormula",
+ CellTags->"DEF:Test_MyLab"],
+Cell[12786, 324, 234, 4, 36, "FormalTextInputFormula",
+ CellTags->"DEF:Test_1"],
+Cell[13023, 330, 162, 3, 36, "FormalTextInputFormula",
+ CellTags->"DEF:Test_2"],
+Cell[13188, 335, 100, 2, 32, "Input",
+ CellGroupingRules->"OutputGrouping"]
+}, Open  ]],
+Cell[13303, 340, 114, 2, 32, "Input"],
+Cell[CellGroupData[{
+Cell[13442, 346, 168, 3, 32, "Input"],
+Cell[13613, 351, 2603, 42, 512, "Output"]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[16253, 398, 198, 3, 26, "Input"],
+Cell[CellGroupData[{
+Cell[16476, 405, 149, 2, 43, "Print",
+ CellTags->"Info3505825115-8215813"],
+Cell[16628, 409, 1366, 37, 24, "Print",
+ CellTags->"Info3505825115-8215813"]
+}, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[8159, 215, 102, 1, 73, "Section"],
+Cell[18043, 452, 69, 1, 32, "Input"],
+Cell[18115, 455, 70, 1, 31, "Output"]
+}, Open  ]],
 Cell[CellGroupData[{
-Cell[8286, 220, 94, 1, 39, "Subsection"],
-Cell[8383, 223, 519, 11, 45, "Output"],
+Cell[18222, 461, 308, 5, 32, "Input"],
 Cell[CellGroupData[{
-Cell[8927, 238, 102, 1, 29, "Subsubsection"],
+Cell[18555, 470, 161, 2, 43, "Print",
+ CellTags->"Info3505825099-5732760"],
+Cell[18719, 474, 2013, 51, 182, "Print",
+ CellTags->"Info3505825099-5732760"]
+}, Open  ]]
+}, Open  ]],
 Cell[CellGroupData[{
-Cell[9054, 243, 65, 1, 32, "Input"],
-Cell[9122, 246, 78, 1, 36, "FormalTextInputFormula",
+Cell[20781, 531, 77, 0, 32, "Input"],
+Cell[20861, 533, 87, 2, 31, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[20985, 540, 145, 1, 32, "Input"],
+Cell[21133, 543, 87, 2, 31, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[21257, 550, 163, 3, 32, "Input"],
+Cell[21423, 555, 74, 1, 31, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[21534, 561, 72, 1, 32, "Input"],
+Cell[21609, 564, 494, 9, 36, "FormalTextInputFormula",
+ CellTags->"def:WW_1"],
+Cell[22106, 575, 182, 4, 36, "FormalTextInputFormula",
+ CellTags->"def:WW_g"],
+Cell[22291, 581, 100, 2, 32, "Input",
+ CellGroupingRules->"OutputGrouping"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[22428, 588, 128, 2, 32, "Input"],
+Cell[22559, 592, 74, 1, 31, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[22670, 598, 46, 0, 32, "Input"],
+Cell[22719, 600, 1132, 35, 52, "Output"]
+}, Open  ]],
+Cell[23866, 638, 404, 10, 32, "Input"],
+Cell[24273, 650, 1245, 26, 143, "Input"],
+Cell[25521, 678, 191, 4, 32, "Input"],
+Cell[25715, 684, 2767, 64, 297, "Input"],
+Cell[28485, 750, 154, 3, 32, "Input"],
+Cell[28642, 755, 145, 3, 32, "Input"],
+Cell[CellGroupData[{
+Cell[28812, 762, 169, 3, 32, "Input"],
+Cell[28984, 767, 1228, 37, 47, "Output"]
+}, Open  ]],
+Cell[30227, 807, 369, 6, 32, "Input"],
+Cell[30599, 815, 372, 6, 32, "Input"],
+Cell[30974, 823, 378, 6, 32, "Input"],
+Cell[31355, 831, 375, 6, 32, "Input"],
+Cell[CellGroupData[{
+Cell[31755, 841, 102, 1, 29, "Subsubsection"],
+Cell[CellGroupData[{
+Cell[31882, 846, 138, 2, 32, "Input"],
+Cell[32023, 850, 121, 2, 36, "FormalTextInputFormula",
  CellTags->"def:WW"],
-Cell[9203, 249, 100, 2, 32, "Input",
+Cell[32147, 854, 100, 2, 32, "Input",
  CellGroupingRules->"OutputGrouping"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[9340, 256, 151, 3, 32, "Input"],
-Cell[9494, 261, 1204, 37, 47, "Output"]
+Cell[32284, 861, 151, 3, 32, "Input"],
+Cell[32438, 866, 1204, 37, 47, "Output"]
 }, Open  ]],
-Cell[10713, 301, 129, 2, 32, "Input"]
+Cell[33657, 906, 129, 2, 32, "Input"]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]]

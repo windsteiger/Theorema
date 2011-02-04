@@ -19,7 +19,7 @@
 
 (* 
 Theorema editor: W. Windsteiger
-Developer:       W. Windsteiger
+Author(s):       W. Windsteiger
 
 What is the purpose of the Theorema editor? Read more in /ProgrammersDoc/Guidelines.nb#1871658360
 *)
@@ -39,23 +39,24 @@ Which[!ValueQ[$TheoremaDirectory],
 	Exit[]
 ];
 
-Protect[$TheoremaDirectory];
+Protect[$TheoremaDirectory]; 
 
-If[ $FrontEnd=!=Null,
-    `priv`welcomeScreen = NotebookOpen[ToFileName[{$TheoremaDirectory,"Theorema","FrontEnd"},"Startup.nb"],
-        WindowElements -> {}, WindowSize -> All, WindowFrame -> "Frameless", Deployed -> True],
+If[ TrueQ[$Notebooks],
+    If[!ValueQ[`priv`welcomeScreen],
+    	`priv`welcomeScreen = NotebookOpen[ToFileName[{$TheoremaDirectory,"Theorema","FrontEnd"},"Startup.nb"],
+        WindowElements -> {}, WindowSize -> All, WindowFrame -> "Frameless", Deployed -> True]],
     Print["Theorema Copyright (C) 2010 The Theorema Group.\n
     This program comes with ABSOLUTELY NO WARRANTY;\n\n    This is free software, and you are welcome to\n    redistribute it under the conditions of the\n    GNU General Public License, see <http://www.gnu.org/licenses/>."]
 ];
 
 EndPackage[]
 
+
 Get["Theorema`GUI`GUI`"]
 		
 Pause[5];
 
-If[$FrontEnd=!=Null,
+If[$Notebooks && MemberQ[Notebooks[], Theorema`priv`welcomeScreen],
 	NotebookClose[Theorema`priv`welcomeScreen]];
 
-Remove["Theorema`priv`*"];
 	
