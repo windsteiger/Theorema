@@ -17,9 +17,10 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-BeginPackage["Theorema`GUI`GUI`"];
+BeginPackage["Theorema`Interface`GUI`"];
 (* Exported symbols added here with SymbolName::usage *)  
 
+theoremaCommander::usage = "The Theorema commander"
 updateKBBrowser::usage = "";
 displayKBBrowser::usage = "";
 
@@ -27,6 +28,20 @@ Needs["Theorema`System`Messages`"];
 
 Begin["`Private`"] (* Begin Private Context *) 
 
+
+(* ::Section:: *)
+(* Region Title *)
+
+theoremaCommander[] :=
+    Module[ {style = Replace[ScreenStyleEnvironment,Options[InputNotebook[], ScreenStyleEnvironment]]},
+        CreatePalette[Dynamic[displayKBBrowser[],TrackedSymbols->{kbStruct}],
+        	StyleDefinitions -> ToFileName[{"Theorema"}, "GUI.nb"],
+        	WindowTitle -> "Theorema Commander",
+        	ScreenStyleEnvironment -> style,
+        	WindowElements -> {"StatusArea"}]
+    ]
+
+ 
 (* ::Subsubsection:: *)
 (* extractKBStruct *)
 
@@ -123,6 +138,9 @@ structView[file_, Cell[content_, style_, ___], tags_] :=
         Row[{Checkbox[Dynamic[allTrue[tags], setAll[tags, #] &]], 
           Style[content, style]}, Spacer[10]]
     ]
+
+structView[args___] :=
+    unexpected[structView, {args}]
 
 isSelected[_] := False
 

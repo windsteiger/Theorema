@@ -7,98 +7,9 @@ What is the purpose of the Theorema editor? Read more in /ProgrammersDoc/Guideli
 
 BeginPackage["Theorema`Language`Parser`"];
 
-preprocessTheoremaExpression::usage = "The standard preprocessor";
-DEFINITION::usage = "Theorema definition environment";
-\[GraySquare]::usage = "End of environment marker";
 
 Begin["`Private`"]
 
-SetAttributes[preprocessTheoremaExpression,HoldAll];
-
-preprocessTheoremaExpression[expr_]:=preprocessTheoremaExpressionHold[Hold[expr]];
-
-preprocessTheoremaExpressionHold[expr_]:=markVariables[globalTyping[freshNames[expr]]];
-preprocessTheoremaExpressionHold[expr_]:=
-	Which[inEnvironment[],
-		processEnvironment[ReleaseHold[expr]],
-		True,
-		ReleaseHold[expr]
-	]
-
-processEnvironment[\[GraySquare]] := closeEnvironment[]
-
-processEnvironment[x_] :=
-    Module[ {nb = InputNotebook[], newLab},
-        newLab = adjustFormulaLabel[nb];
-        appendEnvironmentFormula[x, newLab];
-    ]
-
-inEnvironment[] := Length[$environmentLabels]>0
-
-adjustFormulaLabel[nb_NotebookObject] := 
-	Module[{cl}, 
-		SelectionMove[nb, Previous, Cell];
-        cl = CellTags /. Options[NotebookSelection[nb], CellTags];
-        Switch[cl,
-        	{_,_},
-        	cl = newFormulaLabel[nb,cl]
-        ];
-        SelectionMove[nb, After, Cell];
-        cl
-	]
-adjustFormulaLabel[args___]	:= unexpected[adjustFormulaLabel,{args}]
-
-newFormulaLabel[nb_NotebookObject, {_, lab_}] := 
-	Module[{newLab},		
-        newLab = currentEnvironment[][[2]]<>"_"<>If[lab==="???",incrementCurrentCounter[];currentCounterLabel[],lab];
-        SetOptions[NotebookSelection[nb], CellTags->newLab];
-        newLab		
-	]
-newFormulaLabel[args___] := unexpected[newFormulaLabel,{args}]
-
-appendEnvironmentFormula[form_, lab_] := 
-	Module[{}, 
-		$environmentFormulae = ReplacePart[$environmentFormulae, 1->Append[First[$environmentFormulae], {form, lab}]]
-	]
-		
-initSession[] := 
-	Module[{}, 
-		$environmentLabels = {};
-		$environmentFormulaCounters = {};
-		$environmentFormulae = {};
-		$Pre = preprocessTheoremaExpression;
-	]
-
-currentEnvironment[] := First[$environmentLabels]
-
-currentFormulae[] := First[$environmentFormulae]
-
-currentCounter[] := First[$environmentFormulaCounters]
-
-currentCounterLabel[] := ToString[currentCounter[]]
-
-incrementCurrentCounter[] := 
-	Module[{},
-		$environmentFormulaCounters = ReplacePart[$environmentFormulaCounters, 1->currentCounter[]+1]
-	]
-
-DEFINITION[label_] := openEnvironment["DEF", label];
-
-openEnvironment[type_, label_] :=
-    Module[{},
-        PrependTo[$environmentFormulaCounters, 0];
-        PrependTo[$environmentFormulae, {}];
-        PrependTo[$environmentLabels, {type,type<>":"<>label}];
-    ]
-
-closeEnvironment[] := 
-	Module[{env=currentEnvironment[]},
-		tmaEnv[env[[1]],env[[2]]] = currentFormulae[];
-		$environmentFormulaCounters = Rest[$environmentFormulaCounters];
-        $environmentFormulae = Rest[$environmentFormulae];
-        $environmentLabels = Rest[$environmentLabels];
-        (*updateKBBrowser[];*)
-	]
 	
 (*
 MakeTheoremaExpression[RowBox[{UnderscriptBox["\[ForAll]",rng_],form_}],f_]:=
@@ -501,7 +412,6 @@ MakeTheoremaExpression[RowBox[{"with","[",v__,"]"}],f_]:=ToConditionBox[v]
 MakeTheoremaExpression[RowBox[{"bound","[",v__,"]"}],f_]:=ToHoldingRangeBox[v]
 *)
 
-initSession[];
 
 End[];
 EndPackage[];

@@ -52,8 +52,13 @@ If[ TrueQ[$Notebooks],
 EndPackage[]
 
 
-Get["Theorema`GUI`GUI`"]
-		
+Get["Theorema`Interface`GUI`"]
+Get["Theorema`Language`Parser`"]
+Get["Theorema`Language`Session`"]
+
+initSession[];
+theoremaCommander[];
+	
 Pause[5];
 
 If[$Notebooks && MemberQ[Notebooks[], Theorema`priv`welcomeScreen],
