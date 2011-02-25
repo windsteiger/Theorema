@@ -56,8 +56,8 @@ Get["Theorema`Interface`GUI`"]
 Get["Theorema`Language`Parser`"]
 Get["Theorema`Language`Session`"]
 
+initGUI[];
 initSession[];
-theoremaCommander[];
 	
 Pause[5];
 

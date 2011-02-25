@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       145,          7]
-NotebookDataLength[      6239,        245]
-NotebookOptionsPosition[      4076,        179]
-NotebookOutlinePosition[      4537,        199]
-CellTagsIndexPosition[      4494,        196]
+NotebookDataLength[      7025,        276]
+NotebookOptionsPosition[      4598,        202]
+NotebookOutlinePosition[      5059,        222]
+CellTagsIndexPosition[      5016,        219]
 MenuPosition->1300
 WindowFrame->Normal*)
 
@@ -149,6 +149,8 @@ Cell[CellGroupData[{
 
 Cell["Styles for formulae", "Section"],
 
+Cell[CellGroupData[{
+
 Cell[StyleData["FormalTextInputFormula"],
  FontFamily->"Courier",
  FontSize->10,
@@ -159,13 +161,34 @@ Cell[StyleData["FormalTextInputFormula"],
  FontColor->RGBColor[
   0.047058823529411764`, 0.2784313725490196, 0.5254901960784314]],
 
-Cell[StyleData["FormalTextInputFormula"],
+Cell[StyleData["FormalTextInputFormula", "Presentation"],
  FontFamily->"Courier",
  FontSize->14,
  FontWeight->"Plain",
  FontSlant->"Italic",
  FontVariations->{"StrikeThrough"->False,
- "Underline"->False}],
+ "Underline"->False}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[StyleData["FormalTextInputFormulaUneval"],
+ FontFamily->"Courier",
+ FontSize->10,
+ FontWeight->"Plain",
+ FontSlant->"Italic",
+ FontVariations->{"StrikeThrough"->False,
+ "Underline"->False},
+ FontColor->GrayLevel[0.5]],
+
+Cell[StyleData["FormalTextInputFormulaUneval", "Presentation"],
+ FontFamily->"Courier",
+ FontSize->14,
+ FontWeight->"Plain",
+ FontSlant->"Italic",
+ FontVariations->{"StrikeThrough"->False,
+ "Underline"->False}]
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -238,13 +261,21 @@ Cell[3160, 137, 201, 6, 57, 48, 0, "StyleData", "Subsubsection", \
 }, Open  ]],
 Cell[CellGroupData[{
 Cell[3410, 149, 38, 0, 54, "Section"],
-Cell[3451, 151, 276, 8, 41, 41, 0, "StyleData", "FormalTextInputFormula", \
-"All"],
-Cell[3730, 161, 188, 6, 45, 41, 0, "StyleData", "FormalTextInputFormula", \
-"All"],
 Cell[CellGroupData[{
-Cell[3943, 171, 43, 1, 40, 28, 0, "StyleData", "Hyperlink", "All"],
-Cell[3989, 174, 59, 1, 45, 44, 0, "StyleData", "Hyperlink", "Presentation"]
+Cell[3473, 153, 276, 8, 41, 41, 0, "StyleData", "FormalTextInputFormula", \
+"All"],
+Cell[3752, 163, 204, 6, 45, 57, 0, "StyleData", "FormalTextInputFormula", \
+"Presentation"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[3993, 174, 222, 7, 41, 47, 0, "StyleData", \
+"FormalTextInputFormulaUneval", "All"],
+Cell[4218, 183, 210, 6, 45, 63, 0, "StyleData", \
+"FormalTextInputFormulaUneval", "Presentation"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4465, 194, 43, 1, 40, 28, 0, "StyleData", "Hyperlink", "All"],
+Cell[4511, 197, 59, 1, 45, 44, 0, "StyleData", "Hyperlink", "Presentation"]
 }, Open  ]]
 }, Open  ]]
 }

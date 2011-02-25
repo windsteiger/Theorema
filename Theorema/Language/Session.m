@@ -17,7 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-BeginPackage["Theorema`Interface`Session`"];
+BeginPackage["Theorema`Language`Session`"];
 (* Exported symbols added here with SymbolName::usage *)  
 
 preprocessTheoremaExpression::usage = "The standard preprocessor";
@@ -49,10 +49,12 @@ preprocessTheoremaExpressionHold[expr_]:=
 		ReleaseHold[expr]
 	]
 
-processEnvironment[\[GraySquare]] := closeEnvironment[]
+processEnvironment[\[GraySquare]] :=
+    (closeEnvironment[];
+     SelectionMove[EvaluationNotebook[], After, EvaluationCell];)
 
 processEnvironment[x_] :=
-    Module[ {nb = InputNotebook[], newLab},
+    Module[ {nb = EvaluationNotebook[], newLab},
         newLab = adjustFormulaLabel[nb];
         appendEnvironmentFormula[x, newLab];
     ]
@@ -61,13 +63,13 @@ inEnvironment[] := Length[$environmentLabels]>0
 
 adjustFormulaLabel[nb_NotebookObject] := 
 	Module[{cl}, 
-		SelectionMove[nb, Previous, Cell];
+		SelectionMove[nb, All, EvaluationCell];
         cl = CellTags /. Options[NotebookSelection[nb], CellTags];
         Switch[cl,
         	{_,_},
         	cl = newFormulaLabel[nb,cl]
         ];
-        SelectionMove[nb, After, Cell];
+        (*SelectionMove[nb, After, Cell];*)
         cl
 	]
 adjustFormulaLabel[args___]	:= unexpected[adjustFormulaLabel,{args}]
@@ -90,6 +92,7 @@ initSession[] :=
 		$environmentLabels = {};
 		$environmentFormulaCounters = {};
 		$environmentFormulae = {};
+		$tmaEnv = {};
 		$Pre = preprocessTheoremaExpression;
 	]
 
@@ -117,13 +120,27 @@ openEnvironment[type_, label_] :=
 
 closeEnvironment[] := 
 	Module[{env=currentEnvironment[]},
-		tmaEnv[env[[1]],env[[2]]] = currentFormulae[];
+		updateEnv[ env[[1]], env[[2]], currentFormulae[]];
 		$environmentFormulaCounters = Rest[$environmentFormulaCounters];
         $environmentFormulae = Rest[$environmentFormulae];
         $environmentLabels = Rest[$environmentLabels];
         Theorema`Interface`GUI`updateKBBrowser[];
 	]
 
+updateEnv[ type_, lab_, form_] :=
+    Module[ { pos},
+        pos = Position[ $tmaEnv, {type, lab, _}];
+        If[ pos === {},
+            PrependTo[ $tmaEnv, {type, lab, form}],
+            $tmaEnv[[pos[[1,1]]]] = {type, lab, form}
+        ]
+    ]
+
+insertNewFormulaCell[] := 
+	Module[{ envLab = currentEnvironment[]}, 
+		NotebookWrite[InputNotebook[], Cell[BoxData[], "FormalTextInputFormula", CellTags->{envLab[[2]], "???"}]]
+	]
+	
 (* ::Section:: *)
 (* end of package *)
   

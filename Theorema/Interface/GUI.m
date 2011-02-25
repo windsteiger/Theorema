@@ -20,27 +20,60 @@
 BeginPackage["Theorema`Interface`GUI`"];
 (* Exported symbols added here with SymbolName::usage *)  
 
-theoremaCommander::usage = "The Theorema commander"
-updateKBBrowser::usage = "";
-displayKBBrowser::usage = "";
+initGUI::usage = "Initialize the GUI and all global variables"
+$theoremaGUI::usage = "Theorema GUI structure"
+updateKBBrowser::usage = ""
+displayKBBrowser::usage = ""
 
-Needs["Theorema`System`Messages`"];
+Needs["Theorema`System`Messages`"]
+Needs["Theorema`Interface`Language`"]
 
 Begin["`Private`"] (* Begin Private Context *) 
 
 
 (* ::Section:: *)
-(* Region Title *)
+(* initGUI *)
 
-theoremaCommander[] :=
+initGUI[] := 
+	Module[{ }, 
+		$kbStruct = {};
+		$theoremaGUI = {"Theorema Commander" -> theoremaCommander[]};
+	]
+
+(* ::Section:: *)
+(* theoremaCommander *)
+
+theoremaCommander[] /; $Notebooks :=
     Module[ {style = Replace[ScreenStyleEnvironment,Options[InputNotebook[], ScreenStyleEnvironment]]},
-        CreatePalette[Dynamic[displayKBBrowser[],TrackedSymbols->{kbStruct}],
+        CreatePalette[ Dynamic[Refresh[
+        	TabView[{
+        		translate["tcLangTabLabel"]->TabView[{
+        			translate["tcLangTabMathTabLabel"]->emptyPane[translate["not available"]],
+        			translate["tcLangTabEnvTabLabel"]->envButtons[]}, Dynamic[$tcLangTab],
+        			ControlPlacement->Top],
+        		translate["tcProveTabLabel"]->TabView[{
+        			translate["tcProveTabKBTabLabel"]->Dynamic[Refresh[displayKBBrowser[],TrackedSymbols :> {$kbStruct}]],
+        			translate["tcProveTabBuiltinTabLabel"]->emptyPane[translate["not available"]]}, Dynamic[$tcProveTab],
+        			ControlPlacement->Top],
+        		translate["tcComputeTabLabel"]->TabView[{
+        			translate["tcComputeTabKBTabLabel"]->emptyPane[translate["not available"]],
+        			translate["tcComputeTabBuiltinTabLabel"]->emptyPane[translate["not available"]]}, Dynamic[$tcCompTab],
+        			ControlPlacement->Top],
+        		translate["tcPreferencesTabLabel"]->Row[{translate["tcPrefLanguage"], PopupMenu[Dynamic[$Language], availableLanguages[]]}, Spacer[10]]},
+        		Dynamic[$tcTopLevelTab],
+        		LabelStyle->{Bold}, ControlPlacement->Left
+        	], TrackedSymbols :> {$Language}]],
         	StyleDefinitions -> ToFileName[{"Theorema"}, "GUI.nb"],
         	WindowTitle -> "Theorema Commander",
         	ScreenStyleEnvironment -> style,
-        	WindowElements -> {"StatusArea"}]
+        	WindowElements -> {"StatusArea"}, 
+        	Deployed -> True,
+        	ShowCellBracket -> False,
+        	WindowFloating -> True,
+        	WindowClickSelect -> False]
     ]
 
+emptyPane[text_String:""]:=Pane[text, {300,600}, Alignment->{Center,Center}]
  
 (* ::Subsubsection:: *)
 (* extractKBStruct *)
@@ -86,8 +119,7 @@ arrangeInput[{struct_, isolated_}, item_] :=
           ],
           {i, Length[struct]}];
         If[ NumberQ[pos],
-            {Insert[struct, item, {pos, -1}], 
-            isolated},
+            {Insert[struct, item, {pos, -1}], isolated},
             {struct, Insert[isolated, {item}, -1]}
         ]
     ]
@@ -109,15 +141,21 @@ arrangeSub[struct_, item : {head_, ___}] :=
 
 (* ::Subsubsection:: *)
 (* structView *)
+Clear[structView];
 
-structView[file_, {head_Cell, rest__}, tags_] :=
+structView[file_, {head:Cell[sec_, style:"Title"|"Section"|"Subsection"|"Subsubsection", ___], rest__}, tags_] :=
     Module[ {sub, compTags},
         sub = Transpose[Map[structView[file, #, tags] &, {rest}]];
         compTags = Apply[Union, sub[[2]]];
-        {OpenerView[{structView[file, head, compTags], Column[sub[[1]]]}], 
+        {OpenerView[{structView[file, head, compTags], Column[sub[[1]]]}, 
+        	ToExpression[StringReplace["Dynamic[NEWSYM]", 
+        		"NEWSYM" -> "$kbStructState$"<>FileBaseName[file]<>"$"<>style<>"$"<>ToString[Hash[sec]]]]], 
          compTags}
     ]
 
+structView[file_, {Cell[sec_, style:"Section"|"Subsection"|"Subsubsection", ___]}, tags_] :=
+	Sequence[]
+ 
 structView[file_, item_List, tags_] :=
     Module[ {sub, compTags},
         sub = Transpose[Map[structView[file, #, tags] &, item]];
@@ -126,12 +164,14 @@ structView[file_, item_List, tags_] :=
     ]
 
 structView[file_, Cell[content_, "FormalTextInputFormula", ___], tags_] :=
-    {Row[{Spacer[14], Style["unlabeled formula", "FormalTextInputFormula"]}, Spacer[10]], {}}
+    Sequence[]
 
 structView[file_, Cell[content_, "FormalTextInputFormula", ___, CellTags -> ct_, ___], 
   tags_] :=
-    {Row[{Checkbox[Dynamic[isSelected[ct]]], Hyperlink[ Style[ct, "FormalTextInputFormula"], {file, ct}]}, 
+  Module[ { isEval = MemberQ[ Theorema`Language`Session`Private`$tmaEnv, {_,ct}, Infinity]},
+    {Row[{Checkbox[Dynamic[isSelected[ct]], Enabled->isEval], Hyperlink[ Style[ct, If[ isEval, "FormalTextInputFormula", "FormalTextInputFormulaUneval"]], {file, ct}]}, 
       Spacer[10]], {ct}}
+  ]
 
 structView[file_, Cell[content_, style_, ___], tags_] :=
     Module[ {},
@@ -159,22 +199,68 @@ setAll[l_, val_] :=
 (* updateKBBrowser *)
 
 updateKBBrowser[] :=
-    (kbStruct[CurrentValue["NotebookFullFileName"]] = 
-    Module[ {nb = NotebookGet[EvaluationNotebook[]]},
-        extractKBStruct[nb] /. l_?VectorQ :> Extract[nb, l]
-    ];)
- 
+    Module[ {file = CurrentValue["NotebookFullFileName"], pos, new},
+        pos = Position[ $kbStruct, file -> _];
+        new = file -> With[ {nb = NotebookGet[EvaluationNotebook[]]},
+                          extractKBStruct[nb] /. l_?VectorQ :> Extract[nb, l]
+                      ];
+        If[ pos === {},
+            AppendTo[ $kbStruct, new],
+            $kbStruct[[pos[[1,1]]]] = new
+        ]
+    ]
+
 (* ::Subsubsection:: *)
 (* displayKBBrowser *)
    
 displayKBBrowser[] :=
-    TabView[
-      Map[Tooltip[Style[FileBaseName[#], "NotebookName"], #] -> 
-         Pane[structView[#, kbStruct[#], {}][[1]], {600, 200}, 
-          ImageSizeAction -> "Scrollable", Scrollbars -> Automatic] &, 
-       Map[#[[1, 1, 1]] &, DownValues[kbStruct]]], 
-      Appearance -> {"Limited", 10}]
+    Module[ {},
+        If[ $kbStruct === {},
+            emptyPane[translate["No knowledge available"]],
+            TabView[
+                  Map[Tooltip[Style[FileBaseName[#[[1]]], "NotebookName"], #[[1]]] -> 
+                     Pane[structView[#[[1]], #[[2]], {}][[1]], {300, 600}, 
+                      ImageSizeAction -> "Scrollable", Scrollbars -> Automatic] &, 
+                   $kbStruct], 
+                  Appearance -> {"Limited", 10}, FrameMargins->None]
+        ]
+    ]
 
+
+(* ::Section:: *)
+(* Palettes *)
+
+insertNewEnv[type_String] :=
+    Module[ {nb = InputNotebook[]},
+        NotebookWrite[
+         nb, {Cell[
+           BoxData[RowBox[{type, "[", "\"" <> "\[SelectionPlaceholder]" <> "\"", "]"}]], 
+           "OpenEnvironment"], 
+          Cell[BoxData[""], "FormalTextInputFormula", 
+           CellTags -> {"ENV", "???"}],
+          Cell[BoxData["\[GraySquare]"], "CloseEnvironment"]}];
+    ]
+
+envtype2title = {
+	"definition" -> "DEFINITION",
+	"theorem" -> "THEOREM"
+};
+
+envtype2tag = {
+	"definition" -> "DEF:",
+	"theorem" -> "THM:"
+};
+
+(* ::Subsection:: *)
+(* Buttons *)
+
+makeButton["DEF"] := Button[translate["tcLangTabEnvTabButtonDefLabel"], insertNewEnv["DEFINITION"], Appearance->Tiny, ImageSize->Automatic]
+makeButton["THM"] := Button[translate["tcLangTabEnvTabButtonThmLabel"], insertNewEnv["THEOREM"], Appearance->Tiny, ImageSize->Automatic]
+
+allEnvironments = {"DEF", "THM", "LMA", "PRP", "COR", "CNJ", "ALG"};
+allEnvironments = {"DEF", "THM"};
+
+envButtons[] := Pane[ Grid[ Partition[ Join[ Map[ makeButton, allEnvironments], Table["", {3-Mod[Length[allEnvironments],3]}]], 3]], {300,600}]
 
 (* ::Section:: *)
 (* end of package *)
