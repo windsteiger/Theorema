@@ -7,10 +7,86 @@ What is the purpose of the Theorema editor? Read more in /ProgrammersDoc/Guideli
 
 BeginPackage["Theorema`Language`Parser`"];
 
+Needs["Theorema`Common`"]
 
 Begin["`Private`"]
 
-	
+
+(* ::Section:: *)
+(* Preprocessing *)
+
+(* ::Subsection:: *)
+(* preprocessTheoremaExpression *)
+
+SetAttributes[preprocessTheoremaExpression,HoldAll];
+
+preprocessTheoremaExpression[expr_]:=preprocessTheoremaExpressionHold[Hold[expr]];
+
+preprocessTheoremaExpressionHold[expr_]:=
+	Which[inEnvironment[],
+		processEnvironment[ReleaseHold[ freshNames[ markVariables[expr]]]],
+		True,
+		ReleaseHold[expr]
+	]
+
+freshNames[expr_Hold] := replaceAllExcept[ expr, 
+	s_Symbol :> Module[{name=ToString[s]}, If[StringTake[name,{-1}]==="$", s, ToExpression[name <> "TM"]]], {Hold, \[GraySquare]}]
+freshNames[args___] := unexpected[ freshNames, {args}]
+
+
+markVariables[Hold[QU$[r_RNG$, expr_]]] := 
+ Module[{s = Map[#->VAR$[#]&, specifiedVariables[r]]},
+  		replaceAllExcept[markVariables[Hold[expr]], s, {SEQ$, VAR$, NEW$, FIX$}]]
+
+markVariables[Hold[h_[e___]]] := applyHold[
+  		markVariables[Hold[h]],
+  		markVariables[Hold[e]]]
+
+markVariables[Hold[f_, t__]] := joinHold[
+  		markVariables[Hold[f]],
+  		markVariables[Hold[t]]]
+
+markVariables[Hold[]] := Hold[]
+
+markVariables[Hold[e_]] := Hold[e]
+
+markVariables[args___] := unexpected[ markVariables, {args}]
+
+initParser[] :=
+    Module[ {},
+        $Pre = preprocessTheoremaExpression;
+    ]
+
+parseTheoremaExpressions[] := inEnvironment[]
+
+MakeExpression[ RowBox[{UnderscriptBox["\[ForAll]", rng_], form_}], f_] :=
+    With[ {r = toRangeBox[rng]},
+        MakeExpression[ RowBox[{"QU$", "[", 
+            RowBox[{r, ",", RowBox[{"forall", "[", RowBox[{r, ",", "True", ",", form}], "]"}]}],
+             "]"}], f]
+    ] /; parseTheoremaExpressions[]
+
+QU$[args___] := unexpected[ QU$, {args}]
+
+(* ::Section:: *)
+(* Ranges *)
+
+toRangeBox[s_] :=
+    RowBox[{"RNG$", "[", makeRangeSequence[s], "]"}]            
+
+makeRangeSequence[RowBox[{s_,",",r__}]] :=
+    Sequence[ makeRangeSequence[s], ",", makeRangeSequence[RowBox[{r}]]]
+
+makeRangeSequence[RowBox[{s_}]] :=
+    makeRangeSequence[s]
+
+makeRangeSequence[s_] :=
+    RowBox[{"SIMPRNG$","[",s,"]"}]
+
+specifiedVariables[RNG$[r___]] :=
+    Map[ Part[#,1]&, {r}]
+
+
 (*
 MakeTheoremaExpression[RowBox[{UnderscriptBox["\[ForAll]",rng_],form_}],f_]:=
 With[({r=ToHoldingRangeBox[rng]}),
@@ -97,7 +173,7 @@ ToHoldingRangeBox::usage="ToHoldingRangeBox[box] produces the range specificatio
 
 ToTMRangeBox::usage="ToTMRangeBox[box] produces the range specification of a quantifier (without any attributes).";
 
-ToPreliminaryRangeBox[s_]:=RowBox[{"\[Bullet]range","[",MakeRangeSequence[s],"]"}]
+
 
 ToHoldingRangeBox[x_]:=ToPreliminaryRangeBox[x]/.rangeToHoldingRange
 
@@ -213,15 +289,6 @@ MakeRangeSequence[RowBox[{k_,"\[LongRightArrow]"|"\[RightArrow]"|"\[Rule]",s_}]]
 
 SetAttributes[\[Bullet]\[Bullet]simpleRange,HoldFirst];
 
-\[Bullet]simpleRange::usage="\[Bullet]simpleRange[x] usually denotes that the variable `x` ranges over the \"universe\".";
-
-\[Bullet]\[Bullet]simpleRange::usage="\[Bullet]\[Bullet]simpleRange[x] usually denotes that the variable `x` ranges over the \"universe\".";
-
-MakeRangeSequence[RowBox[{s_,",",r__}]]:=Sequence[MakeRangeSequence[s],",",MakeRangeSequence[RowBox[{r}]]]
-
-MakeRangeSequence[RowBox[{s_}]]:=MakeRangeSequence[s]
-
-MakeRangeSequence[s_]:=RowBox[{"\[Bullet]simpleRange","[",s,"]"}]
 
 \[Bullet]locval::usage="\[Bullet]locval[x,v] declares `v` as a local value for `x`.";
 
@@ -292,9 +359,6 @@ MakePatternRangeBoxes[{x_},f_]:={MakeBoxes[x,f]}
 
 MakePatternRangeBoxes[{x_,y__},f_]:=Prepend[Prepend[MakePatternRangeBoxes[{y},f],","],MakeBoxes[x,f]]
 
-SpecifiedVariables[(\[Bullet]range|\[Bullet]\[Bullet]range)[r___]]:=
-Map[Part[#,1]&,
-Cases[{r},rangePattern[__]]]
 
 ToConditionBox[]:="True"
 
@@ -412,6 +476,8 @@ MakeTheoremaExpression[RowBox[{"with","[",v__,"]"}],f_]:=ToConditionBox[v]
 MakeTheoremaExpression[RowBox[{"bound","[",v__,"]"}],f_]:=ToHoldingRangeBox[v]
 *)
 
+
+initParser[];
 
 End[];
 EndPackage[];

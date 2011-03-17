@@ -1,9 +1,9 @@
 (* Mathematica Package *)
 
-BeginPackage["Theorema`System`Messages`", {"Theorema`"}]
+BeginPackage["Theorema`System`Messages`"]
 (* Exported symbols added here with SymbolName::usage *)  
 
-Map[ Get, FileNames[ "*.m", ToFileName[{$TheoremaDirectory, "Theorema", "System", "LanguageData"}]]];
+Needs["Theorema`Common`"]
 
 Begin["`Private`"] (* Begin Private Context *) 
 

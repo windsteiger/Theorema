@@ -20,6 +20,7 @@ BeginPackage["Theorema`Interface`Language`"]
 translate::usage = "translate[s_String,lang_String] gives string s in language lang."
 availableLanguages::usage = "availableLanguages[] gives all available languages."
 
+Needs["Theorema`"];
 Needs["Theorema`System`Messages`"];
 
 Begin["`Private`"] (* Begin Private Context *) 

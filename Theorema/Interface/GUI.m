@@ -20,7 +20,6 @@
 BeginPackage["Theorema`Interface`GUI`"];
 (* Exported symbols added here with SymbolName::usage *)  
 
-initGUI::usage = "Initialize the GUI and all global variables"
 $theoremaGUI::usage = "Theorema GUI structure"
 updateKBBrowser::usage = ""
 displayKBBrowser::usage = ""
@@ -48,7 +47,7 @@ theoremaCommander[] /; $Notebooks :=
         CreatePalette[ Dynamic[Refresh[
         	TabView[{
         		translate["tcLangTabLabel"]->TabView[{
-        			translate["tcLangTabMathTabLabel"]->emptyPane[translate["not available"]],
+        			translate["tcLangTabMathTabLabel"]->Dynamic[Refresh[ langButtons[], TrackedSymbols :> {$buttonNat}]],
         			translate["tcLangTabEnvTabLabel"]->envButtons[]}, Dynamic[$tcLangTab],
         			ControlPlacement->Top],
         		translate["tcProveTabLabel"]->TabView[{
@@ -66,14 +65,10 @@ theoremaCommander[] /; $Notebooks :=
         	StyleDefinitions -> ToFileName[{"Theorema"}, "GUI.nb"],
         	WindowTitle -> "Theorema Commander",
         	ScreenStyleEnvironment -> style,
-        	WindowElements -> {"StatusArea"}, 
-        	Deployed -> True,
-        	ShowCellBracket -> False,
-        	WindowFloating -> True,
-        	WindowClickSelect -> False]
+        	WindowElements -> {"StatusArea"}]
     ]
 
-emptyPane[text_String:""]:=Pane[text, {300,600}, Alignment->{Center,Center}]
+emptyPane[text_String:""]:=Pane[text, Alignment->{Center,Center}]
  
 (* ::Subsubsection:: *)
 (* extractKBStruct *)
@@ -241,29 +236,80 @@ insertNewEnv[type_String] :=
           Cell[BoxData["\[GraySquare]"], "CloseEnvironment"]}];
     ]
 
-envtype2title = {
-	"definition" -> "DEFINITION",
-	"theorem" -> "THEOREM"
-};
-
-envtype2tag = {
-	"definition" -> "DEF:",
-	"theorem" -> "THM:"
-};
 
 (* ::Subsection:: *)
 (* Buttons *)
 
-makeButton["DEF"] := Button[translate["tcLangTabEnvTabButtonDefLabel"], insertNewEnv["DEFINITION"], Appearance->Tiny, ImageSize->Automatic]
-makeButton["THM"] := Button[translate["tcLangTabEnvTabButtonThmLabel"], insertNewEnv["THEOREM"], Appearance->Tiny, ImageSize->Automatic]
+envButtonData["DEFINITION"] := {"tcLangTabEnvTabButtonDefLabel"};
+envButtonData["THEOREM"] := {"tcLangTabEnvTabButtonThmLabel"};
 
-allEnvironments = {"DEF", "THM", "LMA", "PRP", "COR", "CNJ", "ALG"};
-allEnvironments = {"DEF", "THM"};
+makeEnvButton[ bname_String] :=
+    With[ { bd = envButtonData[bname]},
+			Button[Style[ translate[bd[[1]]], "EnvButton"], insertNewEnv[bname], Appearance -> "FramedPalette", Alignment -> {Left, Top}]
+    ]
 
-envButtons[] := Pane[ Grid[ Partition[ Join[ Map[ makeButton, allEnvironments], Table["", {3-Mod[Length[allEnvironments],3]}]], 3]], {300,600}]
+allEnvironments = {"DEFINITION", "THEOREM", "LEMMA", "PROPOSITION", "COROLLARY", "CONJECTURE", "ALGORITHM"};
+allEnvironments = {"DEFINITION", "THEOREM"};
+
+envButtons[] := Pane[ Grid[ Partition[ Map[ makeEnvButton, allEnvironments], 2]]]
+
+$buttonNat = False;
+
+langButtonData["FORALL1"] := 
+	{
+		If[ $buttonNat, 
+			translate["FORALL1"], 
+			DisplayForm[RowBox[{UnderscriptBox["\[ForAll]", Placeholder["rg"]], TagBox[ FrameBox["expr"], "SelectionPlaceholder"]}]]],
+		DisplayForm[RowBox[{UnderscriptBox["\[ForAll]", "\[Placeholder]"], "\[SelectionPlaceholder]"}]],
+		translate["QUANT1Tooltip"]
+	}
+
+langButtonData["FORALL2"] := 
+	{
+		If[ $buttonNat, 
+			translate["FORALL2"], 
+			DisplayForm[RowBox[{UnderscriptBox[ UnderscriptBox["\[ForAll]", Placeholder["rg"]], Placeholder["cond"]], TagBox[ FrameBox["expr"], "SelectionPlaceholder"]}]]],
+		DisplayForm[RowBox[{UnderscriptBox[ UnderscriptBox["\[ForAll]", "\[Placeholder]"], "\[Placeholder]"], "\[SelectionPlaceholder]"}]],
+		translate["QUANT2Tooltip"]
+	}
+
+langButtonData["EXISTS1"] := 
+	{
+		If[ $buttonNat, 
+			translate["EXISTS1"], 
+			DisplayForm[RowBox[{UnderscriptBox["\[Exists]", Placeholder["rg"]], TagBox[ FrameBox["expr"], "SelectionPlaceholder"]}]]],
+		DisplayForm[RowBox[{UnderscriptBox["\[Exists]", "\[Placeholder]"], "\[SelectionPlaceholder]"}]],
+		translate["QUANT1Tooltip"]
+	}
+
+langButtonData["EXISTS2"] := 
+	{
+		If[ $buttonNat, 
+			translate["EXISTS2"], 
+			DisplayForm[RowBox[{UnderscriptBox[ UnderscriptBox["\[Exists]", Placeholder["rg"]], Placeholder["cond"]], TagBox[ FrameBox["expr"], "SelectionPlaceholder"]}]]],
+		DisplayForm[RowBox[{UnderscriptBox[ UnderscriptBox["\[Exists]", "\[Placeholder]"], "\[Placeholder]"], "\[SelectionPlaceholder]"}]],
+		translate["QUANT2Tooltip"]
+	}
+
+makeLangButton[ bname_String] :=
+    With[ { bd = langButtonData[bname]},
+			Tooltip[ PasteButton[ Style[ bd[[1]], "LangButton"], bd[[2]], Appearance -> "FramedPalette", Alignment -> {Left, Top}], bd[[3]], TooltipDelay -> 0.5]
+    ]
+
+allFormulae = {"FORALL1", "FORALL2", "EXISTS1", "EXISTS2"};
+
+langButtons[] := Pane[ 
+	Column[{
+		Grid[ Partition[ Map[ makeLangButton, allFormulae], 2], Alignment -> {Left, Top}],
+		Row[{translate["tcLangTabMathTabBS"], 
+			Row[{RadioButton[Dynamic[$buttonNat], False], translate["tcLangTabMathTabBSform"]}, Spacer[2]], 
+			Row[{RadioButton[Dynamic[$buttonNat], True], translate["tcLangTabMathTabBSnat"]}, Spacer[2]]}, Spacer[10]]
+	}, Dividers -> Center, Spacings -> 4]]
 
 (* ::Section:: *)
 (* end of package *)
+
+initGUI[];
   
 End[] (* End Private Context *)
 

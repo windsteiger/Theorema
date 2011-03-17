@@ -20,34 +20,13 @@
 BeginPackage["Theorema`Language`Session`"];
 (* Exported symbols added here with SymbolName::usage *)  
 
-preprocessTheoremaExpression::usage = "The standard preprocessor";
-DEFINITION::usage = "Theorema definition environment";
-\[GraySquare]::usage = "End of environment marker";
-initSession::usage = "Initialize session variables";
-
-Needs["Theorema`System`Messages`"];
+Needs["Theorema`Common`"];
 
 Begin["`Private`"] (* Begin Private Context *) 
 
 
 (* ::Section:: *)
 (* Preprocessing *)
-
-
-(* ::Subsubsection:: *)
-(* preprocessTheoremaExpression *)
-
-SetAttributes[preprocessTheoremaExpression,HoldAll];
-
-preprocessTheoremaExpression[expr_]:=preprocessTheoremaExpressionHold[Hold[expr]];
-
-preprocessTheoremaExpressionHold[expr_]:=markVariables[globalTyping[freshNames[expr]]];
-preprocessTheoremaExpressionHold[expr_]:=
-	Which[inEnvironment[],
-		processEnvironment[ReleaseHold[expr]],
-		True,
-		ReleaseHold[expr]
-	]
 
 processEnvironment[\[GraySquare]] :=
     (closeEnvironment[];
@@ -69,7 +48,7 @@ adjustFormulaLabel[nb_NotebookObject] :=
         	{_,_},
         	cl = newFormulaLabel[nb,cl]
         ];
-        (*SelectionMove[nb, After, Cell];*)
+        SelectionMove[nb, After, Cell];
         cl
 	]
 adjustFormulaLabel[args___]	:= unexpected[adjustFormulaLabel,{args}]
@@ -93,7 +72,6 @@ initSession[] :=
 		$environmentFormulaCounters = {};
 		$environmentFormulae = {};
 		$tmaEnv = {};
-		$Pre = preprocessTheoremaExpression;
 	]
 
 currentEnvironment[] := First[$environmentLabels]
@@ -116,10 +94,12 @@ openEnvironment[type_, label_] :=
         PrependTo[$environmentFormulaCounters, 0];
         PrependTo[$environmentFormulae, {}];
         PrependTo[$environmentLabels, {type,type<>":"<>label}];
+        Begin["Theorema`Language`"];
     ]
 
 closeEnvironment[] := 
 	Module[{env=currentEnvironment[]},
+		End[];
 		updateEnv[ env[[1]], env[[2]], currentFormulae[]];
 		$environmentFormulaCounters = Rest[$environmentFormulaCounters];
         $environmentFormulae = Rest[$environmentFormulae];
@@ -143,6 +123,8 @@ insertNewFormulaCell[] :=
 	
 (* ::Section:: *)
 (* end of package *)
+
+initSession[];
   
 End[] (* End Private Context *)
 

@@ -10,86 +10,14 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       145,          7]
-NotebookDataLength[      7128,        205]
-NotebookOptionsPosition[      6511,        180]
-NotebookOutlinePosition[      6850,        195]
-CellTagsIndexPosition[      6807,        192]
+NotebookDataLength[      4278,        122]
+NotebookOptionsPosition[      3991,        108]
+NotebookOutlinePosition[      4330,        123]
+CellTagsIndexPosition[      4287,        120]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
 Notebook[{
-Cell[BoxData[
- RowBox[{
-  RowBox[{"PaletteAppear", "[", 
-   RowBox[{
-    RowBox[{"\[SelectionPlaceholder]", "\[Implies]", "\[Placeholder]"}], ",", 
-    "True"}], "]"}], ":=", 
-  "\"\<if \[SelectionPlaceholder] then \[Placeholder]\>\""}]], "Input",
- CellChangeTimes->{{3.482134342990299*^9, 3.482134375833842*^9}, 
-   3.482134418326609*^9, {3.48213458685258*^9, 3.482134588307854*^9}}],
-
-Cell[BoxData[
- RowBox[{
-  RowBox[{"PaletteAppear", "[", 
-   RowBox[{"expr_", ",", "False"}], "]"}], ":=", 
-  RowBox[{"Tooltip", "[", 
-   RowBox[{"expr", ",", 
-    RowBox[{"PaletteAppear", "[", 
-     RowBox[{"expr", ",", "True"}], "]"}]}], "]"}]}]], "Input",
- CellChangeTimes->{{3.482134342990299*^9, 3.482134375833842*^9}, {
-  3.482134418326609*^9, 3.48213443604569*^9}, {3.482134591849184*^9, 
-  3.482134593175976*^9}, {3.482134867479256*^9, 3.482134892606676*^9}}],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[
- RowBox[{"Checkbox", "[", 
-  RowBox[{"Dynamic", "[", "lit", "]"}], "]"}]], "Input",
- CellChangeTimes->{{3.482134530858211*^9, 3.482134569595495*^9}}],
-
-Cell[BoxData[
- CheckboxBox[Dynamic[$CellContext`lit]]], "Output",
- CellChangeTimes->{{3.482134533248137*^9, 3.482134538503138*^9}, 
-   3.482134570508229*^9}]
-}, Open  ]],
-
-Cell[CellGroupData[{
-
-Cell[BoxData[
- RowBox[{"Dynamic", "[", 
-  RowBox[{"PasteButton", "[", 
-   RowBox[{
-    RowBox[{"PaletteAppear", "[", 
-     RowBox[{
-      RowBox[{"\[SelectionPlaceholder]", "\[Implies]", "\[Placeholder]"}], 
-      ",", "lit"}], "]"}], ",", 
-    RowBox[{"\[SelectionPlaceholder]", "\[Implies]", "\[Placeholder]"}]}], 
-   "]"}], "]"}]], "Input",
- CellChangeTimes->{{3.482133649206424*^9, 3.482133650342157*^9}, {
-   3.482134193017709*^9, 3.482134257134588*^9}, {3.482134457644961*^9, 
-   3.4821344845165*^9}, 3.48213452051775*^9}],
-
-Cell[BoxData[
- DynamicBox[ToBoxes[
-   PasteButton[
-    $CellContext`PaletteAppear[
-     Implies[$CellContext` \[SelectionPlaceholder], $CellContext` \
-\[Placeholder]], $CellContext`lit], 
-    Implies[$CellContext` \[SelectionPlaceholder], $CellContext` \
-\[Placeholder]]], StandardForm],
-  ImageSizeCache->{366., {9., 19.}}]], "Output",
- CellChangeTimes->{{3.482134234596611*^9, 3.482134258128678*^9}, 
-   3.482134526271396*^9}]
-}, Open  ]],
-
-Cell[BoxData[
- RowBox[{
-  RowBox[{"P", "[", "x", "]"}], "\[Implies]", 
-  RowBox[{"\[Placeholder]", "\[Implies]", 
-   RowBox[{"\[Placeholder]", "\[Implies]", "\[Placeholder]"}]}]}]], "Input",
- CellChangeTimes->{{3.482134271933135*^9, 3.482134278888892*^9}, {
-  3.482134606618716*^9, 3.482134613194394*^9}}],
-
 Cell[BoxData[
  RowBox[{"CellPrint", "[", 
   RowBox[{"Cell", "[", 
@@ -194,19 +122,8 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[545, 20, 384, 8, 32, "Input"],
-Cell[932, 30, 466, 10, 55, "Input"],
-Cell[CellGroupData[{
-Cell[1423, 44, 163, 3, 32, "Input"],
-Cell[1589, 49, 157, 3, 31, "Output"]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[1783, 57, 528, 12, 32, "Input"],
-Cell[2314, 71, 428, 10, 45, "Output"]
-}, Open  ]],
-Cell[2757, 84, 305, 6, 32, "Input"],
-Cell[3065, 92, 2496, 52, 297, "Input"],
-Cell[5564, 146, 943, 32, 72, "Text"]
+Cell[545, 20, 2496, 52, 297, "Input"],
+Cell[3044, 74, 943, 32, 72, "Text"]
 }
 ]
 *)

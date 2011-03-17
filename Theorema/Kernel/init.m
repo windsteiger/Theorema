@@ -26,8 +26,6 @@ What is the purpose of the Theorema editor? Read more in /ProgrammersDoc/Guideli
 
 BeginPackage["Theorema`"];
 
-Theorema::usage = "Global symbol to attach messages to.";
-
 Which[!ValueQ[$TheoremaDirectory],
 	$TheoremaDirectory=With[{`priv`possibleDirs=Select[$Path,(FileType[ToFileName[{#,"Theorema","Kernel"},"init.m"]]===File)&]},
 		If[`priv`possibleDirs==={},
@@ -39,6 +37,8 @@ Which[!ValueQ[$TheoremaDirectory],
 	Exit[]
 ];
 
+Map[ Get, FileNames[ "*.m", ToFileName[{$TheoremaDirectory, "Theorema", "Kernel", "LanguageData"}]]];
+
 Protect[$TheoremaDirectory]; 
 
 If[ TrueQ[$Notebooks],
@@ -49,15 +49,13 @@ If[ TrueQ[$Notebooks],
     This program comes with ABSOLUTELY NO WARRANTY;\n\n    This is free software, and you are welcome to\n    redistribute it under the conditions of the\n    GNU General Public License, see <http://www.gnu.org/licenses/>."]
 ];
 
-EndPackage[]
-
-
+Needs["Theorema`Common`"]
 Get["Theorema`Interface`GUI`"]
 Get["Theorema`Language`Parser`"]
 Get["Theorema`Language`Session`"]
+Get["Theorema`Tools`"]
 
-initGUI[];
-initSession[];
+EndPackage[]
 	
 Pause[5];
 
