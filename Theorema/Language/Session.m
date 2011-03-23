@@ -87,40 +87,29 @@ incrementCurrentCounter[] :=
 		$environmentFormulaCounters = ReplacePart[$environmentFormulaCounters, 1->currentCounter[]+1]
 	]
 
-DEFINITION[label_] := openEnvironment["DEF", label];
+DEFINITION := openEnvironment["DEF"];
 
-openEnvironment[type_, label_] :=
+openEnvironment[type_] :=
     Module[{},
         PrependTo[$environmentFormulaCounters, 0];
         PrependTo[$environmentFormulae, {}];
-        PrependTo[$environmentLabels, {type,type<>":"<>label}];
+        PrependTo[$environmentLabels, type];
         Begin["Theorema`Language`"];
     ]
 
 closeEnvironment[] := 
-	Module[{env=currentEnvironment[]},
+	Module[{},
 		End[];
-		updateEnv[ env[[1]], env[[2]], currentFormulae[]];
+		updateEnv[ currentEnvironment[], currentFormulae[]];
 		$environmentFormulaCounters = Rest[$environmentFormulaCounters];
         $environmentFormulae = Rest[$environmentFormulae];
         $environmentLabels = Rest[$environmentLabels];
-        Theorema`Interface`GUI`updateKBBrowser[];
+        updateKBBrowser[];
 	]
 
-updateEnv[ type_, lab_, form_] :=
-    Module[ { pos},
-        pos = Position[ $tmaEnv, {type, lab, _}];
-        If[ pos === {},
-            PrependTo[ $tmaEnv, {type, lab, form}],
-            $tmaEnv[[pos[[1,1]]]] = {type, lab, form}
-        ]
-    ]
+updateEnv[ type_, form_] :=
+    PrependTo[ $tmaEnv, {type, form}]
 
-insertNewFormulaCell[] := 
-	Module[{ envLab = currentEnvironment[]}, 
-		NotebookWrite[InputNotebook[], Cell[BoxData[], "FormalTextInputFormula", CellTags->{envLab[[2]], "???"}]]
-	]
-	
 (* ::Section:: *)
 (* end of package *)
 

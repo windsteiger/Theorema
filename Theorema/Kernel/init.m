@@ -49,7 +49,7 @@ If[ TrueQ[$Notebooks],
     This program comes with ABSOLUTELY NO WARRANTY;\n\n    This is free software, and you are welcome to\n    redistribute it under the conditions of the\n    GNU General Public License, see <http://www.gnu.org/licenses/>."]
 ];
 
-Needs["Theorema`Common`"]
+Get["Theorema`Common`"]
 Get["Theorema`Interface`GUI`"]
 Get["Theorema`Language`Parser`"]
 Get["Theorema`Language`Session`"]

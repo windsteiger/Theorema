@@ -6,6 +6,7 @@ With[ {lang = "German"},
     	translate["tcLangTabEnvTabLabel", lang] = "Umgebungen";
     		translate["tcLangTabEnvTabButtonDefLabel", lang] = "Neue Definition";
     		translate["tcLangTabEnvTabButtonThmLabel", lang] = "Neues Theorem";
+    		translate["tcLangTabEnvTabButtonFormLabel", lang] = "Neue Formel";
     	translate["tcLangTabMathTabLabel", lang] = "Mathematik";
      		translate["FORALL1", lang] = "f\[UDoubleDot]r alle \!\(\*FormBox[FrameBox[\"rg\"], Placeholder]\) gilt \!\(\*FormBox[FrameBox[\"expr\"], SelectionPlaceholder]\)";   	
      		translate["FORALL2", lang] = "f\[UDoubleDot]r alle \!\(\*FormBox[FrameBox[\"rg\"], Placeholder]\) mit \!\(\*FormBox[FrameBox[\"cond\"], Placeholder]\) gilt \!\(\*FormBox[FrameBox[\"expr\"], SelectionPlaceholder]\)";   	

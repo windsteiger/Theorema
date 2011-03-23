@@ -3,7 +3,7 @@
 With[ {lang = "English"},
 	MessageName[Theorema, "usage", lang] = "Global symbol to attach messages to.";
 	MessageName[$TheoremaDirectory, "usage", lang] = "The directory where the Theorema system is installed.";
-	MessageName[DEFINITION, "usage", lang] = "DEFINITION[ label] opens a definition environment labelled 'label' ...";
+	MessageName[DEFINITION, "usage", lang] = "DEFINITION opens a definition environment labelled 'label' ...";
 	MessageName[\[GraySquare], "usage", lang] = "\[GraySquare] closes an environment ...";
 	MessageName[QU$, "usage", lang] = "A marker introduced during the parsing process that temporarily marks quantified variables.";
 	MessageName[VAR$, "usage", lang] = "";

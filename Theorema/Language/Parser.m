@@ -29,8 +29,16 @@ preprocessTheoremaExpressionHold[expr_]:=
 		ReleaseHold[expr]
 	]
 
-freshNames[expr_Hold] := replaceAllExcept[ expr, 
-	s_Symbol :> Module[{name=ToString[s]}, If[StringTake[name,{-1}]==="$", s, ToExpression[name <> "TM"]]], {Hold, \[GraySquare]}]
+freshNames[expr_Hold] :=
+    replaceAllExcept[ expr, 
+    {DoubleLongRightArrow|DoubleRightArrow->impliesTM, DoubleLongLeftRightArrow|DoubleLeftRightArrow->iffTM,
+    	SetDelayed->equalDefTM,
+    s_Symbol :> Module[ {name = ToString[s]},
+                    If[ StringTake[name,{-1}]==="$",
+                        s,
+                        ToExpression[ToLowerCase[StringTake[name,1]]<>StringDrop[name,1]<> "TM"]
+                    ]
+                ]}, {Hold, \[GraySquare]}]
 freshNames[args___] := unexpected[ freshNames, {args}]
 
 
@@ -59,12 +67,17 @@ initParser[] :=
 
 parseTheoremaExpressions[] := inEnvironment[]
 
+MakeExpression[RowBox[{a_, TagBox[op_, Identity, ___], b_}], f_] := MakeExpression[RowBox[{a, op, b}], f] /; parseTheoremaExpressions[]
+  
 MakeExpression[ RowBox[{UnderscriptBox["\[ForAll]", rng_], form_}], f_] :=
     With[ {r = toRangeBox[rng]},
         MakeExpression[ RowBox[{"QU$", "[", 
             RowBox[{r, ",", RowBox[{"forall", "[", RowBox[{r, ",", "True", ",", form}], "]"}]}],
              "]"}], f]
     ] /; parseTheoremaExpressions[]
+
+MakeExpression[ RowBox[{left_, RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], right_}], f_] :=
+    MakeExpression[ RowBox[{"iffDef", "[", RowBox[{left, ",", right}], "]"}], f] /; parseTheoremaExpressions[]
 
 QU$[args___] := unexpected[ QU$, {args}]
 
