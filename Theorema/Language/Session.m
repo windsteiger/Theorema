@@ -37,8 +37,10 @@ processEnvironment[x_] :=
         newLab = adjustFormulaLabel[nb];
         appendEnvironmentFormula[x, newLab];
     ]
+processEnvironment[args___] := unexcpected[ processEnvironment, {args}]
 
 inEnvironment[] := Length[$environmentLabels]>0
+inEnvironment[args___] := unexcpected[ inEnvironment, {args}]
 
 adjustFormulaLabel[nb_NotebookObject] := 
 	Module[{cl}, 
@@ -59,12 +61,13 @@ newFormulaLabel[nb_NotebookObject, {_, lab_}] :=
         SetOptions[NotebookSelection[nb], CellTags->newLab];
         newLab		
 	]
-newFormulaLabel[args___] := unexpected[newFormulaLabel,{args}]
+newFormulaLabel[args___] := unexpected[ newFormulaLabel, {args}]
 
 appendEnvironmentFormula[form_, lab_] := 
 	Module[{}, 
 		$environmentFormulae = ReplacePart[$environmentFormulae, 1->Append[First[$environmentFormulae], {form, lab}]]
 	]
+appendEnvironmentFormula[args___] := unexpected[ appendEnvironmentFormula, {args}]
 		
 initSession[] := 
 	Module[{}, 
@@ -73,19 +76,25 @@ initSession[] :=
 		$environmentFormulae = {};
 		$tmaEnv = {};
 	]
+initSession[args___] := unexpected[ initSession, {args}]
 
 currentEnvironment[] := First[$environmentLabels]
+currentEnvironment[args___] := unexpected[ currentEnvironment, {args}]
 
 currentFormulae[] := First[$environmentFormulae]
+currentFormulae[args___] := unexpected[ currentFormulae, {args}]
 
 currentCounter[] := First[$environmentFormulaCounters]
+currentCounter[args___] := unexpected[ currentCounter, {args}]
 
 currentCounterLabel[] := ToString[currentCounter[]]
+currentCounterLabel[args___] := unexpected[ currentCounterLabel, {args}]
 
 incrementCurrentCounter[] := 
 	Module[{},
 		$environmentFormulaCounters = ReplacePart[$environmentFormulaCounters, 1->currentCounter[]+1]
 	]
+incrementCurrentCounter[args___] := unexpected[ incrementCurrentCounter, {args}]
 
 DEFINITION := openEnvironment["DEF"];
 
@@ -96,6 +105,7 @@ openEnvironment[type_] :=
         PrependTo[$environmentLabels, type];
         Begin["Theorema`Language`"];
     ]
+openEnvironment[args___] := unexpected[ openEnvironment, {args}]
 
 closeEnvironment[] := 
 	Module[{},
@@ -106,9 +116,37 @@ closeEnvironment[] :=
         $environmentLabels = Rest[$environmentLabels];
         updateKBBrowser[];
 	]
+closeEnvironment[args___] := unexpected[ closeEnvironment, {args}]
 
 updateEnv[ type_, form_] :=
     PrependTo[ $tmaEnv, {type, form}]
+updateEnv[args___] := unexpected[ updateEnv, {args}]
+
+
+
+(* ::Section:: *)
+(* Computation *)
+
+processComputation[\[GraySquare]] := (closeComputation[];)
+processComputation[x_] := x
+processComputation[args___] := unexcpected[ processComputation, {args}]
+
+COMPUTE := openComputation[];
+
+openComputation[] :=
+  Module[ {},
+  	If[ !inComputation[],
+      Begin["Theorema`Computation`"];
+  	]
+  ]
+openComputation[args___] := unexcpected[ openComputation, {args}]
+
+
+inComputation[] := Context[] === "Theorema`Computation`"
+inComputation[args___] := unexcpected[ inComputation, {args}]
+
+closeComputation[] := (End[];)
+closeComputation[args___] := unexcpected[ closeComputation, {args}]
 
 (* ::Section:: *)
 (* end of package *)

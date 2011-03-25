@@ -25,6 +25,8 @@ preprocessTheoremaExpression[expr_]:=preprocessTheoremaExpressionHold[Hold[expr]
 preprocessTheoremaExpressionHold[expr_]:=
 	Which[inEnvironment[],
 		processEnvironment[ReleaseHold[ freshNames[ markVariables[expr]]]],
+		inComputation[],
+		processComputation[ReleaseHold[ freshNames[ markVariables[expr]]]],
 		True,
 		ReleaseHold[expr]
 	]
@@ -32,11 +34,17 @@ preprocessTheoremaExpressionHold[expr_]:=
 freshNames[expr_Hold] :=
     replaceAllExcept[ expr, 
     {DoubleLongRightArrow|DoubleRightArrow->impliesTM, DoubleLongLeftRightArrow|DoubleLeftRightArrow->iffTM,
-    	SetDelayed->equalDefTM,
+    	SetDelayed->equalDefTM, Wedge->andTM, Vee->orTM,
+    s_Symbol?(Context[#]==="System`"&) :> Module[ {name = ToString[s]},
+                    If[ StringTake[name,{-1}]==="$",
+                        s,
+                        ToExpression[ToLowerCase[StringTake[name,1]]<>StringDrop[name,1]<> "$TM"]
+                    ]
+                ],
     s_Symbol :> Module[ {name = ToString[s]},
                     If[ StringTake[name,{-1}]==="$",
                         s,
-                        ToExpression[ToLowerCase[StringTake[name,1]]<>StringDrop[name,1]<> "TM"]
+                        ToExpression[name <> "$TM"]
                     ]
                 ]}, {Hold, \[GraySquare]}]
 freshNames[args___] := unexpected[ freshNames, {args}]
@@ -65,7 +73,7 @@ initParser[] :=
         $Pre = preprocessTheoremaExpression;
     ]
 
-parseTheoremaExpressions[] := inEnvironment[]
+parseTheoremaExpressions[] := inEnvironment[] || inComputation[]
 
 MakeExpression[RowBox[{a_, TagBox[op_, Identity, ___], b_}], f_] := MakeExpression[RowBox[{a, op, b}], f] /; parseTheoremaExpressions[]
   

@@ -30,8 +30,10 @@ Begin["`Private`"] (* Begin Private Context *)
 (* initGUI *)
 
 initGUI[] := 
-	Module[{ }, 
+	Module[{ tc}, 
 		$kbStruct = {};
+		If[ ValueQ[$theoremaGUI], tc = "Theorema Commander" /. $theoremaGUI];
+		If[ $Notebooks && MemberQ[Notebooks[], tc], NotebookClose[tc]];
 		$theoremaGUI = {"Theorema Commander" -> theoremaCommander[]};
 	]
 
@@ -215,7 +217,7 @@ displayKBBrowser[] :=
             emptyPane[translate["No knowledge available"]],
             TabView[
                   Map[Tooltip[Style[FileBaseName[#[[1]]], "NotebookName"], #[[1]]] -> 
-                     Pane[structView[#[[1]], #[[2]], {}][[1]], {300, 600}, 
+                     Pane[structView[#[[1]], #[[2]], {}][[1]],
                       ImageSizeAction -> "Scrollable", Scrollbars -> Automatic] &, 
                    $kbStruct], 
                   Appearance -> {"Limited", 10}, FrameMargins->None]

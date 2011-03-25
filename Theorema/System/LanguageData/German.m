@@ -14,6 +14,6 @@ With[ {lang = "German"},
 
 (* Theorema`Language`Session` *)
 	MessageName[initSession, "usage", lang] = "initSession[] initialisiert die globalen Session-Variablen ...";
-	MessageName[inEnvironment, "usage", lang] = "initEnvironment[] ergibt innerhalb einer Umgebung 'True' ...";
+	MessageName[inEnvironment, "usage", lang] = "inEnvironment[] ergibt innerhalb einer Umgebung 'True' ...";
 
 ]

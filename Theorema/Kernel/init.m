@@ -24,6 +24,8 @@ Author(s):       W. Windsteiger
 What is the purpose of the Theorema editor? Read more in /ProgrammersDoc/Guidelines.nb#1871658360
 *)
 
+On[ Assert]
+
 BeginPackage["Theorema`"];
 
 Which[!ValueQ[$TheoremaDirectory],
@@ -44,7 +46,8 @@ Protect[$TheoremaDirectory];
 If[ TrueQ[$Notebooks],
     If[!ValueQ[`priv`welcomeScreen],
     	`priv`welcomeScreen = NotebookOpen[ToFileName[{$TheoremaDirectory,"Theorema","FrontEnd"},"Startup.nb"],
-        WindowElements -> {}, WindowSize -> All, WindowFrame -> "Frameless", Deployed -> True]],
+        WindowElements -> {}, WindowSize -> All, WindowFrame -> "Frameless", Deployed -> True];
+        SelectionMove[ `priv`welcomeScreen, Next, Cell]],
     Print["Theorema Copyright (C) 2010 The Theorema Group.\n
     This program comes with ABSOLUTELY NO WARRANTY;\n\n    This is free software, and you are welcome to\n    redistribute it under the conditions of the\n    GNU General Public License, see <http://www.gnu.org/licenses/>."]
 ];

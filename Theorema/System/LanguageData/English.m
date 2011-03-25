@@ -10,11 +10,13 @@ With[ {lang = "English"},
 
 (* Theorema`Language`Parser` *)
 	MessageName[processEnvironment, "usage", lang] = "processEnvironment[ expr] ...";
+	MessageName[processComputation, "usage", lang] = "processComputation[ expr] ...";
 	MessageName[specifiedVariables, "usage", lang] = "";
 
 (* Theorema`Language`Session` *)
-	MessageName[inEnvironment, "usage", lang] = "initEnvironment[] evaluates to 'True' inside an environment ...";
+	MessageName[inEnvironment, "usage", lang] = "inEnvironment[] evaluates to 'True' inside an environment ...";
 	MessageName[$tmaEnv, "usage", lang] = "Collection of environments evaluated in the current session, i.e. the knowledge base.";
+	MessageName[inComputation, "usage", lang] = "inComputation[] evaluates to 'True' inside a computation ...";
 
 (* Theorema`Tools` *)
 	MessageName[replaceAllExcept, "usage", lang] = "replaceAllExcept[ expr, rules, expt] applies rule(s) to all subparts of 'expr' except those contained in the list 'expt'.";
