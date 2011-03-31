@@ -263,7 +263,7 @@ closeEnv[] :=
 closeEnv[args___] :=
     unexpected[closeEnv, {args}]
 
-newFormulaCell[ label_:{"ENV", "???"}] = Cell[BoxData[""], "FormalTextInputFormula", CellTags->label]	
+newFormulaCell[ label_:{"ENV", "??"}] = Cell[BoxData[""], "FormalTextInputFormula", CellTags->label]	
 newFormulaCell[args___] :=
     unexpected[newFormulaCell, {args}]
 
