@@ -103,6 +103,7 @@ openEnvironment[type_] :=
         PrependTo[$environmentFormulaCounters, 0];
         PrependTo[$environmentFormulae, {}];
         PrependTo[$environmentLabels, type];
+        SetOptions[$FrontEnd, DefaultNewCellStyle -> "FormalTextInputFormula"];
         Begin["Theorema`Language`"];
     ]
 openEnvironment[args___] := unexpected[ openEnvironment, {args}]
@@ -114,6 +115,7 @@ closeEnvironment[] :=
 		$environmentFormulaCounters = Rest[$environmentFormulaCounters];
         $environmentFormulae = Rest[$environmentFormulae];
         $environmentLabels = Rest[$environmentLabels];
+        SetOptions[$FrontEnd, DefaultNewCellStyle -> "Input"];
         updateKBBrowser[];
 	]
 closeEnvironment[args___] := unexpected[ closeEnvironment, {args}]
@@ -136,6 +138,7 @@ COMPUTE := openComputation[];
 openComputation[] :=
   Module[ {},
   	If[ !inComputation[],
+  	  SetOptions[$FrontEnd, DefaultNewCellStyle -> "Computation"];
       Begin["Theorema`Computation`"];
   	]
   ]
@@ -145,8 +148,21 @@ openComputation[args___] := unexcpected[ openComputation, {args}]
 inComputation[] := Context[] === "Theorema`Computation`"
 inComputation[args___] := unexcpected[ inComputation, {args}]
 
-closeComputation[] := (End[];)
+closeComputation[] := Module[{},
+	End[];
+  	SetOptions[$FrontEnd, DefaultNewCellStyle -> "Input"];
+	]
 closeComputation[args___] := unexcpected[ closeComputation, {args}]
+
+
+(* ::Section:: *)
+(* Built-in computation *)
+
+Begin["Theorema`Computation`"]
+
+plus$TM /; activeComputation[Plus] = Plus
+
+End[]
 
 (* ::Section:: *)
 (* end of package *)

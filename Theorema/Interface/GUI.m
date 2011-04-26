@@ -49,10 +49,11 @@ theoremaCommander[] /; $Notebooks :=
         			translate["tcLangTabEnvTabLabel"]->envButtons[]}, Dynamic[$tcLangTab],
         			ControlPlacement->Top],
         		translate["tcProveTabLabel"]->TabView[{
-        			translate["tcProveTabKBTabLabel"]->Dynamic[Refresh[displayKBBrowser[],TrackedSymbols :> {$kbStruct}]],
+        			translate["tcProveTabKBTabLabel"]->Dynamic[Refresh[displayKBBrowser[], TrackedSymbols :> {$kbStruct}]],
         			translate["tcProveTabBuiltinTabLabel"]->emptyPane[translate["not available"]]}, Dynamic[$tcProveTab],
         			ControlPlacement->Top],
         		translate["tcComputeTabLabel"]->TabView[{
+        			translate["tcComputeTabSetupTabLabel"]->Dynamic[Refresh[ compSetup[], TrackedSymbols :> {$buttonNat}]],
         			translate["tcComputeTabKBTabLabel"]->emptyPane[translate["not available"]],
         			translate["tcComputeTabBuiltinTabLabel"]->emptyPane[translate["not available"]]}, Dynamic[$tcCompTab],
         			ControlPlacement->Top],
@@ -236,8 +237,8 @@ insertNewEnv[type_String] :=
     Module[ {nb = InputNotebook[]},
         NotebookWrite[
          nb, {newOpenEnvCell[ type], 
-          newFormulaCell[],
-          newCloseEnvCell[]}];
+          newFormulaCell[ type],
+          newCloseEnvCell[ type]}];
     ]
 insertNewEnv[args___] :=
     unexpected[insertNewEnv, {args}]
@@ -249,29 +250,32 @@ openNewEnv[type_String] :=
 openNewEnv[args___] :=
     unexpected[openNewEnv, {args}]
 
-insertNewFormulaCell[] := 
+insertNewFormulaCell[ style_String] := 
 	Module[{}, 
-		NotebookWrite[ InputNotebook[], newFormulaCell[]]
+		NotebookWrite[ InputNotebook[], newFormulaCell[ style]]
 	]
 insertNewFormulaCell[args___] :=
     unexpected[insertNewFormulaCell, {args}]
 
-closeEnv[] :=
+closeEnv[ type_String] :=
     Module[ {},
-        NotebookWrite[ InputNotebook[], newCloseEnvCell[]];
+        NotebookWrite[ InputNotebook[], newCloseEnvCell[type]];
     ]
 closeEnv[args___] :=
     unexpected[closeEnv, {args}]
 
-newFormulaCell[ label_:{"ENV", "??"}] = Cell[BoxData[""], "FormalTextInputFormula", CellTags->label]	
+newFormulaCell[ "COMPUTE"] = Cell[BoxData[""], "Computation"]	
+newFormulaCell[ style_, label_:{"ENV", "???"}] = Cell[BoxData[""], "FormalTextInputFormula", CellTags->label]	
 newFormulaCell[args___] :=
     unexpected[newFormulaCell, {args}]
 
+newOpenEnvCell[ "COMPUTE"] := Cell[BoxData["COMPUTE"], "OpenComputation"]
 newOpenEnvCell[ type_String] := Cell[BoxData[type], "OpenEnvironment"]
 newOpenEnvCell[args___] :=
     unexpected[newOpenEnvCell, {args}]
 
-newCloseEnvCell[] := Cell[BoxData["\[GraySquare]"], "CloseEnvironment"]
+newCloseEnvCell[ "COMPUTE"] := Cell[BoxData["\[GraySquare]"], "CloseComputation"]
+newCloseEnvCell[ _String] := Cell[BoxData["\[GraySquare]"], "CloseEnvironment"]
 newCloseEnvCell[args___] :=
     unexpected[newCloseEnvCell, {args}]
 
@@ -292,7 +296,7 @@ makeEnvButton[args___] :=
     unexpected[makeEnvButton, {args}]
 
 makeFormButton[] :=
-    Button[Style[ translate["tcLangTabEnvTabButtonFormLabel"], "EnvButton"], insertNewFormulaCell[], 
+    Button[Style[ translate["tcLangTabEnvTabButtonFormLabel"], "EnvButton"], insertNewFormulaCell[ "Env"], 
     	Appearance -> "FramedPalette", Alignment -> {Left, Top}]
 makeFormButton[args___] :=
     unexpected[makeFormButton, {args}]
@@ -483,6 +487,15 @@ langButtons[] := Pane[
 	}, Dividers -> Center, Spacings -> 4]]
 langButtons[args___] :=
     unexpected[langButtons, {args}]
+    
+envButtonData["COMPUTE"] := {"tcComputeTabSetupTabButtonCompLabel"};
+compSetup[] := Pane[ 
+	Column[{
+		makeEnvButton[ "COMPUTE"]
+	}, Dividers -> Center, Spacings -> 4]]
+compSetup[args___] :=
+    unexpected[compSetup, {args}]
+
 
 (* ::Section:: *)
 (* end of package *)
