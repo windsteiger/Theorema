@@ -35,7 +35,7 @@ freshNames[expr_Hold] :=
     replaceAllExcept[ expr, 
     {DoubleLongRightArrow|DoubleRightArrow->impliesTM, DoubleLongLeftRightArrow|DoubleLeftRightArrow->iffTM,
     	SetDelayed->equalDefTM, Wedge->andTM, Vee->orTM,
-    s_Symbol/;(Context[s]==="System`"&) :> Module[ {name = ToString[s]},
+    s_Symbol/;(Context[s]==="System`") :> Module[ {name = ToString[s]},
                     If[ StringTake[name,{-1}]==="$",
                         s,
                         ToExpression[ToLowerCase[StringTake[name,1]]<>StringDrop[name,1]<> "$TM"]
