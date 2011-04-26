@@ -43,21 +43,41 @@ inEnvironment[] := Length[$environmentLabels]>0
 inEnvironment[args___] := unexcpected[ inEnvironment, {args}]
 
 adjustFormulaLabel[nb_NotebookObject] := 
-	Module[{cl}, 
+	Module[{cl,cid}, 
 		SelectionMove[nb, All, EvaluationCell];
-        cl = CellTags /. Options[NotebookSelection[nb], CellTags];
-        Switch[cl,
-        	{_,_},
-        	cl = newFormulaLabel[nb,cl]
+        {cl,cid} = {CellTags,CellID} /. Options[NotebookSelection[nb], {CellTags,CellID}];
+        (*
+         * Replace unlabeled formula with counter.
+         *)
+        If[cl=="???",
+        	cl = newFormulaLabel[nb,cl],
+        	true
         ];
+        (*
+         * If Cell is not labeled by its CellID, relabel it and hide cell tags..
+         *)
+        If[cl!=ToString[cid],
+        	relabelCell[nb,cl,cid],
+        	true
+       	];
         SelectionMove[nb, After, Cell];
         cl
 	]
 adjustFormulaLabel[args___]	:= unexpected[adjustFormulaLabel,{args}]
 
-newFormulaLabel[nb_NotebookObject, {_, lab_}] := 
+relabelCell[nb_NotebookObject, cl_, cid_] :=
+	Module[{newFrameLabel,newLabel},
+		newFrameLabel = cl;
+		newLabel = ToString[cid];
+		SetOptions[NotebookSelection[nb], CellFrameLabels->{{{},newFrameLabel},{{},{}}}, CellTags->newLabel, ShowCellTags->False];
+	]
+	
+relabelCell[args___] := unexpected[relabelCell,{args}]
+
+newFormulaLabel[nb_NotebookObject, lab_] := 
 	Module[{newLab},		
-        newLab = currentEnvironment[][[2]]<>"_"<>If[lab==="???",incrementCurrentCounter[];currentCounterLabel[],lab];
+        (* newLab = currentEnvironment[][[2]]<>"_"<>If[lab==="???",incrementCurrentCounter[];currentCounterLabel[],lab]; *)
+        newLab = If[lab==="???",incrementCurrentCounter[];currentCounterLabel[],lab];
         SetOptions[NotebookSelection[nb], CellTags->newLab];
         newLab		
 	]

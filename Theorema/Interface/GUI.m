@@ -160,13 +160,21 @@ structView[file_, item_List, tags_] :=
 
 structView[file_, Cell[content_, "FormalTextInputFormula", ___], tags_] :=
     Sequence[]
+    
+structView[file_, Cell[content_, "FormalTextInputFormula", ___, CellFrameLabels -> {{_,cfl_},{_,_}}, ___, CellTags -> ct_,___], 
+  tags_] :=
+  Module[ { isEval = MemberQ[ $tmaEnv, {_,ct}, Infinity]},
+    {Row[{Checkbox[Dynamic[isSelected[ct]], Enabled->isEval], Hyperlink[ Style[cfl, If[ isEval, "FormalTextInputFormula", "FormalTextInputFormulaUneval"]], {file, ct}]}, 
+      Spacer[10]], {cfl}}
+  ]
 
-structView[file_, Cell[content_, "FormalTextInputFormula", ___, CellTags -> ct_, ___], 
+(*structView[file_, Cell[content_, "FormalTextInputFormula", ___, CellTags -> ct_, ___], 
   tags_] :=
   Module[ { isEval = MemberQ[ $tmaEnv, {_,ct}, Infinity]},
     {Row[{Checkbox[Dynamic[isSelected[ct]], Enabled->isEval], Hyperlink[ Style[ct, If[ isEval, "FormalTextInputFormula", "FormalTextInputFormulaUneval"]], {file, ct}]}, 
       Spacer[10]], {ct}}
   ]
+*)
 
 structView[file_, Cell[ BoxData[content_String]|content_String, style_, ___], tags_] :=
     Module[ {},
