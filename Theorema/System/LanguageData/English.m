@@ -27,7 +27,9 @@ With[ {lang = "English"},
 	MessageName[$theoremaGUI, "usage", lang] = "Theorema GUI structure";
 	MessageName[updateKBBrowser, "usage", lang] = "";
 	MessageName[displayKBBrowser, "usage", lang] = "";
-
+	MessageName[$initLabel, "usage", lang] = "Initial label of each formula. Serves as a hint for user to provide system with her own label.";
+	MessageName[$labelSeparator,"usage",lang] = "Separator of different labels assigned to one formula.";
+	
 (* Theorema`Interface`Language` *)
 	MessageName[translate, "usage", lang] = "translate[s_String,lang_String] gives string s in language lang.";
 	MessageName[availableLanguages, "usage", lang] = "availableLanguages[] gives all available languages.";

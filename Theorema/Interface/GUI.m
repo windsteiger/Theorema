@@ -35,6 +35,8 @@ initGUI[] :=
 		If[ ValueQ[$theoremaGUI], tc = "Theorema Commander" /. $theoremaGUI];
 		If[ $Notebooks && MemberQ[Notebooks[], tc], NotebookClose[tc]];
 		$theoremaGUI = {"Theorema Commander" -> theoremaCommander[]};
+		$initLabel = "???";
+		$labelSeparator = ",";
 	]
 
 (* ::Section:: *)
@@ -161,11 +163,14 @@ structView[file_, item_List, tags_] :=
 structView[file_, Cell[content_, "FormalTextInputFormula", ___], tags_] :=
     Sequence[]
     
-structView[file_, Cell[content_, "FormalTextInputFormula", ___, CellFrameLabels -> {{_,cfl_},{_,_}}, ___, CellTags -> ct_,___], 
+structView[file_, Cell[content_, "FormalTextInputFormula", ___, CellTags -> cellTags_, ___,CellID -> cellID_,___], 
   tags_] :=
-  Module[ { isEval = MemberQ[ $tmaEnv, {_,ct}, Infinity]},
-    {Row[{Checkbox[Dynamic[isSelected[ct]], Enabled->isEval], Hyperlink[ Style[cfl, If[ isEval, "FormalTextInputFormula", "FormalTextInputFormulaUneval"]], {file, ct}]}, 
-      Spacer[10]], {cfl}}
+  Module[ { isEval = MemberQ[ $tmaEnv, {_,cellTags}, Infinity], cleanCellTags, formulaLabel},
+	cleanCellTags = Select[cellTags, # != ToString[cellID] && # != $initLabel  & ];
+	(* Join list of CellTags, use $labelSeparator. *)
+	formulaLabel = StringJoin @@ Riffle[cleanCellTags,$labelSeparator];
+    {Row[{Checkbox[Dynamic[isSelected[cellTags]], Enabled->isEval], Hyperlink[ Style[formulaLabel, If[ isEval, "FormalTextInputFormula", "FormalTextInputFormulaUneval"]], {file, ToString[cellID]}]}, 
+      Spacer[10]], {formulaLabel}}
   ]
 
 (*structView[file_, Cell[content_, "FormalTextInputFormula", ___, CellTags -> ct_, ___], 
@@ -273,7 +278,7 @@ closeEnv[args___] :=
     unexpected[closeEnv, {args}]
 
 newFormulaCell[ "COMPUTE"] = Cell[BoxData[""], "Computation"]	
-newFormulaCell[ style_, label_:{"ENV", "???"}] = Cell[BoxData[""], "FormalTextInputFormula", CellTags->label]	
+newFormulaCell[ style_, label_:$initLabel] = Cell[BoxData[""], "FormalTextInputFormula", CellTags->label]	
 newFormulaCell[args___] :=
     unexpected[newFormulaCell, {args}]
 
