@@ -144,7 +144,7 @@ structView[file_, {head:Cell[sec_, style:"Title"|"Section"|"Subsection"|"Subsubs
         compTags = Apply[Union, sub[[2]]];
         {OpenerView[{structView[file, head, compTags], Column[sub[[1]]]}, 
         	ToExpression[StringReplace["Dynamic[NEWSYM]", 
-        		"NEWSYM" -> "$kbStructState$"<>FileBaseName[file]<>"$"<>style<>"$"<>ToString[Hash[sec]]]]], 
+        		"NEWSYM" -> "$kbStructState$"<>ToString[Hash[FileBaseName[file]]]<>"$"<>style<>"$"<>ToString[Hash[sec]]]]], 
          compTags}
     ]
 
@@ -235,7 +235,6 @@ displayKBBrowser[] :=
 
 displayKBBrowser[args___] :=
     unexpected[displayKBBrowser, {args}]
-
 
 
 (* ::Section:: *)
