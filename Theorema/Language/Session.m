@@ -18,7 +18,6 @@
 *)
 
 BeginPackage["Theorema`Language`Session`"];
-(* Exported symbols added here with SymbolName::usage *)  
 
 Needs["Theorema`Common`"];
 
@@ -180,7 +179,11 @@ closeComputation[args___] := unexcpected[ closeComputation, {args}]
 
 Begin["Theorema`Computation`"]
 
-plus$TM /; activeComputation[Plus] = Plus
+activeComputation[_] := False
+
+plus$TM /; activeComputation["plus"] = Plus
+times$TM /; activeComputation["times"] = Times
+set$TM /; activeComputation["equal"] = equal
 
 End[]
 

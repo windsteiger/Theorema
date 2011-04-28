@@ -27,4 +27,7 @@ With[ {lang = "German"},
 	    translate["tcPrefLanguage", lang] = "Sprache";
     translate["not available", lang] = "nicht verf\[UDoubleDot]gbar";
     translate["No knowledge available", lang] = "Kein Wissen verf\[UDoubleDot]gbar";
+   
+    translate["Sets", lang] = "Mengen";
+    translate["Arithmetic", lang] = "Arithmetik";
 ]

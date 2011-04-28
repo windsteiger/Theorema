@@ -43,4 +43,7 @@ With[ {lang = "English"},
 	    translate["tcPrefLanguage", lang] = "Language";
     translate["not available", lang] = "not available";
     translate["No knowledge available", lang] = "No knowledge available";
+    
+    translate["Sets", lang] = "Sets";
+    translate["Arithmetic", lang] = "Arithmetic";
 ]

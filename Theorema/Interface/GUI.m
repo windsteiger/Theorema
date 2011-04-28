@@ -55,7 +55,7 @@ theoremaCommander[] /; $Notebooks :=
         		translate["tcComputeTabLabel"]->TabView[{
         			translate["tcComputeTabSetupTabLabel"]->Dynamic[Refresh[ compSetup[], TrackedSymbols :> {$buttonNat}]],
         			translate["tcComputeTabKBTabLabel"]->emptyPane[translate["not available"]],
-        			translate["tcComputeTabBuiltinTabLabel"]->emptyPane[translate["not available"]]}, Dynamic[$tcCompTab],
+        			translate["tcComputeTabBuiltinTabLabel"]->displayBuiltinBrowser[]}, Dynamic[$tcCompTab],
         			ControlPlacement->Top],
         		translate["tcPreferencesTabLabel"]->Row[{translate["tcPrefLanguage"], PopupMenu[Dynamic[$Language], availableLanguages[]]}, Spacer[10]]},
         		Dynamic[$tcTopLevelTab],
@@ -232,10 +232,73 @@ displayKBBrowser[] :=
                   Appearance -> {"Limited", 10}, FrameMargins->None]
         ]
     ]
-
 displayKBBrowser[args___] :=
     unexpected[displayKBBrowser, {args}]
 
+(* ::Subsubsection:: *)
+(* structViewBuiltin *)
+Clear[structViewBuiltin];
+
+structViewBuiltin[{category_String, rest__List}, tags_] :=
+    Module[ {sub, compTags},
+        sub = Transpose[Map[structViewBuiltin[#, tags] &, {rest}]];
+        compTags = Apply[Union, sub[[2]]];
+        {OpenerView[{structViewBuiltin[category, compTags], Column[sub[[1]]]}, 
+        	ToExpression["Dynamic[$builtinStructState$"<>category<>"]"]], 
+         compTags}
+    ]
+
+structViewBuiltin[ item:List[__List], tags_] :=
+    Module[ {sub, compTags},
+        sub = Transpose[Map[structViewBuiltin[#, tags] &, item]];
+        compTags = Apply[Union, sub[[2]]];
+        {Column[sub[[1]]], compTags}
+    ]
+    
+structViewBuiltin[ {op_String, display_}, tags_] :=
+  Module[ { },
+    {Row[{Checkbox[Dynamic[Theorema`Computation`activeComputation[op]]], Style[ DisplayForm[display], "FormalTextInputFormula"]}, 
+      Spacer[10]], {op}}
+  ]
+
+structViewBuiltin[ category_String, tags_] :=
+    Module[ {},
+        Row[{Checkbox[Dynamic[allTrue[tags, Theorema`Computation`activeComputation], setAll[tags, Theorema`Computation`activeComputation, #] &]], 
+          Style[ category, "Section"]}, Spacer[10]]
+    ]
+
+structViewBuiltin[args___] :=
+    unexpected[structViewBuiltin, {args}]
+
+allTrue[ l_, test_] :=
+    Catch[Module[ {},
+              Scan[If[ Not[TrueQ[test[#]]],
+                       Throw[False]
+                   ] &, l];
+              True
+          ]]
+
+setAll[l_, test_, val_] :=
+    Scan[(test[#] = val) &, l]
+
+$tmaBuiltins = {
+	{translate["Sets"], 
+		{"union", RowBox[{"A","\[Union]","B"}]},
+		{"intersection", RowBox[{"A","\[Intersection]","B"}]},
+		{"equal", RowBox[{"A","=","B"}]}},
+	{translate["Arithmetic"], 
+		{"plus", RowBox[{"A","+","B"}]},
+		{"times", RowBox[{"A","*","B"}]},
+		{"equal", RowBox[{"A","=","B"}]}}
+};
+   
+(* ::Subsubsection:: *)
+(* displayBuiltinBrowser *)
+
+displayBuiltinBrowser[] :=
+  Pane[structViewBuiltin[ $tmaBuiltins, {}][[1]],
+  	ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
+displayBuiltinBrowser[args___] := unexcpected[ displayBuiltinBrowser, {args}]
 
 (* ::Section:: *)
 (* Palettes *)
