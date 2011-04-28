@@ -42,41 +42,50 @@ inEnvironment[] := Length[$environmentLabels]>0
 inEnvironment[args___] := unexcpected[ inEnvironment, {args}]
 
 adjustFormulaLabel[nb_NotebookObject] := 
-	Module[{cl,cid}, 
+	Module[{cellTags,cellID,newCellTags}, 
 		SelectionMove[nb, All, EvaluationCell];
-        {cl,cid} = {CellTags,CellID} /. Options[NotebookSelection[nb], {CellTags,CellID}];
+        {cellTags,cellID} = {CellTags,CellID} /. Options[NotebookSelection[nb], {CellTags,CellID}];
+		(*
+		 * Make sure we have a list of CellTags
+		 *)
+		cellTags = Flatten[{cellTags}];
+		(*
+		 * We need CellID as String
+		 *)
+		cellID = ToString[cellID];
         (*
          * Replace unlabeled formula with counter.
          *)
-        If[cl=="???",
-        	cl = newFormulaLabel[nb,cl],
-        	true
-        ];
+        newFormulaLabel[nb,cellTags];
         (*
-         * If Cell is not labeled by its CellID, relabel it and hide cell tags..
+         * Relabel Cell and hide CellTags.
          *)
-        If[cl!=ToString[cid],
-        	relabelCell[nb,cl,cid],
-        	true
-       	];
+        newCellTags = relabelCell[nb,cellTags,cellID];
         SelectionMove[nb, After, Cell];
-        cl
+        newCellTags
 	]
 adjustFormulaLabel[args___]	:= unexpected[adjustFormulaLabel,{args}]
 
-relabelCell[nb_NotebookObject, cl_, cid_] :=
-	Module[{newFrameLabel,newLabel},
-		newFrameLabel = cl;
-		newLabel = ToString[cid];
-		SetOptions[NotebookSelection[nb], CellFrameLabels->{{{},newFrameLabel},{{},{}}}, CellTags->newLabel, ShowCellTags->False];
+relabelCell[nb_NotebookObject, cellTags_List, cellID_String] :=
+	Module[{newFrameLabel,newCellTags,cleanCellTags},
+	    (* Was the cell allready labeled by its CellID or $initLabel? Than remove CellID or $initLabel from CellTags list. *)
+		cleanCellTags = Select[cellTags, # != cellID && # != $initLabel  & ];
+		(* Join list of CellTags, use $labelSeparator. *)
+		newFrameLabel = StringJoin @@ Riffle[cleanCellTags,$labelSeparator];
+		(* Put newFrameLabel in brackets. *)
+		newFrameLabel = "("<>newFrameLabel<>")";
+		(* Keep cleaned CellTags and add CellID *)
+		newCellTags = Join[{cellID},cleanCellTags];
+		SetOptions[NotebookSelection[nb], CellFrameLabels->{{None,newFrameLabel},{None,None}}, CellTags->newCellTags, ShowCellTags->False];
+		newCellTags
 	]
 	
 relabelCell[args___] := unexpected[relabelCell,{args}]
 
 newFormulaLabel[nb_NotebookObject, lab_] := 
 	Module[{newLab},		
-        (* newLab = currentEnvironment[][[2]]<>"_"<>If[lab==="???",incrementCurrentCounter[];currentCounterLabel[],lab]; *)
-        newLab = If[lab==="???",incrementCurrentCounter[];currentCounterLabel[],lab];
+        (* newLab = currentEnvironment[][[2]]<>"_"<>If[lab===$initLabel,incrementCurrentCounter[];currentCounterLabel[],lab]; *)
+        newLab = If[lab==$initLabel || lab=={},incrementCurrentCounter[];currentCounterLabel[],lab];
         SetOptions[NotebookSelection[nb], CellTags->newLab];
         newLab		
 	]
