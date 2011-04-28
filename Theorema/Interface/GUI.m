@@ -51,12 +51,12 @@ theoremaCommander[] /; $Notebooks :=
         			translate["tcLangTabEnvTabLabel"]->envButtons[]}, Dynamic[$tcLangTab],
         			ControlPlacement->Top],
         		translate["tcProveTabLabel"]->TabView[{
-        			translate["tcProveTabKBTabLabel"]->Dynamic[Refresh[displayKBBrowser[], TrackedSymbols :> {$kbStruct}]],
+        			translate["tcProveTabKBTabLabel"]->Dynamic[Refresh[displayKBBrowser["prove"], TrackedSymbols :> {$kbStruct}]],
         			translate["tcProveTabBuiltinTabLabel"]->emptyPane[translate["not available"]]}, Dynamic[$tcProveTab],
         			ControlPlacement->Top],
         		translate["tcComputeTabLabel"]->TabView[{
         			translate["tcComputeTabSetupTabLabel"]->Dynamic[Refresh[ compSetup[], TrackedSymbols :> {$buttonNat}]],
-        			translate["tcComputeTabKBTabLabel"]->emptyPane[translate["not available"]],
+        			translate["tcComputeTabKBTabLabel"]->Dynamic[Refresh[displayKBBrowser["compute"], TrackedSymbols :> {$kbStruct}]],
         			translate["tcComputeTabBuiltinTabLabel"]->displayBuiltinBrowser[]}, Dynamic[$tcCompTab],
         			ControlPlacement->Top],
         		translate["tcPreferencesTabLabel"]->Row[{translate["tcPrefLanguage"], PopupMenu[Dynamic[$Language], availableLanguages[]]}, Spacer[10]]},
@@ -140,37 +140,45 @@ arrangeSub[struct_, item : {head_, ___}] :=
 (* structView *)
 Clear[structView];
 
-structView[file_, {head:Cell[sec_, style:"Title"|"Section"|"Subsection"|"Subsubsection"|"OpenEnvironment", ___], rest__}, tags_] :=
+structView[file_, {head:Cell[sec_, style:"Title"|"Section"|"Subsection"|"Subsubsection"|"OpenEnvironment", ___], rest__}, tags_, task_] :=
     Module[ {sub, compTags},
-        sub = Transpose[Map[structView[file, #, tags] &, {rest}]];
+        sub = Transpose[Map[structView[file, #, tags, task] &, {rest}]];
         compTags = Apply[Union, sub[[2]]];
-        {OpenerView[{structView[file, head, compTags], Column[sub[[1]]]}, 
+        {OpenerView[{structView[file, head, compTags, task], Column[sub[[1]]]}, 
         	ToExpression[StringReplace["Dynamic[NEWSYM]", 
         		"NEWSYM" -> "$kbStructState$"<>ToString[Hash[FileBaseName[file]]]<>"$"<>style<>"$"<>ToString[Hash[sec]]]]], 
          compTags}
     ]
 
-structView[file_, {Cell[sec_, style:"Section"|"Subsection"|"Subsubsection", ___]}, tags_] :=
+structView[file_, {Cell[sec_, style:"Section"|"Subsection"|"Subsubsection", ___]}, tags_, task_] :=
 	Sequence[]
  
-structView[file_, item_List, tags_] :=
+structView[file_, item_List, tags_, task_] :=
     Module[ {sub, compTags},
-        sub = Transpose[Map[structView[file, #, tags] &, item]];
+        sub = Transpose[Map[structView[file, #, tags, task] &, item]];
         compTags = Apply[Union, sub[[2]]];
         {Column[sub[[1]]], compTags}
     ]
 
-structView[file_, Cell[content_, "FormalTextInputFormula", ___], tags_] :=
+structView[file_, Cell[content_, "FormalTextInputFormula", ___], tags_, task_] :=
     Sequence[]
     
 structView[file_, Cell[content_, "FormalTextInputFormula", ___, CellTags -> cellTags_, ___,CellID -> cellID_,___], 
-  tags_] :=
+  tags_, task_] :=
   Module[ { isEval = MemberQ[ $tmaEnv, {_,cellTags}, Infinity], cleanCellTags, formulaLabel},
 	cleanCellTags = Select[cellTags, # != ToString[cellID] && # != $initLabel  & ];
 	(* Join list of CellTags, use $labelSeparator. *)
 	formulaLabel = StringJoin @@ Riffle[cleanCellTags,$labelSeparator];
-    {Row[{Checkbox[Dynamic[isSelected[cellTags]], Enabled->isEval], Hyperlink[ Style[formulaLabel, If[ isEval, "FormalTextInputFormula", "FormalTextInputFormulaUneval"]], {file, ToString[cellID]}]}, 
-      Spacer[10]], {formulaLabel}}
+    {Switch[ task,
+    	"prove",
+    	Row[{Checkbox[Dynamic[kbSelectProve[cellTags]], Enabled->isEval], 
+    		Hyperlink[ Style[formulaLabel, If[ isEval, "FormalTextInputFormula", "FormalTextInputFormulaUneval"]], {file, ToString[cellID]}]},
+    		Spacer[10]],
+    	"compute",
+    	Row[{Checkbox[Dynamic[kbSelectCompute[cellTags]], Enabled->isEval], 
+    		Hyperlink[ Style[formulaLabel, If[ isEval, "FormalTextInputFormula", "FormalTextInputFormulaUneval"]], {file, ToString[cellID]}]},
+    		Spacer[10]]
+    	], {formulaLabel}}
   ]
 
 (*structView[file_, Cell[content_, "FormalTextInputFormula", ___, CellTags -> ct_, ___], 
@@ -181,27 +189,19 @@ structView[file_, Cell[content_, "FormalTextInputFormula", ___, CellTags -> cell
   ]
 *)
 
-structView[file_, Cell[ BoxData[content_String]|content_String, style_, ___], tags_] :=
-    Module[ {},
-        Row[{Checkbox[Dynamic[allTrue[tags], setAll[tags, #] &]], 
-          Style[content, style]}, Spacer[10]]
+structView[file_, Cell[ BoxData[content_String]|content_String, style_, ___], tags_, task_] :=
+    Switch[ task,
+    	"prove",
+        Row[{Checkbox[Dynamic[allTrue[tags, kbSelectProve], setAll[tags, kbSelectProve, #] &]], Style[content, style]}, Spacer[10]],
+        "compute",
+        Row[{Checkbox[Dynamic[allTrue[tags, kbSelectCompute], setAll[tags, kbSelectCompute, #] &]], Style[content, style]}, Spacer[10]]
     ]
 
 structView[args___] :=
     unexpected[structView, {args}]
 
-isSelected[_] := False
-
-allTrue[l_] :=
-    Catch[Module[ {},
-              Scan[If[ Not[TrueQ[isSelected[#]]],
-                       Throw[False]
-                   ] &, l];
-              True
-          ]]
-
-setAll[l_, val_] :=
-    Scan[(isSelected[#] = val) &, l]
+kbSelectProve[_] := False
+kbSelectCompute[_] := False
 
 (* ::Subsubsection:: *)
 (* updateKBBrowser *)
@@ -225,13 +225,13 @@ updateKBBrowser[args___] :=
 (* ::Subsubsection:: *)
 (* displayKBBrowser *)
    
-displayKBBrowser[] :=
+displayKBBrowser[ task_String] :=
     Module[ {},
         If[ $kbStruct === {},
             emptyPane[translate["No knowledge available"]],
             TabView[
                   Map[Tooltip[Style[FileBaseName[#[[1]]], "NotebookName"], #[[1]]] -> 
-                     Pane[structView[#[[1]], #[[2]], {}][[1]],
+                     Pane[structView[#[[1]], #[[2]], {}, task][[1]],
                       ImageSizeAction -> "Scrollable", Scrollbars -> Automatic] &, 
                    $kbStruct], 
                   Appearance -> {"Limited", 10}, FrameMargins->None]
