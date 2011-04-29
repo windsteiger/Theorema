@@ -10,27 +10,199 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       145,          7]
-NotebookDataLength[      2177,         78]
-NotebookOptionsPosition[      1647,         53]
-NotebookOutlinePosition[      2005,         69]
-CellTagsIndexPosition[      1962,         66]
+NotebookDataLength[      9471,        303]
+NotebookOptionsPosition[      7463,        225]
+NotebookOutlinePosition[      7893,        242]
+CellTagsIndexPosition[      7850,        239]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
 Notebook[{
 
 Cell[CellGroupData[{
-Cell["Programmer's Guidelines", "Title",
- CellChangeTimes->{{3.503903921841095*^9, 3.503903933944887*^9}},
+Cell["\<\
+Programmer's Guidelines Theorema.2\
+\>", "Title",
+ CellChangeTimes->{{3.503903921841095*^9, 3.503903933944887*^9}, {
+  3.513058950777701*^9, 3.513058951287076*^9}},
  CellID->882976022],
-
-Cell["Theorema.2", "Subtitle",
- CellChangeTimes->{{3.503903939431836*^9, 3.503903942638564*^9}},
- CellID->1025677832],
 
 Cell[CellGroupData[{
 
-Cell["Theorema editor", "Section",
+Cell["Recommended Development Tools", "Subsubsection",
+ CellChangeTimes->{{3.513058651910804*^9, 3.513058670706804*^9}},
+ CellID->1101778183],
+
+Cell[TextData[{
+ "Write packages in plain .m-files, no programming in .nb notebook-files. \
+m-files can be edited as package files in the ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " FrontEnd, still providing some of the convenient notebook features (e.g. \
+sectioning, collapsing cell groups, etc.).\nAlternatively, the \
+WolframWorkbench provides a very convenient development environment."
+}], "Text",
+ CellChangeTimes->{{3.513058679670517*^9, 3.513058828593065*^9}, {
+  3.513058895075178*^9, 3.513058936223579*^9}},
+ CellID->1807771345]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Naming Conventions", "Subsubsection",
+ CellChangeTimes->{{3.513058352711657*^9, 3.513058358263449*^9}},
+ CellID->322908692],
+
+Cell[TextData[{
+ "Function names: lower case, no special characters except $, upper case on \
+word boundaries, e.g. openComputation.\nGlobal variables: start with $.\nData \
+structures: short names, all upper case, ending in $, e.g. VAR$.\nUnevaluated \
+fresh names (in order to avoid evaluation by ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ "): lower case, ending in $TM, e.g. plus$TM."
+}], "Text",
+ CellChangeTimes->{{3.513058375917258*^9, 3.513058615650928*^9}},
+ CellID->824571219]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Package Dependencies", "Subsubsection",
+ CellChangeTimes->{{3.513057253548153*^9, 3.513057311941472*^9}},
+ CellID->808805643],
+
+Cell["\<\
+Usually, if package A depends on package B, package A is set up using\
+\>", "Text",
+ CellChangeTimes->{{3.513057351123462*^9, 3.513057416636685*^9}},
+ CellID->168153129],
+
+Cell[BoxData[
+ RowBox[{"BeginPackage", "[", 
+  RowBox[{"\"\<A`\>\"", ",", 
+   RowBox[{"{", "\"\<B`\>\"", "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.513057420206714*^9, 3.513057438951042*^9}},
+ CellID->1908198389],
+
+Cell["\<\
+so that symbols exported by B are visible in A. In order to keep the \
+ContextPath \[OpenCurlyDoubleQuote]clean\[CloseCurlyDoubleQuote], we use \
+so-called \[OpenCurlyDoubleQuote]private package import\
+\[CloseCurlyDoubleQuote]\
+\>", "Text",
+ CellChangeTimes->{{3.513057447881406*^9, 3.513057448871446*^9}, {
+  3.51305760416886*^9, 3.513057665206061*^9}},
+ CellID->1551789716],
+
+Cell[BoxData[{
+ RowBox[{"BeginPackage", "[", "\"\<A`\>\"", "]"}], "\n", 
+ RowBox[{"Needs", "[", "\"\<B`\>\"", "]"}]}], "Input",
+ CellChangeTimes->{{3.513057420206714*^9, 3.513057438951042*^9}, {
+  3.513057673248259*^9, 3.513057697123312*^9}},
+ CellID->927943111],
+
+Cell["\<\
+which also makes symbols exported by B visible in A, but will not leave \
+\[OpenCurlyDoubleQuote]B`\[CloseCurlyDoubleQuote] in the ContextPath after \
+loading package A.
+Moreover, we use one central package Theorema`Common` for shared symbols. All \
+symbols that need to be used across packages should be defined there, and all \
+packages that need symbols from other packages just use\
+\>", "Text",
+ CellChangeTimes->{{3.513057737922485*^9, 3.513057881047261*^9}, {
+  3.513057940055224*^9, 3.513057988028137*^9}},
+ CellID->318801287],
+
+Cell[BoxData[
+ RowBox[{"Needs", "[", "\"\<Theorema`Common`\>\"", "]"}]], "Input",
+ CellChangeTimes->{3.513058004086103*^9},
+ CellID->1351933892],
+
+Cell["\<\
+This gives a flat package hierarchy that can easily be maintained.\
+\>", "Text",
+ CellChangeTimes->{{3.513058026416772*^9, 3.513058060553581*^9}},
+ CellID->1166297507]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Language Dependency", "Subsubsection",
+ CellChangeTimes->{{3.513057316020966*^9, 3.513057324081456*^9}},
+ CellID->1570982239],
+
+Cell["\<\
+Language dependent strings (help messages, button labels, menu entries, etc.) \
+should be defined in the corresponding \[OpenCurlyDoubleQuote]LanguageData\
+\[CloseCurlyDoubleQuote] packages. Use the function \
+\[OpenCurlyDoubleQuote]translate\[CloseCurlyDoubleQuote] accordingly.\
+\>", "Text",
+ CellChangeTimes->{{3.513058082433791*^9, 3.513058133778015*^9}, {
+  3.513058276854291*^9, 3.51305833459441*^9}},
+ CellID->1463669761]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+Default Case for Pattern Definitions\
+\>", "Subsubsection",
+ CellChangeTimes->{{3.5130570195594*^9, 3.513057032599498*^9}},
+ CellID->612761324],
+
+Cell["\<\
+For functions that are defined through various patterns, provide a default \
+case that will match if all (intended) cases fail.\
+\>", "Text",
+ CellChangeTimes->{{3.513057038104899*^9, 3.513057149607101*^9}},
+ CellID->1807041091],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"f", "[", "args___", "]"}], ":=", 
+  RowBox[{"unexpected", "[", 
+   RowBox[{"f", ",", 
+    RowBox[{"{", "args", "}"}]}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.513056884623223*^9, 3.51305688462481*^9}, 
+   3.513057011267955*^9, {3.513057152864087*^9, 3.513057155733866*^9}},
+ CellID->1383636587],
+
+Cell["\<\
+This will interrupt program execution and tell that \[OpenCurlyQuote]f\
+\[CloseCurlyQuote] has been called with unexpected arguments \
+\[OpenCurlyQuote]args\[CloseCurlyQuote]. This will facilitate debugging.\
+\>", "Text",
+ CellChangeTimes->{{3.513057161385442*^9, 3.513057221359454*^9}},
+ CellID->255831916]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Use Assert", "Subsubsection",
+ CellChangeTimes->{{3.513056893013967*^9, 3.513056895235039*^9}},
+ CellID->1007040944],
+
+Cell[TextData[{
+ "Assert is a new feature in ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " 8, which allows to test assumptions that interrupt program execution in \
+case it is detected that the test fails."
+}], "Text",
+ CellChangeTimes->{{3.51305690002701*^9, 3.513056993149039*^9}},
+ CellID->961204065],
+
+Cell[BoxData[
+ RowBox[{"Assert", "[", "test", "]"}]], "Input",
+ CellChangeTimes->{{3.513056589524633*^9, 3.513056590642774*^9}, {
+  3.513056997030746*^9, 3.513056999028284*^9}},
+ CellID->1358998773]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Theorema editor", "Subsubsection",
  CellChangeTimes->{{3.503903952396789*^9, 3.503903956456551*^9}, {
   3.503904034455522*^9, 3.503904041702376*^9}},
  CellID->1871658360],
@@ -51,11 +223,12 @@ can pull the changes and forward them into the common repository."
 }, Open  ]]
 }, Open  ]]
 },
-WindowSize->{640, 750},
-WindowMargins->{{Automatic, 367}, {32, Automatic}},
+WindowSize->{1075, 766},
+WindowMargins->{{315, Automatic}, {78, Automatic}},
 CreateCellID->True,
-FrontEndVersion->"7.0 for Linux x86 (32-bit) (November 10, 2008)",
-StyleDefinitions->"Default.nb"
+FrontEndVersion->"8.0 for Linux x86 (32-bit) (February 23, 2011)",
+StyleDefinitions->FrontEnd`FileName[{"Report"}, "StandardReport.nb", 
+  CharacterEncoding -> "UTF-8"]
 ]
 (* End of Notebook Content *)
 
@@ -69,14 +242,66 @@ CellTagsIndex->{}
 (*NotebookFileOutline
 Notebook[{
 Cell[CellGroupData[{
-Cell[567, 22, 126, 2, 85, "Title",
+Cell[567, 22, 194, 5, 86, "Title",
  CellID->882976022],
-Cell[696, 26, 117, 2, 53, "Subtitle",
- CellID->1025677832],
 Cell[CellGroupData[{
-Cell[838, 32, 170, 3, 73, "Section",
+Cell[786, 31, 141, 2, 24, "Subsubsection",
+ CellID->1101778183],
+Cell[930, 35, 550, 11, 68, "Text",
+ CellID->1807771345]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[1517, 51, 129, 2, 24, "Subsubsection",
+ CellID->322908692],
+Cell[1649, 55, 495, 10, 87, "Text",
+ CellID->824571219]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2181, 70, 131, 2, 24, "Subsubsection",
+ CellID->808805643],
+Cell[2315, 74, 179, 4, 30, "Text",
+ CellID->168153129],
+Cell[2497, 80, 217, 5, 39, "Input",
+ CellID->1908198389],
+Cell[2717, 87, 386, 8, 30, "Text",
+ CellID->1551789716],
+Cell[3106, 97, 262, 5, 59, "Input",
+ CellID->927943111],
+Cell[3371, 104, 544, 10, 68, "Text",
+ CellID->318801287],
+Cell[3918, 116, 144, 3, 39, "Input",
+ CellID->1351933892],
+Cell[4065, 121, 177, 4, 30, "Text",
+ CellID->1166297507]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4279, 130, 131, 2, 24, "Subsubsection",
+ CellID->1570982239],
+Cell[4413, 134, 438, 8, 49, "Text",
+ CellID->1463669761]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4888, 147, 153, 4, 24, "Subsubsection",
+ CellID->612761324],
+Cell[5044, 153, 238, 5, 30, "Text",
+ CellID->1807041091],
+Cell[5285, 160, 331, 8, 39, "Input",
+ CellID->1383636587],
+Cell[5619, 170, 317, 6, 30, "Text",
+ CellID->255831916]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[5973, 181, 122, 2, 24, "Subsubsection",
+ CellID->1007040944],
+Cell[6098, 185, 312, 8, 30, "Text",
+ CellID->961204065],
+Cell[6413, 195, 198, 4, 39, "Input",
+ CellID->1358998773]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[6648, 204, 176, 3, 24, "Subsubsection",
  CellID->1871658360],
-Cell[1011, 37, 608, 12, 111, "Text",
+Cell[6827, 209, 608, 12, 68, "Text",
  CellID->1469832235]
 }, Open  ]]
 }, Open  ]]

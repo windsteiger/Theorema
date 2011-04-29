@@ -31,12 +31,22 @@ Begin["`Private`"] (* Begin Private Context *)
 
 initGUI[] := 
 	Module[{ tc}, 
+        $tmaBuiltins = {
+        	{"Sets", 
+        		{"union", RowBox[{"A","\[Union]","B"}]},
+        		{"intersection", RowBox[{"A","\[Intersection]","B"}]},
+        		{"equal", RowBox[{"A","=","B"}]}},
+        	{"Arithmetic", 
+        		{"plus", RowBox[{"A","+","B"}]},
+        		{"times", RowBox[{"A","*","B"}]},
+        		{"equal", RowBox[{"A","=","B"}]}}
+        };
 		$kbStruct = {};
+		$initLabel = "???";
+		$labelSeparator = ",";
 		If[ ValueQ[$theoremaGUI], tc = "Theorema Commander" /. $theoremaGUI];
 		If[ $Notebooks && MemberQ[Notebooks[], tc], NotebookClose[tc]];
 		$theoremaGUI = {"Theorema Commander" -> theoremaCommander[]};
-		$initLabel = "???";
-		$labelSeparator = ",";
 	]
 
 (* ::Section:: *)
@@ -52,7 +62,7 @@ theoremaCommander[] /; $Notebooks :=
         			ControlPlacement->Top],
         		translate["tcProveTabLabel"]->TabView[{
         			translate["tcProveTabKBTabLabel"]->Dynamic[Refresh[displayKBBrowser["prove"], TrackedSymbols :> {$kbStruct}]],
-        			translate["tcProveTabBuiltinTabLabel"]->emptyPane[translate["not available"]]}, Dynamic[$tcProveTab],
+        			translate["tcProveTabBuiltinTabLabel"]->displayBuiltinBrowser[]}, Dynamic[$tcProveTab],
         			ControlPlacement->Top],
         		translate["tcComputeTabLabel"]->TabView[{
         			translate["tcComputeTabSetupTabLabel"]->Dynamic[Refresh[ compSetup[], TrackedSymbols :> {$buttonNat}]],
@@ -166,6 +176,7 @@ structView[file_, Cell[content_, "FormalTextInputFormula", ___], tags_, task_] :
 structView[file_, Cell[content_, "FormalTextInputFormula", ___, CellTags -> cellTags_, ___,CellID -> cellID_,___], 
   tags_, task_] :=
   Module[ { isEval = MemberQ[ $tmaEnv, {_,cellTags}, Infinity], cleanCellTags, formulaLabel},
+	Assert[VectorQ[cellTags, StringQ]];
 	cleanCellTags = Select[cellTags, # != ToString[cellID] && # != $initLabel  & ];
 	(* Join list of CellTags, use $labelSeparator. *)
 	formulaLabel = StringJoin @@ Riffle[cleanCellTags,$labelSeparator];
@@ -175,7 +186,7 @@ structView[file_, Cell[content_, "FormalTextInputFormula", ___, CellTags -> cell
     		Hyperlink[ Style[formulaLabel, If[ isEval, "FormalTextInputFormula", "FormalTextInputFormulaUneval"]], {file, ToString[cellID]}]},
     		Spacer[10]],
     	"compute",
-    	Row[{Checkbox[Dynamic[kbSelectCompute[cellTags]], Enabled->isEval], 
+    	Row[{Checkbox[Dynamic[Theorema`Computation`activeComputationKB[cellTags]], Enabled->isEval], 
     		Hyperlink[ Style[formulaLabel, If[ isEval, "FormalTextInputFormula", "FormalTextInputFormulaUneval"]], {file, ToString[cellID]}]},
     		Spacer[10]]
     	], {formulaLabel}}
@@ -194,14 +205,13 @@ structView[file_, Cell[ BoxData[content_String]|content_String, style_, ___], ta
     	"prove",
         Row[{Checkbox[Dynamic[allTrue[tags, kbSelectProve], setAll[tags, kbSelectProve, #] &]], Style[content, style]}, Spacer[10]],
         "compute",
-        Row[{Checkbox[Dynamic[allTrue[tags, kbSelectCompute], setAll[tags, kbSelectCompute, #] &]], Style[content, style]}, Spacer[10]]
+        Row[{Checkbox[Dynamic[allTrue[tags, Theorema`Computation`activeComputationKB], setAll[tags, Theorema`Computation`activeComputationKB, #] &]], Style[content, style]}, Spacer[10]]
     ]
 
 structView[args___] :=
     unexpected[structView, {args}]
 
 kbSelectProve[_] := False
-kbSelectCompute[_] := False
 
 (* ::Subsubsection:: *)
 (* updateKBBrowser *)
@@ -269,7 +279,7 @@ structViewBuiltin[ {op_String, display_}, tags_] :=
 structViewBuiltin[ category_String, tags_] :=
     Module[ {},
         Row[{Checkbox[Dynamic[allTrue[tags, Theorema`Computation`activeComputation], setAll[tags, Theorema`Computation`activeComputation, #] &]], 
-          Style[ category, "Section"]}, Spacer[10]]
+          Style[ translate[category], "Section"]}, Spacer[10]]
     ]
 
 structViewBuiltin[args___] :=
@@ -285,17 +295,6 @@ allTrue[ l_, test_] :=
 
 setAll[l_, test_, val_] :=
     Scan[(test[#] = val) &, l]
-
-$tmaBuiltins = {
-	{translate["Sets"], 
-		{"union", RowBox[{"A","\[Union]","B"}]},
-		{"intersection", RowBox[{"A","\[Intersection]","B"}]},
-		{"equal", RowBox[{"A","=","B"}]}},
-	{translate["Arithmetic"], 
-		{"plus", RowBox[{"A","+","B"}]},
-		{"times", RowBox[{"A","*","B"}]},
-		{"equal", RowBox[{"A","=","B"}]}}
-};
    
 (* ::Subsubsection:: *)
 (* displayBuiltinBrowser *)
@@ -304,6 +303,14 @@ displayBuiltinBrowser[] :=
   Pane[structViewBuiltin[ $tmaBuiltins, {}][[1]],
   	ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
 displayBuiltinBrowser[args___] := unexcpected[ displayBuiltinBrowser, {args}]
+
+printComputationInfo[] :=
+  Module[ {act},
+      act = Union[ Cases[ DownValues[Theorema`Computation`activeComputation], HoldPattern[s_:>True]:>s[[1,1]]]];
+      Print[OpenerView[{"", OpenerView[{Style[translate["Builtins used in computation"], "CILabel"], act}]}, False]];
+  ]
+printComputationInfo[args___] := unexcpected[ printComputationInfo, {args}]
+
 
 (* ::Section:: *)
 (* Palettes *)

@@ -97,13 +97,13 @@ appendEnvironmentFormula[form_, lab_] :=
 	]
 appendEnvironmentFormula[args___] := unexpected[ appendEnvironmentFormula, {args}]
 		
-initSession[] := 
-	Module[{}, 
-		$environmentLabels = {};
-		$environmentFormulaCounters = {};
-		$environmentFormulae = {};
-		$tmaEnv = {};
-	]
+initSession[] :=
+    Module[ {},
+        $environmentLabels = {};
+        $environmentFormulaCounters = {};
+        $environmentFormulae = {};
+        $tmaEnv = {};
+    ]
 initSession[args___] := unexpected[ initSession, {args}]
 
 currentEnvironment[] := First[$environmentLabels]
@@ -158,7 +158,10 @@ updateEnv[args___] := unexpected[ updateEnv, {args}]
 (* Computation *)
 
 processComputation[\[GraySquare]] := (closeComputation[];)
-processComputation[x_] := x
+processComputation[x_] := Module[ {},
+	printComputationInfo[];
+	x
+]
 processComputation[args___] := unexcpected[ processComputation, {args}]
 
 COMPUTE := openComputation[];
@@ -182,19 +185,20 @@ closeComputation[] := Module[{},
 	]
 closeComputation[args___] := unexcpected[ closeComputation, {args}]
 
-
 (* ::Section:: *)
 (* Built-in computation *)
 
 Begin["Theorema`Computation`"]
 
 activeComputation[_] := False
+activeComputationKB[_] := False
 
 plus$TM /; activeComputation["plus"] = Plus
 times$TM /; activeComputation["times"] = Times
 set$TM /; activeComputation["equal"] = equal
 
 End[]
+
 
 (* ::Section:: *)
 (* end of package *)
