@@ -46,4 +46,7 @@ With[ {lang = "English"},
     
     translate["Sets", lang] = "Sets";
     translate["Arithmetic", lang] = "Arithmetic";
+    
+(* Theorema`Language`Session` *)
+    translate["notUniqueLabel", lang] = "This label is not unique in the notebook: ";
 ]
