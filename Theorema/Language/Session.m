@@ -118,7 +118,7 @@ uniqueLabel[{_,occurences_Integer}] :=
 		True,
 		False
 	]
-uniqueLabel[args___] := unexpected[uniqueLabelCheck,{args___}]
+uniqueLabel[args___] := unexpected[uniqueLabel,{args___}]
 
 newFormulaLabel[nb_NotebookObject] := 
 	Module[{newFormulaCounter},
