@@ -35,7 +35,7 @@ processEnvironment[\[GraySquare]] :=
 processEnvironment[x_] :=
     Module[ {nb = EvaluationNotebook[], newLab},
         newLab = adjustFormulaLabel[nb];
-        appendEnvironmentFormula[x, newLab];
+        updateKnowledgeBase[x, newLab];
     ]
 processEnvironment[args___] := unexcpected[ processEnvironment, {args}]
 
@@ -132,29 +132,20 @@ newFormulaLabel[nb_NotebookObject] :=
 	]
 newFormulaLabel[args___] := unexpected[ newFormulaLabel, {args}]
 
-appendEnvironmentFormula[form_, lab_] := 
-	Module[{}, 
-		$environmentFormulae = ReplacePart[$environmentFormulae, 1->Append[First[$environmentFormulae], {form, lab}]]
-	]
-appendEnvironmentFormula[args___] := unexpected[ appendEnvironmentFormula, {args}]
+updateKnowledgeBase[ form_, lab_] :=
+    $tmaEnv = Union[ $tmaEnv, {{lab, form}}, SameTest -> (#1[[1]]===#2[[1]]&) ]
+updateKnowledgeBase[args___] := unexpected[ updateKnowledgeBase, {args}]
+
 		
 initSession[] :=
     Module[ {},
         $environmentLabels = {};
-        $environmentFormulaCounters = {};
-        $environmentFormulae = {};
         $tmaEnv = {};
     ]
 initSession[args___] := unexpected[ initSession, {args}]
 
 currentEnvironment[] := First[$environmentLabels]
 currentEnvironment[args___] := unexpected[ currentEnvironment, {args}]
-
-currentFormulae[] := First[$environmentFormulae]
-currentFormulae[args___] := unexpected[ currentFormulae, {args}]
-
-currentCounter[] := First[$environmentFormulaCounters]
-currentCounter[args___] := unexpected[ currentCounter, {args}]
 
 formulaCounter[nb_NotebookObject] :=
 	Module[{max,rawNotebook,counterValues},
@@ -173,21 +164,10 @@ formulaCounter[nb_NotebookObject] :=
 	]
 formulaCounter[args___] := unexpected[ formulaCounter, {args}]
  
-currentCounterLabel[] := ToString[currentCounter[]]
-currentCounterLabel[args___] := unexpected[ currentCounterLabel, {args}]
-
-incrementCurrentCounter[] := 
-	Module[{},
-		$environmentFormulaCounters = ReplacePart[$environmentFormulaCounters, 1->currentCounter[]+1]
-	]
-incrementCurrentCounter[args___] := unexpected[ incrementCurrentCounter, {args}]
-
 DEFINITION := openEnvironment["DEF"];
 
 openEnvironment[type_] :=
     Module[{},
-        PrependTo[$environmentFormulaCounters, 0];
-        PrependTo[$environmentFormulae, {}];
         PrependTo[$environmentLabels, type];
         SetOptions[$FrontEnd, DefaultNewCellStyle -> "FormalTextInputFormula"];
         Begin["Theorema`Language`"];
@@ -197,19 +177,11 @@ openEnvironment[args___] := unexpected[ openEnvironment, {args}]
 closeEnvironment[] := 
 	Module[{},
 		End[];
-		updateEnv[ currentEnvironment[], currentFormulae[]];
-		$environmentFormulaCounters = Rest[$environmentFormulaCounters];
-        $environmentFormulae = Rest[$environmentFormulae];
         $environmentLabels = Rest[$environmentLabels];
         SetOptions[$FrontEnd, DefaultNewCellStyle -> "Input"];
         updateKBBrowser[];
 	]
 closeEnvironment[args___] := unexpected[ closeEnvironment, {args}]
-
-updateEnv[ type_, form_] :=
-    PrependTo[ $tmaEnv, {type, form}]
-updateEnv[args___] := unexpected[ updateEnv, {args}]
-
 
 
 (* ::Section:: *)

@@ -175,7 +175,7 @@ structView[file_, Cell[content_, "FormalTextInputFormula", ___], tags_, task_] :
     
 structView[file_, Cell[content_, "FormalTextInputFormula", ___, CellTags -> cellTags_, ___,CellID -> cellID_,___], 
   tags_, task_] :=
-  Module[ { isEval = MemberQ[ $tmaEnv, {_,cellTags}, Infinity], cleanCellTags, formulaLabel},
+  Module[ { isEval = MemberQ[ $tmaEnv, {cellTags,_}], cleanCellTags, formulaLabel},
 	Assert[VectorQ[cellTags, StringQ]];
 	cleanCellTags = Select[cellTags, # != ToString[cellID] && # != $initLabel  & ];
 	(* Join list of CellTags, use $labelSeparator. *)
