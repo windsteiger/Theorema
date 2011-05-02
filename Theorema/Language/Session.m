@@ -118,7 +118,7 @@ uniqueLabel[{_,occurences_Integer}] :=
 		True,
 		False
 	]
-uniqueLabel[args___] := unexpected[uniqueLabel,{args___}]
+uniqueLabel[args___] := unexpected[uniqueLabel,{args}]
 
 newFormulaLabel[nb_NotebookObject] := 
 	Module[{newFormulaCounter},
@@ -256,7 +256,6 @@ times$TM /; activeComputation["times"] = Times
 set$TM /; activeComputation["equal"] = equal
 
 End[]
-
 
 (* ::Section:: *)
 (* end of package *)

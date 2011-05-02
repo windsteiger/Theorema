@@ -47,7 +47,10 @@ With[ {lang = "English"},
     translate["Sets", lang] = "Sets";
     translate["Arithmetic", lang] = "Arithmetic";
     translate["Builtins used in computation", lang] = "Builtins used in computation";
-    
+
+(* General *)
+	translate["outsideSession", lang] = "An evaluation of this type of cell is not expected in the current type of session";
+	    
 (* Theorema`Language`Session` *)
     translate["notUniqueLabel", lang] = "This label is not unique in the notebook: ";
 ]

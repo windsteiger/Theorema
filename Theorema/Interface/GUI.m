@@ -580,6 +580,20 @@ compSetup[args___] :=
 
 
 (* ::Section:: *)
+(* checkSession *)
+
+checkSession[ test_String] :=
+    Module[ {},
+        If[ !TrueQ[ToExpression[test]],
+            MessageDialog[translate["outsideSession"]];
+        ]
+    ]
+checkSession[args___] :=
+    unexpected[checkSession, {args}]
+
+
+
+(* ::Section:: *)
 (* end of package *)
 
 initGUI[];
