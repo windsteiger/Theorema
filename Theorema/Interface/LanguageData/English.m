@@ -47,4 +47,7 @@ With[ {lang = "English"},
     translate["Sets", lang] = "Sets";
     translate["Arithmetic", lang] = "Arithmetic";
     translate["Builtins used in computation", lang] = "Builtins used in computation";
+    
+(* Theorema`Language`Session` *)
+    translate["notUniqueLabel", lang] = "This label is not unique in the notebook: ";
 ]

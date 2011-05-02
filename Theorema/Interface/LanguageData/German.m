@@ -30,4 +30,5 @@ With[ {lang = "German"},
    
     translate["Sets", lang] = "Mengen";
     translate["Arithmetic", lang] = "Arithmetik";
+    translate["notUniqueLabel", lang] = "This label is not unique in the notebook: ";
 ]

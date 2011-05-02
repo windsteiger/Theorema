@@ -20,6 +20,7 @@
 BeginPackage["Theorema`Language`Session`"];
 
 Needs["Theorema`Common`"];
+Needs["Theorema`Interface`Language`"];
 
 Begin["`Private`"] (* Begin Private Context *) 
 
@@ -56,7 +57,11 @@ adjustFormulaLabel[nb_NotebookObject] :=
         (*
          * Replace unlabeled formula with counter.
          *)
-        newFormulaLabel[nb,cellTags];
+         If[cellTags=={$initLabel} || cellTags=={},
+         	cellTags = newFormulaLabel[nb];
+         	,
+         	True
+         ];
         (*
          * Relabel Cell and hide CellTags.
          *)
@@ -67,7 +72,15 @@ adjustFormulaLabel[nb_NotebookObject] :=
 adjustFormulaLabel[args___]	:= unexpected[adjustFormulaLabel,{args}]
 
 relabelCell[nb_NotebookObject, cellTags_List, cellID_String] :=
-	Module[{newFrameLabel,newCellTags,cleanCellTags},
+	Module[{newFrameLabel,newCellTags,cleanCellTags,duplicateCellTags},
+		(* Perform check, weather are the given CellTags unique in the documment. *)
+		duplicateCellTags = findDuplicateCellTags[nb,cellTags];
+		If[duplicateCellTags===None,
+				True
+			,
+				DialogInput[Column[{translate["notUniqueLabel"] <> StringJoin @@ Riffle[duplicateCellTags,$labelSeparator], Button["OK", DialogReturn[True]]}]];
+				True
+		];
 	    (* Was the cell allready labeled by its CellID or $initLabel? Than remove CellID or $initLabel from CellTags list. *)
 		cleanCellTags = Select[cellTags, # != cellID && # != $initLabel  & ];
 		(* Join list of CellTags, use $labelSeparator. *)
@@ -79,15 +92,43 @@ relabelCell[nb_NotebookObject, cellTags_List, cellID_String] :=
 		SetOptions[NotebookSelection[nb], CellFrameLabels->{{None,newFrameLabel},{None,None}}, CellTags->newCellTags, ShowCellTags->False];
 		newCellTags
 	]
-	
 relabelCell[args___] := unexpected[relabelCell,{args}]
 
-newFormulaLabel[nb_NotebookObject, lab_] := 
-	Module[{newLab},		
-        (* newLab = currentEnvironment[][[2]]<>"_"<>If[lab===$initLabel,incrementCurrentCounter[];currentCounterLabel[],lab]; *)
-        newLab = If[lab==$initLabel || lab=={},incrementCurrentCounter[];currentCounterLabel[],lab];
-        SetOptions[NotebookSelection[nb], CellTags->newLab];
-        newLab		
+findDuplicateCellTags[nb_NotebookObject, cellTags_List] :=
+	Module[{rawNotebook,allCellTags,selectedCellTags,duplicateCellTags},
+		rawNotebook = NotebookGet[nb];
+		(* Collect all CellTags from document. *)
+		allCellTags = Flatten[Cases[rawNotebook,Cell[___,CellTags -> tags_,___] -> tags, Infinity]];
+		(* We look only for the duplicates to elements of current CellTags list.*)
+		selectedCellTags = Select[allCellTags,MemberQ[cellTags,#] &];
+		(* Are there more elements (clean cellTags as duplicate might appear even in one cell CellTags)? *)
+		(* Check if CellTags are unique in curent Notebook. *)
+		If[Length[selectedCellTags] > Length[DeleteDuplicates[cellTags]],
+				(* If not select and return duplicate Labels, *)
+				duplicateCellTags = Cases[Select[Tally[selectedCellTags],uniqueLabel[#]==False &],{cellTag_,_} -> cellTag]
+			,
+				(* else return None. *)
+				None
+		]
+	]
+findDuplicateCellTags[args___] := unexpected[findDuplicateCellTags,{args}]
+
+uniqueLabel[{_,occurences_Integer}] :=
+	If[occurences == 1,
+		True,
+		False
+	]
+uniqueLabel[args___] := unexpected[uniqueLabel,{args___}]
+
+newFormulaLabel[nb_NotebookObject] := 
+	Module[{newFormulaCounter},
+		(* Find highest value of any automatically counted formula. *)
+		newFormulaCounter = formulaCounter[nb]+1;
+		(* Construct new CellTags with value of the incremented formulaCounter as a list. *)
+		newCellTags = {ToString[newFormulaCounter]};
+		(* Introduce new cell option FormulaCounter with incremented value. *)
+		SetOptions[NotebookSelection[nb], FormulaCounter->newFormulaCounter];
+		newCellTags
 	]
 newFormulaLabel[args___] := unexpected[ newFormulaLabel, {args}]
 
@@ -115,6 +156,23 @@ currentFormulae[args___] := unexpected[ currentFormulae, {args}]
 currentCounter[] := First[$environmentFormulaCounters]
 currentCounter[args___] := unexpected[ currentCounter, {args}]
 
+formulaCounter[nb_NotebookObject] :=
+	Module[{max,rawNotebook,counterValues},
+		max = 0;
+		rawNotebook = NotebookGet[nb];
+		(* Is FormulaCounter property assigned to any cell?. *)
+		If[Count[rawNotebook,FormulaCounter,Infinity]>0,
+				(* If so, select all such values. *)
+				counterValues = Cases[rawNotebook,Cell[___,FormulaCounter -> counter_,___] -> counter, Infinity];
+				(* Find maximum. *)
+				max = Max[counterValues];
+			,
+				True;
+		];
+		max
+	]
+formulaCounter[args___] := unexpected[ formulaCounter, {args}]
+ 
 currentCounterLabel[] := ToString[currentCounter[]]
 currentCounterLabel[args___] := unexpected[ currentCounterLabel, {args}]
 
