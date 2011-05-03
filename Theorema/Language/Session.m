@@ -43,7 +43,7 @@ inEnvironment[] := Length[$environmentLabels]>0
 inEnvironment[args___] := unexcpected[ inEnvironment, {args}]
 
 adjustFormulaLabel[nb_NotebookObject] := 
-	Module[{cellTags,cellID,newCellTags}, 
+	Module[{cellTags,cellID,newCellTags, cleanCellTags}, 
 		SelectionMove[nb, All, EvaluationCell];
         {cellTags,cellID} = {CellTags,CellID} /. Options[NotebookSelection[nb], {CellTags,CellID}];
 		(*
@@ -51,28 +51,29 @@ adjustFormulaLabel[nb_NotebookObject] :=
 		 *)
 		cellTags = Flatten[{cellTags}];
 		(*
-		 * We need CellID as String
+		 * Remove any automated labels (begins with "CellID_").
+		 * Remove initLabel
 		 *)
-		cellID = ToString[cellID];
+		cleanCellTags = Select[cellTags, Length[StringPosition[#, "CellID_"]] == 0 && # != $initLabel &];
         (*
          * Replace unlabeled formula with counter.
          *)
-         If[cellTags=={$initLabel} || cellTags=={},
-         	cellTags = newFormulaLabel[nb];
+         If[Length[cleanCellTags]==0,
+         	cleanCellTags = automatedFormulaLabel[nb];
          	,
          	True
          ];
         (*
          * Relabel Cell and hide CellTags.
          *)
-        newCellTags = relabelCell[nb,cellTags,cellID];
+        newCellTags = relabelCell[nb,cleanCellTags,cellID];
         SelectionMove[nb, After, Cell];
         newCellTags
 	]
 adjustFormulaLabel[args___]	:= unexpected[adjustFormulaLabel,{args}]
 
-relabelCell[nb_NotebookObject, cellTags_List, cellID_String] :=
-	Module[{newFrameLabel,newCellTags,cleanCellTags,duplicateCellTags},
+relabelCell[nb_NotebookObject, cellTags_List, cellID_Integer] :=
+	Module[{newFrameLabel,newCellTags,duplicateCellTags},
 		(* Perform check, weather are the given CellTags unique in the documment. *)
 		duplicateCellTags = findDuplicateCellTags[nb,cellTags];
 		If[duplicateCellTags===None,
@@ -81,18 +82,22 @@ relabelCell[nb_NotebookObject, cellTags_List, cellID_String] :=
 				DialogInput[Column[{translate["notUniqueLabel"] <> StringJoin @@ Riffle[duplicateCellTags,$labelSeparator], Button["OK", DialogReturn[True]]}]];
 				True
 		];
-	    (* Was the cell allready labeled by its CellID or $initLabel? Than remove CellID or $initLabel from CellTags list. *)
-		cleanCellTags = Select[cellTags, # != cellID && # != $initLabel  & ];
 		(* Join list of CellTags, use $labelSeparator. *)
-		newFrameLabel = StringJoin @@ Riffle[cleanCellTags,$labelSeparator];
+		newFrameLabel = StringJoin @@ Riffle[cellTags,$labelSeparator];
 		(* Put newFrameLabel in brackets. *)
 		newFrameLabel = "("<>newFrameLabel<>")";
 		(* Keep cleaned CellTags and add CellID *)
-		newCellTags = Join[{cellID},cleanCellTags];
+		newCellTags = Join[{getCellIDLabel[cellID]},cellTags];
 		SetOptions[NotebookSelection[nb], CellFrameLabels->{{None,newFrameLabel},{None,None}}, CellTags->newCellTags, ShowCellTags->False];
 		newCellTags
 	]
-relabelCell[args___] := unexpected[relabelCell,{args}]
+relabelCell[args___] := unexpected[ relabelCell,{args}]
+
+getCellIDLabel[cellID_Integer] :=
+	Module[{},
+		"CellID_" <> ToString[cellID]
+	]
+getCellIDLabel[args___] := unexpected[ getCellIDLabel,{args}]
 
 findDuplicateCellTags[nb_NotebookObject, cellTags_List] :=
 	Module[{rawNotebook,allCellTags,selectedCellTags,duplicateCellTags},
@@ -120,17 +125,25 @@ uniqueLabel[{_,occurences_Integer}] :=
 	]
 uniqueLabel[args___] := unexpected[uniqueLabel,{args}]
 
-newFormulaLabel[nb_NotebookObject] := 
-	Module[{newFormulaCounter},
+
+(* ::Section:: *)
+(* Region Title *)
+
+(* ::Section:: *)
+(* Region Title *)
+
+(* ::Section:: *)
+(* Region Title *)
+
+automatedFormulaLabel[nb_NotebookObject] := 
+	Module[{formulaCounter, newCellTags},
+		incrementFormulaCounter[nb];
 		(* Find highest value of any automatically counted formula. *)
-		newFormulaCounter = formulaCounter[nb]+1;
+		formulaCounter = getFormulaCounter[nb];
 		(* Construct new CellTags with value of the incremented formulaCounter as a list. *)
-		newCellTags = {ToString[newFormulaCounter]};
-		(* Introduce new cell option FormulaCounter with incremented value. *)
-		SetOptions[NotebookSelection[nb], FormulaCounter->newFormulaCounter];
-		newCellTags
+		newCellTags = {ToString[formulaCounter]}
 	]
-newFormulaLabel[args___] := unexpected[ newFormulaLabel, {args}]
+automatedFormulaLabel[args___] := unexpected[ automatedFormulaLabel, {args}]
 
 appendEnvironmentFormula[form_, lab_] := 
 	Module[{}, 
@@ -144,6 +157,7 @@ initSession[] :=
         $environmentFormulaCounters = {};
         $environmentFormulae = {};
         $tmaEnv = {};
+        $formulaCounterName = "TheoremaFormulaCounter";
     ]
 initSession[args___] := unexpected[ initSession, {args}]
 
@@ -156,22 +170,25 @@ currentFormulae[args___] := unexpected[ currentFormulae, {args}]
 currentCounter[] := First[$environmentFormulaCounters]
 currentCounter[args___] := unexpected[ currentCounter, {args}]
 
-formulaCounter[nb_NotebookObject] :=
-	Module[{max,rawNotebook,counterValues},
-		max = 0;
-		rawNotebook = NotebookGet[nb];
-		(* Is FormulaCounter property assigned to any cell?. *)
-		If[Count[rawNotebook,FormulaCounter,Infinity]>0,
-				(* If so, select all such values. *)
-				counterValues = Cases[rawNotebook,Cell[___,FormulaCounter -> counter_,___] -> counter, Infinity];
-				(* Find maximum. *)
-				max = Max[counterValues];
-			,
-				True;
-		];
-		max
+incrementFormulaCounter[nb_NotebookObject] :=
+	Module[{formulaCounter},
+		formulaCounter = getFormulaCounter[nb];
+		formulaCounter++;
+		(* Save Incremented formulaCounter to the notebook options. *)
+		SetOptions[nb, CounterAssignments -> {{$formulaCounterName -> formulaCounter}}]
 	]
-formulaCounter[args___] := unexpected[ formulaCounter, {args}]
+incrementFormulaCounter[args___] := unexpected[ incrementFormulaCounter, {args}]
+
+getFormulaCounter[nb_NotebookObject] :=
+	Module[{formulaCounter},
+		(* Extract theoremaFormulaCounter from the options of the notebook. *)
+		formulaCounter = 
+			$formulaCounterName /. Flatten[
+				(* Extract CounerAssignments from the options of the notebook. *)
+				{CounterAssignments } /. Options[nb, CounterAssignments]
+			]
+	]
+getFormulaCounter[args___] := unexpected[ getFormulaCounter, {args}]
  
 currentCounterLabel[] := ToString[currentCounter[]]
 currentCounterLabel[args___] := unexpected[ currentCounterLabel, {args}]
