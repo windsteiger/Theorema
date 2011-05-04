@@ -17,6 +17,8 @@ With[ {lang = "English"},
 	MessageName[inEnvironment, "usage", lang] = "inEnvironment[] evaluates to 'True' inside an environment ...";
 	MessageName[$tmaEnv, "usage", lang] = "Collection of environments evaluated in the current session, i.e. the knowledge base.";
 	MessageName[inComputation, "usage", lang] = "inComputation[] evaluates to 'True' inside a computation ...";
+	MessageName[$formulaCounterName,"usage", lang] = "Name of formulaCounter in the notebook options in CounterAssignments parameter.";
+	MessageName[getCellIDLabel, "usage", lang] = "getCellIDLabel[cellID_Integer] returns string label for the given integer CellID value.";
 
 (* Theorema`Tools` *)
 	MessageName[replaceAllExcept, "usage", lang] = "replaceAllExcept[ expr, rules, expt] applies rule(s) to all subparts of 'expr' except those contained in the list 'expt'.";
