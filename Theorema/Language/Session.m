@@ -52,13 +52,14 @@ adjustFormulaLabel[nb_NotebookObject] :=
 		cellTags = Flatten[{cellTags}];
 		(*
 		 * Remove any automated labels (begins with "CellID_").
-		 * Remove initLabel
+		 * Remove any automated labels (begins with "NotebookName_").
+		 * Remove initLabel.
 		 *)
-		cleanCellTags = Select[cellTags, Length[StringPosition[#, "CellID_"]] == 0 && # != $initLabel &];
+		cleanCellTags = getCleanCellTags[cellTags];
         (*
          * Replace unlabeled formula with counter.
          *)
-         If[Length[cleanCellTags]==0,
+         If[cleanCellTags==={},
          	cleanCellTags = automatedFormulaLabel[nb];
          	,
          	True
@@ -71,6 +72,15 @@ adjustFormulaLabel[nb_NotebookObject] :=
         newCellTags
 	]
 adjustFormulaLabel[args___]	:= unexpected[adjustFormulaLabel,{args}]
+
+(*
+ * Returns all CellTags except CellTags used for cell identification: CellID_12345 and NotebookName_abcde.
+ *)
+getCleanCellTags[cellTags_] :=
+	Module[{},
+		Select[cellTags, StringPosition[#, "CellID_"] === {} && StringPosition[#, "NotebookName_"] === {} && # != $initLabel &]
+	]
+getCleanCellTags[args___]	:= unexpected[getCleanCellTags,{args}]
 
 relabelCell[nb_NotebookObject, cellTags_List, cellID_Integer] :=
 	Module[{newFrameLabel,newCellTags,duplicateCellTags},
@@ -87,7 +97,7 @@ relabelCell[nb_NotebookObject, cellTags_List, cellID_Integer] :=
 		(* Put newFrameLabel in brackets. *)
 		newFrameLabel = "("<>newFrameLabel<>")";
 		(* Keep cleaned CellTags and add CellID *)
-		newCellTags = Join[{getCellIDLabel[cellID]},cellTags];
+		newCellTags = Join[{getCellIDLabel[cellID]},{getNotebookNameLabel[]},cellTags];
 		SetOptions[NotebookSelection[nb], CellFrameLabels->{{None,newFrameLabel},{None,None}}, CellTags->newCellTags, ShowCellTags->False];
 		newCellTags
 	]
@@ -98,6 +108,12 @@ getCellIDLabel[cellID_Integer] :=
 		"CellID_" <> ToString[cellID]
 	]
 getCellIDLabel[args___] := unexpected[ getCellIDLabel,{args}]
+
+getNotebookNameLabel[] :=
+	Module[{},
+		"NotebookName_" <> FileBaseName[CurrentValue["NotebookFullFileName"]]
+	]
+getNotebookNameLabel[args___] := unexpected[ getNotebookNameLabel,{args}]
 
 findDuplicateCellTags[nb_NotebookObject, cellTags_List] :=
 	Module[{rawNotebook,allCellTags,selectedCellTags,duplicateCellTags},

@@ -19,7 +19,8 @@ With[ {lang = "English"},
 	MessageName[inComputation, "usage", lang] = "inComputation[] evaluates to 'True' inside a computation ...";
 	MessageName[$formulaCounterName,"usage", lang] = "Name of formulaCounter in the notebook options in CounterAssignments parameter.";
 	MessageName[getCellIDLabel, "usage", lang] = "getCellIDLabel[cellID_Integer] returns string label for the given integer CellID value.";
-
+	MessageName[getCleanCellTags,"usage", lang] = "getCleanCellTags[cellTags] returns all CellTags except tags used for cell identification: CellID_12345 and NotebookName_abcde.";
+	
 (* Theorema`Tools` *)
 	MessageName[replaceAllExcept, "usage", lang] = "replaceAllExcept[ expr, rules, expt] applies rule(s) to all subparts of 'expr' except those contained in the list 'expt'.";
 	MessageName[joinHold, "usage", lang] = "joinHold[Hold[a],Hold[b]] produces Hold[a,b].";
