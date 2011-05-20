@@ -3,10 +3,6 @@
 With[ {lang = "English"},
 (* Theorema Commander *)
     translate["tcLangTabLabel", lang] = "Language";
-    	translate["tcLangTabEnvTabLabel", lang] = "environments";
-    		translate["tcLangTabEnvTabButtonDefLabel", lang] = "New Definition";
-    		translate["tcLangTabEnvTabButtonThmLabel", lang] = "New Theorem";
-    		translate["tcLangTabEnvTabButtonFormLabel", lang] = "New Formula";
     	translate["tcLangTabMathTabLabel", lang] = "math";
      		translate["AND1", lang] = "\!\(\*FormBox[FrameBox[\"left\"], SelectionPlaceholder]\) and \!\(\*FormBox[FrameBox[\"right\"], SelectionPlaceholder]\)";   	
      		translate["AND2", lang] = translate["AND1", lang];   	
@@ -31,6 +27,14 @@ With[ {lang = "English"},
      		translate["tcLangTabMathTabBS", lang] = "Button style:";   	
      		translate["tcLangTabMathTabBSnat", lang] = "natural";   	
      		translate["tcLangTabMathTabBSform", lang] = "formal";   	
+    	translate["tcLangTabEnvTabLabel", lang] = "environments";
+    		translate["tcLangTabEnvTabButtonDefLabel", lang] = "New Definition";
+    		translate["tcLangTabEnvTabButtonThmLabel", lang] = "New Theorem";
+    		translate["tcLangTabEnvTabButtonFormLabel", lang] = "New Formula";
+    	translate["tcLangTabArchTabLabel", lang] = "archives";
+    		translate["tcLangTabArchTabButtonArchLabel", lang] = "New Archive";
+    		translate["tcLangTabArchTabButtonInfoLabel", lang] = "Archive Info";
+    		translate["tcLangTabArchTabButtonCloseLabel", lang] = "Close Archive";
     translate["tcProveTabLabel", lang] = "Prove";
     	translate["tcProveTabKBTabLabel", lang] = "KB";
     	translate["tcProveTabBuiltinTabLabel", lang] = "built-in";
@@ -50,6 +54,8 @@ With[ {lang = "English"},
 
 (* General *)
 	translate["outsideSession", lang] = "An evaluation of this type of cell is not expected in the current type of session";
+	translate["archLabelNeeds", lang] = "needs:";
+	translate["archLabelPublic", lang] = "public:";
 	    
 (* Theorema`Language`Session` *)
     translate["notUniqueLabel", lang] = "This label is not unique in the notebook: ";

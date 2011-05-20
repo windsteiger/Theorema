@@ -58,7 +58,8 @@ theoremaCommander[] /; $Notebooks :=
         	TabView[{
         		translate["tcLangTabLabel"]->TabView[{
         			translate["tcLangTabMathTabLabel"]->Dynamic[Refresh[ langButtons[], TrackedSymbols :> {$buttonNat}]],
-        			translate["tcLangTabEnvTabLabel"]->envButtons[]}, Dynamic[$tcLangTab],
+        			translate["tcLangTabEnvTabLabel"]->envButtons[],
+        			translate["tcLangTabArchTabLabel"]->archButtons[]}, Dynamic[$tcLangTab],
         			ControlPlacement->Top],
         		translate["tcProveTabLabel"]->TabView[{
         			translate["tcProveTabKBTabLabel"]->Dynamic[Refresh[displayKBBrowser["prove"], TrackedSymbols :> {$kbStruct}]],
@@ -334,7 +335,9 @@ openNewEnv[args___] :=
 
 insertNewFormulaCell[ style_String] := 
 	Module[{}, 
-		NotebookWrite[ InputNotebook[], newFormulaCell[ style]]
+		NotebookWrite[ InputNotebook[], newFormulaCell[ style]];
+		(* we use NotebookFind because parameter Placeholder in NotebookWrite does not work (Mma 8.0.1) *)
+		NotebookFind[ InputNotebook[], "\[SelectionPlaceholder]", Previous];
 	]
 insertNewFormulaCell[args___] :=
     unexpected[insertNewFormulaCell, {args}]
@@ -346,17 +349,15 @@ closeEnv[ type_String] :=
 closeEnv[args___] :=
     unexpected[closeEnv, {args}]
 
-newFormulaCell[ "COMPUTE"] = Cell[BoxData[""], "Computation"]	
-newFormulaCell[ style_, label_:$initLabel] = Cell[BoxData[""], "FormalTextInputFormula", CellTags->label]	
+newFormulaCell[ "COMPUTE"] = Cell[BoxData["\[SelectionPlaceholder]"], "Computation"]	
+newFormulaCell[ style_, label_:$initLabel] = Cell[BoxData["\[SelectionPlaceholder]"], "FormalTextInputFormula", CellTags->label]	
 newFormulaCell[args___] :=
     unexpected[newFormulaCell, {args}]
 
-newOpenEnvCell[ "COMPUTE"] := Cell[BoxData["COMPUTE"], "OpenComputation"]
 newOpenEnvCell[ type_String] := Cell[BoxData[type], "OpenEnvironment"]
 newOpenEnvCell[args___] :=
     unexpected[newOpenEnvCell, {args}]
 
-newCloseEnvCell[ "COMPUTE"] := Cell[BoxData["\[GraySquare]"], "CloseComputation"]
 newCloseEnvCell[ _String] := Cell[BoxData["\[GraySquare]"], "CloseEnvironment"]
 newCloseEnvCell[args___] :=
     unexpected[newCloseEnvCell, {args}]
@@ -394,6 +395,69 @@ envButtons[] :=
     }, Center, Dividers->Center]]
 envButtons[args___] :=
     unexpected[envButtons, {args}]
+
+(* ::Section:: *)
+(* Archives Tab *)
+
+archButtons[] :=
+    Module[ {},
+        Pane[
+        	Column[{
+        		makeArchNewButton[],
+        		makeArchInfoButton[],
+        		makeArchCloseButton[]}
+        	]
+        ]
+    ]
+archButtons[args___] := unexpected[archButtons, {args}]
+
+makeArchNewButton[] :=
+	Button[Style[ translate["tcLangTabArchTabButtonArchLabel"], "EnvButton"], insertNewArchive[], 
+    	Appearance -> "FramedPalette", Alignment -> {Left, Top}]
+makeArchNewButton[args___] := unexpected[makeArchNewButton, {args}]
+
+makeArchInfoButton[] :=
+	Button[Style[ translate["tcLangTabArchTabButtonInfoLabel"], "EnvButton"], insertArchiveInfo[], 
+    	Appearance -> "FramedPalette", Alignment -> {Left, Top}]
+makeArchInfoButton[args___] := unexpected[makeArchInfoButton, {args}]
+
+makeArchCloseButton[] :=
+	Button[Style[ translate["tcLangTabArchTabButtonCloseLabel"], "EnvButton"], insertCloseArchive[], 
+    	Appearance -> "FramedPalette", Alignment -> {Left, Top}]
+makeArchCloseButton[args___] := unexpected[makeArchCloseButton, {args}]
+
+insertNewArchive[] :=
+	Module[{nb = InputNotebook[]},
+		NotebookWrite[nb, archiveOpenCell[]];
+		insertArchiveInfo[];
+		If[ NotebookFind[nb, "CloseArchive", All, CellStyle] === $Failed,
+			SelectionMove[nb, After, Notebook];
+			insertCloseArchive[];
+			NotebookFind[nb, "OpenArchive", All, CellStyle]
+		]
+	]
+insertNewArchive[args___] := unexpected[insertNewArchive, {args}]
+
+insertArchiveInfo[] := NotebookWrite[ InputNotebook[], archiveInfoCells[]]
+insertArchiveInfo[args___] := unexpected[insertArchiveInfo, {args}]
+
+insertCloseArchive[] := NotebookWrite[ InputNotebook[], archiveCloseCells[]]
+insertCloseArchive[args___] := unexpected[insertCloseArchive, {args}]
+
+archiveOpenCell[] := Cell["ArchiveName`", "OpenArchive"]
+archiveOpenCell[args___] := unexpected[archiveOpenCell, {args}]
+
+archiveInfoCells[] := {
+	Cell[ BoxData[RowBox[{"{","}"}]], "ArchiveInfo", CellFrameLabels->{{translate["archLabelNeeds"], None}, {None, None}}],
+	Cell[ BoxData[RowBox[{"{","}"}]], "ArchiveInfo", CellFrameLabels->{{translate["archLabelPublic"], None}, {None, None}}]}
+archiveInfoCells[args___] := unexpected[archiveInfoCells, {args}]
+
+archiveCloseCells[] := Cell["\[FilledUpTriangle]", "CloseArchive"]
+archiveCloseCells[args___] := unexpected[archiveCloseCells, {args}]
+
+
+(* ::Section:: *)
+(* Math Tab *)
 
 $buttonNat = False;
 
@@ -570,13 +634,18 @@ langButtons[] := Pane[
 langButtons[args___] :=
     unexpected[langButtons, {args}]
     
-envButtonData["COMPUTE"] := {"tcComputeTabSetupTabButtonCompLabel"};
 compSetup[] := Pane[ 
 	Column[{
-		makeEnvButton[ "COMPUTE"]
+		makeCompButton[]
 	}, Dividers -> Center, Spacings -> 4]]
 compSetup[args___] :=
     unexpected[compSetup, {args}]
+
+makeCompButton[] :=
+    Button[Style[ translate["tcComputeTabSetupTabButtonCompLabel"], "EnvButton"], insertNewFormulaCell[ "COMPUTE"], 
+    	Appearance -> "FramedPalette", Alignment -> {Left, Top}]
+makeCompButton[args___] :=
+    unexpected[makeCompButton, {args}]
 
 
 (* ::Section:: *)
