@@ -281,13 +281,16 @@ processArchiveInfo[args___] := unexpected[processArchiveInfo, {args}]
 closeArchive[_String] :=
 	Module[{file},
 		End[];
-		file = ToFileName[ $TheoremaArchiveDirectory, ContextToFileName[ $Context]];
+		file = ToFileName[ $TheoremaArchiveDirectory, 
+			StringReplacePart[ ContextToFileName[ $Context], "ta", -1]];
 		$archiveContext = $Context;
 		EndPackage[];
+		(* Reset the context path in order to force Mathematica to write
+		explicit contexts to the file *)
 		Block[{$ContextPath = {"System`"}},
 			Put[ file];
-			Put[ file, Definition[$tmaArch]];
-			Put[ file, Definition[$archiveContext]]
+			Put[ Definition[$tmaArch], file];
+			PutAppend[ Definition[$archiveContext], file]
 		];
 		"Null"
 	]
