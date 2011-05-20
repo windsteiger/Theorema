@@ -115,11 +115,11 @@ adjustFormulaLabel[nb_NotebookObject] :=
 adjustFormulaLabel[args___]	:= unexpected[adjustFormulaLabel,{args}]
 
 (*
- * Returns all CellTags except CellTags used for cell identification: CellID_12345 and NotebookName_abcde.
+ * Returns all CellTags except CellTag used for cell identification: CellID_12345.
  *)
 getCleanCellTags[cellTags_] :=
 	Module[{},
-		Select[cellTags, StringPosition[#, "CellID_"] === {} && StringPosition[#, "NotebookName_"] === {} && # != $initLabel &]
+		Select[cellTags, StringPosition[#, "CellID_"] === {} && # != $initLabel &]
 	]
 getCleanCellTags[args___]	:= unexpected[getCleanCellTags,{args}]
 
@@ -127,18 +127,16 @@ relabelCell[nb_NotebookObject, cellTags_List, cellID_Integer] :=
 	Module[{newFrameLabel,newCellTags,duplicateCellTags},
 		(* Perform check, weather are the given CellTags unique in the documment. *)
 		duplicateCellTags = findDuplicateCellTags[nb,cellTags];
-		If[duplicateCellTags===None,
-				True
-			,
-				DialogInput[Column[{translate["notUniqueLabel"] <> StringJoin @@ Riffle[duplicateCellTags,$labelSeparator], Button["OK", DialogReturn[True]]}]];
-				True
+		If[duplicateCellTags=!={},
+			DialogInput[Column[{translate["notUniqueLabel"] <> StringJoin @@ Riffle[duplicateCellTags,$labelSeparator],
+				Button["OK", DialogReturn[True]]}]]
 		];
 		(* Join list of CellTags, use $labelSeparator. *)
 		newFrameLabel = StringJoin @@ Riffle[cellTags,$labelSeparator];
 		(* Put newFrameLabel in brackets. *)
 		newFrameLabel = "("<>newFrameLabel<>")";
 		(* Keep cleaned CellTags and add CellID *)
-		newCellTags = Join[{getCellIDLabel[cellID]},{getNotebookNameLabel[]},cellTags];
+		newCellTags = Join[{getCellIDLabel[cellID]},cellTags];
 		SetOptions[NotebookSelection[nb], CellFrameLabels->{{None,newFrameLabel},{None,None}}, CellTags->newCellTags, ShowCellTags->False];
 		newCellTags
 	]
@@ -149,12 +147,6 @@ getCellIDLabel[cellID_Integer] :=
 		"CellID_" <> ToString[cellID]
 	]
 getCellIDLabel[args___] := unexpected[ getCellIDLabel,{args}]
-
-getNotebookNameLabel[] :=
-	Module[{},
-		"NotebookName_" <> FileBaseName[CurrentValue["NotebookFullFileName"]]
-	]
-getNotebookNameLabel[args___] := unexpected[ getNotebookNameLabel,{args}]
 
 findDuplicateCellTags[nb_NotebookObject, cellTags_List] :=
 	Module[{rawNotebook,allCellTags,selectedCellTags,duplicateCellTags},
@@ -169,17 +161,13 @@ findDuplicateCellTags[nb_NotebookObject, cellTags_List] :=
 				(* If not select and return duplicate Labels, *)
 				duplicateCellTags = Cases[Select[Tally[selectedCellTags],uniqueLabel[#]==False &],{cellTag_,_} -> cellTag]
 			,
-				(* else return None. *)
-				None
+				(* else return {} *)
+				{}
 		]
 	]
 findDuplicateCellTags[args___] := unexpected[findDuplicateCellTags,{args}]
 
-uniqueLabel[{_,occurences_Integer}] :=
-	If[occurences == 1,
-		True,
-		False
-	]
+uniqueLabel[{_,occurences_Integer}] := occurences == 1
 uniqueLabel[args___] := unexpected[uniqueLabel,{args}]
 
 

@@ -174,23 +174,24 @@ structView[file_, item_List, tags_, task_] :=
 structView[file_, Cell[content_, "FormalTextInputFormula", ___], tags_, task_] :=
     Sequence[]
     
-structView[file_, Cell[content_, "FormalTextInputFormula", ___, CellTags -> cellTags_, ___,CellID -> cellID_,___], 
+structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cellTags_, b___], 
   tags_, task_] :=
-  Module[ { isEval = MemberQ[ $tmaEnv, {cellTags,_}], cleanCellTags, formulaLabel},
+  Module[ { isEval = MemberQ[ $tmaEnv, {cellTags,_}], cleanCellTags, formulaLabel, cellIDLabel},
 	Assert[VectorQ[cellTags, StringQ]];
+	cellIDLabel = getCellIDLabel[ CellID /. {a,b}];
 	cleanCellTags = getCleanCellTags[cellTags];
 	(* Join list of CellTags, use $labelSeparator. *)
 	formulaLabel = StringJoin @@ Riffle[cleanCellTags,$labelSeparator];
     {Switch[ task,
     	"prove",
     	Row[{Checkbox[Dynamic[kbSelectProve[cellTags]], Enabled->isEval], 
-    		Hyperlink[ Style[formulaLabel, If[ isEval, "FormalTextInputFormula", "FormalTextInputFormulaUneval"]], {file, getCellIDLabel[cellID]}]},
+    		Hyperlink[ Style[formulaLabel, If[ isEval, "FormalTextInputFormula", "FormalTextInputFormulaUneval"]], {file, cellIDLabel}]},
     		Spacer[10]],
     	"compute",
     	Row[{Checkbox[Dynamic[Theorema`Computation`activeComputationKB[cellTags]], Enabled->isEval], 
-    		Hyperlink[ Style[formulaLabel, If[ isEval, "FormalTextInputFormula", "FormalTextInputFormulaUneval"]], {file, getCellIDLabel[cellID]}]},
+    		Hyperlink[ Style[formulaLabel, If[ isEval, "FormalTextInputFormula", "FormalTextInputFormulaUneval"]], {file, cellIDLabel}]},
     		Spacer[10]]
-    	], {formulaLabel}}
+    	], {cellTags}}
   ]
 
 (*structView[file_, Cell[content_, "FormalTextInputFormula", ___, CellTags -> ct_, ___], 
