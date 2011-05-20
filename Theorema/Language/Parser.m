@@ -11,81 +11,23 @@ Needs["Theorema`Common`"]
 
 Begin["`Private`"]
 
+initParser[]:=
+  Module[{},
+    $parseTheoremaExpressions = False;
+  ]
+initParser[args___]:=unexpected[initParser, {args}]
 
-(* ::Section:: *)
-(* Preprocessing *)
-
-(* ::Subsection:: *)
-(* preprocessTheoremaExpression *)
-
-SetAttributes[preprocessTheoremaExpression,HoldAll];
-
-preprocessTheoremaExpression[expr_]:=preprocessTheoremaExpressionHold[Hold[expr]];
-
-preprocessTheoremaExpressionHold[expr_]:=
-	Which[inEnvironment[],
-		processEnvironment[ReleaseHold[ freshNames[ markVariables[expr]]]],
-		inComputation[],
-		processComputation[ReleaseHold[ freshNames[ markVariables[expr]]]],
-		True,
-		ReleaseHold[expr]
-	]
-
-freshNames[expr_Hold] :=
-    replaceAllExcept[ expr, 
-    {DoubleLongRightArrow|DoubleRightArrow->impliesTM, DoubleLongLeftRightArrow|DoubleLeftRightArrow->iffTM,
-    	SetDelayed->equalDefTM, Wedge->andTM, Vee->orTM,
-    s_Symbol/;(Context[s]==="System`") :> Module[ {name = ToString[s]},
-                    If[ StringTake[name,{-1}]==="$",
-                        s,
-                        ToExpression[ToLowerCase[StringTake[name,1]]<>StringDrop[name,1]<> "$TM"]
-                    ]
-                ],
-    s_Symbol :> Module[ {name = ToString[s]},
-                    If[ StringTake[name,{-1}]==="$",
-                        s,
-                        ToExpression[name <> "$TM"]
-                    ]
-                ]}, {Hold, \[GraySquare]}]
-freshNames[args___] := unexpected[ freshNames, {args}]
-
-
-markVariables[Hold[QU$[r_RNG$, expr_]]] := 
- Module[{s = Map[#->VAR$[#]&, specifiedVariables[r]]},
-  		replaceAllExcept[markVariables[Hold[expr]], s, {SEQ$, VAR$, NEW$, FIX$}]]
-
-markVariables[Hold[h_[e___]]] := applyHold[
-  		markVariables[Hold[h]],
-  		markVariables[Hold[e]]]
-
-markVariables[Hold[f_, t__]] := joinHold[
-  		markVariables[Hold[f]],
-  		markVariables[Hold[t]]]
-
-markVariables[Hold[]] := Hold[]
-
-markVariables[Hold[e_]] := Hold[e]
-
-markVariables[args___] := unexpected[ markVariables, {args}]
-
-initParser[] :=
-    Module[ {},
-        $Pre = preprocessTheoremaExpression;
-    ]
-
-parseTheoremaExpressions[] := inEnvironment[] || inComputation[]
-
-MakeExpression[RowBox[{a_, TagBox[op_, Identity, ___], b_}], f_] := MakeExpression[RowBox[{a, op, b}], f] /; parseTheoremaExpressions[]
+MakeExpression[RowBox[{a_, TagBox[op_, Identity, ___], b_}], f_] := MakeExpression[RowBox[{a, op, b}], f] /; $parseTheoremaExpressions
   
 MakeExpression[ RowBox[{UnderscriptBox["\[ForAll]", rng_], form_}], f_] :=
     With[ {r = toRangeBox[rng]},
         MakeExpression[ RowBox[{"QU$", "[", 
             RowBox[{r, ",", RowBox[{"forall", "[", RowBox[{r, ",", "True", ",", form}], "]"}]}],
              "]"}], f]
-    ] /; parseTheoremaExpressions[]
+    ] /; $parseTheoremaExpressions
 
 MakeExpression[ RowBox[{left_, RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], right_}], f_] :=
-    MakeExpression[ RowBox[{"iffDef", "[", RowBox[{left, ",", right}], "]"}], f] /; parseTheoremaExpressions[]
+    MakeExpression[ RowBox[{"iffDef", "[", RowBox[{left, ",", right}], "]"}], f] /; $parseTheoremaExpressions
 
 QU$[args___] := unexpected[ QU$, {args}]
 
@@ -103,9 +45,6 @@ makeRangeSequence[RowBox[{s_}]] :=
 
 makeRangeSequence[s_] :=
     RowBox[{"SIMPRNG$","[",s,"]"}]
-
-specifiedVariables[RNG$[r___]] :=
-    Map[ Part[#,1]&, {r}]
 
 
 (*
@@ -496,7 +435,6 @@ MakeTheoremaExpression[RowBox[{"with","[",v__,"]"}],f_]:=ToConditionBox[v]
 
 MakeTheoremaExpression[RowBox[{"bound","[",v__,"]"}],f_]:=ToHoldingRangeBox[v]
 *)
-
 
 initParser[];
 

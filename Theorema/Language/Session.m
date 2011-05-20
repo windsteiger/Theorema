@@ -20,6 +20,7 @@
 BeginPackage["Theorema`Language`Session`"];
 
 Needs["Theorema`Common`"];
+Needs["Theorema`Language`"];
 Needs["Theorema`Interface`Language`"];
 
 Begin["`Private`"] (* Begin Private Context *) 
@@ -28,19 +29,59 @@ Begin["`Private`"] (* Begin Private Context *)
 (* ::Section:: *)
 (* Preprocessing *)
 
-processEnvironment[\[GraySquare]] :=
+
+freshNames[expr_Hold] :=
+    replaceAllExcept[ expr, 
+    {DoubleLongRightArrow|DoubleRightArrow->implies$TM, DoubleLongLeftRightArrow|DoubleLeftRightArrow->iff$TM,
+    	SetDelayed->equalDef$TM, Wedge->and$TM, Vee->or$TM,
+    s_Symbol/;(Context[s]==="System`") :> Module[ {name = ToString[s]},
+                    If[ StringTake[name,{-1}]==="$",
+                        s,
+                        ToExpression[ToLowerCase[StringTake[name,1]]<>StringDrop[name,1]<> "$TM"]
+                    ]
+                ],
+    s_Symbol :> Module[ {name = ToString[s]},
+                    If[ StringTake[name,{-1}]==="$",
+                        s,
+                        ToExpression[name <> "$TM"]
+                    ]
+                ]}, {Hold}]
+freshNames[args___] := unexpected[ freshNames, {args}]
+
+specifiedVariables[RNG$[r___]] :=
+    Map[ Part[#,1]&, {r}]
+
+markVariables[Hold[QU$[r_RNG$, expr_]]] := 
+ Module[{s = Map[#->VAR$[#]&, specifiedVariables[r]]},
+  		replaceAllExcept[markVariables[Hold[expr]], s, {SEQ$, VAR$, NEW$, FIX$}]]
+
+markVariables[Hold[h_[e___]]] := applyHold[
+  		markVariables[Hold[h]],
+  		markVariables[Hold[e]]]
+
+markVariables[Hold[f_, t__]] := joinHold[
+  		markVariables[Hold[f]],
+  		markVariables[Hold[t]]]
+
+markVariables[Hold[]] := Hold[]
+
+markVariables[Hold[e_]] := Hold[e]
+
+markVariables[args___] := unexpected[ markVariables, {args}]
+
+
+(*processEnvironment[\[GraySquare]] :=
     (closeEnvironment[];
      SelectionMove[EvaluationNotebook[], After, EvaluationCell];)
+*)
+SetAttributes[processEnvironment,HoldAll];
 
 processEnvironment[x_] :=
     Module[ {nb = EvaluationNotebook[], newLab},
         newLab = adjustFormulaLabel[nb];
-        updateKnowledgeBase[x, newLab];
+        updateKnowledgeBase[ReleaseHold[ freshNames[ markVariables[ Hold[x]]]], newLab];
     ]
 processEnvironment[args___] := unexcpected[ processEnvironment, {args}]
-
-inEnvironment[] := Length[$environmentLabels]>0
-inEnvironment[args___] := unexcpected[ inEnvironment, {args}]
 
 adjustFormulaLabel[nb_NotebookObject] := 
 	Module[{cellTags,cellID,newCellTags, cleanCellTags}, 
@@ -145,12 +186,6 @@ uniqueLabel[args___] := unexpected[uniqueLabel,{args}]
 (* ::Section:: *)
 (* Region Title *)
 
-(* ::Section:: *)
-(* Region Title *)
-
-(* ::Section:: *)
-(* Region Title *)
-
 automatedFormulaLabel[nb_NotebookObject] := 
 	Module[{formulaCounter, newCellTags},
 		incrementFormulaCounter[nb];
@@ -162,7 +197,10 @@ automatedFormulaLabel[nb_NotebookObject] :=
 automatedFormulaLabel[args___] := unexpected[ automatedFormulaLabel, {args}]
 
 updateKnowledgeBase[ form_, lab_] :=
-    $tmaEnv = Union[ $tmaEnv, {{lab, form}}, SameTest -> (#1[[1]]===#2[[1]]&) ]
+    If[ inArchive[], 
+    	$tmaArch = Union[ $tmaArch, {{lab, form}}, SameTest -> (#1[[1]]===#2[[1]]&)],
+    	$tmaEnv = Union[ $tmaEnv, {{lab, form}}, SameTest -> (#1[[1]]===#2[[1]]&)]
+    ]
 updateKnowledgeBase[args___] := unexpected[ updateKnowledgeBase, {args}]
 
 		
@@ -170,6 +208,7 @@ initSession[] :=
     Module[ {},
         $environmentLabels = {};
         $tmaEnv = {};
+        $tmaArch = {};
         $formulaCounterName = "TheoremaFormulaCounter";
     ]
 initSession[args___] := unexpected[ initSession, {args}]
@@ -197,55 +236,104 @@ getFormulaCounter[nb_NotebookObject] :=
 	]
 getFormulaCounter[args___] := unexpected[ getFormulaCounter, {args}]
  
-DEFINITION := openEnvironment["DEF"];
-
-openEnvironment[type_] :=
+openEnvironment[type_String] :=
     Module[{},
+		$parseTheoremaExpressions = True; 
         PrependTo[$environmentLabels, type];
-        SetOptions[$FrontEnd, DefaultNewCellStyle -> "FormalTextInputFormula"];
-        Begin["Theorema`Language`"];
+        SetOptions[ InputNotebook[], DefaultNewCellStyle -> "FormalTextInputFormula"];
+        $ContextPath = Join[{"Theorema`Language`", "Theorema`"}, $ContextPath];
     ]
 openEnvironment[args___] := unexpected[ openEnvironment, {args}]
 
 closeEnvironment[] := 
 	Module[{},
-		End[];
+		$ContextPath = Fold[ DeleteCases, $ContextPath, {"Theorema`Language`", "Theorema`"}];
+		SetOptions[ InputNotebook[], DefaultNewCellStyle -> "Input"];
         $environmentLabels = Rest[$environmentLabels];
-        SetOptions[$FrontEnd, DefaultNewCellStyle -> "Input"];
+		$parseTheoremaExpressions = False; 
         updateKBBrowser[];
 	]
 closeEnvironment[args___] := unexpected[ closeEnvironment, {args}]
 
+(* ::Section:: *)
+(* Archives *)
+
+openArchive[name_String] :=
+	Module[{nb = EvaluationNotebook[]},
+		NotebookFind[nb, "ArchiveInfo", All, CellStyle];
+		BeginPackage["Theorema`Knowledge`"<>name];
+		SelectionEvaluate[nb];
+		"Null"
+	]
+openArchive[args___] := unexpected[openArchive, {args}]
+
+inArchive[] := 
+	Module[{c = $Context}, 
+		StringLength[c] >= 9 && StringTake[c,-9]==="`private`"
+	];
+inArchive[args___] := unexpected[inArchive, {args}]
+
+SetAttributes[ processArchiveInfo, HoldAll];
+
+processArchiveInfo[ a_] :=
+	Module[{nb = EvaluationNotebook[], cf},
+		SelectionMove[nb, All, EvaluationCell];
+        {cf} = {CellFrameLabels} /. Options[NotebookSelection[nb], CellFrameLabels];
+		Switch[cf[[1,1]],
+			translate["archLabelNeeds"],
+			Scan[ loadArchive, a],
+			translate["archLabelPublic"],
+			ReleaseHold[freshNames[ Hold[a]]];
+			Begin["`private`"];
+			SelectionMove[nb, After, Cell];       
+		];
+	]
+processArchiveInfo[args___] := unexpected[processArchiveInfo, {args}]
+
+closeArchive[_String] :=
+	Module[{file},
+		End[];
+		file = ToFileName[ $TheoremaArchiveDirectory, ContextToFileName[ $Context]];
+		$archiveContext = $Context;
+		EndPackage[];
+		Block[{$ContextPath = {"System`"}},
+			Put[ file];
+			Put[ file, Definition[$tmaArch]];
+			Put[ file, Definition[$archiveContext]]
+		];
+		"Null"
+	]
+closeArchive[args___] := unexpected[closeArchive, {args}]
+
+loadArchive[] :=
+	Module[{},
+		"not implemented"
+	]
+loadArchive[args___] := unexpected[loadArchive, {args}]
 
 (* ::Section:: *)
 (* Computation *)
 
-processComputation[\[GraySquare]] := (closeComputation[];)
+SetAttributes[processComputation, HoldAll];
+
 processComputation[x_] := Module[ {},
 	printComputationInfo[];
-	x
+	ReleaseHold[ freshNames[ markVariables[ Hold[x]]]]
 ]
 processComputation[args___] := unexcpected[ processComputation, {args}]
 
-COMPUTE := openComputation[];
-
-openComputation[] :=
-  Module[ {},
-  	If[ !inComputation[],
-  	  SetOptions[$FrontEnd, DefaultNewCellStyle -> "Computation"];
-      Begin["Theorema`Computation`"];
-  	]
-  ]
+openComputation[] := 
+	Module[{},
+		$parseTheoremaExpressions = True; 
+		Begin["Theorema`Computation`"];
+	]
 openComputation[args___] := unexcpected[ openComputation, {args}]
 
-
-inComputation[] := Context[] === "Theorema`Computation`"
-inComputation[args___] := unexcpected[ inComputation, {args}]
-
-closeComputation[] := Module[{},
-	End[];
-  	SetOptions[$FrontEnd, DefaultNewCellStyle -> "Input"];
-	]
+closeComputation[] :=
+    Module[ {},
+        End[];
+		$parseTheoremaExpressions = False; 
+    ]
 closeComputation[args___] := unexcpected[ closeComputation, {args}]
 
 (* ::Section:: *)
