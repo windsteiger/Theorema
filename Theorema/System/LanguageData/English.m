@@ -12,11 +12,11 @@ With[ {lang = "English"},
 	MessageName[processEnvironment, "usage", lang] = "processEnvironment[ expr] ...";
 	MessageName[processComputation, "usage", lang] = "processComputation[ expr] ...";
 	MessageName[specifiedVariables, "usage", lang] = "";
+	MessageName[$parseTheoremaExpressions, "usage", lang] = "whether to parse expressions with their Theorema meaning ...";
 
 (* Theorema`Language`Session` *)
-	MessageName[inEnvironment, "usage", lang] = "inEnvironment[] evaluates to 'True' inside an environment ...";
 	MessageName[$tmaEnv, "usage", lang] = "Collection of environments evaluated in the current session, i.e. the knowledge base.";
-	MessageName[inComputation, "usage", lang] = "inComputation[] evaluates to 'True' inside a computation ...";
+	MessageName[$tmaArch, "usage", lang] = "Collection of environments evaluated in the current archive.";
 	MessageName[$formulaCounterName,"usage", lang] = "Name of formulaCounter in the notebook options in CounterAssignments parameter.";
 	MessageName[getCellIDLabel, "usage", lang] = "getCellIDLabel[cellID_Integer] returns string label for the given integer CellID value.";
 	MessageName[getCleanCellTags,"usage", lang] = "getCleanCellTags[cellTags] returns all CellTags except tags used for cell identification: CellID_12345 and NotebookName_abcde.";
