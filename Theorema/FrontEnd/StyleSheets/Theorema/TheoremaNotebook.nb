@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       145,          7]
-NotebookDataLength[     22012,        727]
-NotebookOptionsPosition[     14596,        536]
-NotebookOutlinePosition[     15061,        556]
-CellTagsIndexPosition[     15018,        553]
+NotebookDataLength[     23221,        765]
+NotebookOptionsPosition[     15833,        575]
+NotebookOutlinePosition[     16273,        594]
+CellTagsIndexPosition[     16230,        591]
 MenuPosition->1300
 WindowFrame->Normal*)
 
@@ -390,6 +390,8 @@ Cell[StyleData["Input"],
 Cell[StyleData["OpenEnvironment", StyleDefinitions -> StyleData["Input"]],
  CellFrame->{{False, False}, {False, True}},
  CellBracketOptions->{"Color"->GrayLevel[0.8]},
+ CellProlog:>($PreRead = Theorema`Language`Session`Private`openEnvironment),
+ CellEpilog:>Unset[$PreRead],
  CellFrameMargins->6,
  CellFrameColor->GrayLevel[0.603922],
  MenuSortingValue->1510,
@@ -416,8 +418,8 @@ Cell[StyleData["FormalTextInputFormula", StyleDefinitions -> StyleData[
  CellMargins->{{86, 10}, {2, 2}},
  CellBracketOptions->{"Color"->GrayLevel[0.9]},
  CellGroupingRules->"GraphicsGrouping",
- CellProlog:>Theorema`Interface`GUI`Private`checkSession[
-  "Theorema`Common`inEnvironment[]"],
+ CellProlog:>($Pre = Theorema`Common`processEnvironment; Null),
+ CellEpilog:>Unset[$Pre],
  ShowCellTags->True,
  MenuSortingValue->1450,
  MenuCommandKey->"8",
@@ -428,6 +430,8 @@ Cell[StyleData["CloseEnvironment", StyleDefinitions -> StyleData["Input"]],
  CellFrame->{{False, False}, {True, False}},
  CellBracketOptions->{"Color"->GrayLevel[0.8]},
  CellGroupingRules->"OutputGrouping",
+ CellProlog:>Theorema`Language`Session`Private`closeEnvironment[],
+ CellEvaluationFunction:>(Null& ),
  CellFrameMargins->2,
  CellFrameColor->GrayLevel[0.603922],
  TextAlignment->Right,
@@ -443,11 +447,15 @@ Cell[StyleData["OpenComputation", StyleDefinitions -> StyleData["Input"]],
  Background->GrayLevel[0.97]],
 
 Cell[StyleData["Computation", StyleDefinitions -> StyleData["Input"]],
- ShowCellBracket->False,
+ ShowCellBracket->Automatic,
  ShowGroupOpener->True,
  CellMargins->{{74, 0}, {-5, 10}},
  CellBracketOptions->{"Color"->RGBColor[0, 0.333333, 0.498039]},
- CellProlog:>Theorema`Session`Private`openComputation[],
+ CellProlog:>(
+  Theorema`Language`Session`Private`openComputation[]; $Pre = 
+   Theorema`Common`processComputation; Null),
+ CellEpilog:>(Theorema`Language`Session`Private`closeComputation[]; 
+  Unset[$Pre]),
  GeneratedCellStyles->{"Output"->"ComputationResult",
  "Print"->"ComputationInfo"},
  CellFrameLabels->{{None, 
@@ -458,25 +466,17 @@ Cell[StyleData["Computation", StyleDefinitions -> StyleData["Input"]],
  Background->RGBColor[1, 1, 0.964706]],
 
 Cell[StyleData["ComputationResult", StyleDefinitions -> StyleData["Output"]],
- ShowCellBracket->False,
+ ShowCellBracket->Automatic,
  CellMargins->{{82, 10}, {5, -5}},
  CellBracketOptions->{"Color"->RGBColor[0, 0.333333, 0.498039]},
  FontColor->RGBColor[0, 0.333333, 0.498039]],
 
 Cell[StyleData["ComputationInfo", StyleDefinitions -> StyleData["Print"]],
- ShowCellBracket->False,
+ ShowCellBracket->Automatic,
  CellMargins->{{74, 30}, {0, 0}},
  CellFrameLabels->{{None, 
     Cell["...?", "CILabel"]}, {None, None}},
  TextAlignment->Right],
-
-Cell[StyleData["CloseComputation", StyleDefinitions -> StyleData["Input"]],
- CellFrame->{{False, False}, {True, False}},
- CellBracketOptions->{"Color"->RGBColor[0, 0.333333, 0.498039]},
- CellFrameMargins->2,
- CellFrameColor->GrayLevel[0.603922],
- TextAlignment->Right,
- MenuSortingValue->1520],
 
 Cell[StyleData["CellLabel"]],
 
@@ -496,7 +496,8 @@ Cell[StyleData["FrameLabel"],
  "StrikeThrough"->False,
  "Underline"->False},
  FontColor->RGBColor[
-  0.36470588235294116`, 0.5411764705882353, 0.6941176470588235]],
+  0.36470588235294116`, 0.5411764705882353, 0.6941176470588235],
+ Background->None],
 
 Cell[StyleData["FrameLabel", "Presentation"],
  FontSize->18],
@@ -510,35 +511,72 @@ Cell[StyleData["FrameLabel", "Printout"]]
 Cell[StyleData["CILabel", StyleDefinitions -> StyleData["FrameLabel"]],
  FontColor->RGBColor[0.6666666666666666, 0., 0.]],
 
-Cell[StyleData["OpenArchive", StyleDefinitions -> StyleData["Input"]],
+Cell[StyleData["OpenArchive"],
  CellFrame->{{False, False}, {False, True}},
- CellMargins->{{0, 0}, {5, 10}},
+ ShowCellBracket->Automatic,
+ CellMargins->{{0, 0}, {0, 10}},
  CellBracketOptions->{"Color"->GrayLevel[0.8]},
+ Evaluatable->True,
  CellGroupingRules->{"SectionGrouping", 20},
- CellFrameMargins->6,
+ CellProlog:>($PreRead = Theorema`Language`Session`Private`openArchive),
+ CellEpilog:>Unset[$PreRead],
+ CellFrameMargins->3,
  CellFrameColor->GrayLevel[0.603922],
+ CellFrameLabels->{{None, None}, {None, 
+    Cell["Archive", "FrameLabel"]}},
+ CellFrameLabelMargins->1,
  TextAlignment->Center,
  MenuSortingValue->1510,
- FontWeight->"Bold",
+ FontFamily->"Arial Black",
+ FontSize->24,
+ FontWeight->"Plain",
+ FontSlant->"Plain",
+ FontVariations->{"StrikeThrough"->False,
+ "Underline"->False},
  Background->GrayLevel[0.97]],
 
-Cell[StyleData["CloseArchive", StyleDefinitions -> StyleData["Input"]],
- CellFrame->{{False, False}, {True, False}},
- CellMargins->{{66, 0}, {5, 10}},
+Cell[StyleData["ArchiveInfo", StyleDefinitions -> StyleData["Input"]],
+ ShowCellBracket->Automatic,
+ CellMargins->{{100, 100}, {0, 0}},
  CellBracketOptions->{"Color"->GrayLevel[0.8]},
+ CellProlog:>($Pre = Theorema`Language`Session`Private`processArchiveInfo; 
+  Null),
+ CellEpilog:>Unset[$Pre],
+ CellFrameMargins->5,
+ ShowCellTags->False,
+ MenuSortingValue->1510,
+ FontWeight->"Bold",
+ Background->GrayLevel[0.985]],
+
+Cell[StyleData["CloseArchive"],
+ CellFrame->{{False, False}, {True, False}},
+ ShowCellBracket->Automatic,
+ CellMargins->{{0, 0}, {5, 10}},
+ CellBracketOptions->{"Color"->GrayLevel[0.8]},
+ Evaluatable->True,
  CellGroupingRules->{"SectionGrouping", 25},
+ CellProlog:>($PreRead = Theorema`Language`Session`Private`closeArchive),
+ CellEpilog:>Unset[$PreRead],
  CellFrameMargins->2,
  CellFrameColor->GrayLevel[0.603922],
- TextAlignment->Right,
+ CellFrameLabels->{{None, None}, {
+    Cell["Archive", "FrameLabel"], None}},
+ CellFrameLabelMargins->1,
+ TextAlignment->Center,
  MenuSortingValue->1520,
- FontSize->18]
+ FontFamily->"Arial Black",
+ FontSize->24,
+ FontWeight->"Plain",
+ FontSlant->"Plain",
+ FontVariations->{"StrikeThrough"->False,
+ "Underline"->False},
+ Background->GrayLevel[0.97]]
 }, Open  ]]
 },
 AutoGeneratedPackage->None,
 Editable->True,
 Saveable->True,
-WindowSize->{897, 3629},
-WindowMargins->{{268, Automatic}, {Automatic, 27}},
+WindowMargins->{{Automatic, 436}, {Automatic, 25}},
 TrackCellChangeTimes->False,
 MenuSortingValue->1300,
 FrontEndVersion->"8.0 for Linux x86 (32-bit) (February 23, 2011)",
@@ -698,35 +736,35 @@ Cell[9640, 381, 71, 2, 63, 23, 0, "StyleData", "Code", "All",
  MenuSortingValue->None,
  MenuCommandKey->None],
 Cell[9714, 385, 69, 2, 47, 24, 0, "StyleData", "Input", "All"],
-Cell[9786, 389, 303, 7, 60, 74, 0, "StyleData", "OpenEnvironment", "All",
+Cell[9786, 389, 410, 9, 60, 74, 0, "StyleData", "OpenEnvironment", "All",
  MenuSortingValue->1510],
-Cell[10092, 398, 526, 13, 36, 75, 0, "StyleData", "FormalTextGlobal", "All"],
-Cell[10621, 413, 430, 11, 36, 83, 1, "StyleData", "FormalTextInputFormula", \
+Cell[10199, 400, 526, 13, 36, 75, 0, "StyleData", "FormalTextGlobal", "All"],
+Cell[10728, 415, 424, 11, 36, 83, 1, "StyleData", "FormalTextInputFormula", \
 "All",
  MenuSortingValue->1450,
  MenuCommandKey->"8"],
-Cell[11054, 426, 314, 7, 50, 75, 0, "StyleData", "CloseEnvironment", "All",
+Cell[11155, 428, 416, 9, 50, 75, 0, "StyleData", "CloseEnvironment", "All",
  MenuSortingValue->1520],
-Cell[11371, 435, 320, 7, 60, 74, 0, "StyleData", "OpenComputation", "All",
+Cell[11574, 439, 320, 7, 60, 74, 0, "StyleData", "OpenComputation", "All",
  MenuSortingValue->1510],
-Cell[11694, 444, 578, 13, 53, 70, 0, "StyleData", "Computation", "All"],
-Cell[12275, 459, 247, 4, 32, 77, 0, "StyleData", "ComputationResult", "All"],
-Cell[12525, 465, 228, 5, 32, 74, 0, "StyleData", "ComputationInfo", "All"],
-Cell[12756, 472, 293, 6, 50, 75, 0, "StyleData", "CloseComputation", "All",
- MenuSortingValue->1520],
-Cell[13052, 480, 28, 0, 35, 28, 0, "StyleData", "CellLabel", "All"],
+Cell[11897, 448, 734, 17, 53, 70, 0, "StyleData", "Computation", "All"],
+Cell[12634, 467, 251, 4, 32, 77, 0, "StyleData", "ComputationResult", "All"],
+Cell[12888, 473, 232, 5, 32, 74, 0, "StyleData", "ComputationInfo", "All"],
+Cell[13123, 480, 28, 0, 35, 28, 0, "StyleData", "CellLabel", "All"],
 Cell[CellGroupData[{
-Cell[13105, 484, 400, 14, 36, 29, 0, "StyleData", "FrameLabel", "All",
+Cell[13176, 484, 419, 15, 36, 29, 0, "StyleData", "FrameLabel", "All",
  StyleMenuListing->None],
-Cell[13508, 500, 60, 1, 45, 45, 0, "StyleData", "FrameLabel", \
+Cell[13598, 501, 60, 1, 45, 45, 0, "StyleData", "FrameLabel", \
 "Presentation"],
-Cell[13571, 503, 56, 1, 35, 42, 0, "StyleData", "FrameLabel", "Condensed"],
-Cell[13630, 506, 41, 0, 39, 41, 0, "StyleData", "FrameLabel", "Printout"]
+Cell[13661, 504, 56, 1, 35, 42, 0, "StyleData", "FrameLabel", "Condensed"],
+Cell[13720, 507, 41, 0, 39, 41, 0, "StyleData", "FrameLabel", "Printout"]
 }, Closed]],
-Cell[13686, 509, 121, 1, 36, 71, 0, "StyleData", "CILabel", "All"],
-Cell[13810, 512, 401, 10, 60, 70, 0, "StyleData", "OpenArchive", "All",
+Cell[13776, 510, 121, 1, 36, 71, 0, "StyleData", "CILabel", "All"],
+Cell[13900, 513, 747, 22, 80, 30, 0, "StyleData", "OpenArchive", "All",
  MenuSortingValue->1510],
-Cell[14214, 524, 366, 9, 50, 71, 0, "StyleData", "CloseArchive", "All",
+Cell[14650, 537, 415, 11, 42, 70, 0, "StyleData", "ArchiveInfo", "All",
+ MenuSortingValue->1510],
+Cell[15068, 550, 749, 22, 83, 31, 0, "StyleData", "CloseArchive", "All",
  MenuSortingValue->1520]
 }, Open  ]]
 }
