@@ -43,6 +43,9 @@ Map[ Get, FileNames[ "*.m", ToFileName[{$TheoremaDirectory, "Theorema", "Kernel"
 
 Protect[$TheoremaDirectory]; 
 
+$TheoremaArchiveDirectory = $TheoremaDirectory;
+$TheoremaArchivePath = Prepend[ $Path, $TheoremaArchiveDirectory];
+
 If[ TrueQ[$Notebooks],
     If[!ValueQ[`priv`welcomeScreen],
     	`priv`welcomeScreen = NotebookOpen[ToFileName[{$TheoremaDirectory,"Theorema","FrontEnd"},"Startup.nb"],
@@ -54,8 +57,7 @@ If[ TrueQ[$Notebooks],
 
 Get["Theorema`Common`"]
 Get["Theorema`Interface`GUI`"]
-Get["Theorema`Language`Parser`"]
-Get["Theorema`Language`Session`"]
+Get["Theorema`Language`"]
 Get["Theorema`Tools`"]
 
 EndPackage[]
