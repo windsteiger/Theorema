@@ -281,7 +281,7 @@ processArchiveInfo[args___] := unexpected[processArchiveInfo, {args}]
 closeArchive[_String] :=
 	Module[{file},
 		End[];
-		file = ToFileName[ $TheoremaArchiveDirectory, 
+		file = ToFileName[ Theorema`$TheoremaArchiveDirectory, 
 			StringReplacePart[ ContextToFileName[ $Context], "ta", -1]];
 		$archiveContext = $Context;
 		EndPackage[];
