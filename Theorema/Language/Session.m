@@ -198,6 +198,7 @@ initSession[] :=
         $tmaEnv = {};
         $tmaArch = {};
         $formulaCounterName = "TheoremaFormulaCounter";
+        $archiveFileName = "";
     ]
 initSession[args___] := unexpected[ initSession, {args}]
 
@@ -246,10 +247,20 @@ closeEnvironment[args___] := unexpected[ closeEnvironment, {args}]
 (* ::Section:: *)
 (* Archives *)
 
+getArchivePath[context_] := ToFileName[ Theorema`$TheoremaArchiveDirectory, 
+			StringReplacePart[ ContextToFileName[ context], "ta", -1]];
+getArchivePath[args___] := unexpected[ getArchivePath, {args}]
+
+getArchiveNotebookPath[context_] := ToFileName[ Theorema`$TheoremaArchiveDirectory, 
+			StringReplacePart[ ContextToFileName[ context], "nb", -1]];
+getArchiveNotebookPath[args___] := unexpected[ getArchiveNotebookPath, {args}]
+
 openArchive[name_String] :=
 	Module[{nb = EvaluationNotebook[]},
 		NotebookFind[nb, "ArchiveInfo", All, CellStyle];
 		BeginPackage["Theorema`Knowledge`"<>name];
+		(* Based on the current context set the $archiveFileName for the current archive notebook. *)
+		Theorema`Common`$archiveFileName = getArchiveNotebookPath[$Context];
 		SelectionEvaluate[nb];
 		"Null"
 	]
@@ -279,26 +290,45 @@ processArchiveInfo[ a_] :=
 processArchiveInfo[args___] := unexpected[processArchiveInfo, {args}]
 
 closeArchive[_String] :=
-	Module[{file},
+	Module[{nb = EvaluationNotebook[], archivePath, archiveNotebookPath},
 		End[];
-		file = ToFileName[ Theorema`$TheoremaArchiveDirectory, 
-			StringReplacePart[ ContextToFileName[ $Context], "ta", -1]];
-		$archiveContext = $Context;
+		archivePath = getArchivePath[ $Context];
+		archiveNotebookPath = getArchiveNotebookPath[ $Context];
+		$archiveContent = $tmaArch;
+		$archiveTree = archiveNotebookPath /. Theorema`Interface`GUI`Private`$kbStruct;
 		EndPackage[];
 		(* Reset the context path in order to force Mathematica to write
 		explicit contexts to the file *)
 		Block[{$ContextPath = {"System`"}},
-			Put[ file];
-			Put[ Definition[$tmaArch], file];
-			PutAppend[ Definition[$archiveContext], file]
+			Put[ archivePath];
+			Put[ Definition[$archiveContent], archivePath];
+			PutAppend[ Definition[$archiveTree], archivePath];
+			NotebookSave[ nb, archiveNotebookPath]
 		];
+		(* Resetarchive related variables. *)
+		$archiveFileName = "";
+		$tmaArch = {};
 		"Null"
 	]
 closeArchive[args___] := unexpected[closeArchive, {args}]
 
-loadArchive[] :=
-	Module[{},
-		"not implemented"
+loadArchive[name_String] :=
+	Module[{archivePath, archiveNotebookPath, pos},
+		BeginPackage["Theorema`Knowledge`"<>name];
+			archivePath = getArchivePath[ $Context];
+			archiveNotebookPath = getArchiveNotebookPath[ $Context];
+			If[!(FileExistsQ[archivePath] && FileExistsQ[archiveNotebookPath]),
+				DialogInput[Column[{translate["archiveNotFound"] <> name,Button["OK", DialogReturn[True]]}]];
+				Return[]
+			];
+			Get[archivePath];
+		EndPackage[];
+		$tmaEnv = Union[$tmaEnv, $archiveContent];
+		pos = Position[ Theorema`Interface`GUI`Private`$kbStruct, archiveNotebookPath -> _];
+        If[ pos === {},
+            AppendTo[ Theorema`Interface`GUI`Private`$kbStruct, archiveNotebookPath -> $archiveTree],
+            Theorema`Interface`GUI`Private`$kbStruct[[pos[[1,1]]]] = archiveNotebookPath -> $archiveTree
+        ];
 	]
 loadArchive[args___] := unexpected[loadArchive, {args}]
 

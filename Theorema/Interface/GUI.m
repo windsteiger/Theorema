@@ -93,7 +93,7 @@ extractKBStruct[nb_NotebookObject] := extractKBStruct[ NotebookGet[nb]];
 
 extractKBStruct[nb_Notebook] :=
     Module[ {posTit = Cases[Position[nb, Cell[_, "Title", ___]], {a___, 1}],
-      posSec = Cases[Position[nb, Cell[_, "Section", ___]], {a___, 1}], 
+      posSec =  Cases[Position[nb, Cell[_, "Section", ___]], {a___, 1}], 
       posSubsec = Cases[Position[nb, Cell[_, "Subsection", ___]], {a___, 1}], 
       posSubsubsec = Cases[Position[nb, Cell[_, "Subsubsection", ___]], {a___, 1}], 
       posEnv = Cases[Position[nb, Cell[_, "OpenEnvironment", ___]], {a___, 1}], 
@@ -219,7 +219,11 @@ kbSelectProve[_] := False
 (* updateKBBrowser *)
 
 updateKBBrowser[] :=
-    Module[ {file = CurrentValue["NotebookFullFileName"], pos, new},
+    Module[ {file, pos, new},
+    	If[!inArchive[],
+    		file = CurrentValue["NotebookFullFileName"],
+    		file = $archiveFileName
+    	];
         pos = Position[ $kbStruct, file -> _];
         new = file -> With[ {nb = NotebookGet[EvaluationNotebook[]]},
                           extractKBStruct[nb] /. l_?VectorQ :> Extract[nb, l]

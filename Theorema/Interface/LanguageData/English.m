@@ -59,4 +59,5 @@ With[ {lang = "English"},
 	    
 (* Theorema`Language`Session` *)
     translate["notUniqueLabel", lang] = "This label is not unique in the notebook: ";
+    translate["archiveNotFound", lang] = "This archive was not found: ";
 ]
