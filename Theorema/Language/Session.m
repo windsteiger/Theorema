@@ -92,8 +92,7 @@ adjustFormulaLabel[nb_NotebookObject] :=
 		 *)
 		cellTags = Flatten[{cellTags}];
 		(*
-		 * Remove any automated labels (begins with "CellID_").
-		 * Remove any automated labels (begins with "NotebookName_").
+		 * Remove any automated labels (begins with "CellID_" or "Context_").
 		 * Remove initLabel.
 		 *)
 		cleanCellTags = getCleanCellTags[cellTags];
@@ -119,7 +118,7 @@ adjustFormulaLabel[args___]	:= unexpected[adjustFormulaLabel,{args}]
  *)
 getCleanCellTags[cellTags_] :=
 	Module[{},
-		Select[cellTags, StringPosition[#, "CellID_"] === {} && # != $initLabel &]
+		Select[cellTags, StringPosition[#, "CellID_"] === {} && StringPosition[#, "Context_"] === {} && # != $initLabel &]
 	]
 getCleanCellTags[args___]	:= unexpected[getCleanCellTags,{args}]
 
@@ -136,7 +135,7 @@ relabelCell[nb_NotebookObject, cellTags_List, cellID_Integer] :=
 		(* Put newFrameLabel in brackets. *)
 		newFrameLabel = "("<>newFrameLabel<>")";
 		(* Keep cleaned CellTags and add CellID *)
-		newCellTags = Join[{getCellIDLabel[cellID]},cellTags];
+		newCellTags = Join[{getCellIDLabel[cellID],getContextLabel[]},cellTags];
 		SetOptions[NotebookSelection[nb], CellFrameLabels->{{None,newFrameLabel},{None,None}}, CellTags->newCellTags, ShowCellTags->False];
 		newCellTags
 	]
@@ -148,6 +147,12 @@ getCellIDLabel[cellID_Integer] :=
 	]
 getCellIDLabel[args___] := unexpected[ getCellIDLabel,{args}]
 
+getContextLabel[] :=
+	Module[{},
+		"Context_" <> $Context
+	]
+getContextLabel[args___] := unexpected[ getContextLabel,{args}]
+	
 findDuplicateCellTags[nb_NotebookObject, cellTags_List] :=
 	Module[{rawNotebook,allCellTags,selectedCellTags,duplicateCellTags},
 		rawNotebook = NotebookGet[nb];
@@ -305,7 +310,7 @@ closeArchive[_String] :=
 			PutAppend[ Definition[$archiveTree], archivePath];
 			NotebookSave[ nb, archiveNotebookPath]
 		];
-		(* Resetarchive related variables. *)
+		(* Reset archive related variables. *)
 		$archiveFileName = "";
 		$tmaArch = {};
 		"Null"
