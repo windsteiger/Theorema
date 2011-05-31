@@ -306,6 +306,11 @@ closeArchive[_String] :=
 		(* Reset the context path in order to force Mathematica to write
 		explicit contexts to the file *)
 		Block[{$ContextPath = {"System`"}},
+			(* Create the directory for an archive if does not exist. *)
+			If[!DirectoryQ[ DirectoryName[ archivePath]],
+				CreateDirectory[ DirectoryName[ archivePath]]
+			];
+			(* Save an archive. *)
 			Put[ archivePath];
 			Put[ Definition[$tmaArch], archivePath];
 			PutAppend[ Definition[$tmaArchTree], archivePath];
