@@ -236,11 +236,13 @@ openEnvironment[type_String] :=
         PrependTo[$environmentLabels, type];
         SetOptions[ InputNotebook[], DefaultNewCellStyle -> "FormalTextInputFormula"];
         $ContextPath = Join[{"Theorema`Language`", "Theorema`"}, $ContextPath];
+        Begin["Theorema`Knowledge`"];
     ]
 openEnvironment[args___] := unexpected[ openEnvironment, {args}]
 
 closeEnvironment[] := 
 	Module[{},
+		End[];
 		$ContextPath = Fold[ DeleteCases, $ContextPath, {"Theorema`Language`", "Theorema`"}];
 		SetOptions[ InputNotebook[], DefaultNewCellStyle -> "Input"];
         $environmentLabels = Rest[$environmentLabels];
@@ -307,7 +309,7 @@ closeArchive[_String] :=
 			Put[ archivePath];
 			Put[ Definition[$tmaArch], archivePath];
 			PutAppend[ Definition[$tmaArchTree], archivePath];
-			NotebookSave[ nb, archiveNotebookPath]
+			NotebookSave[ nb, archiveNotebookPath];
 		];
 		(* Reset archive related variables. *)
 		$archiveFileName = "";
