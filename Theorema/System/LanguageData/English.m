@@ -17,6 +17,7 @@ With[ {lang = "English"},
 (* Theorema`Language`Session` *)
 	MessageName[$tmaEnv, "usage", lang] = "Collection of environments evaluated in the current session, i.e. the knowledge base.";
 	MessageName[$tmaArch, "usage", lang] = "Collection of environments evaluated in the current archive.";
+	MessageName[$tmaArchTree, "usage", lang] = "Tree representation of the archive used in the commander.";
 	MessageName[$formulaCounterName,"usage", lang] = "Name of formulaCounter in the notebook options in CounterAssignments parameter.";
 	MessageName[getCellIDLabel, "usage", lang] = "getCellIDLabel[cellID_Integer] returns string label for the given integer CellID value.";
 	MessageName[getCleanCellTags,"usage", lang] = "getCleanCellTags[cellTags] returns all CellTags except tags used for cell identification: CellID_12345 and NotebookName_abcde.";

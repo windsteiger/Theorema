@@ -134,7 +134,7 @@ relabelCell[nb_NotebookObject, cellTags_List, cellID_Integer] :=
 		newFrameLabel = StringJoin @@ Riffle[cellTags,$labelSeparator];
 		(* Put newFrameLabel in brackets. *)
 		newFrameLabel = "("<>newFrameLabel<>")";
-		(* Keep cleaned CellTags and add CellID *)
+		(* Keep cleaned CellTags and add identification (CellId and Context). *)
 		newCellTags = Join[{getCellIDLabel[cellID],getContextLabel[]},cellTags];
 		SetOptions[NotebookSelection[nb], CellFrameLabels->{{None,newFrameLabel},{None,None}}, CellTags->newCellTags, ShowCellTags->False];
 		newCellTags
@@ -299,20 +299,20 @@ closeArchive[_String] :=
 		End[];
 		archivePath = getArchivePath[ $Context];
 		archiveNotebookPath = getArchiveNotebookPath[ $Context];
-		$archiveContent = $tmaArch;
-		$archiveTree = archiveNotebookPath /. Theorema`Interface`GUI`Private`$kbStruct;
+		$tmaArchTree = archiveNotebookPath /. Theorema`Interface`GUI`Private`$kbStruct;
 		EndPackage[];
 		(* Reset the context path in order to force Mathematica to write
 		explicit contexts to the file *)
 		Block[{$ContextPath = {"System`"}},
 			Put[ archivePath];
-			Put[ Definition[$archiveContent], archivePath];
-			PutAppend[ Definition[$archiveTree], archivePath];
+			Put[ Definition[$tmaArch], archivePath];
+			PutAppend[ Definition[$tmaArchTree], archivePath];
 			NotebookSave[ nb, archiveNotebookPath]
 		];
 		(* Reset archive related variables. *)
 		$archiveFileName = "";
 		$tmaArch = {};
+		$tmaArchTree = {};
 		"Null"
 	]
 closeArchive[args___] := unexpected[closeArchive, {args}]
@@ -328,11 +328,11 @@ loadArchive[name_String] :=
 			];
 			Get[archivePath];
 		EndPackage[];
-		$tmaEnv = Union[$tmaEnv, $archiveContent];
+		$tmaEnv = Union[$tmaEnv, $tmaArch];
 		pos = Position[ Theorema`Interface`GUI`Private`$kbStruct, archiveNotebookPath -> _];
         If[ pos === {},
-            AppendTo[ Theorema`Interface`GUI`Private`$kbStruct, archiveNotebookPath -> $archiveTree],
-            Theorema`Interface`GUI`Private`$kbStruct[[pos[[1,1]]]] = archiveNotebookPath -> $archiveTree
+            AppendTo[ Theorema`Interface`GUI`Private`$kbStruct, archiveNotebookPath -> $tmaArchTree],
+            Theorema`Interface`GUI`Private`$kbStruct[[pos[[1,1]]]] = archiveNotebookPath -> $tmaArchTree
         ];
 	]
 loadArchive[args___] := unexpected[loadArchive, {args}]
