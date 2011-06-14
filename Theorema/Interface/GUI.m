@@ -151,17 +151,17 @@ arrangeSub[struct_, item : {head_, ___}] :=
 (* structView *)
 Clear[structView];
 
-structView[file_, {head:Cell[sec_, style:"Title"|"Section"|"Subsection"|"Subsubsection"|"OpenEnvironment", ___], rest__}, tags_, task_] :=
+structView[file_, {head:Cell[sec_, "Title"|"Section"|"Subsection"|"Subsubsection"|"OpenEnvironment", opts___], rest__}, tags_, task_] :=
     Module[ {sub, compTags},
         sub = Transpose[Map[structView[file, #, tags, task] &, {rest}]];
         compTags = Apply[Union, sub[[2]]];
         {OpenerView[{structView[file, head, compTags, task], Column[sub[[1]]]}, 
         	ToExpression[StringReplace["Dynamic[NEWSYM]", 
-        		"NEWSYM" -> "$kbStructState$"<>ToString[Hash[FileBaseName[file]]]<>"$"<>style<>"$"<>ToString[Hash[sec]]]]], 
+        		"NEWSYM" -> "$kbStructState$"<>ToString[Hash[FileBaseName[file]]]<>"$"<>ToString[CellID/.{opts}]]]], 
          compTags}
     ]
 
-structView[file_, {Cell[sec_, style:"Section"|"Subsection"|"Subsubsection", ___]}, tags_, task_] :=
+structView[file_, {Cell[sec_, "Title"|"Section"|"Subsection"|"Subsubsection"|"OpenEnvironment", ___]}, tags_, task_] :=
 	Sequence[]
  
 structView[file_, item_List, tags_, task_] :=
