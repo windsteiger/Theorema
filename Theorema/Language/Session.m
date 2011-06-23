@@ -236,13 +236,15 @@ openEnvironment[type_String] :=
         PrependTo[$environmentLabels, type];
         SetOptions[ InputNotebook[], DefaultNewCellStyle -> "FormalTextInputFormula"];
         $ContextPath = Join[{"Theorema`Language`", "Theorema`"}, $ContextPath];
-        Begin["Theorema`Knowledge`"];
+        (* Set default context if I am not in an archive. *)
+        If[ !inArchive[], Begin["Theorema`Knowledge`"]];
     ]
 openEnvironment[args___] := unexpected[ openEnvironment, {args}]
 
 closeEnvironment[] := 
 	Module[{},
-		End[];
+		(* Restore context if I am not in an archive. *)
+		If[ !inArchive[], End[]];
 		$ContextPath = Fold[ DeleteCases, $ContextPath, {"Theorema`Language`", "Theorema`"}];
 		SetOptions[ InputNotebook[], DefaultNewCellStyle -> "Input"];
         $environmentLabels = Rest[$environmentLabels];
@@ -274,9 +276,9 @@ openArchive[name_String] :=
 openArchive[args___] := unexpected[openArchive, {args}]
 
 inArchive[] := 
-	Module[{c = $Context}, 
-		StringLength[c] >= 9 && StringTake[c,-9]==="`private`"
-	];
+	Module[{}, 
+		StringLength[$Context] >= 9 && StringTake[$Context,-9]==="`private`"
+	]
 inArchive[args___] := unexpected[inArchive, {args}]
 
 SetAttributes[ processArchiveInfo, HoldAll];
