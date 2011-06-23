@@ -202,6 +202,7 @@ initSession[] :=
         $environmentLabels = {};
         $tmaEnv = {};
         $tmaArch = {};
+        $tmaArchNeeds = {};
         $formulaCounterName = "TheoremaFormulaCounter";
         $archiveFileName = "";
     ]
@@ -289,11 +290,11 @@ processArchiveInfo[ a_] :=
         {cf} = {CellFrameLabels} /. Options[NotebookSelection[nb], CellFrameLabels];
 		Switch[cf[[1,1]],
 			translate["archLabelNeeds"],
-			Scan[ loadArchive, a],
+			$tmaArchNeeds = a; Scan[ loadArchive, a], (* Remember and load current dependencies. *)
 			translate["archLabelPublic"],
 			ReleaseHold[freshNames[ Hold[a]]];
 			Begin["`private`"];
-			SelectionMove[nb, After, Cell];       
+			SelectionMove[nb, After, Cell];      
 		];
 	]
 processArchiveInfo[args___] := unexpected[processArchiveInfo, {args}]
@@ -316,18 +317,24 @@ closeArchive[_String] :=
 			Put[ archivePath];
 			Put[ Definition[$tmaArch], archivePath];
 			PutAppend[ Definition[$tmaArchTree], archivePath];
+			PutAppend[ Definition[$tmaArchNeeds], archivePath];
 			NotebookSave[ nb, archiveNotebookPath];
 		];
 		(* Reset archive related variables. *)
 		$archiveFileName = "";
 		$tmaArch = {};
 		$tmaArchTree = {};
+		$tmaArchNeeds = {};
 		"Null"
 	]
 closeArchive[args___] := unexpected[closeArchive, {args}]
 
 loadArchive[name_String] :=
-	Module[{archivePath, archiveNotebookPath, pos},
+	Module[{archivePath, archiveNotebookPath, pos, tmpArch, tmpArchTree, tmpArchNeeds},
+		(* Save Current Settings into the local Variables *)
+		tmpArch = $tmaArch;
+		tmpArchTree = $tmaArchTree;
+		tmpArchNeeds = $tmaArchNeeds;
 		BeginPackage["Theorema`Knowledge`"<>name];
 			archivePath = getArchivePath[ $Context];
 			archiveNotebookPath = getArchiveNotebookPath[ $Context];
@@ -343,6 +350,14 @@ loadArchive[name_String] :=
             AppendTo[ Theorema`Interface`GUI`Private`$kbStruct, archiveNotebookPath -> $tmaArchTree],
             Theorema`Interface`GUI`Private`$kbStruct[[pos[[1,1]]]] = archiveNotebookPath -> $tmaArchTree
         ];
+        (* Resursively load all dependencies. *)
+        If[ $tmaArch =!= {},
+        	Scan[ loadArchive, $tmaArchNeeds]
+        ];
+        (* Restore Original Settings *)
+        $tmaArch = tmpArch;
+		$tmaArchTree = tmpArchTree;
+		$tmaArchNeeds = tmpArchNeeds;
 	]
 loadArchive[args___] := unexpected[loadArchive, {args}]
 
@@ -367,7 +382,7 @@ openComputation[args___] := unexcpected[ openComputation, {args}]
 closeComputation[] :=
     Module[ {},
         End[];
-		$parseTheoremaExpressions = False; 
+		$parseTheoremaExpressions = False;
     ]
 closeComputation[args___] := unexcpected[ closeComputation, {args}]
 
