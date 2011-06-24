@@ -349,8 +349,9 @@ loadArchive[name_String] :=
             Theorema`Interface`GUI`Private`$kbStruct[[pos[[1,1]]]] = archiveNotebookPath -> $tmaArchTree
         ];
         (* Resursively load all dependencies. *)
-        If[ $tmaArchNeeds =!= {},
-        	Scan[ loadArchive, $tmaArchNeeds]
+        tmpArchNeeds = $tmaArchNeeds;
+        If[ tmpArchNeeds =!= {},
+        	Scan[ loadArchive, tmpArchNeeds]
         ];
         (* Restore Original Settings *)
 		$tmaArchNeeds = originalArchNeeds;
