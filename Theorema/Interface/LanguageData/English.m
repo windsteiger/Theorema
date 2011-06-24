@@ -44,7 +44,8 @@ With[ {lang = "English"},
     	translate["tcComputeTabKBTabLabel", lang] = "KB";
     	translate["tcComputeTabBuiltinTabLabel", lang] = "built-in";
     translate["tcPreferencesTabLabel", lang] = "Preferences";
-	    translate["tcPrefLanguage", lang] = "Language";
+	    translate["tcPrefLanguage", lang] = "Language:";
+	    translate["tcPrefArchiveDir", lang] = "Archive Directory:";
     translate["not available", lang] = "not available";
     translate["No knowledge available", lang] = "No knowledge available";
     

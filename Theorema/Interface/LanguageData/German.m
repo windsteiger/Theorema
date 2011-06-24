@@ -28,7 +28,8 @@ With[ {lang = "German"},
 	    translate["tcComputeTabKBTabLabel", lang] = "Wissen";
 	    translate["tcComputeTabBuiltinTabLabel", lang] = "eingebaut";
     translate["tcPreferencesTabLabel", lang] = "Einstellungen";
-	    translate["tcPrefLanguage", lang] = "Sprache";
+	    translate["tcPrefLanguage", lang] = "Sprache:";
+	    translate["tcPrefArchiveDir", lang] = "Archiv Verzeichnis:";
     translate["not available", lang] = "nicht verf\[UDoubleDot]gbar";
     translate["No knowledge available", lang] = "Kein Wissen verf\[UDoubleDot]gbar";
    
