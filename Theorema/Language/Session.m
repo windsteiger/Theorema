@@ -330,11 +330,9 @@ closeArchive[_String] :=
 closeArchive[args___] := unexpected[closeArchive, {args}]
 
 loadArchive[name_String] :=
-	Module[{archivePath, archiveNotebookPath, pos, tmpArch, tmpArchTree, tmpArchNeeds},
+	Module[{archivePath, archiveNotebookPath, pos, originalArchNeeds, tmpArchNeeds},
 		(* Save Current Settings into the local Variables *)
-		tmpArch = $tmaArch;
-		tmpArchTree = $tmaArchTree;
-		tmpArchNeeds = $tmaArchNeeds;
+		originalArchNeeds = $tmaArchNeeds;
 		BeginPackage["Theorema`Knowledge`"<>name];
 			archivePath = getArchivePath[ $Context];
 			archiveNotebookPath = getArchiveNotebookPath[ $Context];
@@ -351,13 +349,11 @@ loadArchive[name_String] :=
             Theorema`Interface`GUI`Private`$kbStruct[[pos[[1,1]]]] = archiveNotebookPath -> $tmaArchTree
         ];
         (* Resursively load all dependencies. *)
-        If[ $tmaArch =!= {},
+        If[ $tmaArchNeeds =!= {},
         	Scan[ loadArchive, $tmaArchNeeds]
         ];
         (* Restore Original Settings *)
-        $tmaArch = tmpArch;
-		$tmaArchTree = tmpArchTree;
-		$tmaArchNeeds = tmpArchNeeds;
+		$tmaArchNeeds = originalArchNeeds;
 	]
 loadArchive[args___] := unexpected[loadArchive, {args}]
 
