@@ -348,7 +348,8 @@ loadArchive[name_String] :=
             AppendTo[ Theorema`Interface`GUI`Private`$kbStruct, archiveNotebookPath -> $tmaArchTree],
             Theorema`Interface`GUI`Private`$kbStruct[[pos[[1,1]]]] = archiveNotebookPath -> $tmaArchTree
         ];
-        (* Resursively load all dependencies. *)
+        (* Resursively load all dependencies, we need a local variable 
+           in order not to be overriden by first subarchive load call. *)
         tmpArchNeeds = $tmaArchNeeds;
         If[ tmpArchNeeds =!= {},
         	Scan[ loadArchive, tmpArchNeeds]
