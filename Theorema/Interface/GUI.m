@@ -70,9 +70,10 @@ theoremaCommander[] /; $Notebooks :=
         			translate["tcComputeTabKBTabLabel"]->Dynamic[Refresh[displayKBBrowser["compute"], TrackedSymbols :> {$kbStruct}]],
         			translate["tcComputeTabBuiltinTabLabel"]->displayBuiltinBrowser[]}, Dynamic[$tcCompTab],
         			ControlPlacement->Top],
-        		translate["tcPreferencesTabLabel"]->Column[{
-        			Row[{translate["tcPrefLanguage"], PopupMenu[Dynamic[$Language], availableLanguages[]]}, Spacer[10]],
-        			Row[{translate["tcPrefArchiveDir"], Dynamic[$TheoremaArchiveDirectory], FileNameSetter[Dynamic[$TheoremaArchiveDirectory], "Directory"]}, Spacer[10]]}
+        		translate["tcPreferencesTabLabel"]->TabView[{
+        			translate["tcPrefLanguage"]->PopupMenu[Dynamic[$Language], availableLanguages[]],
+        			translate["tcPrefArchiveDir"]->Row[{Dynamic[Tooltip[ToFileName[Take[FileNameSplit[$TheoremaArchiveDirectory], -2]], $TheoremaArchiveDirectory]],
+        				FileNameSetter[Dynamic[$TheoremaArchiveDirectory], "Directory"]}, Spacer[10]]}
         			]},
         		Dynamic[$tcTopLevelTab],
         		LabelStyle->{Bold}, ControlPlacement->Left

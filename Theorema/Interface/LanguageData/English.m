@@ -44,8 +44,8 @@ With[ {lang = "English"},
     	translate["tcComputeTabKBTabLabel", lang] = "KB";
     	translate["tcComputeTabBuiltinTabLabel", lang] = "built-in";
     translate["tcPreferencesTabLabel", lang] = "Preferences";
-	    translate["tcPrefLanguage", lang] = "Language:";
-	    translate["tcPrefArchiveDir", lang] = "Archive Directory:";
+	    translate["tcPrefLanguage", lang] = "Language";
+	    translate["tcPrefArchiveDir", lang] = "Archive Directory";
     translate["not available", lang] = "not available";
     translate["No knowledge available", lang] = "No knowledge available";
     
@@ -61,4 +61,5 @@ With[ {lang = "English"},
 (* Theorema`Language`Session` *)
     translate["notUniqueLabel", lang] = "This label is not unique in the notebook: ";
     translate["archiveNotFound", lang] = "This archive was not found: ";
+    translate["fileTypeArchive", lang] = "Theorema archive";
 ]

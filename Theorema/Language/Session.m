@@ -236,7 +236,7 @@ openEnvironment[type_String] :=
 		$parseTheoremaExpressions = True; 
         PrependTo[$environmentLabels, type];
         SetOptions[ InputNotebook[], DefaultNewCellStyle -> "FormalTextInputFormula"];
-        $ContextPath = Join[{"Theorema`Language`", "Theorema`"}, $ContextPath];
+        PrependTo[ $ContextPath, "Theorema`Language`"];
         (* Set default context if I am not in an archive. *)
         If[ !inArchive[], Begin["Theorema`Knowledge`"]];
     ]
@@ -246,7 +246,7 @@ closeEnvironment[] :=
 	Module[{},
 		(* Restore context if I am not in an archive. *)
 		If[ !inArchive[], End[]];
-		$ContextPath = Fold[ DeleteCases, $ContextPath, {"Theorema`Language`", "Theorema`"}];
+		$ContextPath = DeleteCases[ $ContextPath, "Theorema`Language`"];
 		SetOptions[ InputNotebook[], DefaultNewCellStyle -> "Input"];
         $environmentLabels = Rest[$environmentLabels];
 		$parseTheoremaExpressions = False; 
@@ -268,7 +268,7 @@ getArchiveNotebookPath[args___] := unexpected[ getArchiveNotebookPath, {args}]
 openArchive[name_String] :=
 	Module[{nb = EvaluationNotebook[]},
 		NotebookFind[nb, "ArchiveInfo", All, CellStyle];
-		BeginPackage["Theorema`Knowledge`"<>name];
+		BeginPackage[name, {"Theorema`"}];
 		(* Based on the current context set the $archiveFileName for the current archive notebook. *)
 		Theorema`Common`$archiveFileName = getArchiveNotebookPath[$Context];
 		SelectionEvaluate[nb];
@@ -329,19 +329,25 @@ closeArchive[_String] :=
 	]
 closeArchive[args___] := unexpected[closeArchive, {args}]
 
+SetAttributes[ loadArchive, Listable]
+
+loadArchive[] := 
+	Module[{fileList=FileNameSetter[$TheoremaArchiveDirectory, "OpenList", {translate["fileTypeArchive"]->{"*.ta"}}]}, 
+		loadArchive[fileList];
+	]
 loadArchive[name_String] :=
 	Module[{archivePath, archiveNotebookPath, pos, originalArchNeeds, tmpArchNeeds},
 		(* Save Current Settings into the local Variables *)
 		originalArchNeeds = $tmaArchNeeds;
-		BeginPackage["Theorema`Knowledge`"<>name];
-			archivePath = getArchivePath[ $Context];
-			archiveNotebookPath = getArchiveNotebookPath[ $Context];
-			If[!(FileExistsQ[archivePath] && FileExistsQ[archiveNotebookPath]),
-				DialogInput[Column[{translate["archiveNotFound"] <> name,Button["OK", DialogReturn[True]]}]];
-				Return[]
-			];
-			Get[archivePath];
-		EndPackage[];
+		archivePath = getArchivePath[ name];
+		archiveNotebookPath = getArchiveNotebookPath[ name];
+		If[!(FileExistsQ[archivePath] && FileExistsQ[archiveNotebookPath]),
+			DialogInput[Column[{translate["archiveNotFound"] <> name,Button["OK", DialogReturn[True]]}]];
+			Return[]
+		];
+		BeginPackage[ name];
+			Get[archivePath, Path->$TheoremaArchivePath];
+		EndPackage[]; (* ContextPath updated in order to make sure that public archive symbols are visible *)
 		$tmaEnv = Union[$tmaEnv, $tmaArch];
 		pos = Position[ Theorema`Interface`GUI`Private`$kbStruct, archiveNotebookPath -> _];
         If[ pos === {},

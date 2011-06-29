@@ -43,8 +43,8 @@ Map[ Get, FileNames[ "*.m", ToFileName[{$TheoremaDirectory, "Theorema", "Kernel"
 
 Protect[$TheoremaDirectory]; 
 
-$TheoremaArchiveDirectory = $TheoremaDirectory;
-$TheoremaArchivePath = Prepend[ $Path, $TheoremaArchiveDirectory];
+$TheoremaArchiveDirectory = ToFileName[{$TheoremaDirectory,"Theorema","Knowledge"}];
+$TheoremaArchivePath = {$HomeDirectory, $TheoremaArchiveDirectory};
 
 If[ TrueQ[$Notebooks],
     If[!ValueQ[`priv`welcomeScreen],
