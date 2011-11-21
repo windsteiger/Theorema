@@ -32,6 +32,14 @@ applyHold[Hold[a_], Hold[b___]] := Hold[a[b]];
 
 joinHold[Hold[a_], Hold[b___]] := Hold[a, b];
 
+
+(* ::Subsubsection:: *)
+(* notification *)
+
+notification[msg__String] /; $Notebooks := MessageDialog[ StringForm[msg]]
+notification[msg__String] := Message[ msg]
+notification[args___] := unexpected[notification, {args}]
+
 End[]
 
 EndPackage[]

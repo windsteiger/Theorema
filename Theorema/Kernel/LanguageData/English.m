@@ -6,5 +6,9 @@ With[ {lang = "English"},
 	MessageName[$TheoremaArchiveDirectory, "usage", lang] = "The directory where Theorema stores knowledge archives.";
 	MessageName[$TheoremaArchivePath, "usage", lang] = "The directory where Theorema searches for knowledge archives.";
 	MessageName[loadArchive, "usage", lang] = "loadArchive[ArchiveName`] loads the specified archive into the current session.";
+	
+	MessageName[Theorema, "archiveName", lang] = "Wrong name for archive: `` . Theorema archive name must be a context string.";
+	MessageName[Theorema, "archiveNotFound", lang] = "No such archive: `` .";
+	
 ]
 

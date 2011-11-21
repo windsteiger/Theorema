@@ -414,7 +414,8 @@ archButtons[] :=
         	Column[{
         		makeArchNewButton[],
         		makeArchInfoButton[],
-        		makeArchCloseButton[]}
+        		makeArchCloseButton[],
+        		makeArchLoadButton[]}
         	]
         ]
     ]
@@ -463,6 +464,15 @@ archiveInfoCells[args___] := unexpected[archiveInfoCells, {args}]
 
 archiveCloseCells[] := Cell["\[FilledUpTriangle]", "CloseArchive"]
 archiveCloseCells[args___] := unexpected[archiveCloseCells, {args}]
+
+makeArchLoadButton[] :=
+    DynamicModule[ {arch = $TheoremaArchiveDirectory},
+        Row[{translate["tcLangTabArchTabLoadArch"],
+            FileNameSetter[Dynamic[arch], "OpenList", {translate["fileTypeArchive"]->{"*.ta"}}, Appearance -> translate["tcLangTabArchTabButtonSelectLabel"]],
+            Button[Style[ translate["tcLangTabArchTabButtonLoadLabel"], "EnvButton"], loadArchive[arch], 
+            Appearance -> "FramedPalette", Alignment -> {Left, Top}]}]
+    ]
+makeArchLoadButton[args___] := unexpected[makeArchLoadButton, {args}]
 
 
 (* ::Section:: *)

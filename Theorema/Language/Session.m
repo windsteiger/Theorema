@@ -257,12 +257,17 @@ closeEnvironment[args___] := unexpected[ closeEnvironment, {args}]
 (* ::Section:: *)
 (* Archives *)
 
-getArchivePath[context_] := ToFileName[ Theorema`$TheoremaArchiveDirectory, 
-			StringReplacePart[ ContextToFileName[ context], "ta", -1]];
+getArchivePath[context_String] :=
+    Check[
+    	ToFileName[ Theorema`$TheoremaArchiveDirectory, StringReplacePart[ ContextToFileName[ context], "ta", -1]],
+    	notification[ Theorema::archiveName, context],
+    		{Context::cxname}];
 getArchivePath[args___] := unexpected[ getArchivePath, {args}]
 
-getArchiveNotebookPath[context_] := ToFileName[ Theorema`$TheoremaArchiveDirectory, 
-			StringReplacePart[ ContextToFileName[ context], "nb", -1]];
+getArchiveNotebookPath[context_String] := Check[
+    	ToFileName[ Theorema`$TheoremaArchiveDirectory, StringReplacePart[ ContextToFileName[ context], "nb", -1]],
+    	notification[ StringForm[ Theorema::archiveName, context]],
+    		{Context::cxname}];
 getArchiveNotebookPath[args___] := unexpected[ getArchiveNotebookPath, {args}]
 
 openArchive[name_String] :=
@@ -331,10 +336,8 @@ closeArchive[args___] := unexpected[closeArchive, {args}]
 
 SetAttributes[ loadArchive, Listable]
 
-loadArchive[] := 
-	Module[{fileList=FileNameSetter[$TheoremaArchiveDirectory, "OpenList", {translate["fileTypeArchive"]->{"*.ta"}}]}, 
-		loadArchive[fileList];
-	]
+(* tbd: loadArchive with full path name *)
+
 loadArchive[name_String] :=
 	Module[{archivePath, archiveNotebookPath, pos, originalArchNeeds, tmpArchNeeds},
 		(* Save Current Settings into the local Variables *)
@@ -342,7 +345,7 @@ loadArchive[name_String] :=
 		archivePath = getArchivePath[ name];
 		archiveNotebookPath = getArchiveNotebookPath[ name];
 		If[!(FileExistsQ[archivePath] && FileExistsQ[archiveNotebookPath]),
-			DialogInput[Column[{translate["archiveNotFound"] <> name,Button["OK", DialogReturn[True]]}]];
+			notification[ Theorema::archiveNotFound, name];
 			Return[]
 		];
 		BeginPackage[ name];

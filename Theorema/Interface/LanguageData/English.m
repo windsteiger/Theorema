@@ -35,6 +35,9 @@ With[ {lang = "English"},
     		translate["tcLangTabArchTabButtonArchLabel", lang] = "New Archive";
     		translate["tcLangTabArchTabButtonInfoLabel", lang] = "Archive Info";
     		translate["tcLangTabArchTabButtonCloseLabel", lang] = "Close Archive";
+    		translate["tcLangTabArchTabLoadArch", lang] = "Load Archives: ";
+    		translate["tcLangTabArchTabButtonSelectLabel", lang] = "Select Archives ...";
+    		translate["tcLangTabArchTabButtonLoadLabel", lang] = "Load";
     translate["tcProveTabLabel", lang] = "Prove";
     	translate["tcProveTabKBTabLabel", lang] = "KB";
     	translate["tcProveTabBuiltinTabLabel", lang] = "built-in";
@@ -60,6 +63,5 @@ With[ {lang = "English"},
 	    
 (* Theorema`Language`Session` *)
     translate["notUniqueLabel", lang] = "This label is not unique in the notebook: ";
-    translate["archiveNotFound", lang] = "This archive was not found: ";
     translate["fileTypeArchive", lang] = "Theorema archive";
 ]

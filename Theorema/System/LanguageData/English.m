@@ -29,6 +29,7 @@ With[ {lang = "English"},
 	MessageName[replaceAllExcept, "usage", lang] = "replaceAllExcept[ expr, rules, expt] applies rule(s) to all subparts of 'expr' except those contained in the list 'expt'.";
 	MessageName[joinHold, "usage", lang] = "joinHold[Hold[a],Hold[b]] produces Hold[a,b].";
 	MessageName[applyHold, "usage", lang] = "applyHold[Hold[a],Hold[b]] produces Hold[a[b]]";
+	MessageName[notification, "usage", lang] = "notification[text] displays 'text' as a user notification.";
 
 (* Theorema`Interface`GUI` *)
 	MessageName[$theoremaGUI, "usage", lang] = "Theorema GUI structure";
