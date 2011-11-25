@@ -223,11 +223,7 @@ kbSelectProve[_] := False
 (* updateKBBrowser *)
 
 updateKBBrowser[] :=
-    Module[ {file, pos, new},
-    	If[!inArchive[],
-    		file = CurrentValue["NotebookFullFileName"],
-    		file = $archiveFileName
-    	];
+    Module[ {file=CurrentValue["NotebookFullFileName"], pos, new},
         pos = Position[ $kbStruct, file -> _];
         new = file -> With[ {nb = NotebookGet[EvaluationNotebook[]]},
                           extractKBStruct[nb] /. l_?VectorQ :> Extract[nb, l]

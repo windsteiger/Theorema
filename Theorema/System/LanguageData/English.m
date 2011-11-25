@@ -22,7 +22,6 @@ With[ {lang = "English"},
 	MessageName[$formulaCounterName,"usage", lang] = "Name of formulaCounter in the notebook options in CounterAssignments parameter.";
 	MessageName[getCellIDLabel, "usage", lang] = "getCellIDLabel[cellID_Integer] returns string label for the given integer CellID value.";
 	MessageName[getCleanCellTags,"usage", lang] = "getCleanCellTags[cellTags] returns all CellTags except tags used for cell identification: CellID_12345 and NotebookName_abcde.";
-	MessageName[$archiveFileName,"usage", lang] = "FileName of currently processed archive.";
 	MessageName[inArchive,"usage",lang] = "inArchive[] returns True when we are currently processing an archive.";
 	
 (* Theorema`Tools` *)
