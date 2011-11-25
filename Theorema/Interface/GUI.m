@@ -315,10 +315,10 @@ displayBuiltinBrowser[] :=
 displayBuiltinBrowser[args___] := unexcpected[ displayBuiltinBrowser, {args}]
 
 printComputationInfo[] :=
-  Module[ {act},
-      act = Union[ Cases[ DownValues[Theorema`Computation`activeComputation], HoldPattern[s_:>True]:>s[[1,1]]]];
-      Print[OpenerView[{"", OpenerView[{Style[translate["Builtins used in computation"], "CILabel"], act}]}, False]];
-  ]
+    Module[ {act},
+        act = Union[ Cases[ DownValues[Theorema`Computation`activeComputation], HoldPattern[s_:>True]:>s[[1,1]]]];
+        CellPrint[Cell[ToBoxes[OpenerView[{"", OpenerView[{Style[translate["Builtins used in computation"], "CILabel"], act}]}, False]], "ComputationInfo"]];
+    ]
 printComputationInfo[args___] := unexcpected[ printComputationInfo, {args}]
 
 
@@ -382,14 +382,13 @@ envButtonData[args___] :=
 
 makeEnvButton[ bname_String] :=
     With[ { bd = envButtonData[bname]},
-			Button[Style[ translate[bd[[1]]], "EnvButton"], insertNewEnv[bname], Appearance -> "FramedPalette", Alignment -> {Left, Top}]
+			Button[Style[ translate[bd[[1]]], "EnvButton"], insertNewEnv[bname], Alignment -> {Left, Top}]
     ]
 makeEnvButton[args___] :=
     unexpected[makeEnvButton, {args}]
 
 makeFormButton[] :=
-    Button[Style[ translate["tcLangTabEnvTabButtonFormLabel"], "EnvButton"], insertNewFormulaCell[ "Env"], 
-    	Appearance -> "FramedPalette", Alignment -> {Left, Top}]
+    Button[Style[ translate["tcLangTabEnvTabButtonFormLabel"], "EnvButton"], insertNewFormulaCell[ "Env"], Alignment -> {Left, Top}]
 makeFormButton[args___] :=
     unexpected[makeFormButton, {args}]
     
@@ -412,28 +411,27 @@ archButtons[] :=
     Module[ {},
         Pane[
         	Column[{
+        		OpenerView[{Style[translate["tcLangTabArchTabSectionCreate"],"Section"], Column[{
         		makeArchNewButton[],
         		makeArchInfoButton[],
-        		makeArchCloseButton[],
-        		makeArchLoadButton[]}
+        		makeArchCloseButton[]}]}],
+        		OpenerView[{Style[translate["tcLangTabArchTabSectionLoad"],"Section"], Column[{
+        		makeArchLoadButton[]}]}]}
         	]
         ]
     ]
 archButtons[args___] := unexpected[archButtons, {args}]
 
 makeArchNewButton[] :=
-	Button[Style[ translate["tcLangTabArchTabButtonArchLabel"], "EnvButton"], insertNewArchive[], 
-    	Appearance -> "FramedPalette", Alignment -> {Left, Top}]
+	Button[Style[ translate["tcLangTabArchTabButtonArchLabel"], "EnvButton"], insertNewArchive[], Alignment -> {Left, Top}]
 makeArchNewButton[args___] := unexpected[makeArchNewButton, {args}]
 
 makeArchInfoButton[] :=
-	Button[Style[ translate["tcLangTabArchTabButtonInfoLabel"], "EnvButton"], insertArchiveInfo[], 
-    	Appearance -> "FramedPalette", Alignment -> {Left, Top}]
+	Button[Style[ translate["tcLangTabArchTabButtonInfoLabel"], "EnvButton"], insertArchiveInfo[], Alignment -> {Left, Top}]
 makeArchInfoButton[args___] := unexpected[makeArchInfoButton, {args}]
 
 makeArchCloseButton[] :=
-	Button[Style[ translate["tcLangTabArchTabButtonCloseLabel"], "EnvButton"], insertCloseArchive[], 
-    	Appearance -> "FramedPalette", Alignment -> {Left, Top}]
+	Button[Style[ translate["tcLangTabArchTabButtonCloseLabel"], "EnvButton"], insertCloseArchive[], Alignment -> {Left, Top}]
 makeArchCloseButton[args___] := unexpected[makeArchCloseButton, {args}]
 
 insertNewArchive[] :=
@@ -467,13 +465,34 @@ archiveCloseCells[args___] := unexpected[archiveCloseCells, {args}]
 
 makeArchLoadButton[] :=
     DynamicModule[ {arch = $TheoremaArchiveDirectory},
-        Row[{translate["tcLangTabArchTabLoadArch"],
-            FileNameSetter[Dynamic[arch], "OpenList", {translate["fileTypeArchive"]->{"*.ta"}}, Appearance -> translate["tcLangTabArchTabButtonSelectLabel"]],
-            Button[Style[ translate["tcLangTabArchTabButtonLoadLabel"], "EnvButton"], loadArchive[arch], 
-            Appearance -> "FramedPalette", Alignment -> {Left, Top}]}]
+        Column[{
+            Dynamic[showSelectedArchives[arch]], 
+            Row[{FileNameSetter[Dynamic[arch], "OpenList", {translate["fileTypeArchive"]->{"*.ta"}}, Appearance -> translate["tcLangTabArchTabButtonSelectLabel"]],
+            Button[Style[ translate["tcLangTabArchTabButtonLoadLabel"], "EnvButton"], (loadArchive[arch];arch=$TheoremaArchiveDirectory;), Alignment -> {Left, Top}]}]}]
     ]
 makeArchLoadButton[args___] := unexpected[makeArchLoadButton, {args}]
 
+showSelectedArchives[ l_List] :=
+    Pane[ Column[ Map[ archiveName, l]], ImageSize->{200,20*Length[l]}, ImageSizeAction->"Scrollable"]
+showSelectedArchives[ s_String] :=
+    translate["tcLangTabArchTabNoArchSel"]
+showSelectedArchives[args___] := unexpected[showSelectedArchives, {args}]
+
+archiveName[ f_String] :=
+    Module[ {file = OpenRead[f],meta,n},
+        While[ !(OptionQ[meta = Read[file, Expression]] || meta === EndOfFile)];
+        Close[file];
+        If[ meta===EndOfFile,
+            Return[translate["tcLangTabArchTabNoArchName"]],
+            n = "Archive name" /. meta;
+            If[ StringQ[n] && StringMatchQ[n, (WordCharacter|"`")..~~"`"],
+                n,
+                translate["tcLangTabArchTabNoArchName"]
+            ]
+        ]
+    ]
+archiveName[args___] :=
+    unexpected[archiveName, {args}]
 
 (* ::Section:: *)
 (* Math Tab *)
@@ -635,7 +654,7 @@ langButtonData[args___] :=
 makeLangButton[ bname_String] :=
     With[ { bd = langButtonData[bname]},
 			Tooltip[ Button[ Style[ bd[[1]], "LangButton"], 
-				FrontEndExecute[{NotebookApply[ InputNotebook[], bd[[2]], Placeholder]}], Appearance -> "FramedPalette", Alignment -> {Left, Top}, ImageSize -> All],
+				FrontEndExecute[{NotebookApply[ InputNotebook[], bd[[2]], Placeholder]}], Appearance -> "DialogBox", Alignment -> {Left, Top}, ImageSize -> All],
 				bd[[3]], TooltipDelay -> 0.5]
     ]
 makeLangButton[args___] :=
@@ -661,8 +680,7 @@ compSetup[args___] :=
     unexpected[compSetup, {args}]
 
 makeCompButton[] :=
-    Button[Style[ translate["tcComputeTabSetupTabButtonCompLabel"], "EnvButton"], insertNewFormulaCell[ "COMPUTE"], 
-    	Appearance -> "FramedPalette", Alignment -> {Left, Top}]
+    Button[Style[ translate["tcComputeTabSetupTabButtonCompLabel"], "EnvButton"], insertNewFormulaCell[ "COMPUTE"], Alignment -> {Left, Top}]
 makeCompButton[args___] :=
     unexpected[makeCompButton, {args}]
 
@@ -677,15 +695,13 @@ checkSession[ test_String] :=
         ]
     ]
 checkSession[args___] :=
-    unexpected[checkSession, {args}]
-
-
+    unexpected[checkSession, {args}];
 
 (* ::Section:: *)
 (* end of package *)
 
 initGUI[];
 
-End[] (* End Private Context *)
+End[]; (* End Private Context *)
 
 EndPackage[];

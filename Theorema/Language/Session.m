@@ -257,17 +257,19 @@ closeEnvironment[args___] := unexpected[ closeEnvironment, {args}]
 (* ::Section:: *)
 (* Archives *)
 
-getArchivePath[context_String] :=
-    Check[
-    	ToFileName[ Theorema`$TheoremaArchiveDirectory, StringReplacePart[ ContextToFileName[ context], "ta", -1]],
-    	notification[ Theorema::archiveName, context],
-    		{Context::cxname}];
+getArchivePath[arch_String] :=
+    Module[ {fn},
+        Which[ FileExtension[arch]==="ta",
+            arch,
+            StringQ[fn = Quiet[ContextToFileName[ arch]]],
+            StringReplacePart[ fn, "ta", -1],
+            True,
+            notification[ Theorema::archiveName, context]
+        ]
+    ];
 getArchivePath[args___] := unexpected[ getArchivePath, {args}]
 
-getArchiveNotebookPath[context_String] := Check[
-    	ToFileName[ Theorema`$TheoremaArchiveDirectory, StringReplacePart[ ContextToFileName[ context], "nb", -1]],
-    	notification[ StringForm[ Theorema::archiveName, context]],
-    		{Context::cxname}];
+getArchiveNotebookPath[arch_String] := StringReplacePart[getArchivePath[arch],"nb",{-2,-1}]
 getArchiveNotebookPath[args___] := unexpected[ getArchiveNotebookPath, {args}]
 
 openArchive[name_String] :=
@@ -277,7 +279,6 @@ openArchive[name_String] :=
 		(* Based on the current context set the $archiveFileName for the current archive notebook. *)
 		Theorema`Common`$archiveFileName = getArchiveNotebookPath[$Context];
 		SelectionEvaluate[nb];
-		"Null"
 	]
 openArchive[args___] := unexpected[openArchive, {args}]
 
@@ -330,21 +331,17 @@ closeArchive[_String] :=
 		$tmaArch = {};
 		$tmaArchTree = {};
 		$tmaArchNeeds = {};
-		"Null"
 	]
 closeArchive[args___] := unexpected[closeArchive, {args}]
 
 SetAttributes[ loadArchive, Listable]
 
-(* tbd: loadArchive with full path name *)
-
-loadArchive[name_String] :=
+loadArchive[name_String, globals_List:{}] :=
 	Module[{archivePath, archiveNotebookPath, pos, originalArchNeeds, tmpArchNeeds},
 		(* Save Current Settings into the local Variables *)
 		originalArchNeeds = $tmaArchNeeds;
 		archivePath = getArchivePath[ name];
-		archiveNotebookPath = getArchiveNotebookPath[ name];
-		If[!(FileExistsQ[archivePath] && FileExistsQ[archiveNotebookPath]),
+		If[!FileExistsQ[archivePath],
 			notification[ Theorema::archiveNotFound, name];
 			Return[]
 		];
@@ -352,9 +349,9 @@ loadArchive[name_String] :=
 			Get[archivePath, Path->$TheoremaArchivePath];
 		EndPackage[]; (* ContextPath updated in order to make sure that public archive symbols are visible *)
 		$tmaEnv = Union[$tmaEnv, $tmaArch];
-		pos = Position[ Theorema`Interface`GUI`Private`$kbStruct, archiveNotebookPath -> _];
-        If[ pos === {},
-            AppendTo[ Theorema`Interface`GUI`Private`$kbStruct, archiveNotebookPath -> $tmaArchTree],
+		If[!FileExistsQ[archiveNotebookPath=getArchiveNotebookPath[ name]],archiveNotebookPath=archivePath];
+        If[ (pos = Position[ Theorema`Interface`GUI`Private`$kbStruct, archiveNotebookPath -> _]) === {},
+            AppendTo[ Theorema`Interface`GUI`Private`$kbStruct, archivePath -> $tmaArchTree],
             Theorema`Interface`GUI`Private`$kbStruct[[pos[[1,1]]]] = archiveNotebookPath -> $tmaArchTree
         ];
         (* Resursively load all dependencies, we need a local variable 
