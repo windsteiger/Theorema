@@ -32,6 +32,7 @@ With[ {lang = "English"},
 
 (* Theorema`Interface`GUI` *)
 	MessageName[$theoremaGUI, "usage", lang] = "Theorema GUI structure";
+	MessageName[$kbStruct, "usage", lang] = "Structured knowledge base to be displayed in the KB browser";
 	MessageName[updateKBBrowser, "usage", lang] = "";
 	MessageName[displayKBBrowser, "usage", lang] = "";
 	MessageName[$initLabel, "usage", lang] = "Initial label of each formula. Serves as a hint for user to provide system with her own label.";

@@ -279,10 +279,10 @@ openArchive[name_String] :=
             CreateDirectory[ DirectoryName[ archiveNotebookPath]]
         ];
         (* TODO: Check whether notebook or corresponding archive already exists in order to prevent overwriting existing archives *)
-        posBrowser = Position[ Theorema`Interface`GUI`Private`$kbStruct, CurrentValue["NotebookFullFileName"] -> _, 1, 1];
+        posBrowser = Position[ $kbStruct, CurrentValue["NotebookFullFileName"] -> _, 1, 1];
         NotebookSave[ nb, archiveNotebookPath];
         If[ Length[posBrowser] === 1,
-            Theorema`Interface`GUI`Private`$kbStruct = ReplacePart[ Theorema`Interface`GUI`Private`$kbStruct, Append[posBrowser[[1]],1] -> CurrentValue["NotebookFullFileName"]]
+            $kbStruct = ReplacePart[ $kbStruct, Append[posBrowser[[1]],1] -> CurrentValue["NotebookFullFileName"]]
         ];
         NotebookFind[ nb, "ArchiveInfo", All, CellStyle];
         BeginPackage[ name, {"Theorema`"}];
@@ -321,7 +321,7 @@ closeArchive[_String] :=
         archName = $Context;
         archivePath = getArchivePath[ archName];
         archiveNotebookPath = getArchiveNotebookPath[ archName];
-        $tmaArchTree = currNB /. Theorema`Interface`GUI`Private`$kbStruct;
+        $tmaArchTree = currNB /. $kbStruct;
         EndPackage[];
         (* Reset the context path in order to force Mathematica to write
         explicit contexts to the file *)
@@ -358,9 +358,9 @@ loadArchive[name_String] :=
 		EndPackage[]; (* ContextPath updated in order to make sure that public archive symbols are visible *)
 		$tmaEnv = Union[$tmaEnv, $tmaArch];
 		If[!FileExistsQ[archiveNotebookPath=getArchiveNotebookPath[ name]],archiveNotebookPath=archivePath];
-        If[ (pos = Position[ Theorema`Interface`GUI`Private`$kbStruct, archiveNotebookPath -> _]) === {},
-            AppendTo[ Theorema`Interface`GUI`Private`$kbStruct, archiveNotebookPath -> $tmaArchTree],
-            Theorema`Interface`GUI`Private`$kbStruct[[pos[[1,1]]]] = archiveNotebookPath -> $tmaArchTree
+        If[ (pos = Position[ $kbStruct, archiveNotebookPath -> _]) === {},
+            AppendTo[ $kbStruct, archiveNotebookPath -> $tmaArchTree],
+            $kbStruct[[pos[[1,1]]]] = archiveNotebookPath -> $tmaArchTree
         ];
         (* Resursively load all dependencies, we need a local variable 
            in order not to be overriden by first subarchive load call. *)
