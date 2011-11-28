@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       145,          7]
-NotebookDataLength[     10056,        387]
-NotebookOptionsPosition[      6665,        289]
-NotebookOutlinePosition[      7130,        309]
-CellTagsIndexPosition[      7087,        306]
+NotebookDataLength[     10088,        388]
+NotebookOptionsPosition[      6697,        290]
+NotebookOutlinePosition[      7162,        310]
+CellTagsIndexPosition[      7119,        307]
 MenuPosition->1300
 WindowFrame->Normal*)
 
@@ -227,7 +227,8 @@ Cell[StyleData["EnvButton", StyleDefinitions -> StyleData["Button"]],
  FontWeight->"Plain",
  FontSlant->"Plain",
  FontVariations->{"StrikeThrough"->False,
- "Underline"->False}],
+ "Underline"->False},
+ Appearance -> "FramedPalette"],
 
 Cell[StyleData["LangButton", StyleDefinitions -> StyleData["Button"]],
  FontFamily->"Verdana",
@@ -371,23 +372,23 @@ Cell[4859, 209, 210, 6, 41, 63, 0, "StyleData", \
 }, Open  ]],
 Cell[CellGroupData[{
 Cell[5118, 221, 32, 0, 54, "Section"],
-Cell[5153, 223, 215, 6, 37, 69, 0, "StyleData", "EnvButton", "All"],
-Cell[5371, 231, 216, 6, 37, 70, 0, "StyleData", "LangButton", "All"]
+Cell[5153, 223, 247, 7, 37, 69, 0, "StyleData", "EnvButton", "All"],
+Cell[5403, 232, 216, 6, 37, 70, 0, "StyleData", "LangButton", "All"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[5624, 242, 31, 0, 54, "Section"],
+Cell[5656, 243, 31, 0, 54, "Section"],
 Cell[CellGroupData[{
-Cell[5680, 246, 43, 1, 36, 28, 0, "StyleData", "Hyperlink", "All"],
-Cell[5726, 249, 59, 1, 41, 44, 0, "StyleData", "Hyperlink", "Presentation"]
+Cell[5712, 247, 43, 1, 36, 28, 0, "StyleData", "Hyperlink", "All"],
+Cell[5758, 250, 59, 1, 41, 44, 0, "StyleData", "Hyperlink", "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[5822, 255, 631, 20, 51, 79, 0, "StyleData", "SelectionPlaceholder", "All",
+Cell[5854, 256, 631, 20, 51, 79, 0, "StyleData", "SelectionPlaceholder", "All",
  StyleMenuListing->None],
-Cell[6456, 277, 70, 1, 45, 55, 0, "StyleData", "SelectionPlaceholder", \
+Cell[6488, 278, 70, 1, 45, 55, 0, "StyleData", "SelectionPlaceholder", \
 "Presentation"]
 }, Open  ]],
-Cell[6541, 281, 41, 1, 40, 23, 0, "StyleData", "Pane", "All"],
-Cell[6585, 284, 64, 2, 40, 26, 0, "StyleData", "TabView", "All"]
+Cell[6573, 282, 41, 1, 40, 23, 0, "StyleData", "Pane", "All"],
+Cell[6617, 285, 64, 2, 40, 26, 0, "StyleData", "TabView", "All"]
 }, Open  ]]
 }
 ]
