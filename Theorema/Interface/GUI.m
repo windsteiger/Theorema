@@ -180,7 +180,7 @@ structView[file_, Cell[content_, "FormalTextInputFormula", ___], tags_, task_] :
     
 structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cellTags_, b___], 
   tags_, task_] :=
-  Module[ { isEval = MemberQ[ $tmaEnv, {cellTags,_}], cleanCellTags, formulaLabel, cellIDLabel},
+  Module[ { isEval = MemberQ[ $tmaEnv, {cellTags,_}] || MemberQ[ $tmaArch, {cellTags,_}], cleanCellTags, formulaLabel, cellIDLabel},
 	Assert[VectorQ[cellTags, StringQ]];
 	cellIDLabel = getCellIDLabel[ CellID /. {a,b}];
 	cleanCellTags = getCleanCellTags[cellTags];
@@ -473,22 +473,6 @@ showSelectedArchives[ l_List] :=
 showSelectedArchives[ s_String] :=
     translate["tcLangTabArchTabNoArchSel"]
 showSelectedArchives[args___] := unexpected[showSelectedArchives, {args}]
-
-archiveName[ f_String] :=
-    Module[ {file = OpenRead[f],meta,n},
-        While[ !(OptionQ[meta = Read[file, Expression]] || meta === EndOfFile)];
-        Close[file];
-        If[ meta===EndOfFile,
-            Return[translate["tcLangTabArchTabNoArchName"]],
-            n = "Archive name" /. meta;
-            If[ StringQ[n] && StringMatchQ[n, (WordCharacter|"`")..~~"`"],
-                n,
-                translate["tcLangTabArchTabNoArchName"]
-            ]
-        ]
-    ]
-archiveName[args___] :=
-    unexpected[archiveName, {args}]
 
 (* ::Section:: *)
 (* Math Tab *)

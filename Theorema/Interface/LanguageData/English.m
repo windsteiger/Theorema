@@ -38,7 +38,6 @@ With[ {lang = "English"},
     		translate["tcLangTabArchTabButtonCloseLabel", lang] = "Close Archive";
     		translate["tcLangTabArchTabSectionLoad", lang] = "Loading Archives";
     		translate["tcLangTabArchTabNoArchSel", lang] = "No archives selected";
-    		translate["tcLangTabArchTabNoArchName", lang] = "No archive name available for selected archive. Check file content.";
     		translate["tcLangTabArchTabButtonSelectLabel", lang] = "Select Archives ...";
     		translate["tcLangTabArchTabButtonLoadLabel", lang] = "Load";
     translate["tcProveTabLabel", lang] = "Prove";
@@ -61,10 +60,12 @@ With[ {lang = "English"},
 
 (* General *)
 	translate["outsideSession", lang] = "An evaluation of this type of cell is not expected in the current type of session";
-	translate["archLabelNeeds", lang] = "needs:";
-	translate["archLabelPublic", lang] = "public:";
+	translate["archLabelNeeds", lang] = "needs: ";
+	translate["archLabelPublic", lang] = "public: ";
 	    
 (* Theorema`Language`Session` *)
     translate["notUniqueLabel", lang] = "This label is not unique in the notebook: ";
     translate["fileTypeArchive", lang] = "Theorema archive";
+    translate["noArchName", lang] = "No archive name available for chosen archive. Check file content.";
+
 ]

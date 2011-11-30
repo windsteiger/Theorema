@@ -23,6 +23,7 @@ With[ {lang = "English"},
 	MessageName[getCellIDLabel, "usage", lang] = "getCellIDLabel[cellID_Integer] returns string label for the given integer CellID value.";
 	MessageName[getCleanCellTags,"usage", lang] = "getCleanCellTags[cellTags] returns all CellTags except tags used for cell identification: CellID_12345 and NotebookName_abcde.";
 	MessageName[inArchive,"usage",lang] = "inArchive[] returns True when we are currently processing an archive.";
+	MessageName[archiveName,"usage",lang] = "archiveName[f] returns the short archive name (=context name) for an archive stored in file f.";
 	
 (* Theorema`Tools` *)
 	MessageName[replaceAllExcept, "usage", lang] = "replaceAllExcept[ expr, rules, expt] applies rule(s) to all subparts of 'expr' except those contained in the list 'expt'.";
