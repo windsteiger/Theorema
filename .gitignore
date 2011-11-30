@@ -2,3 +2,4 @@ Theorema/Knowledge/*
 .MathematicaResources
 .settings
 .project
+*.orig
