@@ -178,26 +178,48 @@ structView[file_, item_List, tags_, task_] :=
 
 structView[file_, Cell[content_, "FormalTextInputFormula", ___], tags_, task_] :=
     Sequence[]
-    
+
+(*
+  If we load an archive without corresponding notebook available, then $kbStruct contains the archive name instead of the notebook name.
+  Hence, 'file' will then be the archive instead of the notebook.
+  Instead of hyperlinking into the notebook, we then present a window showing the original cell content.
+*)    
 structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cellTags_, b___], 
   tags_, task_] :=
-  Module[ { isEval = MemberQ[ $tmaEnv, {cellTags,_}] || MemberQ[ $tmaArch, {cellTags,_}], cleanCellTags, formulaLabel, cellIDLabel},
-	Assert[VectorQ[cellTags, StringQ]];
-	cellIDLabel = getCellIDLabel[ CellID /. {a,b}];
-	cleanCellTags = getCleanCellTags[cellTags];
-	(* Join list of CellTags, use $labelSeparator. *)
-	formulaLabel = StringJoin @@ Riffle[cleanCellTags,$labelSeparator];
+  Module[ { isEval = MemberQ[ $tmaEnv, {cellTags,_}] || MemberQ[ $tmaArch, {cellTags,_}], cleanCellTags, formulaLabel, cellIDLabel, nbAvail},
+    Assert[VectorQ[cellTags, StringQ]];
+    cellIDLabel = getCellIDLabel[ CellID /. {a,b}];
+    cleanCellTags = getCleanCellTags[cellTags];
+    (* Join list of CellTags, use $labelSeparator. *)
+    formulaLabel = StringJoin @@ Riffle[cleanCellTags,$labelSeparator];
+    nbAvail = FileExistsQ[file] && FileExtension[file]==="nb";
     {Switch[ task,
-    	"prove",
-    	Row[{Checkbox[Dynamic[kbSelectProve[cellTags]], Enabled->isEval], 
-    		Hyperlink[ Style[formulaLabel, If[ isEval, "FormalTextInputFormula", "FormalTextInputFormulaUneval"]], {file, cellIDLabel}]},
-    		Spacer[10]],
-    	"compute",
-    	Row[{Checkbox[Dynamic[Theorema`Computation`activeComputationKB[cellTags]], Enabled->isEval], 
-    		Hyperlink[ Style[formulaLabel, If[ isEval, "FormalTextInputFormula", "FormalTextInputFormulaUneval"]], {file, cellIDLabel}]},
-    		Spacer[10]]
-    	], {cellTags}}
-  ]
+        "prove",
+        Row[{Checkbox[Dynamic[kbSelectProve[cellTags]], Enabled->isEval], 
+            If[ nbAvail,
+                Hyperlink[ Style[formulaLabel, If[ isEval,
+                                                   "FormalTextInputFormula",
+                                                   "FormalTextInputFormulaUneval"
+                                               ]], {file, cellIDLabel}],
+                Button[ Style[formulaLabel, "FormalTextInputFormula"], 
+                	CreateDialog[{Cell[ content, "Output"], CancelButton["OK", NotebookClose[ButtonNotebook[]]]}],
+                	Appearance->None]
+            ]},
+            Spacer[10]],
+        "compute",
+        Row[{Checkbox[Dynamic[Theorema`Computation`activeComputationKB[cellTags]], Enabled->isEval],
+            If[ nbAvail,
+                Hyperlink[ Style[formulaLabel, If[ isEval,
+                                                   "FormalTextInputFormula",
+                                                   "FormalTextInputFormulaUneval"
+                                               ]], {file, cellIDLabel}],
+                Button[ Style[formulaLabel, "FormalTextInputFormula"],
+                	CreateDialog[{Cell[ content, "Output"], CancelButton["OK", NotebookClose[ButtonNotebook[]]]}],
+                	Appearance->None]
+            ]},
+            Spacer[10]]
+        ], {cellTags}}
+]
 
 (*structView[file_, Cell[content_, "FormalTextInputFormula", ___, CellTags -> ct_, ___], 
   tags_] :=

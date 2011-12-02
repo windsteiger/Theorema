@@ -361,6 +361,7 @@ loadArchive[name_String] :=
         cxt = archiveName[ archivePath];
         Begin[cxt];
         	archiveContent = ReadList[ archivePath, Hold[Expression]];
+        	ReleaseHold[ archiveContent];
         EndPackage[]; (* ContextPath updated in order to make sure that public archive symbols are visible *)
         $tmaEnv = Union[$tmaEnv, $tmaArch];
         If[ !FileExistsQ[archiveNotebookPath = getArchiveNotebookPath[ name]],
