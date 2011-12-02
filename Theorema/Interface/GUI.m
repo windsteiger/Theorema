@@ -100,9 +100,10 @@ extractKBStruct[nb_Notebook] :=
       posSec =  Cases[Position[nb, Cell[_, "Section", ___]], {a___, 1}], 
       posSubsec = Cases[Position[nb, Cell[_, "Subsection", ___]], {a___, 1}], 
       posSubsubsec = Cases[Position[nb, Cell[_, "Subsubsection", ___]], {a___, 1}], 
+      posSubsubsubsec = Cases[Position[nb, Cell[_, "Subsubsubsection", ___]], {a___, 1}], 
       posEnv = Cases[Position[nb, Cell[_, "OpenEnvironment", ___]], {a___, 1}], 
       posInp = Position[nb, Cell[_, "FormalTextInputFormula", ___]], inputs, depth, sub, root, heads, isolated},
-        heads = Join[posEnv, posSubsubsec, posSubsec, posSec, posTit];
+        heads = Join[posEnv, posSubsubsubsec, posSubsubsec, posSubsec, posSec, posTit];
         {inputs, isolated} = Fold[arrangeInput, {Map[List, heads], {}}, posInp];
         depth = Union[Map[Length[#[[1]]] &, inputs]];
         While[Length[depth] > 1,
@@ -155,17 +156,17 @@ arrangeSub[struct_, item : {head_, ___}] :=
 (* structView *)
 Clear[structView];
 
-structView[file_, {head:Cell[sec_, "Title"|"Section"|"Subsection"|"Subsubsection"|"OpenEnvironment", opts___], rest__}, tags_, task_] :=
+structView[file_, {head:Cell[sec_, "Title"|"Section"|"Subsection"|"Subsubsection"|"Subsubsubsection"|"OpenEnvironment", opts___], rest__}, tags_, task_] :=
     Module[ {sub, compTags},
         sub = Transpose[Map[structView[file, #, tags, task] &, {rest}]];
         compTags = Apply[Union, sub[[2]]];
-        {OpenerView[{structView[file, head, compTags, task], Column[sub[[1]]]}, 
+        {OpenerView[{envView[file, head, compTags, task], Column[sub[[1]]]}, 
         	ToExpression[StringReplace["Dynamic[NEWSYM]", 
         		"NEWSYM" -> "$kbStructState$"<>ToString[Hash[FileBaseName[file]]]<>"$"<>ToString[CellID/.{opts}]]]], 
          compTags}
     ]
 
-structView[file_, {Cell[sec_, "Title"|"Section"|"Subsection"|"Subsubsection"|"OpenEnvironment", ___]}, tags_, task_] :=
+structView[file_, {Cell[sec_, "Title"|"Section"|"Subsection"|"Subsubsection"|"Subsubsubsection"|"OpenEnvironment", ___]}, tags_, task_] :=
 	Sequence[]
  
 structView[file_, item_List, tags_, task_] :=
@@ -206,16 +207,19 @@ structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cel
   ]
 *)
 
-structView[file_, Cell[ BoxData[content_String]|content_String, style_, ___], tags_, task_] :=
-    Switch[ task,
-    	"prove",
-        Row[{Checkbox[Dynamic[allTrue[tags, kbSelectProve], setAll[tags, kbSelectProve, #] &]], Style[content, style]}, Spacer[10]],
-        "compute",
-        Row[{Checkbox[Dynamic[allTrue[tags, Theorema`Computation`activeComputationKB], setAll[tags, Theorema`Computation`activeComputationKB, #] &]], Style[content, style]}, Spacer[10]]
-    ]
-
 structView[args___] :=
     unexpected[structView, {args}]
+
+envView[file_, Cell[ BoxData[content_]|content_String, style_, ___], tags_, task_] :=
+    Switch[ task,
+    	"prove",
+        Row[{Checkbox[Dynamic[allTrue[tags, kbSelectProve], setAll[tags, kbSelectProve, #] &]], Style[ DisplayForm[ content], style]}, Spacer[10]],
+        "compute",
+        Row[{Checkbox[Dynamic[allTrue[tags, Theorema`Computation`activeComputationKB], setAll[tags, Theorema`Computation`activeComputationKB, #] &]], Style[ DisplayForm[ content], style]}, Spacer[10]]
+    ]
+envView[args___] :=
+    unexpected[envView, {args}]
+
 
 kbSelectProve[_] := False
 
