@@ -25,7 +25,7 @@ With[ {lang = "English"},
 	MessageName[inArchive,"usage",lang] = "inArchive[] returns True when we are currently processing an archive.";
 	MessageName[archiveName,"usage",lang] = "archiveName[f] returns the short archive name (=context name) for an archive stored in file f.";
 	
-(* Theorema`Tools` *)
+(* Theorema`Utilities` *)
 	MessageName[replaceAllExcept, "usage", lang] = "replaceAllExcept[ expr, rules, expt] applies rule(s) to all subparts of 'expr' except those contained in the list 'expt'.";
 	MessageName[joinHold, "usage", lang] = "joinHold[Hold[a],Hold[b]] produces Hold[a,b].";
 	MessageName[applyHold, "usage", lang] = "applyHold[Hold[a],Hold[b]] produces Hold[a[b]]";

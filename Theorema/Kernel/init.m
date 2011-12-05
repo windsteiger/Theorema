@@ -58,7 +58,7 @@ If[ TrueQ[$Notebooks],
 Get["Theorema`Common`"]
 Get["Theorema`Interface`GUI`"]
 Get["Theorema`Language`"]
-Get["Theorema`Tools`"]
+Get["Theorema`Utilities`"]
 
 EndPackage[]
 	

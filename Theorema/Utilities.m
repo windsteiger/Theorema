@@ -1,6 +1,6 @@
 (* Mathematica Package *)
 
-BeginPackage["Theorema`Tools`"]
+BeginPackage["Theorema`Utilities`"]
 
 Needs["Theorema`Common`"]
 
