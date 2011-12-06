@@ -84,7 +84,7 @@ processEnvironment[x_] :=
 processEnvironment[args___] := unexcpected[ processEnvironment, {args}]
 
 adjustFormulaLabel[nb_NotebookObject] := 
-	Module[{cellTags,cellID,newCellTags, cleanCellTags}, 
+	Module[{ cellTags, cellID, newCellTags, cleanCellTags}, 
 		SelectionMove[nb, All, EvaluationCell];
         {cellTags,cellID} = {CellTags,CellID} /. Options[NotebookSelection[nb], {CellTags,CellID}];
 		(*
@@ -92,7 +92,7 @@ adjustFormulaLabel[nb_NotebookObject] :=
 		 *)
 		cellTags = Flatten[{cellTags}];
 		(*
-		 * Remove any automated labels (begins with "CellID_" or "Context_").
+		 * Remove any automated labels (begins with "ID_" or "Source_").
 		 * Remove initLabel.
 		 *)
 		cleanCellTags = getCleanCellTags[cellTags];
@@ -100,9 +100,7 @@ adjustFormulaLabel[nb_NotebookObject] :=
          * Replace unlabeled formula with counter.
          *)
          If[cleanCellTags==={},
-         	cleanCellTags = automatedFormulaLabel[nb];
-         	,
-         	True
+         	cleanCellTags = automatedFormulaLabel[nb]
          ];
         (*
          * Relabel Cell and hide CellTags.
@@ -114,67 +112,85 @@ adjustFormulaLabel[nb_NotebookObject] :=
 adjustFormulaLabel[args___]	:= unexpected[adjustFormulaLabel,{args}]
 
 (*
- * Returns all CellTags except CellTag used for cell identification: CellID_12345.
+ * Returns all CellTags except the generated tags used for formula identification, i.e. ID_...
  *)
-getCleanCellTags[cellTags_] :=
-	Module[{},
-		Select[cellTags, StringPosition[#, "CellID_"] === {} && StringPosition[#, "Context_"] === {} && # != $initLabel &]
-	]
-getCleanCellTags[args___]	:= unexpected[getCleanCellTags,{args}]
+getCleanCellTags[cellTags_List] :=
+    Select[ cellTags, !StringMatchQ[ #, (("ID_"|"Source_") ~~ __) | $initLabel]&]
+getCleanCellTags[args___] := unexpected[getCleanCellTags,{args}]
+
+getKeyTags[cellTags_List] :=
+    Select[ cellTags, StringMatchQ[ #, ("ID_"|"Source_") ~~ __]&]
+getKeyTags[args___] := unexpected[getKeyTags,{args}]
 
 relabelCell[nb_NotebookObject, cellTags_List, cellID_Integer] :=
-	Module[{newFrameLabel,newCellTags,duplicateCellTags},
+	Module[{ newFrameLabel, newCellTags, autoTags},
 		(* Perform check, weather are the given CellTags unique in the documment. *)
-		duplicateCellTags = findDuplicateCellTags[nb,cellTags];
-		If[duplicateCellTags=!={},
-			DialogInput[Column[{translate["notUniqueLabel"] <> StringJoin @@ Riffle[duplicateCellTags,$labelSeparator],
-				Button["OK", DialogReturn[True]]}]]
-		];
+		ensureNotebookIntegrity[nb,cellTags];
 		(* Join list of CellTags, use $labelSeparator. *)
 		newFrameLabel = StringJoin @@ Riffle[cellTags,$labelSeparator];
 		(* Put newFrameLabel in brackets. *)
 		newFrameLabel = "("<>newFrameLabel<>")";
-		(* Keep cleaned CellTags and add identification (CellId and Context). *)
-		newCellTags = Join[{getCellIDLabel[cellID],getContextLabel[]},cellTags];
+		(* Keep cleaned CellTags and add identification (ID). *)
+		autoTags = {cellIDLabel[cellID], sourceLabel[]};
+		newCellTags = Join[ autoTags, cellTags];
 		SetOptions[NotebookSelection[nb], CellFrameLabels->{{None,newFrameLabel},{None,None}}, CellTags->newCellTags, ShowCellTags->False];
-		newCellTags
+		autoTags
 	]
 relabelCell[args___] := unexpected[ relabelCell,{args}]
 
-getCellIDLabel[cellID_Integer] :=
-	Module[{},
-		"CellID_" <> ToString[cellID]
-	]
-getCellIDLabel[args___] := unexpected[ getCellIDLabel,{args}]
+cellIDLabel[ cellID_Integer] := "ID_" <> ToString[cellID]
+cellIDLabel[ args___] := unexpected[ cellIDLabel, {args}]
 
-getContextLabel[] :=
-	Module[{},
-		"Context_" <> $Context
-	]
-getContextLabel[args___] := unexpected[ getContextLabel,{args}]
+sourceLabel[ ] /; inArchive[] := "Source_" <> currentArchiveName[]
+sourceLabel[ ] := "Source_" <> CurrentValue["NotebookFullFileName"]
+sourceLabel[ args___] := unexpected[ sourceLabel, {args}]
 	
-findDuplicateCellTags[nb_NotebookObject, cellTags_List] :=
-	Module[{rawNotebook,allCellTags,selectedCellTags,duplicateCellTags},
-		rawNotebook = NotebookGet[nb];
-		(* Collect all CellTags from document. *)
-		allCellTags = Flatten[Cases[rawNotebook,Cell[___,CellTags -> tags_,___] -> tags, Infinity]];
-		(* We look only for the duplicates to elements of current CellTags list.*)
-		selectedCellTags = Select[allCellTags,MemberQ[cellTags,#] &];
-		(* Are there more elements (clean cellTags as duplicate might appear even in one cell CellTags)? *)
-		(* Check if CellTags are unique in curent Notebook. *)
-		If[Length[selectedCellTags] > Length[DeleteDuplicates[cellTags]],
-				(* If not select and return duplicate Labels, *)
-				duplicateCellTags = Cases[Select[Tally[selectedCellTags],uniqueLabel[#]==False &],{cellTag_,_} -> cellTag]
-			,
-				(* else return {} *)
-				{}
-		]
-	]
-findDuplicateCellTags[args___] := unexpected[findDuplicateCellTags,{args}]
+ensureNotebookIntegrity[nb_NotebookObject, cellTags_List] :=
+    Module[ {rawNotebook,allCellTags,selectedCellTags,duplicateCellTags,srcTags, sl, outdPos, updNb},
+    	sl = sourceLabel[];
+        rawNotebook = NotebookGet[nb];
+        (* Collect all CellTags from document. *)
+        allCellTags = Flatten[Cases[rawNotebook,Cell[___,CellTags -> tags_,___] -> tags, Infinity]];
+        (* We look only for the duplicates to elements of current CellTags list.*)
+        selectedCellTags = Select[allCellTags,MemberQ[cellTags,#] &];
+        (* Check if CellTags are unique in current Notebook. *)
+        If[ Length[selectedCellTags] > Length[DeleteDuplicates[selectedCellTags]],
+            (* If not give an appropriate warning *)
+            duplicateCellTags = Cases[Select[Tally[selectedCellTags], duplicateLabel],{cellTag_,_} -> cellTag];
+            notification[ translate["notUniqueLabel"], duplicateCellTags]
+        ];
+        (* Check if we have cell tags Source_src with src != current notebook filename *)
+        srcTags = DeleteDuplicates[ Select[ allCellTags, (StringMatchQ[#, "Source_" ~~ __] && # =!= sl)&]];
+        If[ srcTags =!= {},
+        	(* If yes, this indicates that the filename has changed and probably some formulae 
+        	are stored in the environment with an outdated key 
+        	-> update the key
+        	-> update the cell tags
+        	-> remove outdated tab from KBbrowser
+        	 *)
+        	updateKeys[ sl, srcTags];
+        	outdPos = Position[ rawNotebook, CellTags -> { ___, s_String /; StringMatchQ[ s, "Source_" ~~ __] && s =!= sl, ___}];
+        	updNb = MapAt[ (# /. s_String /; StringMatchQ[ s, "Source_" ~~ __] -> sl)&, rawNotebook, outdPos];
+        	(* TODO: notify the user that outdated labels have been encountered, ask for update *)
+        	(*NotebookPut[ updNb, nb]*)
+        ]
+    ]
+checkNotebookIntegrity[args___] := unexpected[checkNotebookIntegrity,{args}]
 
-uniqueLabel[{_,occurences_Integer}] := occurences == 1
-uniqueLabel[args___] := unexpected[uniqueLabel,{args}]
+duplicateLabel[{_, occurences_Integer}] := occurences > 1
+duplicateLabel[args___] := unexpected[ duplicateLabel, {args}]
 
+updateKeys[ new_String, srcTags_List] := Fold[ updateSingleKey, new, srcTags]
+updateKeys[args___] := unexpected[updateKeys, {args}]
+
+updateSingleKey[ new_String, old_String] :=
+    Module[ {},
+        $tmaEnv = Map[ Replace[ #, {id_,old}:>{id,new}]&, $tmaEnv, {2}];
+        DownValues[Theorema`Interface`GUI`Private`kbSelectProve] = DownValues[Theorema`Interface`GUI`Private`kbSelectProve] /. {id_,old} :> {id,new};
+        DownValues[Theorema`Computation`activeComputationKB] = DownValues[Theorema`Computation`activeComputationKB] /. {id_,old} :> {id,new};
+        new
+    ]
+updateSingleKey[args___] := unexpected[updateSingleKey, {args}]
 
 (* ::Section:: *)
 (* Region Title *)
@@ -204,6 +220,8 @@ initSession[] :=
         $tmaArch = {};
         $tmaArchNeeds = {};
         $formulaCounterName = "TheoremaFormulaCounter";
+        $Pre=.;
+        $PreRead=.;
     ]
 initSession[args___] := unexpected[ initSession, {args}]
 
@@ -300,11 +318,11 @@ openArchive[name_String] :=
     ]
 openArchive[args___] := unexpected[openArchive, {args}]
 
-inArchive[] := 
-	Module[{}, 
-		StringLength[$Context] >= 9 && StringTake[$Context,-9]==="`private`"
-	]
+inArchive[] := StringLength[$Context] >= 9 && StringTake[$Context,-9]==="`private`"
 inArchive[args___] := unexpected[inArchive, {args}]
+
+currentArchiveName[] := StringDrop[$Context,-8]
+currentArchiveName[args___] := unexpected[currentArchiveName, {args}]
 
 SetAttributes[ processArchiveInfo, HoldAll];
 

@@ -47,6 +47,7 @@ initGUI[] :=
 		If[ ValueQ[$theoremaGUI], tc = "Theorema Commander" /. $theoremaGUI];
 		If[ $Notebooks && MemberQ[Notebooks[], tc], NotebookClose[tc]];
 		$theoremaGUI = {"Theorema Commander" -> theoremaCommander[]};
+		kbSelectProve[_] := False
 	]
 
 (* ::Section:: *)
@@ -176,9 +177,6 @@ structView[file_, item_List, tags_, task_] :=
         {Column[sub[[1]]], compTags}
     ]
 
-structView[file_, Cell[content_, "FormalTextInputFormula", ___], tags_, task_] :=
-    Sequence[]
-
 (*
   If we load an archive without corresponding notebook available, then $kbStruct contains the archive name instead of the notebook name.
   Hence, 'file' will then be the archive instead of the notebook.
@@ -186,48 +184,45 @@ structView[file_, Cell[content_, "FormalTextInputFormula", ___], tags_, task_] :
 *)    
 structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cellTags_, b___], 
   tags_, task_] :=
-  Module[ { isEval = MemberQ[ $tmaEnv, {cellTags,_}] || MemberQ[ $tmaArch, {cellTags,_}], cleanCellTags, formulaLabel, cellIDLabel, nbAvail},
-    Assert[VectorQ[cellTags, StringQ]];
-    cellIDLabel = getCellIDLabel[ CellID /. {a,b}];
-    cleanCellTags = getCleanCellTags[cellTags];
+  Module[ { isEval, cleanCellTags, keyTags, formulaLabel, idLabel, nbAvail},
+    Assert[ VectorQ[cellTags, StringQ]];
+    idLabel = cellIDLabel[ CellID /. {a,b}];
+    cleanCellTags = getCleanCellTags[ cellTags];
+    keyTags = getKeyTags[ cellTags];
+    isEval = MemberQ[ $tmaEnv, {keyTags, _}] || MemberQ[ $tmaArch, {keyTags, _}];
     (* Join list of CellTags, use $labelSeparator. *)
     formulaLabel = StringJoin @@ Riffle[cleanCellTags,$labelSeparator];
     nbAvail = FileExistsQ[file] && FileExtension[file]==="nb";
     {Switch[ task,
         "prove",
-        Row[{Checkbox[Dynamic[kbSelectProve[cellTags]], Enabled->isEval], 
+        Row[{Checkbox[Dynamic[kbSelectProve["KEY"]], Enabled->isEval] /. "KEY" -> keyTags, 
             If[ nbAvail,
                 Hyperlink[ Style[formulaLabel, If[ isEval,
                                                    "FormalTextInputFormula",
                                                    "FormalTextInputFormulaUneval"
-                                               ]], {file, cellIDLabel}],
+                                               ]], {file, idLabel}],
                 Button[ Style[formulaLabel, "FormalTextInputFormula"], 
                 	CreateDialog[{Cell[ content, "Output"], CancelButton["OK", NotebookClose[ButtonNotebook[]]]}],
                 	Appearance->None]
             ]},
             Spacer[10]],
         "compute",
-        Row[{Checkbox[Dynamic[Theorema`Computation`activeComputationKB[cellTags]], Enabled->isEval],
+        Row[{Checkbox[Dynamic[Theorema`Computation`activeComputationKB["KEY"]], Enabled->isEval] /. "KEY" -> keyTags,
             If[ nbAvail,
                 Hyperlink[ Style[formulaLabel, If[ isEval,
                                                    "FormalTextInputFormula",
                                                    "FormalTextInputFormulaUneval"
-                                               ]], {file, cellIDLabel}],
+                                               ]], {file, idLabel}],
                 Button[ Style[formulaLabel, "FormalTextInputFormula"],
                 	CreateDialog[{Cell[ content, "Output"], CancelButton["OK", NotebookClose[ButtonNotebook[]]]}],
                 	Appearance->None]
             ]},
             Spacer[10]]
-        ], {cellTags}}
+        ], {keyTags}}
 ]
 
-(*structView[file_, Cell[content_, "FormalTextInputFormula", ___, CellTags -> ct_, ___], 
-  tags_] :=
-  Module[ { isEval = MemberQ[ $tmaEnv, {_,ct}, Infinity]},
-    {Row[{Checkbox[Dynamic[isSelected[ct]], Enabled->isEval], Hyperlink[ Style[ct, If[ isEval, "FormalTextInputFormula", "FormalTextInputFormulaUneval"]], {file, ct}]}, 
-      Spacer[10]], {ct}}
-  ]
-*)
+structView[file_, Cell[content_, "FormalTextInputFormula", ___], tags_, task_] :=
+    Sequence[]
 
 structView[args___] :=
     unexpected[structView, {args}]
@@ -242,8 +237,6 @@ envView[file_, Cell[ BoxData[content_]|content_String, style_, ___], tags_, task
 envView[args___] :=
     unexpected[envView, {args}]
 
-
-kbSelectProve[_] := False
 
 (* ::Subsubsection:: *)
 (* updateKBBrowser *)
