@@ -64,7 +64,7 @@ With[ {lang = "English"},
 	translate["archLabelPublic", lang] = "public: ";
 	    
 (* Theorema`Language`Session` *)
-    translate["notUniqueLabel", lang] = "This label is not unique in the notebook: ";
+    translate["notUniqueLabel", lang] = "These labels are not unique in the notebook: ``\n\nThis is just a warning, you can continue,\nbut referencing formulae from this notebook\nmight turn out to be confusing.";
     translate["fileTypeArchive", lang] = "Theorema archive";
     translate["noArchName", lang] = "No archive name available for chosen archive. Check file content.";
 
