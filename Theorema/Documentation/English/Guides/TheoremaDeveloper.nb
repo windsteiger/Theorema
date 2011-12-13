@@ -1,0 +1,350 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 8.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       157,          7]
+NotebookDataLength[      9008,        341]
+NotebookOptionsPosition[      5828,        231]
+NotebookOutlinePosition[      6460,        253]
+CellTagsIndexPosition[      6417,        250]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[TextData[{
+ "New in: ",
+ Cell["0.0", "HistoryData",
+  CellTags->"New"],
+ " | Modified in: ",
+ Cell[" ", "HistoryData",
+  CellTags->"Modified"],
+ " | Obsolete in: ",
+ Cell[" ", "HistoryData",
+  CellTags->"Obsolete"],
+ " | Excised in: ",
+ Cell[" ", "HistoryData",
+  CellTags->"Excised"]
+}], "History",
+ CellID->1247902091],
+
+Cell[CellGroupData[{
+
+Cell["Categorization", "CategorizationSection",
+ CellID->1122911449],
+
+Cell["Guide", "Categorization",
+ CellLabel->"Entity Type",
+ CellID->686433507],
+
+Cell["Theorema", "Categorization",
+ CellLabel->"Paclet Name",
+ CellID->605800465],
+
+Cell["Theorema`", "Categorization",
+ CellLabel->"Context",
+ CellID->468444828],
+
+Cell["Theorema/guide/TheoremaDeveloper", "Categorization",
+ CellChangeTimes->{{3.532412044918911*^9, 3.532412051050804*^9}},
+ CellLabel->"URI"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Keywords", "KeywordsSection",
+ CellID->1427428552],
+
+Cell["Packages", "Keywords",
+ CellChangeTimes->{{3.532259370490205*^9, 3.532259400068061*^9}, {
+  3.532262267902426*^9, 3.532262270919039*^9}, {3.53226235883648*^9, 
+  3.532262360314083*^9}},
+ CellID->1118212517],
+
+Cell["Theorema GUI", "Keywords",
+ CellChangeTimes->{{3.532259370490205*^9, 3.532259400068061*^9}, {
+  3.532262267902426*^9, 3.532262270919039*^9}},
+ CellID->1251852827],
+
+Cell["Stylesheets", "Keywords",
+ CellChangeTimes->{{3.532259370490205*^9, 3.532259400068061*^9}, {
+  3.532262267902426*^9, 3.532262274532916*^9}},
+ CellID->224812530],
+
+Cell["Session", "Keywords",
+ CellChangeTimes->{{3.532259370490205*^9, 3.532259400068061*^9}, {
+  3.532262267902426*^9, 3.532262274532916*^9}},
+ CellID->728076183]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Details", "DetailsSection",
+ CellID->307771771],
+
+Cell["B. Buchberger", "Details",
+ CellChangeTimes->{{3.532259423699675*^9, 3.532259426765047*^9}},
+ CellLabel->"Lead",
+ CellID->795394057],
+
+Cell["W. Windsteiger", "Details",
+ CellChangeTimes->{{3.532259432085596*^9, 3.532259435199405*^9}},
+ CellLabel->"Developers",
+ CellID->350963985],
+
+Cell["W. Windsteiger", "Details",
+ CellChangeTimes->{3.532259442810544*^9},
+ CellLabel->"Authors",
+ CellID->802101],
+
+Cell["XXXX", "Details",
+ CellLabel->"Feature Name",
+ CellID->509823116],
+
+Cell["XXXX", "Details",
+ CellLabel->"QA",
+ CellID->199884516],
+
+Cell["XXXX", "Details",
+ CellLabel->"DA",
+ CellID->463951815],
+
+Cell["XXXX", "Details",
+ CellLabel->"Docs",
+ CellID->8237523],
+
+Cell["XXXX", "Details",
+ CellLabel->"Features Page Notes",
+ CellID->813936640],
+
+Cell["XXXX", "Details",
+ CellLabel->"Comments",
+ CellID->240026365]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Theorema Developer Guide", "GuideTitle",
+ CellID->942062912],
+
+Cell["\<\
+This is an overview of the inner workings of Theorema for system developers.\
+\>", "GuideAbstract",
+ CellChangeTimes->{{3.532261465667157*^9, 3.532261491948977*^9}},
+ CellID->2001916300],
+
+Cell["\<\
+The Theorema system is made up from a collection of packages separating \
+different system functionalities into different pieces of source code.\
+\>", "GuideText",
+ CellChangeTimes->{{3.532262056514959*^9, 3.532262059291968*^9}, {
+  3.532262123827995*^9, 3.532262184057502*^9}, {3.532262373644833*^9, 
+  3.53226237991854*^9}},
+ CellID->1475329426],
+
+Cell[TextData[{
+ "The Theorema user interface consists of Theorema documents (i.e. ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " notebooks using specilaized stylesheets) and the Theorema Commander, a \
+graphical user interface that supports standard Theorema actions with menus, \
+buttons, and other standard controls."
+}], "GuideText",
+ CellChangeTimes->{{3.532262429721567*^9, 3.532262606458563*^9}, 
+   3.532262668920991*^9},
+ CellID->2018679617]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["", "GuideFunctionsSection",
+ CellID->1866139230],
+
+Cell[TextData[{
+ Cell[BoxData["XXXX"], "InlineGuideFunction"],
+ " \[LongDash] XXXX"
+}], "GuideText",
+ CellID->203374175],
+
+Cell[TextData[{
+ Cell[BoxData["XXXX"], "InlineGuideFunction"],
+ " \[LongDash] XXXX"
+}], "GuideText",
+ CellID->1463276848],
+
+Cell[CellGroupData[{
+
+Cell["\t", "GuideDelimiter",
+ CellID->311258892],
+
+Cell["XXXX . XXXX . ", "InlineGuideFunctionListing",
+ CellID->58033752]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Tutorials", "GuideTutorialsSection",
+ CellID->415694126],
+
+Cell[TextData[ButtonBox["Theorema Package Structure",
+ BaseStyle->"Link",
+ ButtonData->
+  "paclet:Theorema/tutorial/TheoremaPackageStructure"]], "GuideTutorial",
+ CellChangeTimes->{{3.532262925827568*^9, 3.532262957434955*^9}},
+ CellID->174529033],
+
+Cell[TextData[ButtonBox["Theorema Stylesheets",
+ BaseStyle->"Link",
+ ButtonData->"paclet:Theorema/tutorial/TheoremaStylesheets"]], "GuideTutorial",\
+
+ CellChangeTimes->{{3.532262754311016*^9, 3.532262782342997*^9}},
+ CellID->806871991],
+
+Cell[TextData[ButtonBox["Theorema Commander",
+ BaseStyle->"Link",
+ ButtonData->"paclet:Theorema/tutorial/TheoremaCommander"]], "GuideTutorial",
+ CellChangeTimes->{{3.532262798539303*^9, 3.532262808906441*^9}},
+ CellID->1885805579]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["More About", "GuideMoreAboutSection",
+ CellID->23220180],
+
+Cell["XXXX", "GuideMoreAbout",
+ CellID->1567025153],
+
+Cell["XXXX", "GuideMoreAbout",
+ CellID->252299663]
+}, Open  ]],
+
+Cell["Related Links", "GuideRelatedLinksSection",
+ CellID->415694148]
+},
+WindowSize->{700, 770},
+WindowMargins->{{120, Automatic}, {91, Automatic}},
+FrontEndVersion->"8.0 for Linux x86 (32-bit) (February 23, 2011)",
+StyleDefinitions->Notebook[{
+   Cell[
+    StyleData[
+    StyleDefinitions -> 
+     FrontEnd`FileName[{"Wolfram"}, "GuidePageStyles.nb", CharacterEncoding -> 
+       "UTF-8"]]]}, Visible -> False, FrontEndVersion -> 
+  "8.0 for Linux x86 (32-bit) (February 23, 2011)", StyleDefinitions -> 
+  "PrivateStylesheetFormatting.nb"]
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[557, 20, 325, 14, 24, "History",
+ CellID->1247902091],
+Cell[CellGroupData[{
+Cell[907, 38, 68, 1, 29, "CategorizationSection",
+ CellID->1122911449],
+Cell[978, 41, 78, 2, 32, "Categorization",
+ CellID->686433507],
+Cell[1059, 45, 81, 2, 32, "Categorization",
+ CellID->605800465],
+Cell[1143, 49, 78, 2, 32, "Categorization",
+ CellID->468444828],
+Cell[1224, 53, 143, 2, 32, "Categorization"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[1404, 60, 56, 1, 29, "KeywordsSection",
+ CellID->1427428552],
+Cell[1463, 63, 212, 4, 19, "Keywords",
+ CellID->1118212517],
+Cell[1678, 69, 168, 3, 19, "Keywords",
+ CellID->1251852827],
+Cell[1849, 74, 166, 3, 19, "Keywords",
+ CellID->224812530],
+Cell[2018, 79, 162, 3, 19, "Keywords",
+ CellID->728076183]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2217, 87, 53, 1, 29, "DetailsSection",
+ CellID->307771771],
+Cell[2273, 90, 138, 3, 32, "Details",
+ CellID->795394057],
+Cell[2414, 95, 145, 3, 32, "Details",
+ CellID->350963985],
+Cell[2562, 100, 115, 3, 32, "Details",
+ CellID->802101],
+Cell[2680, 105, 71, 2, 32, "Details",
+ CellID->509823116],
+Cell[2754, 109, 61, 2, 32, "Details",
+ CellID->199884516],
+Cell[2818, 113, 61, 2, 32, "Details",
+ CellID->463951815],
+Cell[2882, 117, 61, 2, 32, "Details",
+ CellID->8237523],
+Cell[2946, 121, 78, 2, 32, "Details",
+ CellID->813936640],
+Cell[3027, 125, 67, 2, 32, "Details",
+ CellID->240026365]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[3131, 132, 66, 1, 76, "GuideTitle",
+ CellID->942062912],
+Cell[3200, 135, 196, 4, 27, "GuideAbstract",
+ CellID->2001916300],
+Cell[3399, 141, 357, 7, 38, "GuideText",
+ CellID->1475329426],
+Cell[3759, 150, 458, 10, 70, "GuideText",
+ CellID->2018679617]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4254, 165, 54, 1, 70, "GuideFunctionsSection",
+ CellID->1866139230],
+Cell[4311, 168, 120, 4, 23, "GuideText",
+ CellID->203374175],
+Cell[4434, 174, 121, 4, 23, "GuideText",
+ CellID->1463276848],
+Cell[CellGroupData[{
+Cell[4580, 182, 48, 1, 26, "GuideDelimiter",
+ CellID->311258892],
+Cell[4631, 185, 71, 1, 22, "InlineGuideFunctionListing",
+ CellID->58033752]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4751, 192, 62, 1, 72, "GuideTutorialsSection",
+ CellID->415694126],
+Cell[4816, 195, 247, 5, 22, "GuideTutorial",
+ CellID->174529033],
+Cell[5066, 202, 235, 5, 22, "GuideTutorial",
+ CellID->806871991],
+Cell[5304, 209, 230, 4, 22, "GuideTutorial",
+ CellID->1885805579]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[5571, 218, 62, 1, 72, "GuideMoreAboutSection",
+ CellID->23220180],
+Cell[5636, 221, 51, 1, 22, "GuideMoreAbout",
+ CellID->1567025153],
+Cell[5690, 224, 50, 1, 22, "GuideMoreAbout",
+ CellID->252299663]
+}, Open  ]],
+Cell[5755, 228, 69, 1, 72, "GuideRelatedLinksSection",
+ CellID->415694148]
+}
+]
+*)
+
+(* End of internal cache information *)

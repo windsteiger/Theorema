@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       145,          7]
-NotebookDataLength[      6681,        274]
-NotebookOptionsPosition[      3289,        165]
-NotebookOutlinePosition[      4634,        202]
-CellTagsIndexPosition[      4591,        199]
+NotebookDataLength[      6642,        274]
+NotebookOptionsPosition[      3284,        165]
+NotebookOutlinePosition[      4595,        202]
+CellTagsIndexPosition[      4552,        199]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -51,9 +51,9 @@ Cell["Theorema`", "Categorization",
  CellLabel->"Context",
  CellID->468444828],
 
-Cell["Theorema/tutorial/Theorema Tutorial", "Categorization",
+Cell["Theorema/tutorial/TheoremaMain", "Categorization",
  CellLabel->"URI"]
-}, Closed]],
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -171,8 +171,8 @@ TaggingRules->{
     "$DocumentationDirectory" -> 
     "/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/", 
     "$ApplicationDirectory" -> "/home/wwindste/Theorema.2/Theorema/Theorema"},
-   "SearchTextTranslated" -> ""},
-FrontEndVersion->"7.0 for Linux x86 (32-bit) (November 10, 2008)",
+   "SearchTextTranslated" -> "", "LinkTrails" -> ""},
+FrontEndVersion->"8.0 for Linux x86 (32-bit) (February 23, 2011)",
 StyleDefinitions->Notebook[{
    Cell[
     StyleData[StyleDefinitions -> FrontEnd`FileName[{
@@ -186,9 +186,9 @@ StyleDefinitions->Notebook[{
                ParentDirectory[]]]]]]]], "usr", "local", "Wolfram", 
         "Mathematica", "7.0", "SystemFiles", "FrontEnd", "StyleSheets", 
         "Wolfram"}, "Reference.nb", CharacterEncoding -> "iso8859-1"]]]}, 
-  WindowMargins -> {{Automatic, 88}, {Automatic, 150}}, Visible -> False, 
-  FrontEndVersion -> "7.0 for Linux x86 (32-bit) (November 10, 2008)", 
-  StyleDefinitions -> "PrivateStylesheetFormatting.nb"]
+  Visible -> False, FrontEndVersion -> 
+  "8.0 for Linux x86 (32-bit) (February 23, 2011)", StyleDefinitions -> 
+  "PrivateStylesheetFormatting.nb"]
 ]
 (* End of Notebook Content *)
 
@@ -201,78 +201,78 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[545, 20, 325, 14, 46, "History",
+Cell[545, 20, 325, 14, 43, "History",
  CellID->1247902091],
 Cell[CellGroupData[{
-Cell[895, 38, 68, 1, 21, "CategorizationSection",
+Cell[895, 38, 68, 1, 19, "CategorizationSection",
  CellID->1122911449],
-Cell[966, 41, 81, 2, 70, "Categorization",
+Cell[966, 41, 81, 2, 32, "Categorization",
  CellID->686433507],
-Cell[1050, 45, 81, 2, 70, "Categorization",
+Cell[1050, 45, 81, 2, 32, "Categorization",
  CellID->605800465],
-Cell[1134, 49, 78, 2, 70, "Categorization",
+Cell[1134, 49, 78, 2, 32, "Categorization",
  CellID->468444828],
-Cell[1215, 53, 80, 1, 70, "Categorization"]
-}, Closed]],
+Cell[1215, 53, 75, 1, 33, "Categorization"]
+}, Open  ]],
 Cell[CellGroupData[{
-Cell[1332, 59, 56, 1, 21, "KeywordsSection",
+Cell[1327, 59, 56, 1, 29, "KeywordsSection",
  CellID->1427428552],
-Cell[1391, 62, 45, 1, 21, "Keywords",
+Cell[1386, 62, 45, 1, 19, "Keywords",
  CellID->1251852827],
-Cell[1439, 65, 53, 1, 25, "DetailsSection",
+Cell[1434, 65, 53, 1, 24, "DetailsSection",
  CellID->307771771],
-Cell[1495, 68, 72, 2, 40, "Details",
+Cell[1490, 68, 72, 2, 37, "Details",
  CellID->218895918],
-Cell[1570, 72, 79, 2, 40, "Details",
+Cell[1565, 72, 79, 2, 37, "Details",
  CellID->350963985],
-Cell[1652, 76, 76, 2, 40, "Details",
+Cell[1647, 76, 76, 2, 37, "Details",
  CellID->795871300],
-Cell[1731, 80, 71, 2, 40, "Details",
+Cell[1726, 80, 71, 2, 37, "Details",
  CellID->199739161],
-Cell[1805, 84, 60, 2, 40, "Details",
+Cell[1800, 84, 60, 2, 37, "Details",
  CellID->40625308],
-Cell[1868, 88, 61, 2, 40, "Details",
+Cell[1863, 88, 61, 2, 37, "Details",
  CellID->357121918],
-Cell[1932, 92, 62, 2, 40, "Details",
+Cell[1927, 92, 62, 2, 37, "Details",
  CellID->35949532],
-Cell[1997, 96, 78, 2, 40, "Details",
+Cell[1992, 96, 78, 2, 37, "Details",
  CellID->929432370],
-Cell[2078, 100, 67, 2, 40, "Details",
+Cell[2073, 100, 67, 2, 37, "Details",
  CellID->240026365]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[2182, 107, 54, 1, 54, "Title",
+Cell[2177, 107, 54, 1, 52, "Title",
  CellID->509267359],
-Cell[2239, 110, 41, 1, 34, "Text",
+Cell[2234, 110, 41, 1, 32, "Text",
  CellID->1534169418],
-Cell[2283, 113, 186, 5, 97, "DefinitionBox",
+Cell[2278, 113, 186, 5, 94, "DefinitionBox",
  CellID->2096742444],
-Cell[2472, 120, 45, 1, 33, "Caption",
+Cell[2467, 120, 45, 1, 32, "Caption",
  CellID->1891092685],
-Cell[2520, 123, 47, 1, 33, "MathCaption",
+Cell[2515, 123, 47, 1, 32, "MathCaption",
  CellID->836781195],
 Cell[CellGroupData[{
-Cell[2592, 128, 74, 2, 29, "Input",
+Cell[2587, 128, 74, 2, 27, "Input",
  CellID->2058623809],
-Cell[2669, 132, 75, 2, 37, "Output",
+Cell[2664, 132, 75, 2, 36, "Output",
  CellID->1181321046]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[2781, 139, 65, 1, 46, "TutorialMoreAboutSection",
+Cell[2776, 139, 65, 1, 45, "TutorialMoreAboutSection",
  CellID->23220180],
-Cell[2849, 142, 54, 1, 21, "TutorialMoreAbout",
+Cell[2844, 142, 54, 1, 18, "TutorialMoreAbout",
  CellID->1567025153]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[2940, 148, 72, 1, 46, "RelatedTutorialsSection",
+Cell[2935, 148, 72, 1, 45, "RelatedTutorialsSection",
  CellID->415694126],
-Cell[3015, 151, 52, 1, 21, "RelatedTutorials",
+Cell[3010, 151, 52, 1, 18, "RelatedTutorials",
  CellID->806871991]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[3104, 157, 98, 1, 46, "TutorialRelatedLinksSection",
+Cell[3099, 157, 98, 1, 45, "TutorialRelatedLinksSection",
  CellID->415694148],
-Cell[3205, 160, 56, 1, 21, "TutorialRelatedLinks",
+Cell[3200, 160, 56, 1, 18, "TutorialRelatedLinks",
  CellID->415694149]
 }, Open  ]]
 }, Open  ]]
@@ -281,4 +281,3 @@ Cell[3205, 160, 56, 1, 21, "TutorialRelatedLinks",
 *)
 
 (* End of internal cache information *)
-

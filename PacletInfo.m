@@ -1,12 +1,13 @@
 (* Paclet Info File *)
 
-(* created 2010/12/02*)
+(* created 2011/12/07*)
 
 Paclet[
     Name -> "Theorema",
     Version -> "0.0.1",
     MathematicaVersion -> "7+",
     Description -> "Theorema package",
+    Creator -> "The Theorema Group / RISC",
     Extensions -> 
         {
             {"Documentation", Language -> "English", MainPage -> "Tutorials/Theorema Tutorial"}
