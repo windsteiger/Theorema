@@ -252,7 +252,6 @@ openEnvironment[type_String] :=
     Module[{},
 		$parseTheoremaExpressions = True; 
         PrependTo[$environmentLabels, type];
-        SetOptions[ InputNotebook[], DefaultNewCellStyle -> "FormalTextInputFormula"];
         PrependTo[ $ContextPath, "Theorema`Language`"];
         (* Set default context if I am not in an archive. *)
         If[ !inArchive[], Begin["Theorema`Knowledge`"]];
@@ -264,8 +263,7 @@ closeEnvironment[] :=
 		(* Restore context if I am not in an archive. *)
 		If[ !inArchive[], End[]];
 		$ContextPath = DeleteCases[ $ContextPath, "Theorema`Language`"];
-		SetOptions[ InputNotebook[], DefaultNewCellStyle -> "Input"];
-        $environmentLabels = Rest[$environmentLabels];
+		$environmentLabels = Rest[$environmentLabels];
 		$parseTheoremaExpressions = False; 
         updateKBBrowser[];
 	]
