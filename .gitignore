@@ -3,3 +3,6 @@ Theorema/Knowledge/*
 .settings
 .project
 *.orig
+build
+Prototypes
+docbuild.xml
