@@ -89,30 +89,38 @@ emptyPane[text_String:""]:=Pane[text, Alignment->{Center,Center}]
  
 (* ::Subsubsection:: *)
 (* extractKBStruct *)
-
 (*
-Documentation see /ProgrammersDoc/GUIDoc.nb#496401653
+extract hierarchically structured knowledge from a notebook
 *)
 
 extractKBStruct[nb_NotebookObject] := extractKBStruct[ NotebookGet[nb]];
 
 extractKBStruct[nb_Notebook] :=
-    Module[ {posTit = Cases[Position[nb, Cell[_, "Title", ___]], {a___, 1}],
+    Module[ {posTit = Cases[Position[nb, Cell[_, "Title"|"OpenArchive", ___]], {a___, 1}],
       posSec =  Cases[Position[nb, Cell[_, "Section", ___]], {a___, 1}], 
       posSubsec = Cases[Position[nb, Cell[_, "Subsection", ___]], {a___, 1}], 
       posSubsubsec = Cases[Position[nb, Cell[_, "Subsubsection", ___]], {a___, 1}], 
       posSubsubsubsec = Cases[Position[nb, Cell[_, "Subsubsubsection", ___]], {a___, 1}], 
       posEnv = Cases[Position[nb, Cell[_, "OpenEnvironment", ___]], {a___, 1}], 
       posInp = Position[nb, Cell[_, "FormalTextInputFormula", ___]], inputs, depth, sub, root, heads, isolated},
+      (* extract all positions of relevant cells
+         join possible containers with decreasing level of nesting *)
         heads = Join[posEnv, posSubsubsubsec, posSubsubsec, posSubsec, posSec, posTit];
+        (* build up a nested list structure representing the nested cell structure 
+           start with singleton lists containing a header and add input cells to the respective group *)
         {inputs, isolated} = Fold[arrangeInput, {Map[List, heads], {}}, posInp];
         depth = Union[Map[Length[#[[1]]] &, inputs]];
+        (* go through all groups starting with the most deeply nested one *)
         While[Length[depth] > 1,
+            (* the most deeply nested ones are the possible candidates to be joined to other groups *)
          sub = Select[inputs, Length[#[[1]]] == depth[[-1]] &];
+         (* the less deeply nested ones are groups to which subitems may be added *)
          root = Select[inputs, Length[#[[1]]] < depth[[-1]] &];
+         (* one after the other add lower priority groups to higher priority ones *)
          inputs = Fold[arrangeSub, root, sub];
          depth = Drop[depth, -1];
          ];
+         (* finally, add isolated nodes at the beginning *)
         Join[isolated, inputs]
     ]
 
@@ -121,25 +129,44 @@ extractKBStruct[args___] :=
 
 
 (* ::Subsubsection:: *)
-(* arrangeInput *)
+(* arrange items *)
 
 arrangeInput[{struct_, isolated_}, item_] :=
+(* given a structured list and a list of isolated items,
+   add a new input cell item at the appropriate position
+   struct is a list of lists, each sublist represents a group and starts with the group header,
+   each entry is a position specification list
+   groups are sorted so that low-level groups come first *)
     Module[ {l, root, pos},
+    	(* go through all groups to find the one on the right level *)
         pos = Do[
           root = Drop[struct[[i, 1]], -1];
           l = Length[root];
+          (* if the position specification of a group header (dropping its last position)
+             coincides with the starting part of the item, then this is the right group,
+             i.e. the closest enclosing group *)
           If[ Length[item] > l && Take[item, l] == root,
               Return[i]
           ],
           {i, Length[struct]}];
+          (* if we have found a fitting group (Return[i] from the loop) we insert 
+             at the end in that group, otherwise we add to the list of isolated nodes *)
         If[ NumberQ[pos],
             {Insert[struct, item, {pos, -1}], isolated},
             {struct, Insert[isolated, {item}, -1]}
         ]
     ]
+arrangeInput[args___] := unexpected[arrangeInput, {args}]
 
 arrangeSub[struct_, item : {head_, ___}] :=
+(* given a structured list,
+   add a group item at the appropriate position
+   struct is a list of lists, each sublist represents a group and starts with the group header,
+   each entry is a position specification list
+   groups are sorted so that low-level groups come first   
+   Works like arrangeInput, only that we compare by taking the group header representing the item *)
     Module[ {l, root, pos},
+    	(* go through all groups to find the one on the right level *)
         pos = Do[
           root = Drop[struct[[i, 1]], -1];
           l = Length[root];
@@ -147,52 +174,103 @@ arrangeSub[struct_, item : {head_, ___}] :=
               Return[i]
           ],
           {i, Length[struct]}];
+          (* if we have found a fitting group (Return[i] from the loop) we insert 
+             into that group keeping the sorted order, otherwise make a new group and insert it at the beginning *)
         If[ NumberQ[pos],
-            Insert[struct, item, {pos, -1}],
-            Insert[struct, {item}, 2]
+            insertSorted[struct, item, pos],
+            Insert[struct, {item}, 1]
         ]
     ]
+arrangeSub[args___] := unexpected[arrangeSub, {args}]
+
+insertSorted[struct_, item:{head_, ___}, pos_Integer] :=
+(* insert item into the sorted list that occurs at position pos in struct *)
+    Module[ {p = -1, h},
+        Do[
+        	(* go through all elements in the sublist at position pos
+        	   if an element is a list of integers it represents a position,
+        	   otherwise it represents a group of positions, and we select the group header at position 1 *)
+            If[ !MatchQ[ h = struct[[pos, i]], {__Integer}],
+                h = h[[1]]
+            ];
+            (* we compare the last entry in the position spec: if the elements pos is greater than the item's
+               then we need to insert before that one *)
+            If[ h[[ Length[h]]] > head[[ Length[h]]],
+                p = i;
+                Return[]
+            ],
+        (* we start comparing at position 2 because we never insert before the group header *)
+        {i, 2, Length[struct[[pos]]]}];
+        (* if we haven't found a position (Return[i] in the loop) then we insert at position -1, i.e. at the end *)
+        Insert[ struct, item, {pos, p}]
+    ]
+insertSorted[args___] := unexpected[insertSorted, {args}]
+
 
 (* ::Subsubsection:: *)
 (* structView *)
 Clear[structView];
 
-structView[file_, {head:Cell[sec_, "Title"|"Section"|"Subsection"|"Subsubsection"|"Subsubsubsection"|"OpenEnvironment", opts___], rest__}, tags_, task_] :=
+(* produce a list containing the structured view corresponding to notebook file and a list of all cell tags contained
+   recursively process the nested list structure generated by extractKBStruct 
+   parameter 'task' decides whether the view is generated for the prove tab or the compute tab *)
+   
+(* group with header and content *)   
+structView[file_, {head:Cell[sec_, "Title"|"OpenArchive"|"Section"|"Subsection"|"Subsubsection"|"Subsubsubsection"|"OpenEnvironment", opts___], rest__}, tags_, task_] :=
     Module[ {sub, compTags},
+    	(* process content componentwise
+    	   during recursion, we collect all cell tags from cells contained in that group 
+    	   Transpose -> pos 1 contains the list of subviews
+    	   pos 2 contains the list of tags in subgroups *)
         sub = Transpose[Map[structView[file, #, tags, task] &, {rest}]];
         compTags = Apply[Union, sub[[2]]];
-        {OpenerView[{envView[file, head, compTags, task], Column[sub[[1]]]}, 
+        (* generate an opener view with the view of the header and the content as a column
+           a global symbol with unique name is generated, whose value stores the state of the opener *)
+        {OpenerView[{headerView[file, head, compTags, task], Column[sub[[1]]]}, 
         	ToExpression[StringReplace["Dynamic[NEWSYM]", 
         		"NEWSYM" -> "$kbStructState$"<>ToString[Hash[FileBaseName[file]]]<>"$"<>ToString[CellID/.{opts}]]]], 
          compTags}
     ]
-
-structView[file_, {Cell[sec_, "Title"|"Section"|"Subsection"|"Subsubsection"|"Subsubsubsection"|"OpenEnvironment", ___]}, tags_, task_] :=
+    
+(* group with header and no content -> ignore *)   
+structView[file_, {Cell[sec_, "Title"|"OpenArchive"|"Section"|"Subsection"|"Subsubsection"|"Subsubsubsection"|"OpenEnvironment", ___]}, tags_, task_] :=
 	Sequence[]
- 
+
+(* list processed componentwise *) 
 structView[file_, item_List, tags_, task_] :=
     Module[ {sub, compTags},
+     	(* process content componentwise
+    	   during recursion, we collect all cell tags from cells contained in that group 
+    	   Transpose -> pos 1 contains the list of subviews
+    	   pos 2 contains the list of tags in subgroups *)
         sub = Transpose[Map[structView[file, #, tags, task] &, item]];
         compTags = Apply[Union, sub[[2]]];
+        (* generate a column and return the collected tags also *)
         {Column[sub[[1]]], compTags}
     ]
 
-(*
-  If we load an archive without corresponding notebook available, then $kbStruct contains the archive name instead of the notebook name.
-  Hence, 'file' will then be the archive instead of the notebook.
-  Instead of hyperlinking into the notebook, we then present a window showing the original cell content.
-*)    
+(* input cell with cell tags *)
 structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cellTags_, b___], 
   tags_, task_] :=
   Module[ { isEval, cleanCellTags, keyTags, formulaLabel, idLabel, nbAvail},
     Assert[ VectorQ[cellTags, StringQ]];
     idLabel = cellIDLabel[ CellID /. {a,b}];
     cleanCellTags = getCleanCellTags[ cellTags];
+    (* keyTags are those cell tags that are used to uniquely identify the formula in the KB *)
     keyTags = getKeyTags[ cellTags];
+    (* check whether cell has been evaluated -> formula is in KB? *)
     isEval = MemberQ[ $tmaEnv, {keyTags, _}] || MemberQ[ $tmaArch, {keyTags, _}];
     (* Join list of CellTags, use $labelSeparator. *)
     formulaLabel = StringJoin @@ Riffle[cleanCellTags,$labelSeparator];
+    (*
+    If we load an archive without corresponding notebook available, then $kbStruct contains the archive name instead of the notebook name.
+    Hence, 'file' will then be the archive instead of the notebook.
+    Instead of hyperlinking into the notebook, we then present a window showing the original cell content. *)    
     nbAvail = FileExistsQ[file] && FileExtension[file]==="nb";
+    (* generate a checkbox and display the label
+       checkbox sets the value of the global function kbSelectProve[labels] (activeComputationKB[labels] resp. for the compute tab),
+       enabled only if the formula has been evaluated 
+       label is a hyperlink to the notebook or a button that opens a new window displaying the formula *)
     {Switch[ task,
         "prove",
         Row[{Checkbox[Dynamic[kbSelectProve["KEY"]], Enabled->isEval] /. "KEY" -> keyTags, 
@@ -221,38 +299,51 @@ structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cel
         ], {keyTags}}
 ]
 
+(* input cell without cell tags -> ignore *)
 structView[file_, Cell[content_, "FormalTextInputFormula", ___], tags_, task_] :=
     Sequence[]
 
 structView[args___] :=
     unexpected[structView, {args}]
 
-envView[file_, Cell[ BoxData[content_]|content_String, style_, ___], tags_, task_] :=
+(* header view *)
+headerView[file_, Cell[ BoxData[content_]|content_String, style_, ___], tags_, task_] :=
+(* tags contains all tags contained in the group
+   generate a checkbox for the whole group and the header from the cell
+   checkbox does not have an associated variable whose value the box represents
+   instead, the checkbox is checked if all tags containd in the group are checked,
+   checking the box calls function setAll in order to set/unset all tags contained in the group *)
     Switch[ task,
     	"prove",
         Row[{Checkbox[Dynamic[allTrue[tags, kbSelectProve], setAll[tags, kbSelectProve, #] &]], Style[ DisplayForm[ content], style]}, Spacer[10]],
         "compute",
         Row[{Checkbox[Dynamic[allTrue[tags, Theorema`Computation`activeComputationKB], setAll[tags, Theorema`Computation`activeComputationKB, #] &]], Style[ DisplayForm[ content], style]}, Spacer[10]]
     ]
-envView[args___] :=
-    unexpected[envView, {args}]
+headerView[args___] :=
+    unexpected[headerView, {args}]
 
 
 (* ::Subsubsection:: *)
 (* updateKBBrowser *)
 
+(* global variable $kbStruct contains the knowledge structure
+   for each notebook ever evaluated in the session it contains an entry
+   filename -> struct, where
+   filename is the full filename of the notebook and
+   struct is the nested cell structure containing the cells at those positions obtained by extractKBStruct *)
 updateKBBrowser[] :=
     Module[ {file=CurrentValue["NotebookFullFileName"], pos, new},
         pos = Position[ $kbStruct, file -> _];
         new = file -> With[ {nb = NotebookGet[EvaluationNotebook[]]},
                           extractKBStruct[nb] /. l_?VectorQ :> Extract[nb, l]
                       ];
+        (* if there is already an entry for that notebook then replace the structure,
+           otherwise add new entry *)
         If[ pos === {},
             AppendTo[ $kbStruct, new],
             $kbStruct[[pos[[1,1]]]] = new
         ]
     ]
-
 updateKBBrowser[args___] :=
     unexpected[updateKBBrowser, {args}]
 
@@ -264,6 +355,8 @@ displayKBBrowser[ task_String] :=
     Module[ {},
         If[ $kbStruct === {},
             emptyPane[translate["No knowledge available"]],
+            (* generate tabs for each notebook,
+               tab label contains a short form of the filename, tab contains a Pane containing the structured view *)
             TabView[
                   Map[Tooltip[Style[FileBaseName[#[[1]]], "NotebookName"], #[[1]]] -> 
                      Pane[structView[#[[1]], #[[2]], {}, task][[1]],
@@ -279,6 +372,9 @@ displayKBBrowser[args___] :=
 (* structViewBuiltin *)
 Clear[structViewBuiltin];
 
+(* structured view for builtin operators
+   follows the ideas of the structured view of the KB *)
+   
 structViewBuiltin[{category_String, rest__List}, tags_] :=
     Module[ {sub, compTags},
         sub = Transpose[Map[structViewBuiltin[#, tags] &, {rest}]];
@@ -310,6 +406,10 @@ structViewBuiltin[ category_String, tags_] :=
 structViewBuiltin[args___] :=
     unexpected[structViewBuiltin, {args}]
 
+
+(* ::Subsubsection:: *)
+(* check/set values *)
+
 allTrue[ l_, test_] :=
     Catch[Module[ {},
               Scan[If[ Not[TrueQ[test[#]]],
@@ -324,11 +424,18 @@ setAll[l_, test_, val_] :=
 (* ::Subsubsection:: *)
 (* displayBuiltinBrowser *)
 
+(* see displayKBBrowser *)
+
 displayBuiltinBrowser[] :=
   Pane[structViewBuiltin[ $tmaBuiltins, {}][[1]],
   	ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
 displayBuiltinBrowser[args___] := unexcpected[ displayBuiltinBrowser, {args}]
 
+(* ::Subsubsection:: *)
+(* printComputationInfo *)
+
+(* this function is called during a computation (see processComputation[])
+   effect: print a cell containg information about the environment settings for that computation *)
 printComputationInfo[] :=
     Module[ {act},
         act = Union[ Cases[ DownValues[Theorema`Computation`activeComputation], HoldPattern[s_:>True]:>s[[1,1]]]];
