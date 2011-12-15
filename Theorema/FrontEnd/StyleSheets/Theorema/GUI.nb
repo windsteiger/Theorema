@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       145,          7]
-NotebookDataLength[      9812,        378]
-NotebookOptionsPosition[      6426,        281]
-NotebookOutlinePosition[      6890,        301]
-CellTagsIndexPosition[      6847,        298]
+NotebookDataLength[      9792,        377]
+NotebookOptionsPosition[      6406,        280]
+NotebookOutlinePosition[      6870,        300]
+CellTagsIndexPosition[      6827,        297]
 MenuPosition->0
 WindowFrame->Normal*)
 
@@ -150,8 +150,7 @@ Cell[StyleData["OpenEnvironment"],
  FontFamily->"Times New Roman",
  FontSize->10,
  FontSlant->"Plain",
- FontVariations->{"StrikeThrough"->False,
- "Underline"->False}],
+ FontVariations->{"CapsType"->"SmallCaps"}],
 
 Cell[StyleData["OpenEnvironment", "Presentation"],
  FontFamily->"Times New Roman",
@@ -338,47 +337,47 @@ Cell[2946, 131, 201, 6, 53, 48, 0, "StyleData", "Subsubsection", \
 "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[3184, 142, 360, 11, 36, 34, 0, "StyleData", "OpenEnvironment", "All",
+Cell[3184, 142, 340, 10, 36, 34, 0, "StyleData", "OpenEnvironment", "All",
  MenuSortingValue->1350,
  MenuCommandKey->"6"],
-Cell[3547, 155, 182, 5, 41, 50, 0, "StyleData", "OpenEnvironment", \
+Cell[3527, 154, 182, 5, 41, 50, 0, "StyleData", "OpenEnvironment", \
 "Presentation"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[3778, 166, 38, 0, 54, "Section"],
+Cell[3758, 165, 38, 0, 54, "Section"],
 Cell[CellGroupData[{
-Cell[3841, 170, 276, 8, 36, 41, 0, "StyleData", "FormalTextInputFormula", \
+Cell[3821, 169, 276, 8, 36, 41, 0, "StyleData", "FormalTextInputFormula", \
 "All"],
-Cell[4120, 180, 204, 6, 41, 57, 0, "StyleData", "FormalTextInputFormula", \
+Cell[4100, 179, 204, 6, 41, 57, 0, "StyleData", "FormalTextInputFormula", \
 "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[4361, 191, 222, 7, 36, 47, 0, "StyleData", \
+Cell[4341, 190, 222, 7, 36, 47, 0, "StyleData", \
 "FormalTextInputFormulaUneval", "All"],
-Cell[4586, 200, 210, 6, 41, 63, 0, "StyleData", \
+Cell[4566, 199, 210, 6, 41, 63, 0, "StyleData", \
 "FormalTextInputFormulaUneval", "Presentation"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[4845, 212, 32, 0, 54, "Section"],
-Cell[4880, 214, 247, 7, 37, 69, 0, "StyleData", "EnvButton", "All"],
-Cell[5130, 223, 216, 6, 37, 70, 0, "StyleData", "LangButton", "All"]
+Cell[4825, 211, 32, 0, 54, "Section"],
+Cell[4860, 213, 247, 7, 37, 69, 0, "StyleData", "EnvButton", "All"],
+Cell[5110, 222, 216, 6, 37, 70, 0, "StyleData", "LangButton", "All"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[5383, 234, 31, 0, 54, "Section"],
+Cell[5363, 233, 31, 0, 54, "Section"],
 Cell[CellGroupData[{
-Cell[5439, 238, 43, 1, 36, 28, 0, "StyleData", "Hyperlink", "All"],
-Cell[5485, 241, 59, 1, 41, 44, 0, "StyleData", "Hyperlink", "Presentation"]
+Cell[5419, 237, 43, 1, 36, 28, 0, "StyleData", "Hyperlink", "All"],
+Cell[5465, 240, 59, 1, 41, 44, 0, "StyleData", "Hyperlink", "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[5581, 247, 631, 20, 51, 79, 0, "StyleData", "SelectionPlaceholder", "All",
+Cell[5561, 246, 631, 20, 51, 79, 0, "StyleData", "SelectionPlaceholder", "All",
  StyleMenuListing->None],
-Cell[6215, 269, 70, 1, 45, 55, 0, "StyleData", "SelectionPlaceholder", \
+Cell[6195, 268, 70, 1, 45, 55, 0, "StyleData", "SelectionPlaceholder", \
 "Presentation"]
 }, Open  ]],
-Cell[6300, 273, 41, 1, 40, 23, 0, "StyleData", "Pane", "All"],
-Cell[6344, 276, 66, 2, 40, 26, 0, "StyleData", "TabView", "All"]
+Cell[6280, 272, 41, 1, 40, 23, 0, "StyleData", "Pane", "All"],
+Cell[6324, 275, 66, 2, 40, 26, 0, "StyleData", "TabView", "All"]
 }, Open  ]]
 }
 ]

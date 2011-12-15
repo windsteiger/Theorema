@@ -14,6 +14,7 @@ Begin["`Private`"]
 initParser[]:=
   Module[{},
     $parseTheoremaExpressions = False;
+    $parseTheoremaGlobals = False;
   ]
 initParser[args___]:=unexpected[initParser, {args}]
 
@@ -31,6 +32,9 @@ MakeExpression[ RowBox[{left_, RowBox[{":", "\[NegativeThickSpace]\[NegativeThin
 
 QU$[args___] := unexpected[ QU$, {args}]
 
+MakeExpression[ UnderscriptBox["\[ForAll]", rng_], f_] :=
+    MakeExpression[ RowBox[{"global", "[", rng, "]"}], f] /; $parseTheoremaGlobals
+   
 (* ::Section:: *)
 (* Ranges *)
 

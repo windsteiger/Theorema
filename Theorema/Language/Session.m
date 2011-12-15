@@ -78,8 +78,9 @@ SetAttributes[processEnvironment,HoldAll];
 
 processEnvironment[x_] :=
     Module[ {nb = EvaluationNotebook[], newLab},
-        newLab = adjustFormulaLabel[nb];
+    	newLab = adjustFormulaLabel[nb];
         updateKnowledgeBase[ReleaseHold[ freshNames[ markVariables[ Hold[x]]]], newLab];
+        closeEnvironment[];
     ]
 processEnvironment[args___] := unexcpected[ processEnvironment, {args}]
 
@@ -116,18 +117,39 @@ adjustFormulaLabel[args___]	:= unexpected[adjustFormulaLabel,{args}]
  *)
 getCleanCellTags[cellTags_List] :=
     Select[ cellTags, !StringMatchQ[ #, (("ID_"|"Source_") ~~ __) | $initLabel]&]
+getCleanCellTags[cellTag_String] := getCleanCellTags[{cellTag}]
 getCleanCellTags[args___] := unexpected[getCleanCellTags,{args}]
 
-getKeyTags[cellTags_List] :=
+getKeyTags[ cellTags_List] :=
     Select[ cellTags, StringMatchQ[ #, ("ID_"|"Source_") ~~ __]&]
-getKeyTags[args___] := unexpected[getKeyTags,{args}]
+getKeyTags[ cellTag_String] := getKeyTags[ {cellTag}]
+getKeyTags[ args___] := unexpected[ getKeyTags, {args}]
+
+getCellLabel[ cellTags_List, key_String] :=
+	Module[{id = Select[ cellTags, StringMatchQ[ #, key ~~ $cellTagKeySeparator ~~ __]&]},
+		If[ id === {},
+			cellLabel[ $initLabel, key],
+			id[[1]]
+		]
+	]
+getCellLabel[ args___] := unexpected[ getCellLabel, {args}]
+
+getCellIDLabel[ cellTags_] := getCellLabel[ cellTags, "ID"]
+getCellIDLabel[ args___] := unexpected[ getCellIDLabel, {args}]
+
+getCellSourceLabel[ cellTags_] := getCellLabel[ cellTags, "Source"]
+getCellSourceLabel[ args___] := unexpected[ getCellSourceLabel, {args}]
+
+cellTagsToString[ cellTags_ /; VectorQ[ cellTags, StringQ]] := Apply[ StringJoin, Riffle[ cellTags, $labelSeparator]]
+cellTagsToString[ ct_String] := ct
+cellTagsToString[ args___] := unexpected[cellTagsToString, {args}]
 
 relabelCell[nb_NotebookObject, cellTags_List, cellID_Integer] :=
 	Module[{ newFrameLabel, newCellTags, autoTags},
 		(* Perform check, weather are the given CellTags unique in the documment. *)
 		ensureNotebookIntegrity[nb,cellTags];
 		(* Join list of CellTags, use $labelSeparator. *)
-		newFrameLabel = StringJoin @@ Riffle[cellTags,$labelSeparator];
+		newFrameLabel = cellTagsToString[ cellTags];
 		(* Put newFrameLabel in brackets. *)
 		newFrameLabel = "("<>newFrameLabel<>")";
 		(* Keep cleaned CellTags and add identification (ID). *)
@@ -138,11 +160,14 @@ relabelCell[nb_NotebookObject, cellTags_List, cellID_Integer] :=
 	]
 relabelCell[args___] := unexpected[ relabelCell,{args}]
 
-cellIDLabel[ cellID_Integer] := "ID_" <> ToString[cellID]
+cellLabel[ l_, key_String] := key <> $cellTagKeySeparator <> ToString[l]
+cellLabel[ args___] := unexpected[ cellLabel, {args}]
+
+cellIDLabel[ cellID_] := cellLabel[ cellID, "ID"]
 cellIDLabel[ args___] := unexpected[ cellIDLabel, {args}]
 
-sourceLabel[ ] /; inArchive[] := "Source_" <> currentArchiveName[]
-sourceLabel[ ] := "Source_" <> CurrentValue["NotebookFullFileName"]
+sourceLabel[ ] /; inArchive[] := cellLabel[ currentArchiveName[], "Source"]
+sourceLabel[ ] := cellLabel[ CurrentValue["NotebookFullFileName"], "Source"]
 sourceLabel[ args___] := unexpected[ sourceLabel, {args}]
 	
 ensureNotebookIntegrity[nb_NotebookObject, cellTags_List] :=
@@ -160,7 +185,7 @@ ensureNotebookIntegrity[nb_NotebookObject, cellTags_List] :=
             notification[ translate["notUniqueLabel"], duplicateCellTags]
         ];
         (* Check if we have cell tags Source_src with src != current notebook filename *)
-        srcTags = DeleteDuplicates[ Select[ allCellTags, (StringMatchQ[#, "Source_" ~~ __] && # =!= sl)&]];
+        srcTags = DeleteDuplicates[ Select[ allCellTags, (StringMatchQ[#, "Source" ~~ $cellTagKeySeparator ~~ __] && # =!= sl)&]];
         If[ srcTags =!= {},
         	(* If yes, this indicates that the filename has changed and probably some formulae 
         	are stored in the environment with an outdated key 
@@ -169,13 +194,13 @@ ensureNotebookIntegrity[nb_NotebookObject, cellTags_List] :=
         	-> remove outdated tab from KBbrowser
         	 *)
         	updateKeys[ sl, srcTags];
-        	outdPos = Position[ rawNotebook, CellTags -> { ___, s_String /; StringMatchQ[ s, "Source_" ~~ __] && s =!= sl, ___}];
-        	updNb = MapAt[ (# /. s_String /; StringMatchQ[ s, "Source_" ~~ __] -> sl)&, rawNotebook, outdPos];
+        	outdPos = Position[ rawNotebook, CellTags -> { ___, s_String /; StringMatchQ[ s, "Source" ~~ $cellTagKeySeparator ~~ __] && s =!= sl, ___}];
+        	updNb = MapAt[ (# /. s_String /; StringMatchQ[ s, "Source" ~~ $cellTagKeySeparator ~~ __] -> sl)&, rawNotebook, outdPos];
         	(* TODO: notify the user that outdated labels have been encountered, ask for update *)
         	(*NotebookPut[ updNb, nb]*)
         ]
     ]
-checkNotebookIntegrity[args___] := unexpected[checkNotebookIntegrity,{args}]
+ensureNotebookIntegrity[ args___] := unexpected[ ensureNotebookIntegrity, {args}]
 
 duplicateLabel[{_, occurences_Integer}] := occurences > 1
 duplicateLabel[args___] := unexpected[ duplicateLabel, {args}]
@@ -206,16 +231,17 @@ automatedFormulaLabel[nb_NotebookObject] :=
 automatedFormulaLabel[args___] := unexpected[ automatedFormulaLabel, {args}]
 
 updateKnowledgeBase[ form_, lab_] :=
-    If[ inArchive[], 
-    	$tmaArch = Union[ $tmaArch, {{lab, form}}, SameTest -> (#1[[1]]===#2[[1]]&)],
-    	$tmaEnv = Union[ $tmaEnv, {{lab, form}}, SameTest -> (#1[[1]]===#2[[1]]&)]
+    Module[ {},
+        $tmaEnv = Union[ $tmaEnv, {{lab, form}}, SameTest -> (#1[[1]]===#2[[1]]&)];
+        If[ inArchive[],
+            $tmaArch = Union[ $tmaArch, {{lab, form}}, SameTest -> (#1[[1]]===#2[[1]]&)]
+        ]
     ]
 updateKnowledgeBase[args___] := unexpected[ updateKnowledgeBase, {args}]
 
 		
 initSession[] :=
     Module[ {},
-        $environmentLabels = {};
         $tmaEnv = {};
         $tmaArch = {};
         $tmaArchNeeds = {};
@@ -224,9 +250,6 @@ initSession[] :=
         $PreRead=.;
     ]
 initSession[args___] := unexpected[ initSession, {args}]
-
-currentEnvironment[] := First[$environmentLabels]
-currentEnvironment[args___] := unexpected[ currentEnvironment, {args}]
 
 incrementFormulaCounter[nb_NotebookObject] :=
 	Module[{formulaCounter},
@@ -248,13 +271,13 @@ getFormulaCounter[nb_NotebookObject] :=
 	]
 getFormulaCounter[args___] := unexpected[ getFormulaCounter, {args}]
  
-openEnvironment[type_String] :=
+openEnvironment[expr_] :=
     Module[{},
 		$parseTheoremaExpressions = True; 
-        PrependTo[$environmentLabels, type];
         PrependTo[ $ContextPath, "Theorema`Language`"];
         (* Set default context if I am not in an archive. *)
         If[ !inArchive[], Begin["Theorema`Knowledge`"]];
+        expr
     ]
 openEnvironment[args___] := unexpected[ openEnvironment, {args}]
 
@@ -263,7 +286,6 @@ closeEnvironment[] :=
 		(* Restore context if I am not in an archive. *)
 		If[ !inArchive[], End[]];
 		$ContextPath = DeleteCases[ $ContextPath, "Theorema`Language`"];
-		$environmentLabels = Rest[$environmentLabels];
 		$parseTheoremaExpressions = False; 
         updateKBBrowser[];
 	]

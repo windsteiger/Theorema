@@ -44,6 +44,7 @@ initGUI[] :=
 		$kbStruct = {};
 		$initLabel = "???";
 		$labelSeparator = ",";
+		$cellTagKeySeparator = "_";
 		If[ ValueQ[$theoremaGUI], tc = "Theorema Commander" /. $theoremaGUI];
 		If[ $Notebooks && MemberQ[Notebooks[], tc], NotebookClose[tc]];
 		$theoremaGUI = {"Theorema Commander" -> theoremaCommander[]};
@@ -96,7 +97,7 @@ extract hierarchically structured knowledge from a notebook
 extractKBStruct[nb_NotebookObject] := extractKBStruct[ NotebookGet[nb]];
 
 extractKBStruct[nb_Notebook] :=
-    Module[ {posTit = Cases[Position[nb, Cell[_, "Title"|"OpenArchive", ___]], {a___, 1}],
+    Module[ {posTit = Cases[Position[nb, Cell[_, "Title", ___]], {a___, 1}],
       posSec =  Cases[Position[nb, Cell[_, "Section", ___]], {a___, 1}], 
       posSubsec = Cases[Position[nb, Cell[_, "Subsection", ___]], {a___, 1}], 
       posSubsubsec = Cases[Position[nb, Cell[_, "Subsubsection", ___]], {a___, 1}], 
@@ -216,7 +217,7 @@ Clear[structView];
    parameter 'task' decides whether the view is generated for the prove tab or the compute tab *)
    
 (* group with header and content *)   
-structView[file_, {head:Cell[sec_, "Title"|"OpenArchive"|"Section"|"Subsection"|"Subsubsection"|"Subsubsubsection"|"OpenEnvironment", opts___], rest__}, tags_, task_] :=
+structView[file_, {head:Cell[sec_, "Title"|"Section"|"Subsection"|"Subsubsection"|"Subsubsubsection"|"OpenEnvironment", opts___], rest__}, tags_, task_] :=
     Module[ {sub, compTags},
     	(* process content componentwise
     	   during recursion, we collect all cell tags from cells contained in that group 
@@ -233,7 +234,7 @@ structView[file_, {head:Cell[sec_, "Title"|"OpenArchive"|"Section"|"Subsection"|
     ]
     
 (* group with header and no content -> ignore *)   
-structView[file_, {Cell[sec_, "Title"|"OpenArchive"|"Section"|"Subsection"|"Subsubsection"|"Subsubsubsection"|"OpenEnvironment", ___]}, tags_, task_] :=
+structView[file_, {Cell[sec_, "Title"|"Section"|"Subsection"|"Subsubsection"|"Subsubsubsection"|"OpenEnvironment", ___]}, tags_, task_] :=
 	Sequence[]
 
 (* list processed componentwise *) 
@@ -252,52 +253,55 @@ structView[file_, item_List, tags_, task_] :=
 (* input cell with cell tags *)
 structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cellTags_, b___], 
   tags_, task_] :=
-  Module[ { isEval, cleanCellTags, keyTags, formulaLabel, idLabel, nbAvail},
-    Assert[ VectorQ[cellTags, StringQ]];
-    idLabel = cellIDLabel[ CellID /. {a,b}];
-    cleanCellTags = getCleanCellTags[ cellTags];
-    (* keyTags are those cell tags that are used to uniquely identify the formula in the KB *)
-    keyTags = getKeyTags[ cellTags];
-    (* check whether cell has been evaluated -> formula is in KB? *)
-    isEval = MemberQ[ $tmaEnv, {keyTags, _}] || MemberQ[ $tmaArch, {keyTags, _}];
-    (* Join list of CellTags, use $labelSeparator. *)
-    formulaLabel = StringJoin @@ Riffle[cleanCellTags,$labelSeparator];
-    (*
-    If we load an archive without corresponding notebook available, then $kbStruct contains the archive name instead of the notebook name.
-    Hence, 'file' will then be the archive instead of the notebook.
-    Instead of hyperlinking into the notebook, we then present a window showing the original cell content. *)    
-    nbAvail = FileExistsQ[file] && FileExtension[file]==="nb";
-    (* generate a checkbox and display the label
-       checkbox sets the value of the global function kbSelectProve[labels] (activeComputationKB[labels] resp. for the compute tab),
-       enabled only if the formula has been evaluated 
-       label is a hyperlink to the notebook or a button that opens a new window displaying the formula *)
-    {Switch[ task,
-        "prove",
-        Row[{Checkbox[Dynamic[kbSelectProve["KEY"]], Enabled->isEval] /. "KEY" -> keyTags, 
-            If[ nbAvail,
-                Hyperlink[ Style[formulaLabel, If[ isEval,
-                                                   "FormalTextInputFormula",
-                                                   "FormalTextInputFormulaUneval"
-                                               ]], {file, idLabel}],
-                Button[ Style[formulaLabel, "FormalTextInputFormula"], 
-                	CreateDialog[{Cell[ content, "Output"], CancelButton["OK", NotebookClose[ButtonNotebook[]]]}],
-                	Appearance->None]
-            ]},
-            Spacer[10]],
-        "compute",
-        Row[{Checkbox[Dynamic[Theorema`Computation`activeComputationKB["KEY"]], Enabled->isEval] /. "KEY" -> keyTags,
-            If[ nbAvail,
-                Hyperlink[ Style[formulaLabel, If[ isEval,
-                                                   "FormalTextInputFormula",
-                                                   "FormalTextInputFormulaUneval"
-                                               ]], {file, idLabel}],
-                Button[ Style[formulaLabel, "FormalTextInputFormula"],
-                	CreateDialog[{Cell[ content, "Output"], CancelButton["OK", NotebookClose[ButtonNotebook[]]]}],
-                	Appearance->None]
-            ]},
-            Spacer[10]]
-        ], {keyTags}}
-]
+    Module[ { isEval, cleanCellTags, keyTags, formulaLabel, idLabel, nbAvail},
+        cleanCellTags = getCleanCellTags[ cellTags];
+        (* keyTags are those cell tags that are used to uniquely identify the formula in the KB *)
+        keyTags = getKeyTags[ cellTags];
+        (* check whether cell has been evaluated -> formula is in KB? *)
+        isEval = MemberQ[ $tmaEnv, {keyTags, _}];
+        (* Join list of CellTags, use $labelSeparator. *)
+        If[ cleanCellTags === {},
+            formulaLabel = cellTagsToString[ cellTags];
+			idLabel = formulaLabel,
+            formulaLabel = cellTagsToString[ cleanCellTags];
+			idLabel = getCellIDLabel[ keyTags];
+        ];
+        (*
+        If we load an archive without corresponding notebook available, then $kbStruct contains the archive name instead of the notebook name.
+        Hence, 'file' will then be the archive instead of the notebook.
+        Instead of hyperlinking into the notebook, we then present a window showing the original cell content. *)
+        nbAvail = FileExistsQ[file] && FileExtension[file]==="nb";
+        (* generate a checkbox and display the label
+           checkbox sets the value of the global function kbSelectProve[labels] (activeComputationKB[labels] resp. for the compute tab),
+           enabled only if the formula has been evaluated 
+           label is a hyperlink to the notebook or a button that opens a new window displaying the formula *)
+        {Switch[ task,
+            "prove",
+            Row[{Checkbox[Dynamic[kbSelectProve["KEY"]], Enabled->isEval] /. "KEY" -> keyTags, 
+                If[ nbAvail,
+                    Hyperlink[ Style[formulaLabel, If[ isEval,
+                                                       "FormalTextInputFormula",
+                                                       "FormalTextInputFormulaUneval"
+                                                   ]], {file, idLabel}],
+                    Button[ Style[formulaLabel, "FormalTextInputFormula"], 
+                        CreateDialog[{Cell[ content, "Output"], CancelButton["OK", NotebookClose[ButtonNotebook[]]]}],
+                        Appearance->None]
+                ]},
+                Spacer[10]],
+            "compute",
+            Row[{Checkbox[Dynamic[Theorema`Computation`activeComputationKB["KEY"]], Enabled->isEval] /. "KEY" -> keyTags,
+                If[ nbAvail,
+                    Hyperlink[ Style[formulaLabel, If[ isEval,
+                                                       "FormalTextInputFormula",
+                                                       "FormalTextInputFormulaUneval"
+                                                   ]], {file, idLabel}],
+                    Button[ Style[formulaLabel, "FormalTextInputFormula"],
+                        CreateDialog[{Cell[ content, "Output"], CancelButton["OK", NotebookClose[ButtonNotebook[]]]}],
+                        Appearance->None]
+                ]},
+                Spacer[10]]
+            ], {keyTags}}
+    ]
 
 (* input cell without cell tags -> ignore *)
 structView[file_, Cell[content_, "FormalTextInputFormula", ___], tags_, task_] :=
@@ -307,7 +311,7 @@ structView[args___] :=
     unexpected[structView, {args}]
 
 (* header view *)
-headerView[file_, Cell[ BoxData[content_]|content_String, style_, ___], tags_, task_] :=
+headerView[file_, Cell[ content_String, style_, ___], tags_, task_] :=
 (* tags contains all tags contained in the group
    generate a checkbox for the whole group and the header from the cell
    checkbox does not have an associated variable whose value the box represents
@@ -315,9 +319,9 @@ headerView[file_, Cell[ BoxData[content_]|content_String, style_, ___], tags_, t
    checking the box calls function setAll in order to set/unset all tags contained in the group *)
     Switch[ task,
     	"prove",
-        Row[{Checkbox[Dynamic[allTrue[tags, kbSelectProve], setAll[tags, kbSelectProve, #] &]], Style[ DisplayForm[ content], style]}, Spacer[10]],
+        Row[{Checkbox[Dynamic[allTrue[tags, kbSelectProve], setAll[tags, kbSelectProve, #] &]], Style[ content, style]}, Spacer[10]],
         "compute",
-        Row[{Checkbox[Dynamic[allTrue[tags, Theorema`Computation`activeComputationKB], setAll[tags, Theorema`Computation`activeComputationKB, #] &]], Style[ DisplayForm[ content], style]}, Spacer[10]]
+        Row[{Checkbox[Dynamic[allTrue[tags, Theorema`Computation`activeComputationKB], setAll[tags, Theorema`Computation`activeComputationKB, #] &]], Style[ content, style]}, Spacer[10]]
     ]
 headerView[args___] :=
     unexpected[headerView, {args}]
@@ -452,7 +456,8 @@ insertNewEnv[type_String] :=
         NotebookWrite[
          nb, {newOpenEnvCell[ type], 
           newFormulaCell[ type],
-          newCloseEnvCell[ type]}];
+          newEndEnvCell[],
+          newCloseEnvCell[]}];
     ]
 insertNewEnv[args___] :=
     unexpected[insertNewEnv, {args}]
@@ -473,23 +478,27 @@ insertNewFormulaCell[ style_String] :=
 insertNewFormulaCell[args___] :=
     unexpected[insertNewFormulaCell, {args}]
 
-closeEnv[ type_String] :=
+closeEnv[] :=
     Module[ {},
-        NotebookWrite[ InputNotebook[], newCloseEnvCell[type]];
+        NotebookWrite[ InputNotebook[], {newEndEnvCell[], newCloseEnvCell[]}];
     ]
 closeEnv[args___] :=
     unexpected[closeEnv, {args}]
 
 newFormulaCell[ "COMPUTE"] = Cell[BoxData["\[SelectionPlaceholder]"], "Computation"]	
-newFormulaCell[ style_, label_:$initLabel] = Cell[BoxData["\[SelectionPlaceholder]"], "FormalTextInputFormula", CellTags->label]	
+newFormulaCell[ style_, label_:$initLabel] = Cell[BoxData["\[SelectionPlaceholder]"], "FormalTextInputFormula", CellTags->{label}]	
 newFormulaCell[args___] :=
     unexpected[newFormulaCell, {args}]
 
-newOpenEnvCell[ type_String] := Cell[BoxData[type], "OpenEnvironment"]
+newOpenEnvCell[ type_String] := Cell[ type, "OpenEnvironment"]
 newOpenEnvCell[args___] :=
     unexpected[newOpenEnvCell, {args}]
 
-newCloseEnvCell[ _String] := Cell[BoxData["\[GraySquare]"], "CloseEnvironment"]
+newEndEnvCell[] := Cell[ "\[GraySquare]", "EndEnvironmentMarker"]
+newEndEnvCell[args___] :=
+    unexpected[newEndEnvCell, {args}]
+
+newCloseEnvCell[] := Cell[ "", "CloseEnvironment"]
 newCloseEnvCell[args___] :=
     unexpected[newCloseEnvCell, {args}]
 
@@ -497,14 +506,20 @@ newCloseEnvCell[args___] :=
 (* ::Subsection:: *)
 (* Buttons *)
 
-envButtonData["DEFINITION"] := {"tcLangTabEnvTabButtonDefLabel"};
-envButtonData["THEOREM"] := {"tcLangTabEnvTabButtonThmLabel"};
+envButtonData["DEF"] := "tcLangTabEnvTabButtonDefLabel";
+envButtonData["THM"] := "tcLangTabEnvTabButtonThmLabel";
+envButtonData["LMA"] := "tcLangTabEnvTabButtonLmaLabel";
+envButtonData["PRP"] := "tcLangTabEnvTabButtonPrpLabel";
+envButtonData["COR"] := "tcLangTabEnvTabButtonCorLabel";
+envButtonData["CNJ"] := "tcLangTabEnvTabButtonCnjLabel";
+envButtonData["ALG"] := "tcLangTabEnvTabButtonAlgLabel";
+envButtonData["EXM"] := "tcLangTabEnvTabButtonExmLabel";
 envButtonData[args___] :=
     unexpected[envButtonData, {args}]
 
 makeEnvButton[ bname_String] :=
     With[ { bd = envButtonData[bname]},
-			Button[Style[ translate[bd[[1]]], "EnvButton"], insertNewEnv[bname], Alignment -> {Left, Top}]
+			Button[Style[ translate[bd], "EnvButton"], insertNewEnv[ translate[bd]], Alignment -> {Left, Top}]
     ]
 makeEnvButton[args___] :=
     unexpected[makeEnvButton, {args}]
@@ -514,8 +529,7 @@ makeFormButton[] :=
 makeFormButton[args___] :=
     unexpected[makeFormButton, {args}]
     
-allEnvironments = {"DEFINITION", "THEOREM", "LEMMA", "PROPOSITION", "COROLLARY", "CONJECTURE", "ALGORITHM"};
-allEnvironments = {"DEFINITION", "THEOREM"};
+allEnvironments = {"DEF", "THM", "LMA", "PRP", "COR", "CNJ", "ALG", "EXM"};
 
 envButtons[] :=
     Pane[ 
@@ -696,6 +710,29 @@ langButtonData["EQUIV2"] :=
 		translate["CONN2WEAKTooltip"]
 	}
 
+langButtonData["EQ1"] := 
+	{
+		If[ $buttonNat, 
+			translate["EQ1"], 
+			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
+				"\[Equal]",
+				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
+		RowBox[{"\[SelectionPlaceholder]", "\[Equal]", "\[Placeholder]"}],
+		translate["CONN2Tooltip"]
+	}
+
+langButtonData["EQ2"] := 
+	{
+		If[ $buttonNat, 
+			translate["EQ2"], 
+			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
+				"=",
+				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
+		RowBox[{"\[SelectionPlaceholder]",
+			TagBox[ "=", Identity, SyntaxForm->"a\[Equal]b"], "\[Placeholder]"}],
+		translate["CONN2Tooltip"]
+	}
+
 langButtonData["EQUIVDEF"] := 
 	{
 		If[ $buttonNat, 
@@ -766,7 +803,7 @@ makeLangButton[ bname_String] :=
 makeLangButton[args___] :=
     unexpected[makeLangButton, {args}]
 
-allFormulae = {"AND1", "AND2", "OR1", "OR2", "IMPL1", "IMPL2", "EQUIV1", "EQUIV2", "EQUIVDEF", "EQDEF", "FORALL1", "FORALL2", "EXISTS1", "EXISTS2"};
+allFormulae = {"AND1", "AND2", "OR1", "OR2", "IMPL1", "IMPL2", "EQUIV1", "EQUIV2", "EQ1", "EQ2", "EQUIVDEF", "EQDEF", "FORALL1", "FORALL2", "EXISTS1", "EXISTS2"};
 
 langButtons[] := Pane[ 
 	Column[{
