@@ -85,32 +85,28 @@ processEnvironment[x_] :=
 processEnvironment[args___] := unexcpected[ processEnvironment, {args}]
 
 adjustFormulaLabel[nb_NotebookObject] := 
-	Module[{ cellTags, cellID, newCellTags, cleanCellTags}, 
-		SelectionMove[nb, All, EvaluationCell];
-        {cellTags,cellID} = {CellTags,CellID} /. Options[NotebookSelection[nb], {CellTags,CellID}];
+	Module[{ cellTags = CurrentValue["CellTags"], cellID = CurrentValue["CellID"], cleanCellTags},
 		(*
-		 * Make sure we have a list of CellTags
+		 * Make sure we have a list of CellTags (could also be a plain string)
 		 *)
 		cellTags = Flatten[{cellTags}];
 		(*
 		 * Remove any automated labels (begins with "ID_" or "Source_").
 		 * Remove initLabel.
 		 *)
-		cleanCellTags = getCleanCellTags[cellTags];
+		cleanCellTags = getCleanCellTags[ cellTags];
         (*
          * Replace unlabeled formula with counter.
          *)
          If[cleanCellTags==={},
-         	cleanCellTags = automatedFormulaLabel[nb]
+         	cleanCellTags = automatedFormulaLabel[ nb]
          ];
         (*
          * Relabel Cell and hide CellTags.
          *)
-        newCellTags = relabelCell[nb,cleanCellTags,cellID];
-        SelectionMove[nb, After, Cell];
-        newCellTags
+        relabelCell[ nb, cleanCellTags, cellID]
 	]
-adjustFormulaLabel[args___]	:= unexpected[adjustFormulaLabel,{args}]
+adjustFormulaLabel[ args___] := unexpected[ adjustFormulaLabel, {args}]
 
 (*
  * Returns all CellTags except the generated tags used for formula identification, i.e. ID_...
