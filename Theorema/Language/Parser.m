@@ -33,7 +33,7 @@ MakeExpression[ RowBox[{left_, RowBox[{":", "\[NegativeThickSpace]\[NegativeThin
 QU$[args___] := unexpected[ QU$, {args}]
 
 MakeExpression[ UnderscriptBox["\[ForAll]", rng_], f_] :=
-    MakeExpression[ RowBox[{"global", "[", rng, "]"}], f] /; $parseTheoremaGlobals
+    MakeExpression[ RowBox[{"univVar", "[", rng, "]"}], f] /; $parseTheoremaGlobals
    
 (* ::Section:: *)
 (* Ranges *)

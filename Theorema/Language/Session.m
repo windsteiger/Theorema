@@ -69,23 +69,78 @@ markVariables[Hold[e_]] := Hold[e]
 
 markVariables[args___] := unexpected[ markVariables, {args}]
 
+openGlobalDeclaration[ expr_] :=
+    Module[ {},
+        $parseTheoremaGlobals = True;
+        expr
+    ]
+openGlobalDeclaration[ args___] := unexpected[ openGlobalDeclaration, {args}]
 
-(*processEnvironment[\[GraySquare]] :=
-    (closeEnvironment[];
-     SelectionMove[EvaluationNotebook[], After, EvaluationCell];)
-*)
+closeGlobalDeclaration[] :=
+    Module[ {},
+        $parseTheoremaGlobals = False;
+    ]
+closeGlobalDeclaration[ args___] := unexpected[ closeGlobalDeclaration, {args}]
+
+getGlobalDeclaration[ file_String] := Replace[ file, $globalDeclarations]
+getGlobalDeclaration[ file_String, id_Integer] := Cases[ getGlobalDeclaration[ file], {id, d_} -> d]
+getGlobalDeclaration[ file_String, l_List] := 
+	(* Mapping over l ensures the order of extracted definitions to match the order of ids in l *)
+	Apply[ Join, Map[ getGlobalDeclaration[ file, #]&, l]]
+getGlobalDeclaration[ args___] := unexpected[ getGlobalDeclaration, {args}]
+
+putGlobalDeclaration[ file_String, id_Integer, decl_] :=
+	Module[{posF, posId},
+		posF = Position[ $globalDeclarations, file -> _];
+		If[ posF === {},
+			PrependTo[ $globalDeclarations, file -> {{id, decl}}],
+			posId = Position[ Extract[ $globalDeclarations, posF[[1]]], {id, _}];
+			If[ posId === {},
+				$globalDeclarations = With[ {posDecl = Append[ posF[[1]], 2]}, 
+					ReplacePart[ $globalDeclarations, posDecl -> Append[ Extract[ $globalDeclarations, posDecl], {id, decl}]]],
+				$globalDeclarations = With[ {posDecl = Append[ Join[ posF[[1]], posId[[1]]], 2]}, 
+					ReplacePart[ $globalDeclarations, posDecl -> decl]]
+			]
+		]
+	]
+putGlobalDeclaration[ args___] := unexpected[ putGlobalDeclaration, {args}]
+
+processGlobalDeclaration[ x_] := 
+	Module[ {},
+		putGlobalDeclaration[ CurrentValue["NotebookFullFileName"], CurrentValue["CellID"], x];
+		closeGlobalDeclaration[];
+	]
+processGlobalDeclaration[ args___] := unexpected[ processGlobalDeclaration, {args}]
+
+
 SetAttributes[processEnvironment,HoldAll];
 
 processEnvironment[x_] :=
-    Module[ {nb = EvaluationNotebook[], newLab},
-    	newLab = adjustFormulaLabel[nb];
-        updateKnowledgeBase[ReleaseHold[ freshNames[ markVariables[ Hold[x]]]], newLab];
+    Module[ {nb = EvaluationNotebook[], rawNotebook, key, tags, globDec},
+        rawNotebook = NotebookGet[ nb];
+    	{key, tags} = adjustFormulaLabel[ nb];
+		(* Perform necessary actions on the whole notebook *)
+		ensureNotebookIntegrity[ nb, rawNotebook, tags];
+		(* extract the global declarations that are applicable in the current evaluation *)
+		globDec = applicableGlobalDeclarations[ nb, rawNotebook, evaluationPosition[ nb, rawNotebook]];
+		(* process the expression according the Theorema syntax rules and add it to the KB *)
+        updateKnowledgeBase[ReleaseHold[ freshNames[ markVariables[ Hold[x]]]], key, globDec];
+        (* close the environment to clear $Pre and $PreRead *)
         closeEnvironment[];
     ]
 processEnvironment[args___] := unexcpected[ processEnvironment, {args}]
 
+evaluationPosition[ nb_NotebookObject, raw_Notebook] :=
+	Module[{pos},
+		SelectionMove[ nb, All, EvaluationCell];
+		pos = Position[ raw, NotebookRead[nb]];
+		SelectionMove[ nb, After, Cell];
+		pos[[1]]
+	]
+evaluationPosition[ args___] := unexpected[ evaluationPosition, {args}]
+
 adjustFormulaLabel[nb_NotebookObject] := 
-	Module[{ cellTags = CurrentValue["CellTags"], cellID = CurrentValue["CellID"], cleanCellTags},
+	Module[{ cellTags = CurrentValue["CellTags"], cellID = CurrentValue["CellID"], cleanCellTags, key},
 		(*
 		 * Make sure we have a list of CellTags (could also be a plain string)
 		 *)
@@ -104,7 +159,8 @@ adjustFormulaLabel[nb_NotebookObject] :=
         (*
          * Relabel Cell and hide CellTags.
          *)
-        relabelCell[ nb, cleanCellTags, cellID]
+        key = relabelCell[ nb, cleanCellTags, cellID];
+        {key, cleanCellTags}
 	]
 adjustFormulaLabel[ args___] := unexpected[ adjustFormulaLabel, {args}]
 
@@ -142,16 +198,15 @@ cellTagsToString[ args___] := unexpected[cellTagsToString, {args}]
 
 relabelCell[nb_NotebookObject, cellTags_List, cellID_Integer] :=
 	Module[{ newFrameLabel, newCellTags, autoTags},
-		(* Perform check, weather are the given CellTags unique in the documment. *)
-		ensureNotebookIntegrity[nb,cellTags];
-		(* Join list of CellTags, use $labelSeparator. *)
+		(* Join list of CellTags, use $labelSeparator *)
 		newFrameLabel = cellTagsToString[ cellTags];
-		(* Put newFrameLabel in brackets. *)
+		(* Put newFrameLabel in parentheses *)
 		newFrameLabel = "("<>newFrameLabel<>")";
-		(* Keep cleaned CellTags and add identification (ID). *)
-		autoTags = {cellIDLabel[cellID], sourceLabel[]};
+		(* Keep cleaned CellTags and add identification (ID) *)
+		autoTags = {cellIDLabel[ cellID], sourceLabel[ nb]};
 		newCellTags = Join[ autoTags, cellTags];
 		SetOptions[NotebookSelection[nb], CellFrameLabels->{{None,newFrameLabel},{None,None}}, CellTags->newCellTags, ShowCellTags->False];
+		(* return autoTags to be used as key for formula in KB *)
 		autoTags
 	]
 relabelCell[args___] := unexpected[ relabelCell,{args}]
@@ -162,14 +217,13 @@ cellLabel[ args___] := unexpected[ cellLabel, {args}]
 cellIDLabel[ cellID_] := cellLabel[ cellID, "ID"]
 cellIDLabel[ args___] := unexpected[ cellIDLabel, {args}]
 
-sourceLabel[ ] /; inArchive[] := cellLabel[ currentArchiveName[], "Source"]
-sourceLabel[ ] := cellLabel[ CurrentValue["NotebookFullFileName"], "Source"]
+sourceLabel[ nb_NotebookObject] /; inArchive[] := cellLabel[ currentArchiveName[], "Source"]
+sourceLabel[ nb_NotebookObject] := cellLabel[ CurrentValue[ nb, "NotebookFullFileName"], "Source"]
 sourceLabel[ args___] := unexpected[ sourceLabel, {args}]
 	
-ensureNotebookIntegrity[nb_NotebookObject, cellTags_List] :=
-    Module[ {rawNotebook,allCellTags,selectedCellTags,duplicateCellTags,srcTags, sl, outdPos, updNb},
+ensureNotebookIntegrity[ nb_NotebookObject, rawNotebook_Notebook, cellTags_List] :=
+    Module[ {allCellTags, selectedCellTags, duplicateCellTags, srcTags, sl, outdPos, updNb},
     	sl = sourceLabel[];
-        rawNotebook = NotebookGet[nb];
         (* Collect all CellTags from document. *)
         allCellTags = Flatten[Cases[rawNotebook,Cell[___,CellTags -> tags_,___] -> tags, Infinity]];
         (* We look only for the duplicates to elements of current CellTags list.*)
@@ -193,7 +247,7 @@ ensureNotebookIntegrity[nb_NotebookObject, cellTags_List] :=
         	outdPos = Position[ rawNotebook, CellTags -> { ___, s_String /; StringMatchQ[ s, "Source" ~~ $cellTagKeySeparator ~~ __] && s =!= sl, ___}];
         	updNb = MapAt[ (# /. s_String /; StringMatchQ[ s, "Source" ~~ $cellTagKeySeparator ~~ __] -> sl)&, rawNotebook, outdPos];
         	(* TODO: notify the user that outdated labels have been encountered, ask for update *)
-        	(*NotebookPut[ updNb, nb]*)
+        	(* NotebookPut[ updNb, nb] *)
         ]
     ]
 ensureNotebookIntegrity[ args___] := unexpected[ ensureNotebookIntegrity, {args}]
@@ -213,8 +267,6 @@ updateSingleKey[ new_String, old_String] :=
     ]
 updateSingleKey[args___] := unexpected[updateSingleKey, {args}]
 
-(* ::Section:: *)
-(* Region Title *)
 
 automatedFormulaLabel[nb_NotebookObject] := 
 	Module[{formulaCounter, newCellTags},
@@ -226,20 +278,40 @@ automatedFormulaLabel[nb_NotebookObject] :=
 	]
 automatedFormulaLabel[args___] := unexpected[ automatedFormulaLabel, {args}]
 
-updateKnowledgeBase[ form_, lab_] :=
-    Module[ {},
-        $tmaEnv = Union[ $tmaEnv, {{lab, form}}, SameTest -> (#1[[1]]===#2[[1]]&)];
+applicableGlobalDeclarations[ nb_NotebookObject, raw_Notebook, pos_List] :=
+	Module[{ globDeclID},
+		(* Find global declarations that apply to the cell at position pos, i.e. those that occur "above" (incl. nesting)
+		   from those cells collect the CellIDs *)
+		globDeclID = Cases[ raw, c:Cell[ _, "GlobalDeclaration", ___, CellID -> id_, ___] /; occursBelow[ Position[ raw, c][[1]], pos] -> id, Infinity];
+		(* Lookup the ids in the global declarations in the current notebook
+		   Due to the way the ids are searched, they are sorted by the order how they occur in the notebook
+		   -> this is how they have to be applied to the expression *)
+		getGlobalDeclaration[ CurrentValue[ nb, "NotebookFullFileName"], globDeclID]
+	]
+applicableGlobalDeclarations[ args___] := unexpected[ applicableGlobalDeclarations, {args}]
+
+occursBelow[ {a___, p_}, {a___, q_, ___}] /; q > p := True
+occursBelow[ x_, y_] := False
+occursBelow[args___] := unexpected[ occursBelow, {args}]
+
+updateKnowledgeBase[ form_, lab_, glob_] :=
+    Module[ {newForm = applyGlobalDeclaration[ form, glob]},
+        $tmaEnv = joinKB[ {{lab, newForm}}, $tmaEnv];
         If[ inArchive[],
-            $tmaArch = Union[ $tmaArch, {{lab, form}}, SameTest -> (#1[[1]]===#2[[1]]&)]
+            $tmaArch = joinKB[ {{lab, newForm}}, $tmaArch];
         ]
     ]
 updateKnowledgeBase[args___] := unexpected[ updateKnowledgeBase, {args}]
 
-		
+applyGlobalDeclaration[ expr_, g_List] := Fold[ applyGlobalDeclaration, expr, Reverse[ g]]
+applyGlobalDeclaration[ expr_, d_] := {d, expr}
+applyGlobalDeclaration[ args___] := unexpected[ applyGlobalDeclaration, {args}]
+
 initSession[] :=
     Module[ {},
         $tmaEnv = {};
         $tmaArch = {};
+        $globalDeclarations = {};
         $tmaArchNeeds = {};
         $formulaCounterName = "TheoremaFormulaCounter";
         $Pre=.;
@@ -344,22 +416,21 @@ SetAttributes[ processArchiveInfo, HoldAll];
 
 processArchiveInfo[ a_] :=
 	Module[{nb = EvaluationNotebook[], cf},
-		SelectionMove[nb, All, EvaluationCell];
-        {cf} = {CellFrameLabels} /. Options[NotebookSelection[nb], CellFrameLabels];
+		cf = CurrentValue[ nb, "CellFrameLabels"];
 		Switch[cf[[1,1]],
 			translate["archLabelNeeds"],
 			$tmaArchNeeds = a; Scan[ loadArchive, a], (* Remember and load current dependencies. *)
 			translate["archLabelPublic"],
 			ReleaseHold[freshNames[ Hold[a]]];
-			Begin["`private`"];
-			SelectionMove[nb, After, Cell];      
+			Begin["`private`"];     
 		];
 	]
 processArchiveInfo[args___] := unexpected[processArchiveInfo, {args}]
 
 closeArchive[_String] :=
-    Module[ {nb = EvaluationNotebook[], currNB = CurrentValue["NotebookFullFileName"], archName, archFile, archivePath},
+    Module[ {nb = EvaluationNotebook[], currNB, archName, archFile, archivePath},
         End[];
+        currNB = CurrentValue[ nb, "NotebookFullFileName"];
         archName = $Context;
         archivePath = getArchivePath[ archName];
         $tmaArchTree = currNB /. $kbStruct;
@@ -384,7 +455,7 @@ closeArchive[_String] :=
 closeArchive[args___] := unexpected[closeArchive, {args}]
 
 SetAttributes[ loadArchive, Listable]
-loadArchive[name_String] :=
+loadArchive[ name_String, globalDecl_:{}] :=
     Module[ {archivePath, cxt, archiveContent, archiveNotebookPath, pos},
         (* Save Current Settings into the local Variables *)
         archivePath = getArchivePath[ name];
@@ -395,18 +466,26 @@ loadArchive[name_String] :=
         cxt = archiveName[ archivePath];
         Begin[cxt];
         	archiveContent = ReadList[ archivePath, Hold[Expression]];
-        	ReleaseHold[ archiveContent];
+        	ReleaseHold[ Map[ applyGlobalDeclaration[ #, globalDecl]&, archiveContent, {2}]];
         EndPackage[]; (* ContextPath updated in order to make sure that public archive symbols are visible *)
-        $tmaEnv = Union[$tmaEnv, $tmaArch];
+        $tmaEnv = joinKB[ $tmaArch, $tmaEnv];
         If[ !FileExistsQ[archiveNotebookPath = getArchiveNotebookPath[ name]],
             archiveNotebookPath = archivePath
         ];
         If[ (pos = Position[ $kbStruct, archiveNotebookPath -> _]) === {},
             AppendTo[ $kbStruct, archiveNotebookPath -> $tmaArchTree],
-            $kbStruct[[pos[[1,1]]]] = archiveNotebookPath -> $tmaArchTree
+            $kbStruct = ReplacePart[ $kbStruct, pos[[1]] -> (archiveNotebookPath -> $tmaArchTree)];
         ];
     ]
 loadArchive[args___] := unexpected[loadArchive, {args}]
+
+SetAttributes[ includeArchive, Listable]
+includeArchive[ name_String] :=
+	Module[ {nb = EvaluationNotebook[], raw},
+		raw = NotebookGet[ nb]; 
+		loadArchive[ name, applicableGlobalDeclarations[ nb, raw, evaluationPosition[ nb, raw]]];
+	]
+includeArchive[ args___] := unexpected[ includeArchive, {args}]
 
 archiveName[ f_String] :=
     Module[ {file = OpenRead[f],meta,n},

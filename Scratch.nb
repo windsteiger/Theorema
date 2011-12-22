@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       145,          7]
-NotebookDataLength[    368231,       7920]
-NotebookOptionsPosition[    364474,       7795]
-NotebookOutlinePosition[    365900,       7839]
-CellTagsIndexPosition[    365684,       7831]
+NotebookDataLength[    382927,       8358]
+NotebookOptionsPosition[    378460,       8210]
+NotebookOutlinePosition[    379886,       8254]
+CellTagsIndexPosition[    379670,       8246]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -7791,10 +7791,425 @@ Cell[BoxData[
     "1", ",", "1", ",", "1", ",", "1", ",", "4", ",", "1", ",", "1", ",", 
      "19", ",", "1", ",", "1", ",", "2"}], "}"}]}], "}"}]], "Output",
  CellChangeTimes->{3.532842964019093*^9}]
-}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Notebooks", "[", "]"}]], "Input"],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+   InterpretationBox[
+    RowBox[{"NotebookObject", "[", 
+     PanelBox[GridBox[{
+        {
+         TooltipBox[
+          ButtonBox[
+           StyleBox[
+            
+            DynamicBox[FEPrivate`FrontEndResource[
+             "FEBitmaps", "ManipulatePasteIcon"],
+             ImageSizeCache->{13., {4., 9.}}],
+            DynamicUpdating->True],
+           Appearance->{Automatic, None},
+           BaseStyle->{},
+           ButtonFunction:>FrontEndExecute[{
+              FrontEnd`SetSelectedNotebook[
+               NotebookObject[
+                FrontEndObject[
+                 LinkObject["htt_shm", 1, 1]], 26]]}],
+           Evaluator->None,
+           Method->"Queued"],
+          DynamicBox[
+           FEPrivate`FrontEndResource[
+           "FEStrings", "NotebookObjectToTheFront"]]], 
+         TagBox[
+          TooltipBox["\<\"Scratch.nb\"\>",
+           "\"/home/wwindste/WolframWorkspaces/Base/Theorema/Scratch.nb\"",
+           TooltipStyle->"TextStyling"],
+          
+          Annotation[#, 
+           "/home/wwindste/WolframWorkspaces/Base/Theorema/Scratch.nb", 
+           "Tooltip"]& ]}
+       },
+       GridBoxAlignment->{
+        "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}},
+          "RowsIndexed" -> {}}],
+      FrameMargins->{{4, 5}, {4, 4}}], "]"}],
+    NotebookObject[
+     FrontEndObject[
+      LinkObject["htt_shm", 1, 1]], 26],
+    Editable->False], ",", 
+   InterpretationBox[
+    RowBox[{"NotebookObject", "[", 
+     PanelBox[GridBox[{
+        {
+         TooltipBox[
+          ButtonBox[
+           StyleBox[
+            
+            DynamicBox[FEPrivate`FrontEndResource[
+             "FEBitmaps", "ManipulatePasteIcon"],
+             ImageSizeCache->{13., {4., 9.}}],
+            DynamicUpdating->True],
+           Appearance->{Automatic, None},
+           BaseStyle->{},
+           ButtonFunction:>FrontEndExecute[{
+              FrontEnd`SetSelectedNotebook[
+               NotebookObject[
+                FrontEndObject[
+                 LinkObject["htt_shm", 1, 1]], 23]]}],
+           Evaluator->None,
+           Method->"Queued"],
+          DynamicBox[
+           FEPrivate`FrontEndResource[
+           "FEStrings", "NotebookObjectToTheFront"]]], 
+         TagBox[
+          TooltipBox["\<\"findGlobalDeclarations.nb\"\>",
+           
+           "\"/home/wwindste/WolframWorkspaces/Base/Theorema/Theorema/\
+Documentation/English/ReferencePages/Symbols/findGlobalDeclarations.nb\"",
+           TooltipStyle->"TextStyling"],
+          
+          Annotation[#, 
+           "/home/wwindste/WolframWorkspaces/Base/Theorema/Theorema/\
+Documentation/English/ReferencePages/Symbols/findGlobalDeclarations.nb", 
+           "Tooltip"]& ]}
+       },
+       GridBoxAlignment->{
+        "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}},
+          "RowsIndexed" -> {}}],
+      FrameMargins->{{4, 5}, {4, 4}}], "]"}],
+    NotebookObject[
+     FrontEndObject[
+      LinkObject["htt_shm", 1, 1]], 23],
+    Editable->False], ",", 
+   InterpretationBox[
+    RowBox[{"NotebookObject", "[", 
+     PanelBox[GridBox[{
+        {
+         TooltipBox[
+          ButtonBox[
+           StyleBox[
+            
+            DynamicBox[FEPrivate`FrontEndResource[
+             "FEBitmaps", "ManipulatePasteIcon"],
+             ImageSizeCache->{13., {4., 9.}}],
+            DynamicUpdating->True],
+           Appearance->{Automatic, None},
+           BaseStyle->{},
+           ButtonFunction:>FrontEndExecute[{
+              FrontEnd`SetSelectedNotebook[
+               NotebookObject[
+                FrontEndObject[
+                 LinkObject["htt_shm", 1, 1]], 35]]}],
+           Evaluator->None,
+           Method->"Queued"],
+          DynamicBox[
+           FEPrivate`FrontEndResource[
+           "FEStrings", "NotebookObjectToTheFront"]]], 
+         TagBox[
+          TooltipBox["\<\"FormalTextLanguage.nb\"\>",
+           
+           "\"/home/wwindste/WolframWorkspaces/Base/Theorema/Prototypes/\
+FormalTextLanguage.nb\"",
+           TooltipStyle->"TextStyling"],
+          
+          Annotation[#, 
+           "/home/wwindste/WolframWorkspaces/Base/Theorema/Prototypes/\
+FormalTextLanguage.nb", "Tooltip"]& ]}
+       },
+       GridBoxAlignment->{
+        "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}},
+          "RowsIndexed" -> {}}],
+      FrameMargins->{{4, 5}, {4, 4}}], "]"}],
+    NotebookObject[
+     FrontEndObject[
+      LinkObject["htt_shm", 1, 1]], 35],
+    Editable->False], ",", 
+   InterpretationBox[
+    RowBox[{"NotebookObject", "[", 
+     PanelBox[GridBox[{
+        {
+         TooltipBox[
+          ButtonBox[
+           StyleBox[
+            
+            DynamicBox[FEPrivate`FrontEndResource[
+             "FEBitmaps", "ManipulatePasteIcon"],
+             ImageSizeCache->{13., {4., 9.}}],
+            DynamicUpdating->True],
+           Appearance->{Automatic, None},
+           BaseStyle->{},
+           ButtonFunction:>FrontEndExecute[{
+              FrontEnd`SetSelectedNotebook[
+               NotebookObject[
+                FrontEndObject[
+                 LinkObject["htt_shm", 1, 1]], 31]]}],
+           Evaluator->None,
+           Method->"Queued"],
+          DynamicBox[
+           FEPrivate`FrontEndResource[
+           "FEStrings", "NotebookObjectToTheFront"]]], 
+         TagBox[
+          TooltipBox["\<\"NotebookGet - Wolfram Mathematica\"\>",
+           
+           "\"/usr/local/Wolfram/Mathematica/8.0/Documentation/English/System/\
+ReferencePages/Symbols/NotebookGet.nb\"",
+           TooltipStyle->"TextStyling"],
+          
+          Annotation[#, 
+           "/usr/local/Wolfram/Mathematica/8.0/Documentation/English/System/\
+ReferencePages/Symbols/NotebookGet.nb", "Tooltip"]& ]}
+       },
+       GridBoxAlignment->{
+        "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}},
+          "RowsIndexed" -> {}}],
+      FrameMargins->{{4, 5}, {4, 4}}], "]"}],
+    NotebookObject[
+     FrontEndObject[
+      LinkObject["htt_shm", 1, 1]], 31],
+    Editable->False], ",", 
+   InterpretationBox[
+    RowBox[{"NotebookObject", "[", 
+     PanelBox[GridBox[{
+        {
+         TooltipBox[
+          ButtonBox[
+           StyleBox[
+            
+            DynamicBox[FEPrivate`FrontEndResource[
+             "FEBitmaps", "ManipulatePasteIcon"],
+             ImageSizeCache->{13., {4., 9.}}],
+            DynamicUpdating->True],
+           Appearance->{Automatic, None},
+           BaseStyle->{},
+           ButtonFunction:>FrontEndExecute[{
+              FrontEnd`SetSelectedNotebook[
+               NotebookObject[
+                FrontEndObject[
+                 LinkObject["htt_shm", 1, 1]], 19]]}],
+           Evaluator->None,
+           Method->"Queued"],
+          DynamicBox[
+           FEPrivate`FrontEndResource[
+           "FEStrings", "NotebookObjectToTheFront"]]], 
+         TagBox[
+          TooltipBox["\<\"Welcome to Wolfram Mathematica 8\"\>",
+           
+           "\"/usr/local/Wolfram/Mathematica/8.0/SystemFiles/FrontEnd/\
+TextResources/MathematicaNavigator.nb\"",
+           TooltipStyle->"TextStyling"],
+          
+          Annotation[#, 
+           "/usr/local/Wolfram/Mathematica/8.0/SystemFiles/FrontEnd/\
+TextResources/MathematicaNavigator.nb", "Tooltip"]& ]}
+       },
+       GridBoxAlignment->{
+        "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}},
+          "RowsIndexed" -> {}}],
+      FrameMargins->{{4, 5}, {4, 4}}], "]"}],
+    NotebookObject[
+     FrontEndObject[
+      LinkObject["htt_shm", 1, 1]], 19],
+    Editable->False], ",", 
+   InterpretationBox[
+    RowBox[{"NotebookObject", "[", 
+     PanelBox[GridBox[{
+        {
+         TooltipBox[
+          ButtonBox[
+           StyleBox[
+            
+            DynamicBox[FEPrivate`FrontEndResource[
+             "FEBitmaps", "ManipulatePasteIcon"],
+             ImageSizeCache->{13., {4., 9.}}],
+            DynamicUpdating->True],
+           Appearance->{Automatic, None},
+           BaseStyle->{},
+           ButtonFunction:>FrontEndExecute[{
+              FrontEnd`SetSelectedNotebook[
+               NotebookObject[
+                FrontEndObject[
+                 LinkObject["htt_shm", 1, 1]], 1]]}],
+           Evaluator->None,
+           Method->"Queued"],
+          DynamicBox[
+           FEPrivate`FrontEndResource[
+           "FEStrings", "NotebookObjectToTheFront"]]], 
+         StyleBox["\<\"Messages\"\>",
+          StripOnInput->False,
+          FontColor->GrayLevel[0.5]]}
+       },
+       GridBoxAlignment->{
+        "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}},
+          "RowsIndexed" -> {}}],
+      FrameMargins->{{4, 5}, {4, 4}}], "]"}],
+    NotebookObject[
+     FrontEndObject[
+      LinkObject["htt_shm", 1, 1]], 1],
+    Editable->False]}], "}"}]], "Output",
+ CellChangeTimes->{3.533276643791876*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"nb", "=", 
+  RowBox[{
+   RowBox[{"Notebooks", "[", "]"}], "[", 
+   RowBox[{"[", "3", "]"}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.533033743191633*^9, 3.533033756379479*^9}, {
+  3.533276649769746*^9, 3.533276649801924*^9}}],
+
+Cell[BoxData[
+ InterpretationBox[
+  RowBox[{"NotebookObject", "[", 
+   PanelBox[GridBox[{
+      {
+       TooltipBox[
+        ButtonBox[
+         StyleBox[
+          
+          DynamicBox[FEPrivate`FrontEndResource[
+           "FEBitmaps", "ManipulatePasteIcon"],
+           ImageSizeCache->{13., {4., 9.}}],
+          DynamicUpdating->True],
+         Appearance->{Automatic, None},
+         BaseStyle->{},
+         ButtonFunction:>FrontEndExecute[{
+            FrontEnd`SetSelectedNotebook[
+             NotebookObject[
+              FrontEndObject[
+               LinkObject["htt_shm", 1, 1]], 35]]}],
+         Evaluator->None,
+         Method->"Queued"],
+        DynamicBox[
+         FEPrivate`FrontEndResource[
+         "FEStrings", "NotebookObjectToTheFront"]]], 
+       TagBox[
+        TooltipBox["\<\"FormalTextLanguage.nb\"\>",
+         "\"/home/wwindste/WolframWorkspaces/Base/Theorema/Prototypes/\
+FormalTextLanguage.nb\"",
+         TooltipStyle->"TextStyling"],
+        Annotation[#, 
+         "/home/wwindste/WolframWorkspaces/Base/Theorema/Prototypes/\
+FormalTextLanguage.nb", "Tooltip"]& ]}
+     },
+     GridBoxAlignment->{
+      "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+       "RowsIndexed" -> {}}],
+    FrameMargins->{{4, 5}, {4, 4}}], "]"}],
+  NotebookObject[
+   FrontEndObject[
+    LinkObject["htt_shm", 1, 1]], 35],
+  Editable->False]], "Output",
+ CellChangeTimes->{3.533033757572457*^9, 3.533276651396172*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"rawNotebook", "=", 
+   RowBox[{"NotebookGet", "[", "nb", "]"}]}], ";"}]], "Input",
+ CellChangeTimes->{{3.533033708818497*^9, 3.533033730802627*^9}, {
+  3.533033761383726*^9, 3.533033762038742*^9}}],
+
+Cell[BoxData[
+ RowBox[{"SelectionMove", "[", 
+  RowBox[{"nb", ",", "Previous", ",", "Cell"}], "]"}]], "Input",
+ CellChangeTimes->{{3.533033859644247*^9, 3.533033873704702*^9}}],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"NotebookRead", "[", "nb", "]"}]], "Input",
+ CellChangeTimes->{{3.533034004913552*^9, 3.533034005288949*^9}}],
+
+Cell[BoxData[
+ RowBox[{"Cell", "[", 
+  RowBox[{
+   RowBox[{"BoxData", "[", 
+    RowBox[{"RowBox", "[", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"RowBox", "[", 
+        RowBox[{"{", 
+         RowBox[{"\<\"R\"\>", ",", "\<\"[\"\>", ",", "\<\"x\"\>", 
+          ",", "\<\"]\"\>"}], "}"}], "]"}], ",", 
+       RowBox[{"TagBox", "[", 
+        RowBox[{"\<\"\[DoubleLongRightArrow]\"\>", ",", "Identity", ",", 
+         RowBox[{"SyntaxForm", "\[Rule]", "\<\"a\[DoubleRightArrow]b\"\>"}]}],
+         "]"}], ",", 
+       RowBox[{"RowBox", "[", 
+        RowBox[{"{", 
+         RowBox[{"\<\"S\"\>", ",", "\<\"[\"\>", ",", "\<\"x\"\>", 
+          ",", "\<\"]\"\>"}], "}"}], "]"}]}], "}"}], "]"}], "]"}], 
+   ",", "\<\"FormalTextInputFormula\"\>", ",", 
+   RowBox[{"CellFrameLabels", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{
+      RowBox[{"{", 
+       RowBox[{"None", ",", "\<\"(11)\"\>"}], "}"}], ",", 
+      RowBox[{"{", 
+       RowBox[{"None", ",", "None"}], "}"}]}], "}"}]}], ",", 
+   RowBox[{"ShowCellTags", "\[Rule]", "False"}], ",", 
+   RowBox[{"CellChangeTimes", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{"{", 
+      RowBox[{"3.532929712716465`*^9", ",", "3.532929738610442`*^9"}], "}"}], 
+     "}"}]}], ",", 
+   RowBox[{"CellTags", "\[Rule]", 
+    RowBox[{"{", 
+     RowBox[{"\<\"ID_853689289\"\>", 
+      ",", "\<\"Source_/home/wwindste/Theorema.2/Theorema/Prototypes/\
+FormalTextLanguage.nb\"\>", ",", "\<\"11\"\>"}], "}"}]}], ",", 
+   RowBox[{"CellID", "\[Rule]", "853689289"}]}], "]"}]], "Output",
+ CellChangeTimes->{
+  3.533033796248077*^9, 3.5330338869189*^9, {3.533034006190863*^9, 
+   3.533034015112185*^9}, 3.533276676146939*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"{", "pos", "}"}], "=", 
+  RowBox[{"Position", "[", 
+   RowBox[{"rawNotebook", ",", 
+    RowBox[{"NotebookRead", "[", "nb", "]"}]}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.533033036504172*^9, 3.533033036505596*^9}, {
+  3.53303402428287*^9, 3.533034033396022*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"{", 
+   RowBox[{
+   "1", ",", "1", ",", "1", ",", "1", ",", "4", ",", "1", ",", "1", ",", "5", 
+    ",", "1", ",", "1", ",", "2"}], "}"}], "}"}]], "Output",
+ CellChangeTimes->{3.533276684824705*^9}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData["pos"], "Input",
+ CellChangeTimes->{{3.533034029182743*^9, 3.533034029491864*^9}}],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{
+  "1", ",", "1", ",", "1", ",", "1", ",", "4", ",", "1", ",", "1", ",", "5", 
+   ",", "1", ",", "1", ",", "2"}], "}"}]], "Output",
+ CellChangeTimes->{3.533034030124516*^9}]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{"Needs", "[", "\"\<Theorema`\>\"", "]"}]], "Input",
+ CellChangeTimes->{{3.5332767129044*^9, 3.533276719701358*^9}}]
 },
 WindowSize->{872, 750},
-WindowMargins->{{213, Automatic}, {152, Automatic}},
+WindowMargins->{{291, Automatic}, {100, Automatic}},
 ShowSelection->True,
 FrontEndVersion->"8.0 for Linux x86 (32-bit) (February 23, 2011)",
 StyleDefinitions->Notebook[{
@@ -7808,11 +8223,11 @@ StyleDefinitions->Notebook[{
 (* Internal cache information *)
 (*CellTagsOutline
 CellTagsIndex->{
- "Info3506923120-3780624"->{
-  Cell[7776, 218, 118, 2, 42, "Print",
-   CellTags->"Info3506923120-3780624"],
-  Cell[7897, 222, 746, 21, 23, "Print",
-   CellTags->"Info3506923120-3780624"]},
+ "Info3503830027-2852806"->{
+  Cell[46223, 1112, 146, 3, 41, "Print",
+   CellTags->"Info3503830027-2852806"],
+  Cell[46372, 1117, 2389, 60, 119, "Print",
+   CellTags->"Info3503830027-2852806"]},
  "Info3506765933-6779518"->{
   Cell[8848, 253, 153, 2, 42, "Print",
    CellTags->"Info3506765933-6779518"]},
@@ -7821,19 +8236,19 @@ CellTagsIndex->{
    CellTags->"Info3506765976-6064345"],
   Cell[9414, 271, 33163, 732, 1535, "Print",
    CellTags->"Info3506765976-6064345"]},
- "Info3503830027-2852806"->{
-  Cell[46223, 1112, 146, 3, 41, "Print",
-   CellTags->"Info3503830027-2852806"],
-  Cell[46372, 1117, 2389, 60, 119, "Print",
-   CellTags->"Info3503830027-2852806"]}
+ "Info3506923120-3780624"->{
+  Cell[7776, 218, 118, 2, 42, "Print",
+   CellTags->"Info3506923120-3780624"],
+  Cell[7897, 222, 746, 21, 23, "Print",
+   CellTags->"Info3506923120-3780624"]}
  }
 *)
 (*CellTagsIndex
 CellTagsIndex->{
- {"Info3506923120-3780624", 365003, 7810},
- {"Info3506765933-6779518", 365192, 7815},
- {"Info3506765976-6064345", 365301, 7818},
- {"Info3503830027-2852806", 365495, 7823}
+ {"Info3503830027-2852806", 378989, 8225},
+ {"Info3506765933-6779518", 379184, 8230},
+ {"Info3506765976-6064345", 379293, 8233},
+ {"Info3506923120-3780624", 379487, 8238}
  }
 *)
 (*NotebookFileOutline
@@ -7921,7 +8336,30 @@ Cell[362317, 7731, 737, 19, 50, "Output"]
 Cell[CellGroupData[{
 Cell[363091, 7755, 335, 8, 30, "Input"],
 Cell[363429, 7765, 1029, 27, 69, "Output"]
-}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[364495, 7797, 57, 1, 30, "Input"],
+Cell[364555, 7800, 8843, 253, 157, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[373435, 8058, 249, 6, 30, "Input"],
+Cell[373687, 8066, 1459, 42, 46, "Output"]
+}, Open  ]],
+Cell[375161, 8111, 232, 5, 30, "Input"],
+Cell[375396, 8118, 176, 3, 30, "Input"],
+Cell[CellGroupData[{
+Cell[375597, 8125, 132, 2, 30, "Input"],
+Cell[375732, 8129, 1647, 41, 132, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[377416, 8175, 299, 7, 30, "Input"],
+Cell[377718, 8184, 238, 6, 30, "Output"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[377993, 8195, 95, 1, 30, "Input"],
+Cell[378091, 8198, 212, 5, 30, "Output"]
+}, Open  ]],
+Cell[378318, 8206, 138, 2, 30, "Input"]
 }
 ]
 *)

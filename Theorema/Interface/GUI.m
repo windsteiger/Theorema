@@ -227,6 +227,7 @@ structView[file_, {head:Cell[sec_, "Title"|"Section"|"Subsection"|"Subsubsection
         compTags = Apply[Union, sub[[2]]];
         (* generate an opener view with the view of the header and the content as a column
            a global symbol with unique name is generated, whose value stores the state of the opener *)
+        (* TODO: Use TaggingRules to store the state -> Tutorial "Storing and Tracking Palette States" *)
         {OpenerView[{headerView[file, head, compTags, task], Column[sub[[1]]]}, 
         	ToExpression[StringReplace["Dynamic[NEWSYM]", 
         		"NEWSYM" -> "$kbStructState$"<>ToString[Hash[FileBaseName[file]]]<>"$"<>ToString[CellID/.{opts}]]]], 
