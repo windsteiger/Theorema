@@ -48,12 +48,27 @@ freshNames[expr_Hold] :=
                 ]}, {Hold}]
 freshNames[args___] := unexpected[ freshNames, {args}]
 
-specifiedVariables[RNG$[r___]] :=
-    Map[ Part[#,1]&, {r}]
+specifiedVariables[ RNG$[r___]] := Map[ extractVar, {r}]
+specifiedVariables[ args___] := unexpected[ specifiedVariables, {args}]
 
-markVariables[Hold[QU$[r_RNG$, expr_]]] := 
- Module[{s = Map[#->VAR$[#]&, specifiedVariables[r]]},
-  		replaceAllExcept[markVariables[Hold[expr]], s, {SEQ$, VAR$, NEW$, FIX$}]]
+extractVar[ r_[ VAR$[ v_], ___]] := v
+extractVar[ r_[ v_, ___]] := v
+extractVar[ args___] := unexpected[ extractVar, {args}]
+
+
+markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
+    Module[ {s},
+        With[ {sym = Unique[]},
+        	(* all symbols sym specified as variables in r are translated into VAR$[sym]
+        	   we substitute all symbols with matching "base name" (neglecting the context!) so that also
+        	   symbols in different context get substituted. This is important when processing archives, because
+        	   global variables in an archive live in the archive's private context, whereas the global declaration
+        	   lives in the context of the loading notebook/archive. With the substitution below, the private`sym becomes 
+        	   a VAR$[loading`sym] *)
+            s = Map[ sym_Symbol /; SymbolName[sym] === SymbolName[#] -> VAR$[#]&, specifiedVariables[r]]
+        ];
+        replaceAllExcept[markVariables[Hold[expr]], s, {SEQ$, VAR$, NEW$, FIX$}]
+    ]
 
 markVariables[Hold[h_[e___]]] := applyHold[
   		markVariables[Hold[h]],
@@ -119,9 +134,11 @@ SetAttributes[processEnvironment,HoldAll];
 
 processEnvironment[x_] :=
     Module[ {nb = EvaluationNotebook[], rawNotebook, key, tags, globDec},
-        rawNotebook = NotebookGet[ nb];
+    	(* select current cell: we need to refer to this selection when we set the cell options *)
+		SelectionMove[ nb, All, EvaluationCell];
     	{key, tags} = adjustFormulaLabel[ nb];
 		(* Perform necessary actions on the whole notebook *)
+        rawNotebook = NotebookGet[ nb];
 		ensureNotebookIntegrity[ nb, rawNotebook, tags];
 		(* extract the global declarations that are applicable in the current evaluation *)
 		globDec = applicableGlobalDeclarations[ nb, rawNotebook, evaluationPosition[ nb, rawNotebook]];
@@ -129,6 +146,7 @@ processEnvironment[x_] :=
         updateKnowledgeBase[ReleaseHold[ freshNames[ markVariables[ Hold[x]]]], key, globDec];
         (* close the environment to clear $Pre and $PreRead *)
         closeEnvironment[];
+		SelectionMove[ nb, After, Cell];
     ]
 processEnvironment[args___] := unexcpected[ processEnvironment, {args}]
 
@@ -136,8 +154,8 @@ evaluationPosition[ nb_NotebookObject, raw_Notebook] :=
 	Module[{pos},
 		SelectionMove[ nb, All, EvaluationCell];
 		pos = Position[ raw, NotebookRead[nb]];
-		SelectionMove[ nb, After, Cell];
 		pos[[1]]
+		(* we leave the current cell selected, the calling function should decide where to move the selection *)
 	]
 evaluationPosition[ args___] := unexpected[ evaluationPosition, {args}]
 
@@ -305,8 +323,15 @@ updateKnowledgeBase[ form_, lab_, glob_] :=
     ]
 updateKnowledgeBase[args___] := unexpected[ updateKnowledgeBase, {args}]
 
+Clear[ applyGlobalDeclaration]
 applyGlobalDeclaration[ expr_, g_List] := Fold[ applyGlobalDeclaration, expr, Reverse[ g]]
-applyGlobalDeclaration[ expr_, d_] := {d, expr}
+applyGlobalDeclaration[ expr_, globalForall$TM[ r_, c_]] := forall$TM[ r, c, ReleaseHold[ markVariables[ Hold[ QU$[ r, expr]]]]]
+applyGlobalDeclaration[ expr_, globalForall$TM[ r_, c_, d_]] := 
+	With[ {new = applyGlobalDeclaration[ expr, d]}, 
+		forall$TM[ r, c, ReleaseHold[ markVariables[ Hold[ QU$[ r, new]]]]]
+	]
+applyGlobalDeclaration[ expr_, globalImplies$TM[ c_]] := implies$TM[ c, expr]
+applyGlobalDeclaration[ expr_, globalImplies$TM[ c_, d_]] := implies$TM[ c, applyGlobalDeclaration[ expr, d]]
 applyGlobalDeclaration[ args___] := unexpected[ applyGlobalDeclaration, {args}]
 
 initSession[] :=
@@ -495,6 +520,7 @@ includeArchive[ name_String] :=
 	Module[ {nb = EvaluationNotebook[], raw},
 		raw = NotebookGet[ nb]; 
 		loadArchive[ name, applicableGlobalDeclarations[ nb, raw, evaluationPosition[ nb, raw]]];
+		SelectionMove[ nb, After, Cell];
 	]
 (* we don't use Listable because we want no output *)
 includeArchive[ l_List] := Scan[ includeArchive, l]

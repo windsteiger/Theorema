@@ -1,6 +1,6 @@
 (* Paclet Info File *)
 
-(* created 2011/12/07*)
+(* created 2011/12/23*)
 
 Paclet[
     Name -> "Theorema",

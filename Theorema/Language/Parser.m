@@ -65,7 +65,7 @@ MakeExpression[ RowBox[ {UnderscriptBox[ "\[ForAll]", rng_], decl_}], f_] :=
     standardQuantifier[ "globalForall", rng, "true", decl, f] /; $parseTheoremaGlobals
 
 MakeExpression[ RowBox[ {UnderscriptBox[ UnderscriptBox[ "\[ForAll]", rng_], cond_], decl_}], f_] :=
-    standardQuantifier[ "globalForall", rng, "true", decl, f] /; $parseTheoremaGlobals
+    standardQuantifier[ "globalForall", rng, cond, decl, f] /; $parseTheoremaGlobals
 
 MakeExpression[ RowBox[ {cond_, "\[Implies]"|"\[DoubleLongRightArrow]"|"\[DoubleRightArrow]"}], f_] := 
 	MakeExpression[ RowBox[{ "globalImplies", "[", cond, "]"}], f] /; $parseTheoremaGlobals
