@@ -1,0 +1,540 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 8.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       157,          7]
+NotebookDataLength[     14411,        531]
+NotebookOptionsPosition[     10244,        373]
+NotebookOutlinePosition[     10659,        389]
+CellTagsIndexPosition[     10616,        386]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[TextData[{
+ "New in: ",
+ Cell["0.0", "HistoryData",
+  CellTags->"New"],
+ " | Modified in: ",
+ Cell[" ", "HistoryData",
+  CellTags->"Modified"],
+ " | Obsolete in: ",
+ Cell[" ", "HistoryData",
+  CellTags->"Obsolete"],
+ " | Excised in: ",
+ Cell[" ", "HistoryData",
+  CellTags->"Excised"]
+}], "History",
+ CellID->1247902091],
+
+Cell[CellGroupData[{
+
+Cell["Categorization", "CategorizationSection",
+ CellID->1122911449],
+
+Cell["Tutorial", "Categorization",
+ CellLabel->"Entity Type",
+ CellID->686433507],
+
+Cell["Theorema", "Categorization",
+ CellLabel->"Paclet Name",
+ CellID->605800465],
+
+Cell["Theorema`", "Categorization",
+ CellLabel->"Context",
+ CellID->468444828],
+
+Cell["Theorema/tutorial/ProgrammersGuidelines", "Categorization",
+ CellLabel->"URI"]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Keywords", "KeywordsSection",
+ CellID->1427428552],
+
+Cell["XXXX", "Keywords",
+ CellID->1251852827]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Details", "DetailsSection",
+ CellID->307771771],
+
+Cell["XXXX", "Details",
+ CellLabel->"Lead",
+ CellID->218895918],
+
+Cell["XXXX", "Details",
+ CellLabel->"Developers",
+ CellID->350963985],
+
+Cell["XXXX", "Details",
+ CellLabel->"Authors",
+ CellID->795871300],
+
+Cell["XXXX", "Details",
+ CellLabel->"Feature Name",
+ CellID->199739161],
+
+Cell["XXXX", "Details",
+ CellLabel->"QA",
+ CellID->40625308],
+
+Cell["XXXX", "Details",
+ CellLabel->"DA",
+ CellID->357121918],
+
+Cell["XXXX", "Details",
+ CellLabel->"Docs",
+ CellID->35949532],
+
+Cell["XXXX", "Details",
+ CellLabel->"Features Page Notes",
+ CellID->929432370],
+
+Cell["XXXX", "Details",
+ CellLabel->"Comments",
+ CellID->240026365]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Programmers Guidelines", "Title",
+ CellChangeTimes->{3.533480067090696*^9},
+ CellID->509267359],
+
+Cell[CellGroupData[{
+
+Cell["Development", "Section",
+ CellChangeTimes->{{3.533479372233269*^9, 3.533479375320985*^9}},
+ CellID->1905755158],
+
+Cell[CellGroupData[{
+
+Cell["Recommended Development Tools", "Subsubsection",
+ CellChangeTimes->{{3.513058651910804*^9, 3.513058670706804*^9}},
+ CellID->1101778183],
+
+Cell[TextData[{
+ "Write packages in plain .m-files, no programming in .nb notebook-files. \
+m-files can be edited as package files in the ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " FrontEnd, still providing some of the convenient notebook features (e.g. \
+sectioning, collapsing cell groups, etc.).\nAlternatively, the \
+WolframWorkbench provides a very convenient development environment."
+}], "Text",
+ CellChangeTimes->{{3.513058679670517*^9, 3.513058828593065*^9}, {
+  3.513058895075178*^9, 3.513058936223579*^9}},
+ CellID->1807771345]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Language Dependency", "Subsubsection",
+ CellChangeTimes->{{3.513057316020966*^9, 3.513057324081456*^9}},
+ CellID->1570982239],
+
+Cell["\<\
+Language dependent strings (help messages, button labels, menu entries, etc.) \
+should be defined in the corresponding \[OpenCurlyDoubleQuote]LanguageData\
+\[CloseCurlyDoubleQuote] packages. Use the function \
+\[OpenCurlyDoubleQuote]translate\[CloseCurlyDoubleQuote] accordingly. It will \
+use the language chosen in $Language.\
+\>", "Text",
+ CellChangeTimes->{{3.513058082433791*^9, 3.513058133778015*^9}, {
+  3.513058276854291*^9, 3.51305833459441*^9}, {3.533479669306433*^9, 
+  3.533479686253084*^9}},
+ CellID->1463669761]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Programming", "Section",
+ CellChangeTimes->{{3.533479397699534*^9, 3.533479399819206*^9}},
+ CellID->1789751322],
+
+Cell[CellGroupData[{
+
+Cell["Naming Conventions", "Subsubsection",
+ CellChangeTimes->{{3.513058352711657*^9, 3.513058358263449*^9}},
+ CellID->322908692],
+
+Cell[TextData[{
+ "Function names: lower case, no special characters except $, upper case on \
+word boundaries, e.g. openComputation.\nGlobal variables: start with $.\nData \
+structures: short names, all upper case, ending in $, e.g. VAR$.\nUnevaluated \
+fresh names (in order to avoid evaluation by ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ "): lower case, ending in $TM, e.g. plus$TM."
+}], "Text",
+ CellChangeTimes->{{3.513058375917258*^9, 3.513058615650928*^9}},
+ CellID->824571219]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Package Dependencies", "Subsubsection",
+ CellChangeTimes->{{3.513057253548153*^9, 3.513057311941472*^9}},
+ CellID->808805643],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+Usually, if package A depends on package B, package A is set up using\
+\>", "Text",
+ CellChangeTimes->{{3.513057351123462*^9, 3.513057416636685*^9}},
+ CellID->168153129],
+
+Cell[BoxData[
+ RowBox[{"BeginPackage", "[", 
+  RowBox[{"\"\<A`\>\"", ",", 
+   RowBox[{"{", "\"\<B`\>\"", "}"}]}], "]"}]], "Input",
+ CellChangeTimes->{{3.513057420206714*^9, 3.513057438951042*^9}},
+ CellID->1908198389]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+so that symbols exported by B are visible in A. In order to keep the \
+ContextPath \[OpenCurlyDoubleQuote]clean\[CloseCurlyDoubleQuote], we use \
+so-called \[OpenCurlyDoubleQuote]private package import\
+\[CloseCurlyDoubleQuote]\
+\>", "Text",
+ CellChangeTimes->{{3.513057447881406*^9, 3.513057448871446*^9}, {
+  3.51305760416886*^9, 3.513057665206061*^9}},
+ CellID->1551789716],
+
+Cell[BoxData[{
+ RowBox[{"BeginPackage", "[", "\"\<A`\>\"", "]"}], "\n", 
+ RowBox[{"Needs", "[", "\"\<B`\>\"", "]"}]}], "Input",
+ CellChangeTimes->{{3.513057420206714*^9, 3.513057438951042*^9}, {
+  3.513057673248259*^9, 3.513057697123312*^9}},
+ CellID->927943111]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+which also makes symbols exported by B visible in A, but will not leave \
+\[OpenCurlyDoubleQuote]B`\[CloseCurlyDoubleQuote] in the ContextPath after \
+loading package A.
+Moreover, we use one central package Theorema`Common` for shared symbols. All \
+symbols that need to be used across packages should be defined there, and all \
+packages that need symbols from other packages just use\
+\>", "Text",
+ CellChangeTimes->{{3.513057737922485*^9, 3.513057881047261*^9}, {
+  3.513057940055224*^9, 3.513057988028137*^9}},
+ CellID->318801287],
+
+Cell[BoxData[
+ RowBox[{"Needs", "[", "\"\<Theorema`Common`\>\"", "]"}]], "Input",
+ CellChangeTimes->{3.513058004086103*^9},
+ CellID->1351933892]
+}, Open  ]],
+
+Cell["\<\
+This gives a flat package hierarchy that can easily be maintained.\
+\>", "Text",
+ CellChangeTimes->{{3.513058026416772*^9, 3.513058060553581*^9}},
+ CellID->1166297507]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Default Case for Pattern Definitions", "Subsubsection",
+ CellChangeTimes->{{3.5130570195594*^9, 3.513057032599498*^9}},
+ CellID->612761324],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+For functions that are defined through various patterns, provide a default \
+case that will match if all (intended) cases fail.\
+\>", "Text",
+ CellChangeTimes->{{3.513057038104899*^9, 3.513057149607101*^9}},
+ CellID->1807041091],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"f", "[", "args___", "]"}], ":=", 
+  RowBox[{"unexpected", "[", 
+   RowBox[{"f", ",", 
+    RowBox[{"{", "args", "}"}]}], "]"}]}]], "Input",
+ CellChangeTimes->{{3.513056884623223*^9, 3.51305688462481*^9}, 
+   3.513057011267955*^9, {3.513057152864087*^9, 3.513057155733866*^9}},
+ CellID->1383636587]
+}, Open  ]],
+
+Cell["\<\
+This will interrupt program execution and tell that \[OpenCurlyQuote]f\
+\[CloseCurlyQuote] has been called with unexpected arguments \
+\[OpenCurlyQuote]args\[CloseCurlyQuote]. This will facilitate debugging.\
+\>", "Text",
+ CellChangeTimes->{{3.513057161385442*^9, 3.513057221359454*^9}},
+ CellID->255831916]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Use Assert", "Subsubsection",
+ CellChangeTimes->{{3.513056893013967*^9, 3.513056895235039*^9}},
+ CellID->1007040944],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ "Assert is a new feature in ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " 8, which allows to test assumptions that interrupt program execution in \
+case it is detected that the test fails."
+}], "Text",
+ CellChangeTimes->{{3.51305690002701*^9, 3.513056993149039*^9}},
+ CellID->961204065],
+
+Cell[BoxData[
+ RowBox[{"Assert", "[", "test", "]"}]], "Input",
+ CellChangeTimes->{{3.513056589524633*^9, 3.513056590642774*^9}, {
+  3.513056997030746*^9, 3.513056999028284*^9}},
+ CellID->1358998773]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Organization", "Section",
+ CellChangeTimes->{{3.533479467735167*^9, 3.533479470579596*^9}},
+ CellID->549865337],
+
+Cell[CellGroupData[{
+
+Cell["Theorema editor", "Subsubsection",
+ CellChangeTimes->{{3.503903952396789*^9, 3.503903956456551*^9}, {
+  3.503904034455522*^9, 3.503904041702376*^9}},
+ CellID->1871658360],
+
+Cell[TextData[{
+ "Every file names a ",
+ StyleBox["Theorema editor",
+  FontSlant->"Italic"],
+ " (TE) in the file's header. The TE is the person through which \
+modifications to that file can go into the common repository. Technically, \
+this means that changes to a file, which is not edited by yourself, should be \
+made in a separate branch in the revision control system, from which the TE \
+can pull the changes and forward them into the common repository."
+}], "Text",
+ CellChangeTimes->{{3.50390398570317*^9, 3.503904290955221*^9}, {
+  3.505113941000962*^9, 3.505113942682419*^9}},
+ CellID->1469832235]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["More About", "TutorialMoreAboutSection",
+ CellID->23220180],
+
+Cell["XXXX", "TutorialMoreAbout",
+ CellID->1567025153]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Related Tutorials", "RelatedTutorialsSection",
+ CellID->415694126],
+
+Cell["XXXX", "RelatedTutorials",
+ CellID->806871991]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Related Wolfram Education Group Courses", "TutorialRelatedLinksSection",
+ CellID->415694148],
+
+Cell["XXXX", "TutorialRelatedLinks",
+ CellID->415694149]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{700, 770},
+WindowMargins->{{330, Automatic}, {137, Automatic}},
+FrontEndVersion->"8.0 for Linux x86 (32-bit) (February 23, 2011)",
+StyleDefinitions->FrontEnd`FileName[{"Wolfram"}, "TutorialPageStyles.nb", 
+  CharacterEncoding -> "UTF-8"]
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[557, 20, 325, 14, 24, "History",
+ CellID->1247902091],
+Cell[CellGroupData[{
+Cell[907, 38, 68, 1, 29, "CategorizationSection",
+ CellID->1122911449],
+Cell[978, 41, 81, 2, 32, "Categorization",
+ CellID->686433507],
+Cell[1062, 45, 81, 2, 32, "Categorization",
+ CellID->605800465],
+Cell[1146, 49, 78, 2, 32, "Categorization",
+ CellID->468444828],
+Cell[1227, 53, 84, 1, 32, "Categorization"]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[1348, 59, 56, 1, 19, "KeywordsSection",
+ CellID->1427428552],
+Cell[1407, 62, 45, 1, 19, "Keywords",
+ CellID->1251852827]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[1489, 68, 53, 1, 19, "DetailsSection",
+ CellID->307771771],
+Cell[1545, 71, 63, 2, 32, "Details",
+ CellID->218895918],
+Cell[1611, 75, 69, 2, 32, "Details",
+ CellID->350963985],
+Cell[1683, 79, 66, 2, 32, "Details",
+ CellID->795871300],
+Cell[1752, 83, 71, 2, 32, "Details",
+ CellID->199739161],
+Cell[1826, 87, 60, 2, 32, "Details",
+ CellID->40625308],
+Cell[1889, 91, 61, 2, 32, "Details",
+ CellID->357121918],
+Cell[1953, 95, 62, 2, 32, "Details",
+ CellID->35949532],
+Cell[2018, 99, 78, 2, 32, "Details",
+ CellID->929432370],
+Cell[2099, 103, 67, 2, 32, "Details",
+ CellID->240026365]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[2203, 110, 101, 2, 106, "Title",
+ CellID->509267359],
+Cell[CellGroupData[{
+Cell[2329, 116, 117, 2, 43, "Section",
+ CellID->1905755158],
+Cell[CellGroupData[{
+Cell[2471, 122, 141, 2, 41, "Subsubsection",
+ CellID->1101778183],
+Cell[2615, 126, 550, 11, 86, "Text",
+ CellID->1807771345]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[3202, 142, 131, 2, 41, "Subsubsection",
+ CellID->1570982239],
+Cell[3336, 146, 535, 10, 60, "Text",
+ CellID->1463669761]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[3920, 162, 117, 2, 43, "Section",
+ CellID->1789751322],
+Cell[CellGroupData[{
+Cell[4062, 168, 129, 2, 41, "Subsubsection",
+ CellID->322908692],
+Cell[4194, 172, 495, 10, 144, "Text",
+ CellID->824571219]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4726, 187, 131, 2, 41, "Subsubsection",
+ CellID->808805643],
+Cell[CellGroupData[{
+Cell[4882, 193, 179, 4, 23, "Text",
+ CellID->168153129],
+Cell[5064, 199, 217, 5, 26, "Input",
+ CellID->1908198389]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[5318, 209, 386, 8, 42, "Text",
+ CellID->1551789716],
+Cell[5707, 219, 262, 5, 46, "Input",
+ CellID->927943111]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[6006, 229, 544, 10, 108, "Text",
+ CellID->318801287],
+Cell[6553, 241, 144, 3, 26, "Input",
+ CellID->1351933892]
+}, Open  ]],
+Cell[6712, 247, 177, 4, 23, "Text",
+ CellID->1166297507]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[6926, 256, 145, 2, 41, "Subsubsection",
+ CellID->612761324],
+Cell[CellGroupData[{
+Cell[7096, 262, 238, 5, 40, "Text",
+ CellID->1807041091],
+Cell[7337, 269, 331, 8, 26, "Input",
+ CellID->1383636587]
+}, Open  ]],
+Cell[7683, 280, 317, 6, 42, "Text",
+ CellID->255831916]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[8037, 291, 122, 2, 41, "Subsubsection",
+ CellID->1007040944],
+Cell[CellGroupData[{
+Cell[8184, 297, 312, 8, 40, "Text",
+ CellID->961204065],
+Cell[8499, 307, 198, 4, 26, "Input",
+ CellID->1358998773]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[8758, 318, 117, 2, 44, "Section",
+ CellID->549865337],
+Cell[CellGroupData[{
+Cell[8900, 324, 176, 3, 41, "Subsubsection",
+ CellID->1871658360],
+Cell[9079, 329, 608, 12, 91, "Text",
+ CellID->1469832235]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[9724, 346, 65, 1, 72, "TutorialMoreAboutSection",
+ CellID->23220180],
+Cell[9792, 349, 54, 1, 22, "TutorialMoreAbout",
+ CellID->1567025153]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[9883, 355, 72, 1, 72, "RelatedTutorialsSection",
+ CellID->415694126],
+Cell[9958, 358, 52, 1, 22, "RelatedTutorials",
+ CellID->806871991]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[10047, 364, 98, 1, 72, "TutorialRelatedLinksSection",
+ CellID->415694148],
+Cell[10148, 367, 56, 1, 22, "TutorialRelatedLinks",
+ CellID->415694149]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)
