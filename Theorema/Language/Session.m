@@ -72,12 +72,14 @@ markVariables[args___] := unexpected[ markVariables, {args}]
 openGlobalDeclaration[ expr_] :=
     Module[ {},
         $parseTheoremaGlobals = True;
+        PrependTo[ $ContextPath, "Theorema`Language`"];
         expr
     ]
 openGlobalDeclaration[ args___] := unexpected[ openGlobalDeclaration, {args}]
 
 closeGlobalDeclaration[] :=
     Module[ {},
+		$ContextPath = DeleteCases[ $ContextPath, "Theorema`Language`"];
         $parseTheoremaGlobals = False;
     ]
 closeGlobalDeclaration[ args___] := unexpected[ closeGlobalDeclaration, {args}]
@@ -107,7 +109,7 @@ putGlobalDeclaration[ args___] := unexpected[ putGlobalDeclaration, {args}]
 
 processGlobalDeclaration[ x_] := 
 	Module[ {},
-		putGlobalDeclaration[ CurrentValue["NotebookFullFileName"], CurrentValue["CellID"], x];
+		putGlobalDeclaration[ CurrentValue["NotebookFullFileName"], CurrentValue["CellID"], ReleaseHold[ freshNames[ markVariables[ Hold[x]]]]];
 		closeGlobalDeclaration[];
 	]
 processGlobalDeclaration[ args___] := unexpected[ processGlobalDeclaration, {args}]
@@ -454,7 +456,6 @@ closeArchive[_String] :=
     ]
 closeArchive[args___] := unexpected[closeArchive, {args}]
 
-SetAttributes[ loadArchive, Listable]
 loadArchive[ name_String, globalDecl_:{}] :=
     Module[ {archivePath, cxt, archiveContent, archiveNotebookPath, pos},
         (* Save Current Settings into the local Variables *)
@@ -464,11 +465,21 @@ loadArchive[ name_String, globalDecl_:{}] :=
             Return[]
         ];
         cxt = archiveName[ archivePath];
-        Begin[cxt];
-        	archiveContent = ReadList[ archivePath, Hold[Expression]];
-        	ReleaseHold[ Map[ applyGlobalDeclaration[ #, globalDecl]&, archiveContent, {2}]];
-        EndPackage[]; (* ContextPath updated in order to make sure that public archive symbols are visible *)
-        $tmaEnv = joinKB[ $tmaArch, $tmaEnv];
+        Block[ {$tmaArch},
+            BeginPackage[cxt];
+            (* we could just Get[archivePath], but we read the content and prevent evaluation for the moment
+               this would be the place to process the archive content before evaluation *)
+            archiveContent = ReadList[ archivePath, Hold[Expression]];
+            ReleaseHold[ archiveContent];
+            (* after reading and evaluating the archive $tmaArch has a value, namely the actual KB contained in the archive
+               this is why we use the Block in order not
+               to overwrite $tmaArch when loading an archive from within another one ... *)
+        	(* ContextPath updated in order to make sure that public archive symbols are visible *)
+            EndPackage[];
+            (* before joining it to the KB, we apply global declarations *)
+            $tmaArch = Map[ MapAt[ applyGlobalDeclaration[ #, globalDecl]&, #, 2]&, $tmaArch];
+            $tmaEnv = joinKB[ $tmaArch, $tmaEnv];
+        ];
         If[ !FileExistsQ[archiveNotebookPath = getArchiveNotebookPath[ name]],
             archiveNotebookPath = archivePath
         ];
@@ -477,14 +488,16 @@ loadArchive[ name_String, globalDecl_:{}] :=
             $kbStruct = ReplacePart[ $kbStruct, pos[[1]] -> (archiveNotebookPath -> $tmaArchTree)];
         ];
     ]
+loadArchive[ l_List, globalDecl_:{}] := Scan[ loadArchive[ #, globalDecl]&, l]
 loadArchive[args___] := unexpected[loadArchive, {args}]
 
-SetAttributes[ includeArchive, Listable]
 includeArchive[ name_String] :=
 	Module[ {nb = EvaluationNotebook[], raw},
 		raw = NotebookGet[ nb]; 
 		loadArchive[ name, applicableGlobalDeclarations[ nb, raw, evaluationPosition[ nb, raw]]];
 	]
+(* we don't use Listable because we want no output *)
+includeArchive[ l_List] := Scan[ includeArchive, l]
 includeArchive[ args___] := unexpected[ includeArchive, {args}]
 
 archiveName[ f_String] :=
