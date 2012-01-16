@@ -16,10 +16,10 @@ initParser[]:=
     $parseTheoremaExpressions = False;
     $parseTheoremaGlobals = False;
   ]
-initParser[args___]:=unexpected[initParser, {args}]
+initParser[args___] := unexpected[ initParser, {args}]
 
-MakeExpression[RowBox[{a_, TagBox[op_, Identity, ___], b_}], f_] := 
-	MakeExpression[RowBox[{a, op, b}], f] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+MakeExpression[RowBox[{a_, TagBox[op_, Identity, ___], b_}], fmt_] := 
+	MakeExpression[RowBox[{a, op, b}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 
 standardQuantifier[ name_, rng_, cond_, expr_, fmt_] :=
     With[ {r = toRangeBox[ rng]},
@@ -29,17 +29,94 @@ standardQuantifier[ name_, rng_, cond_, expr_, fmt_] :=
     ]
 standardQuantifier[ args___] := unexpected[ standardQuantifier, {args}]
     
-MakeExpression[ RowBox[{UnderscriptBox["\[ForAll]", rng_], form_}], f_] :=
-    standardQuantifier[ "forall", rng, "true", form, f] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[{UnderscriptBox[ q_?isQuantifierSymbol, rng_], form_}], fmt_] :=
+    standardQuantifier[ Replace[ q, $tmaQuantifierToName], rng, "True", form, fmt] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{UnderscriptBox[ UnderscriptBox[ "\[ForAll]", rng_], cond_], form_}], f_] :=
-    standardQuantifier[ "forall", rng, cond, form, f] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[{UnderscriptBox[ UnderscriptBox[ q_?isQuantifierSymbol, rng_], cond_], form_}], fmt_] :=
+    standardQuantifier[ Replace[ q, $tmaQuantifierToName], rng, cond, form, fmt] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{left_, RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], right_}], f_] :=
-    MakeExpression[ RowBox[{"iffDef", "[", RowBox[{left, ",", right}], "]"}], f] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[{left_, RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], right_}], fmt_] :=
+    MakeExpression[ RowBox[{"IffDef", "[", RowBox[{left, ",", right}], "]"}], fmt] /; $parseTheoremaExpressions
 
 QU$[args___] := unexpected[ QU$, {args}]
 
+AppendTo[ $ContextPath, "Theorema`Language`"];
+
+MakeBoxes[ (q_?isQuantifierName)[ rng_, True$TM, form_], fmt_] := 
+	RowBox[ {UnderscriptBox[ Replace[ q, $tmaNameToQuantifier], makeRangeBox[ rng, fmt]],
+		MakeBoxes[ form, fmt]}
+	]
+
+MakeBoxes[ (q_?isQuantifierName)[ rng_, cond_, form_], fmt_] := 
+	RowBox[ {UnderscriptBox[ UnderscriptBox[ Replace[ q, $tmaNameToQuantifier], makeRangeBox[ rng, fmt]], MakeBoxes[ cond, fmt]],
+		MakeBoxes[ form, fmt]}
+	]
+
+MakeBoxes[ (op_?isNonStandardOperatorName)[ arg__], fmt_] :=
+    With[ {b = Replace[ op, $tmaNonStandardOperatorToBuiltin]},
+        MakeBoxes[ b[ arg], fmt]
+    ]
+MakeBoxes[ (op_?isStandardOperatorName)[ arg__], fmt_] :=
+    With[ {b = tmaToInputOperator[ op]},
+        MakeBoxes[ b[ arg], fmt]
+    ]
+MakeBoxes[ VAR$[ v_], fmt_] := StyleBox[ MakeBoxes[ v, fmt], "ExpressionVariable"]
+
+MakeBoxes[ s_Symbol, fmt_] := 
+	Module[ {n = SymbolName[ s]},
+		If[ StringLength[ n] > 3 && StringTake[ n, -3] === "$TM",
+			StringDrop[ n, -3],
+			n
+		]
+	]
+	
+(* To add a new quantifier, just add a pair to this list *)	
+$tmaQuantifiers =
+    {{"\[ForAll]", "Forall"},
+     {"\[Exists]", "Exists"},
+     {"\[Intersection]", "IntersectionOf"},
+     {"\[Union]", "UnionOf"}
+    };
+
+$tmaQuantifierSymbols = Transpose[ $tmaQuantifiers][[1]];
+$tmaQuantifierNames = ToExpression[ Map[ "Theorema`Language`" <> # <> "$TM"&, Transpose[ $tmaQuantifiers][[2]]]];
+$tmaQuantifierToName = Dispatch[ Apply[ Rule, $tmaQuantifiers, {1}]];
+$tmaNameToQuantifier = Dispatch[ MapThread[ Rule, {$tmaQuantifierNames, $tmaQuantifierSymbols}]];
+
+isQuantifierSymbol[ s_String] := MemberQ[ $tmaQuantifierSymbols, s]
+isQuantifierSymbol[ args___] := unexpected[ isQuantifierSymbol, {args}]
+
+isQuantifierName[ f_] := MemberQ[ $tmaQuantifierNames, f]
+isQuantifierName[ args___] := unexpected[ isQuantifierName, {args}]
+
+$tmaNonStandardOperators = 
+    {
+     {Iff$TM, DoubleRightArrow},
+     {EqualDef$TM, SetDelayed},
+     {Equal$TM, Set},
+     {Tuple$TM, AngleBracket}
+    };
+
+$tmaNonStandardOperatorNames = Transpose[ $tmaNonStandardOperators][[1]];
+$tmaNonStandardOperatorToBuiltin = Dispatch[ Apply[ Rule, $tmaNonStandardOperators, {1}]];
+
+isNonStandardOperatorName[ f_] := MemberQ[ $tmaNonStandardOperatorNames, f]
+isNonStandardOperatorName[ args___] := unexpected[ isNonStandardOperatorName, {args}]
+
+isStandardOperatorName[ f_] :=
+    Module[ {n = SymbolName[ f]},
+        StringLength[ n] > 3 && StringTake[ n, -3] === "$TM"
+    ]
+isStandardOperatorName[ args___] := unexpected[ isStandardOperatorName, {args}]
+
+tmaToInputOperator[ op_] :=
+    Module[ {n = SymbolName[ op]},
+        If[ StringTake[ n, -1] == "$",
+            ToExpression[ n],
+            ToExpression[ StringDrop[ n, -3]]
+        ]
+    ]
+tmaToInputOperator[ args___] := unexpected[ tmaToInputOperator, {args}]
 
 (* ::Section:: *)
 (* Global Declarations *)
@@ -52,23 +129,23 @@ standardGlobalQuantifier[ name_, rng_, cond_, fmt_] :=
     ]
 standardGlobalQuantifier[ args___] := unexpected[ standardGlobalQuantifier, {args}]
 
-MakeExpression[RowBox[{a_, TagBox[ "\[DoubleLongRightArrow]", Identity, ___]}], f_] := 
-	MakeExpression[RowBox[{a, "\[DoubleLongRightArrow]"}], f] /; $parseTheoremaGlobals
+MakeExpression[RowBox[{a_, TagBox[ "\[DoubleLongRightArrow]", Identity, ___]}], fmt_] := 
+	MakeExpression[RowBox[{a, "\[DoubleLongRightArrow]"}], fmt] /; $parseTheoremaGlobals
 
-MakeExpression[ UnderscriptBox[ "\[ForAll]", rng_], f_] :=
-    standardGlobalQuantifier[ "globalForall", rng, "true", f] /; $parseTheoremaGlobals
+MakeExpression[ UnderscriptBox[ "\[ForAll]", rng_], fmt_] :=
+    standardGlobalQuantifier[ "globalForall", rng, "True", fmt] /; $parseTheoremaGlobals
 
-MakeExpression[ UnderscriptBox[ UnderscriptBox[ "\[ForAll]", rng_], cond_], f_] :=
-    standardGlobalQuantifier[ "globalForall", rng, cond, f] /; $parseTheoremaGlobals
+MakeExpression[ UnderscriptBox[ UnderscriptBox[ "\[ForAll]", rng_], cond_], fmt_] :=
+    standardGlobalQuantifier[ "globalForall", rng, cond, fmt] /; $parseTheoremaGlobals
 
-MakeExpression[ RowBox[ {UnderscriptBox[ "\[ForAll]", rng_], decl_}], f_] :=
-    standardQuantifier[ "globalForall", rng, "true", decl, f] /; $parseTheoremaGlobals
+MakeExpression[ RowBox[ {UnderscriptBox[ "\[ForAll]", rng_], decl_}], fmt_] :=
+    standardQuantifier[ "globalForall", rng, "True", decl, fmt] /; $parseTheoremaGlobals
 
-MakeExpression[ RowBox[ {UnderscriptBox[ UnderscriptBox[ "\[ForAll]", rng_], cond_], decl_}], f_] :=
-    standardQuantifier[ "globalForall", rng, cond, decl, f] /; $parseTheoremaGlobals
+MakeExpression[ RowBox[ {UnderscriptBox[ UnderscriptBox[ "\[ForAll]", rng_], cond_], decl_}], fmt_] :=
+    standardQuantifier[ "globalForall", rng, cond, decl, fmt] /; $parseTheoremaGlobals
 
-MakeExpression[ RowBox[ {cond_, "\[Implies]"|"\[DoubleLongRightArrow]"|"\[DoubleRightArrow]"}], f_] := 
-	MakeExpression[ RowBox[{ "globalImplies", "[", cond, "]"}], f] /; $parseTheoremaGlobals
+MakeExpression[ RowBox[ {cond_, "\[Implies]"|"\[DoubleLongRightArrow]"|"\[DoubleRightArrow]"}], fmt_] := 
+	MakeExpression[ RowBox[{ "globalImplies", "[", cond, "]"}], fmt] /; $parseTheoremaGlobals
 	
 	
 (* ::Section:: *)
@@ -76,6 +153,7 @@ MakeExpression[ RowBox[ {cond_, "\[Implies]"|"\[DoubleLongRightArrow]"|"\[Double
 
 toRangeBox[s_] :=
     RowBox[{"RNG$", "[", makeRangeSequence[s], "]"}]            
+toRangeBox[args___] := unexpected[ toRangeBox, {args}]
 
 makeRangeSequence[RowBox[{s_,",",r__}]] :=
     Sequence[ makeRangeSequence[s], ",", makeRangeSequence[RowBox[{r}]]]
@@ -91,6 +169,16 @@ makeRangeSequence[ RowBox[{p_, "[", v_, "]"}]] :=
 
 makeRangeSequence[s_] :=
     RowBox[{"SIMPRNG$","[",s,"]"}]
+makeRangeSequence[args___] := unexpected[ makeRangeSequence, {args}]
+
+
+makeRangeBox[ RNG$[ s__SIMPRNG$], fmt_] := RowBox[ Riffle[ Map[ makeRangeBox[ #, fmt]&, {s}], ","]]
+makeRangeBox[ RNG$[ s__], fmt_] := GridBox[ Map[ {makeRangeBox[ #, fmt]}&, {s}]]
+makeRangeBox[ SETRNG$[ v_, s_], fmt_] := RowBox[ {MakeBoxes[v, fmt], "\[Element]", MakeBoxes[ s, fmt]}]
+makeRangeBox[ PREDRNG$[ v_, p_], fmt_] := RowBox[ {MakeBoxes[ p, fmt], "[", MakeBoxes[v, fmt], "]"}]
+makeRangeBox[ SIMPRNG$[ v_], fmt_] := MakeBoxes[ v, fmt]
+
+makeRangeBox[args___] := unexpected[ makeRangeBox, {args}]
 
 (*
 MakeTheoremaExpression[RowBox[{UnderscriptBox["\[ForAll]",rng_],form_}],f_]:=
@@ -482,6 +570,8 @@ MakeTheoremaExpression[RowBox[{"bound","[",v__,"]"}],f_]:=ToHoldingRangeBox[v]
 *)
 
 initParser[];
+
+$ContextPath = Drop[ $ContextPath, -1];
 
 End[];
 EndPackage[];

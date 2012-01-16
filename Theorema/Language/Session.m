@@ -32,18 +32,19 @@ Begin["`Private`"] (* Begin Private Context *)
 
 freshNames[expr_Hold] :=
     replaceAllExcept[ expr, 
-    {DoubleLongRightArrow|DoubleRightArrow->implies$TM, DoubleLongLeftRightArrow|DoubleLeftRightArrow->iff$TM,
-    	SetDelayed->equalDef$TM, Wedge->and$TM, Vee->or$TM,
-    s_Symbol/;(Context[s]==="System`") :> Module[ {name = ToString[s]},
-                    If[ StringTake[name,{-1}]==="$",
+    {DoubleLongRightArrow|DoubleRightArrow->Implies$TM, DoubleLongLeftRightArrow|DoubleLeftRightArrow|Equivalent->Iff$TM,
+    	SetDelayed->EqualDef$TM, Set->Equal$TM, Wedge->And$TM, Vee->Or$TM, List->makeSet, AngleBracket->Tuple$TM,
+(*    s_Symbol /; (Context[s] === "System`") :> Module[ {name = ToString[s]},
+                    If[ StringTake[ name, -1] === "$",
                         s,
-                        ToExpression[ToLowerCase[StringTake[name,1]]<>StringDrop[name,1]<> "$TM"]
+                        ToExpression[ ToLowerCase[ StringTake[ name, 1]] <> StringDrop[ name, 1] <> "$TM"]
                     ]
                 ],
+                *)
     s_Symbol :> Module[ {name = ToString[s]},
-                    If[ StringTake[name,{-1}]==="$",
+                    If[ StringTake[ name, -1] === "$",
                         s,
-                        ToExpression[name <> "$TM"]
+                        ToExpression[ name <> "$TM"]
                     ]
                 ]}, {Hold}]
 freshNames[args___] := unexpected[ freshNames, {args}]
@@ -58,16 +59,14 @@ extractVar[ args___] := unexpected[ extractVar, {args}]
 
 markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
     Module[ {s},
-        With[ {sym = Unique[]},
-        	(* all symbols sym specified as variables in r are translated into VAR$[sym]
-        	   we substitute all symbols with matching "base name" (neglecting the context!) so that also
-        	   symbols in different context get substituted. This is important when processing archives, because
-        	   global variables in an archive live in the archive's private context, whereas the global declaration
-        	   lives in the context of the loading notebook/archive. With the substitution below, the private`sym becomes 
-        	   a VAR$[loading`sym] *)
-            s = Map[ sym_Symbol /; SymbolName[sym] === SymbolName[#] -> VAR$[#]&, specifiedVariables[r]]
-        ];
-        replaceAllExcept[markVariables[Hold[expr]], s, {SEQ$, VAR$, NEW$, FIX$}]
+        (* all symbols sym specified as variables in r are translated into VAR$[sym]
+           we substitute all symbols with matching "base name" (neglecting the context!) so that also
+           symbols in different context get substituted. This is important when processing archives, because
+           global variables in an archive live in the archive's private context, whereas the global declaration
+           lives in the context of the loading notebook/archive. With the substitution below, the private`sym becomes 
+           a VAR$[loading`sym] *)
+        s = Map[ sym_Symbol /; SymbolName[sym] === SymbolName[#] -> VAR$[#]&, specifiedVariables[r]];
+        replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {SEQ$, VAR$, NEW$, FIX$}]
     ]
 
 markVariables[Hold[h_[e___]]] := applyHold[
@@ -143,7 +142,7 @@ processEnvironment[x_] :=
 		(* extract the global declarations that are applicable in the current evaluation *)
 		globDec = applicableGlobalDeclarations[ nb, rawNotebook, evaluationPosition[ nb, rawNotebook]];
 		(* process the expression according the Theorema syntax rules and add it to the KB *)
-        updateKnowledgeBase[ReleaseHold[ freshNames[ markVariables[ Hold[x]]]], key, globDec];
+        updateKnowledgeBase[ReleaseHold[ freshNames[ markVariables[ Hold[x]]]], key, globDec, tags];
         (* close the environment to clear $Pre and $PreRead *)
         closeEnvironment[];
 		SelectionMove[ nb, After, Cell];
@@ -185,7 +184,7 @@ adjustFormulaLabel[nb_NotebookObject] :=
 adjustFormulaLabel[ args___] := unexpected[ adjustFormulaLabel, {args}]
 
 (*
- * Returns all CellTags except the generated tags used for formula identification, i.e. ID_...
+ * Returns all CellTags except the generated tags used for formula identification, i.e. ID_... and Source_...
  *)
 getCleanCellTags[cellTags_List] :=
     Select[ cellTags, !StringMatchQ[ #, (("ID_"|"Source_") ~~ __) | $initLabel]&]
@@ -212,16 +211,17 @@ getCellIDLabel[ args___] := unexpected[ getCellIDLabel, {args}]
 getCellSourceLabel[ cellTags_] := getCellLabel[ cellTags, "Source"]
 getCellSourceLabel[ args___] := unexpected[ getCellSourceLabel, {args}]
 
-cellTagsToString[ cellTags_ /; VectorQ[ cellTags, StringQ]] := Apply[ StringJoin, Riffle[ cellTags, $labelSeparator]]
-cellTagsToString[ ct_String] := ct
+cellTagsToString[ cellTags_ /; VectorQ[ cellTags, StringQ]] := makeLabel[ Apply[ StringJoin, Riffle[ cellTags, $labelSeparator]]]
+cellTagsToString[ ct_String] := makeLabel[ ct]
 cellTagsToString[ args___] := unexpected[cellTagsToString, {args}]
+
+makeLabel[ s_String] := "(" <> s <> ")"
+makeLabel[ args___] := unexpected[ makeLabel, {args}]
 
 relabelCell[nb_NotebookObject, cellTags_List, cellID_Integer] :=
 	Module[{ newFrameLabel, newCellTags, autoTags},
 		(* Join list of CellTags, use $labelSeparator *)
 		newFrameLabel = cellTagsToString[ cellTags];
-		(* Put newFrameLabel in parentheses *)
-		newFrameLabel = "("<>newFrameLabel<>")";
 		(* Keep cleaned CellTags and add identification (ID) *)
 		autoTags = {cellIDLabel[ cellID], sourceLabel[ nb]};
 		newCellTags = Join[ autoTags, cellTags];
@@ -314,24 +314,31 @@ occursBelow[ {a___, p_}, {a___, q_, ___}] /; q > p := True
 occursBelow[ x_, y_] := False
 occursBelow[args___] := unexpected[ occursBelow, {args}]
 
-updateKnowledgeBase[ form_, lab_, glob_] :=
+updateKnowledgeBase[ form_, key_, glob_, tags_] :=
     Module[ {newForm = applyGlobalDeclaration[ form, glob]},
-        $tmaEnv = joinKB[ {{lab, newForm}}, $tmaEnv];
+        $tmaEnv = joinKB[ {{key, newForm, cellTagsToString[ tags]}}, $tmaEnv];
         If[ inArchive[],
-            $tmaArch = joinKB[ {{lab, newForm}}, $tmaArch];
+            $tmaArch = joinKB[ {{key, newForm, cellTagsToString[ tags]}}, $tmaArch];
         ]
     ]
 updateKnowledgeBase[args___] := unexpected[ updateKnowledgeBase, {args}]
 
+findSelectedFormula[ Cell[ _, ___, CellTags -> t_, ___]] :=
+	Module[ { key = getKeyTags[ t]},
+		Cases[ $tmaEnv, {key, form_, tag_} -> {form, tag}]
+	]	
+findSelectedFormula[ sel_] := {}
+findSelectedFormula[args___] := unexpected[ findSelectedFormula, {args}]
+
 Clear[ applyGlobalDeclaration]
 applyGlobalDeclaration[ expr_, g_List] := Fold[ applyGlobalDeclaration, expr, Reverse[ g]]
-applyGlobalDeclaration[ expr_, globalForall$TM[ r_, c_]] := forall$TM[ r, c, ReleaseHold[ markVariables[ Hold[ QU$[ r, expr]]]]]
+applyGlobalDeclaration[ expr_, globalForall$TM[ r_, c_]] := Forall$TM[ r, c, ReleaseHold[ markVariables[ Hold[ QU$[ r, expr]]]]]
 applyGlobalDeclaration[ expr_, globalForall$TM[ r_, c_, d_]] := 
 	With[ {new = applyGlobalDeclaration[ expr, d]}, 
-		forall$TM[ r, c, ReleaseHold[ markVariables[ Hold[ QU$[ r, new]]]]]
+		Forall$TM[ r, c, ReleaseHold[ markVariables[ Hold[ QU$[ r, new]]]]]
 	]
-applyGlobalDeclaration[ expr_, globalImplies$TM[ c_]] := implies$TM[ c, expr]
-applyGlobalDeclaration[ expr_, globalImplies$TM[ c_, d_]] := implies$TM[ c, applyGlobalDeclaration[ expr, d]]
+applyGlobalDeclaration[ expr_, globalImplies$TM[ c_]] := Implies$TM[ c, expr]
+applyGlobalDeclaration[ expr_, globalImplies$TM[ c_, d_]] := Implies$TM[ c, applyGlobalDeclaration[ expr, d]]
 applyGlobalDeclaration[ args___] := unexpected[ applyGlobalDeclaration, {args}]
 
 initSession[] :=

@@ -28,6 +28,7 @@ With[ {lang = "English"},
 	MessageName[archiveName,"usage",lang] = "archiveName[f] returns the short archive name (=context name) for an archive stored in file f.";
 	MessageName[processEnvironment, "usage", lang] = "processEnvironment[ expr] ...";
 	MessageName[processComputation, "usage", lang] = "processComputation[ expr] ...";
+	MessageName[findSelectedFormula, "usage", lang] = "findSelectedFormula[ sel] ...";
 	
 (* Theorema`Utilities` *)
 	MessageName[replaceAllExcept, "usage", lang] = "replaceAllExcept[ expr, rules, expt] applies rule(s) to all subparts of 'expr' except those contained in the list 'expt'.";
