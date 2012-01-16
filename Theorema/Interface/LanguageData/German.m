@@ -30,8 +30,8 @@ With[ {lang = "German"},
     translate["tcPreferencesTabLabel", lang] = "Einstellungen";
 	    translate["tcPrefLanguage", lang] = "Sprache";
 	    translate["tcPrefArchiveDir", lang] = "Archiv Verzeichnis";
-    translate["not available", lang] = "nicht verf\[UDoubleDot]gbar";
-    translate["No knowledge available", lang] = "Kein Wissen verf\[UDoubleDot]gbar";
+    translate["nA", lang] = "nicht verf\[UDoubleDot]gbar";
+    translate["noKnowl", lang] = "Kein Wissen verf\[UDoubleDot]gbar";
    
     translate["Sets", lang] = "Mengen";
     translate["Arithmetic", lang] = "Arithmetik";

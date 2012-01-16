@@ -48,37 +48,44 @@ initGUI[] :=
 		If[ ValueQ[$theoremaGUI], tc = "Theorema Commander" /. $theoremaGUI];
 		If[ $Notebooks && MemberQ[Notebooks[], tc], NotebookClose[tc]];
 		$theoremaGUI = {"Theorema Commander" -> theoremaCommander[]};
-		kbSelectProve[_] := False
+		kbSelectProve[_] := False;
+		kbSelectSolve[_] := False
 	]
 
 (* ::Section:: *)
 (* theoremaCommander *)
 
 theoremaCommander[] /; $Notebooks :=
-    Module[ {style = Replace[ScreenStyleEnvironment,Options[InputNotebook[], ScreenStyleEnvironment]]},
+    Module[ {style = Replace[ ScreenStyleEnvironment, Options[InputNotebook[], ScreenStyleEnvironment]]},
         CreatePalette[ Dynamic[Refresh[
         	TabView[{
         		translate["tcLangTabLabel"]->TabView[{
         			translate["tcLangTabMathTabLabel"]->Dynamic[Refresh[ langButtons[], TrackedSymbols :> {$buttonNat}]],
         			translate["tcLangTabEnvTabLabel"]->envButtons[],
         			translate["tcLangTabArchTabLabel"]->archButtons[]}, Dynamic[$tcLangTab],
-        			ControlPlacement->Top],
+        			LabelStyle->"TabLabel2", ControlPlacement->Top],
         		translate["tcProveTabLabel"]->TabView[{
+        			translate["tcProveTabGoalTabLabel"]->Dynamic[ Refresh[ displaySelectedGoal[], UpdateInterval -> 2]],
         			translate["tcProveTabKBTabLabel"]->Dynamic[Refresh[displayKBBrowser["prove"], TrackedSymbols :> {$kbStruct}]],
-        			translate["tcProveTabBuiltinTabLabel"]->displayBuiltinBrowser[]}, Dynamic[$tcProveTab],
-        			ControlPlacement->Top],
+        			translate["tcProveTabBuiltinTabLabel"]->displayBuiltinBrowser[],
+        			translate["tcProveTabProverTabLabel"]->selectProver[],
+        			translate["tcProveTabSubmitTabLabel"]->submitProveTask[]}, Dynamic[$tcProveTab],
+        			LabelStyle->"TabLabel2", ControlPlacement->Top],
         		translate["tcComputeTabLabel"]->TabView[{
         			translate["tcComputeTabSetupTabLabel"]->Dynamic[Refresh[ compSetup[], TrackedSymbols :> {$buttonNat}]],
         			translate["tcComputeTabKBTabLabel"]->Dynamic[Refresh[displayKBBrowser["compute"], TrackedSymbols :> {$kbStruct}]],
         			translate["tcComputeTabBuiltinTabLabel"]->displayBuiltinBrowser[]}, Dynamic[$tcCompTab],
-        			ControlPlacement->Top],
+        			LabelStyle->"TabLabel2", ControlPlacement->Top],
+        		translate["tcSolveTabLabel"]->TabView[{
+        			translate["tcSolveTabKBTabLabel"]->Dynamic[Refresh[displayKBBrowser["solve"], TrackedSymbols :> {$kbStruct}]]}, Dynamic[$tcSolveTab],
+        			LabelStyle->"TabLabel2", ControlPlacement->Top],
         		translate["tcPreferencesTabLabel"]->TabView[{
         			translate["tcPrefLanguage"]->PopupMenu[Dynamic[$Language], availableLanguages[]],
         			translate["tcPrefArchiveDir"]->Row[{Dynamic[Tooltip[ToFileName[Take[FileNameSplit[$TheoremaArchiveDirectory], -2]], $TheoremaArchiveDirectory]],
-        				FileNameSetter[Dynamic[$TheoremaArchiveDirectory], "Directory"]}, Spacer[10]]}
-        			]},
+        				FileNameSetter[Dynamic[$TheoremaArchiveDirectory], "Directory"]}, Spacer[10]]},
+        			LabelStyle->"TabLabel2", ControlPlacement->Top]},
         		Dynamic[$tcTopLevelTab],
-        		LabelStyle->{Bold}, ControlPlacement->Left
+        		LabelStyle->"TabLabel1", ControlPlacement->Left
         	], TrackedSymbols :> {$Language}]],
         	StyleDefinitions -> ToFileName[{"Theorema"}, "GUI.nb"],
         	WindowTitle -> "Theorema Commander",
@@ -86,7 +93,24 @@ theoremaCommander[] /; $Notebooks :=
         	WindowElements -> {"StatusArea"}]
     ]
 
-emptyPane[text_String:""]:=Pane[text, Alignment->{Center,Center}]
+emptyPane[ text_String:""] := Pane[ text, Alignment -> {Center, Center}]
+
+(* ::Subsubsection:: *)
+(* displaySelectedGoal *)
+   
+displaySelectedGoal[ ] :=
+    Module[ { sel = NotebookRead[ InputNotebook[]], goal},
+    	goal = findSelectedFormula[ sel];
+        If[ goal === {},
+            emptyPane[ translate["noGoal"]],
+            Pane[ Row[ displayLabeledFormula[ goal], Spacer[5]], 350, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
+        ]
+    ]
+displaySelectedGoal[args___] :=
+    unexpected[displaySelectedGoal, {args}]
+
+displayLabeledFormula[ {form_, lab_}] := {Style[ lab, "FormulaLabel"], Style[ TraditionalForm[ form], "DisplayFormula"]}
+displayLabeledFormula[ args___] := unexpected[ displayLabeledFormula, {args}]
  
 (* ::Subsubsection:: *)
 (* extractKBStruct *)
@@ -259,7 +283,7 @@ structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cel
         (* keyTags are those cell tags that are used to uniquely identify the formula in the KB *)
         keyTags = getKeyTags[ cellTags];
         (* check whether cell has been evaluated -> formula is in KB? *)
-        isEval = MemberQ[ $tmaEnv, {keyTags, _}];
+        isEval = MemberQ[ $tmaEnv, {keyTags, _, _}];
         (* Join list of CellTags, use $labelSeparator. *)
         If[ cleanCellTags === {},
             formulaLabel = cellTagsToString[ cellTags];
@@ -300,7 +324,19 @@ structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cel
                         CreateDialog[{Cell[ content, "Output"], CancelButton["OK", NotebookClose[ButtonNotebook[]]]}],
                         Appearance->None]
                 ]},
-                Spacer[10]]
+                Spacer[10]],
+            "solve",
+            Row[{Checkbox[Dynamic[kbSelectSolve["KEY"]], Enabled->isEval] /. "KEY" -> keyTags, 
+                If[ nbAvail,
+                    Hyperlink[ Style[formulaLabel, If[ isEval,
+                                                       "FormalTextInputFormula",
+                                                       "FormalTextInputFormulaUneval"
+                                                   ]], {file, idLabel}],
+                    Button[ Style[formulaLabel, "FormalTextInputFormula"], 
+                        CreateDialog[{Cell[ content, "Output"], CancelButton["OK", NotebookClose[ButtonNotebook[]]]}],
+                        Appearance->None]
+                ]},
+                Spacer[10]]    
             ], {keyTags}}
     ]
 
@@ -322,7 +358,9 @@ headerView[file_, Cell[ content_String, style_, ___], tags_, task_] :=
     	"prove",
         Row[{Checkbox[Dynamic[allTrue[tags, kbSelectProve], setAll[tags, kbSelectProve, #] &]], Style[ content, style]}, Spacer[10]],
         "compute",
-        Row[{Checkbox[Dynamic[allTrue[tags, Theorema`Computation`activeComputationKB], setAll[tags, Theorema`Computation`activeComputationKB, #] &]], Style[ content, style]}, Spacer[10]]
+        Row[{Checkbox[Dynamic[allTrue[tags, Theorema`Computation`activeComputationKB], setAll[tags, Theorema`Computation`activeComputationKB, #] &]], Style[ content, style]}, Spacer[10]],
+        "solve",
+        Row[{Checkbox[Dynamic[allTrue[tags, kbSelectSolve], setAll[tags, kbSelectSolve, #] &]], Style[ content, style]}, Spacer[10]]        
     ]
 headerView[args___] :=
     unexpected[headerView, {args}]
@@ -359,7 +397,7 @@ updateKBBrowser[args___] :=
 displayKBBrowser[ task_String] :=
     Module[ {},
         If[ $kbStruct === {},
-            emptyPane[translate["No knowledge available"]],
+            emptyPane[translate["noKnowl"]],
             (* generate tabs for each notebook,
                tab label contains a short form of the filename, tab contains a Pane containing the structured view *)
             TabView[
@@ -435,6 +473,12 @@ displayBuiltinBrowser[] :=
   Pane[structViewBuiltin[ $tmaBuiltins, {}][[1]],
   	ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
 displayBuiltinBrowser[args___] := unexcpected[ displayBuiltinBrowser, {args}]
+
+selectProver[ ] := emptyPane[]
+selectProver[ args___] := unexpected[ selectProver, {args}]
+
+submitProveTask[ ] := emptyPane[]
+submitProveTask[ args___] := unexpected[ submitProveTask, {args}]
 
 (* ::Subsubsection:: *)
 (* printComputationInfo *)
