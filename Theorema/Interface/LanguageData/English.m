@@ -71,6 +71,7 @@ With[ {lang = "English"},
 	    
     translate["Sets", lang] = "Sets";
     translate["Arithmetic", lang] = "Arithmetic";
+    translate["Logic", lang] = "Logic";
     translate["Builtins used in computation", lang] = "Builtins used in computation";
 
 (* General *)

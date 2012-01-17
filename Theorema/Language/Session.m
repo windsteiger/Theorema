@@ -49,10 +49,10 @@ freshNames[expr_Hold] :=
                 ]}, {Hold}]
 freshNames[args___] := unexpected[ freshNames, {args}]
 
-specifiedVariables[ RNG$[r___]] := Map[ extractVar, {r}]
+specifiedVariables[ (RNG$|Theorema`Computation`RNG$)[r___]] := Map[ extractVar, {r}]
 specifiedVariables[ args___] := unexpected[ specifiedVariables, {args}]
 
-extractVar[ r_[ VAR$[ v_], ___]] := v
+extractVar[ r_[ (VAR$|Theorema`Computation`VAR$)[ v_], ___]] := v
 extractVar[ r_[ v_, ___]] := v
 extractVar[ args___] := unexpected[ extractVar, {args}]
 
@@ -69,6 +69,12 @@ markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
         replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {SEQ$, VAR$, NEW$, FIX$}]
     ]
 
+markVariables[ Hold[ Theorema`Computation`QU$[ r_Theorema`Computation`RNG$, expr_]]] :=
+    Module[ {s},
+        s = Map[ sym_Symbol /; SymbolName[sym] === SymbolName[#] -> Theorema`Computation`VAR$[#]&, specifiedVariables[r]];
+        replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {Theorema`Computation`SEQ$, Theorema`Computation`VAR$}]
+    ]
+    
 markVariables[Hold[h_[e___]]] := applyHold[
   		markVariables[Hold[h]],
   		markVariables[Hold[e]]]
@@ -575,19 +581,6 @@ closeComputation[] :=
     ]
 closeComputation[args___] := unexcpected[ closeComputation, {args}]
 
-(* ::Section:: *)
-(* Built-in computation *)
-
-Begin["Theorema`Computation`"]
-
-activeComputation[_] := False
-activeComputationKB[_] := False
-
-plus$TM /; activeComputation["plus"] = Plus
-times$TM /; activeComputation["times"] = Times
-set$TM /; activeComputation["equal"] = equal
-
-End[]
 
 (* ::Section:: *)
 (* end of package *)

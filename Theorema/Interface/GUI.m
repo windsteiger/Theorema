@@ -33,13 +33,17 @@ initGUI[] :=
 	Module[{ tc}, 
         $tmaBuiltins = {
         	{"Sets", 
-        		{"union", RowBox[{"A","\[Union]","B"}]},
-        		{"intersection", RowBox[{"A","\[Intersection]","B"}]},
-        		{"equal", RowBox[{"A","=","B"}]}},
+        		{"Union", RowBox[{"A","\[Union]","B"}]},
+        		{"Intersection", RowBox[{"A","\[Intersection]","B"}]},
+        		{"Equal", RowBox[{"A","=","B"}]}},
         	{"Arithmetic", 
-        		{"plus", RowBox[{"A","+","B"}]},
-        		{"times", RowBox[{"A","*","B"}]},
-        		{"equal", RowBox[{"A","=","B"}]}}
+        		{"Plus", RowBox[{"A","+","B"}]},
+        		{"Times", RowBox[{"A","*","B"}]},
+        		{"Equal", RowBox[{"A","=","B"}]}},
+        	{"Logic", 
+        		{"Forall", RowBox[{"\[ForAll]","P"}]},
+        		{"Exists", RowBox[{"\[Exists]","P"}]},
+        		{"Equal", RowBox[{"A","=","B"}]}}
         };
 		$kbStruct = {};
 		$initLabel = "???";

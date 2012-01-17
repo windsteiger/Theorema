@@ -61,6 +61,15 @@ Get["Theorema`Language`"]
 Get["Theorema`Utilities`"]
 
 EndPackage[]
+
+BeginPackage["Theorema`"]
+
+(* The package "Theorema`Computation`" introduces the same names as "Theorema`Language`".
+   Therefore, we load it from its own Theorema`-context in order to avoid "shadowing" messages during startup 
+   *)
+Get["Theorema`Computation`"]
+
+EndPackage[]
 	
 Pause[5];
 
