@@ -49,10 +49,10 @@ freshNames[expr_Hold] :=
                 ]}, {Hold}]
 freshNames[args___] := unexpected[ freshNames, {args}]
 
-specifiedVariables[ (RNG$|Theorema`Computation`RNG$)[r___]] := Map[ extractVar, {r}]
+specifiedVariables[ (RNG$|Theorema`Computation`Language`RNG$)[r___]] := Map[ extractVar, {r}]
 specifiedVariables[ args___] := unexpected[ specifiedVariables, {args}]
 
-extractVar[ r_[ (VAR$|Theorema`Computation`VAR$)[ v_], ___]] := v
+extractVar[ r_[ (VAR$|Theorema`Computation`Language`VAR$)[ v_], ___]] := v
 extractVar[ r_[ v_, ___]] := v
 extractVar[ args___] := unexpected[ extractVar, {args}]
 
@@ -69,10 +69,10 @@ markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
         replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {SEQ$, VAR$, NEW$, FIX$}]
     ]
 
-markVariables[ Hold[ Theorema`Computation`QU$[ r_Theorema`Computation`RNG$, expr_]]] :=
+markVariables[ Hold[ Theorema`Computation`Language`QU$[ r_Theorema`Computation`Language`RNG$, expr_]]] :=
     Module[ {s},
-        s = Map[ sym_Symbol /; SymbolName[sym] === SymbolName[#] -> Theorema`Computation`VAR$[#]&, specifiedVariables[r]];
-        replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {Theorema`Computation`SEQ$, Theorema`Computation`VAR$}]
+        s = Map[ sym_Symbol /; SymbolName[sym] === SymbolName[#] -> Theorema`Computation`Language`VAR$[#]&, specifiedVariables[r]];
+        replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {Theorema`Computation`Language`SEQ$, Theorema`Computation`Language`VAR$}]
     ]
     
 markVariables[Hold[h_[e___]]] := applyHold[
@@ -288,7 +288,7 @@ updateSingleKey[ new_String, old_String] :=
     Module[ {},
         $tmaEnv = Map[ Replace[ #, {id_,old}:>{id,new}]&, $tmaEnv, {2}];
         DownValues[Theorema`Interface`GUI`Private`kbSelectProve] = DownValues[Theorema`Interface`GUI`Private`kbSelectProve] /. {id_,old} :> {id,new};
-        DownValues[Theorema`Computation`activeComputationKB] = DownValues[Theorema`Computation`activeComputationKB] /. {id_,old} :> {id,new};
+        DownValues[Theorema`Computation`Language`Private`activeComputationKB] = DownValues[Theorema`Computation`Language`Private`activeComputationKB] /. {id_,old} :> {id,new};
         new
     ]
 updateSingleKey[args___] := unexpected[updateSingleKey, {args}]
@@ -308,7 +308,7 @@ applicableGlobalDeclarations[ nb_NotebookObject, raw_Notebook, pos_List] :=
 	Module[{ globDeclID},
 		(* Find global declarations that apply to the cell at position pos, i.e. those that occur "above" (incl. nesting)
 		   from those cells collect the CellIDs *)
-		globDeclID = Cases[ raw, c:Cell[ _, "GlobalDeclaration", ___, CellID -> id_, ___] /; occursBelow[ Position[ raw, c][[1]], pos] -> id, Infinity];
+		globDeclID = Cases[ raw, c:Cell[ _, "GlobalDeclaration"|"EnvironmentDeclaration", ___, CellID -> id_, ___] /; occursBelow[ Position[ raw, c][[1]], pos] -> id, Infinity];
 		(* Lookup the ids in the global declarations in the current notebook
 		   Due to the way the ids are searched, they are sorted by the order how they occur in the notebook
 		   -> this is how they have to be applied to the expression *)
@@ -570,13 +570,15 @@ processComputation[args___] := unexcpected[ processComputation, {args}]
 openComputation[] := 
 	Module[{},
 		$parseTheoremaExpressions = True; 
-		Begin["Theorema`Computation`"];
+        PrependTo[ $ContextPath, "Theorema`Computation`Language`"];
+		Begin[ "Theorema`Computation`Knowledge`"];
 	]
 openComputation[args___] := unexcpected[ openComputation, {args}]
 
 closeComputation[] :=
     Module[ {},
         End[];
+		$ContextPath = DeleteCases[ $ContextPath, "Theorema`Computation`Language`"];
 		$parseTheoremaExpressions = False;
     ]
 closeComputation[args___] := unexcpected[ closeComputation, {args}]
