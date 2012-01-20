@@ -4,12 +4,12 @@ With[ {lang = "German"},
 	MessageName[VAR$, "usage", lang] = "";
 	MessageName[RNG$, "usage", lang] = "";
 	MessageName[SIMPRNG$, "usage", lang] = "SIMPRNG[x] usually denotes that the variable x ranges over the universe.";
-	MessageName[equalDef$TM, "usage", lang] = "";
-	MessageName[iff$TM, "usage", lang] = "";
-	MessageName[implies$TM, "usage", lang] = "";
-	MessageName[and$TM, "usage", lang] = "";
-	MessageName[or$TM, "usage", lang] = "";
-	MessageName[forall$TM, "usage", lang] = "";
-	MessageName[exists$TM, "usage", lang] = "";
+	MessageName[EqualDef$TM, "usage", lang] = "";
+	MessageName[Iff$TM, "usage", lang] = "";
+	MessageName[Implies$TM, "usage", lang] = "";
+	MessageName[And$TM, "usage", lang] = "";
+	MessageName[Or$TM, "usage", lang] = "";
+	MessageName[Forall$TM, "usage", lang] = "";
+	MessageName[Exists$TM, "usage", lang] = "";
 ]
 

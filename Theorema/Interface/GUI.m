@@ -30,20 +30,26 @@ Begin["`Private`"] (* Begin Private Context *)
 (* initGUI *)
 
 initGUI[] := 
-	Module[{ tc}, 
+	Module[{ tc},
+		(*
+		   In $tmaBuiltins
+		   o) nesting gives the nested structure for display
+		   o) each entry has the form
+		      {key, box display, default active for proving, default active for computation},
+		      where "key" is the corresponding key used in activeComputation *)
         $tmaBuiltins = {
         	{"Sets", 
-        		{"Union", RowBox[{"A","\[Union]","B"}]},
-        		{"Intersection", RowBox[{"A","\[Intersection]","B"}]},
-        		{"Equal", RowBox[{"A","=","B"}]}},
+        		{"Union", RowBox[{"A","\[Union]","B"}], False, False},
+        		{"Intersection", RowBox[{"A","\[Intersection]","B"}], False, False},
+        		{"Equal", RowBox[{"A","=","B"}], False, False}},
         	{"Arithmetic", 
-        		{"Plus", RowBox[{"A","+","B"}]},
-        		{"Times", RowBox[{"A","*","B"}]},
-        		{"Equal", RowBox[{"A","=","B"}]}},
+        		{"Plus", RowBox[{"A","+","B"}], False, False},
+        		{"Times", RowBox[{"A","*","B"}], False, False},
+        		{"Equal", RowBox[{"A","=","B"}], False, False}},
         	{"Logic", 
-        		{"Forall", RowBox[{"\[ForAll]","P"}]},
-        		{"Exists", RowBox[{"\[Exists]","P"}]},
-        		{"Equal", RowBox[{"A","=","B"}]}}
+        		{"Forall", RowBox[{"\[ForAll]","P"}], False, False},
+        		{"Exists", RowBox[{"\[Exists]","P"}], False, False},
+        		{"Equal", RowBox[{"A","=","B"}], False, False}}
         };
 		$kbStruct = {};
 		$initLabel = "???";
@@ -53,8 +59,16 @@ initGUI[] :=
 		If[ $Notebooks && MemberQ[Notebooks[], tc], NotebookClose[tc]];
 		$theoremaGUI = {"Theorema Commander" -> theoremaCommander[]};
 		kbSelectProve[_] := False;
-		kbSelectSolve[_] := False
+		kbSelectSolve[_] := False;
+		initBuiltins[];
 	]
+
+initBuiltins[] :=
+	Module[{bui},
+		bui = Cases[ $tmaBuiltins, {_String, _, _Symbol, _Symbol}, Infinity];
+		Scan[ (Theorema`Computation`Language`Private`activeComputation[#[[1]]] = #[[4]])&, bui];
+	]
+initBuiltins[ args___] := unexpected[ initBuiltins, {args}]
 
 (* ::Section:: *)
 (* theoremaCommander *)
@@ -318,7 +332,7 @@ structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cel
                 ]},
                 Spacer[10]],
             "compute",
-            Row[{Checkbox[Dynamic[Theorema`Computation`activeComputationKB["KEY"]], Enabled->isEval] /. "KEY" -> keyTags,
+            Row[{Checkbox[Dynamic[Theorema`Computation`Language`Private`activeComputationKB["KEY"]], Enabled->isEval] /. "KEY" -> keyTags,
                 If[ nbAvail,
                     Hyperlink[ Style[formulaLabel, If[ isEval,
                                                        "FormalTextInputFormula",
@@ -362,7 +376,7 @@ headerView[file_, Cell[ content_String, style_, ___], tags_, task_] :=
     	"prove",
         Row[{Checkbox[Dynamic[allTrue[tags, kbSelectProve], setAll[tags, kbSelectProve, #] &]], Style[ content, style]}, Spacer[10]],
         "compute",
-        Row[{Checkbox[Dynamic[allTrue[tags, Theorema`Computation`activeComputationKB], setAll[tags, Theorema`Computation`activeComputationKB, #] &]], Style[ content, style]}, Spacer[10]],
+        Row[{Checkbox[Dynamic[allTrue[tags, Theorema`Computation`Language`Private`activeComputationKB], setAll[tags, Theorema`Computation`Language`Private`activeComputationKB, #] &]], Style[ content, style]}, Spacer[10]],
         "solve",
         Row[{Checkbox[Dynamic[allTrue[tags, kbSelectSolve], setAll[tags, kbSelectSolve, #] &]], Style[ content, style]}, Spacer[10]]        
     ]
@@ -438,15 +452,15 @@ structViewBuiltin[ item:List[__List], tags_] :=
         {Column[sub[[1]]], compTags}
     ]
     
-structViewBuiltin[ {op_String, display_}, tags_] :=
+structViewBuiltin[ {op_String, display_, _, _}, tags_] :=
   Module[ { },
-    {Row[{Checkbox[Dynamic[Theorema`Computation`activeComputation[op]]], Style[ DisplayForm[display], "FormalTextInputFormula"]}, 
+    {Row[{Checkbox[Dynamic[Theorema`Computation`Language`Private`activeComputation[op]]], Style[ DisplayForm[display], "FormalTextInputFormula"]}, 
       Spacer[10]], {op}}
   ]
 
 structViewBuiltin[ category_String, tags_] :=
     Module[ {},
-        Row[{Checkbox[Dynamic[allTrue[tags, Theorema`Computation`activeComputation], setAll[tags, Theorema`Computation`activeComputation, #] &]], 
+        Row[{Checkbox[Dynamic[allTrue[tags, Theorema`Computation`Language`Private`activeComputation], setAll[tags, Theorema`Computation`Language`Private`activeComputation, #] &]], 
           Style[ translate[category], "Section"]}, Spacer[10]]
     ]
 
@@ -491,7 +505,7 @@ submitProveTask[ args___] := unexpected[ submitProveTask, {args}]
    effect: print a cell containg information about the environment settings for that computation *)
 printComputationInfo[] :=
     Module[ {act},
-        act = Union[ Cases[ DownValues[Theorema`Computation`activeComputation], HoldPattern[s_:>True]:>s[[1,1]]]];
+        act = Union[ Cases[ DownValues[Theorema`Computation`Language`Private`activeComputation], HoldPattern[s_:>True]:>s[[1,1]]]];
         CellPrint[Cell[ToBoxes[OpenerView[{"", OpenerView[{Style[translate["Builtins used in computation"], "CILabel"], act}]}, False]], "ComputationInfo"]];
     ]
 printComputationInfo[args___] := unexcpected[ printComputationInfo, {args}]

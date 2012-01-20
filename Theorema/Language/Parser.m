@@ -42,7 +42,7 @@ QU$[args___] := unexpected[ QU$, {args}]
 
 AppendTo[ $ContextPath, "Theorema`Language`"];
 
-MakeBoxes[ (q_?isQuantifierName)[ rng_, True$TM, form_], fmt_] := 
+MakeBoxes[ (q_?isQuantifierName)[ rng_, True$TM|Theorema`Computation`Language`True$TM, form_], fmt_] := 
 	RowBox[ {UnderscriptBox[ Replace[ q, $tmaNameToQuantifier], makeRangeBox[ rng, fmt]],
 		MakeBoxes[ form, fmt]}
 	]
@@ -60,7 +60,7 @@ MakeBoxes[ (op_?isStandardOperatorName)[ arg__], fmt_] :=
     With[ {b = tmaToInputOperator[ op]},
         MakeBoxes[ b[ arg], fmt]
     ]
-MakeBoxes[ VAR$[ v_], fmt_] := StyleBox[ MakeBoxes[ v, fmt], "ExpressionVariable"]
+MakeBoxes[ (VAR$|Theorema`Computation`Language`VAR$)[ v_], fmt_] := StyleBox[ MakeBoxes[ v, fmt], "ExpressionVariable"]
 
 MakeBoxes[ s_Symbol, fmt_] := 
 	Module[ {n = SymbolName[ s]},
@@ -79,9 +79,9 @@ $tmaQuantifiers =
     };
 
 $tmaQuantifierSymbols = Transpose[ $tmaQuantifiers][[1]];
-$tmaQuantifierNames = ToExpression[ Map[ "Theorema`Language`" <> # <> "$TM"&, Transpose[ $tmaQuantifiers][[2]]]];
+$tmaQuantifierNames = Flatten[ ToExpression[ Map[ {"Theorema`Language`" <> # <> "$TM", "Theorema`Computation`Language`" <> # <> "$TM"}&, Transpose[ $tmaQuantifiers][[2]]]]];
 $tmaQuantifierToName = Dispatch[ Apply[ Rule, $tmaQuantifiers, {1}]];
-$tmaNameToQuantifier = Dispatch[ MapThread[ Rule, {$tmaQuantifierNames, $tmaQuantifierSymbols}]];
+$tmaNameToQuantifier = Dispatch[ MapThread[ Rule, {$tmaQuantifierNames, Flatten[ Map[ {#, #}&, $tmaQuantifierSymbols]]}]];
 
 isQuantifierSymbol[ s_String] := MemberQ[ $tmaQuantifierSymbols, s]
 isQuantifierSymbol[ args___] := unexpected[ isQuantifierSymbol, {args}]
@@ -151,9 +151,42 @@ MakeExpression[ RowBox[ {cond_, "\[Implies]"|"\[DoubleLongRightArrow]"|"\[Double
 (* ::Section:: *)
 (* Ranges *)
 
+Clear[ toRangeBox, makeRangeSequence]
+
 toRangeBox[s_] :=
     RowBox[{"RNG$", "[", makeRangeSequence[s], "]"}]            
 toRangeBox[args___] := unexpected[ toRangeBox, {args}]
+
+makeRangeSequence[ RowBox[{v_, "\[Element]", s_}]] :=
+	makeSingleSetRange[ v, s]
+
+makeRangeSequence[ RowBox[{x___, y_, ",", RowBox[{v_, "\[Element]", s_}]}]] :=
+    Sequence[ makeRangeSequence[ RowBox[{x, RowBox[{y, "\[Element]", s}]}]], ",",
+    	makeSingleSetRange[ v, s]]
+
+makeRangeSequence[ RowBox[{p_, "[", RowBox[{x__, ",", v_}], "]"}]] :=
+	Sequence[ makeRangeSequence[ RowBox[{p, "[", RowBox[{x}], "]"}]], ",",
+		makeSinglePredRange[ v, p]]
+
+makeRangeSequence[ RowBox[{p_, "[", RowBox[{v_}], "]"}]] :=
+	makeSinglePredRange[ v, p]
+
+makeRangeSequence[ RowBox[{p_, "[", v_String, "]"}]] :=
+	makeSinglePredRange[ v, p]
+
+makeRangeSequence[ RowBox[{RowBox[{v_, "=", lower_}], ",", "\[Ellipsis]", ",", upper_}]] :=
+    makeSingleStepRange[ v, lower, upper, "1"]
+
+makeRangeSequence[ RowBox[{x___, y_, ",", RowBox[{v_, "=", lower_}], ",", "\[Ellipsis]", ",", upper_}]] :=
+    Sequence[ makeRangeSequence[ RowBox[{x, RowBox[{y, "=", lower}], ",", "\[Ellipsis]", ",", upper}]], ",",
+    	makeSingleStepRange[ v, lower, upper, "1"]]
+
+makeRangeSequence[ RowBox[{RowBox[{v_, "=", lower_}], ",", OverscriptBox["\[Ellipsis]", step_], ",", upper_}]] :=
+    makeSingleStepRange[ v, lower, upper, step]
+
+makeRangeSequence[ RowBox[{x___, y_, ",", RowBox[{v_, "=", lower_}], ",", OverscriptBox["\[Ellipsis]", step_], ",", upper_}]] :=
+    Sequence[ makeRangeSequence[ RowBox[{x, RowBox[{y, "=", lower}], ",", OverscriptBox["\[Ellipsis]", step], ",", upper}]], ",",
+    	makeSingleStepRange[ v, lower, upper, step]]
 
 makeRangeSequence[RowBox[{s_,",",r__}]] :=
     Sequence[ makeRangeSequence[s], ",", makeRangeSequence[RowBox[{r}]]]
@@ -161,98 +194,37 @@ makeRangeSequence[RowBox[{s_,",",r__}]] :=
 makeRangeSequence[RowBox[{s_}]] :=
     makeRangeSequence[s]
 
-makeRangeSequence[ RowBox[{v_, "\[Element]", s_}]] :=
-    RowBox[ {"SETRNG$", "[", RowBox[ {v, ",", s}], "]"}]
-
-makeRangeSequence[ RowBox[{p_, "[", v_, "]"}]] :=
-    RowBox[ {"PREDRNG$", "[", RowBox[ {v, ",", p}], "]"}]
-
 makeRangeSequence[s_] :=
     RowBox[{"SIMPRNG$","[",s,"]"}]
 makeRangeSequence[args___] := unexpected[ makeRangeSequence, {args}]
 
+makeSingleSetRange[ v_, s_] := 
+	RowBox[ {"SETRNG$", "[", RowBox[ {v, ",", s}], "]"}]
+makeSingleSetRange[args___] := unexpected[ makeSingleSetRange, {args}]
 
-makeRangeBox[ RNG$[ s__SIMPRNG$], fmt_] := RowBox[ Riffle[ Map[ makeRangeBox[ #, fmt]&, {s}], ","]]
-makeRangeBox[ RNG$[ s__], fmt_] := GridBox[ Map[ {makeRangeBox[ #, fmt]}&, {s}]]
-makeRangeBox[ SETRNG$[ v_, s_], fmt_] := RowBox[ {MakeBoxes[v, fmt], "\[Element]", MakeBoxes[ s, fmt]}]
-makeRangeBox[ PREDRNG$[ v_, p_], fmt_] := RowBox[ {MakeBoxes[ p, fmt], "[", MakeBoxes[v, fmt], "]"}]
-makeRangeBox[ SIMPRNG$[ v_], fmt_] := MakeBoxes[ v, fmt]
+makeSinglePredRange[ v_, p_] := 
+	RowBox[ {"PREDRNG$", "[", RowBox[ {v, ",", p}], "]"}]
+makeSinglePredRange[args___] := unexpected[ makeSinglePredRange, {args}]
 
+makeSingleStepRange[ v_, lower_, upper_, step_] :=
+	RowBox[ {"STEPRNG$", "[", RowBox[ {v, ",", lower, ",", upper, ",", step}], "]"}]
+makeSingleStepRange[args___] := unexpected[ makeSingleStepRange, {args}]
+
+
+makeRangeBox[ (RNG$|Theorema`Computation`Language`RNG$)[ s:(SIMPRNG$|Theorema`Computation`Language`SIMPRNG$)[_]..], fmt_] := RowBox[ Riffle[ Map[ makeRangeBox[ #, fmt]&, {s}], ","]]
+makeRangeBox[ (RNG$|Theorema`Computation`Language`RNG$)[ s__], fmt_] := GridBox[ Map[ {makeRangeBox[ #, fmt]}&, {s}]]
+makeRangeBox[ (SETRNG$|Theorema`Computation`Language`SETRNG$)[ v_, s_], fmt_] := RowBox[ {MakeBoxes[v, fmt], "\[Element]", MakeBoxes[ s, fmt]}]
+makeRangeBox[ (PREDRNG$|Theorema`Computation`Language`PREDRNG$)[ v_, p_], fmt_] := RowBox[ {MakeBoxes[ p, fmt], "[", MakeBoxes[v, fmt], "]"}]
+makeRangeBox[ (STEPRNG$|Theorema`Computation`Language`STEPRNG$)[ v_, lower_, upper_, step_], fmt_] := 
+	RowBox[ {RowBox[ {MakeBoxes[v, fmt], "=", MakeBoxes[ lower, fmt]}], ",", makeEllipsisBox[ step, fmt], ",", MakeBoxes[ upper, fmt]}]
+makeRangeBox[ (SIMPRNG$|Theorema`Computation`Language`SIMPRNG$)[ v_], fmt_] := MakeBoxes[ v, fmt]
 makeRangeBox[args___] := unexpected[ makeRangeBox, {args}]
 
+makeEllipsisBox[ 1, fmt_] := "\[Ellipsis]"
+makeEllipsisBox[ step_, fmt_] := OverscriptBox[ "\[Ellipsis]", MakeBoxes[ step, fmt]]
+makeEllipsisBox[ args___] := unexpected[ makeEllipsisBox, {args}]
+
 (*
-MakeTheoremaExpression[RowBox[{UnderscriptBox["\[ForAll]",rng_],form_}],f_]:=
-With[({r=ToHoldingRangeBox[rng]}),
-FormBox["MakeTheoremaExpression","InputForm"][RowBox[{"\!\(InputForm`Theorema`Language`Syntax`Parser`Private`\[LeftPointer]VARIABLES\[RightPointer]\)","[",(RowBox[{r,",",RowBox[{"ForAll","[",RowBox[{r,",","True",",",form}],"]"}]}]),"]"}],f]];
-
-MakeBoxes[\[Trademark]ForAll[(\[Bullet]range|\[Bullet]\[Bullet]range)[rng___],True,op_[x___]],f_]:= 
-RowBox[{UnderscriptBox["\[ForAll]",MakeRangeBoxes[\[Bullet]\[Bullet]range[rng],f]],MakeBoxes[op[x],f]}];
-
-$TmaFreshNameKeywordPatterns=Alternatives[FormBox["\\[LeftPointer]LF\\[RightPointer]","InputForm"],\[LeftPointer]NEW\[RightPointer],\[LeftPointer]USED\[RightPointer],\[Bullet]range];
-
-QuotedFreshNames[Hold[h_[e___]]]/;MatchQ[h,$TmaFreshNameKeywordPatterns]:=
-(Hold[h[e]]/.MarkerTranslations\[RegisteredTrademark])//.$TmaOperatorTranslations;
-
-QuotedFreshNames[Hold[FormBox["\\[LeftPointer]FRESHNAMES\\[RightPointer]","InputForm"][expr__]]]:=
-Hold[expr]//.$TmaOperatorTranslations;
-
-QuotedFreshNames[Hold[h_[e___]]]:=
-ApplyHold[
-QuotedFreshNames[Hold[h]],
-QuotedFreshNames[Hold[e]]];
-
-QuotedFreshNames[Hold[f_,t__]]:=
-Join[
-QuotedFreshNames[Hold[f]],
-QuotedFreshNames[Hold[t]]];
-
-QuotedFreshNames[Hold[]]:=Hold[]
-
-QuotedFreshNames[Hold[e_]]:=Hold[e]
-
-$TmaFreshNameProgKeywordPatterns=Alternatives[\[Bullet]newProofSits];
-
-FreshNamesProg[Hold[h_[e___]]]/;MatchQ[h,$TmaFreshNameProgKeywordPatterns]:=
-Hold[h[e]]//.TmaProgTranslations\[RegisteredTrademark];
-
-FreshNamesProg[Hold[h_[e___]]]:=
-ApplyHold[
-FreshNamesProg[Hold[h]],
-FreshNamesProg[Hold[e]]];
-
-FreshNamesProg[Hold[f_,t__]]:=
-Join[
-FreshNamesProg[Hold[f]],
-FreshNamesProg[Hold[t]]];
-
-FreshNamesProg[Hold[]]:=Hold[]
-
-FreshNamesProg[Hold[e_]]:=Hold[e]
-
-MarkBoundVariables[Hold[FormBox["\\[LeftPointer]VARIABLES\\[RightPointer]","InputForm"][vlist_List,expr_]]]:=(Module[{s=Map[Rule[#,\[Bullet]var[#]]&,Select[vlist,IsIdentifier]]},
-ReplaceAllExcept[MarkBoundVariables[Hold[expr]],s,{\[Bullet]seq,\[Bullet]var,\[Bullet]new,\[Bullet]fix}]])
-
-MarkBoundVariables[Hold[FormBox["\\[LeftPointer]VARIABLES\\[RightPointer]","InputForm"][r:(_\[Bullet]range|_\[Bullet]\[Bullet]range),expr_]]]:=
-MarkBoundVariables[
-Hold[FormBox["\\[LeftPointer]VARIABLES\\[RightPointer]","InputForm"][#,expr]]&[(SpecifiedVariables[r])]]
-
-MarkBoundVariables[Hold[FormBox["\\[LeftPointer]VARIABLES\\[RightPointer]","InputForm"][v_,expr_]]]:=MarkBoundVariables[Hold[FormBox["\\[LeftPointer]VARIABLES\\[RightPointer]","InputForm"][{v},expr]]]
-
-MarkBoundVariables[Hold[h_[e___]]]:=ApplyHold[
-MarkBoundVariables[Hold[h]],
-MarkBoundVariables[Hold[e]]]
-
-MarkBoundVariables[Hold[f_,t__]]:=Join[
-MarkBoundVariables[Hold[f]],
-MarkBoundVariables[Hold[t]]]
-
-MarkBoundVariables[Hold[]]:=Hold[]
-
-MarkBoundVariables[Hold[e_]]:=Hold[e]
-
-MarkBoundVariables[e_]/;PrintMessage[Theorema::unexpected,e,MarkBoundVariables]:=Null
-
-MarkVariables[expr_Hold]:=MarkBoundVariables[expr]
 
 SetAttributes[\[Bullet]\[Bullet]range,HoldAll];
 
@@ -467,106 +439,7 @@ SetAttributes[MakeConditionBoxes,HoldAll];
 
 MakeConditionBoxes[x_,f_]:=MakeBoxes[x,f];
 
-TmaEnvironmentTranslationList\[RegisteredTrademark]=({{"Definition", "\[Bullet]def"}, {"Definitions", "\[Bullet]def"}, {"Theorem", "\[Bullet]thm"}, {"Theorems", "\[Bullet]thm"}, {"Lemma", "\[Bullet]lma"}, {"Lemmata", "\[Bullet]lma"}, {"Axiom", "\[Bullet]axm"}, {"Axioms", "\[Bullet]axm"}, {"Corollary", "\[Bullet]crlr"}, {"Corollaries", "\[Bullet]crlr"}, {"Proposition", "\[Bullet]prop"}, {"Propositions", "\[Bullet]prop"}, {"Theory", "\[Bullet]thr"}, {"Theories", "\[Bullet]thr"}, {"KnowledgeBase", "\[Bullet]kb"}, {"KnowledgeBases", "\[Bullet]kb"}, {"Algorithm", "\[Bullet]alg"}, {"Algorithms", "\[Bullet]alg"}, {"Assumption", "\[Bullet]asm"}, {"Assumptions", "\[Bullet]asm"}, {"Formula", "\[Bullet]fml"}, {"Formulae", "\[Bullet]fml"}, {"System", "\[Bullet]sys"}, {"Systems", "\[Bullet]sys"}});
 
-TmaEnvironmentTags\[RegisteredTrademark]=Union[{"\[Bullet]bui"},(Transpose[TmaEnvironmentTranslationList\[RegisteredTrademark]])[[2]]];
-
-TmaEnvironmentTagPatterns\[RegisteredTrademark]=Apply[Alternatives,ToExpression[TmaEnvironmentTags\[RegisteredTrademark]]];
-
-TmaEnvironments\[RegisteredTrademark]=(Transpose[TmaEnvironmentTranslationList\[RegisteredTrademark]])[[1]];
-
-TmaEnvironmentPatterns\[RegisteredTrademark]=Apply[Alternatives,TmaEnvironments\[RegisteredTrademark]];
-
-TmaEnvironmentTranslations\[RegisteredTrademark]=Dispatch[Map[Apply[Rule,#]&,TmaEnvironmentTranslationList\[RegisteredTrademark]]];
-
-TmaEnvironmentTagTranslations\[RegisteredTrademark]=Dispatch[Union[MapThread[Rule[#1,#2]&,{ToExpression[(Transpose[TmaEnvironmentTranslationList\[RegisteredTrademark]])[[2]]],TmaEnvironments\[RegisteredTrademark]}],SameTest->(#1[[1]]===#2[[1]]&)]];
-
-MakeExpression[RowBox[{env:TmaEnvironmentPatterns\[RegisteredTrademark],"[",RowBox[{name_,",",rangeCond__,",",formulaList_?NotIsPreOrPattern}],"]"}],f_]:=
-Module[{rg,cond,type,form},
-{rg,cond,type}=ToRangeConditionTypeBox[Hold[rangeCond],"FreshNames"];
-form=ToFormulaListBox[formulaList];
-MakeExpression[RowBox[{env,"[",RowBox[{name,",",MakeTheoremaExpression[RowBox[{"Theorema`Language`Syntax`Parser`Private`\[LeftPointer]VARIABLES\[RightPointer]","[",RowBox[{rg,",",RowBox[{env/.TmaEnvironmentTranslations\[RegisteredTrademark],"[",RowBox[{name,",",rg,",",cond,",",RowBox[{"Theorema`Language`Syntax`Parser`Private`TypeQuantifiers","[",RowBox[{type,",",form}],"]"}]}],"]"}]}],"]"}],f]}],"]"}],f]]/;$SessionIdentifier==="User"
-
-MakeExpression[RowBox[{env:TmaEnvironmentPatterns\[RegisteredTrademark],"[",RowBox[{name_,",",formulaList_?NotIsPreOrPattern}],"]"}],f_]:=
-Module[{form,rg=RowBox[{"\[Bullet]range","[","]"}]},
-form=ToFormulaListBox[formulaList];
-MakeExpression[RowBox[{env,"[",RowBox[{name,",",MakeTheoremaExpression[RowBox[{"Theorema`Language`Syntax`Parser`Private`\[LeftPointer]VARIABLES\[RightPointer]","[",RowBox[{rg,",",RowBox[{env/.TmaEnvironmentTranslations\[RegisteredTrademark],"[",RowBox[{name,",",rg,",","True",",",form}],"]"}]}],"]"}],f]}],"]"}],f]]/;$SessionIdentifier==="User"
-
-NotIsPreOrPattern[RowBox[{"Theorema`Language`Syntax`Parser`Private`\[LeftPointer]VARIABLES\[RightPointer]",___}]]:=False
-
-NotIsPreOrPattern[_]:=True
-
-ToFormulaListBox[s_]:=RowBox[{"\[Bullet]flist","[",MakeFormulaSequence[s],"]"}]
-
-MakeFormulaSequence[env:RowBox[{TmaEnvironmentPatterns\[RegisteredTrademark],"[",___,"]"}]]:=MakeFormulaSequence[GridBox[{{env}}]]
-
-MakeFormulaSequence[f_]:=RowBox[{"\[Bullet]lf","[",RowBox[{"\"\"",",",f}],"]"}]
-
-MakeFormulaSequence[GridBox[{{f_,l_},r:{_,_}..}]]:=Sequence[MakeFormulaSequence[f,l],",",MakeFormulaSequence[GridBox[{r}]]]
-
-MakeFormulaSequence[GridBox[{{f_,l_}}]]:=MakeFormulaSequence[f,l]
-
-MakeFormulaSequence[f_,l_]:=RowBox[{"\[Bullet]lf","[",RowBox[{l,",",f}],"]"}]
-
-MakeFormulaSequence[GridBox[{{env:RowBox[{TmaEnvironmentPatterns\[RegisteredTrademark],"[",___,"]"}]},r:{RowBox[{"Built\[Dash]in"|"Built\[Dash]ins"|"Properties"|"Property","[",___,"]"}]}...}]]:=Sequence[env,MakeFormulaSequence[GridBox[{r}]]]
-
-MakeFormulaSequence[GridBox[{{env:RowBox[{TmaEnvironmentPatterns\[RegisteredTrademark],"[",___,"]"}]},r__}]]:=Sequence[env,",",MakeFormulaSequence[GridBox[{r}]]]
-
-MakeFormulaSequence[GridBox[{{RowBox[{env:"Built\[Dash]in"|"Built\[Dash]ins"|"Properties"|"Property","[",___,"]"}]},r___}]]:=(PrintMessage[Theorema::invalidNesting,env];MakeFormulaSequence[GridBox[{r}]])
-
-MakeFormulaSequence[GridBox[{}]]:=Sequence[]
-
-MakeFormulaSequence[GridBox[c:{{_},{_}..}]]:=Module[{l=Length[c],labels},
-labels=Table["\""<>ToString[i]<>"\"",{i,1,Length[c]}];
-MakeFormulaSequence[GridBox[Transpose[Append[Transpose[c],labels]]]]]
-
-MakeFormulaSequence[RowBox[{"(",eqn_,")"}]]:=MakeFormulaSequence[eqn]
-
-ToRangeConditionTypeBox[Hold[],_]:={RowBox[{"\[Bullet]range","[","]"}],"True",RowBox[{"\[Bullet]\[Bullet]range","[","]"}]}
-
-ToRangeConditionTypeBox[Hold[rg:RowBox[{"any",___}]],_]:={rg,"True",RowBox[{"\[Bullet]\[Bullet]range","[","]"}]}
-
-ToRangeConditionTypeBox[Hold[ty:RowBox[{"bound",___}]],_]:={RowBox[{"\[Bullet]range","[","]"}],"True",ty}
-
-ToRangeConditionTypeBox[Hold[rg:RowBox[{"any",___}],",",ty:RowBox[{"bound",___}]],_]:={rg,"True",ty}
-
-ToRangeConditionTypeBox[Hold[rg:RowBox[{"any",___}],",",cond_],fn_]:={rg,FreshNameInCond[cond,fn],RowBox[{"\[Bullet]\[Bullet]range","[","]"}]}
-
-ToRangeConditionTypeBox[Hold[rg:RowBox[{"any",___}],",",cond_,",",ty:RowBox[{"bound",___}]],fn_]:={rg,FreshNameInCond[cond,fn],ty}
-
-ToRangeConditionTypeBox[Hold[GridBox[{{r1_},{r2_}}]],fn_]:=ToRangeConditionTypeBox[Hold[r1,",",r2],fn]
-
-ToRangeConditionTypeBox[Hold[GridBox[{{r1_},{r2_},{r3_}}]],fn_]:=ToRangeConditionTypeBox[Hold[r1,",",r2,",",r3],fn]
-
-ToRangeConditionTypeBox[Hold[RowBox[{"(",RowBox[{r__}],")"}]],fn_]:=ToRangeConditionTypeBox[Hold[r],fn]
-
-ToRangeConditionTypeBox[Hold[more___],_]:=(PrintMessage[Theorema::varCondType];
-{RowBox[{"\[Bullet]range","[","]"}],"True",RowBox[{"\[Bullet]\[Bullet]range","[","]"}]})
-
-FreshNameInCond[cond_,"FreshNames"]:=RowBox[{"\[Bullet]","[",cond,"]"}]
-
-FreshNameInCond[cond_,_]:=cond
-
-IntroduceVar[r:_[_\[Bullet]var,___]]:=r
-
-IntroduceVar[r_[n_,s___]]:=r[\[Bullet]var[n],s]
-
-TypeQuantifiers[r_\[Bullet]\[Bullet]range,e_]:=With[{s=Apply[List,Map[RangeToHoldingSimpleRange[#]->IntroduceVar[#]&,r/.rangeToHoldingRange]]},
-e/.s]
-
-TypeQuantifiers[a___]/;PrintMessage[Theorema::wrongArguments,"TypeQuantifiers",a]:=Null
-
-RangeToHoldingSimpleRange[_[n_\[Bullet]var,___]]:=\[Bullet]\[Bullet]simpleRange[n]
-
-RangeToHoldingSimpleRange[_[n_,___]]:=\[Bullet]\[Bullet]simpleRange[\[Bullet]var[n]]
-
-MakeTheoremaExpression[RowBox[{"any","[",v__,"]"}],f_]:=ToHoldingRangeBox[v]
-
-MakeTheoremaExpression[RowBox[{"any","[","]"}],f_]:=RowBox[{"\[Bullet]range","[","]"}]
-
-MakeTheoremaExpression[RowBox[{"with","[",v__,"]"}],f_]:=ToConditionBox[v]
-
-MakeTheoremaExpression[RowBox[{"bound","[",v__,"]"}],f_]:=ToHoldingRangeBox[v]
 *)
 
 initParser[];
