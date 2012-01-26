@@ -1,8 +1,10 @@
-BeginPackage["Theorema`Computation`Language`", {"Theorema`"}]
+BeginPackage["Theorema`Computation`Language`"]
 
 (*
    Load the same symbols like in Theorema`Language` so that all language constructs will be
    available in Computation context as well *)
+
+Needs[ "Theorema`Common`"]
    
 Map[ Get, FileNames[ "*.m", ToFileName[{$TheoremaDirectory, "Theorema", "Language", "LanguageData"}]]];
 
@@ -10,17 +12,29 @@ Begin[ "`Private`"]
 
 activeComputationKB[_] := False
 
-(* TODO:
-   Make activeComputation check a global parameter that tells whether computation is done inside a proof or
-   on the global level. GUI can then set activeComputation or activeProof resp., and active[x] (instead
-   of activeComputation) can then
-   check the appropriate one with the help of the global setting *)
+buiActive[ f_String] :=
+	Switch[ $computationContext,
+		"prove",
+		buiActProve[ f], 
+		"compute",
+		buiActComputation[ f],
+		"solve",
+		buiActSolve[ f]
+	]
+buiActive[ args___] := unexpected[ buiActive, {args}]
+
+setComputationContext[ c_String] :=
+    Module[ {},
+        $computationContext = c;
+    ]
+setComputationContext[ args___] := unexpected[ setComputationContext, {args}]
+
    
-Plus$TM /; activeComputation["Plus"] = Plus
-Times$TM /; activeComputation["Times"] = Times
-Equal$TM /; activeComputation["Equal"] = equal$TC
-Forall$TM /; activeComputation["Forall"] = forall$TC
-Exists$TM /; activeComputation["Exists"] = exists$TC
+Plus$TM /; buiActive["Plus"] = Plus
+Times$TM /; buiActive["Times"] = Times
+Equal$TM /; buiActive["Equal"] = equal$TC
+Forall$TM /; buiActive["Forall"] = forall$TC
+Exists$TM /; buiActive["Exists"] = exists$TC
 
 End[]
 EndPackage[]

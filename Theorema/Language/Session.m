@@ -331,7 +331,7 @@ updateKnowledgeBase[args___] := unexpected[ updateKnowledgeBase, {args}]
 
 findSelectedFormula[ Cell[ _, ___, CellTags -> t_, ___]] :=
 	Module[ { key = getKeyTags[ t]},
-		Cases[ $tmaEnv, {key, form_, tag_} -> {form, tag}]
+		Cases[ $tmaEnv, {key, form_, tag_}, {1}, 1]
 	]	
 findSelectedFormula[ sel_] := {}
 findSelectedFormula[args___] := unexpected[ findSelectedFormula, {args}]
@@ -571,13 +571,15 @@ openComputation[] :=
 	Module[{},
 		$parseTheoremaExpressions = True; 
         PrependTo[ $ContextPath, "Theorema`Computation`Language`"];
+		setComputationContext[ "compute"];
 		Begin[ "Theorema`Computation`Knowledge`"];
 	]
 openComputation[args___] := unexcpected[ openComputation, {args}]
 
 closeComputation[] :=
-    Module[ {},
+    Module[ {},    	
         End[];
+		setComputationContext[ "none"];
 		$ContextPath = DeleteCases[ $ContextPath, "Theorema`Computation`Language`"];
 		$parseTheoremaExpressions = False;
     ]

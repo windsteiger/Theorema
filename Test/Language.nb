@@ -10,19 +10,14 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[     24447,        682]
-NotebookOptionsPosition[     16124,        433]
-NotebookOutlinePosition[     22172,        612]
-CellTagsIndexPosition[     21546,        589]
+NotebookDataLength[     39238,       1092]
+NotebookOptionsPosition[     30457,        826]
+NotebookOutlinePosition[     36276,        999]
+CellTagsIndexPosition[     35741,        978]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
 Notebook[{
-Cell[BoxData[
- RowBox[{"Needs", "[", "\"\<Theorema`\>\"", "]"}]], "Input",
- CellChangeTimes->{{3.535980624536995*^9, 3.535980630964249*^9}},
- CellID->880887267],
-
 Cell[BoxData[
  UnderscriptBox["\[ForAll]", "a"]], "GlobalDeclaration",
  CellChangeTimes->{{3.535980654706128*^9, 3.535980681963633*^9}},
@@ -50,8 +45,7 @@ Cell[BoxData[
  CellChangeTimes->{{3.535958935877088*^9, 3.535958966461132*^9}},
  CellTags->{
   "ID_1636935908", 
-   "Source_/home/wwindste/WolframWorkspaces/Base/Theorema/Test/Language.nb", 
-   "1"},
+   "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "1"},
  CellID->1636935908],
 
 Cell[BoxData[
@@ -171,6 +165,8 @@ Cell["\[GraySquare]", "EndEnvironmentMarker",
 Cell["", "CloseEnvironment",
  CellID->862514851],
 
+Cell[CellGroupData[{
+
 Cell[BoxData[
  RowBox[{
   UnderscriptBox["\[ForAll]", 
@@ -181,7 +177,7 @@ Cell[BoxData[
  CellID->1791385580],
 
 Cell[BoxData[
- DynamicModuleBox[{Typeset`var$$ = True}, 
+ DynamicModuleBox[{Typeset`var$$ = False}, 
   InterpretationBox[
    StyleBox[
     PaneSelectorBox[{False->GridBox[{
@@ -244,7 +240,14 @@ Cell[BoxData[
                   StripOnInput->False]},
                 {"", 
                  PaneBox[
-                  RowBox[{"{", "}"}],
+                  StyleBox[
+                   RowBox[{"{", 
+                    
+                    RowBox[{"\<\"Equal\"\>", ",", "\<\"Exists\"\>", 
+                    ",", "\<\"Forall\"\>", ",", "\<\"Intersection\"\>", 
+                    ",", "\<\"Plus\"\>", ",", "\<\"Times\"\>", 
+                    ",", "\<\"Union\"\>"}], "}"}], "CIContent",
+                   StripOnInput->False],
                   ImageMargins->0]}
                },
                AutoDelete->False,
@@ -264,7 +267,10 @@ Cell[BoxData[
              Deployed->False,
              StripOnInput->False],
             OpenerView[{
-              Style["Builtins used in computation", "CIContent"], {}}, False]],
+              Style["Builtins used in computation", "CIContent"], 
+              
+              Style[{"Equal", "Exists", "Forall", "Intersection", "Plus", 
+                "Times", "Union"}, "CIContent"]}, False]],
            DynamicModuleValues:>{}],
           Setting[#, {0}]& ],
          ImageMargins->0]}
@@ -285,10 +291,151 @@ Cell[BoxData[
     StripOnInput->False],
    OpenerView[{"", 
      OpenerView[{
-       Style["Builtins used in computation", "CIContent"], {}}]}, False]],
+       Style["Builtins used in computation", "CIContent"], 
+       Style[{
+        "Equal", "Exists", "Forall", "Intersection", "Plus", "Times", 
+         "Union"}, "CIContent"]}]}, False]],
   DynamicModuleValues:>{}]], "ComputationInfo",
- CellChangeTimes->{3.535982801584141*^9},
- CellID->826091799],
+ CellChangeTimes->{3.536329968429591*^9},
+ CellID->875347772],
+
+Cell[BoxData[
+ RowBox[{"forall$TC", "[", 
+  RowBox[{
+   RowBox[{"RNG$", "[", 
+    RowBox[{"STEPRNG$", "[", 
+     RowBox[{
+      StyleBox["x", "ExpressionVariable"], ",", "1", ",", "n", ",", "1"}], 
+     "]"}], "]"}], ",", "True", ",", 
+   RowBox[{"P", "[", 
+    StyleBox["x", "ExpressionVariable"], "]"}]}], "]"}]], "ComputationResult",\
+
+ CellChangeTimes->{3.53598280162167*^9, 3.536329322843867*^9, 
+  3.536329779611093*^9, 3.536329968440352*^9},
+ CellID->1168793688]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  UnderscriptBox["\[ForAll]", 
+   RowBox[{
+    RowBox[{"x", "=", "1"}], ",", "\[Ellipsis]", ",", "n"}]], 
+  RowBox[{"P", "[", "x", "]"}]}]], "Computation",
+ CellChangeTimes->{3.53598216380274*^9, 3.536329358952827*^9},
+ CellID->203455808],
+
+Cell[BoxData[
+ DynamicModuleBox[{Typeset`var$$ = True}, 
+  InterpretationBox[
+   StyleBox[
+    PaneSelectorBox[{False->GridBox[{
+       {
+        OpenerBox[Dynamic[Typeset`var$$],
+         Appearance->Automatic,
+         AutoAction->False,
+         ContinuousAction->False,
+         Enabled->Automatic], "\<\"\"\>"}
+      },
+      AutoDelete->False,
+      BaselinePosition->{1, 1},
+      GridBoxAlignment->{"Columns" -> {{Left}}},
+      GridBoxBackground->{"Columns" -> {{Automatic}}},
+      GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+      GridBoxSpacings->{"Columns" -> {{0.2}}, "Rows" -> {{0.5}}}], True->
+     GridBox[{
+       {
+        OpenerBox[Dynamic[Typeset`var$$],
+         Appearance->Automatic,
+         AutoAction->False,
+         ContinuousAction->False,
+         Enabled->Automatic], "\<\"\"\>"},
+       {"", 
+        PaneBox[
+         TagBox[
+          DynamicModuleBox[{Typeset`var$$ = True}, 
+           InterpretationBox[
+            StyleBox[
+             PaneSelectorBox[{False->GridBox[{
+                {
+                 OpenerBox[Dynamic[Typeset`var$$],
+                  Appearance->Automatic,
+                  AutoAction->False,
+                  ContinuousAction->False,
+                  Enabled->Automatic], 
+                 StyleBox["\<\"Builtins used in computation\"\>", "CILabel",
+                  StripOnInput->False]}
+               },
+               AutoDelete->False,
+               BaselinePosition->{1, 1},
+               GridBoxAlignment->{"Columns" -> {{Left}}},
+               GridBoxBackground->{"Columns" -> {{Automatic}}},
+               
+               GridBoxItemSize->{
+                "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+               GridBoxSpacings->{"Columns" -> {{0.2}}, "Rows" -> {{0.5}}}], 
+              True->GridBox[{
+                {
+                 OpenerBox[Dynamic[Typeset`var$$],
+                  Appearance->Automatic,
+                  AutoAction->False,
+                  ContinuousAction->False,
+                  Enabled->Automatic], 
+                 StyleBox["\<\"Builtins used in computation\"\>", "CILabel",
+                  StripOnInput->False]},
+                {"", 
+                 PaneBox[
+                  RowBox[{"{", 
+                   
+                   RowBox[{"\<\"Exists\"\>", ",", "\<\"Plus\"\>", 
+                    ",", "\<\"Times\"\>"}], "}"}],
+                  ImageMargins->0]}
+               },
+               AutoDelete->False,
+               BaselinePosition->{1, 1},
+               GridBoxAlignment->{"Columns" -> {{Left}}},
+               GridBoxBackground->{"Columns" -> {{Automatic}}},
+               
+               GridBoxItemSize->{
+                "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+               GridBoxSpacings->{"Columns" -> {{0.2}}, "Rows" -> {{0.5}}}]}, 
+              Dynamic[Typeset`var$$],
+              Alignment->Automatic,
+              BaselinePosition->Baseline,
+              DefaultBaseStyle->"OpenerView",
+              ImageMargins->0,
+              ImageSize->Automatic],
+             Deployed->False,
+             StripOnInput->False],
+            OpenerView[{
+              Style["Builtins used in computation", "CILabel"], {
+              "Exists", "Plus", "Times"}}, False]],
+           DynamicModuleValues:>{}],
+          Setting[#, {0}]& ],
+         ImageMargins->0]}
+      },
+      AutoDelete->False,
+      BaselinePosition->{1, 1},
+      GridBoxAlignment->{"Columns" -> {{Left}}},
+      GridBoxBackground->{"Columns" -> {{Automatic}}},
+      GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+      GridBoxSpacings->{"Columns" -> {{0.2}}, "Rows" -> {{0.5}}}]}, Dynamic[
+     Typeset`var$$],
+     Alignment->Automatic,
+     BaselinePosition->Baseline,
+     DefaultBaseStyle->"OpenerView",
+     ImageMargins->0,
+     ImageSize->Automatic],
+    Deployed->False,
+    StripOnInput->False],
+   OpenerView[{"", 
+     OpenerView[{
+       Style["Builtins used in computation", "CILabel"], {
+       "Exists", "Plus", "Times"}}]}, False]],
+  DynamicModuleValues:>{}]], "ComputationInfo",
+ CellChangeTimes->{3.536329360584028*^9},
+ CellID->2105075298],
 
 Cell[BoxData[
  RowBox[{
@@ -301,8 +448,254 @@ Cell[BoxData[
     }]], 
   RowBox[{"P", "[", 
    StyleBox["x", "ExpressionVariable"], "]"}]}]], "ComputationResult",
- CellChangeTimes->{3.53598280162167*^9},
- CellID->2052408024],
+ CellChangeTimes->{3.536329360628376*^9},
+ CellID->1943039908]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"1", "+", "1"}]], "Computation",
+ CellChangeTimes->{{3.536329344797392*^9, 3.536329345523937*^9}},
+ CellID->277393357],
+
+Cell[BoxData[
+ DynamicModuleBox[{Typeset`var$$ = False}, 
+  InterpretationBox[
+   StyleBox[
+    PaneSelectorBox[{False->GridBox[{
+       {
+        OpenerBox[Dynamic[Typeset`var$$],
+         Appearance->Automatic,
+         AutoAction->False,
+         ContinuousAction->False,
+         Enabled->Automatic], "\<\"\"\>"}
+      },
+      AutoDelete->False,
+      BaselinePosition->{1, 1},
+      GridBoxAlignment->{"Columns" -> {{Left}}},
+      GridBoxBackground->{"Columns" -> {{Automatic}}},
+      GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+      GridBoxSpacings->{"Columns" -> {{0.2}}, "Rows" -> {{0.5}}}], True->
+     GridBox[{
+       {
+        OpenerBox[Dynamic[Typeset`var$$],
+         Appearance->Automatic,
+         AutoAction->False,
+         ContinuousAction->False,
+         Enabled->Automatic], "\<\"\"\>"},
+       {"", 
+        PaneBox[
+         TagBox[
+          DynamicModuleBox[{Typeset`var$$ = False}, 
+           InterpretationBox[
+            StyleBox[
+             PaneSelectorBox[{False->GridBox[{
+                {
+                 OpenerBox[Dynamic[Typeset`var$$],
+                  Appearance->Automatic,
+                  AutoAction->False,
+                  ContinuousAction->False,
+                  Enabled->Automatic], 
+                 StyleBox["\<\"Builtins used in computation\"\>", "CILabel",
+                  StripOnInput->False]}
+               },
+               AutoDelete->False,
+               BaselinePosition->{1, 1},
+               GridBoxAlignment->{"Columns" -> {{Left}}},
+               GridBoxBackground->{"Columns" -> {{Automatic}}},
+               
+               GridBoxItemSize->{
+                "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+               GridBoxSpacings->{"Columns" -> {{0.2}}, "Rows" -> {{0.5}}}], 
+              True->GridBox[{
+                {
+                 OpenerBox[Dynamic[Typeset`var$$],
+                  Appearance->Automatic,
+                  AutoAction->False,
+                  ContinuousAction->False,
+                  Enabled->Automatic], 
+                 StyleBox["\<\"Builtins used in computation\"\>", "CILabel",
+                  StripOnInput->False]},
+                {"", 
+                 PaneBox[
+                  RowBox[{"{", 
+                   
+                   RowBox[{"\<\"Exists\"\>", ",", "\<\"Forall\"\>", 
+                    ",", "\<\"Plus\"\>", ",", "\<\"Times\"\>"}], "}"}],
+                  ImageMargins->0]}
+               },
+               AutoDelete->False,
+               BaselinePosition->{1, 1},
+               GridBoxAlignment->{"Columns" -> {{Left}}},
+               GridBoxBackground->{"Columns" -> {{Automatic}}},
+               
+               GridBoxItemSize->{
+                "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+               GridBoxSpacings->{"Columns" -> {{0.2}}, "Rows" -> {{0.5}}}]}, 
+              Dynamic[Typeset`var$$],
+              Alignment->Automatic,
+              BaselinePosition->Baseline,
+              DefaultBaseStyle->"OpenerView",
+              ImageMargins->0,
+              ImageSize->Automatic],
+             Deployed->False,
+             StripOnInput->False],
+            OpenerView[{
+              Style["Builtins used in computation", "CILabel"], {
+              "Exists", "Forall", "Plus", "Times"}}, False]],
+           DynamicModuleValues:>Automatic],
+          Setting[#, {0}]& ],
+         ImageMargins->0]}
+      },
+      AutoDelete->False,
+      BaselinePosition->{1, 1},
+      GridBoxAlignment->{"Columns" -> {{Left}}},
+      GridBoxBackground->{"Columns" -> {{Automatic}}},
+      GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+      GridBoxSpacings->{"Columns" -> {{0.2}}, "Rows" -> {{0.5}}}]}, Dynamic[
+     Typeset`var$$],
+     Alignment->Automatic,
+     BaselinePosition->Baseline,
+     DefaultBaseStyle->"OpenerView",
+     ImageMargins->0,
+     ImageSize->Automatic],
+    Deployed->False,
+    StripOnInput->False],
+   OpenerView[{"", 
+     OpenerView[{
+       Style["Builtins used in computation", "CILabel"], {
+       "Exists", "Forall", "Plus", "Times"}}]}, False]],
+  DynamicModuleValues:>{}]], "ComputationInfo",
+ CellChangeTimes->{3.5363293477414*^9},
+ CellID->1698066385],
+
+Cell[BoxData["2"], "ComputationResult",
+ CellChangeTimes->{3.536329347786624*^9},
+ CellID->859473738]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"1", "+", "1"}]], "Computation",
+ CellChangeTimes->{{3.536329344797392*^9, 3.536329372438328*^9}},
+ CellID->1011115407],
+
+Cell[BoxData[
+ DynamicModuleBox[{Typeset`var$$ = True}, 
+  InterpretationBox[
+   StyleBox[
+    PaneSelectorBox[{False->GridBox[{
+       {
+        OpenerBox[Dynamic[Typeset`var$$],
+         Appearance->Automatic,
+         AutoAction->False,
+         ContinuousAction->False,
+         Enabled->Automatic], "\<\"\"\>"}
+      },
+      AutoDelete->False,
+      BaselinePosition->{1, 1},
+      GridBoxAlignment->{"Columns" -> {{Left}}},
+      GridBoxBackground->{"Columns" -> {{Automatic}}},
+      GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+      GridBoxSpacings->{"Columns" -> {{0.2}}, "Rows" -> {{0.5}}}], True->
+     GridBox[{
+       {
+        OpenerBox[Dynamic[Typeset`var$$],
+         Appearance->Automatic,
+         AutoAction->False,
+         ContinuousAction->False,
+         Enabled->Automatic], "\<\"\"\>"},
+       {"", 
+        PaneBox[
+         TagBox[
+          DynamicModuleBox[{Typeset`var$$ = True}, 
+           InterpretationBox[
+            StyleBox[
+             PaneSelectorBox[{False->GridBox[{
+                {
+                 OpenerBox[Dynamic[Typeset`var$$],
+                  Appearance->Automatic,
+                  AutoAction->False,
+                  ContinuousAction->False,
+                  Enabled->Automatic], 
+                 StyleBox["\<\"Builtins used in computation\"\>", "CILabel",
+                  StripOnInput->False]}
+               },
+               AutoDelete->False,
+               BaselinePosition->{1, 1},
+               GridBoxAlignment->{"Columns" -> {{Left}}},
+               GridBoxBackground->{"Columns" -> {{Automatic}}},
+               
+               GridBoxItemSize->{
+                "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+               GridBoxSpacings->{"Columns" -> {{0.2}}, "Rows" -> {{0.5}}}], 
+              True->GridBox[{
+                {
+                 OpenerBox[Dynamic[Typeset`var$$],
+                  Appearance->Automatic,
+                  AutoAction->False,
+                  ContinuousAction->False,
+                  Enabled->Automatic], 
+                 StyleBox["\<\"Builtins used in computation\"\>", "CILabel",
+                  StripOnInput->False]},
+                {"", 
+                 PaneBox[
+                  RowBox[{"{", 
+                   RowBox[{"\<\"Exists\"\>", ",", "\<\"Times\"\>"}], "}"}],
+                  ImageMargins->0]}
+               },
+               AutoDelete->False,
+               BaselinePosition->{1, 1},
+               GridBoxAlignment->{"Columns" -> {{Left}}},
+               GridBoxBackground->{"Columns" -> {{Automatic}}},
+               
+               GridBoxItemSize->{
+                "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+               GridBoxSpacings->{"Columns" -> {{0.2}}, "Rows" -> {{0.5}}}]}, 
+              Dynamic[Typeset`var$$],
+              Alignment->Automatic,
+              BaselinePosition->Baseline,
+              DefaultBaseStyle->"OpenerView",
+              ImageMargins->0,
+              ImageSize->Automatic],
+             Deployed->False,
+             StripOnInput->False],
+            OpenerView[{
+              Style["Builtins used in computation", "CILabel"], {
+              "Exists", "Times"}}, False]],
+           DynamicModuleValues:>{}],
+          Setting[#, {0}]& ],
+         ImageMargins->0]}
+      },
+      AutoDelete->False,
+      BaselinePosition->{1, 1},
+      GridBoxAlignment->{"Columns" -> {{Left}}},
+      GridBoxBackground->{"Columns" -> {{Automatic}}},
+      GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+      GridBoxSpacings->{"Columns" -> {{0.2}}, "Rows" -> {{0.5}}}]}, Dynamic[
+     Typeset`var$$],
+     Alignment->Automatic,
+     BaselinePosition->Baseline,
+     DefaultBaseStyle->"OpenerView",
+     ImageMargins->0,
+     ImageSize->Automatic],
+    Deployed->False,
+    StripOnInput->False],
+   OpenerView[{"", 
+     OpenerView[{
+       Style["Builtins used in computation", "CILabel"], {
+       "Exists", "Times"}}]}, False]],
+  DynamicModuleValues:>{}]], "ComputationInfo",
+ CellChangeTimes->{3.536329390340351*^9},
+ CellID->764130449],
+
+Cell[BoxData[
+ RowBox[{"1", "+", "1"}]], "ComputationResult",
+ CellChangeTimes->{{3.536329381862531*^9, 3.536329390362746*^9}},
+ CellID->613611414]
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -443,143 +836,139 @@ StyleDefinitions->FrontEnd`FileName[{"Theorema"}, "TheoremaNotebook.nb",
 (* Internal cache information *)
 (*CellTagsOutline
 CellTagsIndex->{
+ "ID_1636935908"->{
+  Cell[987, 36, 452, 12, 28, "FormalTextInputFormula",
+   CellTags->{
+    "ID_1636935908", 
+     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "1"},
+   CellID->1636935908]},
+ "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb"->{
+  Cell[987, 36, 452, 12, 28, "FormalTextInputFormula",
+   CellTags->{
+    "ID_1636935908", 
+     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "1"},
+   CellID->1636935908],
+  Cell[1442, 50, 511, 13, 28, "FormalTextInputFormula",
+   CellTags->{
+    "ID_1242901413", 
+     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "2"},
+   CellID->1242901413],
+  Cell[1956, 65, 592, 15, 32, "FormalTextInputFormula",
+   CellTags->{
+    "ID_330716980", 
+     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "3"},
+   CellID->330716980],
+  Cell[2551, 82, 559, 13, 27, "FormalTextInputFormula",
+   CellTags->{
+    "ID_1346427776", 
+     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "4"},
+   CellID->1346427776],
+  Cell[3113, 97, 584, 14, 28, "FormalTextInputFormula",
+   CellTags->{
+    "ID_1421485859", 
+     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "5"},
+   CellID->1421485859],
+  Cell[3700, 113, 604, 14, 29, "FormalTextInputFormula",
+   CellTags->{
+    "ID_1874491785", 
+     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "6"},
+   CellID->1874491785],
+  Cell[4307, 129, 688, 16, 29, "FormalTextInputFormula",
+   CellTags->{
+    "ID_1491028062", 
+     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "7"},
+   CellID->1491028062],
+  Cell[4998, 147, 415, 11, 28, "FormalTextInputFormula",
+   CellTags->{
+    "ID_822628176", 
+     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "8"},
+   CellID->822628176]},
+ "1"->{
+  Cell[987, 36, 452, 12, 28, "FormalTextInputFormula",
+   CellTags->{
+    "ID_1636935908", 
+     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "1"},
+   CellID->1636935908]},
  "ID_1242901413"->{
-  Cell[1621, 56, 511, 13, 28, "FormalTextInputFormula",
+  Cell[1442, 50, 511, 13, 28, "FormalTextInputFormula",
    CellTags->{
     "ID_1242901413", 
      "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "2"},
    CellID->1242901413]},
+ "2"->{
+  Cell[1442, 50, 511, 13, 28, "FormalTextInputFormula",
+   CellTags->{
+    "ID_1242901413", 
+     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "2"},
+   CellID->1242901413]},
+ "ID_330716980"->{
+  Cell[1956, 65, 592, 15, 32, "FormalTextInputFormula",
+   CellTags->{
+    "ID_330716980", 
+     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "3"},
+   CellID->330716980]},
+ "3"->{
+  Cell[1956, 65, 592, 15, 32, "FormalTextInputFormula",
+   CellTags->{
+    "ID_330716980", 
+     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "3"},
+   CellID->330716980]},
  "ID_1346427776"->{
-  Cell[2730, 88, 559, 13, 27, "FormalTextInputFormula",
+  Cell[2551, 82, 559, 13, 27, "FormalTextInputFormula",
+   CellTags->{
+    "ID_1346427776", 
+     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "4"},
+   CellID->1346427776]},
+ "4"->{
+  Cell[2551, 82, 559, 13, 27, "FormalTextInputFormula",
    CellTags->{
     "ID_1346427776", 
      "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "4"},
    CellID->1346427776]},
  "ID_1421485859"->{
-  Cell[3292, 103, 584, 14, 28, "FormalTextInputFormula",
+  Cell[3113, 97, 584, 14, 28, "FormalTextInputFormula",
    CellTags->{
     "ID_1421485859", 
      "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "5"},
    CellID->1421485859]},
- "ID_1491028062"->{
-  Cell[4486, 135, 688, 16, 29, "FormalTextInputFormula",
-   CellTags->{
-    "ID_1491028062", 
-     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "7"},
-   CellID->1491028062]},
- "ID_1636935908"->{
-  Cell[1150, 41, 468, 13, 28, "FormalTextInputFormula",
-   CellTags->{
-    "ID_1636935908", 
-     "Source_/home/wwindste/WolframWorkspaces/Base/Theorema/Test/Language.nb",
-      "1"},
-   CellID->1636935908]},
- "ID_1874491785"->{
-  Cell[3879, 119, 604, 14, 29, "FormalTextInputFormula",
-   CellTags->{
-    "ID_1874491785", 
-     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "6"},
-   CellID->1874491785]},
- "ID_330716980"->{
-  Cell[2135, 71, 592, 15, 32, "FormalTextInputFormula",
-   CellTags->{
-    "ID_330716980", 
-     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "3"},
-   CellID->330716980]},
- "ID_822628176"->{
-  Cell[5177, 153, 415, 11, 28, "FormalTextInputFormula",
-   CellTags->{
-    "ID_822628176", 
-     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "8"},
-   CellID->822628176]},
- "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb"->{
-  Cell[1621, 56, 511, 13, 28, "FormalTextInputFormula",
-   CellTags->{
-    "ID_1242901413", 
-     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "2"},
-   CellID->1242901413],
-  Cell[2135, 71, 592, 15, 32, "FormalTextInputFormula",
-   CellTags->{
-    "ID_330716980", 
-     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "3"},
-   CellID->330716980],
-  Cell[2730, 88, 559, 13, 27, "FormalTextInputFormula",
-   CellTags->{
-    "ID_1346427776", 
-     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "4"},
-   CellID->1346427776],
-  Cell[3292, 103, 584, 14, 28, "FormalTextInputFormula",
-   CellTags->{
-    "ID_1421485859", 
-     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "5"},
-   CellID->1421485859],
-  Cell[3879, 119, 604, 14, 29, "FormalTextInputFormula",
-   CellTags->{
-    "ID_1874491785", 
-     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "6"},
-   CellID->1874491785],
-  Cell[4486, 135, 688, 16, 29, "FormalTextInputFormula",
-   CellTags->{
-    "ID_1491028062", 
-     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "7"},
-   CellID->1491028062],
-  Cell[5177, 153, 415, 11, 28, "FormalTextInputFormula",
-   CellTags->{
-    "ID_822628176", 
-     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "8"},
-   CellID->822628176]},
- "Source_/home/wwindste/WolframWorkspaces/Base/Theorema/Test/Language.nb"->{
-  Cell[1150, 41, 468, 13, 28, "FormalTextInputFormula",
-   CellTags->{
-    "ID_1636935908", 
-     "Source_/home/wwindste/WolframWorkspaces/Base/Theorema/Test/Language.nb",
-      "1"},
-   CellID->1636935908]},
- "1"->{
-  Cell[1150, 41, 468, 13, 28, "FormalTextInputFormula",
-   CellTags->{
-    "ID_1636935908", 
-     "Source_/home/wwindste/WolframWorkspaces/Base/Theorema/Test/Language.nb",
-      "1"},
-   CellID->1636935908]},
- "2"->{
-  Cell[1621, 56, 511, 13, 28, "FormalTextInputFormula",
-   CellTags->{
-    "ID_1242901413", 
-     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "2"},
-   CellID->1242901413]},
- "3"->{
-  Cell[2135, 71, 592, 15, 32, "FormalTextInputFormula",
-   CellTags->{
-    "ID_330716980", 
-     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "3"},
-   CellID->330716980]},
- "4"->{
-  Cell[2730, 88, 559, 13, 27, "FormalTextInputFormula",
-   CellTags->{
-    "ID_1346427776", 
-     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "4"},
-   CellID->1346427776]},
  "5"->{
-  Cell[3292, 103, 584, 14, 28, "FormalTextInputFormula",
+  Cell[3113, 97, 584, 14, 28, "FormalTextInputFormula",
    CellTags->{
     "ID_1421485859", 
      "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "5"},
    CellID->1421485859]},
- "6"->{
-  Cell[3879, 119, 604, 14, 29, "FormalTextInputFormula",
+ "ID_1874491785"->{
+  Cell[3700, 113, 604, 14, 29, "FormalTextInputFormula",
    CellTags->{
     "ID_1874491785", 
      "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "6"},
    CellID->1874491785]},
- "7"->{
-  Cell[4486, 135, 688, 16, 29, "FormalTextInputFormula",
+ "6"->{
+  Cell[3700, 113, 604, 14, 29, "FormalTextInputFormula",
+   CellTags->{
+    "ID_1874491785", 
+     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "6"},
+   CellID->1874491785]},
+ "ID_1491028062"->{
+  Cell[4307, 129, 688, 16, 29, "FormalTextInputFormula",
    CellTags->{
     "ID_1491028062", 
      "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "7"},
    CellID->1491028062]},
+ "7"->{
+  Cell[4307, 129, 688, 16, 29, "FormalTextInputFormula",
+   CellTags->{
+    "ID_1491028062", 
+     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "7"},
+   CellID->1491028062]},
+ "ID_822628176"->{
+  Cell[4998, 147, 415, 11, 28, "FormalTextInputFormula",
+   CellTags->{
+    "ID_822628176", 
+     "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "8"},
+   CellID->822628176]},
  "8"->{
-  Cell[5177, 153, 415, 11, 28, "FormalTextInputFormula",
+  Cell[4998, 147, 415, 11, 28, "FormalTextInputFormula",
    CellTags->{
     "ID_822628176", 
      "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "8"},
@@ -588,100 +977,121 @@ CellTagsIndex->{
 *)
 (*CellTagsIndex
 CellTagsIndex->{
- {"ID_1242901413", 16547, 445},
- {"ID_1346427776", 16758, 451},
- {"ID_1421485859", 16969, 457},
- {"ID_1491028062", 17181, 463},
- {"ID_1636935908", 17393, 469},
- {"ID_1874491785", 17622, 476},
- {"ID_330716980", 17833, 482},
- {"ID_822628176", 18041, 488},
- {"Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", 18296, 494},
- {"Source_/home/wwindste/WolframWorkspaces/Base/Theorema/Test/Language.nb", \
-19704, 530},
- {"1", 19921, 537},
- {"2", 20138, 544},
- {"3", 20337, 550},
- {"4", 20534, 556},
- {"5", 20733, 562},
- {"6", 20933, 568},
- {"7", 21133, 574},
- {"8", 21333, 580}
+ {"ID_1636935908", 30880, 838},
+ {"Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", 31135, 844},
+ {"1", 32662, 885},
+ {"ID_1242901413", 32872, 891},
+ {"2", 33071, 897},
+ {"ID_330716980", 33281, 903},
+ {"3", 33478, 909},
+ {"ID_1346427776", 33687, 915},
+ {"4", 33886, 921},
+ {"ID_1421485859", 34097, 927},
+ {"5", 34296, 933},
+ {"ID_1874491785", 34507, 939},
+ {"6", 34707, 945},
+ {"ID_1491028062", 34919, 951},
+ {"7", 35119, 957},
+ {"ID_822628176", 35330, 963},
+ {"8", 35528, 969}
  }
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[557, 20, 160, 3, 30, "Input",
- CellID->880887267],
-Cell[720, 25, 156, 3, 29, "GlobalDeclaration",
+Cell[557, 20, 156, 3, 29, "GlobalDeclaration",
  CellID->993326560],
 Cell[CellGroupData[{
-Cell[901, 32, 58, 1, 38, "OpenEnvironment",
+Cell[738, 27, 58, 1, 38, "OpenEnvironment",
  CellID->1372089959],
-Cell[962, 35, 185, 4, 21, "EnvironmentDeclaration",
+Cell[799, 30, 185, 4, 21, "EnvironmentDeclaration",
  CellID->1326837667],
-Cell[1150, 41, 468, 13, 28, "FormalTextInputFormula",
+Cell[987, 36, 452, 12, 28, "FormalTextInputFormula",
  CellTags->{
   "ID_1636935908", 
-   "Source_/home/wwindste/WolframWorkspaces/Base/Theorema/Test/Language.nb", 
-   "1"},
+   "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "1"},
  CellID->1636935908],
-Cell[1621, 56, 511, 13, 28, "FormalTextInputFormula",
+Cell[1442, 50, 511, 13, 28, "FormalTextInputFormula",
  CellTags->{
   "ID_1242901413", 
    "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "2"},
  CellID->1242901413],
-Cell[2135, 71, 592, 15, 32, "FormalTextInputFormula",
+Cell[1956, 65, 592, 15, 32, "FormalTextInputFormula",
  CellTags->{
   "ID_330716980", 
    "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "3"},
  CellID->330716980],
-Cell[2730, 88, 559, 13, 27, "FormalTextInputFormula",
+Cell[2551, 82, 559, 13, 27, "FormalTextInputFormula",
  CellTags->{
   "ID_1346427776", 
    "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "4"},
  CellID->1346427776],
-Cell[3292, 103, 584, 14, 28, "FormalTextInputFormula",
+Cell[3113, 97, 584, 14, 28, "FormalTextInputFormula",
  CellTags->{
   "ID_1421485859", 
    "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "5"},
  CellID->1421485859],
-Cell[3879, 119, 604, 14, 29, "FormalTextInputFormula",
+Cell[3700, 113, 604, 14, 29, "FormalTextInputFormula",
  CellTags->{
   "ID_1874491785", 
    "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "6"},
  CellID->1874491785],
-Cell[4486, 135, 688, 16, 29, "FormalTextInputFormula",
+Cell[4307, 129, 688, 16, 29, "FormalTextInputFormula",
  CellTags->{
   "ID_1491028062", 
    "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "7"},
  CellID->1491028062],
-Cell[5177, 153, 415, 11, 28, "FormalTextInputFormula",
+Cell[4998, 147, 415, 11, 28, "FormalTextInputFormula",
  CellTags->{
   "ID_822628176", 
    "Source_/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "8"},
  CellID->822628176],
-Cell[5595, 166, 65, 1, 24, "EndEnvironmentMarker",
+Cell[5416, 160, 65, 1, 24, "EndEnvironmentMarker",
  CellID->338734751]
 }, Open  ]],
-Cell[5675, 170, 48, 1, 10, "CloseEnvironment",
+Cell[5496, 164, 48, 1, 10, "CloseEnvironment",
  CellID->862514851],
-Cell[5726, 173, 241, 7, 45, "Computation",
- CellID->1791385580],
-Cell[5970, 182, 4046, 108, 36, "ComputationInfo",
- CellID->826091799],
-Cell[10019, 292, 362, 12, 26, "ComputationResult",
- CellID->2052408024],
 Cell[CellGroupData[{
-Cell[10406, 308, 162, 3, 30, "Input",
+Cell[5569, 169, 241, 7, 45, "Computation",
+ CellID->1791385580],
+Cell[5813, 178, 4654, 121, 15, "ComputationInfo",
+ CellID->875347772],
+Cell[10470, 301, 469, 13, 17, "ComputationResult",
+ CellID->1168793688]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[10976, 319, 262, 7, 45, "Computation",
+ CellID->203455808],
+Cell[11241, 328, 4169, 109, 57, "ComputationInfo",
+ CellID->2105075298],
+Cell[15413, 439, 363, 12, 26, "ComputationResult",
+ CellID->1943039908]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[15813, 456, 141, 3, 36, "Computation",
+ CellID->277393357],
+Cell[15957, 461, 4219, 109, 15, "ComputationInfo",
+ CellID->1698066385],
+Cell[20179, 572, 101, 2, 17, "ComputationResult",
+ CellID->859473738]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[20317, 579, 142, 3, 36, "Computation",
+ CellID->1011115407],
+Cell[20462, 584, 4090, 107, 57, "ComputationInfo",
+ CellID->764130449],
+Cell[24555, 693, 147, 3, 17, "ComputationResult",
+ CellID->613611414]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[24739, 701, 162, 3, 30, "Input",
  CellID->1919494902],
-Cell[10571, 313, 1253, 32, 90, "Output",
+Cell[24904, 706, 1253, 32, 90, "Output",
  CellID->1071431325]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[11861, 350, 239, 4, 30, "Input",
+Cell[26194, 743, 239, 4, 30, "Input",
  CellID->2119150181],
-Cell[12103, 356, 4005, 74, 1150, "Output",
+Cell[26436, 749, 4005, 74, 1150, "Output",
  CellID->984274870]
 }, Open  ]]
 }

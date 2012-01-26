@@ -29,6 +29,9 @@ With[ {lang = "English"},
 	MessageName[processEnvironment, "usage", lang] = "processEnvironment[ expr] ...";
 	MessageName[processComputation, "usage", lang] = "processComputation[ expr] ...";
 	MessageName[findSelectedFormula, "usage", lang] = "findSelectedFormula[ sel] ...";
+
+(* Theorema`Computation`Language` *)
+	MessageName[setComputationContext, "usage", lang] = "setComputationContext[ c] sets the context for the next computation to c.";
 	
 (* Theorema`Utilities` *)
 	MessageName[replaceAllExcept, "usage", lang] = "replaceAllExcept[ expr, rules, expt] applies rule(s) to all subparts of 'expr' except those contained in the list 'expt'.";

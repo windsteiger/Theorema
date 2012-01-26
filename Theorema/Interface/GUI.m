@@ -35,21 +35,21 @@ initGUI[] :=
 		   In $tmaBuiltins
 		   o) nesting gives the nested structure for display
 		   o) each entry has the form
-		      {key, box display, default active for proving, default active for computation},
+		      {key, box display, default active for proving, default active for computation, default active for solving},
 		      where "key" is the corresponding key used in activeComputation *)
         $tmaBuiltins = {
         	{"Sets", 
-        		{"Union", RowBox[{"A","\[Union]","B"}], False, False},
-        		{"Intersection", RowBox[{"A","\[Intersection]","B"}], False, False},
-        		{"Equal", RowBox[{"A","=","B"}], False, False}},
+        		{"Union", RowBox[{"A","\[Union]","B"}], False, False, False},
+        		{"Intersection", RowBox[{"A","\[Intersection]","B"}], False, False, False},
+        		{"Equal", RowBox[{"A","=","B"}], False, False, False}},
         	{"Arithmetic", 
-        		{"Plus", RowBox[{"A","+","B"}], False, False},
-        		{"Times", RowBox[{"A","*","B"}], False, False},
-        		{"Equal", RowBox[{"A","=","B"}], False, False}},
+        		{"Plus", RowBox[{"A","+","B"}], False, True, False},
+        		{"Times", RowBox[{"A","*","B"}], False, True, False},
+        		{"Equal", RowBox[{"A","=","B"}], False, False, False}},
         	{"Logic", 
-        		{"Forall", RowBox[{"\[ForAll]","P"}], False, False},
-        		{"Exists", RowBox[{"\[Exists]","P"}], False, False},
-        		{"Equal", RowBox[{"A","=","B"}], False, False}}
+        		{"Forall", RowBox[{"\[ForAll]","P"}], False, True, False},
+        		{"Exists", RowBox[{"\[Exists]","P"}], False, True, False},
+        		{"Equal", RowBox[{"A","=","B"}], False, False, False}}
         };
 		$kbStruct = {};
 		$initLabel = "???";
@@ -58,16 +58,27 @@ initGUI[] :=
 		If[ ValueQ[$theoremaGUI], tc = "Theorema Commander" /. $theoremaGUI];
 		If[ $Notebooks && MemberQ[Notebooks[], tc], NotebookClose[tc]];
 		$theoremaGUI = {"Theorema Commander" -> theoremaCommander[]};
+		Clear[ kbSelectProve, kbSelectSolve];
 		kbSelectProve[_] := False;
 		kbSelectSolve[_] := False;
-		initBuiltins[];
+		$tmaSelectedProofGoal = {};
+		initBuiltins[ {"prove", "compute", "solve"}];
+		$registeredProvers = {};
 	]
 
-initBuiltins[] :=
-	Module[{bui},
-		bui = Cases[ $tmaBuiltins, {_String, _, _Symbol, _Symbol}, Infinity];
-		Scan[ (Theorema`Computation`Language`Private`activeComputation[#[[1]]] = #[[4]])&, bui];
-	]
+initBuiltins[ l_List] :=
+    Module[ {bui},
+        bui = Cases[ $tmaBuiltins, {_String, _, _Symbol, _Symbol, _Symbol}, Infinity];
+        If[ MemberQ[ l, "prove"],
+            Scan[ (Theorema`Computation`Language`Private`buiActProve[#[[1]]] = #[[3]])&, bui]
+        ];
+        If[ MemberQ[ l, "compute"],
+            Scan[ (Theorema`Computation`Language`Private`buiActComputation[#[[1]]] = #[[4]])&, bui]
+        ];
+        If[ MemberQ[ l, "solve"],
+            Scan[ (Theorema`Computation`Language`Private`buiActSolve[#[[1]]] = #[[5]])&, bui]
+        ];
+    ]
 initBuiltins[ args___] := unexpected[ initBuiltins, {args}]
 
 (* ::Section:: *)
@@ -85,17 +96,18 @@ theoremaCommander[] /; $Notebooks :=
         		translate["tcProveTabLabel"]->TabView[{
         			translate["tcProveTabGoalTabLabel"]->Dynamic[ Refresh[ displaySelectedGoal[], UpdateInterval -> 2]],
         			translate["tcProveTabKBTabLabel"]->Dynamic[Refresh[displayKBBrowser["prove"], TrackedSymbols :> {$kbStruct}]],
-        			translate["tcProveTabBuiltinTabLabel"]->displayBuiltinBrowser[],
+        			translate["tcProveTabBuiltinTabLabel"]->displayBuiltinBrowser["prove"],
         			translate["tcProveTabProverTabLabel"]->selectProver[],
-        			translate["tcProveTabSubmitTabLabel"]->submitProveTask[]}, Dynamic[$tcProveTab],
+        			translate["tcProveTabSubmitTabLabel"]->Dynamic[ Refresh[ submitProveTask[ $tcProveTab], TrackedSymbols :> {$tcProveTab}]]}, Dynamic[$tcProveTab],
         			LabelStyle->"TabLabel2", ControlPlacement->Top],
         		translate["tcComputeTabLabel"]->TabView[{
         			translate["tcComputeTabSetupTabLabel"]->Dynamic[Refresh[ compSetup[], TrackedSymbols :> {$buttonNat}]],
         			translate["tcComputeTabKBTabLabel"]->Dynamic[Refresh[displayKBBrowser["compute"], TrackedSymbols :> {$kbStruct}]],
-        			translate["tcComputeTabBuiltinTabLabel"]->displayBuiltinBrowser[]}, Dynamic[$tcCompTab],
+        			translate["tcComputeTabBuiltinTabLabel"]->displayBuiltinBrowser["compute"]}, Dynamic[$tcCompTab],
         			LabelStyle->"TabLabel2", ControlPlacement->Top],
         		translate["tcSolveTabLabel"]->TabView[{
-        			translate["tcSolveTabKBTabLabel"]->Dynamic[Refresh[displayKBBrowser["solve"], TrackedSymbols :> {$kbStruct}]]}, Dynamic[$tcSolveTab],
+        			translate["tcSolveTabKBTabLabel"]->Dynamic[Refresh[displayKBBrowser["solve"], TrackedSymbols :> {$kbStruct}]],
+        			translate["tcSolveTabBuiltinTabLabel"]->displayBuiltinBrowser["solve"]}, Dynamic[$tcSolveTab],
         			LabelStyle->"TabLabel2", ControlPlacement->Top],
         		translate["tcPreferencesTabLabel"]->TabView[{
         			translate["tcPrefLanguage"]->PopupMenu[Dynamic[$Language], availableLanguages[]],
@@ -112,6 +124,8 @@ theoremaCommander[] /; $Notebooks :=
     ]
 
 emptyPane[ text_String:""] := Pane[ text, Alignment -> {Center, Center}]
+emptyPane[ text_String:"", size_] := Pane[ text, size, Alignment -> {Left, Top}]
+emptyPane[ args___] := unexpected[ emptyPane, {args}]
 
 (* ::Subsubsection:: *)
 (* displaySelectedGoal *)
@@ -120,15 +134,34 @@ displaySelectedGoal[ ] :=
     Module[ { sel = NotebookRead[ InputNotebook[]], goal},
     	goal = findSelectedFormula[ sel];
         If[ goal === {},
-            emptyPane[ translate["noGoal"]],
-            Pane[ Row[ displayLabeledFormula[ goal], Spacer[5]], 350, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
+            emptyPane[ translate["noGoal"], 350],
+            $selectedProofGoal = goal[[1]];
+            Pane[ Row[ displayLabeledFormula[ $selectedProofGoal], Spacer[5]], 350, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
         ]
     ]
 displaySelectedGoal[args___] :=
     unexpected[displaySelectedGoal, {args}]
 
-displayLabeledFormula[ {form_, lab_}] := {Style[ lab, "FormulaLabel"], Style[ TraditionalForm[ form], "DisplayFormula"]}
+displayLabeledFormula[ {key_, form_, lab_}] := 
+	Module[ {link},
+		link = { StringReplace[ key[[2]], "Source_"->"", 1], key[[1]]};
+		{Hyperlink[ Style[ lab, "FormulaLabel"], link], Style[ TraditionalForm[ form], "DisplayFormula"]}
+	]
 displayLabeledFormula[ args___] := unexpected[ displayLabeledFormula, {args}]
+
+displaySelectedKB[ ] :=
+	Module[ {},
+    	$selectedProofKB = Select[ $tmaEnv, kbSelectProve[#[[1]]]&];
+        If[ $selectedProofKB === {},
+            emptyPane[ translate["noKB"], {350, 350}],
+            Pane[ Grid[ displayLabeledFormulaList[ $selectedProofKB]], {350, 350}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
+        ]
+    ]
+displaySelectedKB[ args___] := unexpected[ displaySelectedKB, {args}]
+
+displayLabeledFormulaList[ l_List] := Map[ displayLabeledFormula, l]
+displayLabeledFormulaList[ args___] := unexpected[ displayLabeledFormulaList, {args}]
+
  
 (* ::Subsubsection:: *)
 (* extractKBStruct *)
@@ -436,32 +469,53 @@ Clear[structViewBuiltin];
 (* structured view for builtin operators
    follows the ideas of the structured view of the KB *)
    
-structViewBuiltin[{category_String, rest__List}, tags_] :=
+structViewBuiltin[{category_String, rest__List}, tags_, task_String] :=
     Module[ {sub, compTags},
-        sub = Transpose[Map[structViewBuiltin[#, tags] &, {rest}]];
+        sub = Transpose[Map[structViewBuiltin[#, tags, task] &, {rest}]];
         compTags = Apply[Union, sub[[2]]];
-        {OpenerView[{structViewBuiltin[category, compTags], Column[sub[[1]]]}, 
+        {OpenerView[{structViewBuiltin[category, compTags, task], Column[sub[[1]]]}, 
         	ToExpression["Dynamic[$builtinStructState$"<>category<>"]"]], 
          compTags}
     ]
 
-structViewBuiltin[ item:List[__List], tags_] :=
+structViewBuiltin[ item:List[__List], tags_, task_String] :=
     Module[ {sub, compTags},
-        sub = Transpose[Map[structViewBuiltin[#, tags] &, item]];
+        sub = Transpose[Map[structViewBuiltin[#, tags, task] &, item]];
         compTags = Apply[Union, sub[[2]]];
         {Column[sub[[1]]], compTags}
     ]
     
-structViewBuiltin[ {op_String, display_, _, _}, tags_] :=
-  Module[ { },
-    {Row[{Checkbox[Dynamic[Theorema`Computation`Language`Private`activeComputation[op]]], Style[ DisplayForm[display], "FormalTextInputFormula"]}, 
-      Spacer[10]], {op}}
-  ]
+structViewBuiltin[ {op_String, display_, _, _, _}, tags_, task_String] :=
+    Module[ { },
+        {Switch[ task,
+            "prove",
+            Row[{Checkbox[ Dynamic[ Theorema`Computation`Language`Private`buiActProve[op]]], Style[ DisplayForm[ display], "FormalTextInputFormula"]}, 
+                Spacer[10]],
+            "compute",
+          	Row[{Checkbox[ Dynamic[ Theorema`Computation`Language`Private`buiActComputation[op]]], Style[ DisplayForm[ display], "FormalTextInputFormula"]}, 
+          		Spacer[10]],
+            "solve",
+          	Row[{Checkbox[ Dynamic[ Theorema`Computation`Language`Private`buiActSolve[op]]], Style[ DisplayForm[ display], "FormalTextInputFormula"]}, 
+          		Spacer[10]]
+        ], {op}}
+    ]
 
-structViewBuiltin[ category_String, tags_] :=
+structViewBuiltin[ category_String, tags_, task_String] :=
     Module[ {},
-        Row[{Checkbox[Dynamic[allTrue[tags, Theorema`Computation`Language`Private`activeComputation], setAll[tags, Theorema`Computation`Language`Private`activeComputation, #] &]], 
-          Style[ translate[category], "Section"]}, Spacer[10]]
+    	Switch[ task,
+    		"prove",
+    		Row[{Checkbox[ Dynamic[ allTrue[ tags, Theorema`Computation`Language`Private`buiActProve], 
+        		setAll[ tags, Theorema`Computation`Language`Private`buiActProve, #] &]], 
+          		Style[ translate[category], "Section"]}, Spacer[10]],
+    		"compute",
+        	Row[{Checkbox[ Dynamic[ allTrue[ tags, Theorema`Computation`Language`Private`buiActComputation], 
+        		setAll[ tags, Theorema`Computation`Language`Private`buiActComputation, #] &]], 
+          		Style[ translate[category], "Section"]}, Spacer[10]],
+          	"solve",
+          	Row[{Checkbox[ Dynamic[ allTrue[ tags, Theorema`Computation`Language`Private`buiActSolve], 
+        		setAll[ tags, Theorema`Computation`Language`Private`buiActSolve, #] &]], 
+          		Style[ translate[category], "Section"]}, Spacer[10]]
+    	]
     ]
 
 structViewBuiltin[args___] :=
@@ -487,16 +541,38 @@ setAll[l_, test_, val_] :=
 
 (* see displayKBBrowser *)
 
-displayBuiltinBrowser[] :=
-  Pane[structViewBuiltin[ $tmaBuiltins, {}][[1]],
+displayBuiltinBrowser[ task_String] :=
+  Pane[ Column[{
+  	Button[ translate[ "ResetBui"], initBuiltins[ {task}]],
+  	structViewBuiltin[ $tmaBuiltins, {}, task][[1]]
+  }],
   	ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
 displayBuiltinBrowser[args___] := unexcpected[ displayBuiltinBrowser, {args}]
 
-selectProver[ ] := emptyPane[]
+selectProver[ ] :=
+	Block[ { $registeredProvers = {prover1, prover2}},
+		PopupMenu[ Dynamic[ $selectedProver], $registeredProvers]
+	]
 selectProver[ args___] := unexpected[ selectProver, {args}]
 
-submitProveTask[ ] := emptyPane[]
+submitProveTask[ dummy_] := 
+	Module[ {},
+		Column[{
+			Labeled[ displaySelectedGoal[], Style[ translate["selGoal"], "CellLabel"], {{ Top, Left}}],
+			Labeled[ displaySelectedKB[], Style[ translate["selKB"], "CellLabel"], {{ Top, Left}}],
+			Button[ translate["prove"], execProveCall[ $selectedProofGoal, $selectedProofKB, $selectedProver]]
+		}]
+	]
 submitProveTask[ args___] := unexpected[ submitProveTask, {args}]
+
+execProveCall[ goal_, kb_, prover_] :=
+	Module[{nb = InputNotebook[]},
+		NotebookFind[ nb, "CloseEnvironment", Next, CellStyle];
+		SelectionMove[ nb, After, CellGroup];
+		SetSelectedNotebook[ nb];
+		printProveInfo[ goal, kb, prover];
+	]
+execProveCall[ args___] := unexpected[ execProveCall, {args}]
 
 (* ::Subsubsection:: *)
 (* printComputationInfo *)
@@ -504,11 +580,59 @@ submitProveTask[ args___] := unexpected[ submitProveTask, {args}]
 (* this function is called during a computation (see processComputation[])
    effect: print a cell containg information about the environment settings for that computation *)
 printComputationInfo[] :=
-    Module[ {act},
-        act = Union[ Cases[ DownValues[Theorema`Computation`Language`Private`activeComputation], HoldPattern[s_:>True]:>s[[1,1]]]];
-        CellPrint[Cell[ToBoxes[OpenerView[{"", OpenerView[{Style[translate["Builtins used in computation"], "CILabel"], act}]}, False]], "ComputationInfo"]];
+    Module[ {kbAct, bui, buiAct},
+        kbAct = Cases[ $tmaEnv, {k_, _, l_} /; Theorema`Computation`Language`Private`activeComputationKB[k] -> l];
+        bui = Cases[ DownValues[ Theorema`Computation`Language`Private`buiActComputation],
+        	HoldPattern[ Verbatim[HoldPattern][ Theorema`Computation`Language`Private`buiActComputation[ op_String]] :> v_] -> {op, v}];
+        buiAct = Cases[ bui, { op_, True} -> op];
+        CellPrint[ Cell[ ToBoxes[ OpenerView[ {"", 
+            Column[ {OpenerView[ {Style[ translate[ "KBcomp"], "CIContent"], Style[ kbAct, "CIContent"]}],
+                OpenerView[ {Style[ translate[ "Buicomp"], "CIContent"], Style[ buiAct, "CIContent"]}],
+                With[ {kb = Cases[ DownValues[ Theorema`Computation`Language`Private`activeComputationKB],
+                	HoldPattern[ Verbatim[HoldPattern][ Theorema`Computation`Language`Private`activeComputationKB[ k_List]] :> v_] -> {k, v}],
+                    allBui = bui},
+                    Button[ Style[ translate["SetEnv"], "CellLabel"], setCompEnv[ kb, allBui], ImageSize -> Automatic]
+                ]}
+            ]}, False]], "ComputationInfo"]];
     ]
 printComputationInfo[args___] := unexcpected[ printComputationInfo, {args}]
+
+setCompEnv[ kb_List, bui_List] :=
+	Module[{},
+		Scan[(Theorema`Computation`Language`Private`activeComputationKB[#[[1]]] = #[[2]])&, kb];
+		Scan[(Theorema`Computation`Language`Private`buiActComputation[#[[1]]] = #[[2]])&, bui]
+	]
+setCompEnv[ args___] := unexpected[ setCompEnv, {args}]
+
+
+(* ::Subsubsection:: *)
+(* printProofInfo *)
+
+printProveInfo[ goal_, kb_, prover_] :=
+    Module[ {kbAct, bui, buiAct},
+        kbAct = Map[ Part[ #, 3]&, kb];
+        bui = Cases[ DownValues[ Theorema`Computation`Language`Private`buiActProve],
+        	HoldPattern[ Verbatim[HoldPattern][ Theorema`Computation`Language`Private`buiActProve[ op_String]] :> v_] -> {op, v}];
+        buiAct = Cases[ bui, { op_, True} -> op];
+        NotebookWrite[ InputNotebook[], Cell[ ToBoxes[ OpenerView[ {"", 
+            Column[ {OpenerView[ {Style[ translate[ "GoalProve"], "PIContent"], Style[ goal[[3]], "PIContent"]}],
+            	OpenerView[ {Style[ translate[ "KBprove"], "PIContent"], Style[ kbAct, "PIContent"]}],
+                OpenerView[ {Style[ translate[ "BuiProve"], "PIContent"], Style[ buiAct, "PIContent"]}],
+                With[ {allKB = Cases[ DownValues[ kbSelectProve],
+                	HoldPattern[ Verbatim[HoldPattern][ kbSelectProve[ k_List]] :> v_] -> {k, v}],
+                    allBui = bui},
+                    Button[ Style[ translate["SetEnv"], "CellLabel"], setProveEnv[ allKB, allBui], ImageSize -> Automatic]
+                ]}
+            ]}, False]], "ProofInfo"]];
+    ]
+printProveInfo[args___] := unexcpected[ printProveInfo, {args}]
+
+setProveEnv[ kb_List, bui_List] :=
+	Module[{},
+		Scan[(kbSelectProve[#[[1]]] = #[[2]])&, kb];
+		Scan[(Theorema`Computation`Language`Private`buiActProve[#[[1]]] = #[[2]])&, bui]
+	]
+setProveEnv[ args___] := unexpected[ setProveEnv, {args}]
 
 
 (* ::Section:: *)
