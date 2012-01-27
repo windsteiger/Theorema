@@ -171,7 +171,7 @@ adjustFormulaLabel[nb_NotebookObject] :=
 		 *)
 		cellTags = Flatten[{cellTags}];
 		(*
-		 * Remove any automated labels (begins with "ID_" or "Source_").
+		 * Remove any automated labels (begins with "ID<sep>" or "Source<sep>").
 		 * Remove initLabel.
 		 *)
 		cleanCellTags = getCleanCellTags[ cellTags];
@@ -190,15 +190,15 @@ adjustFormulaLabel[nb_NotebookObject] :=
 adjustFormulaLabel[ args___] := unexpected[ adjustFormulaLabel, {args}]
 
 (*
- * Returns all CellTags except the generated tags used for formula identification, i.e. ID_... and Source_...
+ * Returns all CellTags except the generated tags used for formula identification, i.e. ID<sep>... and Source<sep>...
  *)
 getCleanCellTags[cellTags_List] :=
-    Select[ cellTags, !StringMatchQ[ #, (("ID_"|"Source_") ~~ __) | $initLabel]&]
+    Select[ cellTags, !StringMatchQ[ #, (("ID"<>$cellTagKeySeparator|"Source"<>$cellTagKeySeparator) ~~ __) | $initLabel]&]
 getCleanCellTags[cellTag_String] := getCleanCellTags[{cellTag}]
 getCleanCellTags[args___] := unexpected[getCleanCellTags,{args}]
 
 getKeyTags[ cellTags_List] :=
-    Select[ cellTags, StringMatchQ[ #, ("ID_"|"Source_") ~~ __]&]
+    Select[ cellTags, StringMatchQ[ #, ("ID"<>$cellTagKeySeparator|"Source"<>$cellTagKeySeparator) ~~ __]&]
 getKeyTags[ cellTag_String] := getKeyTags[ {cellTag}]
 getKeyTags[ args___] := unexpected[ getKeyTags, {args}]
 
@@ -260,7 +260,7 @@ ensureNotebookIntegrity[ nb_NotebookObject, rawNotebook_Notebook, cellTags_List]
             duplicateCellTags = Cases[Select[Tally[selectedCellTags], duplicateLabel],{cellTag_,_} -> cellTag];
             notification[ translate["notUniqueLabel"], duplicateCellTags]
         ];
-        (* Check if we have cell tags Source_src with src != current notebook filename *)
+        (* Check if we have cell tags Source<sep>src with src != current notebook filename *)
         srcTags = DeleteDuplicates[ Select[ allCellTags, (StringMatchQ[#, "Source" ~~ $cellTagKeySeparator ~~ __] && # =!= sl)&]];
         If[ srcTags =!= {},
         	(* If yes, this indicates that the filename has changed and probably some formulae 

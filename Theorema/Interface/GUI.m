@@ -54,7 +54,7 @@ initGUI[] :=
 		$kbStruct = {};
 		$initLabel = "???";
 		$labelSeparator = ",";
-		$cellTagKeySeparator = "_";
+		$cellTagKeySeparator = ":";
 		If[ ValueQ[$theoremaGUI], tc = "Theorema Commander" /. $theoremaGUI];
 		If[ $Notebooks && MemberQ[Notebooks[], tc], NotebookClose[tc]];
 		$theoremaGUI = {"Theorema Commander" -> theoremaCommander[]};
@@ -144,7 +144,7 @@ displaySelectedGoal[args___] :=
 
 displayLabeledFormula[ {key_, form_, lab_}] := 
 	Module[ {link},
-		link = { StringReplace[ key[[2]], "Source_"->"", 1], key[[1]]};
+		link = { StringReplace[ key[[2]], "Source:"->"", 1], key[[1]]};
 		{Hyperlink[ Style[ lab, "FormulaLabel"], link], Style[ TraditionalForm[ form], "DisplayFormula"]}
 	]
 displayLabeledFormula[ args___] := unexpected[ displayLabeledFormula, {args}]
@@ -567,8 +567,12 @@ submitProveTask[ args___] := unexpected[ submitProveTask, {args}]
 
 execProveCall[ goal_, kb_, prover_] :=
 	Module[{nb = InputNotebook[]},
-		NotebookFind[ nb, "CloseEnvironment", Next, CellStyle];
-		SelectionMove[ nb, After, CellGroup];
+		If[ NotebookFind[ nb, "Proof:"<>goal[[3]], All, CellTags] === $Failed,
+			NotebookFind[ nb, goal[[1,1]], All, CellTags];
+			NotebookFind[ nb, "CloseEnvironment", Next, CellStyle];
+			SelectionMove[ nb, After, CellGroup],
+			SelectionMove[ nb, All, CellGroup]
+		];
 		SetSelectedNotebook[ nb];
 		printProveInfo[ goal, kb, prover];
 	]
@@ -614,21 +618,27 @@ printProveInfo[ goal_, kb_, prover_] :=
         bui = Cases[ DownValues[ Theorema`Computation`Language`Private`buiActProve],
         	HoldPattern[ Verbatim[HoldPattern][ Theorema`Computation`Language`Private`buiActProve[ op_String]] :> v_] -> {op, v}];
         buiAct = Cases[ bui, { op_, True} -> op];
-        NotebookWrite[ InputNotebook[], Cell[ ToBoxes[ OpenerView[ {"", 
+        NotebookWrite[ InputNotebook[], Cell[ translate[ "Proof of"]<>" "<>goal[[3]], "OpenProof", CellTags -> "Proof:"<>goal[[3]]]];
+        NotebookWrite[ InputNotebook[], Cell[ (*Button[ Style[ translate["ShowProof"], "CellLabel"], showProof[], ImageSize -> Automatic]*)
+        	ToBoxes[
+        	OpenerView[ {"", 
             Column[ {OpenerView[ {Style[ translate[ "GoalProve"], "PIContent"], Style[ goal[[3]], "PIContent"]}],
             	OpenerView[ {Style[ translate[ "KBprove"], "PIContent"], Style[ kbAct, "PIContent"]}],
                 OpenerView[ {Style[ translate[ "BuiProve"], "PIContent"], Style[ buiAct, "PIContent"]}],
                 With[ {allKB = Cases[ DownValues[ kbSelectProve],
                 	HoldPattern[ Verbatim[HoldPattern][ kbSelectProve[ k_List]] :> v_] -> {k, v}],
                     allBui = bui},
-                    Button[ Style[ translate["SetEnv"], "CellLabel"], setProveEnv[ allKB, allBui], ImageSize -> Automatic]
+                    Button[ Style[ translate["SetEnv"], "CellLabel"], setProveEnv[ goal, allKB, allBui], ImageSize -> Automatic]
                 ]}
             ]}, False]], "ProofInfo"]];
+        NotebookWrite[ InputNotebook[], Cell[ "\[EmptySquare]", "CloseProof"]];
     ]
 printProveInfo[args___] := unexcpected[ printProveInfo, {args}]
 
-setProveEnv[ kb_List, bui_List] :=
+setProveEnv[ goal_, kb_List, bui_List] :=
 	Module[{},
+		$selectedProveGoal = goal;
+		NotebookLocate[ goal[[1,1]]];
 		Scan[(kbSelectProve[#[[1]]] = #[[2]])&, kb];
 		Scan[(Theorema`Computation`Language`Private`buiActProve[#[[1]]] = #[[2]])&, bui]
 	]

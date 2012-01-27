@@ -84,6 +84,8 @@ With[ {lang = "English"},
     translate["KBprove", lang] = "Knowledge used in proof";
     translate["SetEnv", lang] = "Reset environment";
     translate["ResetBui", lang] = "Reset built-ins";
+    translate["Proof of", lang] = "Proof of";
+    translate["ShowProof", lang] = "Show proof";
 
 (* General *)
 	translate["outsideSession", lang] = "An evaluation of this type of cell is not expected in the current type of session";
