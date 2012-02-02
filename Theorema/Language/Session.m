@@ -31,31 +31,36 @@ Begin["`Private`"] (* Begin Private Context *)
 
 
 freshNames[expr_Hold] :=
-    replaceAllExcept[ expr, 
-    {DoubleLongRightArrow|DoubleRightArrow->Implies$TM, DoubleLongLeftRightArrow|DoubleLeftRightArrow|Equivalent->Iff$TM,
-    	SetDelayed->EqualDef$TM, Set->Equal$TM, Wedge->And$TM, Vee->Or$TM, List->makeSet, AngleBracket->Tuple$TM,
-(*    s_Symbol /; (Context[s] === "System`") :> Module[ {name = ToString[s]},
-                    If[ StringTake[ name, -1] === "$",
-                        s,
-                        ToExpression[ ToLowerCase[ StringTake[ name, 1]] <> StringDrop[ name, 1] <> "$TM"]
-                    ]
-                ],
-                *)
-    s_Symbol :> Module[ {name = ToString[s]},
-                    If[ StringTake[ name, -1] === "$",
-                        s,
-                        ToExpression[ name <> "$TM"]
-                    ]
-                ]}, {Hold}]
+	Module[ {symPos, repl},
+		symPos = DeleteCases[ Position[ expr, _Symbol], {0}, {1}, 1];
+		repl = Map[ # -> freshSymbol[ Extract[ expr, #]]&, symPos];
+		ReplacePart[ expr, repl]
+	]
 freshNames[args___] := unexpected[ freshNames, {args}]
 
-specifiedVariables[ (RNG$|Theorema`Computation`Language`RNG$)[r___]] := Map[ extractVar, {r}]
-specifiedVariables[ args___] := unexpected[ specifiedVariables, {args}]
-
-extractVar[ r_[ (VAR$|Theorema`Computation`Language`VAR$)[ v_], ___]] := v
-extractVar[ r_[ v_, ___]] := v
-extractVar[ args___] := unexpected[ extractVar, {args}]
-
+freshSymbol[ s_Symbol] :=
+    Module[ {name},
+        Switch[ s,
+            (* We use ToExpression in order to have the symbol generated in the right context
+               depending on whether we are in a computation or not *)
+            True|False, s,
+            DoubleLongRightArrow|DoubleRightArrow, ToExpression[ "Implies$TM"],
+            DoubleLongLeftRightArrow|DoubleLeftRightArrow|Equivalent, ToExpression[ "Iff$TM"],
+        	SetDelayed, ToExpression[ "EqualDef$TM"], 
+        	Set, ToExpression[ "Equal$TM"],
+        	Wedge, ToExpression[ "And$TM"],
+        	Vee, ToExpression[ "Or$TM"],
+        	List, makeSet,
+        	AngleBracket, ToExpression[ "Tuple$TM"],
+        	_,
+        	name = ToString[s];
+        	If[ StringTake[ name, -1] === "$",
+            	s,
+            	ToExpression[ name <> "$TM"]
+        	]
+        ]
+    ]
+freshSymbol[ args___] := unexpected[ freshSymbol, {args}]
 
 markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
     Module[ {s},
@@ -93,12 +98,14 @@ openGlobalDeclaration[ expr_] :=
     Module[ {},
         $parseTheoremaGlobals = True;
         PrependTo[ $ContextPath, "Theorema`Language`"];
+        If[ !inArchive[], Begin["Theorema`Knowledge`"]];
         expr
     ]
 openGlobalDeclaration[ args___] := unexpected[ openGlobalDeclaration, {args}]
 
 closeGlobalDeclaration[] :=
     Module[ {},
+		If[ !inArchive[], End[]];
 		$ContextPath = DeleteCases[ $ContextPath, "Theorema`Language`"];
         $parseTheoremaGlobals = False;
     ]
@@ -561,9 +568,13 @@ archiveName[args___] :=
 
 SetAttributes[processComputation, HoldAll];
 
-processComputation[x_] := Module[ {},
+processComputation[x_] := Module[ { procSynt, res},
+	procSynt = freshNames[ markVariables[ Hold[x]]];
 	printComputationInfo[];
-	ReleaseHold[ freshNames[ markVariables[ Hold[x]]]]
+	setComputationContext[ "compute"];
+	res = ReleaseHold[ procSynt];
+	setComputationContext[ "none"];
+	res
 ]
 processComputation[args___] := unexcpected[ processComputation, {args}]
 
@@ -571,7 +582,6 @@ openComputation[] :=
 	Module[{},
 		$parseTheoremaExpressions = True; 
         PrependTo[ $ContextPath, "Theorema`Computation`Language`"];
-		setComputationContext[ "compute"];
 		Begin[ "Theorema`Computation`Knowledge`"];
 	]
 openComputation[args___] := unexcpected[ openComputation, {args}]
@@ -579,7 +589,6 @@ openComputation[args___] := unexcpected[ openComputation, {args}]
 closeComputation[] :=
     Module[ {},    	
         End[];
-		setComputationContext[ "none"];
 		$ContextPath = DeleteCases[ $ContextPath, "Theorema`Computation`Language`"];
 		$parseTheoremaExpressions = False;
     ]
