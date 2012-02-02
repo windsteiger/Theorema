@@ -30,6 +30,15 @@ With[ {lang = "English"},
 	MessageName[processComputation, "usage", lang] = "processComputation[ expr] ...";
 	MessageName[findSelectedFormula, "usage", lang] = "findSelectedFormula[ sel] ...";
 
+(* Theorema`Language`FormulaManipulation` *)
+	MessageName[makeSet, "usage", lang] = "";	
+	MessageName[freeVariables, "usage", lang] = "";	
+	MessageName[splitAnd, "usage", lang] = "";	
+	MessageName[makeConjunction, "usage", lang] = "";	
+	MessageName[makeDisjunction, "usage", lang] = "";	
+	MessageName[substituteFree, "usage", lang] = "";	
+
+
 (* Theorema`Computation`Language` *)
 	MessageName[setComputationContext, "usage", lang] = "setComputationContext[ c] sets the context for the next computation to c.";
 	

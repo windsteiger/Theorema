@@ -30,7 +30,7 @@ applyHold[Hold[a_], Hold[b___]] := Hold[a[b]];
 (* ::Subsubsection:: *)
 (* joinHold *)
 
-joinHold[Hold[a_], Hold[b___]] := Hold[a, b];
+joinHold[Hold[a___], Hold[b___]] := Hold[a, b];
 
 
 (* ::Subsubsection:: *)

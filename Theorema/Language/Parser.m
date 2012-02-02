@@ -21,6 +21,7 @@ initParser[args___] := unexpected[ initParser, {args}]
 MakeExpression[RowBox[{a_, TagBox[op_, Identity, ___], b_}], fmt_] := 
 	MakeExpression[RowBox[{a, op, b}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 
+SetAttributes[ standardQuantifier, HoldRest]
 standardQuantifier[ name_, rng_, cond_, expr_, fmt_] :=
     With[ {r = toRangeBox[ rng]},
         MakeExpression[ RowBox[{"QU$", "[", 
@@ -42,7 +43,9 @@ QU$[args___] := unexpected[ QU$, {args}]
 
 AppendTo[ $ContextPath, "Theorema`Language`"];
 
-MakeBoxes[ (q_?isQuantifierName)[ rng_, True$TM|Theorema`Computation`Language`True$TM, form_], fmt_] := 
+Clear[ MakeBoxes];
+
+MakeBoxes[ (q_?isQuantifierName)[ rng_, True, form_], fmt_] := 
 	RowBox[ {UnderscriptBox[ Replace[ q, $tmaNameToQuantifier], makeRangeBox[ rng, fmt]],
 		MakeBoxes[ form, fmt]}
 	]
@@ -56,6 +59,12 @@ MakeBoxes[ (op_?isNonStandardOperatorName)[ arg__], fmt_] :=
     With[ {b = Replace[ op, $tmaNonStandardOperatorToBuiltin]},
         MakeBoxes[ b[ arg], fmt]
     ]
+
+MakeBoxes[ (Set$TM|Theorema`Computation`Language`Set$TM)[ arg__], fmt_] :=
+    MakeBoxes[ {arg}, fmt]
+MakeBoxes[ (Set$TM|Theorema`Computation`Language`Set$TM)[ ], fmt_] :=
+    MakeBoxes[ "\[EmptySet]", fmt]
+
 MakeBoxes[ (op_?isStandardOperatorName)[ arg__], fmt_] :=
     With[ {b = tmaToInputOperator[ op]},
         MakeBoxes[ b[ arg], fmt]
