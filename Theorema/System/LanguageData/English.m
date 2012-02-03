@@ -33,14 +33,17 @@ With[ {lang = "English"},
 (* Theorema`Language`FormulaManipulation` *)
 	MessageName[makeSet, "usage", lang] = "";	
 	MessageName[freeVariables, "usage", lang] = "";	
+	MessageName[variables, "usage", lang] = "";	
 	MessageName[splitAnd, "usage", lang] = "";	
 	MessageName[makeConjunction, "usage", lang] = "";	
 	MessageName[makeDisjunction, "usage", lang] = "";	
 	MessageName[substituteFree, "usage", lang] = "";	
+	MessageName[transferToComputation, "usage", lang] = "";	
 
 
 (* Theorema`Computation`Language` *)
 	MessageName[setComputationContext, "usage", lang] = "setComputationContext[ c] sets the context for the next computation to c.";
+	MessageName[cleanupComputation, "usage", lang] = "cleanupComputation[ ] removes all user defined function from computation context.";
 	
 (* Theorema`Utilities` *)
 	MessageName[replaceAllExcept, "usage", lang] = "replaceAllExcept[ expr, rules, expt] applies rule(s) to all subparts of 'expr' except those contained in the list 'expt'.";

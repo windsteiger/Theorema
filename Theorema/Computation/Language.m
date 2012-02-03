@@ -1,16 +1,21 @@
 BeginPackage["Theorema`Computation`Language`"]
 
+Needs[ "Theorema`Common`"]
+
 (*
    Load the same symbols like in Theorema`Language` so that all language constructs will be
    available in Computation context as well *)
-
-Needs[ "Theorema`Common`"]
-   
 Map[ Get, FileNames[ "*.m", ToFileName[{$TheoremaDirectory, "Theorema", "Language", "LanguageData"}]]];
 
 Begin[ "`Private`"]
 
-activeComputationKB[_] := False
+cleanupComputation[ ] :=
+	Module[{},
+		Clear[ "Theorema`Computation`Knowledge`*"]
+	]
+cleanupComputation[ args___] := unexpected[ cleanupComputation, {args}]
+
+activeComputationKB[_] := False;
 
 buiActive[ f_String] :=
 	Switch[ $computationContext,
@@ -123,6 +128,8 @@ existsIteration[ {x_, iter__}, cond_, form_] :=
             makeDisjunction[ uneval, Or$TM]
         ]
     ]
+
+cleanupComputation[]
     
 End[]
 EndPackage[]

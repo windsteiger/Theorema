@@ -612,6 +612,8 @@ printComputationInfo[args___] := unexcpected[ printComputationInfo, {args}]
 
 setCompEnv[ kb_List, bui_List] :=
 	Module[{},
+		Clear[Theorema`Computation`Language`Private`activeComputationKB];
+		Theorema`Computation`Language`Private`activeComputationKB[_] := False;
 		Scan[(Theorema`Computation`Language`Private`activeComputationKB[#[[1]]] = #[[2]])&, kb];
 		Scan[(Theorema`Computation`Language`Private`buiActComputation[#[[1]]] = #[[2]])&, bui]
 	]
@@ -648,6 +650,8 @@ setProveEnv[ goal_, kb_List, bui_List] :=
 	Module[{},
 		$selectedProveGoal = goal;
 		NotebookLocate[ goal[[1,1]]];
+		Clear[kbSelectProve];
+		kbSelectProve[_] := False;
 		Scan[(kbSelectProve[#[[1]]] = #[[2]])&, kb];
 		Scan[(Theorema`Computation`Language`Private`buiActProve[#[[1]]] = #[[2]])&, bui]
 	]

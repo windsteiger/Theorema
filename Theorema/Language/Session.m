@@ -329,6 +329,7 @@ occursBelow[args___] := unexpected[ occursBelow, {args}]
 
 updateKnowledgeBase[ form_, key_, glob_, tags_] :=
     Module[ {newForm = applyGlobalDeclaration[ form, glob]},
+    	transferToComputation[ newForm, key];
         $tmaEnv = joinKB[ {{key, newForm, cellTagsToString[ tags]}}, $tmaEnv];
         If[ inArchive[],
             $tmaArch = joinKB[ {{key, newForm, cellTagsToString[ tags]}}, $tmaArch];
