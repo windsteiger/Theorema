@@ -29,7 +29,10 @@ Begin["`Private`"] (* Begin Private Context *)
 (* ::Section:: *)
 (* Preprocessing *)
 
-
+freshNames[ Hold[ f_[ lhs_, Program[ rhs_]]]] :=
+	Module[ {},
+		ReplacePart[ freshNames[ Hold[ f[ lhs, "DUMMY"]]], {1,2} -> freshNamesProg[ Hold[ rhs]]]
+	]
 freshNames[expr_Hold] :=
 	Module[ {symPos, repl},
 		symPos = DeleteCases[ Position[ expr, _Symbol], {0}, {1}, 1];
@@ -37,6 +40,14 @@ freshNames[expr_Hold] :=
 		ReplacePart[ expr, repl]
 	]
 freshNames[args___] := unexpected[ freshNames, {args}]
+
+freshNamesProg[ expr_Hold] :=
+	Module[ {symPos, repl},
+		symPos = DeleteCases[ Position[ expr, _Symbol], {0}, {1}, 1];
+		repl = Map[ # -> freshSymbolProg[ Extract[ expr, #]]&, symPos];
+		ReleaseHold[ ReplacePart[ expr, repl]]
+	]
+freshNamesProg[ args___] := unexpected[ freshNamesProg, {args}]
 
 freshSymbol[ s_Symbol] :=
     Module[ {name},
@@ -61,6 +72,21 @@ freshSymbol[ s_Symbol] :=
         ]
     ]
 freshSymbol[ args___] := unexpected[ freshSymbol, {args}]
+
+freshSymbolProg[ s_Symbol] :=
+    Module[ {name},
+        Switch[ s,
+            True|False, s,
+        	Set, ToExpression[ "Assign$TM"],
+        	_,
+        	name = ToString[s];
+        	If[ StringTake[ name, -1] === "$",
+            	s,
+            	ToExpression[ name <> "$TM"]
+        	]
+        ]
+    ]
+freshSymbolProg[ args___] := unexpected[ freshSymbolProg, {args}]
 
 markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
     Module[ {s},

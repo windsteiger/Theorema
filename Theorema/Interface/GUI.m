@@ -58,7 +58,14 @@ initGUI[] :=
         		{"Iff", RowBox[{"P", "\[Equivalent]","Q"}], False, True, False},
         		{"Forall", RowBox[{"\[ForAll]","P"}], False, True, False},
         		{"Exists", RowBox[{"\[Exists]","P"}], False, True, False},
-        		{"Equal", RowBox[{"A","=","B"}], False, False, False}}
+        		{"Equal", RowBox[{"A","=","B"}], False, False, False}},
+        	{"Programming",
+        		{"Module", RowBox[{"Module","[","\[Ellipsis]","]"}], False, True, False},
+        		{"Do", RowBox[{"Do","[","\[Ellipsis]","]"}], False, True, False},
+        		{"While", RowBox[{"While","[","\[Ellipsis]","]"}], False, True, False},
+        		{"For", RowBox[{"For","[","\[Ellipsis]","]"}], False, True, False},
+        		{"Which", RowBox[{"Which","[","\[Ellipsis]","]"}], False, True, False},
+        		{"Switch", RowBox[{"Switch","[","\[Ellipsis]","]"}], False, True, False}}
         };
 		$kbStruct = {};
 		$initLabel = "???";

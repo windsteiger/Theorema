@@ -116,9 +116,10 @@ makeSet[ x___] := Apply[ ToExpression[ "Set$TM"], Union[ {x}]]
 (* transferToComputation *)
 
 transferToComputation[ form_, key_] :=
-	Module[{stripUniv},
+	Module[{stripUniv, exec},
 		stripUniv = stripUniversalQuantifiers[ form];
-		ToExpression[ executableForm[ stripUniv, key]]
+		exec = executableForm[ stripUniv, key];
+		ToExpression[ exec]
 	]
 transferToComputation[ args___] := unexpected[ transferToComputation, {args}]
 
@@ -172,8 +173,11 @@ execLeft[ args___] := unexpected[ execLeft, {args}]
 
 execRight[ e_Hold] := 
 	Module[ {s},
-		s = e /. Theorema`Language`VAR$[a_] -> a;
-		ReleaseHold[ Map[ ToString[ Unevaluated[#]]&, s]]
+		s = e /. {Theorema`Language`Assign$TM -> Set,
+			Theorema`Language`SetDelayed$TM -> SetDelayed, 
+			Theorema`Language`CompoundExpression$TM -> CompoundExpression,
+			Theorema`Language`VAR$[a_] -> a};
+		ReleaseHold[ Map[ Function[ expr, ToString[ Unevaluated[ expr]], {HoldAll}], s]]
 	]
 execRight[ args___] := unexpected[ execRight, {args}]
 

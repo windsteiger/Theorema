@@ -27,6 +27,20 @@ With[ {lang = "English"},
 	MessageName[Union$TM, "usage", lang] = "";
 	MessageName[Tuple$TM, "usage", lang] = "";	
 	MessageName[Set$TM, "usage", lang] = "";	
+    (* Mathematica programming language *)
+	MessageName[Program, "usage", lang] = "";	
+	MessageName[Module$TM, "usage", lang] = "";	
+	MessageName[CompoundExpression$TM, "usage", lang] = "";	
+	MessageName[Assign$TM, "usage", lang] = "";	
+	MessageName[SetDelayed$TM, "usage", lang] = "";	
+	MessageName[Do$TM, "usage", lang] = "";	
+	MessageName[While$TM, "usage", lang] = "";	
+	MessageName[For$TM, "usage", lang] = "";	
+	MessageName[If$TM, "usage", lang] = "";	
+	MessageName[Which$TM, "usage", lang] = "";	
+	MessageName[Switch$TM, "usage", lang] = "";	
+	MessageName[List$TM, "usage", lang] = "";
+	(* Global declarations *)	
 	MessageName[globalForall$TM, "usage", lang] = "globalForall$TM[ rng_, cond_, decl_] is a datastructure representing a (nested) global universal variable, where 
 	\*StyleBox[\"decl\", FontSlant -> \"Italic\"] contains further global declarations. globalForall$TM[ rng_, cond_] is a single global universal variable.";
 	MessageName[globalImplies$TM, "usage", lang] = "globalImplies$TM[ cond_, decl_] is a datastructure representing a (nested) global condition, where

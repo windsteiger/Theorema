@@ -77,6 +77,7 @@ With[ {lang = "English"},
     translate["Sets", lang] = "Sets";
     translate["Arithmetic", lang] = "Arithmetic";
     translate["Logic", lang] = "Logic";
+    translate["Programming", lang] = "Mathematica Programming";
     translate["BuiComp", lang] = "Builtins used in computation";
     translate["KBcomp", lang] = "Knowledge used in computation";
     translate["GoalProve", lang] = "Proof goal";

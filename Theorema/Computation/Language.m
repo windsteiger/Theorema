@@ -129,6 +129,27 @@ existsIteration[ {x_, iter__}, cond_, form_] :=
         ]
     ]
 
+
+(* ::Section:: *)
+(* Mathematica programming constructs *)
+
+(* In a "Theorema program", sets and Mathematica lists (as in Module, Do, ...) may be mixed. Also, there is "=" assignment as opposed
+   to "=" as equality in standard Theorema language.
+   Solution: we write a program inside "Program", and the preprocessor renames symbols differently inside Program, i.e.
+   Set -> Assign$TM (instead of Equal), List -> List$TM
+   When executing the programming constructs, replace List$TM by {} where interpretation as Mathematica lists is desired.
+   *)
+   
+SetAttributes[ Module$TM, HoldAll]
+Module$TM[ l_[v___], body_] /; buiActive["Module"] := Apply[ Module, Hold[ {v}, body]]
+
+SetAttributes[ Do$TM, HoldAll]
+Do$TM[ body_, l_[v___]] /; buiActive["Do"] := Do[ body, {v}]
+
+(* We assume that all lists not treated by the above constructs should in fact be sets *)
+SetAttributes[ List$TM, HoldAll]
+List$TM[ l___] := makeSet[l]
+
 cleanupComputation[]
     
 End[]
