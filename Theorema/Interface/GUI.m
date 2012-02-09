@@ -1020,15 +1020,24 @@ makeLangButton[ bname_String] :=
 makeLangButton[args___] :=
     unexpected[makeLangButton, {args}]
 
-allFormulae = {"AND1", "AND2", "OR1", "OR2", "IMPL1", "IMPL2", "EQUIV1", "EQUIV2", "EQ1", "EQ2", "EQUIVDEF", "EQDEF", "FORALL1", "FORALL2", "EXISTS1", "EXISTS2"};
+allFormulae = {{"Sets", {}},
+			   {"Arithmetic", {}},
+			   {"Logic", {"AND1", "AND2", "OR1", "OR2", "IMPL1", "IMPL2", "EQUIV1", "EQUIV2", "EQ1", "EQ2", "EQUIVDEF", "EQDEF", "FORALL1", "FORALL2", "EXISTS1", "EXISTS2"}}
+};
+
+makeButtonCategory[ {category_String, buttons_List}] :=
+	OpenerView[{
+			Style[ translate[ category], "Section"],
+			Grid[ Partition[ Map[ makeLangButton, buttons], 2], Alignment -> {Left, Top}]}]
+makeButtonCategory[ args___] := unexpected[ makeButtonCategory, {args}]
 
 langButtons[] := Pane[ 
 	Column[{
-		Grid[ Partition[ Map[ makeLangButton, allFormulae], 2], Alignment -> {Left, Top}],
+		Column[ Map[ makeButtonCategory, allFormulae]],
 		Row[{translate["tcLangTabMathTabBS"], 
 			Row[{RadioButton[Dynamic[$buttonNat], False], translate["tcLangTabMathTabBSform"]}, Spacer[2]], 
 			Row[{RadioButton[Dynamic[$buttonNat], True], translate["tcLangTabMathTabBSnat"]}, Spacer[2]]}, Spacer[10]]
-	}, Dividers -> Center, Spacings -> 4]]
+	}, Dividers -> Center, Spacings -> 2]]
 langButtons[args___] :=
     unexpected[langButtons, {args}]
     
