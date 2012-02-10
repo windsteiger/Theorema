@@ -582,7 +582,7 @@ submitProveTask[ dummy_] :=
 submitProveTask[ args___] := unexpected[ submitProveTask, {args}]
 
 execProveCall[ goal_, kb_, prover_] :=
-	Module[{nb = InputNotebook[]},
+	Module[{nb = InputNotebook[], proof},
 		If[ NotebookFind[ nb, "Proof:"<>goal[[3]], All, CellTags] === $Failed,
 			NotebookFind[ nb, goal[[1,1]], All, CellTags];
 			NotebookFind[ nb, "CloseEnvironment", Next, CellStyle];
@@ -590,7 +590,9 @@ execProveCall[ goal_, kb_, prover_] :=
 			SelectionMove[ nb, All, CellGroup]
 		];
 		SetSelectedNotebook[ nb];
-		printProveInfo[ goal, kb, prover];
+
+		proof = callProver[ prover, goal, kb];
+		printProveInfo[ goal, kb, prover, proof];
 	]
 execProveCall[ args___] := unexpected[ execProveCall, {args}]
 
@@ -630,15 +632,16 @@ setCompEnv[ args___] := unexpected[ setCompEnv, {args}]
 (* ::Subsubsection:: *)
 (* printProofInfo *)
 
-printProveInfo[ goal_, kb_, prover_] :=
+printProveInfo[ goal_, kb_, prover_, { pVal_, proofObj_}] :=
     Module[ {kbAct, bui, buiAct},
         kbAct = Map[ Part[ #, 3]&, kb];
         bui = Cases[ DownValues[ Theorema`Computation`Language`Private`buiActProve],
         	HoldPattern[ Verbatim[HoldPattern][ Theorema`Computation`Language`Private`buiActProve[ op_String]] :> v_] -> {op, v}];
         buiAct = Cases[ bui, { op_, True} -> op];
         NotebookWrite[ InputNotebook[], Cell[ translate[ "Proof of"]<>" "<>goal[[3]], "OpenProof", CellTags -> "Proof:"<>goal[[3]]]];
-        NotebookWrite[ InputNotebook[], Cell[ (*Button[ Style[ translate["ShowProof"], "CellLabel"], showProof[], ImageSize -> Automatic]*)
-        	ToBoxes[
+        NotebookWrite[ InputNotebook[], Cell[ BoxData[ ToBoxes[ Row[{ (*proofNotebook[ proofObj],*)
+        	Button[ Style[ translate["ShowProof"], "CellLabel"], displayProof[ proofObj], ImageSize -> Automatic]}]]], "ProofDisplay"]];
+        NotebookWrite[ InputNotebook[], Cell[ ToBoxes[
         	OpenerView[ {"", 
             Column[ {OpenerView[ {Style[ translate[ "GoalProve"], "PIContent"], Style[ goal[[3]], "PIContent"]}],
             	OpenerView[ {Style[ translate[ "KBprove"], "PIContent"], Style[ kbAct, "PIContent"]}],

@@ -16,10 +16,9 @@
 *)
 
 BeginPackage["name`"]
-(* Exported symbols added here with SymbolName::usage *)  
 
-Begin["`Private`"] (* Begin Private Context *) 
+Begin["`Private`"]
 
-End[] (* End Private Context *)
+End[]
 
 EndPackage[]

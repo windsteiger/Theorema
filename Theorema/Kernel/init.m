@@ -59,6 +59,7 @@ Get["Theorema`Common`"]
 Get["Theorema`Language`"]
 Get["Theorema`Utilities`"]
 Get["Theorema`Interface`GUI`"]
+Get["Theorema`Provers`Common`"]
 
 EndPackage[]
 

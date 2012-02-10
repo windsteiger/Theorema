@@ -66,5 +66,9 @@ With[ {lang = "English"},
 	MessageName[translate, "usage", lang] = "translate[s_String,lang_String] gives string s in language lang.";
 	MessageName[availableLanguages, "usage", lang] = "availableLanguages[] gives all available languages.";
 
+(* Theorema`Provers`Common` *)
+	MessageName[callProver, "usage", lang] = "callProver[ prover_, goal_, kb_] calls prover with goal and kb, returns a proof value and proof object.";
+	MessageName[displayProof, "usage", lang] = "displayProof[ proofObject_] displays proofObject.";
+	MessageName[proofNotebook, "usage", lang] = "proofNotebook[ proofObject_] converts proofObject into a DocumentNotebook.";
 
 ]
