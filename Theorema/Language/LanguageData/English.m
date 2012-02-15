@@ -45,8 +45,6 @@ With[ {lang = "English"},
 	\*StyleBox[\"decl\", FontSlant -> \"Italic\"] contains further global declarations. globalForall$TM[ rng_, cond_] is a single global universal variable.";
 	MessageName[globalImplies$TM, "usage", lang] = "globalImplies$TM[ cond_, decl_] is a datastructure representing a (nested) global condition, where
 	\*StyleBox[\"decl\", FontSlant -> \"Italic\"] contains further global declarations. globalImplies$TM[ cond_] is a single global condition.";
-
-	MessageName[PROOFOBJ$, "usage", lang] = "PROOFOBJ$[p] represents a datastructure containing a proof.";
 	
 ]
 

@@ -69,6 +69,7 @@ With[ {lang = "English"},
 (* Theorema`Provers`Common` *)
 	MessageName[callProver, "usage", lang] = "callProver[ prover_, goal_, kb_] calls prover with goal and kb, returns a proof value and proof object.";
 	MessageName[displayProof, "usage", lang] = "displayProof[ proofObject_] displays proofObject.";
-	MessageName[proofNotebook, "usage", lang] = "proofNotebook[ proofObject_] converts proofObject into a DocumentNotebook.";
+	MessageName[$TMAproofObject, "usage", lang] = "$TMAproofObject is the global proof object.";
+	MessageName[showProofNavigation, "usage", lang] = "showProofNavigation[ proofObject_] shows a tree navigation through a proof.";
 
 ]

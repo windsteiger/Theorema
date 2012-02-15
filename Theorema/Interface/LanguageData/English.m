@@ -2,6 +2,7 @@
 
 With[ {lang = "English"},
 (* Theorema Commander *)
+	translate["Theorema Commander", lang] = "Theorema Commander";
     translate["tcLangTabLabel", lang] = "Language";
     	translate["tcLangTabMathTabLabel", lang] = "math";
      		translate["AND1", lang] = "\!\(\*FormBox[FrameBox[\"left\"], SelectionPlaceholder]\) and \!\(\*FormBox[FrameBox[\"right\"], SelectionPlaceholder]\)";   	
@@ -55,6 +56,7 @@ With[ {lang = "English"},
     	translate["tcProveTabBuiltinTabLabel", lang] = "built-in";
     	translate["tcProveTabProverTabLabel", lang] = "prover";
     	translate["tcProveTabSubmitTabLabel", lang] = "submit";
+    	translate["tcProveTabNavigateTabLabel", lang] = "navigate";
     translate["tcComputeTabLabel", lang] = "Compute";
     	translate["tcComputeTabSetupTabLabel", lang] = "setup";
     		translate["tcComputeTabSetupTabButtonCompLabel", lang] = "New Computation";
@@ -73,6 +75,8 @@ With[ {lang = "English"},
 	translate["selGoal", lang] = "Selected proof goal";
 	translate["selKB", lang] = "Selected knowledge base";
 	translate["prove", lang] = "Prove!";
+	translate["OKnext", lang] = "OK, next ...";
+	translate["OK", lang] = "OK";
 	    
     translate["Sets", lang] = "Sets";
     translate["Arithmetic", lang] = "Arithmetic";

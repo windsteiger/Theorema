@@ -77,7 +77,7 @@ initGUI[] :=
 		Clear[ kbSelectProve, kbSelectSolve];
 		kbSelectProve[_] := False;
 		kbSelectSolve[_] := False;
-		$tmaSelectedProofGoal = {};
+		$selectedProofGoal = {};
 		initBuiltins[ {"prove", "compute", "solve"}];
 		$registeredProvers = {};
 	]
@@ -114,7 +114,10 @@ theoremaCommander[] /; $Notebooks :=
         			translate["tcProveTabKBTabLabel"]->Dynamic[Refresh[displayKBBrowser["prove"], TrackedSymbols :> {$kbStruct}]],
         			translate["tcProveTabBuiltinTabLabel"]->displayBuiltinBrowser["prove"],
         			translate["tcProveTabProverTabLabel"]->selectProver[],
-        			translate["tcProveTabSubmitTabLabel"]->Dynamic[ Refresh[ submitProveTask[ $tcProveTab], TrackedSymbols :> {$tcProveTab}]]}, Dynamic[$tcProveTab],
+        			translate["tcProveTabSubmitTabLabel"]->Dynamic[ Refresh[ submitProveTask[ $tcProveTab],
+        				TrackedSymbols :> {$tcProveTab, $selectedProofGoal, $selectedProofKB, $selectedProver}]],
+        			translate["tcProveTabNavigateTabLabel"]->Dynamic[ Refresh[ proofNavigation[ $TMAproofObject],
+        				TrackedSymbols :> {$TMAproofObject}]]}, Dynamic[$tcProveTab],
         			LabelStyle->"TabLabel2", ControlPlacement->Top],
         		translate["tcComputeTabLabel"]->TabView[{
         			translate["tcComputeTabSetupTabLabel"]->Dynamic[Refresh[ compSetup[], TrackedSymbols :> {$buttonNat}]],
@@ -134,7 +137,7 @@ theoremaCommander[] /; $Notebooks :=
         		LabelStyle->"TabLabel1", ControlPlacement->Left
         	], TrackedSymbols :> {$Language}]],
         	StyleDefinitions -> ToFileName[{"Theorema"}, "GUI.nb"],
-        	WindowTitle -> "Theorema Commander",
+        	WindowTitle -> translate["Theorema Commander"],
         	ScreenStyleEnvironment -> style,
         	WindowElements -> {"StatusArea"}]
     ]
@@ -151,8 +154,18 @@ displaySelectedGoal[ ] :=
     	goal = findSelectedFormula[ sel];
         If[ goal === {},
             emptyPane[ translate["noGoal"], 350],
-            $selectedProofGoal = goal[[1]];
-            Pane[ Row[ displayLabeledFormula[ $selectedProofGoal], Spacer[5]], 350, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
+            With[ {selGoal = goal[[1]]},
+            	Pane[ Column[ {
+            		Row[ displayLabeledFormula[ selGoal], Spacer[5]],
+            		Button[ translate[ "OKnext"], $selectedProofGoal = selGoal; $tcProveTab++]}], 350, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
+            ]
+        ]
+    ]
+displaySelectedGoal[ goal_] :=
+    Module[ { },
+        If[ goal === {},
+            emptyPane[ translate["noGoal"], 350],
+            Pane[ Row[ displayLabeledFormula[ goal], Spacer[5]], 350, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
         ]
     ]
 displaySelectedGoal[args___] :=
@@ -160,7 +173,7 @@ displaySelectedGoal[args___] :=
 
 displayLabeledFormula[ {key_, form_, lab_}] := 
 	Module[ {link},
-		link = { StringReplace[ key[[2]], "Source:"->"", 1], key[[1]]};
+		link = { StringReplace[ key[[2]], "Source"<>$cellTagKeySeparator -> "", 1], key[[1]]};
 		{Hyperlink[ Style[ lab, "FormulaLabel"], link], Style[ TraditionalForm[ form], "DisplayFormula"]}
 	]
 displayLabeledFormula[ args___] := unexpected[ displayLabeledFormula, {args}]
@@ -371,22 +384,24 @@ structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cel
             "prove",
             Row[{Checkbox[Dynamic[kbSelectProve["KEY"]], Enabled->isEval] /. "KEY" -> keyTags, 
                 If[ nbAvail,
-                    Hyperlink[ Style[formulaLabel, If[ isEval,
+                    Tooltip[ Hyperlink[ Style[formulaLabel, If[ isEval,
                                                        "FormalTextInputFormula",
                                                        "FormalTextInputFormulaUneval"
                                                    ]], {file, idLabel}],
+                             displayCellContent[ content]],
                     Button[ Style[formulaLabel, "FormalTextInputFormula"], 
-                        CreateDialog[{Cell[ content, "Output"], CancelButton["OK", NotebookClose[ButtonNotebook[]]]}],
+                        CreateDialog[{Cell[ content, "Output"], CancelButton[ translate[ "OK"], NotebookClose[ButtonNotebook[]]]}],
                         Appearance->None]
                 ]},
                 Spacer[10]],
             "compute",
             Row[{Checkbox[Dynamic[Theorema`Computation`Language`Private`activeComputationKB["KEY"]], Enabled->isEval] /. "KEY" -> keyTags,
                 If[ nbAvail,
-                    Hyperlink[ Style[formulaLabel, If[ isEval,
+                    Tooltip[ Hyperlink[ Style[formulaLabel, If[ isEval,
                                                        "FormalTextInputFormula",
                                                        "FormalTextInputFormulaUneval"
                                                    ]], {file, idLabel}],
+                             displayCellContent[ content]],
                     Button[ Style[formulaLabel, "FormalTextInputFormula"],
                         CreateDialog[{Cell[ content, "Output"], CancelButton["OK", NotebookClose[ButtonNotebook[]]]}],
                         Appearance->None]
@@ -395,10 +410,11 @@ structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cel
             "solve",
             Row[{Checkbox[Dynamic[kbSelectSolve["KEY"]], Enabled->isEval] /. "KEY" -> keyTags, 
                 If[ nbAvail,
-                    Hyperlink[ Style[formulaLabel, If[ isEval,
+                    Tooltip[ Hyperlink[ Style[formulaLabel, If[ isEval,
                                                        "FormalTextInputFormula",
                                                        "FormalTextInputFormulaUneval"
                                                    ]], {file, idLabel}],
+                             displayCellContent[ content]],
                     Button[ Style[formulaLabel, "FormalTextInputFormula"], 
                         CreateDialog[{Cell[ content, "Output"], CancelButton["OK", NotebookClose[ButtonNotebook[]]]}],
                         Appearance->None]
@@ -431,6 +447,10 @@ headerView[file_, Cell[ content_String, style_, ___], tags_, task_] :=
     ]
 headerView[args___] :=
     unexpected[headerView, {args}]
+
+displayCellContent[ BoxData[ b_]] := DisplayForm[ b]
+displayCellContent[ c_] := DisplayForm[ c]
+displayCellContent[ args___] := unexpected[ displayCellContent, {args}]
 
 
 (* ::Subsubsection:: *)
@@ -574,15 +594,17 @@ selectProver[ args___] := unexpected[ selectProver, {args}]
 submitProveTask[ dummy_] := 
 	Module[ {},
 		Column[{
-			Labeled[ displaySelectedGoal[], Style[ translate["selGoal"], "CellLabel"], {{ Top, Left}}],
+			Labeled[ displaySelectedGoal[ $selectedProofGoal], Style[ translate["selGoal"], "CellLabel"], {{ Top, Left}}],
 			Labeled[ displaySelectedKB[], Style[ translate["selKB"], "CellLabel"], {{ Top, Left}}],
-			Button[ translate["prove"], execProveCall[ $selectedProofGoal, $selectedProofKB, $selectedProver]]
+			(* Method -> "Queued" so that no time limit is set for proof to complete *)
+			Button[ translate["prove"], execProveCall[ $selectedProofGoal, $selectedProofKB, $selectedProver], Method -> "Queued"]
 		}]
 	]
 submitProveTask[ args___] := unexpected[ submitProveTask, {args}]
 
 execProveCall[ goal_, kb_, prover_] :=
 	Module[{nb = InputNotebook[], proof},
+		$tcProveTab++;
 		If[ NotebookFind[ nb, "Proof:"<>goal[[3]], All, CellTags] === $Failed,
 			NotebookFind[ nb, goal[[1,1]], All, CellTags];
 			NotebookFind[ nb, "CloseEnvironment", Next, CellStyle];
@@ -595,6 +617,11 @@ execProveCall[ goal_, kb_, prover_] :=
 		printProveInfo[ goal, kb, prover, proof];
 	]
 execProveCall[ args___] := unexpected[ execProveCall, {args}]
+
+proofNavigation[ po_] :=
+	Pane[ showProofNavigation[ po], {350, 450},
+  		ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
+proofNavigation[ args___] := unexpected[ proofNavigation, {args}]
 
 (* ::Subsubsection:: *)
 (* printComputationInfo *)
@@ -639,8 +666,9 @@ printProveInfo[ goal_, kb_, prover_, { pVal_, proofObj_}] :=
         	HoldPattern[ Verbatim[HoldPattern][ Theorema`Computation`Language`Private`buiActProve[ op_String]] :> v_] -> {op, v}];
         buiAct = Cases[ bui, { op_, True} -> op];
         NotebookWrite[ InputNotebook[], Cell[ translate[ "Proof of"]<>" "<>goal[[3]], "OpenProof", CellTags -> "Proof:"<>goal[[3]]]];
-        NotebookWrite[ InputNotebook[], Cell[ BoxData[ ToBoxes[ Row[{ (*proofNotebook[ proofObj],*)
-        	Button[ Style[ translate["ShowProof"], "CellLabel"], displayProof[ proofObj], ImageSize -> Automatic]}]]], "ProofDisplay"]];
+        (* Use Method -> "Queued" so that no time limit for proof display applies *)
+        NotebookWrite[ InputNotebook[], Cell[ BoxData[ ToBoxes[
+        	Button[ translate["ShowProof"], displayProof[ proofObj], ImageSize -> Automatic, Method -> "Queued"]]], "ProofDisplay"]];
         NotebookWrite[ InputNotebook[], Cell[ ToBoxes[
         	OpenerView[ {"", 
             Column[ {OpenerView[ {Style[ translate[ "GoalProve"], "PIContent"], Style[ goal[[3]], "PIContent"]}],
@@ -649,7 +677,7 @@ printProveInfo[ goal_, kb_, prover_, { pVal_, proofObj_}] :=
                 With[ {allKB = Cases[ DownValues[ kbSelectProve],
                 	HoldPattern[ Verbatim[HoldPattern][ kbSelectProve[ k_List]] :> v_] -> {k, v}],
                     allBui = bui},
-                    Button[ Style[ translate["SetEnv"], "CellLabel"], setProveEnv[ goal, allKB, allBui], ImageSize -> Automatic]
+                    Button[ translate["SetEnv"], setProveEnv[ goal, allKB, allBui], ImageSize -> Automatic]
                 ]}
             ]}, False]], "ProofInfo"]];
         NotebookWrite[ InputNotebook[], Cell[ "\[EmptySquare]", "CloseProof"]];
@@ -658,7 +686,7 @@ printProveInfo[args___] := unexcpected[ printProveInfo, {args}]
 
 setProveEnv[ goal_, kb_List, bui_List] :=
 	Module[{},
-		$selectedProveGoal = goal;
+		$selectedProofGoal = goal;
 		NotebookLocate[ goal[[1,1]]];
 		Clear[kbSelectProve];
 		kbSelectProve[_] := False;
