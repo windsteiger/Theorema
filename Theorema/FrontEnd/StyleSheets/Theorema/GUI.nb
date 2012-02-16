@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       145,          7]
-NotebookDataLength[     12763,        482]
-NotebookOptionsPosition[      8550,        366]
-NotebookOutlinePosition[      9043,        387]
-CellTagsIndexPosition[      9000,        384]
+NotebookDataLength[     13126,        496]
+NotebookOptionsPosition[      8721,        375]
+NotebookOutlinePosition[      9214,        396]
+CellTagsIndexPosition[      9171,        393]
 MenuPosition->0
 WindowFrame->Normal*)
 
@@ -279,6 +279,15 @@ Cell[StyleData["Hyperlink", "Presentation"],
 
 Cell[CellGroupData[{
 
+Cell[StyleData["HyperlinkActive"],
+ Background->RGBColor[1, 1, 1]],
+
+Cell[StyleData["HyperlinkActive", "Presentation"],
+ FontSize->14]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
 Cell[StyleData["SelectionPlaceholder", StyleDefinitions -> StyleData["Label"]],
  ShowSyntaxStyles->False,
  Placeholder->True,
@@ -468,21 +477,26 @@ Cell[6320, 272, 43, 1, 36, 28, 0, "StyleData", "Hyperlink", "All"],
 Cell[6366, 275, 59, 1, 41, 44, 0, "StyleData", "Hyperlink", "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[6462, 281, 631, 20, 51, 79, 0, "StyleData", "SelectionPlaceholder", "All",
- StyleMenuListing->None],
-Cell[7096, 303, 70, 1, 45, 55, 0, "StyleData", "SelectionPlaceholder", \
+Cell[6462, 281, 66, 1, 56, 34, 0, "StyleData", "HyperlinkActive", "All"],
+Cell[6531, 284, 65, 1, 41, 50, 0, "StyleData", "HyperlinkActive", \
 "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[7203, 309, 616, 19, 51, 70, 0, "StyleData", "Placeholder", "All",
+Cell[6633, 290, 631, 20, 51, 79, 0, "StyleData", "SelectionPlaceholder", "All",
  StyleMenuListing->None],
-Cell[7822, 330, 61, 1, 45, 46, 0, "StyleData", "Placeholder", "Presentation"]
+Cell[7267, 312, 70, 1, 45, 55, 0, "StyleData", "SelectionPlaceholder", \
+"Presentation"]
 }, Open  ]],
-Cell[7898, 334, 274, 11, 41, 23, 0, "StyleData", "Pane", "All"],
-Cell[8175, 347, 66, 2, 40, 26, 0, "StyleData", "TabView", "All"],
-Cell[8244, 351, 186, 6, 38, 31, 0, "StyleData", "TabViewLabel", "All"],
-Cell[8433, 359, 49, 1, 40, 28, 0, "StyleData", "TabLabel1", "All"],
-Cell[8485, 362, 49, 1, 40, 28, 0, "StyleData", "TabLabel2", "All"]
+Cell[CellGroupData[{
+Cell[7374, 318, 616, 19, 51, 70, 0, "StyleData", "Placeholder", "All",
+ StyleMenuListing->None],
+Cell[7993, 339, 61, 1, 45, 46, 0, "StyleData", "Placeholder", "Presentation"]
+}, Open  ]],
+Cell[8069, 343, 274, 11, 41, 23, 0, "StyleData", "Pane", "All"],
+Cell[8346, 356, 66, 2, 40, 26, 0, "StyleData", "TabView", "All"],
+Cell[8415, 360, 186, 6, 38, 31, 0, "StyleData", "TabViewLabel", "All"],
+Cell[8604, 368, 49, 1, 40, 28, 0, "StyleData", "TabLabel1", "All"],
+Cell[8656, 371, 49, 1, 40, 28, 0, "StyleData", "TabLabel2", "All"]
 }, Open  ]]
 }
 ]

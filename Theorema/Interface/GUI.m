@@ -116,8 +116,8 @@ theoremaCommander[] /; $Notebooks :=
         			translate["tcProveTabProverTabLabel"]->selectProver[],
         			translate["tcProveTabSubmitTabLabel"]->Dynamic[ Refresh[ submitProveTask[ $tcProveTab],
         				TrackedSymbols :> {$tcProveTab, $selectedProofGoal, $selectedProofKB, $selectedProver}]],
-        			translate["tcProveTabNavigateTabLabel"]->Dynamic[ Refresh[ proofNavigation[ $TMAproofObject],
-        				TrackedSymbols :> {$TMAproofObject}]]}, Dynamic[$tcProveTab],
+        			translate["tcProveTabNavigateTabLabel"]->Dynamic[ Refresh[ proofNavigation[ $TMAproofTree],
+        				TrackedSymbols :> {$TMAproofTree}]]}, Dynamic[$tcProveTab],
         			LabelStyle->"TabLabel2", ControlPlacement->Top],
         		translate["tcComputeTabLabel"]->TabView[{
         			translate["tcComputeTabSetupTabLabel"]->Dynamic[Refresh[ compSetup[], TrackedSymbols :> {$buttonNat}]],
@@ -150,7 +150,9 @@ emptyPane[ args___] := unexpected[ emptyPane, {args}]
 (* displaySelectedGoal *)
    
 displaySelectedGoal[ ] :=
-    Module[ { sel = NotebookRead[ InputNotebook[]], goal},
+    Module[ { sel, goal},
+    	$proofInitNotebook = InputNotebook[];
+    	sel = NotebookRead[ $proofInitNotebook];
     	goal = findSelectedFormula[ sel];
         If[ goal === {},
             emptyPane[ translate["noGoal"], 350],
@@ -665,11 +667,11 @@ printProveInfo[ goal_, kb_, prover_, { pVal_, proofObj_}] :=
         bui = Cases[ DownValues[ Theorema`Computation`Language`Private`buiActProve],
         	HoldPattern[ Verbatim[HoldPattern][ Theorema`Computation`Language`Private`buiActProve[ op_String]] :> v_] -> {op, v}];
         buiAct = Cases[ bui, { op_, True} -> op];
-        NotebookWrite[ InputNotebook[], Cell[ translate[ "Proof of"]<>" "<>goal[[3]], "OpenProof", CellTags -> "Proof:"<>goal[[3]]]];
+        NotebookWrite[ $proofInitNotebook, Cell[ translate[ "Proof of"]<>" "<>goal[[3]], "OpenProof", CellTags -> "Proof:"<>goal[[3]]]];
         (* Use Method -> "Queued" so that no time limit for proof display applies *)
-        NotebookWrite[ InputNotebook[], Cell[ BoxData[ ToBoxes[
+        NotebookWrite[ $proofInitNotebook, Cell[ BoxData[ ToBoxes[
         	Button[ translate["ShowProof"], displayProof[ proofObj], ImageSize -> Automatic, Method -> "Queued"]]], "ProofDisplay"]];
-        NotebookWrite[ InputNotebook[], Cell[ ToBoxes[
+        NotebookWrite[ $proofInitNotebook, Cell[ ToBoxes[
         	OpenerView[ {"", 
             Column[ {OpenerView[ {Style[ translate[ "GoalProve"], "PIContent"], Style[ goal[[3]], "PIContent"]}],
             	OpenerView[ {Style[ translate[ "KBprove"], "PIContent"], Style[ kbAct, "PIContent"]}],
@@ -680,7 +682,7 @@ printProveInfo[ goal_, kb_, prover_, { pVal_, proofObj_}] :=
                     Button[ translate["SetEnv"], setProveEnv[ goal, allKB, allBui], ImageSize -> Automatic]
                 ]}
             ]}, False]], "ProofInfo"]];
-        NotebookWrite[ InputNotebook[], Cell[ "\[EmptySquare]", "CloseProof"]];
+        NotebookWrite[ $proofInitNotebook, Cell[ "\[EmptySquare]", "CloseProof"]];
     ]
 printProveInfo[args___] := unexcpected[ printProveInfo, {args}]
 
