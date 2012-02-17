@@ -18,7 +18,6 @@
 BeginPackage["Theorema`Provers`Common`"]
 
 Needs[ "Theorema`Common`"]
-Needs[ "Theorema`Language`"]
 
 Begin["`Private`"]
 
@@ -41,6 +40,8 @@ callProver[ prover_, goal_, kb_] :=
   		AppendTo[ $TMAproofTree, {"new2", "pending", "andNode"} -> {"new3", "proved", "terminalNode"}];
   		Pause[2];
   		$TMAproofTree = $TMAproofTree /. {id_, "pending", "andNode"} -> {id, "proved", "andNode"};
+  		Pause[4];
+  		$proofInProgressMarker = {};
 		{$Failed, $TMAproofObject}
 	]
 callProver[ args___] := unexpected[ callProver, {args}]
@@ -83,28 +84,32 @@ makeNode[ args___] := unexpected[ makeNode, {args}]
 
 makeInitialProofObject[ goal_, kb_, prover_] :=
 	PRFOBJ$[
-		PRFINFO$[ "Initial", goal, kb, "Initial"],
-		PRFSIT$[ goal, kb, {}, "pending", "InferenceRules" -> inferenceRules[ prover]]
+		PRFINFO$[ "ID" -> "Initial", goal, kb],
+		PRFSIT$[ "ID" -> "Initial", goal, kb, {}, "pending", "InferenceRules" -> inferenceRules[ prover]]
 	]
 makeInitialProofObject[ args___] := unexpected[ makeInitialProofObject, {args}]
 
 
 (* ::Subsubsection:: *)
 (* makeInitialProofNotebook *)
+
+(* $proofInProgressMarker is used in the docked cells in stylesheet for displaying proofs *)
+$proofInProgressMarker = {};
+        				    				
 makeInitialProofNotebook[ p_PRFOBJ$] :=
     Module[ { cells, t, nb},
         cells = proofObjectToCell[ p];
-        nb = NotebookPut[
-            	Notebook[ Append[ cells,
-            		Cell[BoxData[
+        $proofInProgressMarker = {Cell[BoxData[
         				DynamicBox[ ToBoxes[ Graphics[{Circle[{0, 0}, 1],
-        					Table[Text[ToString[t], 0.9*{Cos[Pi/2 - (Pi/6)*t], Sin[Pi/2 - (Pi/6)*t]}], {t, 1, 12}],
+        					Table[Text[ToString[t], 0.8*{Cos[Pi/2 - (Pi/6)*t], Sin[Pi/2 - (Pi/6)*t]}, BaseStyle -> {FontSize -> 5}], {t, 1, 12}],
         					{Thick, Line[{{0, 0}, {Cos[Pi/2 - 2*Pi*Clock[]], Sin[Pi/2 - 2*Pi*Clock[]]}}],
         						Line[{{0, 0}, {Cos[Pi/4 - 2*Pi*Clock[]], Sin[Pi/4 - 2*Pi*Clock[]]}}]},
-        					{Hue[5/8, 1, Clock[]], Opacity[0.5], Disk[{0, 0}, 1, {Pi/2 - 2*Pi*Clock[], Pi/4 - 2*Pi*Clock[]}]},
-        					{White, Disk[{0, 0}, 0.8]}}], 
-        					StandardForm], ImageSizeCache -> {360., {178., 181.}}]],
-        				"Output", TextAlignment -> Center]], Visible -> False, StyleDefinitions -> FileNameJoin[{"Theorema", "Proof.nb"}]]];
+        					{Hue[ Clock[], 1, Clock[]], Opacity[0.5], Disk[{0, 0}, 1, {Pi/2 - 2*Pi*Clock[], Pi/4 - 2*Pi*Clock[]}]},
+        					{White, Disk[{0, 0}, 0.7]}}, ImageSize -> {50, 50}], 
+        					StandardForm], ImageSizeCache -> {50., {23., 27.}}]],
+        				"Output", TextAlignment -> Center]};
+        nb = NotebookPut[
+            	Notebook[ cells, Visible -> False, StyleDefinitions -> FileNameJoin[{"Theorema", "Proof.nb"}]]];
         nb
     ]
 makeInitialProofNotebook[ args___] := unexpected[ makeInitialProofNotebook, {args}]
@@ -135,54 +140,10 @@ proofObjectToCell[ p_PRFOBJ$] :=
 	Module[{ cellList = proofObjectToCell[ p[[1]]]},
 		Join[ cellList, proofObjectToCell[ p[[2]]]]
 	]
-proofObjectToCell[ PRFINFO$[ "Initial", goal_, kb_, id_]] :=
-    Block[ {$prfStepID = id},
-        {textCell[ "We have to prove:"], 
-         goalCell[ goal], 
-         textCell[ "under the assumptions:"], 
-         assumptionListCells[ kb, ",", "."]
-         }
-    ]
-proofObjectToCell[ PRFSIT$[ g_, ___]] := 
-	{textCell[ "In order to prove", referenceCell[ g], "we have to ..."]}
+proofObjectToCell[ PRFINFO$[ id:("ID" -> "Initial"), goal_, kb_]] := proofStepText[ id, "Initial", $Language, goal, kb]
+proofObjectToCell[ PRFSIT$[ id:("ID" -> _), g_, ___]] := proofStepText[ id, "Proof Situation", $Language, g]
+	
 proofObjectToCell[ args___] := unexpected[ proofObjectToCell, {args}]
-
-goalCell[ {k_, g_, t_}, punct_String:""] := 
-	Cell[ BoxData[ RowBox[ {ToBoxes[ g], punct}]], "Goal", 
-		CellFrameLabels->{{None, Cell[ t, "GoalLabel"]}, {None, None}}, 
-		CellTags -> {getCellIDLabel[ k], $prfStepID}
-	]
-goalCell[ args___] := unexpected[ goalCell, {args}]
-
-assumptionCell[ {k_, a_, t_}, punct_String:""] := 
-	Cell[ BoxData[ RowBox[ {ToBoxes[ a], punct}]], "Assumption", 
-		CellFrameLabels->{{None, Cell[ t, "AssumptionLabel"]}, {None, None}}, 
-		CellTags -> {getCellIDLabel[ k], $prfStepID}
-	]
-assumptionCell[ args___] := unexpected[ assumptionCell, {args}]
-
-assumptionListCells[ {f___, l_}, sep_String, punct_String] :=
-	Module[{initial, term},
-		initial = Map[ assumptionCell[ #, sep]&, {f}];
-		term = assumptionCell[ l, punct];
-		Cell[ CellGroupData[ Append[ initial, term]]]
-	]
-assumptionListCells[ args___] := unexpected[ assumptionListCells, {args}]
-
-textCell[ t__] := Cell[ TextData[ Riffle[ {t}, " "]], "Text", CellTags -> {$prfStepID}]
-textCell[ args___] := unexpected[ textCell, {args}]
-
-referenceCell[ {k_, form_, label_}] :=
-	With[{ tag = getCellIDLabel[k]},
-        Cell[ BoxData[ ToBoxes[
-            Button[ Tooltip[ Mouseover[ Style[ label, "Reference"], Style[ label, "ReferenceHover"]], form],
-            	Module[ {cell},
-        			NotebookFind[ SelectedNotebook[], tag, Previous, CellTags, AutoScroll -> False];
-        			cell = NotebookRead[ SelectedNotebook[]];
-                	CreateDialog[{cell, CancelButton["OK", NotebookClose[ButtonNotebook[]]]}]], Appearance->None]
-        ]]]
-	]
-referenceCell[ args___] := unexpected[ referenceCell, {args}]
 
 
 
