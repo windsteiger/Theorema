@@ -65,6 +65,11 @@ MakeBoxes[ (Set$TM|Theorema`Computation`Language`Set$TM)[ arg__], fmt_] :=
 MakeBoxes[ (Set$TM|Theorema`Computation`Language`Set$TM)[ ], fmt_] :=
     MakeBoxes[ "\[EmptySet]", fmt]
 
+MakeBoxes[ IffDef$TM[ l_, r_], fmt_] :=
+    RowBox[ {MakeBoxes[ l, fmt],
+        TagBox[ RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], Identity, SyntaxForm->"a\[Implies]b"], 
+        MakeBoxes[ r, fmt]}]
+   
 MakeBoxes[ (op_?isStandardOperatorName)[ arg__], fmt_] :=
     With[ {b = tmaToInputOperator[ op]},
         MakeBoxes[ b[ arg], fmt]
@@ -112,13 +117,14 @@ $tmaNonStandardOperatorToBuiltin = Dispatch[ Apply[ Rule, $tmaNonStandardOperato
 isNonStandardOperatorName[ f_] := MemberQ[ $tmaNonStandardOperatorNames, f]
 isNonStandardOperatorName[ args___] := unexpected[ isNonStandardOperatorName, {args}]
 
-isStandardOperatorName[ f_] :=
+isStandardOperatorName[ f_Symbol] :=
     Module[ {n = SymbolName[ f]},
         StringLength[ n] > 3 && StringTake[ n, -3] === "$TM"
     ]
+isStandardOperatorName[ f_] := False
 isStandardOperatorName[ args___] := unexpected[ isStandardOperatorName, {args}]
 
-tmaToInputOperator[ op_] :=
+tmaToInputOperator[ op_Symbol] :=
     Module[ {n = SymbolName[ op]},
         If[ StringTake[ n, -1] == "$",
             ToExpression[ n],
