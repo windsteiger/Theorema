@@ -171,6 +171,7 @@ processGlobalDeclaration[ args___] := unexpected[ processGlobalDeclaration, {arg
 SetAttributes[processEnvironment,HoldAll];
 
 processEnvironment[ Theorema`Language`nE] := Null
+
 processEnvironment[x_] :=
     Module[ {nb = EvaluationNotebook[], rawNotebook, key, tags, globDec},
     	(* select current cell: we need to refer to this selection when we set the cell options *)
@@ -184,7 +185,6 @@ processEnvironment[x_] :=
 		(* process the expression according the Theorema syntax rules and add it to the KB *)
         Catch[ updateKnowledgeBase[ReleaseHold[ freshNames[ markVariables[ Hold[x]]]], key, globDec, tags]];
         (* close the environment to clear $Pre and $PreRead *)
-        closeEnvironment[];
 		SelectionMove[ nb, After, Cell];
     ]
 processEnvironment[args___] := unexcpected[ processEnvironment, {args}]
@@ -418,7 +418,7 @@ openEnvironment[expr_] :=
     Module[{},
 		$parseTheoremaExpressions = True; 
         PrependTo[ $ContextPath, "Theorema`Language`"];
-        (* Set default context if I am not in an archive. *)
+        (* Set default context when not in an archive *)
         If[ !inArchive[], Begin["Theorema`Knowledge`"]];
         expr
     ]
@@ -426,7 +426,7 @@ openEnvironment[args___] := unexpected[ openEnvironment, {args}]
 
 closeEnvironment[] := 
 	Module[{},
-		(* Restore context if I am not in an archive. *)
+		(* Leave "Theorema`Knowledge`" context when not in an archive *)
 		If[ !inArchive[], End[]];
 		$ContextPath = DeleteCases[ $ContextPath, "Theorema`Language`"];
 		$parseTheoremaExpressions = False; 
@@ -467,9 +467,12 @@ openArchive[name_String] :=
         If[ !DirectoryQ[ DirectoryName[ archiveNotebookPath]],
             CreateDirectory[ DirectoryName[ archiveNotebookPath]]
         ];
-        (* TODO: Check whether notebook or corresponding archive already exists in order to prevent overwriting existing archives *)
         posBrowser = Position[ $kbStruct, CurrentValue["NotebookFullFileName"] -> _, 1, 1];
-        NotebookSave[ nb, archiveNotebookPath];
+        If[ !FileExistsQ[ archiveNotebookPath],
+        	NotebookSave[ nb, archiveNotebookPath];
+        ];
+        (* If the notebook was originally Untitled-n and has now been saved under the archive name
+           then replace the name in the KB browser *)
         If[ Length[posBrowser] === 1,
             $kbStruct = ReplacePart[ $kbStruct, Append[posBrowser[[1]],1] -> CurrentValue["NotebookFullFileName"]]
         ];
@@ -490,14 +493,14 @@ currentArchiveName[args___] := unexpected[currentArchiveName, {args}]
 SetAttributes[ processArchiveInfo, HoldAll];
 
 processArchiveInfo[ a_] :=
-	Module[{nb = EvaluationNotebook[], cf},
-		cf = CurrentValue[ nb, "CellFrameLabels"];
-		Switch[cf[[1,1]],
-			translate["archLabelNeeds"],
+	Module[{cf},
+		cf = CurrentValue[ "CellFrameLabels"];
+		Switch[ cf[[1,1]],
+			translate[ "archLabelNeeds"],
 			$tmaArchNeeds = a; Scan[ loadArchive, a], (* Remember and load current dependencies. *)
 			translate["archLabelPublic"],
-			ReleaseHold[freshNames[ Hold[a]]];
-			Begin["`private`"];     
+			ReleaseHold[ freshNames[ Hold[a]]];
+			Begin[ "`private`"];     
 		];
 	]
 processArchiveInfo[args___] := unexpected[processArchiveInfo, {args}]
