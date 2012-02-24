@@ -171,7 +171,6 @@ processGlobalDeclaration[ args___] := unexpected[ processGlobalDeclaration, {arg
 SetAttributes[processEnvironment,HoldAll];
 
 processEnvironment[ Theorema`Language`nE] := Null
-
 processEnvironment[x_] :=
     Module[ {nb = EvaluationNotebook[], rawNotebook, key, tags, globDec},
     	(* select current cell: we need to refer to this selection when we set the cell options *)
@@ -184,8 +183,7 @@ processEnvironment[x_] :=
 		globDec = applicableGlobalDeclarations[ nb, rawNotebook, evaluationPosition[ nb, rawNotebook]];
 		(* process the expression according the Theorema syntax rules and add it to the KB *)
         Catch[ updateKnowledgeBase[ReleaseHold[ freshNames[ markVariables[ Hold[x]]]], key, globDec, tags]];
-        (* close the environment to clear $Pre and $PreRead *)
-		SelectionMove[ nb, After, Cell];
+        SelectionMove[ nb, After, Cell];
     ]
 processEnvironment[args___] := unexcpected[ processEnvironment, {args}]
 
@@ -610,7 +608,8 @@ processComputation[x_] := Module[ { procSynt, res},
 	setComputationContext[ "compute"];
 	res = Catch[ ReleaseHold[ procSynt]];
 	setComputationContext[ "none"];
-	res
+	NotebookWrite[ EvaluationNotebook[], Cell[ ToBoxes[ res, TheoremaForm], "ComputationResult", CellLabel -> "Out["<>ToString[$Line]<>"]="]];
+	res;
 ]
 processComputation[args___] := unexcpected[ processComputation, {args}]
 

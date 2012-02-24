@@ -113,7 +113,9 @@ transferToComputation[ form_, key_] :=
 	Module[{stripUniv, exec},
 		stripUniv = stripUniversalQuantifiers[ form];
 		exec = executableForm[ stripUniv, key];
-		ToExpression[ exec]
+		If[ exec =!= Null,
+			ToExpression[ exec]
+		]
 	]
 transferToComputation[ args___] := unexpected[ transferToComputation, {args}]
 
