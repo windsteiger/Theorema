@@ -62,7 +62,7 @@ freshSymbol[ s_Symbol] :=
         	Wedge, ToExpression[ "And$TM"],
         	Vee, ToExpression[ "Or$TM"],
         	List, makeSet,
-        	AngleBracket, ToExpression[ "Tuple$TM"],
+        	AngleBracket, makeTuple,
         	_,
         	name = ToString[s];
         	If[ StringTake[ name, -1] === "$",
@@ -170,6 +170,7 @@ processGlobalDeclaration[ args___] := unexpected[ processGlobalDeclaration, {arg
 
 SetAttributes[processEnvironment,HoldAll];
 
+processEnvironment[ Theorema`Language`nE] := Null
 processEnvironment[x_] :=
     Module[ {nb = EvaluationNotebook[], rawNotebook, key, tags, globDec},
     	(* select current cell: we need to refer to this selection when we set the cell options *)
@@ -181,7 +182,7 @@ processEnvironment[x_] :=
 		(* extract the global declarations that are applicable in the current evaluation *)
 		globDec = applicableGlobalDeclarations[ nb, rawNotebook, evaluationPosition[ nb, rawNotebook]];
 		(* process the expression according the Theorema syntax rules and add it to the KB *)
-        updateKnowledgeBase[ReleaseHold[ freshNames[ markVariables[ Hold[x]]]], key, globDec, tags];
+        Catch[ updateKnowledgeBase[ReleaseHold[ freshNames[ markVariables[ Hold[x]]]], key, globDec, tags]];
         (* close the environment to clear $Pre and $PreRead *)
         closeEnvironment[];
 		SelectionMove[ nb, After, Cell];
@@ -595,11 +596,16 @@ archiveName[args___] :=
 
 SetAttributes[processComputation, HoldAll];
 
+processComputation[ x:Theorema`Computation`Language`nE] := 
+	Module[{},
+		printComputationInfo[];
+		$Failed
+	]
 processComputation[x_] := Module[ { procSynt, res},
 	procSynt = freshNames[ markVariables[ Hold[x]]];
 	printComputationInfo[];
 	setComputationContext[ "compute"];
-	res = ReleaseHold[ procSynt];
+	res = Catch[ ReleaseHold[ procSynt]];
 	setComputationContext[ "none"];
 	res
 ]

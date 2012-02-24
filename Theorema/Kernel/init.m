@@ -55,20 +55,24 @@ If[ TrueQ[$Notebooks],
     This program comes with ABSOLUTELY NO WARRANTY;\n\n    This is free software, and you are welcome to\n    redistribute it under the conditions of the\n    GNU General Public License, see <http://www.gnu.org/licenses/>."]
 ];
 
+
 Get["Theorema`Common`"]
-Get["Theorema`Language`"]
-Get["Theorema`Utilities`"]
-Get["Theorema`Interface`GUI`"]
-Get["Theorema`Provers`"]
+
+(* The package "Theorema`Computation`Language`" introduces the same names as "Theorema`Language`".
+   Therefore, we load them from different Theorema`-contexts in order to avoid "shadowing" messages during startup.
+   It is important to load "Theorema`Computation`Language`" BEFORE "Theorema`Language`", because in 
+   "Theorema`Language`Syntax`" the symbols in the Computation-context must already exist.
+   *)
+Get["Theorema`Computation`Language`"]
 
 EndPackage[]
 
 BeginPackage["Theorema`"]
 
-(* The package "Theorema`Computation`Language`" introduces the same names as "Theorema`Language`".
-   Therefore, we load it from its own Theorema`-context in order to avoid "shadowing" messages during startup 
-   *)
-Get["Theorema`Computation`Language`"]
+Get["Theorema`Language`"]
+Get["Theorema`Utilities`"]
+Get["Theorema`Interface`GUI`"]
+Get["Theorema`Provers`"]
 
 EndPackage[]
 	

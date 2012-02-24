@@ -20,7 +20,7 @@ BeginPackage["Theorema`Language`", {"Theorema`"}]
 Map[ Get, FileNames[ "*.m", ToFileName[{$TheoremaDirectory, "Theorema", "Language", "LanguageData"}]]];
 
 Get["Theorema`Language`FormulaManipulation`"]
-Get["Theorema`Language`Parser`"]
+Get["Theorema`Language`Syntax`"]
 Get["Theorema`Language`Session`"]
 
 EndPackage[]

@@ -9,7 +9,8 @@ With[ {lang = "English"},
 	MessageName[unexpected, "usage", lang] = "unexpected[ f, {args}] terminates the evaluation of f[args] due to unexpected arguments.";
 
 (* Theorema`Language`Parser` *)
-	MessageName[specifiedVariables, "usage", lang] = "";
+	MessageName[makeSet, "usage", lang] = "makeSet[s] constructs a set from s during the phase of parsing an expression.";	
+	MessageName[makeTuple, "usage", lang] = "makeTuple[t] constructs a tuple from t during the phase of parsing an expression.";	
 	MessageName[$parseTheoremaExpressions, "usage", lang] = "whether to parse expressions with their Theorema meaning ...";
 	MessageName[$parseTheoremaGlobals, "usage", lang] = "whether to parse expressions with their Theorema meaning in a global declaration ...";
 
@@ -31,9 +32,9 @@ With[ {lang = "English"},
 	MessageName[findSelectedFormula, "usage", lang] = "findSelectedFormula[ sel] ...";
 
 (* Theorema`Language`FormulaManipulation` *)
-	MessageName[makeSet, "usage", lang] = "";	
 	MessageName[freeVariables, "usage", lang] = "";	
 	MessageName[variables, "usage", lang] = "";	
+	MessageName[specifiedVariables, "usage", lang] = "";
 	MessageName[splitAnd, "usage", lang] = "";	
 	MessageName[makeConjunction, "usage", lang] = "";	
 	MessageName[makeDisjunction, "usage", lang] = "";	

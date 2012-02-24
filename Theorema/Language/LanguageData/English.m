@@ -26,7 +26,10 @@ With[ {lang = "English"},
 	MessageName[IntersectionOf$TM, "usage", lang] = "";
 	MessageName[Union$TM, "usage", lang] = "";
 	MessageName[Tuple$TM, "usage", lang] = "";	
+	MessageName[TupleOf$TM, "usage", lang] = "";	
 	MessageName[Set$TM, "usage", lang] = "";	
+	MessageName[SetOf$TM, "usage", lang] = "";	
+	MessageName[SequenceOf$TM, "usage", lang] = "";	
     (* Mathematica programming language *)
 	MessageName[Program, "usage", lang] = "";	
 	MessageName[Module$TM, "usage", lang] = "";	

@@ -102,4 +102,8 @@ With[ {lang = "English"},
     translate["fileTypeArchive", lang] = "Theorema archive";
     translate["noArchName", lang] = "No archive name available for chosen archive. Check file content.";
 
+(* Theorema`Language`Parser` *)
+    translate["tupleOfRange", lang] = "The tuple quantifier can only be used with step-ranges, not with ``.";
+    translate["ambiguousRange", lang] = "The range `` does not unambiguously mark one variable.";
+
 ]

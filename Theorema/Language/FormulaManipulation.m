@@ -107,12 +107,6 @@ substituteFree[ args___] := unexpected[ substituteFree, {args}]
 
 
 (* ::Subsubsection:: *)
-(* makeSet *)
-
-makeSet[ x___] := Apply[ ToExpression[ "Set$TM"], Union[ {x}]]
-
-
-(* ::Subsubsection:: *)
 (* transferToComputation *)
 
 transferToComputation[ form_, key_] :=
