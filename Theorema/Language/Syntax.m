@@ -11,6 +11,9 @@ Needs["Theorema`Common`"]
 
 Begin["`Private`"]
 
+theoremaDisplay[ expr_] := DisplayForm[ ToBoxes[ expr, TheoremaForm]]
+theoremaDisplay[ args___] := unexpected[ theoremaDisplay, {args}]
+
 (* $tmaNonStandardOperators is initialized here and gets values added in Expression.m *)
 $tmaNonStandardOperators = {};
 
@@ -235,27 +238,27 @@ getSingleRangeVar[ args___] := unexpected[ getSingleRangeVar, {args}]
 (* ::Section:: *)
 (* MakeBoxes *)
 
-MakeBoxes[ (q_?isQuantifierName)[ rng_, True, form_], fmt_] := 
-	RowBox[ {UnderscriptBox[ Replace[ q, $tmaNameToQuantifier], makeRangeBox[ rng, fmt]],
-		MakeBoxes[ form, fmt]}
+MakeBoxes[ (q_?isQuantifierName)[ rng_, True, form_], TheoremaForm] := 
+	RowBox[ {UnderscriptBox[ Replace[ q, $tmaNameToQuantifier], makeRangeBox[ rng, TheoremaForm]],
+		MakeBoxes[ form, TheoremaForm]}
 	]
 
-MakeBoxes[ (q_?isQuantifierName)[ rng_, cond_, form_], fmt_] := 
-	RowBox[ {UnderscriptBox[ UnderscriptBox[ Replace[ q, $tmaNameToQuantifier], makeRangeBox[ rng, fmt]], MakeBoxes[ cond, fmt]],
-		MakeBoxes[ form, fmt]}
+MakeBoxes[ (q_?isQuantifierName)[ rng_, cond_, form_], TheoremaForm] := 
+	RowBox[ {UnderscriptBox[ UnderscriptBox[ Replace[ q, $tmaNameToQuantifier], makeRangeBox[ rng, TheoremaForm]], MakeBoxes[ cond, TheoremaForm]],
+		MakeBoxes[ form, TheoremaForm]}
 	]
 
-MakeBoxes[ (op_?isNonStandardOperatorName)[ arg__], fmt_] :=
+MakeBoxes[ (op_?isNonStandardOperatorName)[ arg__], TheoremaForm] :=
     With[ {b = Replace[ op, $tmaNonStandardOperatorToBuiltin]},
-        MakeBoxes[ b[ arg], fmt]
+        MakeBoxes[ b[ arg], TheoremaForm]
     ]
 
-MakeBoxes[ (op_?isStandardOperatorName)[ arg__], fmt_] :=
+MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
     With[ {b = tmaToInputOperator[ op]},
-        MakeBoxes[ b[ arg], fmt]
+        MakeBoxes[ b[ arg], TheoremaForm]
     ]
 
-MakeBoxes[ s_Symbol, fmt_] := 
+MakeBoxes[ s_Symbol, TheoremaForm] := 
 	Module[ {n = SymbolName[ s]},
 		If[ StringLength[ n] > 3 && StringTake[ n, -3] === "$TM",
 			StringDrop[ n, -3],

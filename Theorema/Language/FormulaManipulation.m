@@ -113,9 +113,7 @@ transferToComputation[ form_, key_] :=
 	Module[{stripUniv, exec},
 		stripUniv = stripUniversalQuantifiers[ form];
 		exec = executableForm[ stripUniv, key];
-		If[ exec =!= Null,
-			ToExpression[ exec]
-		]
+		ToExpression[ exec]
 	]
 transferToComputation[ args___] := unexpected[ transferToComputation, {args}]
 
@@ -157,7 +155,11 @@ executableForm[ {(Theorema`Language`Iff$TM|Theorema`Language`IffDef$TM|Theorema`
             ]
         ]
     ]
-executableForm[ expr_, key_] := Null
+(* We return a string "$Failed", because when returning the expression $Failed (or also Null) the 
+   ToExpression[...] in the calling transferToComputation calls openEnvironment once more (which means that $PreRead
+   seems to be applied???), resulting in messing up the contexts. With the string "$Failed" this
+   does not happen *)
+executableForm[ expr_, key_] := "$Failed"
 executableForm[ args___] := unexpected[ executableForm, {args}]
 
 execLeft[ e_Hold] := 

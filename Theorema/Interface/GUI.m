@@ -859,7 +859,7 @@ makeArchLoadButton[] :=
 makeArchLoadButton[args___] := unexpected[makeArchLoadButton, {args}]
 
 showSelectedArchives[ l_List] :=
-    Pane[ Column[ Map[ archiveName, l]], ImageSize->{200,20*Length[l]}, ImageSizeAction->"Scrollable"]
+    Pane[ Column[ Map[ Style[ archiveName[ #, Short], LineBreakWithin -> False]&, l]], ImageSize -> {200,20*Length[l]}, Scrollbars -> Automatic]
 showSelectedArchives[ s_String] :=
     translate["tcLangTabArchTabNoArchSel"]
 showSelectedArchives[args___] := unexpected[showSelectedArchives, {args}]

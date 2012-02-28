@@ -357,7 +357,7 @@ updateKnowledgeBase[ form_, key_, glob_, tags_] :=
     	transferToComputation[ newForm, key];
         $tmaEnv = joinKB[ {{key, newForm, cellTagsToString[ tags]}}, $tmaEnv];
         If[ inArchive[],
-            $tmaArch = joinKB[ {{key, newForm, cellTagsToString[ tags]}}, $tmaArch];
+            $tmaArch = joinKB[ {{key, newForm, tags}}, $tmaArch];
         ]
     ]
 updateKnowledgeBase[args___] := unexpected[ updateKnowledgeBase, {args}]
@@ -382,6 +382,7 @@ applyGlobalDeclaration[ args___] := unexpected[ applyGlobalDeclaration, {args}]
 
 initSession[] :=
     Module[ {},
+    	$TheoremaArchives = {};
         $tmaEnv = {};
         $tmaArch = {};
         $globalDeclarations = {};
@@ -440,7 +441,7 @@ getArchivePath[arch_String] :=
         Which[ FileExtension[arch]==="ta",
             fn = arch,
             StringQ[fn = Quiet[ContextToFileName[ arch]]],
-            fn = StringReplacePart[ fn, "ta", -1],
+            fn = StringReplacePart[ Last[ FileNameSplit[ fn]], "ta", -1],
             True,
             notification[ Theorema::archiveName, context];
             Return[$Failed]
@@ -475,7 +476,7 @@ openArchive[name_String] :=
             $kbStruct = ReplacePart[ $kbStruct, Append[posBrowser[[1]],1] -> CurrentValue["NotebookFullFileName"]]
         ];
         NotebookFind[ nb, "ArchiveInfo", All, CellStyle];
-        BeginPackage[ name, {"Theorema`"}];
+        BeginPackage[ "Theorema`Knowledge`" <> name, {"Theorema`"}];
         SelectionEvaluate[nb];
         (* openArchive is used as $PreRead, therefore it must return a string *)
         "Null"
@@ -511,6 +512,10 @@ closeArchive[_String] :=
         archivePath = getArchivePath[ archName];
         $tmaArchTree = currNB /. $kbStruct;
         EndPackage[];
+        (* We don't want to have the archive name in the context path,
+           we control the context path when required using $TheoremaArchives *)
+        $ContextPath = DeleteCases[$ContextPath, archName, {1}, 1];
+        $TheoremaArchives = DeleteDuplicates[ Prepend[ $TheoremaArchives, archName]];
         (* Reset the context path in order to force Mathematica to write
         explicit contexts to the file *)
         Block[ {$ContextPath = {"System`"}},
@@ -539,8 +544,11 @@ loadArchive[ name_String, globalDecl_:{}] :=
             Return[]
         ];
         cxt = archiveName[ archivePath];
+        (* Clear computation definitions available from previous loading or somewhere *)
+        With[{comp = StringReplace[ cxt <> "*", "Theorema`Knowledge`" -> "Theorema`Computation`Knowledge`", 1]},
+        	Clear[comp]
+        ];
         Block[ {$tmaArch},
-            BeginPackage[cxt];
             (* we could just Get[archivePath], but we read the content and prevent evaluation for the moment
                this would be the place to process the archive content before evaluation *)
             archiveContent = ReadList[ archivePath, Hold[Expression]];
@@ -548,12 +556,14 @@ loadArchive[ name_String, globalDecl_:{}] :=
             (* after reading and evaluating the archive $tmaArch has a value, namely the actual KB contained in the archive
                this is why we use the Block in order not
                to overwrite $tmaArch when loading an archive from within another one ... *)
-        	(* ContextPath updated in order to make sure that public archive symbols are visible *)
-            EndPackage[];
-            (* before joining it to the KB, we apply global declarations *)
+            (* we use updateKnowledgeBase: this applies global declarations appropriately and 
+               translates to computational form ... *)
+            Scan[ updateKnowledgeBase[ #[[2]], #[[1]], globalDecl, #[[3]]]&, $tmaArch]
+            (* an alternative to updateKnowledgeBase would be:
             $tmaArch = Map[ MapAt[ applyGlobalDeclaration[ #, globalDecl]&, #, 2]&, $tmaArch];
-            $tmaEnv = joinKB[ $tmaArch, $tmaEnv];
+            $tmaEnv = joinKB[ $tmaArch, $tmaEnv];*)
         ];
+        $TheoremaArchives = DeleteDuplicates[ Prepend[ $TheoremaArchives, cxt]];
         If[ !FileExistsQ[archiveNotebookPath = getArchiveNotebookPath[ name]],
             archiveNotebookPath = archivePath
         ];
@@ -562,6 +572,7 @@ loadArchive[ name_String, globalDecl_:{}] :=
             $kbStruct = ReplacePart[ $kbStruct, pos[[1]] -> (archiveNotebookPath -> $tmaArchTree)];
         ];
     ]
+    Map[ StringReplace[ #, "Theorema`Knowledge`" -> "Theorema`Computation`Knowledge`", 1]&, $TheoremaArchives]
 loadArchive[ l_List, globalDecl_:{}] := Scan[ loadArchive[ #, globalDecl]&, l]
 loadArchive[args___] := unexpected[loadArchive, {args}]
 
@@ -588,6 +599,7 @@ archiveName[ f_String] :=
             ]
         ]
     ]
+archiveName[ f_String, Short] := StringReplace[ archiveName[ f], "Theorema`Knowledge`" -> ""]
 archiveName[args___] :=
     unexpected[archiveName, {args}]
 
@@ -609,14 +621,16 @@ processComputation[x_] := Module[ { procSynt, res},
 	res = Catch[ ReleaseHold[ procSynt]];
 	setComputationContext[ "none"];
 	NotebookWrite[ EvaluationNotebook[], Cell[ ToBoxes[ res, TheoremaForm], "ComputationResult", CellLabel -> "Out["<>ToString[$Line]<>"]="]];
-	res;
 ]
 processComputation[args___] := unexcpected[ processComputation, {args}]
 
 openComputation[] := 
 	Module[{},
-		$parseTheoremaExpressions = True; 
-        PrependTo[ $ContextPath, "Theorema`Computation`Language`"];
+		$parseTheoremaExpressions = True;
+		$ContextPath = Join[ 
+			{"Theorema`Computation`Language`"}, 
+			Map[ StringReplace[ #, "Theorema`Knowledge`" -> "Theorema`Computation`Knowledge`", 1]&, $TheoremaArchives], 
+			$ContextPath]; 
 		Begin[ "Theorema`Computation`Knowledge`"];
 	]
 openComputation[args___] := unexcpected[ openComputation, {args}]
@@ -624,7 +638,7 @@ openComputation[args___] := unexcpected[ openComputation, {args}]
 closeComputation[] :=
     Module[ {},    	
         End[];
-		$ContextPath = DeleteCases[ $ContextPath, "Theorema`Computation`Language`"];
+		$ContextPath = Select[ $ContextPath, (!StringMatchQ[ #, "Theorema`Computation`" ~~ __])&];
 		$parseTheoremaExpressions = False;
     ]
 closeComputation[args___] := unexcpected[ closeComputation, {args}]

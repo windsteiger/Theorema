@@ -8,13 +8,15 @@ With[ {lang = "English"},
 (* Theorema`System`Messages` *)
 	MessageName[unexpected, "usage", lang] = "unexpected[ f, {args}] terminates the evaluation of f[args] due to unexpected arguments.";
 
-(* Theorema`Language`Parser` *)
+(* Theorema`Language`Syntax` *)
+	MessageName[theoremaDisplay, "usage", lang] = "theoremaDisplay[expr] displays expr in Theorema syntax using the definitions for MakeBoxes[ expr, TheoremaForm].";	
 	MessageName[makeSet, "usage", lang] = "makeSet[s] constructs a set from s during the phase of parsing an expression.";	
 	MessageName[makeTuple, "usage", lang] = "makeTuple[t] constructs a tuple from t during the phase of parsing an expression.";	
 	MessageName[$parseTheoremaExpressions, "usage", lang] = "whether to parse expressions with their Theorema meaning ...";
 	MessageName[$parseTheoremaGlobals, "usage", lang] = "whether to parse expressions with their Theorema meaning in a global declaration ...";
 
 (* Theorema`Language`Session` *)
+	MessageName[$TheoremaArchives, "usage", lang] = "List of currently loaded Theorema archives.";
 	MessageName[$tmaEnv, "usage", lang] = "Collection of environments evaluated in the current session, i.e. the knowledge base.";
 	MessageName[$tmaArch, "usage", lang] = "Collection of environments evaluated in the current archive.";
 	MessageName[$tmaArchTree, "usage", lang] = "Tree representation of the archive used in the commander.";

@@ -39,6 +39,10 @@ Which[!ValueQ[$TheoremaDirectory],
 	Exit[]
 ];
 
+(* Introduce TheoremaForm as a new format type *)
+AppendTo[ $BoxForms, System`TheoremaForm];
+ParentForm[ System`TheoremaForm] ^= StandardForm;
+
 Map[ Get, FileNames[ "*.m", ToFileName[{$TheoremaDirectory, "Theorema", "Kernel", "LanguageData"}]]];
 
 Protect[$TheoremaDirectory]; 

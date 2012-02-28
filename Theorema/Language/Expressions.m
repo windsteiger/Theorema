@@ -35,30 +35,30 @@ makeTuple[ x___] := ToExpression[ "Tuple$TM"][x]
 (* ::Section:: *)
 (* MakeBoxes *)
 
-MakeBoxes[ Set$TM[ arg__], fmt_] := MakeBoxes[ {arg}, fmt]
-MakeBoxes[ Set$TM[ ], fmt_] := MakeBoxes[ "\[EmptySet]", fmt]
+MakeBoxes[ Set$TM[ arg__], TheoremaForm] := MakeBoxes[ {arg}, TheoremaForm]
+MakeBoxes[ Set$TM[ ], TheoremaForm] := MakeBoxes[ "\[EmptySet]", TheoremaForm]
 
-MakeBoxes[ SequenceOf$TM[ rng:RNG$[ SETRNG$[ v_, _]], cond_, v_], fmt_] :=
-	RowBox[ {makeRangeBox[ rng, fmt], "|", MakeBoxes[ cond, fmt]}]
+MakeBoxes[ SequenceOf$TM[ rng:RNG$[ SETRNG$[ v_, _]], cond_, v_], TheoremaForm] :=
+	RowBox[ {makeRangeBox[ rng, TheoremaForm], "|", MakeBoxes[ cond, TheoremaForm]}]
 
-MakeBoxes[ SequenceOf$TM[ rng_, True, form_], fmt_] :=
-	RowBox[ {MakeBoxes[ form, fmt], UnderscriptBox[ "|", makeRangeBox[ rng, fmt]]}]
+MakeBoxes[ SequenceOf$TM[ rng_, True, form_], TheoremaForm] :=
+	RowBox[ {MakeBoxes[ form, TheoremaForm], UnderscriptBox[ "|", makeRangeBox[ rng, TheoremaForm]]}]
 
-MakeBoxes[ SequenceOf$TM[ rng_, cond_, form_], fmt_] :=
-	RowBox[ {MakeBoxes[ form, fmt], UnderscriptBox[ "|", makeRangeBox[ rng, fmt]], MakeBoxes[ cond, fmt]}]
+MakeBoxes[ SequenceOf$TM[ rng_, cond_, form_], TheoremaForm] :=
+	RowBox[ {MakeBoxes[ form, TheoremaForm], UnderscriptBox[ "|", makeRangeBox[ rng, TheoremaForm]], MakeBoxes[ cond, TheoremaForm]}]
 
-MakeBoxes[ SetOf$TM[ rng_, cond_, form_], fmt_] :=
-	RowBox[ { "{", MakeBoxes[ SequenceOf$TM[ rng, cond, form], fmt], "}"}]
+MakeBoxes[ SetOf$TM[ rng_, cond_, form_], TheoremaForm] :=
+	RowBox[ { "{", MakeBoxes[ SequenceOf$TM[ rng, cond, form], TheoremaForm], "}"}]
 
-MakeBoxes[ TupleOf$TM[ rng_, cond_, form_], fmt_] :=
-	RowBox[ { "\[LeftAngleBracket]", MakeBoxes[ SequenceOf$TM[ rng, cond, form], fmt], "\[RightAngleBracket]"}]
+MakeBoxes[ TupleOf$TM[ rng_, cond_, form_], TheoremaForm] :=
+	RowBox[ { "\[LeftAngleBracket]", MakeBoxes[ SequenceOf$TM[ rng, cond, form], TheoremaForm], "\[RightAngleBracket]"}]
 
-MakeBoxes[ IffDef$TM[ l_, r_], fmt_] :=
-    RowBox[ {MakeBoxes[ l, fmt],
+MakeBoxes[ IffDef$TM[ l_, r_], TheoremaForm] :=
+    RowBox[ {MakeBoxes[ l, TheoremaForm],
         TagBox[ RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], Identity, SyntaxForm->"a\[Implies]b"], 
-        MakeBoxes[ r, fmt]}]
+        MakeBoxes[ r, TheoremaForm]}]
 
-MakeBoxes[ VAR$[ v_], fmt_] := StyleBox[ MakeBoxes[ v, fmt], "ExpressionVariable"]
+MakeBoxes[ VAR$[ v_], TheoremaForm] := StyleBox[ MakeBoxes[ v, TheoremaForm], "ExpressionVariable"]
 
 makeRangeBox[ RNG$[ s__SIMPRNG$], fmt_] := RowBox[ Riffle[ Map[ makeRangeBox[ #, fmt]&, {s}], ","]]
 makeRangeBox[ RNG$[ s__], fmt_] := GridBox[ Map[ {makeRangeBox[ #, fmt]}&, {s}]]

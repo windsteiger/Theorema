@@ -37,14 +37,14 @@ proofStepText[ args___] := unexpected[ proofStepText, {args}]
 (* Proof Cells *)
 
 goalCell[ {k_, g_, t_}, punct_String:""] := 
-	Cell[ BoxData[ RowBox[ {ToBoxes[ g], punct}]], "Goal", 
+	Cell[ BoxData[ RowBox[ {ToBoxes[ g, TheoremaForm], punct}]], "Goal", 
 		CellFrameLabels->{{None, Cell[ t, "GoalLabel"]}, {None, None}}, 
 		CellTags -> {getCellIDLabel[ k], $proofStepID}
 	]
 goalCell[ args___] := unexpected[ goalCell, {args}]
 
 assumptionCell[ {k_, a_, t_}, punct_String:""] := 
-	Cell[ BoxData[ RowBox[ {ToBoxes[ a], punct}]], "Assumption", 
+	Cell[ BoxData[ RowBox[ {ToBoxes[ a, TheoremaForm], punct}]], "Assumption", 
 		CellFrameLabels->{{None, Cell[ t, "AssumptionLabel"]}, {None, None}}, 
 		CellTags -> {getCellIDLabel[ k], $proofStepID}
 	]
@@ -64,7 +64,7 @@ textCell[ args___] := unexpected[ textCell, {args}]
 referenceCell[ {k_, form_, label_}] :=
 	With[{ tag = getCellIDLabel[k]},
         Cell[ BoxData[ ToBoxes[
-            Button[ Tooltip[ Mouseover[ Style[ label, "Reference"], Style[ label, "ReferenceHover"]], form],
+            Button[ Tooltip[ Mouseover[ Style[ label, "Reference"], Style[ label, "ReferenceHover"]], theoremaDisplay[ form]],
             	Module[ {cell},
         			NotebookFind[ SelectedNotebook[], tag, Previous, CellTags, AutoScroll -> False];
         			cell = NotebookRead[ SelectedNotebook[]];
