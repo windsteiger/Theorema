@@ -27,7 +27,7 @@ makeTuple[ SequenceOf$TM[ r:RNG$[ __STEPRNG$], c_, e_]] := ToExpression[ "TupleO
 
 makeTuple[ SequenceOf$TM[ r_, __]] := 
 	Module[ {},
-		notification[ translate[ "tupleOfRange"], DisplayForm[ makeRangeBox[ r, StandardForm]]];
+		notification[ translate[ "tupleOfRange"], DisplayForm[ makeRangeBox[ r, TheoremaForm]]];
 		Throw[ $Failed]
 	]
 makeTuple[ x___] := ToExpression[ "Tuple$TM"][x]

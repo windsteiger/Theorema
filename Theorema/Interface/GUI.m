@@ -360,12 +360,13 @@ structView[file_, item_List, tags_, task_] :=
 (* input cell with cell tags *)
 structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cellTags_, b___], 
   tags_, task_] :=
-    Module[ { isEval, cleanCellTags, keyTags, formulaLabel, idLabel, nbAvail},
+    Module[ { isEval, formPos, cleanCellTags, keyTags, formulaLabel, idLabel, nbAvail},
         cleanCellTags = getCleanCellTags[ cellTags];
         (* keyTags are those cell tags that are used to uniquely identify the formula in the KB *)
         keyTags = getKeyTags[ cellTags];
         (* check whether cell has been evaluated -> formula is in KB? *)
-        isEval = MemberQ[ $tmaEnv, {keyTags, _, _}];
+        formPos = Position[ $tmaEnv, {keyTags, _, _}, 1, 1];
+        isEval = formPos =!= {};
         (* Join list of CellTags, use $labelSeparator. *)
         If[ cleanCellTags === {},
             formulaLabel = cellTagsToString[ cellTags];
@@ -390,7 +391,10 @@ structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cel
                                                        "FormalTextInputFormula",
                                                        "FormalTextInputFormulaUneval"
                                                    ]], {file, idLabel}],
-                             displayCellContent[ content]],
+                             If[ isEval,
+                             	theoremaDisplay[ Extract[ $tmaEnv, Append[ formPos[[1]], 2]]],
+                             	displayCellContent[ content]]
+                    ],
                     Button[ Style[formulaLabel, "FormalTextInputFormula"], 
                         CreateDialog[{Cell[ content, "Output"], CancelButton[ translate[ "OK"], NotebookClose[ButtonNotebook[]]]}],
                         Appearance->None]

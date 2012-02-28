@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[    685958,      17426]
-NotebookOptionsPosition[    651147,      16309]
-NotebookOutlinePosition[    662467,      16637]
-CellTagsIndexPosition[    661263,      16598]
+NotebookDataLength[    685954,      17426]
+NotebookOptionsPosition[    651145,      16309]
+NotebookOutlinePosition[    662465,      16637]
+CellTagsIndexPosition[    661261,      16598]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -347,12 +347,12 @@ Cell[BoxData[
           "Which", True}, {"While", True}}], ImageSize -> Automatic]}]}, 
     False]],
   DynamicModuleValues:>{}]], "ComputationInfo",
- CellChangeTimes->{3.539419473268441*^9},
- CellID->1608708567],
+ CellChangeTimes->{3.539422821683624*^9},
+ CellID->400202193],
 
 Cell[BoxData[
  FormBox["2", TheoremaForm]], "ComputationResult",
- CellID->1382503791]
+ CellID->413140594]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -3148,14 +3148,14 @@ Cell[BoxData[
           "Which", True}, {"While", True}}], ImageSize -> Automatic]}]}, 
     False]],
   DynamicModuleValues:>{}]], "ComputationInfo",
- CellChangeTimes->{3.539419487330214*^9},
- CellID->1471322907],
+ CellChangeTimes->{3.539422835810896*^9},
+ CellID->2136631133],
 
 Cell[BoxData[
  FormBox[
   RowBox[{"{", 
    RowBox[{"1", ",", "2"}], "}"}], TheoremaForm]], "ComputationResult",
- CellID->903552886]
+ CellID->668140742]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -16322,316 +16322,316 @@ StyleDefinitions->FrontEnd`FileName[{"Theorema"}, "TheoremaNotebook.nb",
 (*CellTagsOutline
 CellTagsIndex->{
  "Info3539356218-4065218"->{
-  Cell[58490, 1447, 174, 3, 42, "Print",
+  Cell[58488, 1447, 174, 3, 42, "Print",
    CellTags->"Info3539356218-4065218",
    CellID->577700309],
-  Cell[58667, 1452, 1153, 32, 43, "Print",
+  Cell[58665, 1452, 1153, 32, 43, "Print",
    CellTags->"Info3539356218-4065218",
    CellID->1169693318]},
  "ID:1636935908"->{
-  Cell[60428, 1511, 551, 15, 28, "FormalTextInputFormula",
+  Cell[60426, 1511, 551, 15, 28, "FormalTextInputFormula",
    CellTags->{
     "ID:1636935908", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "1"},
    CellID->1636935908]},
  "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb"->{
-  Cell[60428, 1511, 551, 15, 28, "FormalTextInputFormula",
+  Cell[60426, 1511, 551, 15, 28, "FormalTextInputFormula",
    CellTags->{
     "ID:1636935908", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "1"},
    CellID->1636935908],
-  Cell[60982, 1528, 940, 26, 28, "FormalTextInputFormula",
+  Cell[60980, 1528, 940, 26, 28, "FormalTextInputFormula",
    CellTags->{
     "ID:1242901413", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "10"},
    CellID->1242901413],
-  Cell[61925, 1556, 592, 15, 32, "FormalTextInputFormula",
+  Cell[61923, 1556, 592, 15, 32, "FormalTextInputFormula",
    CellTags->{
     "ID:330716980", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "3"},
    CellID->330716980],
-  Cell[62520, 1573, 730, 18, 27, "FormalTextInputFormula",
+  Cell[62518, 1573, 730, 18, 27, "FormalTextInputFormula",
    CellTags->{
     "ID:1346427776", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "4"},
    CellID->1346427776],
-  Cell[63253, 1593, 584, 14, 28, "FormalTextInputFormula",
+  Cell[63251, 1593, 584, 14, 28, "FormalTextInputFormula",
    CellTags->{
     "ID:1421485859", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "5"},
    CellID->1421485859],
-  Cell[63840, 1609, 604, 14, 29, "FormalTextInputFormula",
+  Cell[63838, 1609, 604, 14, 29, "FormalTextInputFormula",
    CellTags->{
     "ID:1874491785", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "6"},
    CellID->1874491785],
-  Cell[64447, 1625, 688, 16, 29, "FormalTextInputFormula",
+  Cell[64445, 1625, 688, 16, 29, "FormalTextInputFormula",
    CellTags->{
     "ID:1491028062", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "7"},
    CellID->1491028062],
-  Cell[65138, 1643, 415, 11, 28, "FormalTextInputFormula",
+  Cell[65136, 1643, 415, 11, 28, "FormalTextInputFormula",
    CellTags->{
     "ID:822628176", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "8"},
    CellID->822628176],
-  Cell[65556, 1656, 621, 17, 30, "FormalTextInputFormula",
+  Cell[65554, 1656, 621, 17, 30, "FormalTextInputFormula",
    CellTags->{
     "ID:242022487", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "14"},
    CellID->242022487],
-  Cell[66180, 1675, 403, 10, 19, "FormalTextInputFormula",
+  Cell[66178, 1675, 403, 10, 19, "FormalTextInputFormula",
    CellTags->{
     "ID:2033225528", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "15"},
    CellID->2033225528],
-  Cell[66586, 1687, 535, 15, 19, "FormalTextInputFormula",
+  Cell[66584, 1687, 535, 15, 22, "FormalTextInputFormula",
    CellTags->{
     "ID:1045911681", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "16"},
    CellID->1045911681],
-  Cell[67124, 1704, 351, 9, 19, "FormalTextInputFormula",
+  Cell[67122, 1704, 351, 9, 19, "FormalTextInputFormula",
    CellTags->{
     "ID:338555625", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "17"},
    CellID->338555625],
-  Cell[590238, 14760, 1173, 29, 40, "FormalTextInputFormula",
+  Cell[590236, 14760, 1173, 29, 40, "FormalTextInputFormula",
    CellTags->{
     "ID:412145113", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "9"},
    CellID->412145113]},
  "1"->{
-  Cell[60428, 1511, 551, 15, 28, "FormalTextInputFormula",
+  Cell[60426, 1511, 551, 15, 28, "FormalTextInputFormula",
    CellTags->{
     "ID:1636935908", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "1"},
    CellID->1636935908]},
  "ID:1242901413"->{
-  Cell[60982, 1528, 940, 26, 28, "FormalTextInputFormula",
+  Cell[60980, 1528, 940, 26, 28, "FormalTextInputFormula",
    CellTags->{
     "ID:1242901413", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "10"},
    CellID->1242901413]},
  "10"->{
-  Cell[60982, 1528, 940, 26, 28, "FormalTextInputFormula",
+  Cell[60980, 1528, 940, 26, 28, "FormalTextInputFormula",
    CellTags->{
     "ID:1242901413", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "10"},
    CellID->1242901413]},
  "ID:330716980"->{
-  Cell[61925, 1556, 592, 15, 32, "FormalTextInputFormula",
+  Cell[61923, 1556, 592, 15, 32, "FormalTextInputFormula",
    CellTags->{
     "ID:330716980", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "3"},
    CellID->330716980]},
  "3"->{
-  Cell[61925, 1556, 592, 15, 32, "FormalTextInputFormula",
+  Cell[61923, 1556, 592, 15, 32, "FormalTextInputFormula",
    CellTags->{
     "ID:330716980", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "3"},
    CellID->330716980]},
  "ID:1346427776"->{
-  Cell[62520, 1573, 730, 18, 27, "FormalTextInputFormula",
+  Cell[62518, 1573, 730, 18, 27, "FormalTextInputFormula",
    CellTags->{
     "ID:1346427776", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "4"},
    CellID->1346427776]},
  "4"->{
-  Cell[62520, 1573, 730, 18, 27, "FormalTextInputFormula",
+  Cell[62518, 1573, 730, 18, 27, "FormalTextInputFormula",
    CellTags->{
     "ID:1346427776", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "4"},
    CellID->1346427776]},
  "ID:1421485859"->{
-  Cell[63253, 1593, 584, 14, 28, "FormalTextInputFormula",
+  Cell[63251, 1593, 584, 14, 28, "FormalTextInputFormula",
    CellTags->{
     "ID:1421485859", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "5"},
    CellID->1421485859]},
  "5"->{
-  Cell[63253, 1593, 584, 14, 28, "FormalTextInputFormula",
+  Cell[63251, 1593, 584, 14, 28, "FormalTextInputFormula",
    CellTags->{
     "ID:1421485859", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "5"},
    CellID->1421485859]},
  "ID:1874491785"->{
-  Cell[63840, 1609, 604, 14, 29, "FormalTextInputFormula",
+  Cell[63838, 1609, 604, 14, 29, "FormalTextInputFormula",
    CellTags->{
     "ID:1874491785", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "6"},
    CellID->1874491785]},
  "6"->{
-  Cell[63840, 1609, 604, 14, 29, "FormalTextInputFormula",
+  Cell[63838, 1609, 604, 14, 29, "FormalTextInputFormula",
    CellTags->{
     "ID:1874491785", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "6"},
    CellID->1874491785]},
  "ID:1491028062"->{
-  Cell[64447, 1625, 688, 16, 29, "FormalTextInputFormula",
+  Cell[64445, 1625, 688, 16, 29, "FormalTextInputFormula",
    CellTags->{
     "ID:1491028062", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "7"},
    CellID->1491028062]},
  "7"->{
-  Cell[64447, 1625, 688, 16, 29, "FormalTextInputFormula",
+  Cell[64445, 1625, 688, 16, 29, "FormalTextInputFormula",
    CellTags->{
     "ID:1491028062", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "7"},
    CellID->1491028062]},
  "ID:822628176"->{
-  Cell[65138, 1643, 415, 11, 28, "FormalTextInputFormula",
+  Cell[65136, 1643, 415, 11, 28, "FormalTextInputFormula",
    CellTags->{
     "ID:822628176", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "8"},
    CellID->822628176]},
  "8"->{
-  Cell[65138, 1643, 415, 11, 28, "FormalTextInputFormula",
+  Cell[65136, 1643, 415, 11, 28, "FormalTextInputFormula",
    CellTags->{
     "ID:822628176", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "8"},
    CellID->822628176]},
  "ID:242022487"->{
-  Cell[65556, 1656, 621, 17, 30, "FormalTextInputFormula",
+  Cell[65554, 1656, 621, 17, 30, "FormalTextInputFormula",
    CellTags->{
     "ID:242022487", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "14"},
    CellID->242022487]},
  "14"->{
-  Cell[65556, 1656, 621, 17, 30, "FormalTextInputFormula",
+  Cell[65554, 1656, 621, 17, 30, "FormalTextInputFormula",
    CellTags->{
     "ID:242022487", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "14"},
    CellID->242022487]},
  "ID:2033225528"->{
-  Cell[66180, 1675, 403, 10, 19, "FormalTextInputFormula",
+  Cell[66178, 1675, 403, 10, 19, "FormalTextInputFormula",
    CellTags->{
     "ID:2033225528", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "15"},
    CellID->2033225528]},
  "15"->{
-  Cell[66180, 1675, 403, 10, 19, "FormalTextInputFormula",
+  Cell[66178, 1675, 403, 10, 19, "FormalTextInputFormula",
    CellTags->{
     "ID:2033225528", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "15"},
    CellID->2033225528]},
  "ID:1045911681"->{
-  Cell[66586, 1687, 535, 15, 19, "FormalTextInputFormula",
+  Cell[66584, 1687, 535, 15, 22, "FormalTextInputFormula",
    CellTags->{
     "ID:1045911681", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "16"},
    CellID->1045911681]},
  "16"->{
-  Cell[66586, 1687, 535, 15, 19, "FormalTextInputFormula",
+  Cell[66584, 1687, 535, 15, 22, "FormalTextInputFormula",
    CellTags->{
     "ID:1045911681", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "16"},
    CellID->1045911681]},
  "ID:338555625"->{
-  Cell[67124, 1704, 351, 9, 19, "FormalTextInputFormula",
+  Cell[67122, 1704, 351, 9, 19, "FormalTextInputFormula",
    CellTags->{
     "ID:338555625", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "17"},
    CellID->338555625]},
  "17"->{
-  Cell[67124, 1704, 351, 9, 19, "FormalTextInputFormula",
+  Cell[67122, 1704, 351, 9, 19, "FormalTextInputFormula",
    CellTags->{
     "ID:338555625", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "17"},
    CellID->338555625]},
  "Proof:(8)"->{
-  Cell[67631, 1724, 78, 2, 21, "OpenProof",
+  Cell[67629, 1724, 78, 2, 21, "OpenProof",
    CellTags->"Proof:(8)",
    CellID->1494654586]},
  "Proof:(7)"->{
-  Cell[91006, 2265, 78, 2, 21, "OpenProof",
+  Cell[91004, 2265, 78, 2, 21, "OpenProof",
    CellTags->"Proof:(7)",
    CellID->1503671379]},
  "Info3538978900-6004912"->{
-  Cell[152946, 3837, 250, 5, 43, "Print",
+  Cell[152944, 3837, 250, 5, 43, "Print",
    CellTags->"Info3538978900-6004912",
    CellID->1287175721],
-  Cell[153199, 3844, 2372, 66, 157, "Print",
+  Cell[153197, 3844, 2372, 66, 157, "Print",
    CellTags->"Info3538978900-6004912",
    CellID->632570368]},
  "Info3537267044-9498034"->{
-  Cell[165997, 4169, 166, 3, 42, "Print",
+  Cell[165995, 4169, 166, 3, 42, "Print",
    CellTags->"Info3537267044-9498034",
    CellID->2079055498],
-  Cell[166166, 4174, 2948, 80, 210, "Print",
+  Cell[166164, 4174, 2948, 80, 210, "Print",
    CellTags->"Info3537267044-9498034",
    CellID->167383793]},
  "Info3539356428-4065218"->{
-  Cell[169846, 4283, 178, 3, 42, "Print",
+  Cell[169844, 4283, 178, 3, 42, "Print",
    CellTags->"Info3539356428-4065218",
    CellID->1486095324],
-  Cell[170027, 4288, 1154, 32, 43, "Print",
+  Cell[170025, 4288, 1154, 32, 43, "Print",
    CellTags->"Info3539356428-4065218",
    CellID->1967918314]},
  "Info3539417027-7448449"->{
-  Cell[520296, 13021, 826, 17, 82, "Print",
+  Cell[520294, 13021, 826, 17, 82, "Print",
    CellTags->"Info3539417027-7448449",
    CellID->913308155],
-  Cell[521125, 13040, 21974, 553, 3246, "Print",
+  Cell[521123, 13040, 21974, 553, 3246, "Print",
    CellTags->"Info3539417027-7448449",
    CellID->1036249219]},
  "ID:412145113"->{
-  Cell[590238, 14760, 1173, 29, 40, "FormalTextInputFormula",
+  Cell[590236, 14760, 1173, 29, 40, "FormalTextInputFormula",
    CellTags->{
     "ID:412145113", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "9"},
    CellID->412145113]},
  "9"->{
-  Cell[590238, 14760, 1173, 29, 40, "FormalTextInputFormula",
+  Cell[590236, 14760, 1173, 29, 40, "FormalTextInputFormula",
    CellTags->{
     "ID:412145113", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "9"},
    CellID->412145113]},
  "Info3538898227-6972375"->{
-  Cell[602753, 15126, 166, 3, 42, "Print",
+  Cell[602751, 15126, 166, 3, 42, "Print",
    CellTags->"Info3538898227-6972375",
    CellID->1804662456],
-  Cell[602922, 15131, 1569, 44, 62, "Print",
+  Cell[602920, 15131, 1569, 44, 62, "Print",
    CellTags->"Info3538898227-6972375",
    CellID->1518304074]}
  }
 *)
 (*CellTagsIndex
 CellTagsIndex->{
- {"Info3539356218-4065218", 651616, 16323},
- {"ID:1636935908", 651846, 16330},
- {"Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", 652105, 16336},
- {"1", 654620, 16402},
- {"ID:1242901413", 654834, 16408},
- {"10", 655038, 16414},
- {"ID:330716980", 655252, 16420},
- {"3", 655452, 16426},
- {"ID:1346427776", 655664, 16432},
- {"4", 655866, 16438},
- {"ID:1421485859", 656080, 16444},
- {"5", 656282, 16450},
- {"ID:1874491785", 656496, 16456},
- {"6", 656698, 16462},
- {"ID:1491028062", 656912, 16468},
- {"7", 657114, 16474},
- {"ID:822628176", 657327, 16480},
- {"8", 657527, 16486},
- {"ID:242022487", 657738, 16492},
- {"14", 657940, 16498},
- {"ID:2033225528", 658153, 16504},
- {"15", 658357, 16510},
- {"ID:1045911681", 658572, 16516},
- {"16", 658776, 16522},
- {"ID:338555625", 658990, 16528},
- {"17", 659191, 16534},
- {"Proof:(8)", 659399, 16540},
- {"Proof:(7)", 659510, 16544},
- {"Info3538978900-6004912", 659634, 16548},
- {"Info3537267044-9498034", 659876, 16555},
- {"Info3539356428-4065218", 660118, 16562},
- {"Info3539417027-7448449", 660360, 16569},
- {"ID:412145113", 660598, 16576},
- {"9", 660801, 16582},
- {"Info3538898227-6972375", 661025, 16588}
+ {"Info3539356218-4065218", 651614, 16323},
+ {"ID:1636935908", 651844, 16330},
+ {"Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", 652103, 16336},
+ {"1", 654618, 16402},
+ {"ID:1242901413", 654832, 16408},
+ {"10", 655036, 16414},
+ {"ID:330716980", 655250, 16420},
+ {"3", 655450, 16426},
+ {"ID:1346427776", 655662, 16432},
+ {"4", 655864, 16438},
+ {"ID:1421485859", 656078, 16444},
+ {"5", 656280, 16450},
+ {"ID:1874491785", 656494, 16456},
+ {"6", 656696, 16462},
+ {"ID:1491028062", 656910, 16468},
+ {"7", 657112, 16474},
+ {"ID:822628176", 657325, 16480},
+ {"8", 657525, 16486},
+ {"ID:242022487", 657736, 16492},
+ {"14", 657938, 16498},
+ {"ID:2033225528", 658151, 16504},
+ {"15", 658355, 16510},
+ {"ID:1045911681", 658570, 16516},
+ {"16", 658774, 16522},
+ {"ID:338555625", 658988, 16528},
+ {"17", 659189, 16534},
+ {"Proof:(8)", 659397, 16540},
+ {"Proof:(7)", 659508, 16544},
+ {"Info3538978900-6004912", 659632, 16548},
+ {"Info3537267044-9498034", 659874, 16555},
+ {"Info3539356428-4065218", 660116, 16562},
+ {"Info3539417027-7448449", 660358, 16569},
+ {"ID:412145113", 660596, 16576},
+ {"9", 660799, 16582},
+ {"Info3538898227-6972375", 661023, 16588}
  }
 *)
 (*NotebookFileOutline
@@ -16674,757 +16674,757 @@ Cell[2638, 93, 172, 3, 30, "Output",
 Cell[CellGroupData[{
 Cell[2847, 101, 142, 3, 23, "Computation",
  CellID->1579732474],
-Cell[2992, 106, 10400, 244, 15, "ComputationInfo",
- CellID->1608708567],
-Cell[13395, 352, 85, 2, 15, "ComputationResult",
- CellID->1382503791]
+Cell[2992, 106, 10399, 244, 15, "ComputationInfo",
+ CellID->400202193],
+Cell[13394, 352, 84, 2, 15, "ComputationResult",
+ CellID->413140594]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[13517, 359, 269, 5, 23, "Computation",
+Cell[13515, 359, 269, 5, 23, "Computation",
  CellID->194579654],
-Cell[13789, 366, 10386, 244, 15, "ComputationInfo",
+Cell[13787, 366, 10386, 244, 15, "ComputationInfo",
  CellID->1015121031],
-Cell[24178, 612, 132, 4, 16, "ComputationResult",
+Cell[24176, 612, 132, 4, 16, "ComputationResult",
  CellID->1486267798]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[24347, 621, 370, 7, 23, "Computation",
+Cell[24345, 621, 370, 7, 23, "Computation",
  CellID->1211576278],
-Cell[24720, 630, 10586, 245, 15, "ComputationInfo",
+Cell[24718, 630, 10586, 245, 15, "ComputationInfo",
  CellID->1501088458],
-Cell[35309, 877, 155, 5, 16, "ComputationResult",
+Cell[35307, 877, 155, 5, 16, "ComputationResult",
  CellID->364455147]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[35501, 887, 120, 2, 30, "Input",
+Cell[35499, 887, 120, 2, 30, "Input",
  CellID->937089794],
-Cell[35624, 891, 152, 3, 30, "Output",
+Cell[35622, 891, 152, 3, 30, "Output",
  CellID->1249695720]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[35813, 899, 125, 2, 30, "Input",
+Cell[35811, 899, 125, 2, 30, "Input",
  CellID->2107183564],
-Cell[35941, 903, 304, 7, 30, "Output",
+Cell[35939, 903, 304, 7, 30, "Output",
  CellID->808225961]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[36282, 915, 219, 4, 23, "Computation",
+Cell[36280, 915, 219, 4, 23, "Computation",
  CellID->1828479595],
-Cell[36504, 921, 10585, 245, 15, "ComputationInfo",
+Cell[36502, 921, 10585, 245, 15, "ComputationInfo",
  CellID->188800922],
-Cell[47092, 1168, 132, 4, 16, "ComputationResult",
+Cell[47090, 1168, 132, 4, 16, "ComputationResult",
  CellID->1166427869]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[47261, 1177, 146, 3, 23, "Computation",
+Cell[47259, 1177, 146, 3, 23, "Computation",
  CellID->2023567208],
-Cell[47410, 1182, 10585, 245, 15, "ComputationInfo",
+Cell[47408, 1182, 10585, 245, 15, "ComputationInfo",
  CellID->184524076],
-Cell[57998, 1429, 132, 4, 16, "ComputationResult",
+Cell[57996, 1429, 132, 4, 16, "ComputationResult",
  CellID->1084185991]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[58167, 1438, 298, 5, 30, "Input",
+Cell[58165, 1438, 298, 5, 30, "Input",
  CellID->1793037190],
 Cell[CellGroupData[{
-Cell[58490, 1447, 174, 3, 42, "Print",
+Cell[58488, 1447, 174, 3, 42, "Print",
  CellTags->"Info3539356218-4065218",
  CellID->577700309],
-Cell[58667, 1452, 1153, 32, 43, "Print",
+Cell[58665, 1452, 1153, 32, 43, "Print",
  CellTags->"Info3539356218-4065218",
  CellID->1169693318]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[59881, 1491, 114, 2, 74, "Section",
+Cell[59879, 1491, 114, 2, 74, "Section",
  CellID->1677594751],
-Cell[59998, 1495, 156, 3, 29, "GlobalDeclaration",
+Cell[59996, 1495, 156, 3, 29, "GlobalDeclaration",
  CellID->993326560],
 Cell[CellGroupData[{
-Cell[60179, 1502, 58, 1, 38, "OpenEnvironment",
+Cell[60177, 1502, 58, 1, 38, "OpenEnvironment",
  CellID->1372089959],
-Cell[60240, 1505, 185, 4, 21, "EnvironmentDeclaration",
+Cell[60238, 1505, 185, 4, 21, "EnvironmentDeclaration",
  CellID->1326837667],
-Cell[60428, 1511, 551, 15, 28, "FormalTextInputFormula",
+Cell[60426, 1511, 551, 15, 28, "FormalTextInputFormula",
  CellTags->{
   "ID:1636935908", 
    "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "1"},
  CellID->1636935908],
-Cell[60982, 1528, 940, 26, 28, "FormalTextInputFormula",
+Cell[60980, 1528, 940, 26, 28, "FormalTextInputFormula",
  CellTags->{
   "ID:1242901413", 
    "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "10"},
  CellID->1242901413],
-Cell[61925, 1556, 592, 15, 32, "FormalTextInputFormula",
+Cell[61923, 1556, 592, 15, 32, "FormalTextInputFormula",
  CellTags->{
   "ID:330716980", 
    "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "3"},
  CellID->330716980],
-Cell[62520, 1573, 730, 18, 27, "FormalTextInputFormula",
+Cell[62518, 1573, 730, 18, 27, "FormalTextInputFormula",
  CellTags->{
   "ID:1346427776", 
    "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "4"},
  CellID->1346427776],
-Cell[63253, 1593, 584, 14, 28, "FormalTextInputFormula",
+Cell[63251, 1593, 584, 14, 28, "FormalTextInputFormula",
  CellTags->{
   "ID:1421485859", 
    "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "5"},
  CellID->1421485859],
-Cell[63840, 1609, 604, 14, 29, "FormalTextInputFormula",
+Cell[63838, 1609, 604, 14, 29, "FormalTextInputFormula",
  CellTags->{
   "ID:1874491785", 
    "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "6"},
  CellID->1874491785],
-Cell[64447, 1625, 688, 16, 29, "FormalTextInputFormula",
+Cell[64445, 1625, 688, 16, 29, "FormalTextInputFormula",
  CellTags->{
   "ID:1491028062", 
    "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "7"},
  CellID->1491028062],
-Cell[65138, 1643, 415, 11, 28, "FormalTextInputFormula",
+Cell[65136, 1643, 415, 11, 28, "FormalTextInputFormula",
  CellTags->{
   "ID:822628176", 
    "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "8"},
  CellID->822628176],
-Cell[65556, 1656, 621, 17, 30, "FormalTextInputFormula",
+Cell[65554, 1656, 621, 17, 30, "FormalTextInputFormula",
  CellTags->{
   "ID:242022487", 
    "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "14"},
  CellID->242022487],
-Cell[66180, 1675, 403, 10, 19, "FormalTextInputFormula",
+Cell[66178, 1675, 403, 10, 19, "FormalTextInputFormula",
  CellTags->{
   "ID:2033225528", 
    "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "15"},
  CellID->2033225528],
-Cell[66586, 1687, 535, 15, 19, "FormalTextInputFormula",
+Cell[66584, 1687, 535, 15, 22, "FormalTextInputFormula",
  CellTags->{
   "ID:1045911681", 
    "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "16"},
  CellID->1045911681],
-Cell[67124, 1704, 351, 9, 19, "FormalTextInputFormula",
+Cell[67122, 1704, 351, 9, 19, "FormalTextInputFormula",
  CellTags->{
   "ID:338555625", 
    "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "17"},
  CellID->338555625],
-Cell[67478, 1715, 65, 1, 24, "EndEnvironmentMarker",
+Cell[67476, 1715, 65, 1, 24, "EndEnvironmentMarker",
  CellID->338734751]
 }, Open  ]],
-Cell[67558, 1719, 48, 1, 10, "CloseEnvironment",
+Cell[67556, 1719, 48, 1, 10, "CloseEnvironment",
  CellID->862514851],
 Cell[CellGroupData[{
-Cell[67631, 1724, 78, 2, 21, "OpenProof",
+Cell[67629, 1724, 78, 2, 21, "OpenProof",
  CellTags->"Proof:(8)",
  CellID->1494654586],
 Cell[CellGroupData[{
-Cell[67734, 1730, 8505, 185, 32, "ProofDisplay",
+Cell[67732, 1730, 8505, 185, 32, "ProofDisplay",
  CellID->196544800],
-Cell[76242, 1917, 14655, 339, 15, "ProofInfo",
+Cell[76240, 1917, 14655, 339, 15, "ProofInfo",
  CellID->1126983594]
 }, Open  ]],
-Cell[90912, 2259, 57, 1, 24, "CloseProof",
+Cell[90910, 2259, 57, 1, 24, "CloseProof",
  CellID->1619674528]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[91006, 2265, 78, 2, 21, "OpenProof",
+Cell[91004, 2265, 78, 2, 21, "OpenProof",
  CellTags->"Proof:(7)",
  CellID->1503671379],
 Cell[CellGroupData[{
-Cell[91109, 2271, 9026, 197, 32, "ProofDisplay",
+Cell[91107, 2271, 9026, 197, 32, "ProofDisplay",
  CellID->540003487],
-Cell[100138, 2470, 14915, 345, 15, "ProofInfo",
+Cell[100136, 2470, 14915, 345, 15, "ProofInfo",
  CellID->714321000]
 }, Open  ]],
-Cell[115068, 2818, 57, 1, 24, "CloseProof",
+Cell[115066, 2818, 57, 1, 24, "CloseProof",
  CellID->1577925462]
 }, Open  ]],
-Cell[115140, 2822, 142, 2, 23, "IncludeArchive",
+Cell[115138, 2822, 142, 2, 23, "IncludeArchive",
  CellID->1555117900],
 Cell[CellGroupData[{
-Cell[115307, 2828, 120, 2, 30, "Input",
+Cell[115305, 2828, 120, 2, 30, "Input",
  CellID->979690572],
-Cell[115430, 2832, 154, 3, 30, "Output",
+Cell[115428, 2832, 154, 3, 30, "Output",
  CellID->1312949183]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[115621, 2840, 159, 3, 30, "Input",
+Cell[115619, 2840, 159, 3, 30, "Input",
  CellID->422956012],
-Cell[115783, 2845, 116, 2, 30, "Output",
+Cell[115781, 2845, 116, 2, 30, "Output",
  CellID->585837779]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[115936, 2852, 257, 4, 30, "Input",
+Cell[115934, 2852, 257, 4, 30, "Input",
  CellID->151579708],
-Cell[116196, 2858, 978, 24, 70, "Output",
+Cell[116194, 2858, 978, 24, 70, "Output",
  CellID->756197371]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[117211, 2887, 206, 4, 30, "Input",
+Cell[117209, 2887, 206, 4, 30, "Input",
  CellID->545350332],
-Cell[117420, 2893, 106, 1, 30, "Output"]
+Cell[117418, 2893, 106, 1, 30, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[117563, 2899, 263, 6, 23, "Computation",
+Cell[117561, 2899, 263, 6, 23, "Computation",
  CellID->1853937483],
-Cell[117829, 2907, 10400, 244, 15, "ComputationInfo",
- CellID->1471322907],
-Cell[128232, 3153, 131, 4, 15, "ComputationResult",
- CellID->903552886]
+Cell[117827, 2907, 10400, 244, 15, "ComputationInfo",
+ CellID->2136631133],
+Cell[128230, 3153, 131, 4, 15, "ComputationResult",
+ CellID->668140742]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[128400, 3162, 189, 4, 23, "Computation",
+Cell[128398, 3162, 189, 4, 23, "Computation",
  CellID->890589206],
-Cell[128592, 3168, 10398, 244, 15, "ComputationInfo",
+Cell[128590, 3168, 10398, 244, 15, "ComputationInfo",
  CellID->19797523],
-Cell[138993, 3414, 108, 3, 15, "ComputationResult",
+Cell[138991, 3414, 108, 3, 15, "ComputationResult",
  CellID->1112079778]
 }, Open  ]],
-Cell[139116, 3420, 154, 4, 30, "Input",
+Cell[139114, 3420, 154, 4, 30, "Input",
  CellID->1626848086],
 Cell[CellGroupData[{
-Cell[139295, 3428, 256, 4, 30, "Input",
+Cell[139293, 3428, 256, 4, 30, "Input",
  CellID->121474739],
-Cell[139554, 3434, 1090, 29, 106, "Output",
+Cell[139552, 3434, 1090, 29, 106, "Output",
  CellID->463038785]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[140681, 3468, 157, 3, 30, "Input",
+Cell[140679, 3468, 157, 3, 30, "Input",
  CellID->464939686],
-Cell[140841, 3473, 105, 2, 30, "Output",
+Cell[140839, 3473, 105, 2, 30, "Output",
  CellID->1904542096]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[140983, 3480, 215, 5, 30, "Input",
+Cell[140981, 3480, 215, 5, 30, "Input",
  CellID->1367627067],
-Cell[141201, 3487, 206, 5, 30, "Output",
+Cell[141199, 3487, 206, 5, 30, "Output",
  CellID->1922865856]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[141444, 3497, 70, 1, 30, "Input",
+Cell[141442, 3497, 70, 1, 30, "Input",
  CellID->1808356990],
-Cell[141517, 3500, 9571, 281, 697, "Output",
+Cell[141515, 3500, 9571, 281, 697, "Output",
  CellID->675168849]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[151125, 3786, 124, 2, 24, "Input",
+Cell[151123, 3786, 124, 2, 24, "Input",
  CellID->1574073290],
-Cell[151252, 3790, 424, 8, 50, "Output",
+Cell[151250, 3790, 424, 8, 50, "Output",
  CellID->1282895222]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[151713, 3803, 215, 4, 30, "Input",
+Cell[151711, 3803, 215, 4, 30, "Input",
  CellID->250611018],
-Cell[151931, 3809, 748, 15, 158, "Output",
+Cell[151929, 3809, 748, 15, 158, "Output",
  CellID->520767582]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[152716, 3829, 205, 4, 30, "Input",
+Cell[152714, 3829, 205, 4, 30, "Input",
  CellID->1141685749],
 Cell[CellGroupData[{
-Cell[152946, 3837, 250, 5, 43, "Print",
+Cell[152944, 3837, 250, 5, 43, "Print",
  CellTags->"Info3538978900-6004912",
  CellID->1287175721],
-Cell[153199, 3844, 2372, 66, 157, "Print",
+Cell[153197, 3844, 2372, 66, 157, "Print",
  CellTags->"Info3538978900-6004912",
  CellID->632570368]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[155620, 3916, 208, 4, 30, "Input",
+Cell[155618, 3916, 208, 4, 30, "Input",
  CellID->1384747800],
-Cell[155831, 3922, 156, 4, 30, "Output",
+Cell[155829, 3922, 156, 4, 30, "Output",
  CellID->1447158141]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[156024, 3931, 243, 5, 30, "Input",
+Cell[156022, 3931, 243, 5, 30, "Input",
  CellID->427811824],
-Cell[156270, 3938, 614, 17, 30, "Output",
+Cell[156268, 3938, 614, 17, 30, "Output",
  CellID->1350215185]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[156921, 3960, 271, 5, 30, "Input",
+Cell[156919, 3960, 271, 5, 30, "Input",
  CellID->295057353],
-Cell[157195, 3967, 5726, 94, 1470, "Output",
+Cell[157193, 3967, 5726, 94, 1470, "Output",
  CellID->2118018082]
 }, Closed]],
-Cell[162936, 4064, 253, 5, 24, "Input",
+Cell[162934, 4064, 253, 5, 24, "Input",
  CellID->881736748],
-Cell[163192, 4071, 250, 5, 30, "Input",
+Cell[163190, 4071, 250, 5, 30, "Input",
  CellID->1972978571],
 Cell[CellGroupData[{
-Cell[163467, 4080, 235, 6, 30, "Input",
+Cell[163465, 4080, 235, 6, 30, "Input",
  CellID->1182975562],
-Cell[163705, 4088, 738, 22, 39, "Output",
+Cell[163703, 4088, 738, 22, 39, "Output",
  CellID->1873252243]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[164480, 4115, 169, 3, 30, "Input",
+Cell[164478, 4115, 169, 3, 30, "Input",
  CellID->2024511036],
-Cell[164652, 4120, 154, 4, 30, "Output",
+Cell[164650, 4120, 154, 4, 30, "Output",
  CellID->229083148]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[164843, 4129, 250, 5, 30, "Input",
+Cell[164841, 4129, 250, 5, 30, "Input",
  CellID->736852899],
-Cell[165096, 4136, 139, 3, 30, "Output",
+Cell[165094, 4136, 139, 3, 30, "Output",
  CellID->832383090]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[165272, 4144, 204, 4, 30, "Input",
+Cell[165270, 4144, 204, 4, 30, "Input",
  CellID->1370121138],
-Cell[165479, 4150, 290, 7, 78, "Output",
+Cell[165477, 4150, 290, 7, 78, "Output",
  CellID->2037549048]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[165806, 4162, 166, 3, 30, "Input",
+Cell[165804, 4162, 166, 3, 30, "Input",
  CellID->1955273032],
 Cell[CellGroupData[{
-Cell[165997, 4169, 166, 3, 42, "Print",
+Cell[165995, 4169, 166, 3, 42, "Print",
  CellTags->"Info3537267044-9498034",
  CellID->2079055498],
-Cell[166166, 4174, 2948, 80, 210, "Print",
+Cell[166164, 4174, 2948, 80, 210, "Print",
  CellTags->"Info3537267044-9498034",
  CellID->167383793]
 }, Open  ]]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[169163, 4260, 189, 4, 24, "Input",
+Cell[169161, 4260, 189, 4, 24, "Input",
  CellID->1541668732],
-Cell[169355, 4266, 131, 3, 30, "Output",
+Cell[169353, 4266, 131, 3, 30, "Output",
  CellID->211843285]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[169523, 4274, 298, 5, 30, "Input",
+Cell[169521, 4274, 298, 5, 30, "Input",
  CellID->1697196647],
 Cell[CellGroupData[{
-Cell[169846, 4283, 178, 3, 42, "Print",
+Cell[169844, 4283, 178, 3, 42, "Print",
  CellTags->"Info3539356428-4065218",
  CellID->1486095324],
-Cell[170027, 4288, 1154, 32, 43, "Print",
+Cell[170025, 4288, 1154, 32, 43, "Print",
  CellTags->"Info3539356428-4065218",
  CellID->1967918314]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[171230, 4326, 260, 7, 50, "Input",
+Cell[171228, 4326, 260, 7, 50, "Input",
  CellID->2076419721],
-Cell[171493, 4335, 521, 11, 126, "Output",
+Cell[171491, 4335, 521, 11, 126, "Output",
  CellID->762369429]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[172051, 4351, 270, 5, 23, "Computation",
+Cell[172049, 4351, 270, 5, 23, "Computation",
  CellID->1893908966],
-Cell[172324, 4358, 10400, 244, 15, "ComputationInfo",
+Cell[172322, 4358, 10400, 244, 15, "ComputationInfo",
  CellID->1575277035],
-Cell[182727, 4604, 131, 4, 16, "ComputationResult",
+Cell[182725, 4604, 131, 4, 16, "ComputationResult",
  CellID->109592331]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[182895, 4613, 379, 6, 23, "Computation",
+Cell[182893, 4613, 379, 6, 23, "Computation",
  CellID->88945358],
-Cell[183277, 4621, 10585, 245, 15, "ComputationInfo",
+Cell[183275, 4621, 10585, 245, 15, "ComputationInfo",
  CellID->662960668],
-Cell[193865, 4868, 154, 5, 16, "ComputationResult",
+Cell[193863, 4868, 154, 5, 16, "ComputationResult",
  CellID->95754422]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[194056, 4878, 219, 4, 23, "Computation",
+Cell[194054, 4878, 219, 4, 23, "Computation",
  CellID->1868443842],
-Cell[194278, 4884, 10585, 245, 15, "ComputationInfo",
+Cell[194276, 4884, 10585, 245, 15, "ComputationInfo",
  CellID->670983249],
-Cell[204866, 5131, 156, 5, 16, "ComputationResult",
+Cell[204864, 5131, 156, 5, 16, "ComputationResult",
  CellID->1294992259]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[205059, 5141, 145, 3, 23, "Computation",
+Cell[205057, 5141, 145, 3, 23, "Computation",
  CellID->546509625],
-Cell[205207, 5146, 10586, 245, 15, "ComputationInfo",
+Cell[205205, 5146, 10586, 245, 15, "ComputationInfo",
  CellID->1241332751],
-Cell[215796, 5393, 156, 5, 16, "ComputationResult",
+Cell[215794, 5393, 156, 5, 16, "ComputationResult",
  CellID->1029595611]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[215989, 5403, 145, 3, 30, "Input",
+Cell[215987, 5403, 145, 3, 30, "Input",
  CellID->1330495127],
-Cell[216137, 5408, 148, 4, 30, "Output",
+Cell[216135, 5408, 148, 4, 30, "Output",
  CellID->582396549]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[216322, 5417, 119, 2, 30, "Input",
+Cell[216320, 5417, 119, 2, 30, "Input",
  CellID->36095736],
-Cell[216444, 5421, 105, 2, 30, "Output",
+Cell[216442, 5421, 105, 2, 30, "Output",
  CellID->1692759908]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[216586, 5428, 125, 2, 30, "Input",
+Cell[216584, 5428, 125, 2, 30, "Input",
  CellID->2025658266],
-Cell[216714, 5432, 257, 6, 30, "Output",
+Cell[216712, 5432, 257, 6, 30, "Output",
  CellID->837323898]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[217020, 5444, 117, 2, 74, "Section",
+Cell[217018, 5444, 117, 2, 74, "Section",
  CellID->1498334619],
 Cell[CellGroupData[{
-Cell[217162, 5450, 429, 10, 29, "Computation",
+Cell[217160, 5450, 429, 10, 29, "Computation",
  CellID->98487382],
-Cell[217594, 5462, 9812, 235, 15, "ComputationInfo",
+Cell[217592, 5462, 9812, 235, 15, "ComputationInfo",
  CellID->1479163346],
-Cell[227409, 5699, 363, 12, 24, "ComputationResult",
+Cell[227407, 5699, 363, 12, 24, "ComputationResult",
  CellID->1504671994]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[227809, 5716, 241, 7, 29, "Computation",
+Cell[227807, 5716, 241, 7, 29, "Computation",
  CellID->1791385580],
-Cell[228053, 5725, 9810, 235, 15, "ComputationInfo",
+Cell[228051, 5725, 9810, 235, 15, "ComputationInfo",
  CellID->14065605],
-Cell[237866, 5962, 385, 12, 24, "ComputationResult",
+Cell[237864, 5962, 385, 12, 24, "ComputationResult",
  CellID->1201509063]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[238288, 5979, 315, 9, 29, "Computation",
+Cell[238286, 5979, 315, 9, 29, "Computation",
  CellID->1674073568],
-Cell[238606, 5990, 9811, 235, 15, "ComputationInfo",
+Cell[238604, 5990, 9811, 235, 15, "ComputationInfo",
  CellID->449726254],
-Cell[248420, 6227, 515, 13, 15, "ComputationResult",
+Cell[248418, 6227, 515, 13, 15, "ComputationResult",
  CellID->754137009]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[248972, 6245, 315, 9, 29, "Computation",
+Cell[248970, 6245, 315, 9, 29, "Computation",
  CellID->1845651749],
-Cell[249290, 6256, 9776, 235, 15, "ComputationInfo",
+Cell[249288, 6256, 9776, 235, 15, "ComputationInfo",
  CellID->108509328],
-Cell[259069, 6493, 412, 13, 24, "ComputationResult",
+Cell[259067, 6493, 412, 13, 24, "ComputationResult",
  CellID->737506521]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[259518, 6511, 390, 11, 33, "Computation",
+Cell[259516, 6511, 390, 11, 33, "Computation",
  CellID->1431049582],
-Cell[259911, 6524, 9811, 235, 15, "ComputationInfo",
+Cell[259909, 6524, 9811, 235, 15, "ComputationInfo",
  CellID->1185581040],
-Cell[269725, 6761, 319, 8, 15, "ComputationResult",
+Cell[269723, 6761, 319, 8, 15, "ComputationResult",
  CellID->582741343]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[270081, 6774, 336, 9, 29, "Computation",
+Cell[270079, 6774, 336, 9, 29, "Computation",
  CellID->203455808],
-Cell[270420, 6785, 9810, 235, 15, "ComputationInfo",
+Cell[270418, 6785, 9810, 235, 15, "ComputationInfo",
  CellID->145952955],
-Cell[280233, 7022, 336, 8, 15, "ComputationResult",
+Cell[280231, 7022, 336, 8, 15, "ComputationResult",
  CellID->1753205452]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[280606, 7035, 384, 10, 29, "Computation",
+Cell[280604, 7035, 384, 10, 29, "Computation",
  CellID->30211731],
-Cell[280993, 7047, 9812, 235, 15, "ComputationInfo",
+Cell[280991, 7047, 9812, 235, 15, "ComputationInfo",
  CellID->2129720458],
-Cell[290808, 7284, 409, 13, 24, "ComputationResult",
+Cell[290806, 7284, 409, 13, 24, "ComputationResult",
  CellID->754575839]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[291254, 7302, 341, 10, 29, "Computation",
+Cell[291252, 7302, 341, 10, 29, "Computation",
  CellID->1873687787],
-Cell[291598, 7314, 9812, 235, 15, "ComputationInfo",
+Cell[291596, 7314, 9812, 235, 15, "ComputationInfo",
  CellID->1253293235],
-Cell[301413, 7551, 541, 14, 15, "ComputationResult",
+Cell[301411, 7551, 541, 14, 15, "ComputationResult",
  CellID->1218379290]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[301991, 7570, 340, 10, 29, "Computation",
+Cell[301989, 7570, 340, 10, 29, "Computation",
  CellID->811697226],
-Cell[302334, 7582, 9777, 235, 15, "ComputationInfo",
+Cell[302332, 7582, 9777, 235, 15, "ComputationInfo",
  CellID->1518608613],
-Cell[312114, 7819, 436, 14, 24, "ComputationResult",
+Cell[312112, 7819, 436, 14, 24, "ComputationResult",
  CellID->825684985]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[312587, 7838, 142, 3, 23, "Computation",
+Cell[312585, 7838, 142, 3, 23, "Computation",
  CellID->1011115407],
-Cell[312732, 7843, 9776, 235, 15, "ComputationInfo",
+Cell[312730, 7843, 9776, 235, 15, "ComputationInfo",
  CellID->445048633],
-Cell[322511, 8080, 196, 4, 15, "ComputationResult",
+Cell[322509, 8080, 196, 4, 15, "ComputationResult",
  CellID->1204156752]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[322744, 8089, 141, 3, 23, "Computation",
+Cell[322742, 8089, 141, 3, 23, "Computation",
  CellID->277393357],
-Cell[322888, 8094, 9812, 235, 15, "ComputationInfo",
+Cell[322886, 8094, 9812, 235, 15, "ComputationInfo",
  CellID->1246334821],
-Cell[332703, 8331, 148, 3, 15, "ComputationResult",
+Cell[332701, 8331, 148, 3, 15, "ComputationResult",
  CellID->280699869]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[332888, 8339, 439, 12, 33, "Computation",
+Cell[332886, 8339, 439, 12, 33, "Computation",
  CellID->2073870508],
-Cell[333330, 8353, 9812, 235, 15, "ComputationInfo",
+Cell[333328, 8353, 9812, 235, 15, "ComputationInfo",
  CellID->1700297099],
-Cell[343145, 8590, 332, 9, 15, "ComputationResult",
+Cell[343143, 8590, 332, 9, 15, "ComputationResult",
  CellID->778293369]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[343514, 8604, 805, 21, 41, "Computation",
+Cell[343512, 8604, 805, 21, 41, "Computation",
  CellID->1152856210],
-Cell[344322, 8627, 9776, 235, 15, "ComputationInfo",
+Cell[344320, 8627, 9776, 235, 15, "ComputationInfo",
  CellID->960157500],
-Cell[354101, 8864, 2100, 55, 36, "ComputationResult",
+Cell[354099, 8864, 2100, 55, 36, "ComputationResult",
  CellID->690517246]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[356238, 8924, 256, 7, 30, "Computation",
+Cell[356236, 8924, 256, 7, 30, "Computation",
  CellID->1615862783],
-Cell[356497, 8933, 9776, 235, 15, "ComputationInfo",
+Cell[356495, 8933, 9776, 235, 15, "ComputationInfo",
  CellID->944167556],
-Cell[366276, 9170, 203, 4, 15, "ComputationResult",
+Cell[366274, 9170, 203, 4, 15, "ComputationResult",
  CellID->1238531527]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[366516, 9179, 297, 8, 30, "Computation",
+Cell[366514, 9179, 297, 8, 30, "Computation",
  CellID->1201037010],
-Cell[366816, 9189, 9775, 235, 15, "ComputationInfo",
+Cell[366814, 9189, 9775, 235, 15, "ComputationInfo",
  CellID->540673537],
-Cell[376594, 9426, 128, 2, 15, "ComputationResult",
+Cell[376592, 9426, 128, 2, 15, "ComputationResult",
  CellID->807696050]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[376759, 9433, 273, 7, 30, "Computation",
+Cell[376757, 9433, 273, 7, 30, "Computation",
  CellID->921769592],
-Cell[377035, 9442, 9777, 235, 15, "ComputationInfo",
+Cell[377033, 9442, 9777, 235, 15, "ComputationInfo",
  CellID->1465305827],
-Cell[386815, 9679, 104, 2, 15, "ComputationResult",
+Cell[386813, 9679, 104, 2, 15, "ComputationResult",
  CellID->168737142]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[386956, 9686, 449, 12, 41, "Computation",
+Cell[386954, 9686, 449, 12, 41, "Computation",
  CellID->165054078],
-Cell[387408, 9700, 9777, 235, 15, "ComputationInfo",
+Cell[387406, 9700, 9777, 235, 15, "ComputationInfo",
  CellID->1604596859],
-Cell[397188, 9937, 200, 4, 15, "ComputationResult",
+Cell[397186, 9937, 200, 4, 15, "ComputationResult",
  CellID->244870717]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[397425, 9946, 495, 12, 43, "Computation",
+Cell[397423, 9946, 495, 12, 43, "Computation",
  CellID->514390584],
-Cell[397923, 9960, 9777, 235, 15, "ComputationInfo",
+Cell[397921, 9960, 9777, 235, 15, "ComputationInfo",
  CellID->1113360533],
-Cell[407703, 10197, 695, 23, 18, "ComputationResult",
+Cell[407701, 10197, 695, 23, 18, "ComputationResult",
  CellID->1682361377]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[408435, 10225, 521, 12, 43, "Computation",
+Cell[408433, 10225, 521, 12, 43, "Computation",
  CellID->1089040068],
-Cell[408959, 10239, 9777, 235, 15, "ComputationInfo",
+Cell[408957, 10239, 9777, 235, 15, "ComputationInfo",
  CellID->1098517706],
-Cell[418739, 10476, 438, 15, 18, "ComputationResult",
+Cell[418737, 10476, 438, 15, 18, "ComputationResult",
  CellID->902180314]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[419214, 10496, 737, 18, 40, "Computation",
+Cell[419212, 10496, 737, 18, 40, "Computation",
  CellID->1030427555],
-Cell[419954, 10516, 9812, 235, 15, "ComputationInfo",
+Cell[419952, 10516, 9812, 235, 15, "ComputationInfo",
  CellID->2099805360],
-Cell[429769, 10753, 102, 2, 15, "ComputationResult",
+Cell[429767, 10753, 102, 2, 15, "ComputationResult",
  CellID->993919463]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[429908, 10760, 725, 18, 40, "Computation",
+Cell[429906, 10760, 725, 18, 40, "Computation",
  CellID->626819530],
-Cell[430636, 10780, 9811, 235, 15, "ComputationInfo",
+Cell[430634, 10780, 9811, 235, 15, "ComputationInfo",
  CellID->1982206321],
-Cell[440450, 11017, 105, 2, 15, "ComputationResult",
+Cell[440448, 11017, 105, 2, 15, "ComputationResult",
  CellID->468602894]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[440592, 11024, 829, 20, 40, "Computation",
+Cell[440590, 11024, 829, 20, 40, "Computation",
  CellID->1118177723],
-Cell[441424, 11046, 9812, 235, 15, "ComputationInfo",
+Cell[441422, 11046, 9812, 235, 15, "ComputationInfo",
  CellID->1426088242],
-Cell[451239, 11283, 106, 2, 15, "ComputationResult",
+Cell[451237, 11283, 106, 2, 15, "ComputationResult",
  CellID->1300723109]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[451382, 11290, 802, 19, 40, "Computation",
+Cell[451380, 11290, 802, 19, 40, "Computation",
  CellID->2063520275],
-Cell[452187, 11311, 9811, 235, 15, "ComputationInfo",
+Cell[452185, 11311, 9811, 235, 15, "ComputationInfo",
  CellID->663247889],
-Cell[462001, 11548, 376, 11, 15, "ComputationResult",
+Cell[461999, 11548, 376, 11, 15, "ComputationResult",
  CellID->725979512]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[462414, 11564, 828, 20, 40, "Computation",
+Cell[462412, 11564, 828, 20, 40, "Computation",
  CellID->941369956],
-Cell[463245, 11586, 9812, 235, 15, "ComputationInfo",
+Cell[463243, 11586, 9812, 235, 15, "ComputationInfo",
  CellID->1592498020],
-Cell[473060, 11823, 787, 27, 35, "ComputationResult",
+Cell[473058, 11823, 787, 27, 35, "ComputationResult",
  CellID->1882998958]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[473884, 11855, 759, 18, 30, "Computation",
+Cell[473882, 11855, 759, 18, 30, "Computation",
  CellID->952406679],
-Cell[474646, 11875, 9812, 235, 15, "ComputationInfo",
+Cell[474644, 11875, 9812, 235, 15, "ComputationInfo",
  CellID->1956997315],
-Cell[484461, 12112, 1255, 41, 54, "ComputationResult",
+Cell[484459, 12112, 1255, 41, 54, "ComputationResult",
  CellID->515926111]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[485753, 12158, 790, 19, 30, "Computation",
+Cell[485751, 12158, 790, 19, 30, "Computation",
  CellID->1263723114],
-Cell[486546, 12179, 9746, 234, 15, "ComputationInfo",
+Cell[486544, 12179, 9746, 234, 15, "ComputationInfo",
  CellID->1865004037],
-Cell[496295, 12415, 755, 24, 25, "ComputationResult",
+Cell[496293, 12415, 755, 24, 25, "ComputationResult",
  CellID->627422604]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[497087, 12444, 312, 10, 31, "Computation",
+Cell[497085, 12444, 312, 10, 31, "Computation",
  CellID->574544294],
-Cell[497402, 12456, 10384, 244, 82, "ComputationInfo",
+Cell[497400, 12456, 10384, 244, 82, "ComputationInfo",
  CellID->701678887],
-Cell[507789, 12702, 634, 18, 26, "ComputationResult",
+Cell[507787, 12702, 634, 18, 26, "ComputationResult",
  CellID->699868854]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[508460, 12725, 424, 13, 30, "Computation",
+Cell[508458, 12725, 424, 13, 30, "Computation",
  CellID->500928076],
-Cell[508887, 12740, 10400, 244, 15, "ComputationInfo",
+Cell[508885, 12740, 10400, 244, 15, "ComputationInfo",
  CellID->1158250773],
-Cell[519290, 12986, 804, 23, 35, "ComputationResult",
+Cell[519288, 12986, 804, 23, 35, "ComputationResult",
  CellID->79214255]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[520131, 13014, 140, 3, 30, "Input",
+Cell[520129, 13014, 140, 3, 30, "Input",
  CellID->1706377894],
 Cell[CellGroupData[{
-Cell[520296, 13021, 826, 17, 82, "Print",
+Cell[520294, 13021, 826, 17, 82, "Print",
  CellTags->"Info3539417027-7448449",
  CellID->913308155],
-Cell[521125, 13040, 21974, 553, 3246, "Print",
+Cell[521123, 13040, 21974, 553, 3246, "Print",
  CellTags->"Info3539417027-7448449",
  CellID->1036249219]
 }, Open  ]],
-Cell[543114, 13596, 168, 6, 43, "Output",
+Cell[543112, 13596, 168, 6, 43, "Output",
  CellID->65004996]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[543319, 13607, 148, 3, 30, "Input",
+Cell[543317, 13607, 148, 3, 30, "Input",
  CellID->452348970],
-Cell[543470, 13612, 834, 18, 254, "Output",
+Cell[543468, 13612, 834, 18, 254, "Output",
  CellID->399279262]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[544341, 13635, 426, 13, 30, "Computation",
+Cell[544339, 13635, 426, 13, 30, "Computation",
  CellID->1923940186],
-Cell[544770, 13650, 10357, 244, 15, "ComputationInfo",
+Cell[544768, 13650, 10357, 244, 15, "ComputationInfo",
  CellID->652674330],
-Cell[555130, 13896, 702, 22, 25, "ComputationResult",
+Cell[555128, 13896, 702, 22, 25, "ComputationResult",
  CellID->1971377609]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[555869, 13923, 149, 3, 30, "Input",
+Cell[555867, 13923, 149, 3, 30, "Input",
  CellID->1411710637],
-Cell[556021, 13928, 969, 21, 286, "Output",
+Cell[556019, 13928, 969, 21, 286, "Output",
  CellID->391066088]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[557027, 13954, 214, 5, 23, "Computation",
+Cell[557025, 13954, 214, 5, 23, "Computation",
  CellID->1392099689],
-Cell[557244, 13961, 10400, 244, 15, "ComputationInfo",
+Cell[557242, 13961, 10400, 244, 15, "ComputationInfo",
  CellID->1373321664],
-Cell[567647, 14207, 288, 6, 15, "ComputationResult",
+Cell[567645, 14207, 288, 6, 15, "ComputationResult",
  CellID->2011074225]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[567972, 14218, 320, 8, 23, "Computation",
+Cell[567970, 14218, 320, 8, 23, "Computation",
  CellID->1094429406],
-Cell[568295, 14228, 10400, 244, 15, "ComputationInfo",
+Cell[568293, 14228, 10400, 244, 15, "ComputationInfo",
  CellID->1455835425],
-Cell[578698, 14474, 290, 5, 15, "ComputationResult",
+Cell[578696, 14474, 290, 5, 15, "ComputationResult",
  CellID->380662198]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[579025, 14484, 165, 4, 23, "Computation",
+Cell[579023, 14484, 165, 4, 23, "Computation",
  CellID->1236848492],
-Cell[579193, 14490, 10399, 244, 15, "ComputationInfo",
+Cell[579191, 14490, 10399, 244, 15, "ComputationInfo",
  CellID->690458640],
-Cell[589595, 14736, 130, 2, 15, "ComputationResult",
+Cell[589593, 14736, 130, 2, 15, "ComputationResult",
  CellID->2049673273]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[589774, 14744, 115, 2, 74, "Section",
+Cell[589772, 14744, 115, 2, 74, "Section",
  CellID->332513239],
 Cell[CellGroupData[{
-Cell[589914, 14750, 58, 1, 38, "OpenEnvironment",
+Cell[589912, 14750, 58, 1, 38, "OpenEnvironment",
  CellID->1770062998],
-Cell[589975, 14753, 260, 5, 29, "EnvironmentDeclaration",
+Cell[589973, 14753, 260, 5, 29, "EnvironmentDeclaration",
  CellID->1574886120],
-Cell[590238, 14760, 1173, 29, 40, "FormalTextInputFormula",
+Cell[590236, 14760, 1173, 29, 40, "FormalTextInputFormula",
  CellTags->{
   "ID:412145113", 
    "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "9"},
  CellID->412145113],
-Cell[591414, 14791, 66, 1, 24, "EndEnvironmentMarker",
+Cell[591412, 14791, 66, 1, 24, "EndEnvironmentMarker",
  CellID->1300223080]
 }, Open  ]],
-Cell[591495, 14795, 49, 1, 10, "CloseEnvironment",
+Cell[591493, 14795, 49, 1, 10, "CloseEnvironment",
  CellID->1068241259],
 Cell[CellGroupData[{
-Cell[591569, 14800, 162, 3, 30, "Input",
+Cell[591567, 14800, 162, 3, 30, "Input",
  CellID->1565406460],
-Cell[591734, 14805, 9706, 282, 697, "Output",
+Cell[591732, 14805, 9706, 282, 697, "Output",
  CellID->1874911000]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[601477, 15092, 167, 3, 24, "Input",
+Cell[601475, 15092, 167, 3, 24, "Input",
  CellID->1391707244],
-Cell[601647, 15097, 829, 16, 142, "Output",
+Cell[601645, 15097, 829, 16, 142, "Output",
  CellID->365102397]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[602513, 15118, 215, 4, 30, "Input",
+Cell[602511, 15118, 215, 4, 30, "Input",
  CellID->2124154183],
 Cell[CellGroupData[{
-Cell[602753, 15126, 166, 3, 42, "Print",
+Cell[602751, 15126, 166, 3, 42, "Print",
  CellTags->"Info3538898227-6972375",
  CellID->1804662456],
-Cell[602922, 15131, 1569, 44, 62, "Print",
+Cell[602920, 15131, 1569, 44, 62, "Print",
  CellTags->"Info3538898227-6972375",
  CellID->1518304074]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[604540, 15181, 320, 7, 30, "Input",
+Cell[604538, 15181, 320, 7, 30, "Input",
  CellID->209530079],
-Cell[604863, 15190, 1085, 24, 318, "Output",
+Cell[604861, 15190, 1085, 24, 318, "Output",
  CellID->389968434]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[605985, 15219, 266, 6, 17, "Computation",
+Cell[605983, 15219, 266, 6, 17, "Computation",
  CellID->205321431],
-Cell[606254, 15227, 10400, 244, 15, "ComputationInfo",
+Cell[606252, 15227, 10400, 244, 15, "ComputationInfo",
  CellID->2049777050],
-Cell[616657, 15473, 412, 8, 15, "ComputationResult",
+Cell[616655, 15473, 412, 8, 15, "ComputationResult",
  CellID->666721698]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[617106, 15486, 240, 5, 23, "Computation",
+Cell[617104, 15486, 240, 5, 23, "Computation",
  CellID->2121083924],
-Cell[617349, 15493, 10639, 247, 15, "ComputationInfo",
+Cell[617347, 15493, 10639, 247, 15, "ComputationInfo",
  CellID->803931086],
-Cell[627991, 15742, 554, 16, 15, "ComputationResult",
+Cell[627989, 15742, 554, 16, 15, "ComputationResult",
  CellID->2082819044]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[628582, 15763, 266, 6, 23, "Computation",
+Cell[628580, 15763, 266, 6, 23, "Computation",
  CellID->533105519],
-Cell[628851, 15771, 10603, 248, 15, "ComputationInfo",
+Cell[628849, 15771, 10603, 248, 15, "ComputationInfo",
  CellID->2082900615],
-Cell[639457, 16021, 545, 18, 15, "ComputationResult",
+Cell[639455, 16021, 545, 18, 15, "ComputationResult",
  CellID->863356687]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[640039, 16044, 292, 6, 23, "Computation",
+Cell[640037, 16044, 292, 6, 23, "Computation",
  CellID->1034884285],
-Cell[640334, 16052, 10611, 247, 15, "ComputationInfo",
+Cell[640332, 16052, 10611, 247, 15, "ComputationInfo",
  CellID->1612224523],
-Cell[650948, 16301, 171, 4, 15, "ComputationResult",
+Cell[650946, 16301, 171, 4, 15, "ComputationResult",
  CellID->2141439813]
 }, Open  ]]
 }, Open  ]]

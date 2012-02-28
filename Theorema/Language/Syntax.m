@@ -230,7 +230,7 @@ getSingleRangeVar[ RowBox[{_, "[", v_String, "]"}]] := v
 getSingleRangeVar[ RowBox[{RowBox[{v_, "=", _}], ",", "\[Ellipsis]", ",", _}]] := v
 getSingleRangeVar[ r_] :=
 	Module[ {},
-		notification[ translate[ "ambiguousRange"], DisplayForm[ makeRangeBox[ r, StandardForm]]];
+		notification[ translate[ "ambiguousRange"], DisplayForm[ makeRangeBox[ r, TheoremaForm]]];
 		$Failed
 	]
 getSingleRangeVar[ args___] := unexpected[ getSingleRangeVar, {args}]
