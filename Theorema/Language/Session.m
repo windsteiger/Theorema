@@ -623,7 +623,10 @@ processComputation[x_] := Module[ { procSynt, res},
 	setComputationContext[ "compute"];
 	res = Catch[ ReleaseHold[ procSynt]];
 	setComputationContext[ "none"];
-	NotebookWrite[ EvaluationNotebook[], Cell[ ToBoxes[ res, TheoremaForm], "ComputationResult", CellLabel -> "Out["<>ToString[$Line]<>"]="]];
+	(*NotebookWrite[ EvaluationNotebook[], Cell[ ToBoxes[ res, TheoremaForm], "ComputationResult", CellLabel -> "Out["<>ToString[$Line]<>"]="]];*)
+	(* We force the MakeBoxes[ ..., TheoremaForm] to apply by setting $PrePrint=displayBoxes in the CellProlog of a computation cell.
+	   Unsetting $PrePrint in the CellEpilog ensures this behaviour only for Theorema computation *)
+	res
 ]
 processComputation[args___] := unexcpected[ processComputation, {args}]
 
@@ -645,6 +648,9 @@ closeComputation[] :=
 		$parseTheoremaExpressions = False;
     ]
 closeComputation[args___] := unexcpected[ closeComputation, {args}]
+
+displayBoxes[ expr_] := RawBoxes[ ToBoxes[ expr, TheoremaForm]]
+displayBoxes[ args___] := unexpected[ displayBoxes, {args}]
 
 
 (* ::Section:: *)
