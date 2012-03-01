@@ -773,13 +773,13 @@ envButtonData[args___] :=
 
 makeEnvButton[ bname_String] :=
     With[ { bd = envButtonData[bname]},
-			Button[Style[ translate[bd], "EnvButton"], insertNewEnv[ translate[bd]], Alignment -> {Left, Top}]
+			Button[ translate[bd], insertNewEnv[ translate[bd]], Alignment -> {Left, Top}]
     ]
 makeEnvButton[args___] :=
     unexpected[makeEnvButton, {args}]
 
 makeFormButton[] :=
-    Button[Style[ translate["tcLangTabEnvTabButtonFormLabel"], "EnvButton"], insertNewFormulaCell[ "Env"], Alignment -> {Left, Top}]
+    Button[ translate["tcLangTabEnvTabButtonFormLabel"], insertNewFormulaCell[ "Env"], Alignment -> {Left, Top}]
 makeFormButton[args___] :=
     unexpected[makeFormButton, {args}]
     
@@ -802,6 +802,7 @@ archButtons[] :=
         Pane[
         	Column[{
         		OpenerView[{Style[translate["tcLangTabArchTabSectionCreate"],"Section"], Column[{
+        		makeArchCreateButton[],
         		makeArchNewButton[],
         		makeArchInfoButton[],
         		makeArchCloseButton[]}]}],
@@ -812,27 +813,32 @@ archButtons[] :=
     ]
 archButtons[args___] := unexpected[archButtons, {args}]
 
+makeArchCreateButton[] :=
+	Button[ translate["tcLangTabArchTabButtonNewLabel"], insertNewArchive[ NotebookCreate[ StyleDefinitions -> FileNameJoin[{ "Theorema", "TheoremaNotebook.nb"}]]], Alignment -> {Left, Top}, Method -> "Queued"]
+makeArchNewButton[args___] := unexpected[makeArchNewButton, {args}]
+
 makeArchNewButton[] :=
-	Button[Style[ translate["tcLangTabArchTabButtonArchLabel"], "EnvButton"], insertNewArchive[], Alignment -> {Left, Top}]
+	Button[ translate["tcLangTabArchTabButtonMakeLabel"], insertNewArchive[ InputNotebook[]], Alignment -> {Left, Top}, Method -> "Queued"]
 makeArchNewButton[args___] := unexpected[makeArchNewButton, {args}]
 
 makeArchInfoButton[] :=
-	Button[Style[ translate["tcLangTabArchTabButtonInfoLabel"], "EnvButton"], insertArchiveInfo[], Alignment -> {Left, Top}]
+	Button[ translate["tcLangTabArchTabButtonInfoLabel"], insertArchiveInfo[], Alignment -> {Left, Top}]
 makeArchInfoButton[args___] := unexpected[makeArchInfoButton, {args}]
 
 makeArchCloseButton[] :=
-	Button[Style[ translate["tcLangTabArchTabButtonCloseLabel"], "EnvButton"], insertCloseArchive[], Alignment -> {Left, Top}]
+	Button[ translate["tcLangTabArchTabButtonCloseLabel"], insertCloseArchive[], Alignment -> {Left, Top}]
 makeArchCloseButton[args___] := unexpected[makeArchCloseButton, {args}]
 
-insertNewArchive[] :=
-	Module[{nb = InputNotebook[]},
+insertNewArchive[ nb_NotebookObject] :=
+	Module[{},
+		SelectionMove[nb, Before, Notebook];
 		NotebookWrite[nb, archiveOpenCell[]];
 		insertArchiveInfo[];
 		If[ NotebookFind[nb, "CloseArchive", All, CellStyle] === $Failed,
 			SelectionMove[nb, After, Notebook];
 			insertCloseArchive[];
-			NotebookFind[nb, "OpenArchive", All, CellStyle]
-		]
+		];
+		NotebookFind[nb, "OpenArchive", All, CellStyle]
 	]
 insertNewArchive[args___] := unexpected[insertNewArchive, {args}]
 
@@ -842,7 +848,18 @@ insertArchiveInfo[args___] := unexpected[insertArchiveInfo, {args}]
 insertCloseArchive[] := NotebookWrite[ InputNotebook[], archiveCloseCells[]]
 insertCloseArchive[args___] := unexpected[insertCloseArchive, {args}]
 
-archiveOpenCell[] := Cell["ArchiveName`", "OpenArchive"]
+archiveOpenCell[] := 
+	Module[ {name, input=""},
+		name = DialogInput[ 
+			Column[{ 
+				translate["archiveNameDialogField"],
+				InputField[ Dynamic[ input], String, FieldHint -> translate["archiveNameDialogHint"]],
+				ChoiceButtons[ {DialogReturn[ input], DialogReturn[ ""]}]}]];
+		If[ name === "" || StringTake[ name, -1] =!= "`",
+			name = name <> "`"
+		]; 
+		Cell[ BoxData["\"\<" <> name <> "\>\""], "OpenArchive", CellFrameLabels->{{translate["archLabelName"], None}, {None, translate["archLabelBegin"]}}]
+	]
 archiveOpenCell[args___] := unexpected[archiveOpenCell, {args}]
 
 archiveInfoCells[] := {
@@ -850,7 +867,7 @@ archiveInfoCells[] := {
 	Cell[ BoxData[RowBox[{"{","}"}]], "ArchiveInfo", CellFrameLabels->{{translate["archLabelPublic"], None}, {None, None}}]}
 archiveInfoCells[args___] := unexpected[archiveInfoCells, {args}]
 
-archiveCloseCells[] := Cell["\[FilledUpTriangle]", "CloseArchive"]
+archiveCloseCells[] := Cell["\[FilledUpTriangle]", "CloseArchive", CellFrameLabels->{{None, None}, {translate["archLabelEnd"], None}}]
 archiveCloseCells[args___] := unexpected[archiveCloseCells, {args}]
 
 makeArchLoadButton[] :=
@@ -858,7 +875,7 @@ makeArchLoadButton[] :=
         Column[{
             Dynamic[showSelectedArchives[arch]], 
             Row[{FileNameSetter[Dynamic[arch], "OpenList", {translate["fileTypeArchive"]->{"*.ta"}}, Appearance -> translate["tcLangTabArchTabButtonSelectLabel"]],
-            Button[Style[ translate["tcLangTabArchTabButtonLoadLabel"], "EnvButton"], (loadArchive[arch];arch=$TheoremaArchiveDirectory;), Alignment -> {Left, Top}]}]}]
+            Button[ translate["tcLangTabArchTabButtonLoadLabel"], (loadArchive[arch];arch=$TheoremaArchiveDirectory;), Alignment -> {Left, Top}]}]}]
     ]
 makeArchLoadButton[args___] := unexpected[makeArchLoadButton, {args}]
 
@@ -1050,7 +1067,7 @@ langButtonData[args___] :=
 
 makeLangButton[ bname_String] :=
     With[ { bd = langButtonData[bname]},
-			Tooltip[ Button[ Style[ bd[[1]], "LangButton"], 
+			Tooltip[ Button[ bd[[1]], 
 				FrontEndExecute[{NotebookApply[ InputNotebook[], bd[[2]], Placeholder]}], Appearance -> "DialogBox", Alignment -> {Left, Top}, ImageSize -> All],
 				bd[[3]], TooltipDelay -> 0.5]
     ]
@@ -1086,7 +1103,7 @@ compSetup[args___] :=
     unexpected[compSetup, {args}]
 
 makeCompButton[] :=
-    Button[Style[ translate["tcComputeTabSetupTabButtonCompLabel"], "EnvButton"], insertNewFormulaCell[ "COMPUTE"], Alignment -> {Left, Top}]
+    Button[ translate["tcComputeTabSetupTabButtonCompLabel"], insertNewFormulaCell[ "COMPUTE"], Alignment -> {Left, Top}]
 makeCompButton[args___] :=
     unexpected[makeCompButton, {args}]
 

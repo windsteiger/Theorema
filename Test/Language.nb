@@ -16308,7 +16308,7 @@ Cell[BoxData[
 }, Open  ]]
 },
 WindowSize->{740, 867},
-WindowMargins->{{Automatic, 547}, {93, Automatic}},
+WindowMargins->{{Automatic, 546}, {93, Automatic}},
 Visible->True,
 ShowSelection->True,
 CounterAssignments->{{"TheoremaFormulaCounter" -> 17}},
@@ -16390,7 +16390,7 @@ CellTagsIndex->{
     "ID:1045911681", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "16"},
    CellID->1045911681],
-  Cell[67122, 1704, 351, 9, 19, "FormalTextInputFormula",
+  Cell[67122, 1704, 351, 9, 22, "FormalTextInputFormula",
    CellTags->{
     "ID:338555625", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "17"},
@@ -16527,13 +16527,13 @@ CellTagsIndex->{
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "16"},
    CellID->1045911681]},
  "ID:338555625"->{
-  Cell[67122, 1704, 351, 9, 19, "FormalTextInputFormula",
+  Cell[67122, 1704, 351, 9, 22, "FormalTextInputFormula",
    CellTags->{
     "ID:338555625", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "17"},
    CellID->338555625]},
  "17"->{
-  Cell[67122, 1704, 351, 9, 19, "FormalTextInputFormula",
+  Cell[67122, 1704, 351, 9, 22, "FormalTextInputFormula",
    CellTags->{
     "ID:338555625", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "17"},
@@ -16571,7 +16571,7 @@ CellTagsIndex->{
   Cell[520294, 13021, 826, 17, 82, "Print",
    CellTags->"Info3539417027-7448449",
    CellID->913308155],
-  Cell[521123, 13040, 21974, 553, 3246, "Print",
+  Cell[521123, 13040, 21974, 553, 3284, "Print",
    CellTags->"Info3539417027-7448449",
    CellID->1036249219]},
  "ID:412145113"->{
@@ -16801,7 +16801,7 @@ Cell[66584, 1687, 535, 15, 22, "FormalTextInputFormula",
   "ID:1045911681", 
    "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "16"},
  CellID->1045911681],
-Cell[67122, 1704, 351, 9, 19, "FormalTextInputFormula",
+Cell[67122, 1704, 351, 9, 22, "FormalTextInputFormula",
  CellTags->{
   "ID:338555625", 
    "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "17"},
@@ -16969,7 +16969,7 @@ Cell[165094, 4136, 139, 3, 30, "Output",
  CellID->832383090]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[165270, 4144, 204, 4, 30, "Input",
+Cell[165270, 4144, 204, 4, 50, "Input",
  CellID->1370121138],
 Cell[165477, 4150, 290, 7, 78, "Output",
  CellID->2037549048]
@@ -17085,7 +17085,7 @@ Cell[238286, 5979, 315, 9, 29, "Computation",
  CellID->1674073568],
 Cell[238604, 5990, 9811, 235, 15, "ComputationInfo",
  CellID->449726254],
-Cell[248418, 6227, 515, 13, 15, "ComputationResult",
+Cell[248418, 6227, 515, 13, 35, "ComputationResult",
  CellID->754137009]
 }, Open  ]],
 Cell[CellGroupData[{
@@ -17125,7 +17125,7 @@ Cell[291252, 7302, 341, 10, 29, "Computation",
  CellID->1873687787],
 Cell[291596, 7314, 9812, 235, 15, "ComputationInfo",
  CellID->1253293235],
-Cell[301411, 7551, 541, 14, 15, "ComputationResult",
+Cell[301411, 7551, 541, 14, 35, "ComputationResult",
  CellID->1218379290]
 }, Open  ]],
 Cell[CellGroupData[{
@@ -17295,11 +17295,11 @@ Cell[CellGroupData[{
 Cell[520294, 13021, 826, 17, 82, "Print",
  CellTags->"Info3539417027-7448449",
  CellID->913308155],
-Cell[521123, 13040, 21974, 553, 3246, "Print",
+Cell[521123, 13040, 21974, 553, 3284, "Print",
  CellTags->"Info3539417027-7448449",
  CellID->1036249219]
 }, Open  ]],
-Cell[543112, 13596, 168, 6, 43, "Output",
+Cell[543112, 13596, 168, 6, 30, "Output",
  CellID->65004996]
 }, Open  ]],
 Cell[CellGroupData[{

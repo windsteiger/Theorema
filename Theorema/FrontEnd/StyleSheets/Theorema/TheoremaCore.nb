@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       145,          7]
-NotebookDataLength[      6604,        190]
-NotebookOptionsPosition[      4413,        139]
-NotebookOutlinePosition[      4877,        159]
-CellTagsIndexPosition[      4834,        156]
+NotebookDataLength[      6596,        190]
+NotebookOptionsPosition[      4405,        139]
+NotebookOutlinePosition[      4869,        159]
+CellTagsIndexPosition[      4826,        156]
 MenuPosition->0
 WindowFrame->Normal*)
 
@@ -118,8 +118,8 @@ Cell[StyleData["PIContent"]],
 
 Cell[StyleData["OpenArchive"],
  Evaluatable->True,
- CellProlog:>($PreRead = Theorema`Language`Session`Private`openArchive),
- CellEpilog:>Unset[$PreRead]],
+ CellProlog:>($Pre = Theorema`Language`Session`Private`openArchive),
+ CellEpilog:>Unset[$Pre]],
 
 Cell[StyleData["ArchiveInfo"],
  Evaluatable->True,
@@ -187,10 +187,10 @@ Cell[3538, 110, 71, 0, 35, 71, 0, "StyleData", "CILabel", "All"],
 Cell[3612, 112, 28, 0, 40, 28, 0, "StyleData", "CIContent", "All"],
 Cell[3643, 114, 71, 0, 35, 71, 0, "StyleData", "PILabel", "All"],
 Cell[3717, 116, 28, 0, 40, 28, 0, "StyleData", "PIContent", "All"],
-Cell[3748, 118, 153, 3, 40, 30, 0, "StyleData", "OpenArchive", "All"],
-Cell[3904, 123, 161, 4, 40, 30, 0, "StyleData", "ArchiveInfo", "All"],
-Cell[4068, 129, 155, 3, 40, 31, 0, "StyleData", "CloseArchive", "All"],
-Cell[4226, 134, 171, 2, 47, 73, 0, "StyleData", "IncludeArchive", "All"]
+Cell[3748, 118, 145, 3, 40, 30, 0, "StyleData", "OpenArchive", "All"],
+Cell[3896, 123, 161, 4, 40, 30, 0, "StyleData", "ArchiveInfo", "All"],
+Cell[4060, 129, 155, 3, 40, 31, 0, "StyleData", "CloseArchive", "All"],
+Cell[4218, 134, 171, 2, 47, 73, 0, "StyleData", "IncludeArchive", "All"]
 }, Open  ]]
 }
 ]

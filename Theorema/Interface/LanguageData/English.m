@@ -43,7 +43,8 @@ With[ {lang = "English"},
     		translate["tcLangTabEnvTabButtonFormLabel", lang] = "New Formula";
     	translate["tcLangTabArchTabLabel", lang] = "archives";
     		translate["tcLangTabArchTabSectionCreate", lang] = "Creating Archives";
-    		translate["tcLangTabArchTabButtonArchLabel", lang] = "New Archive";
+    		translate["tcLangTabArchTabButtonNewLabel", lang] = "New Archive";
+    		translate["tcLangTabArchTabButtonMakeLabel", lang] = "Make Archive";
     		translate["tcLangTabArchTabButtonInfoLabel", lang] = "Archive Info";
     		translate["tcLangTabArchTabButtonCloseLabel", lang] = "Close Archive";
     		translate["tcLangTabArchTabSectionLoad", lang] = "Loading Archives";
@@ -94,8 +95,13 @@ With[ {lang = "English"},
 
 (* General *)
 	translate["outsideSession", lang] = "An evaluation of this type of cell is not expected in the current type of session";
+	translate["archLabelBegin", lang] = "Begin Archive";
+	translate["archLabelEnd", lang] = "End Archive";
+	translate["archLabelName", lang] = "name:  ";
 	translate["archLabelNeeds", lang] = "needs: ";
 	translate["archLabelPublic", lang] = "public: ";
+	translate["archiveNameDialogField", lang] = "Choose a name for the archive:";
+	translate["archiveNameDialogHint", lang] = "valid archive name should end in `";
 	    
 (* Theorema`Language`Session` *)
     translate["notUniqueLabel", lang] = "These labels are not unique in the notebook: ``\n\nThis is just a warning, you can continue,\nbut referencing formulae from this notebook\nmight turn out to be confusing.";

@@ -416,7 +416,7 @@ getFormulaCounter[args___] := unexpected[ getFormulaCounter, {args}]
 openEnvironment[expr_] :=
     Module[{},
 		$parseTheoremaExpressions = True; 
-        PrependTo[ $ContextPath, "Theorema`Language`"];
+        $ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
         (* Set default context when not in an archive *)
         If[ !inArchive[], Begin["Theorema`Knowledge`"]];
         expr
@@ -427,7 +427,7 @@ closeEnvironment[] :=
 	Module[{},
 		(* Leave "Theorema`Knowledge`" context when not in an archive *)
 		If[ !inArchive[], End[]];
-		$ContextPath = DeleteCases[ $ContextPath, "Theorema`Language`"];
+		$ContextPath = Select[ $ContextPath, (!StringMatchQ[ #, "Theorema`Knowledge`" ~~ __] || # =!= "Theorema`Language`")&];
 		$parseTheoremaExpressions = False; 
         updateKBBrowser[];
 	]
@@ -476,10 +476,10 @@ openArchive[name_String] :=
             $kbStruct = ReplacePart[ $kbStruct, Append[posBrowser[[1]],1] -> CurrentValue["NotebookFullFileName"]]
         ];
         NotebookFind[ nb, "ArchiveInfo", All, CellStyle];
+        (* We memorize the setting of loaded archives *)
+        $globalArchivesList = $TheoremaArchives;
         BeginPackage[ "Theorema`Knowledge`" <> name, {"Theorema`"}];
         SelectionEvaluate[nb];
-        (* openArchive is used as $PreRead, therefore it must return a string *)
-        "Null"
     ]
 openArchive[args___] := unexpected[openArchive, {args}]
 
@@ -515,7 +515,9 @@ closeArchive[_String] :=
         (* We don't want to have the archive name in the context path,
            we control the context path when required using $TheoremaArchives *)
         $ContextPath = DeleteCases[$ContextPath, archName, {1}, 1];
-        $TheoremaArchives = DeleteDuplicates[ Prepend[ $TheoremaArchives, archName]];
+        (* We restore the globally loaded archives from the value it had before entering the current archive,
+           i.e. all archives loaded inside are removed again, they are treated as local w.r.t. the current archive *)
+        $TheoremaArchives = DeleteDuplicates[ Prepend[ $globalArchivesList, archName]];
         (* Reset the context path in order to force Mathematica to write
         explicit contexts to the file *)
         Block[ {$ContextPath = {"System`"}},
@@ -531,6 +533,7 @@ closeArchive[_String] :=
         ];
         (* Reset archive related variables. *)
         $tmaArch = {};
+        (* Return Null-string because this happens in $PreRead *)
         "Null"
     ]
 closeArchive[args___] := unexpected[closeArchive, {args}]
