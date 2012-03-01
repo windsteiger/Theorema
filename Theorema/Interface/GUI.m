@@ -407,7 +407,10 @@ structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cel
                                                        "FormalTextInputFormula",
                                                        "FormalTextInputFormulaUneval"
                                                    ]], {file, idLabel}],
-                             displayCellContent[ content]],
+                             If[ isEval,
+                             	theoremaDisplay[ Extract[ $tmaEnv, Append[ formPos[[1]], 2]]],
+                             	displayCellContent[ content]]
+                    ],
                     Button[ Style[formulaLabel, "FormalTextInputFormula"],
                         CreateDialog[{Cell[ content, "Output"], CancelButton["OK", NotebookClose[ButtonNotebook[]]]}],
                         Appearance->None]
@@ -420,7 +423,10 @@ structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cel
                                                        "FormalTextInputFormula",
                                                        "FormalTextInputFormulaUneval"
                                                    ]], {file, idLabel}],
-                             displayCellContent[ content]],
+                             If[ isEval,
+                             	theoremaDisplay[ Extract[ $tmaEnv, Append[ formPos[[1]], 2]]],
+                             	displayCellContent[ content]]
+                    ],
                     Button[ Style[formulaLabel, "FormalTextInputFormula"], 
                         CreateDialog[{Cell[ content, "Output"], CancelButton["OK", NotebookClose[ButtonNotebook[]]]}],
                         Appearance->None]
