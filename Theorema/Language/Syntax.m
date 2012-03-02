@@ -208,6 +208,8 @@ makeRangeSequence[RowBox[{s_,",",r__}]] :=
 makeRangeSequence[RowBox[{s_}]] :=
     makeRangeSequence[s]
 
+makeRangeSequence[GridBox[ r_List]] := Apply[ Sequence, Riffle[ Map[ makeRangeSequence, Flatten[ r]], ","]]
+
 makeRangeSequence[s_] :=
     RowBox[{"SIMPRNG$","[",s,"]"}]
 makeRangeSequence[args___] := unexpected[ makeRangeSequence, {args}]

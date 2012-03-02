@@ -39,9 +39,12 @@ initGUI[] :=
 		      where "key" is the corresponding key used in activeComputation *)
         $tmaBuiltins = {
         	{"Sets", 
-        		{"Union", RowBox[{"A","\[Union]","B"}], False, False, False},
+        		{"SetEqual", RowBox[{"A","=","B"}], False, False, False},
+           		{"Union", RowBox[{"A","\[Union]","B"}], False, False, False},
         		{"Intersection", RowBox[{"A","\[Intersection]","B"}], False, False, False},
-        		{"SetEqual", RowBox[{"A","=","B"}], False, False, False}},
+        		{"SequenceOf", RowBox[{"{","\[Ellipsis]", "|", "\[Ellipsis]", "}"}], False, False, False}},
+        	{"Tuples",
+        		{"SequenceOf", RowBox[{"\[LeftAngleBracket]","\[Ellipsis]", "|", "\[Ellipsis]", "\[RightAngleBracket]"}], False, False, False}},
         	{"Arithmetic", 
         		{"Plus", RowBox[{"A","+","B"}], False, True, False},
         		{"Times", RowBox[{"A","*","B"}], False, True, False},

@@ -49,8 +49,13 @@ Or$TM[ a__] /; buiActive["Or"] := Or[ a]
 Implies$TM[ a__] /; buiActive["Implies"] := Implies[ a]
 Iff$TM[ a__] /; buiActive["Iff"] := Equivalent[ a]
 
-ClearAll[ Forall$TM]
-Scan[ SetAttributes[ #, HoldRest]&, {Forall$TM, Exists$TM}]
+rangeToIterator[ SETRNG$[ x_, A_Set$TM]] := { x, Apply[ List, A]}
+rangeToIterator[ STEPRNG$[ x_, l_Integer, h_Integer, s_Integer]] := {x, l, h, s}
+rangeToIterator[ _] := $Failed
+rangeToIterator[ args___] := unexpected[ rangeToIterator, {args}]
+
+ClearAll[ Forall$TM, Exists$TM, SequenceOf$TM]
+Scan[ SetAttributes[ #, HoldRest]&, {Forall$TM, Exists$TM, SequenceOf$TM}]
 Scan[ SetAttributes[ #, HoldFirst]&, {SETRNG$, STEPRNG$}]
 
 Forall$TM[ RNG$[ r_, s__], cond_, form_]/; buiActive["Forall"] := 
@@ -61,12 +66,11 @@ Forall$TM[ RNG$[ r_, s__], cond_, form_]/; buiActive["Forall"] :=
 		]
 	]
 
-Forall$TM[ RNG$[ SETRNG$[ x_, A_Set$TM]], cond_, form_]/; buiActive["Forall"] :=
-   	forallIteration[ {x, Apply[ List, A]}, cond, form] 
+Forall$TM[ RNG$[ r:_SETRNG$|_STEPRNG$], cond_, form_]/; buiActive["Forall"] :=
+   	forallIteration[ rangeToIterator[ r], cond, form] 
 
-Forall$TM[ RNG$[ STEPRNG$[ x_, l_Integer, h_Integer, s_Integer]], cond_, form_]/; buiActive["Forall"] :=
-   	forallIteration[ {x, l, h, s}, cond, form] 
-
+(* We introduce local variables for the iteration so that we can substitute only for free occurrences.
+   Technically, Mathematica coulf iterate the VAR$[..] directly, but it would substitute ALL occurrences then *)
 SetAttributes[ forallIteration, HoldRest]
 forallIteration[ {x_, iter__}, cond_, form_] :=
     Module[ {uneval = {}, ci, sub},
@@ -99,11 +103,8 @@ Exists$TM[ RNG$[ r_, s__], cond_, form_]/; buiActive["Exists"] :=
 		]
 	]
 
-Exists$TM[ RNG$[ SETRNG$[ x_, A_Set$TM]], cond_, form_]/; buiActive["Exists"] := 
-	existsIteration[ {x, Apply[ List, A]}, cond, form]
-
-Exists$TM[ RNG$[ STEPRNG$[ x_, l_Integer, h_Integer, s_Integer]], cond_, form_]/; buiActive["Exists"] := 
-	existsIteration[ {x, l, h, s}, cond, form]
+Exists$TM[ RNG$[ r:_SETRNG$|_STEPRNG$], cond_, form_]/; buiActive["Exists"] :=
+   	existsIteration[ rangeToIterator[ r], cond, form] 
 
 SetAttributes[ existsIteration, HoldRest]
 existsIteration[ {x_, iter__}, cond_, form_] :=
@@ -128,6 +129,37 @@ existsIteration[ {x_, iter__}, cond_, form_] :=
             makeDisjunction[ uneval, Or$TM]
         ]
     ]
+
+(* Instead of nesting SequenceOf expressions and then concatenating the sequences, we construct a multi-iterator from the given ranges *)
+SequenceOf$TM[ RNG$[ r__], cond_, form_] :=
+	Module[ {s},
+		s /; buiActive["SequenceOf"] && (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
+	]
+
+(* The multi-iterator is used in a Do-loop. Local variables have to be introduced to be substituted during the iteration *)   	
+SetAttributes[ sequenceOfIteration, HoldRest]
+sequenceOfIteration[ iter:{__List}, cond_, form_] :=
+    Module[ {seq = {}, ci, comp, tmpVar = Table[ Unique[], {Length[ iter]}], iVar = Map[ First, iter]},
+        Catch[
+            With[ {locIter = Apply[ Sequence, MapThread[ ReplacePart[ #1, 1 -> #2]&, {iter, tmpVar}]], locSubs = Thread[ Rule[ iVar, tmpVar]]},
+                Do[ If[ TrueQ[ cond],
+                        ci = True,
+                        ci = ReleaseHold[ substituteFree[ Hold[ cond], locSubs]]
+                    ];
+                    If[ ci,
+                        comp = ReleaseHold[ substituteFree[ Hold[ form], locSubs]];
+                        AppendTo[ seq, comp],
+                        Continue[],
+                        Throw[ $Failed]
+                    ],
+                    locIter
+                ]
+            ];
+            Apply[ Sequence, seq]
+        ]
+    ]
+sequenceOfIteration[ iter_List, cond_, form_] := $Failed
+sequenceOfIteration[ args___] := unexpected[ sequenceOfIteration, {args}]
 
 
 (* ::Section:: *)

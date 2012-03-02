@@ -68,7 +68,7 @@ freeVariables[ args___] := unexpected[ freeVariables, {args}]
 (* ::Subsubsection:: *)
 (* variables *)
 
-variables[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[r___]] := Map[ #[[1]]&, {r}]
+variables[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[r___]] := Map[ First, {r}]
 variables[ args___] := unexpected[ variables, {args}]
 
 

@@ -80,6 +80,7 @@ With[ {lang = "English"},
 	translate["OK", lang] = "OK";
 	    
     translate["Sets", lang] = "Sets";
+    translate["Tuples", lang] = "Tuples";
     translate["Arithmetic", lang] = "Arithmetic";
     translate["Logic", lang] = "Logic";
     translate["Programming", lang] = "Mathematica Programming";
