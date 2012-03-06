@@ -40,7 +40,9 @@ Which[!ValueQ[$TheoremaDirectory],
 ];
 
 (* Introduce TheoremaForm as a new format type *)
-AppendTo[ $BoxForms, System`TheoremaForm];
+If[ FreeQ[ $BoxForms, System`TheoremaForm], 
+	AppendTo[ $BoxForms, System`TheoremaForm];
+]
 ParentForm[ System`TheoremaForm] ^= StandardForm;
 
 Map[ Get, FileNames[ "*.m", ToFileName[{$TheoremaDirectory, "Theorema", "Kernel", "LanguageData"}]]];
@@ -75,8 +77,8 @@ BeginPackage["Theorema`"]
 
 Get["Theorema`Language`"]
 Get["Theorema`Utilities`"]
-Get["Theorema`Interface`GUI`"]
 Get["Theorema`Provers`"]
+Get["Theorema`Interface`GUI`"]
 
 EndPackage[]
 	

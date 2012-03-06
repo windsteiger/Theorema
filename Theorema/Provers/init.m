@@ -20,6 +20,9 @@ BeginPackage["Theorema`Provers`", {"Theorema`"}]
 Needs["Theorema`Common`"]
 Get["Theorema`Provers`Common`"]
 
+(* Load the language dependent proof texts and prover descriptions*)
+Map[ Get, FileNames[ "*.m", ToFileName[{$TheoremaDirectory, "Theorema", "Provers", "LanguageData"}], 2]];
+
 Begin["`Private`"]
 
 proofStepText[ "ID" -> id_, step_, lang_, rest___] := 
@@ -27,9 +30,6 @@ proofStepText[ "ID" -> id_, step_, lang_, rest___] :=
 		proofStepText[ step, lang, rest]
 	]
 	
-(* Load the language dependent proof texts *)
-Map[ Get, FileNames[ "*.m", ToFileName[{$TheoremaDirectory, "Theorema", "Provers", "LanguageData"}], 2]];
-
 proofStepText[ args___] := unexpected[ proofStepText, {args}]
 
 
@@ -75,4 +75,7 @@ referenceCell[ args___] := unexpected[ referenceCell, {args}]
 
 
 End[]
+
+Get["Theorema`Provers`BasicProver`"]
+
 EndPackage[]

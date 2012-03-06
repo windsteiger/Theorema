@@ -25,13 +25,20 @@ Begin["`Private`"]
 (* ::Subsubsection:: *)
 (* callProver *)
 
-$TMAproofTree = {};
+initProver[] :=
+	Module[ {},
+		(* $proofInProgressMarker is used in the docked cells in stylesheet for displaying proofs *)
+		$proofInProgressMarker = {};
+		$TMAproofTree = {};
+		$registeredRuleSets = {};
+	]
 
-callProver[ prover_, goal_, kb_] :=
+callProver[ rules_, strategy_, goal_, kb_] :=
 	Module[{},
-		$TMAproofObject = makeInitialProofObject[ goal, kb, prover];
+		$TMAproofObject = makeInitialProofObject[ goal, kb, rules, strategy];
 		$TMAproofNotebook = makeInitialProofNotebook[ $TMAproofObject];
 		$TMAproofTree = makeInitialProofTree[ ];
+		proofSearch[ ];
 		Pause[1];
 		$TMAproofTree = {{"Initial", "pending", "andNode"} -> {"new1", "pending", "prfsit"},
   			{"Initial", "pending", "andNode"} -> {"new2", "pending", "prfsit"}};
@@ -45,6 +52,21 @@ callProver[ prover_, goal_, kb_] :=
 		{$Failed, $TMAproofObject}
 	]
 callProver[ args___] := unexpected[ callProver, {args}]
+
+
+(* ::Subsubsection:: *)
+(* proofSearch *)
+
+proofSearch[ ] :=
+	Module[{openPS, openPSpos, selPSpos, selPS},
+		openPSpos = Position[ $TMAproofObject, PRFSIT$[ _, _, _, "pending", ___]];
+		openPS = Extract[ $TMAproofObject, openPSpos];
+		selPSpos = chooseNextPS[ openPS, openPSpos];
+	]
+proofSearch[ args___] := unexpected[ proofSearch, {args}]
+
+(* ::Subsubsection:: *)
+(* showProofNavigation *)
 
 showProofNavigation[ {node:{id_, status_, type_}}] := Graphics[ makeNode[ node, {0, 0}], ImageSize -> {350, 450}, PlotRegion -> {{0.45, 0.55}, {0.9, 1}}]
 
@@ -82,10 +104,10 @@ makeNode[ args___] := unexpected[ makeNode, {args}]
 (* ::Subsubsection:: *)
 (* makeInitialProofObject *)
 
-makeInitialProofObject[ goal_, kb_, prover_] :=
+makeInitialProofObject[ goal_, kb_, rules_, strategy_] :=
 	PRFOBJ$[
 		PRFINFO$[ "ID" -> "Initial", goal, kb],
-		PRFSIT$[ "ID" -> "Initial", goal, kb, {}, "pending", "InferenceRules" -> inferenceRules[ prover]]
+		PRFSIT$[ "ID" -> "Initial", goal, kb, "pending", "InferenceRules" -> preprocessRules[ strategy, rules], "Strategy" -> strategy]
 	]
 makeInitialProofObject[ args___] := unexpected[ makeInitialProofObject, {args}]
 
@@ -93,9 +115,6 @@ makeInitialProofObject[ args___] := unexpected[ makeInitialProofObject, {args}]
 (* ::Subsubsection:: *)
 (* makeInitialProofNotebook *)
 
-(* $proofInProgressMarker is used in the docked cells in stylesheet for displaying proofs *)
-$proofInProgressMarker = {};
-        				    				
 makeInitialProofNotebook[ p_PRFOBJ$] :=
     Module[ { cells, t, nb},
         cells = proofObjectToCell[ p];
@@ -146,6 +165,29 @@ proofObjectToCell[ PRFSIT$[ id:("ID" -> _), g_, ___]] := proofStepText[ id, "Pro
 proofObjectToCell[ args___] := unexpected[ proofObjectToCell, {args}]
 
 
+(* ::Section:: *)
+(* register provers *)
+
+SetAttributes[ registerRuleSet, HoldAll]
+
+registerRuleSet[ n_String, r_, l_List] := 
+	Module[ {},
+		$registeredRuleSets = Union[ $registeredRuleSets, {Hold[ r] -> n}];
+		r = Prepend[ l, n];
+	]
+registerRuleSet[ args___] := unexpected[ registerRuleSet, {args}]
+
+registerStrategy[ n_String, s_, d_String] := Null
+registerStrategy[ args___] := unexpected[ registerStrategy, {args}]
+
+preprocessRules[ s_, r_] := r
+preprocessRules[ args___] := unexpected[ preprocessRules, {args}]
+
+
+(* ::Section:: *)
+(* Package Initialization *)
+
+initProver[]
 
 End[]
 

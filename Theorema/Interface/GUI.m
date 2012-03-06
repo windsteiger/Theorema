@@ -21,6 +21,7 @@ BeginPackage["Theorema`Interface`GUI`"];
 (* Exported symbols added here with SymbolName::usage *)  
 
 Needs["Theorema`Common`"]
+Needs["Theorema`Provers`"]
 Needs["Theorema`Interface`Language`"]
 
 Begin["`Private`"] (* Begin Private Context *) 
@@ -116,7 +117,7 @@ theoremaCommander[] /; $Notebooks :=
         			translate["tcProveTabGoalTabLabel"]->Dynamic[ Refresh[ displaySelectedGoal[], UpdateInterval -> 2]],
         			translate["tcProveTabKBTabLabel"]->Dynamic[Refresh[displayKBBrowser["prove"], TrackedSymbols :> {$kbStruct}]],
         			translate["tcProveTabBuiltinTabLabel"]->displayBuiltinBrowser["prove"],
-        			translate["tcProveTabProverTabLabel"]->selectProver[],
+        			translate["tcProveTabProverTabLabel"]->Dynamic[ Refresh[ selectProver[], TrackedSymbols :> {$selectedRuleSet, $selectedStrategy}]],
         			translate["tcProveTabSubmitTabLabel"]->Dynamic[ Refresh[ submitProveTask[ $tcProveTab],
         				TrackedSymbols :> {$tcProveTab, $selectedProofGoal, $selectedProofKB, $selectedProver}]],
         			translate["tcProveTabNavigateTabLabel"]->Dynamic[ Refresh[ proofNavigation[ $TMAproofTree],
@@ -179,7 +180,7 @@ displaySelectedGoal[args___] :=
 displayLabeledFormula[ {key_, form_, lab_}] := 
 	Module[ {link},
 		link = { StringReplace[ key[[2]], "Source"<>$cellTagKeySeparator -> "", 1], key[[1]]};
-		{Hyperlink[ Style[ lab, "FormulaLabel"], link], Style[ TraditionalForm[ form], "DisplayFormula"]}
+		{Hyperlink[ Style[ lab, "FormulaLabel"], link], Style[ theoremaDisplay[ form], "DisplayFormula"]}
 	]
 displayLabeledFormula[ args___] := unexpected[ displayLabeledFormula, {args}]
 
@@ -572,6 +573,41 @@ structViewBuiltin[ category_String, tags_, task_String] :=
 structViewBuiltin[args___] :=
     unexpected[structViewBuiltin, {args}]
 
+(* ::Subsubsection:: *)
+(* structViewRules *)
+Clear[structViewRules];
+
+(* structured view for builtin operators
+   follows the ideas of the structured view of the KB *)
+
+structViewRules[ Hold[ rs_]] := structViewRules[ rs, {}][[1]]
+
+structViewRules[{category_String, r__}, tags_] :=
+    Module[ {sub, compTags},
+        sub = Transpose[Map[structViewRules[#, tags] &, {r}]];
+        compTags = Apply[Union, sub[[2]]];
+        {OpenerView[{structViewRules[category, compTags], Column[sub[[1]]]}, 
+        	ToExpression[StringReplace["Dynamic[NEWSYM]", 
+        		"NEWSYM" -> "$ruleStructState$" <> ToString[ Hash[ category]]]]], 
+         compTags}
+    ]
+  
+structViewRules[ r_Symbol, tags_] :=
+    Module[ { },
+        {Row[{Checkbox[ Dynamic[ Theorema`Prover`Common`Private`ruleAct[ r]]], r}, 
+                Spacer[10]], {r}}
+    ]
+
+structViewRules[ category_String, tags_] :=
+    Module[ {},
+    	Row[{Checkbox[ Dynamic[ allTrue[ tags, Theorema`Prover`Common`Private`ruleAct], 
+        		setAll[ tags, Theorema`Prover`Common`Private`ruleAct, #] &]], 
+          		Style[ translate[category], "Section"]}, Spacer[10]]
+    ]
+
+structViewRules[args___] :=
+    unexpected[structViewRules, {args}]
+
 
 (* ::Subsubsection:: *)
 (* check/set values *)
@@ -601,10 +637,14 @@ displayBuiltinBrowser[ task_String] :=
 displayBuiltinBrowser[args___] := unexcpected[ displayBuiltinBrowser, {args}]
 
 selectProver[ ] :=
-	Block[ { $registeredProvers = {prover1, prover2}},
-		PopupMenu[ Dynamic[ $selectedProver], $registeredProvers]
-	]
-selectProver[ args___] := unexpected[ selectProver, {args}]
+    Pane[ Column[{
+    PopupMenu[ Dynamic[ $selectedRuleSet], $registeredRuleSets],
+    PopupMenu[ Dynamic[ $selectedStrategy], $registeredStrategies],
+    Apply[ Function[ rs, MessageName[ rs, "usage"], {HoldFirst}], $selectedRuleSet],
+    structViewRules[ $selectedRuleSet]
+    }],
+    ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
+selectProver[ args___] := unexpected[ selectRuleSet, {args}]
 
 submitProveTask[ dummy_] := 
 	Module[ {},
@@ -612,15 +652,15 @@ submitProveTask[ dummy_] :=
 			Labeled[ displaySelectedGoal[ $selectedProofGoal], Style[ translate["selGoal"], "CellLabel"], {{ Top, Left}}],
 			Labeled[ displaySelectedKB[], Style[ translate["selKB"], "CellLabel"], {{ Top, Left}}],
 			(* Method -> "Queued" so that no time limit is set for proof to complete *)
-			Button[ translate["prove"], execProveCall[ $selectedProofGoal, $selectedProofKB, $selectedProver], Method -> "Queued"]
+			Button[ translate["prove"], execProveCall[ $selectedProofGoal, $selectedProofKB, $selectedRuleSet, $selectedStrategy], Method -> "Queued"]
 		}]
 	]
 submitProveTask[ args___] := unexpected[ submitProveTask, {args}]
 
-execProveCall[ goal_, kb_, prover_] :=
+execProveCall[ goal_, kb_, ruleSet_, strategy_] :=
 	Module[{nb = InputNotebook[], proof},
 		$tcProveTab++;
-		If[ NotebookFind[ nb, "Proof:"<>goal[[3]], All, CellTags] === $Failed,
+		If[ NotebookFind[ nb, makeProofIDTag[ goal], All, CellTags] === $Failed,
 			NotebookFind[ nb, goal[[1,1]], All, CellTags];
 			NotebookFind[ nb, "CloseEnvironment", Next, CellStyle];
 			SelectionMove[ nb, After, CellGroup],
@@ -628,8 +668,8 @@ execProveCall[ goal_, kb_, prover_] :=
 		];
 		SetSelectedNotebook[ nb];
 
-		proof = callProver[ prover, goal, kb];
-		printProveInfo[ goal, kb, prover, proof];
+		proof = callProver[ ruleSet, strategy, goal, kb];
+		printProveInfo[ goal, kb, ruleSet, strategy, proof];
 	]
 execProveCall[ args___] := unexpected[ execProveCall, {args}]
 
@@ -674,13 +714,13 @@ setCompEnv[ args___] := unexpected[ setCompEnv, {args}]
 (* ::Subsubsection:: *)
 (* printProofInfo *)
 
-printProveInfo[ goal_, kb_, prover_, { pVal_, proofObj_}] :=
+printProveInfo[ goal_, kb_, rules_, strategy_, { pVal_, proofObj_}] :=
     Module[ {kbAct, bui, buiAct},
         kbAct = Map[ Part[ #, 3]&, kb];
         bui = Cases[ DownValues[ Theorema`Computation`Language`Private`buiActProve],
         	HoldPattern[ Verbatim[HoldPattern][ Theorema`Computation`Language`Private`buiActProve[ op_String]] :> v_] -> {op, v}];
         buiAct = Cases[ bui, { op_, True} -> op];
-        NotebookWrite[ $proofInitNotebook, Cell[ translate[ "Proof of"]<>" "<>goal[[3]], "OpenProof", CellTags -> "Proof:"<>goal[[3]]]];
+        NotebookWrite[ $proofInitNotebook, Cell[ translate[ "Proof of"]<>" "<>goal[[3]], "OpenProof", CellTags -> makeProofIDTag[ goal]]];
         (* Use Method -> "Queued" so that no time limit for proof display applies *)
         NotebookWrite[ $proofInitNotebook, Cell[ BoxData[ ToBoxes[
         	Button[ translate["ShowProof"], displayProof[ proofObj], ImageSize -> Automatic, Method -> "Queued"]]], "ProofDisplay"]];
@@ -709,6 +749,9 @@ setProveEnv[ goal_, kb_List, bui_List] :=
 		Scan[(Theorema`Computation`Language`Private`buiActProve[#[[1]]] = #[[2]])&, bui]
 	]
 setProveEnv[ args___] := unexpected[ setProveEnv, {args}]
+
+makeProofIDTag[ { id_, _,_}] := Apply[ StringJoin, Riffle[ Prepend[ id, "Proof"], "|"]]
+makeProofIDTag[ args___] := unexpected[ makeProofIDTag, {args}]
 
 
 (* ::Section:: *)

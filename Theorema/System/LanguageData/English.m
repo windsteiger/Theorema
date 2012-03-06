@@ -71,6 +71,9 @@ With[ {lang = "English"},
 
 (* Theorema`Provers` *)
 	MessageName[proofStepText, "usage", lang] = "proofStepText[ stepID_, lang_, data___] generates the cell expression explaining the proof step stepID in language lang.";
+	MessageName[$registeredRuleSets, "usage", lang] = "$registeredRuleSets is a list of available provers in the Theorema system.";
+	MessageName[registerRuleSet, "usage", lang] = "registerRuleSet[ n_, p_, r_] registers prover p under the name n consisting of rules r.";
+	MessageName[preprocessRules, "usage", lang] = "preprocessRules[ s_, r_] preprocesses rules r as appropriate for strategy s.";
 
 (* Theorema`Provers`Common` *)
 	MessageName[callProver, "usage", lang] = "callProver[ prover_, goal_, kb_] calls prover with goal and kb, returns a proof value and proof object.";
