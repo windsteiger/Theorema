@@ -83,7 +83,6 @@ initGUI[] :=
 		kbSelectSolve[_] := False;
 		$selectedProofGoal = {};
 		initBuiltins[ {"prove", "compute", "solve"}];
-		$registeredProvers = {};
 	]
 
 initBuiltins[ l_List] :=
@@ -580,13 +579,13 @@ Clear[structViewRules];
 (* structured view for builtin operators
    follows the ideas of the structured view of the KB *)
 
-structViewRules[ Hold[ rs_]] := structViewRules[ rs, {}][[1]]
+structViewRules[ Hold[ rs_], explain_] := structViewRules[ rs, {}, explain][[1]]
 
-structViewRules[{category_String, r__}, tags_] :=
+structViewRules[{category_String, r__}, tags_, explain_String:""] :=
     Module[ {sub, compTags},
         sub = Transpose[Map[structViewRules[#, tags] &, {r}]];
         compTags = Apply[Union, sub[[2]]];
-        {OpenerView[{structViewRules[category, compTags], Column[sub[[1]]]}, 
+        {OpenerView[{structViewRules[category, compTags, explain], Column[sub[[1]]]}, 
         	ToExpression[StringReplace["Dynamic[NEWSYM]", 
         		"NEWSYM" -> "$ruleStructState$" <> ToString[ Hash[ category]]]]], 
          compTags}
@@ -594,15 +593,18 @@ structViewRules[{category_String, r__}, tags_] :=
   
 structViewRules[ r_Symbol, tags_] :=
     Module[ { },
-        {Row[{Checkbox[ Dynamic[ Theorema`Prover`Common`Private`ruleAct[ r]]], r}, 
+        {Row[{Checkbox[ Dynamic[ Theorema`Provers`Common`Private`ruleAct[ r]]], r}, 
                 Spacer[10]], {r}}
     ]
 
-structViewRules[ category_String, tags_] :=
+structViewRules[ category_String, tags_, explain_String] :=
     Module[ {},
-    	Row[{Checkbox[ Dynamic[ allTrue[ tags, Theorema`Prover`Common`Private`ruleAct], 
-        		setAll[ tags, Theorema`Prover`Common`Private`ruleAct, #] &]], 
-          		Style[ translate[category], "Section"]}, Spacer[10]]
+    	Row[{Checkbox[ Dynamic[ allTrue[ tags, Theorema`Provers`Common`Private`ruleAct], 
+        		setAll[ tags, Theorema`Provers`Common`Private`ruleAct, #] &]], 
+          		If[ explain =!= "",
+          			Tooltip[ Style[ translate[category], "Section"], explain],
+          			Style[ translate[category], "Section"]
+          		]}, Spacer[10]]
     ]
 
 structViewRules[args___] :=
@@ -638,11 +640,10 @@ displayBuiltinBrowser[args___] := unexcpected[ displayBuiltinBrowser, {args}]
 
 selectProver[ ] :=
     Pane[ Column[{
-    PopupMenu[ Dynamic[ $selectedRuleSet], $registeredRuleSets],
-    PopupMenu[ Dynamic[ $selectedStrategy], $registeredStrategies],
-    Apply[ Function[ rs, MessageName[ rs, "usage"], {HoldFirst}], $selectedRuleSet],
-    structViewRules[ $selectedRuleSet]
-    }],
+    Row[ { translate[ "selRules"], PopupMenu[ Dynamic[ $selectedRuleSet], Map[ MapAt[ translate, #, {2}]&, $registeredRuleSets]]}],
+    Row[ { translate[ "selStrat"], PopupMenu[ Dynamic[ $selectedStrategy], Map[ MapAt[ translate, #, {2}]&, $registeredStrategies]]}],
+    structViewRules[ $selectedRuleSet, Apply[ Function[ rs, MessageName[ rs, "usage"], {HoldFirst}], $selectedRuleSet]]
+    }], {350, 450},
     ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
 selectProver[ args___] := unexpected[ selectRuleSet, {args}]
 
@@ -720,7 +721,7 @@ printProveInfo[ goal_, kb_, rules_, strategy_, { pVal_, proofObj_}] :=
         bui = Cases[ DownValues[ Theorema`Computation`Language`Private`buiActProve],
         	HoldPattern[ Verbatim[HoldPattern][ Theorema`Computation`Language`Private`buiActProve[ op_String]] :> v_] -> {op, v}];
         buiAct = Cases[ bui, { op_, True} -> op];
-        NotebookWrite[ $proofInitNotebook, Cell[ translate[ "Proof of"]<>" "<>goal[[3]], "OpenProof", CellTags -> makeProofIDTag[ goal]]];
+        NotebookWrite[ $proofInitNotebook, Cell[ translate[ "Proof of"]<>" "<>goal[[3]]<>": "<>ToString[pVal], "OpenProof", CellTags -> makeProofIDTag[ goal]]];
         (* Use Method -> "Queued" so that no time limit for proof display applies *)
         NotebookWrite[ $proofInitNotebook, Cell[ BoxData[ ToBoxes[
         	Button[ translate["ShowProof"], displayProof[ proofObj], ImageSize -> Automatic, Method -> "Queued"]]], "ProofDisplay"]];
@@ -729,24 +730,31 @@ printProveInfo[ goal_, kb_, rules_, strategy_, { pVal_, proofObj_}] :=
             Column[ {OpenerView[ {Style[ translate[ "GoalProve"], "PIContent"], Style[ goal[[3]], "PIContent"]}],
             	OpenerView[ {Style[ translate[ "KBprove"], "PIContent"], Style[ kbAct, "PIContent"]}],
                 OpenerView[ {Style[ translate[ "BuiProve"], "PIContent"], Style[ buiAct, "PIContent"]}],
+                OpenerView[ {Style[ translate[ "selProver"], "PIContent"], Style[ {rules, strategy}, "PIContent"]}],
                 With[ {allKB = Cases[ DownValues[ kbSelectProve],
                 	HoldPattern[ Verbatim[HoldPattern][ kbSelectProve[ k_List]] :> v_] -> {k, v}],
-                    allBui = bui},
-                    Button[ translate["SetEnv"], setProveEnv[ goal, allKB, allBui], ImageSize -> Automatic]
+                    allBui = bui, allRules = Cases[ DownValues[ Theorema`Provers`Common`Private`ruleAct],
+                	HoldPattern[ Verbatim[HoldPattern][ Theorema`Provers`Common`Private`ruleAct[ r_Symbol]] :> v_] -> {r, v}]},
+                    Button[ translate["SetEnv"], setProveEnv[ goal, allKB, allBui, rules, strategy, allRules], ImageSize -> Automatic]
                 ]}
             ]}, False]], "ProofInfo"]];
         NotebookWrite[ $proofInitNotebook, Cell[ "\[EmptySquare]", "CloseProof"]];
     ]
 printProveInfo[args___] := unexcpected[ printProveInfo, {args}]
 
-setProveEnv[ goal_, kb_List, bui_List] :=
+setProveEnv[ goal_, kb_List, bui_List, ruleSet_, strategy_, allRules_List] :=
 	Module[{},
 		$selectedProofGoal = goal;
 		NotebookLocate[ goal[[1,1]]];
 		Clear[kbSelectProve];
 		kbSelectProve[_] := False;
 		Scan[(kbSelectProve[#[[1]]] = #[[2]])&, kb];
-		Scan[(Theorema`Computation`Language`Private`buiActProve[#[[1]]] = #[[2]])&, bui]
+		Clear[Theorema`Provers`Common`Private`ruleAct];
+		Theorema`Provers`Common`Private`ruleAct[_] := True;
+		Scan[(Theorema`Provers`Common`Private`ruleAct[#[[1]]] = #[[2]])&, allRules];
+		Scan[(Theorema`Computation`Language`Private`buiActProve[#[[1]]] = #[[2]])&, bui];
+		$selectedRuleSet = ruleSet;
+		$selectedStrategy = strategy;
 	]
 setProveEnv[ args___] := unexpected[ setProveEnv, {args}]
 

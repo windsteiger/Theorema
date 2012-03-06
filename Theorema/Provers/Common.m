@@ -31,6 +31,8 @@ initProver[] :=
 		$proofInProgressMarker = {};
 		$TMAproofTree = {};
 		$registeredRuleSets = {};
+		$registeredStrategies = {};
+		ruleAct[_] := True;
 	]
 
 callProver[ rules_, strategy_, goal_, kb_] :=
@@ -177,7 +179,10 @@ registerRuleSet[ n_String, r_, l_List] :=
 	]
 registerRuleSet[ args___] := unexpected[ registerRuleSet, {args}]
 
-registerStrategy[ n_String, s_, d_String] := Null
+registerStrategy[ n_String, s_] := 
+Module[ {},
+		$registeredStrategies = Union[ $registeredStrategies, {s -> n}];
+	]
 registerStrategy[ args___] := unexpected[ registerStrategy, {args}]
 
 preprocessRules[ s_, r_] := r

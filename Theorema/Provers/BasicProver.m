@@ -28,6 +28,9 @@ equalityRules = {"equality", andGoal, andKB, implGoalMP, implGoalCP};
 registerRuleSet[ "Quantifier Rules", quantifierRules, {forallGoal, forallKB, existsGoal, existsKB}]
 registerRuleSet[ "Basic Prover", basicProver, {quantifierRules, connectiveRules, equalityRules}]
 
+registerStrategy[ "Apply once", applyOnce]
+registerStrategy[ "Try several", trySeveral]
+
 End[]
 
 EndPackage[]
