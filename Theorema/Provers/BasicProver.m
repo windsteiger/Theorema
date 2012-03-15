@@ -30,7 +30,7 @@ registerRuleSet[ "Basic Prover", basicProver, {quantifierRules, connectiveRules,
 
 applyOnce[ rules_, ps_] := 
 	Module[ {id = getNodeID[ ps]},
-		proveSome[ makePRFINFO[ "applyOnce", ps[[1]], ps[[2]], id], Apply[ makePRFSIT, Drop[ ps, -1]], Apply[ makePRFSIT, Drop[ ps, -1]]]
+		proveSome[ makePRFINFO[ "ProofAlternatives", ps[[1]], ps[[2]], id], Apply[ makePRFSIT, Drop[ ps, -1]], Apply[ makePRFSIT, Drop[ ps, -1]]]
 	]
 applyOnce[ args___] := unexpected[ applyOnce, {args}]
 

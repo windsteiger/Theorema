@@ -71,6 +71,7 @@ With[ {lang = "English"},
 
 (* Theorema`Provers` *)
 	MessageName[proofStepText, "usage", lang] = "proofStepText[ stepID_, lang_, data___] generates the cell expression explaining the proof step stepID in language lang.";
+	MessageName[subProofHeader, "usage", lang] = "subProofHeader[ name_, lang_, pos_] generates the cell expression used as header for the subproof at position pos.";
 
 (* Theorema`Provers`Common` *)
 	MessageName[callProver, "usage", lang] = "callProver[ prover_, goal_, kb_] calls prover with goal and kb, returns a proof value and proof object.";

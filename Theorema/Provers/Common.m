@@ -161,7 +161,7 @@ nodeValue[ args___] := unexpected[ nodeValue, {args}]
 
 searchDepthExceeded[ ps_PRFSIT$] :=
 	TERMINALNODE$[
-		makePRFINFO[ "SearchDepth", getGoal[ ps], getKB[ ps]],
+		makePRFINFO[ "SearchDepth", getGoal[ ps], getKB[ ps], getNodeID[ ps]],
 		failed
 	]
 searchDepthExceeded[ args___] := unexpected[ searchDepthExceeded, {args}]
@@ -170,7 +170,7 @@ searchDepthExceeded[ args___] := unexpected[ searchDepthExceeded, {args}]
 (* ::Subsubsection:: *)
 (* showProofNavigation *)
 
-showProofNavigation[ {}, geometry_List] := Graphics[ makeNode[ {"Initial", pending, PRFSIT$}, {0, 0}, 17], ImageSize -> geometry, PlotRegion -> {{0.4, 0.6}, {0.4, 0.6}}]
+showProofNavigation[ {}, geometry_List] := ""
 
 showProofNavigation[ p:{__Rule}, geometry_List] :=
     Module[ {root = Cases[ p, {"Initial", __}, {2}], font = 18-Ceiling[ Apply[ Times, geometry]/(350*450)]},
@@ -180,13 +180,9 @@ showProofNavigation[ p:{__Rule}, geometry_List] :=
             EdgeRenderingFunction -> ({Dashed, GrayLevel[0.5], Line[#1]}&), ImageSize -> geometry, AspectRatio -> 1/Apply[ Divide, geometry]]
         ]
     ]
-showProofNavigation[ p_] := ""
 showProofNavigation[ args___] := unexpected[ showProofNavigation, {args}]
 
-proofStepNode[ pos_, node:{_, _, _}, font_, ___] := makeNode[ node, pos, font]
-proofStepNode[ args___] := unexpected[ proofStepNode, {args}]
-
-makeNode[ node:{ id_, status_, type_}, pos_List, font_] := 
+proofStepNode[ pos_List, node:{ id_, status_, type_}, font_] := 
 	{
 		Switch[ status,
 			pending, RGBColor[0.360784, 0.67451, 0.933333] (* steelblue *),
@@ -199,18 +195,15 @@ makeNode[ node:{ id_, status_, type_}, pos_List, font_] :=
 			_, Polygon[ Map[ (pos + 0.125*#)&, {{0,1}, {Cos[7*Pi/6], Sin[7*Pi/6]}, {Cos[11*Pi/6], Sin[11*Pi/6]}}]]],
 		{Black, Dynamic[ Text[ 
 			Hyperlink[
-				If[ id === "Initial",
-    				id,
-    				Switch[ type, 
+				Switch[ type, 
        					PRFSIT$, "?",
         				ANDNODE$, "\[Wedge]",
         				ORNODE$, "\[Vee]",
-        				TERMINALNODE$, Switch[ status, proved, "\[CheckmarkedBox]", disproved, "\[Times]", failed, "\[WarningSign]", _, "\[DownQuestion]"]]
-				], 
+        				TERMINALNODE$, Switch[ status, proved, "\[CheckmarkedBox]", disproved, "\[Times]", failed, "\[WarningSign]", _, "\[DownQuestion]"]], 
 				{CurrentValue[ $TMAproofNotebook, "NotebookFileName"], id},
 				BaseStyle -> {FontSize -> font}], pos]]}
 	}
-makeNode[ args___] := unexpected[ makeNode, {args}]
+proofStepNode[ args___] := unexpected[ proofStepNode, {args}]
 
 (* ::Subsubsection:: *)
 (* makeInitialProofObject *)
@@ -276,13 +269,18 @@ proofObjectToCell[ PRFSIT$[ g_, kb_, ___, "ID" -> id_]] := Cell[ CellGroupData[ 
 proofObjectToCell[ (ANDNODE$|ORNODE$)[ pi_PRFINFO$, subnodes__, pVal_]] := 
 	Module[{header, sub},
 		header = proofObjectToCell[ pi, pVal];
-		sub = Map[ proofObjectToCell, {subnodes}];
+		(*sub = Map[ proofObjectToCell, {subnodes}];*)
+		sub = MapIndexed[ subProofToCell[ pi[[1]], #1, #2]&, {subnodes}];
 		Cell[ CellGroupData[ Join[ header, sub], $proofCellStatus]]
 	]
 proofObjectToCell[ TERMINALNODE$[ pi_PRFINFO$, pVal_]] := 
 	Cell[ CellGroupData[ proofObjectToCell[ pi, pVal], $proofCellStatus]]
 	
 proofObjectToCell[ args___] := unexpected[ proofObjectToCell, {args}]
+
+subProofToCell[ name_String, node_, pos_List] :=
+		Cell[ CellGroupData[ Append[ subProofHeader[ name, $Language, pos], proofObjectToCell[ node]], $proofCellStatus]]
+subProofToCell[ args___] := unexpected[ subProofToCell, {args}]
 
 
 (* ::Section:: *)
