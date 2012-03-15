@@ -77,12 +77,14 @@ initGUI[] :=
 		$cellTagKeySeparator = ":";
 		If[ ValueQ[$theoremaGUI], tc = "Theorema Commander" /. $theoremaGUI];
 		If[ $Notebooks && MemberQ[Notebooks[], tc], NotebookClose[tc]];
-		$theoremaGUI = {"Theorema Commander" -> theoremaCommander[]};
 		Clear[ kbSelectProve, kbSelectSolve];
 		kbSelectProve[_] := False;
 		kbSelectSolve[_] := False;
 		$selectedProofGoal = {};
+		$selectedSearchDepth = 30;
+		$maxSearchDepth = 200;
 		initBuiltins[ {"prove", "compute", "solve"}];
+		$theoremaGUI = {"Theorema Commander" -> theoremaCommander[]};
 	]
 
 initBuiltins[ l_List] :=
@@ -108,8 +110,8 @@ theoremaCommander[] /; $Notebooks :=
         CreatePalette[ Dynamic[Refresh[
         	TabView[{
         		translate["tcLangTabLabel"]->TabView[{
-        			translate["tcLangTabMathTabLabel"]->Dynamic[Refresh[ langButtons[], TrackedSymbols :> {$buttonNat}]],
         			translate["tcLangTabEnvTabLabel"]->envButtons[],
+        			translate["tcLangTabMathTabLabel"]->Dynamic[Refresh[ langButtons[], TrackedSymbols :> {$buttonNat}]],
         			translate["tcLangTabArchTabLabel"]->archButtons[]}, Dynamic[$tcLangTab],
         			LabelStyle->"TabLabel2", ControlPlacement->Top],
         		translate["tcProveTabLabel"]->TabView[{
@@ -579,13 +581,13 @@ Clear[structViewRules];
 (* structured view for builtin operators
    follows the ideas of the structured view of the KB *)
 
-structViewRules[ Hold[ rs_], explain_] := structViewRules[ rs, {}, explain][[1]]
+structViewRules[ Hold[ rs_]] := structViewRules[ rs, {}][[1]]
 
-structViewRules[{category_String, r__}, tags_, explain_String:""] :=
+structViewRules[{category_String, r__}, tags_] :=
     Module[ {sub, compTags},
         sub = Transpose[Map[structViewRules[#, tags] &, {r}]];
         compTags = Apply[Union, sub[[2]]];
-        {OpenerView[{structViewRules[category, compTags, explain], Column[sub[[1]]]}, 
+        {OpenerView[{structViewRules[category, compTags], Column[sub[[1]]]}, 
         	ToExpression[StringReplace["Dynamic[NEWSYM]", 
         		"NEWSYM" -> "$ruleStructState$" <> ToString[ Hash[ category]]]]], 
          compTags}
@@ -597,14 +599,11 @@ structViewRules[ r_Symbol, tags_] :=
                 Spacer[10]], {r}}
     ]
 
-structViewRules[ category_String, tags_, explain_String] :=
+structViewRules[ category_String, tags_] :=
     Module[ {},
     	Row[{Checkbox[ Dynamic[ allTrue[ tags, Theorema`Provers`Common`Private`ruleAct], 
         		setAll[ tags, Theorema`Provers`Common`Private`ruleAct, #] &]], 
-          		If[ explain =!= "",
-          			Tooltip[ Style[ translate[category], "Section"], explain],
-          			Style[ translate[category], "Section"]
-          		]}, Spacer[10]]
+          		Style[ translate[ category], "Section"]}, Spacer[10]]
     ]
 
 structViewRules[args___] :=
@@ -640,11 +639,25 @@ displayBuiltinBrowser[args___] := unexcpected[ displayBuiltinBrowser, {args}]
 
 selectProver[ ] :=
     Pane[ Column[{
-    Row[ { translate[ "selRules"], PopupMenu[ Dynamic[ $selectedRuleSet], Map[ MapAt[ translate, #, {2}]&, $registeredRuleSets]]}],
-    Row[ { translate[ "selStrat"], PopupMenu[ Dynamic[ $selectedStrategy], Map[ MapAt[ translate, #, {2}]&, $registeredStrategies]]}],
-    structViewRules[ $selectedRuleSet, Apply[ Function[ rs, MessageName[ rs, "usage"], {HoldFirst}], $selectedRuleSet]]
-    }], {350, 450},
-    ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
+    	Row[ {Labeled[ PopupMenu[ Dynamic[ $selectedRuleSet], Map[ MapAt[ translate, #, {2}]&, $registeredRuleSets]], 
+    		Style[ translate[ "pRules"], "CellLabel"], {{ Top, Left}}], Spacer[5],
+    		Tooltip[ Graphics[{{RGBColor[0.40499, 0.46276, 0.9], Disk[{0, 0}, 1]}, Text[ "?", BaseStyle -> "Section"]}, ImageSize -> {20, 20}], 
+    			Apply[ Function[ rs, MessageName[ rs, "usage"], {HoldFirst}], $selectedRuleSet]]}],
+    	structViewRules[ $selectedRuleSet],
+    	Row[ {Labeled[ PopupMenu[ Dynamic[ $selectedStrategy], Map[ MapAt[ translate, #, {2}]&, $registeredStrategies]], 
+    		Style[ translate[ "pStrat"], "CellLabel"], {{ Top, Left}}], Spacer[5],
+    		Tooltip[ Graphics[{{RGBColor[0.40499, 0.46276, 0.9], Disk[{0, 0}, 1]}, Text[ "?", BaseStyle -> "Section"]}, ImageSize -> {20, 20}], 
+    			With[ {ss = $selectedStrategy}, MessageName[ ss, "usage"]]]}],
+    	Labeled[ Dynamic[ Row[ {Slider[ Dynamic[ $selectedSearchDepth], {2, $maxSearchDepth, 1}],
+    		InputField[ Dynamic[ $selectedSearchDepth], Number, FieldSize -> 3], 
+    		Button[ "-", $selectedSearchDepth--],
+    		Button[ "+", $selectedSearchDepth++],
+    		Button[ "\[LeftSkeleton]", $maxSearchDepth/=2],
+    		Button[ "\[RightSkeleton]", $maxSearchDepth*=2]}]], Style[ translate[ "sDepth"], "CellLabel"], {{ Top, Left}}],
+    	Labeled[ RadioButtonBar[ 
+    		Dynamic[Theorema`Provers`Common`Private`$proofCellStatus], {Open -> translate[ "open"], Closed -> translate[ "closed"]}], 
+    		Style[ translate[ "proofCellStatus"], "CellLabel"], {{ Top, Left}}]	
+    	}], {350, 450}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
 selectProver[ args___] := unexpected[ selectRuleSet, {args}]
 
 submitProveTask[ dummy_] := 
@@ -653,12 +666,12 @@ submitProveTask[ dummy_] :=
 			Labeled[ displaySelectedGoal[ $selectedProofGoal], Style[ translate["selGoal"], "CellLabel"], {{ Top, Left}}],
 			Labeled[ displaySelectedKB[], Style[ translate["selKB"], "CellLabel"], {{ Top, Left}}],
 			(* Method -> "Queued" so that no time limit is set for proof to complete *)
-			Button[ translate["prove"], execProveCall[ $selectedProofGoal, $selectedProofKB, $selectedRuleSet, $selectedStrategy], Method -> "Queued"]
+			Button[ translate["prove"], execProveCall[ $selectedProofGoal, $selectedProofKB, $selectedRuleSet, $selectedStrategy, $selectedSearchDepth], Method -> "Queued"]
 		}]
 	]
 submitProveTask[ args___] := unexpected[ submitProveTask, {args}]
 
-execProveCall[ goal_, kb_, ruleSet_, strategy_] :=
+execProveCall[ goal_, kb_, ruleSet_, strategy_, searchDepth_] :=
 	Module[{nb = InputNotebook[], proof},
 		$tcProveTab++;
 		If[ NotebookFind[ nb, makeProofIDTag[ goal], All, CellTags] === $Failed,
@@ -669,14 +682,16 @@ execProveCall[ goal_, kb_, ruleSet_, strategy_] :=
 		];
 		SetSelectedNotebook[ nb];
 
-		proof = callProver[ ruleSet, strategy, goal, kb];
+		proof = callProver[ ruleSet, strategy, goal, kb, searchDepth];
 		printProveInfo[ goal, kb, ruleSet, strategy, proof];
 	]
 execProveCall[ args___] := unexpected[ execProveCall, {args}]
 
 proofNavigation[ po_] :=
-	Pane[ showProofNavigation[ po], {350, 450},
-  		ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
+    Module[ {geom = {Max[ Count[ po, _ -> {__, Theorema`Provers`Common`Private`TERMINALNODE$|Theorema`Provers`Common`Private`PRFSIT$}]*20, 350], Max[ $selectedSearchDepth*15, 450]}},
+        Pane[ showProofNavigation[ po, geom], {350, 450},
+              ImageSizeAction -> "Scrollable", Scrollbars -> Automatic, ScrollPosition -> geom/2-{350,450}/2]
+    ]
 proofNavigation[ args___] := unexpected[ proofNavigation, {args}]
 
 (* ::Subsubsection:: *)

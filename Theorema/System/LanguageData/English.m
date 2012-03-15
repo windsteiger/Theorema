@@ -71,11 +71,6 @@ With[ {lang = "English"},
 
 (* Theorema`Provers` *)
 	MessageName[proofStepText, "usage", lang] = "proofStepText[ stepID_, lang_, data___] generates the cell expression explaining the proof step stepID in language lang.";
-	MessageName[$registeredRuleSets, "usage", lang] = "$registeredRuleSets is a list of available provers in the Theorema system.";
-	MessageName[$registeredStrategies, "usage", lang] = "$registeredStrategies is a list of available strategies in the Theorema system.";
-	MessageName[registerRuleSet, "usage", lang] = "registerRuleSet[ n_, p_, r_] registers prover p under the name n consisting of rules r.";
-	MessageName[registerStrategy, "usage", lang] = "registerStrategy[ n_, s_] registers strategy s under the name n.";
-	MessageName[preprocessRules, "usage", lang] = "preprocessRules[ s_, r_] preprocesses rules r as appropriate for strategy s.";
 
 (* Theorema`Provers`Common` *)
 	MessageName[callProver, "usage", lang] = "callProver[ prover_, goal_, kb_] calls prover with goal and kb, returns a proof value and proof object.";
@@ -83,5 +78,14 @@ With[ {lang = "English"},
 	MessageName[$TMAproofObject, "usage", lang] = "$TMAproofObject is the global proof object.";
 	MessageName[$TMAproofTree, "usage", lang] = "$TMAproofTree is the global proof tree for visualization.";
 	MessageName[showProofNavigation, "usage", lang] = "showProofNavigation[ proofObject_] shows a tree navigation through a proof.";
+	MessageName[$registeredRuleSets, "usage", lang] = "$registeredRuleSets is a list of available provers in the Theorema system.";
+	MessageName[$registeredStrategies, "usage", lang] = "$registeredStrategies is a list of available strategies in the Theorema system.";
+	MessageName[registerRuleSet, "usage", lang] = "registerRuleSet[ n_, p_, r_] registers prover p under the name n consisting of rules r.";
+	MessageName[registerStrategy, "usage", lang] = "registerStrategy[ n_, s_] registers strategy s under the name n.";
+	MessageName[proveAll, "usage", lang] = "proveAll[ info_, subgoals_] constructs a node in the proof tree using proofinfo info to prove all the given subgoals.";
+	MessageName[proveSome, "usage", lang] = "proveSome[ info_, subgoals_] constructs a node in the proof tree using proofinfo info to prove at least one of the given subgoals.";
+	MessageName[makePRFINFO, "usage", lang] = "makePRFINFO[ ...] constructor for PRFINFO$ data staructure.";
+	MessageName[makePRFSIT, "usage", lang] = "makePRFSIT[ ...] constructor for PRFSIT$ data staructure.";
+	MessageName[getNodeID, "usage", lang] = "getNodeID[ ...] .";
 
 ]

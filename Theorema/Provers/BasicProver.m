@@ -23,10 +23,16 @@ Needs[ "Theorema`Common`"]
 Begin["`Private`"]
 
 connectiveRules = {"connectives", andGoal, andKB, implGoalMP, implGoalCP};
-equalityRules = {"equality", andGoal, andKB, implGoalMP, implGoalCP};
+equalityRules = {"equality", eqGoal, eqKB};
 
 registerRuleSet[ "Quantifier Rules", quantifierRules, {forallGoal, forallKB, existsGoal, existsKB}]
 registerRuleSet[ "Basic Prover", basicProver, {quantifierRules, connectiveRules, equalityRules}]
+
+applyOnce[ rules_, ps_] := 
+	Module[ {id = getNodeID[ ps]},
+		proveSome[ makePRFINFO[ "applyOnce", ps[[1]], ps[[2]], id], Apply[ makePRFSIT, Drop[ ps, -1]], Apply[ makePRFSIT, Drop[ ps, -1]]]
+	]
+applyOnce[ args___] := unexpected[ applyOnce, {args}]
 
 registerStrategy[ "Apply once", applyOnce]
 registerStrategy[ "Try several", trySeveral]

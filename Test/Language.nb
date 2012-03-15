@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[    750495,      19120]
-NotebookOptionsPosition[    710164,      17837]
-NotebookOutlinePosition[    724017,      18231]
-CellTagsIndexPosition[    722421,      18183]
+NotebookDataLength[    760096,      19391]
+NotebookOptionsPosition[    717721,      18046]
+NotebookOutlinePosition[    732596,      18468]
+CellTagsIndexPosition[    730841,      18416]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -2933,6 +2933,452 @@ Cell["\[EmptySquare]", "CloseProof",
 
 Cell[CellGroupData[{
 
+Cell["Theorem", "OpenEnvironment",
+ CellID->1494302939],
+
+Cell[BoxData[
+ RowBox[{"P", "\[And]", "Q"}]], "FormalTextInputFormula",
+ CellFrameLabels->{{None, "(20)"}, {None, None}},
+ ShowCellTags->False,
+ CellChangeTimes->{{3.540553778633752*^9, 3.540553802716202*^9}},
+ CellTags->{
+  "ID:806064238", 
+   "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "20"},
+ CellID->806064238],
+
+Cell["\[GraySquare]", "EndEnvironmentMarker",
+ CellID->459179674]
+}, Open  ]],
+
+Cell["", "CloseEnvironment",
+ CellID->438602653],
+
+Cell[CellGroupData[{
+
+Cell["Proof of (20): $Failed", "OpenProof",
+ CellTags->
+  "Proof|ID:806064238|Source:/home/wwindste/Theorema.2/Theorema/Test/Language.\
+nb",
+ CellID->673042814],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ ButtonBox["\<\"Show proof\"\>",
+  Appearance->Automatic,
+  ButtonFunction:>Theorema`Common`displayProof[
+    Theorema`Provers`Common`Private`PRFOBJ$[
+     Theorema`Provers`Common`Private`PRFINFO$[
+     "ID" -> "Initial", {{
+       "ID:806064238", 
+        "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb"}, 
+       Theorema`Language`And$TM[
+       Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(20)"}, {}], 
+     Theorema`Common`unexpected[
+     Theorema`Provers`Common`Private`propagateProofValues, {
+       Theorema`Provers`applyOnce[
+        Hold[Theorema`Provers`basicProver]]}], 
+     Theorema`Common`unexpected[
+     Theorema`Provers`Common`Private`nodeValue, {
+      Theorema`Provers`Common`Private`PRFOBJ$, {{
+         Theorema`Provers`applyOnce[
+          Hold[Theorema`Provers`basicProver]]}}}]]],
+  Evaluator->Automatic,
+  ImageSize->Automatic,
+  Method->"Queued"]], "ProofDisplay",
+ CellID->298183240],
+
+Cell[BoxData[
+ DynamicModuleBox[{Typeset`var$$ = False}, 
+  InterpretationBox[
+   StyleBox[
+    PaneSelectorBox[{False->GridBox[{
+       {
+        OpenerBox[Dynamic[Typeset`var$$],
+         Appearance->Automatic,
+         AutoAction->False,
+         ContinuousAction->False,
+         Enabled->Automatic], "\<\"\"\>"}
+      },
+      AutoDelete->False,
+      BaselinePosition->{1, 1},
+      GridBoxAlignment->{"Columns" -> {{Left}}},
+      GridBoxBackground->{"Columns" -> {{Automatic}}},
+      GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+      GridBoxSpacings->{"Columns" -> {{0.2}}, "Rows" -> {{0.5}}}], True->
+     GridBox[{
+       {
+        OpenerBox[Dynamic[Typeset`var$$],
+         Appearance->Automatic,
+         AutoAction->False,
+         ContinuousAction->False,
+         Enabled->Automatic], "\<\"\"\>"},
+       {"", 
+        PaneBox[
+         TagBox[GridBox[{
+            {
+             TagBox[
+              DynamicModuleBox[{Typeset`var$$ = False}, 
+               InterpretationBox[
+                StyleBox[
+                 PaneSelectorBox[{False->GridBox[{
+                    {
+                    OpenerBox[Dynamic[Typeset`var$$],
+                    Appearance->Automatic,
+                    AutoAction->False,
+                    ContinuousAction->False,
+                    Enabled->Automatic], 
+                    StyleBox["\<\"Proof goal\"\>", "PIContent",
+                    StripOnInput->False]}
+                   },
+                   AutoDelete->False,
+                   BaselinePosition->{1, 1},
+                   GridBoxAlignment->{"Columns" -> {{Left}}},
+                   GridBoxBackground->{"Columns" -> {{Automatic}}},
+                   
+                   GridBoxItemSize->{
+                    "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+                   
+                   GridBoxSpacings->{
+                    "Columns" -> {{0.2}}, "Rows" -> {{0.5}}}], True->
+                  GridBox[{
+                    {
+                    OpenerBox[Dynamic[Typeset`var$$],
+                    Appearance->Automatic,
+                    AutoAction->False,
+                    ContinuousAction->False,
+                    Enabled->Automatic], 
+                    StyleBox["\<\"Proof goal\"\>", "PIContent",
+                    StripOnInput->False]},
+                    {"", 
+                    PaneBox[
+                    StyleBox["\<\"(20)\"\>", "PIContent",
+                    StripOnInput->False],
+                    ImageMargins->0]}
+                   },
+                   AutoDelete->False,
+                   BaselinePosition->{1, 1},
+                   GridBoxAlignment->{"Columns" -> {{Left}}},
+                   GridBoxBackground->{"Columns" -> {{Automatic}}},
+                   
+                   GridBoxItemSize->{
+                    "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+                   
+                   GridBoxSpacings->{
+                    "Columns" -> {{0.2}}, "Rows" -> {{0.5}}}]}, Dynamic[
+                  Typeset`var$$],
+                  Alignment->Automatic,
+                  BaselinePosition->Baseline,
+                  DefaultBaseStyle->"OpenerView",
+                  ImageMargins->0,
+                  ImageSize->Automatic],
+                 Deployed->False,
+                 StripOnInput->False],
+                OpenerView[{
+                  Style["Proof goal", "PIContent"], 
+                  Style["(20)", "PIContent"]}, False]],
+               DynamicModuleValues:>Automatic],
+              Setting[#, {0}]& ]},
+            {
+             TagBox[
+              DynamicModuleBox[{Typeset`var$$ = False}, 
+               InterpretationBox[
+                StyleBox[
+                 PaneSelectorBox[{False->GridBox[{
+                    {
+                    OpenerBox[Dynamic[Typeset`var$$],
+                    Appearance->Automatic,
+                    AutoAction->False,
+                    ContinuousAction->False,
+                    Enabled->Automatic], 
+                    StyleBox["\<\"Knowledge used in proof\"\>", "PIContent",
+                    StripOnInput->False]}
+                   },
+                   AutoDelete->False,
+                   BaselinePosition->{1, 1},
+                   GridBoxAlignment->{"Columns" -> {{Left}}},
+                   GridBoxBackground->{"Columns" -> {{Automatic}}},
+                   
+                   GridBoxItemSize->{
+                    "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+                   
+                   GridBoxSpacings->{
+                    "Columns" -> {{0.2}}, "Rows" -> {{0.5}}}], True->
+                  GridBox[{
+                    {
+                    OpenerBox[Dynamic[Typeset`var$$],
+                    Appearance->Automatic,
+                    AutoAction->False,
+                    ContinuousAction->False,
+                    Enabled->Automatic], 
+                    StyleBox["\<\"Knowledge used in proof\"\>", "PIContent",
+                    StripOnInput->False]},
+                    {"", 
+                    PaneBox[
+                    StyleBox[
+                    RowBox[{"{", "}"}], "PIContent",
+                    StripOnInput->False],
+                    ImageMargins->0]}
+                   },
+                   AutoDelete->False,
+                   BaselinePosition->{1, 1},
+                   GridBoxAlignment->{"Columns" -> {{Left}}},
+                   GridBoxBackground->{"Columns" -> {{Automatic}}},
+                   
+                   GridBoxItemSize->{
+                    "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+                   
+                   GridBoxSpacings->{
+                    "Columns" -> {{0.2}}, "Rows" -> {{0.5}}}]}, Dynamic[
+                  Typeset`var$$],
+                  Alignment->Automatic,
+                  BaselinePosition->Baseline,
+                  DefaultBaseStyle->"OpenerView",
+                  ImageMargins->0,
+                  ImageSize->Automatic],
+                 Deployed->False,
+                 StripOnInput->False],
+                OpenerView[{
+                  Style["Knowledge used in proof", "PIContent"], 
+                  Style[{}, "PIContent"]}, False]],
+               DynamicModuleValues:>Automatic],
+              Setting[#, {0}]& ]},
+            {
+             TagBox[
+              DynamicModuleBox[{Typeset`var$$ = False}, 
+               InterpretationBox[
+                StyleBox[
+                 PaneSelectorBox[{False->GridBox[{
+                    {
+                    OpenerBox[Dynamic[Typeset`var$$],
+                    Appearance->Automatic,
+                    AutoAction->False,
+                    ContinuousAction->False,
+                    Enabled->Automatic], 
+                    StyleBox["\<\"Builtins used in proof\"\>", "PIContent",
+                    StripOnInput->False]}
+                   },
+                   AutoDelete->False,
+                   BaselinePosition->{1, 1},
+                   GridBoxAlignment->{"Columns" -> {{Left}}},
+                   GridBoxBackground->{"Columns" -> {{Automatic}}},
+                   
+                   GridBoxItemSize->{
+                    "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+                   
+                   GridBoxSpacings->{
+                    "Columns" -> {{0.2}}, "Rows" -> {{0.5}}}], True->
+                  GridBox[{
+                    {
+                    OpenerBox[Dynamic[Typeset`var$$],
+                    Appearance->Automatic,
+                    AutoAction->False,
+                    ContinuousAction->False,
+                    Enabled->Automatic], 
+                    StyleBox["\<\"Builtins used in proof\"\>", "PIContent",
+                    StripOnInput->False]},
+                    {"", 
+                    PaneBox[
+                    StyleBox[
+                    RowBox[{"{", "}"}], "PIContent",
+                    StripOnInput->False],
+                    ImageMargins->0]}
+                   },
+                   AutoDelete->False,
+                   BaselinePosition->{1, 1},
+                   GridBoxAlignment->{"Columns" -> {{Left}}},
+                   GridBoxBackground->{"Columns" -> {{Automatic}}},
+                   
+                   GridBoxItemSize->{
+                    "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+                   
+                   GridBoxSpacings->{
+                    "Columns" -> {{0.2}}, "Rows" -> {{0.5}}}]}, Dynamic[
+                  Typeset`var$$],
+                  Alignment->Automatic,
+                  BaselinePosition->Baseline,
+                  DefaultBaseStyle->"OpenerView",
+                  ImageMargins->0,
+                  ImageSize->Automatic],
+                 Deployed->False,
+                 StripOnInput->False],
+                OpenerView[{
+                  Style["Builtins used in proof", "PIContent"], 
+                  Style[{}, "PIContent"]}, False]],
+               DynamicModuleValues:>Automatic],
+              Setting[#, {0}]& ]},
+            {
+             TagBox[
+              DynamicModuleBox[{Typeset`var$$ = False}, 
+               InterpretationBox[
+                StyleBox[
+                 PaneSelectorBox[{False->GridBox[{
+                    {
+                    OpenerBox[Dynamic[Typeset`var$$],
+                    Appearance->Automatic,
+                    AutoAction->False,
+                    ContinuousAction->False,
+                    Enabled->Automatic], 
+                    StyleBox["\<\"Selected prover\"\>", "PIContent",
+                    StripOnInput->False]}
+                   },
+                   AutoDelete->False,
+                   BaselinePosition->{1, 1},
+                   GridBoxAlignment->{"Columns" -> {{Left}}},
+                   GridBoxBackground->{"Columns" -> {{Automatic}}},
+                   
+                   GridBoxItemSize->{
+                    "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+                   
+                   GridBoxSpacings->{
+                    "Columns" -> {{0.2}}, "Rows" -> {{0.5}}}], True->
+                  GridBox[{
+                    {
+                    OpenerBox[Dynamic[Typeset`var$$],
+                    Appearance->Automatic,
+                    AutoAction->False,
+                    ContinuousAction->False,
+                    Enabled->Automatic], 
+                    StyleBox["\<\"Selected prover\"\>", "PIContent",
+                    StripOnInput->False]},
+                    {"", 
+                    PaneBox[
+                    StyleBox[
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{
+                    "Hold", "[", "Theorema`Provers`basicProver", "]"}], ",", 
+                    "Theorema`Provers`applyOnce"}], "}"}], "PIContent",
+                    StripOnInput->False],
+                    ImageMargins->0]}
+                   },
+                   AutoDelete->False,
+                   BaselinePosition->{1, 1},
+                   GridBoxAlignment->{"Columns" -> {{Left}}},
+                   GridBoxBackground->{"Columns" -> {{Automatic}}},
+                   
+                   GridBoxItemSize->{
+                    "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+                   
+                   GridBoxSpacings->{
+                    "Columns" -> {{0.2}}, "Rows" -> {{0.5}}}]}, Dynamic[
+                  Typeset`var$$],
+                  Alignment->Automatic,
+                  BaselinePosition->Baseline,
+                  DefaultBaseStyle->"OpenerView",
+                  ImageMargins->0,
+                  ImageSize->Automatic],
+                 Deployed->False,
+                 StripOnInput->False],
+                OpenerView[{
+                  Style["Selected prover", "PIContent"], 
+                  Style[{
+                    Hold[Theorema`Provers`basicProver], 
+                    Theorema`Provers`applyOnce}, "PIContent"]}, False]],
+               DynamicModuleValues:>Automatic],
+              Setting[#, {0}]& ]},
+            {
+             ButtonBox["\<\"Reset environment\"\>",
+              Appearance->Automatic,
+              
+              ButtonFunction:>
+               Theorema`Interface`GUI`Private`setProveEnv[{{
+                 "ID:806064238", 
+                  "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.\
+nb"}, 
+                 Theorema`Language`And$TM[
+                 Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], 
+                 "(20)"}, {}, {{"And", False}, {"Do", False}, {
+                 "Equal", False}, {"Exists", False}, {"For", False}, {
+                 "Forall", False}, {"Greater", False}, {
+                 "GreaterEqual", False}, {"Iff", False}, {"Implies", False}, {
+                 "Intersection", False}, {"Less", False}, {
+                 "LessEqual", False}, {"Module", False}, {"Not", False}, {
+                 "Or", False}, {"Plus", False}, {"SequenceOf", False}, {
+                 "SetEqual", False}, {"Switch", False}, {"Times", False}, {
+                 "Union", False}, {"Which", False}, {"While", False}}, 
+                Hold[Theorema`Provers`basicProver], 
+                Theorema`Provers`applyOnce, {}],
+              Evaluator->Automatic,
+              ImageSize->Automatic,
+              Method->"Preemptive"]}
+           },
+           GridBoxAlignment->{"Columns" -> {{Left}}},
+           
+           GridBoxItemSize->{
+            "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+          "Column"],
+         ImageMargins->0]}
+      },
+      AutoDelete->False,
+      BaselinePosition->{1, 1},
+      GridBoxAlignment->{"Columns" -> {{Left}}},
+      GridBoxBackground->{"Columns" -> {{Automatic}}},
+      GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+      GridBoxSpacings->{"Columns" -> {{0.2}}, "Rows" -> {{0.5}}}]}, Dynamic[
+     Typeset`var$$],
+     Alignment->Automatic,
+     BaselinePosition->Baseline,
+     DefaultBaseStyle->"OpenerView",
+     ImageMargins->0,
+     ImageSize->Automatic],
+    Deployed->False,
+    StripOnInput->False],
+   OpenerView[{"", 
+     Column[{
+       OpenerView[{
+         Style["Proof goal", "PIContent"], 
+         Style["(20)", "PIContent"]}], 
+       OpenerView[{
+         Style["Knowledge used in proof", "PIContent"], 
+         Style[{}, "PIContent"]}], 
+       OpenerView[{
+         Style["Builtins used in proof", "PIContent"], 
+         Style[{}, "PIContent"]}], 
+       OpenerView[{
+         Style["Selected prover", "PIContent"], 
+         Style[{
+           Hold[Theorema`Provers`basicProver], Theorema`Provers`applyOnce}, 
+          "PIContent"]}], 
+       Button["Reset environment", 
+        Theorema`Interface`GUI`Private`setProveEnv[{{
+          "ID:806064238", 
+           "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb"}, 
+          Theorema`Language`And$TM[
+          Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(20)"}, {}, {{
+          "And", False}, {"Do", False}, {"Equal", False}, {"Exists", False}, {
+          "For", False}, {"Forall", False}, {"Greater", False}, {
+          "GreaterEqual", False}, {"Iff", False}, {"Implies", False}, {
+          "Intersection", False}, {"Less", False}, {"LessEqual", False}, {
+          "Module", False}, {"Not", False}, {"Or", False}, {"Plus", False}, {
+          "SequenceOf", False}, {"SetEqual", False}, {"Switch", False}, {
+          "Times", False}, {"Union", False}, {"Which", False}, {
+          "While", False}}, 
+         Hold[Theorema`Provers`basicProver], Theorema`Provers`applyOnce, {}], 
+        ImageSize -> Automatic]}]}, False]],
+  DynamicModuleValues:>{}]], "ProofInfo",
+ CellID->632965013]
+}, Open  ]],
+
+Cell["\[EmptySquare]", "CloseProof",
+ CellID->726662969]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Names", "[", "\"\<Theorema`Common`T*\>\"", "]"}]], "Input",
+ CellChangeTimes->{{3.540555588922282*^9, 3.540555606466553*^9}},
+ CellID->300238506],
+
+Cell[BoxData[
+ RowBox[{"{", "\<\"Theorema`Common`TheoremaForm\"\>", "}"}]], "Output",
+ CellChangeTimes->{3.540555607416815*^9},
+ CellID->1046473869]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
 Cell[BoxData["Theorema`Common`$TMAproofObject"], "Input",
  CellChangeTimes->{{3.539687386497976*^9, 3.539687397682375*^9}},
  CellID->1930239317],
@@ -2946,267 +3392,30 @@ Cell[BoxData[
      RowBox[{"{", 
       RowBox[{
        RowBox[{"{", 
-        RowBox[{"\<\"ID:1242901413\"\>", 
+        RowBox[{"\<\"ID:806064238\"\>", 
          ",", "\<\"Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb\
 \"\>"}], "}"}], ",", 
-       RowBox[{"Forall$TM", "[", 
-        RowBox[{
-         RowBox[{"RNG$", "[", 
-          RowBox[{"SIMPRNG$", "[", 
-           RowBox[{"VAR$", "[", "Theorema`Knowledge`a$TM", "]"}], "]"}], 
-          "]"}], ",", "True", ",", 
-         RowBox[{"Implies$TM", "[", 
-          RowBox[{
-           RowBox[{"Theorema`Knowledge`S$TM", "[", 
-            RowBox[{"VAR$", "[", "Theorema`Knowledge`a$TM", "]"}], "]"}], ",", 
-           RowBox[{"Forall$TM", "[", 
-            RowBox[{
-             RowBox[{"RNG$", "[", 
-              RowBox[{
-               RowBox[{"STEPRNG$", "[", 
-                RowBox[{
-                 RowBox[{"VAR$", "[", "Theorema`Knowledge`x$TM", "]"}], ",", 
-                 "1", ",", "Theorema`Knowledge`n$TM", ",", "1"}], "]"}], ",", 
-               
-               RowBox[{"STEPRNG$", "[", 
-                RowBox[{
-                 RowBox[{"VAR$", "[", "Theorema`Knowledge`y$TM", "]"}], ",", 
-                 "1", ",", "Theorema`Knowledge`n$TM", ",", "1"}], "]"}]}], 
-              "]"}], ",", "True", ",", 
-             RowBox[{"IffDef$TM", "[", 
-              RowBox[{
-               RowBox[{"Theorema`Knowledge`P$TM", "[", 
-                RowBox[{
-                 RowBox[{"VAR$", "[", "Theorema`Knowledge`x$TM", "]"}], ",", 
-                 RowBox[{"VAR$", "[", "Theorema`Knowledge`y$TM", "]"}]}], 
-                "]"}], ",", 
-               RowBox[{"Or$TM", "[", 
-                RowBox[{
-                 RowBox[{"Theorema`Knowledge`Q$TM", "[", 
-                  RowBox[{"VAR$", "[", "Theorema`Knowledge`x$TM", "]"}], 
-                  "]"}], ",", 
-                 RowBox[{"Theorema`Knowledge`Q$TM", "[", 
-                  RowBox[{"VAR$", "[", "Theorema`Knowledge`y$TM", "]"}], 
-                  "]"}]}], "]"}]}], "]"}]}], "]"}]}], "]"}]}], "]"}], 
-       ",", "\<\"(10)\"\>"}], "}"}], ",", 
+       RowBox[{"And$TM", "[", 
+        RowBox[{"Theorema`Knowledge`P$TM", ",", "Theorema`Knowledge`Q$TM"}], 
+        "]"}], ",", "\<\"(20)\"\>"}], "}"}], ",", 
+     RowBox[{"{", "}"}]}], "]"}], ",", 
+   RowBox[{"Theorema`Common`unexpected", "[", 
+    RowBox[{"Theorema`Provers`Common`Private`propagateProofValues", ",", 
      RowBox[{"{", 
-      RowBox[{
-       RowBox[{"{", 
-        RowBox[{
-         RowBox[{"{", 
-          
-          RowBox[{"\<\"ID:330716980\"\>", 
-           ",", "\<\"Source:/home/wwindste/Theorema.2/Theorema/Test/Language.\
-nb\"\>"}], "}"}], ",", 
-         RowBox[{"Forall$TM", "[", 
-          RowBox[{
-           RowBox[{"RNG$", "[", 
-            RowBox[{"SIMPRNG$", "[", 
-             RowBox[{"VAR$", "[", "Theorema`Knowledge`a$TM", "]"}], "]"}], 
-            "]"}], ",", "True", ",", 
-           RowBox[{"Implies$TM", "[", 
-            RowBox[{
-             RowBox[{"Theorema`Knowledge`S$TM", "[", 
-              RowBox[{"VAR$", "[", "Theorema`Knowledge`a$TM", "]"}], "]"}], 
-             ",", 
-             RowBox[{"Forall$TM", "[", 
-              RowBox[{
-               RowBox[{"RNG$", "[", 
-                RowBox[{
-                 RowBox[{"STEPRNG$", "[", 
-                  RowBox[{
-                   RowBox[{"VAR$", "[", "Theorema`Knowledge`x$TM", "]"}], ",",
-                    "1", ",", "Theorema`Knowledge`n$TM", ",", "4"}], "]"}], 
-                 ",", 
-                 RowBox[{"STEPRNG$", "[", 
-                  RowBox[{
-                   RowBox[{"VAR$", "[", "Theorema`Knowledge`y$TM", "]"}], ",",
-                    "1", ",", "Theorema`Knowledge`n$TM", ",", "4"}], "]"}], 
-                 ",", 
-                 RowBox[{"STEPRNG$", "[", 
-                  RowBox[{
-                   RowBox[{"VAR$", "[", "Theorema`Knowledge`z$TM", "]"}], ",",
-                    "1", ",", "Theorema`Knowledge`n$TM", ",", "4"}], "]"}]}], 
-                "]"}], ",", "True", ",", 
-               RowBox[{"Theorema`Knowledge`P$TM", "[", 
-                RowBox[{"VAR$", "[", "Theorema`Knowledge`x$TM", "]"}], 
-                "]"}]}], "]"}]}], "]"}]}], "]"}], ",", "\<\"(3)\"\>"}], "}"}],
-        ",", 
-       RowBox[{"{", 
-        RowBox[{
-         RowBox[{"{", 
-          
-          RowBox[{"\<\"ID:1636935908\"\>", 
-           ",", "\<\"Source:/home/wwindste/Theorema.2/Theorema/Test/Language.\
-nb\"\>"}], "}"}], ",", 
-         RowBox[{"Forall$TM", "[", 
-          RowBox[{
-           RowBox[{"RNG$", "[", 
-            RowBox[{"SIMPRNG$", "[", 
-             RowBox[{"VAR$", "[", "Theorema`Knowledge`a$TM", "]"}], "]"}], 
-            "]"}], ",", "True", ",", 
-           RowBox[{"Implies$TM", "[", 
-            RowBox[{
-             RowBox[{"Theorema`Knowledge`S$TM", "[", 
-              RowBox[{"VAR$", "[", "Theorema`Knowledge`a$TM", "]"}], "]"}], 
-             ",", 
-             RowBox[{"Forall$TM", "[", 
-              RowBox[{
-               RowBox[{"RNG$", "[", 
-                RowBox[{"STEPRNG$", "[", 
-                 RowBox[{
-                  RowBox[{"VAR$", "[", "Theorema`Knowledge`x$TM", "]"}], ",", 
-                  "1", ",", "Theorema`Knowledge`n$TM", ",", "1"}], "]"}], 
-                "]"}], ",", "True", ",", 
-               RowBox[{"Equal$TM", "[", 
-                RowBox[{
-                 RowBox[{"Theorema`Knowledge`P$TM", "[", 
-                  RowBox[{"VAR$", "[", "Theorema`Knowledge`x$TM", "]"}], 
-                  "]"}], ",", 
-                 RowBox[{"Times$TM", "[", 
-                  RowBox[{"3", ",", 
-                   RowBox[{"VAR$", "[", "Theorema`Knowledge`x$TM", "]"}]}], 
-                  "]"}]}], "]"}]}], "]"}]}], "]"}]}], "]"}], 
-         ",", "\<\"(1)\"\>"}], "}"}]}], "}"}]}], "]"}], ",", 
-   RowBox[{"Theorema`Provers`Common`Private`PRFSIT$", "[", 
-    RowBox[{
-     RowBox[{"\<\"ID\"\>", "\[Rule]", "\<\"Initial\"\>"}], ",", 
+      RowBox[{"Theorema`Provers`applyOnce", "[", 
+       RowBox[{"Hold", "[", "Theorema`Provers`basicProver", "]"}], "]"}], 
+      "}"}]}], "]"}], ",", 
+   RowBox[{"Theorema`Common`unexpected", "[", 
+    RowBox[{"Theorema`Provers`Common`Private`nodeValue", ",", 
      RowBox[{"{", 
-      RowBox[{
+      RowBox[{"Theorema`Provers`Common`Private`PRFOBJ$", ",", 
        RowBox[{"{", 
-        RowBox[{"\<\"ID:1242901413\"\>", 
-         ",", "\<\"Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb\
-\"\>"}], "}"}], ",", 
-       RowBox[{"Forall$TM", "[", 
-        RowBox[{
-         RowBox[{"RNG$", "[", 
-          RowBox[{"SIMPRNG$", "[", 
-           RowBox[{"VAR$", "[", "Theorema`Knowledge`a$TM", "]"}], "]"}], 
-          "]"}], ",", "True", ",", 
-         RowBox[{"Implies$TM", "[", 
-          RowBox[{
-           RowBox[{"Theorema`Knowledge`S$TM", "[", 
-            RowBox[{"VAR$", "[", "Theorema`Knowledge`a$TM", "]"}], "]"}], ",", 
-           RowBox[{"Forall$TM", "[", 
-            RowBox[{
-             RowBox[{"RNG$", "[", 
-              RowBox[{
-               RowBox[{"STEPRNG$", "[", 
-                RowBox[{
-                 RowBox[{"VAR$", "[", "Theorema`Knowledge`x$TM", "]"}], ",", 
-                 "1", ",", "Theorema`Knowledge`n$TM", ",", "1"}], "]"}], ",", 
-               
-               RowBox[{"STEPRNG$", "[", 
-                RowBox[{
-                 RowBox[{"VAR$", "[", "Theorema`Knowledge`y$TM", "]"}], ",", 
-                 "1", ",", "Theorema`Knowledge`n$TM", ",", "1"}], "]"}]}], 
-              "]"}], ",", "True", ",", 
-             RowBox[{"IffDef$TM", "[", 
-              RowBox[{
-               RowBox[{"Theorema`Knowledge`P$TM", "[", 
-                RowBox[{
-                 RowBox[{"VAR$", "[", "Theorema`Knowledge`x$TM", "]"}], ",", 
-                 RowBox[{"VAR$", "[", "Theorema`Knowledge`y$TM", "]"}]}], 
-                "]"}], ",", 
-               RowBox[{"Or$TM", "[", 
-                RowBox[{
-                 RowBox[{"Theorema`Knowledge`Q$TM", "[", 
-                  RowBox[{"VAR$", "[", "Theorema`Knowledge`x$TM", "]"}], 
-                  "]"}], ",", 
-                 RowBox[{"Theorema`Knowledge`Q$TM", "[", 
-                  RowBox[{"VAR$", "[", "Theorema`Knowledge`y$TM", "]"}], 
-                  "]"}]}], "]"}]}], "]"}]}], "]"}]}], "]"}]}], "]"}], 
-       ",", "\<\"(10)\"\>"}], "}"}], ",", 
-     RowBox[{"{", 
-      RowBox[{
-       RowBox[{"{", 
-        RowBox[{
-         RowBox[{"{", 
-          
-          RowBox[{"\<\"ID:330716980\"\>", 
-           ",", "\<\"Source:/home/wwindste/Theorema.2/Theorema/Test/Language.\
-nb\"\>"}], "}"}], ",", 
-         RowBox[{"Forall$TM", "[", 
-          RowBox[{
-           RowBox[{"RNG$", "[", 
-            RowBox[{"SIMPRNG$", "[", 
-             RowBox[{"VAR$", "[", "Theorema`Knowledge`a$TM", "]"}], "]"}], 
-            "]"}], ",", "True", ",", 
-           RowBox[{"Implies$TM", "[", 
-            RowBox[{
-             RowBox[{"Theorema`Knowledge`S$TM", "[", 
-              RowBox[{"VAR$", "[", "Theorema`Knowledge`a$TM", "]"}], "]"}], 
-             ",", 
-             RowBox[{"Forall$TM", "[", 
-              RowBox[{
-               RowBox[{"RNG$", "[", 
-                RowBox[{
-                 RowBox[{"STEPRNG$", "[", 
-                  RowBox[{
-                   RowBox[{"VAR$", "[", "Theorema`Knowledge`x$TM", "]"}], ",",
-                    "1", ",", "Theorema`Knowledge`n$TM", ",", "4"}], "]"}], 
-                 ",", 
-                 RowBox[{"STEPRNG$", "[", 
-                  RowBox[{
-                   RowBox[{"VAR$", "[", "Theorema`Knowledge`y$TM", "]"}], ",",
-                    "1", ",", "Theorema`Knowledge`n$TM", ",", "4"}], "]"}], 
-                 ",", 
-                 RowBox[{"STEPRNG$", "[", 
-                  RowBox[{
-                   RowBox[{"VAR$", "[", "Theorema`Knowledge`z$TM", "]"}], ",",
-                    "1", ",", "Theorema`Knowledge`n$TM", ",", "4"}], "]"}]}], 
-                "]"}], ",", "True", ",", 
-               RowBox[{"Theorema`Knowledge`P$TM", "[", 
-                RowBox[{"VAR$", "[", "Theorema`Knowledge`x$TM", "]"}], 
-                "]"}]}], "]"}]}], "]"}]}], "]"}], ",", "\<\"(3)\"\>"}], "}"}],
-        ",", 
-       RowBox[{"{", 
-        RowBox[{
-         RowBox[{"{", 
-          
-          RowBox[{"\<\"ID:1636935908\"\>", 
-           ",", "\<\"Source:/home/wwindste/Theorema.2/Theorema/Test/Language.\
-nb\"\>"}], "}"}], ",", 
-         RowBox[{"Forall$TM", "[", 
-          RowBox[{
-           RowBox[{"RNG$", "[", 
-            RowBox[{"SIMPRNG$", "[", 
-             RowBox[{"VAR$", "[", "Theorema`Knowledge`a$TM", "]"}], "]"}], 
-            "]"}], ",", "True", ",", 
-           RowBox[{"Implies$TM", "[", 
-            RowBox[{
-             RowBox[{"Theorema`Knowledge`S$TM", "[", 
-              RowBox[{"VAR$", "[", "Theorema`Knowledge`a$TM", "]"}], "]"}], 
-             ",", 
-             RowBox[{"Forall$TM", "[", 
-              RowBox[{
-               RowBox[{"RNG$", "[", 
-                RowBox[{"STEPRNG$", "[", 
-                 RowBox[{
-                  RowBox[{"VAR$", "[", "Theorema`Knowledge`x$TM", "]"}], ",", 
-                  "1", ",", "Theorema`Knowledge`n$TM", ",", "1"}], "]"}], 
-                "]"}], ",", "True", ",", 
-               RowBox[{"Equal$TM", "[", 
-                RowBox[{
-                 RowBox[{"Theorema`Knowledge`P$TM", "[", 
-                  RowBox[{"VAR$", "[", "Theorema`Knowledge`x$TM", "]"}], 
-                  "]"}], ",", 
-                 RowBox[{"Times$TM", "[", 
-                  RowBox[{"3", ",", 
-                   RowBox[{"VAR$", "[", "Theorema`Knowledge`x$TM", "]"}]}], 
-                  "]"}]}], "]"}]}], "]"}]}], "]"}]}], "]"}], 
-         ",", "\<\"(1)\"\>"}], "}"}]}], "}"}], ",", 
-     RowBox[{"{", "}"}], ",", "\<\"pending\"\>", ",", 
-     RowBox[{"\<\"InferenceRules\"\>", "\[Rule]", 
-      RowBox[{"Theorema`Provers`Common`Private`inferenceRules", "[", 
-       RowBox[{"{", 
-        RowBox[{
-        "BasicProver`Private`andGoal", ",", "BasicProver`Private`andKB", ",", 
-         "BasicProver`Private`implGoalMP", ",", 
-         "BasicProver`Private`implGoalCP"}], "}"}], "]"}]}]}], "]"}]}], 
-  "]"}]], "Output",
- CellChangeTimes->{3.539687398899656*^9},
- CellID->59030728]
+        RowBox[{"{", 
+         RowBox[{"Theorema`Provers`applyOnce", "[", 
+          RowBox[{"Hold", "[", "Theorema`Provers`basicProver", "]"}], "]"}], 
+         "}"}], "}"}]}], "}"}]}], "]"}]}], "]"}]], "Output",
+ CellChangeTimes->{3.539687398899656*^9, 3.540553932237504*^9},
+ CellID->1227301781]
 }, Open  ]],
 
 Cell[BoxData["\"\<testArchive`\>\""], "IncludeArchive",
@@ -17839,7 +18048,7 @@ WindowSize->{740, 867},
 WindowMargins->{{397, Automatic}, {Automatic, 65}},
 Visible->True,
 ShowSelection->True,
-CounterAssignments->{{"TheoremaFormulaCounter" -> 19}},
+CounterAssignments->{{"TheoremaFormulaCounter" -> 20}},
 FrontEndVersion->"8.0 for Linux x86 (32-bit) (February 23, 2011)",
 StyleDefinitions->FrontEnd`FileName[{"Theorema"}, "TheoremaNotebook.nb", 
   CharacterEncoding -> "UTF-8"]
@@ -17943,7 +18152,12 @@ CellTagsIndex->{
     "ID:338555625", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "17"},
    CellID->338555625],
-  Cell[649255, 16288, 1173, 29, 40, "FormalTextInputFormula",
+  Cell[118448, 2938, 333, 8, 19, "FormalTextInputFormula",
+   CellTags->{
+    "ID:806064238", 
+     "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "20"},
+   CellID->806064238],
+  Cell[656812, 16497, 1173, 29, 40, "FormalTextInputFormula",
    CellTags->{
     "ID:412145113", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "9"},
@@ -18124,108 +18338,131 @@ nb"->{
     "Proof|ID:1242901413|Source:/home/wwindste/Theorema.2/Theorema/Test/\
 Language.nb",
    CellID->977639680]},
+ "ID:806064238"->{
+  Cell[118448, 2938, 333, 8, 19, "FormalTextInputFormula",
+   CellTags->{
+    "ID:806064238", 
+     "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "20"},
+   CellID->806064238]},
+ "20"->{
+  Cell[118448, 2938, 333, 8, 19, "FormalTextInputFormula",
+   CellTags->{
+    "ID:806064238", 
+     "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "20"},
+   CellID->806064238]},
+ "Proof|ID:806064238|Source:/home/wwindste/Theorema.2/Theorema/Test/Language.\
+nb"->{
+  Cell[118937, 2957, 160, 4, 21, "OpenProof",
+   CellTags->
+    "Proof|ID:806064238|Source:/home/wwindste/Theorema.2/Theorema/Test/\
+Language.nb",
+   CellID->673042814]},
  "Info3539675509-8586739"->{
-  Cell[133786, 3333, 186, 3, 42, "Print",
+  Cell[141343, 3542, 186, 3, 42, "Print",
    CellTags->"Info3539675509-8586739",
    CellID->2056264234],
-  Cell[133975, 3338, 5136, 163, 805, "Print",
+  Cell[141532, 3547, 5136, 163, 805, "Print",
    CellTags->"Info3539675509-8586739",
    CellID->1535545091]},
  "Info3538978900-6004912"->{
-  Cell[165279, 4232, 250, 5, 43, "Print",
+  Cell[172836, 4441, 250, 5, 43, "Print",
    CellTags->"Info3538978900-6004912",
    CellID->1287175721],
-  Cell[165532, 4239, 2372, 66, 157, "Print",
+  Cell[173089, 4448, 2372, 66, 157, "Print",
    CellTags->"Info3538978900-6004912",
    CellID->632570368]},
  "Info3537267044-9498034"->{
-  Cell[178330, 4564, 166, 3, 42, "Print",
+  Cell[185887, 4773, 166, 3, 42, "Print",
    CellTags->"Info3537267044-9498034",
    CellID->2079055498],
-  Cell[178499, 4569, 2948, 80, 210, "Print",
+  Cell[186056, 4778, 2948, 80, 210, "Print",
    CellTags->"Info3537267044-9498034",
    CellID->167383793]},
  "Info3539356428-4065218"->{
-  Cell[182179, 4678, 178, 3, 42, "Print",
+  Cell[189736, 4887, 178, 3, 42, "Print",
    CellTags->"Info3539356428-4065218",
    CellID->1486095324],
-  Cell[182360, 4683, 1154, 32, 43, "Print",
+  Cell[189917, 4892, 1154, 32, 43, "Print",
    CellTags->"Info3539356428-4065218",
    CellID->1967918314]},
  "Info3539683012-7308960"->{
-  Cell[579766, 14561, 827, 17, 82, "Print",
+  Cell[587323, 14770, 827, 17, 82, "Print",
    CellTags->"Info3539683012-7308960",
    CellID->1687617131],
-  Cell[580596, 14580, 21691, 549, 3073, "Print",
+  Cell[588153, 14789, 21691, 549, 3073, "Print",
    CellTags->"Info3539683012-7308960",
    CellID->835166288]},
  "ID:412145113"->{
-  Cell[649255, 16288, 1173, 29, 40, "FormalTextInputFormula",
+  Cell[656812, 16497, 1173, 29, 40, "FormalTextInputFormula",
    CellTags->{
     "ID:412145113", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "9"},
    CellID->412145113]},
  "9"->{
-  Cell[649255, 16288, 1173, 29, 40, "FormalTextInputFormula",
+  Cell[656812, 16497, 1173, 29, 40, "FormalTextInputFormula",
    CellTags->{
     "ID:412145113", 
      "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "9"},
    CellID->412145113]},
  "Info3538898227-6972375"->{
-  Cell[661770, 16654, 166, 3, 42, "Print",
+  Cell[669327, 16863, 166, 3, 42, "Print",
    CellTags->"Info3538898227-6972375",
    CellID->1804662456],
-  Cell[661939, 16659, 1569, 44, 62, "Print",
+  Cell[669496, 16868, 1569, 44, 62, "Print",
    CellTags->"Info3538898227-6972375",
    CellID->1518304074]}
  }
 *)
 (*CellTagsIndex
 CellTagsIndex->{
- {"Info3540021296-1140785", 710633, 17851},
- {"Info3540021321-1140785", 710821, 17856},
- {"Info3539356218-4065218", 711009, 17861},
- {"ID:1636935908", 711239, 17868},
- {"Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", 711498, 17874},
- {"1", 714401, 17950},
- {"ID:1242901413", 714615, 17956},
- {"10", 714819, 17962},
- {"ID:330716980", 715033, 17968},
- {"3", 715233, 17974},
- {"ID:1346427776", 715445, 17980},
- {"4", 715647, 17986},
- {"ID:1421485859", 715861, 17992},
- {"5", 716063, 17998},
- {"ID:1874491785", 716277, 18004},
- {"6", 716479, 18010},
- {"ID:1491028062", 716693, 18016},
- {"7", 716895, 18022},
- {"ID:822628176", 717108, 18028},
- {"8", 717308, 18034},
- {"ID:242022487", 717519, 18040},
- {"14", 717721, 18046},
- {"ID:1467107305", 717934, 18052},
- {"18", 718138, 18058},
- {"ID:2033225528", 718353, 18064},
- {"15", 718557, 18070},
- {"ID:1045911681", 718772, 18076},
- {"16", 718976, 18082},
- {"ID:1399274849", 719191, 18088},
- {"19", 719395, 18094},
- {"ID:338555625", 719609, 18100},
- {"17", 719810, 18106},
+ {"Info3540021296-1140785", 718190, 18060},
+ {"Info3540021321-1140785", 718378, 18065},
+ {"Info3539356218-4065218", 718566, 18070},
+ {"ID:1636935908", 718796, 18077},
+ {"Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", 719055, 18083},
+ {"1", 722150, 18164},
+ {"ID:1242901413", 722364, 18170},
+ {"10", 722568, 18176},
+ {"ID:330716980", 722782, 18182},
+ {"3", 722982, 18188},
+ {"ID:1346427776", 723194, 18194},
+ {"4", 723396, 18200},
+ {"ID:1421485859", 723610, 18206},
+ {"5", 723812, 18212},
+ {"ID:1874491785", 724026, 18218},
+ {"6", 724228, 18224},
+ {"ID:1491028062", 724442, 18230},
+ {"7", 724644, 18236},
+ {"ID:822628176", 724857, 18242},
+ {"8", 725057, 18248},
+ {"ID:242022487", 725268, 18254},
+ {"14", 725470, 18260},
+ {"ID:1467107305", 725683, 18266},
+ {"18", 725887, 18272},
+ {"ID:2033225528", 726102, 18278},
+ {"15", 726306, 18284},
+ {"ID:1045911681", 726521, 18290},
+ {"16", 726725, 18296},
+ {"ID:1399274849", 726940, 18302},
+ {"19", 727144, 18308},
+ {"ID:338555625", 727358, 18314},
+ {"17", 727559, 18320},
  {"Proof|ID:1636935908|Source:/home/wwindste/Theorema.2/Theorema/Test/\
-Language.nb", 720089, 18113},
+Language.nb", 727838, 18327},
  {"Proof|ID:1242901413|Source:/home/wwindste/Theorema.2/Theorema/Test/\
-Language.nb", 720348, 18120},
- {"Info3539675509-8586739", 720548, 18126},
- {"Info3538978900-6004912", 720792, 18133},
- {"Info3537267044-9498034", 721034, 18140},
- {"Info3539356428-4065218", 721276, 18147},
- {"Info3539683012-7308960", 721518, 18154},
- {"ID:412145113", 721756, 18161},
- {"9", 721959, 18167},
- {"Info3538898227-6972375", 722183, 18173}
+Language.nb", 728097, 18334},
+ {"ID:806064238", 728287, 18340},
+ {"20", 728489, 18346},
+ {"Proof|ID:806064238|Source:/home/wwindste/Theorema.2/Theorema/Test/Language.\
+nb", 728768, 18353},
+ {"Info3539675509-8586739", 728968, 18359},
+ {"Info3538978900-6004912", 729212, 18366},
+ {"Info3537267044-9498034", 729454, 18373},
+ {"Info3539356428-4065218", 729696, 18380},
+ {"Info3539683012-7308960", 729938, 18387},
+ {"ID:412145113", 730176, 18394},
+ {"9", 730379, 18400},
+ {"Info3538898227-6972375", 730603, 18406}
  }
 *)
 (*NotebookFileOutline
@@ -18466,659 +18703,693 @@ Cell[118297, 2929, 56, 1, 24, "CloseProof",
  CellID->310898544]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[118390, 2935, 144, 2, 30, "Input",
- CellID->1930239317],
-Cell[118537, 2939, 11620, 269, 1171, "Output",
- CellID->59030728]
+Cell[118390, 2935, 55, 1, 38, "OpenEnvironment",
+ CellID->1494302939],
+Cell[118448, 2938, 333, 8, 19, "FormalTextInputFormula",
+ CellTags->{
+  "ID:806064238", 
+   "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "20"},
+ CellID->806064238],
+Cell[118784, 2948, 65, 1, 24, "EndEnvironmentMarker",
+ CellID->459179674]
 }, Open  ]],
-Cell[130172, 3211, 142, 2, 23, "IncludeArchive",
+Cell[118864, 2952, 48, 1, 10, "CloseEnvironment",
+ CellID->438602653],
+Cell[CellGroupData[{
+Cell[118937, 2957, 160, 4, 21, "OpenProof",
+ CellTags->
+  "Proof|ID:806064238|Source:/home/wwindste/Theorema.2/Theorema/Test/Language.\
+nb",
+ CellID->673042814],
+Cell[CellGroupData[{
+Cell[119122, 2965, 946, 23, 32, "ProofDisplay",
+ CellID->298183240],
+Cell[120071, 2990, 15608, 369, 15, "ProofInfo",
+ CellID->632965013]
+}, Open  ]],
+Cell[135694, 3362, 56, 1, 24, "CloseProof",
+ CellID->726662969]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[135787, 3368, 169, 3, 30, "Input",
+ CellID->300238506],
+Cell[135959, 3373, 148, 3, 30, "Output",
+ CellID->1046473869]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[136144, 3381, 144, 2, 30, "Input",
+ CellID->1930239317],
+Cell[136291, 3385, 1423, 32, 202, "Output",
+ CellID->1227301781]
+}, Open  ]],
+Cell[137729, 3420, 142, 2, 23, "IncludeArchive",
  CellID->1555117900],
 Cell[CellGroupData[{
-Cell[130339, 3217, 120, 2, 30, "Input",
+Cell[137896, 3426, 120, 2, 30, "Input",
  CellID->979690572],
-Cell[130462, 3221, 154, 3, 30, "Output",
+Cell[138019, 3430, 154, 3, 30, "Output",
  CellID->1312949183]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[130653, 3229, 159, 3, 30, "Input",
+Cell[138210, 3438, 159, 3, 30, "Input",
  CellID->422956012],
-Cell[130815, 3234, 116, 2, 30, "Output",
+Cell[138372, 3443, 116, 2, 30, "Output",
  CellID->585837779]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[130968, 3241, 415, 9, 30, "Input",
+Cell[138525, 3450, 415, 9, 30, "Input",
  CellID->151579708],
-Cell[131386, 3252, 651, 12, 46, "Output",
+Cell[138943, 3461, 651, 12, 46, "Output",
  CellID->214870571]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[132074, 3269, 206, 4, 30, "Input",
+Cell[139631, 3478, 206, 4, 30, "Input",
  CellID->545350332],
-Cell[132283, 3275, 106, 1, 30, "Output"]
+Cell[139840, 3484, 106, 1, 30, "Output"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[132426, 3281, 301, 9, 30, "Input",
+Cell[139983, 3490, 301, 9, 30, "Input",
  CellID->1077746153],
-Cell[132730, 3292, 316, 9, 30, "Output",
+Cell[140287, 3501, 316, 9, 30, "Output",
  CellID->2095499821]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[133083, 3306, 244, 7, 30, "Input",
+Cell[140640, 3515, 244, 7, 30, "Input",
  CellID->2043383851],
-Cell[133330, 3315, 160, 4, 30, "Output",
+Cell[140887, 3524, 160, 4, 30, "Output",
  CellID->1915901012]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[133527, 3324, 234, 5, 30, "Input",
+Cell[141084, 3533, 234, 5, 30, "Input",
  CellID->127684017],
 Cell[CellGroupData[{
-Cell[133786, 3333, 186, 3, 42, "Print",
+Cell[141343, 3542, 186, 3, 42, "Print",
  CellTags->"Info3539675509-8586739",
  CellID->2056264234],
-Cell[133975, 3338, 5136, 163, 805, "Print",
+Cell[141532, 3547, 5136, 163, 805, "Print",
  CellTags->"Info3539675509-8586739",
  CellID->1535545091]
 }, Open  ]]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[139160, 3507, 113, 2, 24, "Input",
+Cell[146717, 3716, 113, 2, 24, "Input",
  CellID->485415444],
-Cell[139276, 3511, 175, 4, 30, "Output",
+Cell[146833, 3720, 175, 4, 30, "Output",
  CellID->956057954]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[139488, 3520, 146, 3, 30, "Input",
+Cell[147045, 3729, 146, 3, 30, "Input",
  CellID->2127381523],
-Cell[139637, 3525, 584, 17, 30, "Output",
+Cell[147194, 3734, 584, 17, 30, "Output",
  CellID->1121293163]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[140258, 3547, 189, 4, 23, "Computation",
+Cell[147815, 3756, 189, 4, 23, "Computation",
  CellID->890589206],
-Cell[140450, 3553, 10722, 248, 15, "ComputationInfo",
+Cell[148007, 3762, 10722, 248, 15, "ComputationInfo",
  CellID->57797172],
-Cell[151175, 3803, 107, 3, 15, "ComputationResult",
+Cell[158732, 4012, 107, 3, 15, "ComputationResult",
  CellID->730766664],
-Cell[151285, 3808, 149, 4, 15, "ComputationResult",
+Cell[158842, 4017, 149, 4, 15, "ComputationResult",
  CellID->569418601]
 }, Open  ]],
-Cell[151449, 3815, 154, 4, 30, "Input",
+Cell[159006, 4024, 154, 4, 30, "Input",
  CellID->1626848086],
 Cell[CellGroupData[{
-Cell[151628, 3823, 256, 4, 30, "Input",
+Cell[159185, 4032, 256, 4, 30, "Input",
  CellID->121474739],
-Cell[151887, 3829, 1090, 29, 106, "Output",
+Cell[159444, 4038, 1090, 29, 106, "Output",
  CellID->463038785]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[153014, 3863, 157, 3, 30, "Input",
+Cell[160571, 4072, 157, 3, 30, "Input",
  CellID->464939686],
-Cell[153174, 3868, 105, 2, 30, "Output",
+Cell[160731, 4077, 105, 2, 30, "Output",
  CellID->1904542096]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[153316, 3875, 215, 5, 30, "Input",
+Cell[160873, 4084, 215, 5, 30, "Input",
  CellID->1367627067],
-Cell[153534, 3882, 206, 5, 30, "Output",
+Cell[161091, 4091, 206, 5, 30, "Output",
  CellID->1922865856]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[153777, 3892, 70, 1, 30, "Input",
+Cell[161334, 4101, 70, 1, 30, "Input",
  CellID->1808356990],
-Cell[153850, 3895, 9571, 281, 697, "Output",
+Cell[161407, 4104, 9571, 281, 697, "Output",
  CellID->675168849]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[163458, 4181, 124, 2, 24, "Input",
+Cell[171015, 4390, 124, 2, 24, "Input",
  CellID->1574073290],
-Cell[163585, 4185, 424, 8, 50, "Output",
+Cell[171142, 4394, 424, 8, 50, "Output",
  CellID->1282895222]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[164046, 4198, 215, 4, 30, "Input",
+Cell[171603, 4407, 215, 4, 30, "Input",
  CellID->250611018],
-Cell[164264, 4204, 748, 15, 158, "Output",
+Cell[171821, 4413, 748, 15, 158, "Output",
  CellID->520767582]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[165049, 4224, 205, 4, 30, "Input",
+Cell[172606, 4433, 205, 4, 30, "Input",
  CellID->1141685749],
 Cell[CellGroupData[{
-Cell[165279, 4232, 250, 5, 43, "Print",
+Cell[172836, 4441, 250, 5, 43, "Print",
  CellTags->"Info3538978900-6004912",
  CellID->1287175721],
-Cell[165532, 4239, 2372, 66, 157, "Print",
+Cell[173089, 4448, 2372, 66, 157, "Print",
  CellTags->"Info3538978900-6004912",
  CellID->632570368]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[167953, 4311, 208, 4, 30, "Input",
+Cell[175510, 4520, 208, 4, 30, "Input",
  CellID->1384747800],
-Cell[168164, 4317, 156, 4, 30, "Output",
+Cell[175721, 4526, 156, 4, 30, "Output",
  CellID->1447158141]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[168357, 4326, 243, 5, 30, "Input",
+Cell[175914, 4535, 243, 5, 30, "Input",
  CellID->427811824],
-Cell[168603, 4333, 614, 17, 30, "Output",
+Cell[176160, 4542, 614, 17, 30, "Output",
  CellID->1350215185]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[169254, 4355, 271, 5, 30, "Input",
+Cell[176811, 4564, 271, 5, 30, "Input",
  CellID->295057353],
-Cell[169528, 4362, 5726, 94, 1470, "Output",
+Cell[177085, 4571, 5726, 94, 1470, "Output",
  CellID->2118018082]
 }, Closed]],
-Cell[175269, 4459, 253, 5, 24, "Input",
+Cell[182826, 4668, 253, 5, 24, "Input",
  CellID->881736748],
-Cell[175525, 4466, 250, 5, 30, "Input",
+Cell[183082, 4675, 250, 5, 30, "Input",
  CellID->1972978571],
 Cell[CellGroupData[{
-Cell[175800, 4475, 235, 6, 30, "Input",
+Cell[183357, 4684, 235, 6, 30, "Input",
  CellID->1182975562],
-Cell[176038, 4483, 738, 22, 39, "Output",
+Cell[183595, 4692, 738, 22, 39, "Output",
  CellID->1873252243]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[176813, 4510, 169, 3, 30, "Input",
+Cell[184370, 4719, 169, 3, 30, "Input",
  CellID->2024511036],
-Cell[176985, 4515, 154, 4, 30, "Output",
+Cell[184542, 4724, 154, 4, 30, "Output",
  CellID->229083148]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[177176, 4524, 250, 5, 30, "Input",
+Cell[184733, 4733, 250, 5, 30, "Input",
  CellID->736852899],
-Cell[177429, 4531, 139, 3, 30, "Output",
+Cell[184986, 4740, 139, 3, 30, "Output",
  CellID->832383090]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[177605, 4539, 204, 4, 30, "Input",
+Cell[185162, 4748, 204, 4, 30, "Input",
  CellID->1370121138],
-Cell[177812, 4545, 290, 7, 78, "Output",
+Cell[185369, 4754, 290, 7, 78, "Output",
  CellID->2037549048]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[178139, 4557, 166, 3, 30, "Input",
+Cell[185696, 4766, 166, 3, 30, "Input",
  CellID->1955273032],
 Cell[CellGroupData[{
-Cell[178330, 4564, 166, 3, 42, "Print",
+Cell[185887, 4773, 166, 3, 42, "Print",
  CellTags->"Info3537267044-9498034",
  CellID->2079055498],
-Cell[178499, 4569, 2948, 80, 210, "Print",
+Cell[186056, 4778, 2948, 80, 210, "Print",
  CellTags->"Info3537267044-9498034",
  CellID->167383793]
 }, Open  ]]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[181496, 4655, 189, 4, 24, "Input",
+Cell[189053, 4864, 189, 4, 24, "Input",
  CellID->1541668732],
-Cell[181688, 4661, 131, 3, 30, "Output",
+Cell[189245, 4870, 131, 3, 30, "Output",
  CellID->211843285]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[181856, 4669, 298, 5, 30, "Input",
+Cell[189413, 4878, 298, 5, 30, "Input",
  CellID->1697196647],
 Cell[CellGroupData[{
-Cell[182179, 4678, 178, 3, 42, "Print",
+Cell[189736, 4887, 178, 3, 42, "Print",
  CellTags->"Info3539356428-4065218",
  CellID->1486095324],
-Cell[182360, 4683, 1154, 32, 43, "Print",
+Cell[189917, 4892, 1154, 32, 43, "Print",
  CellTags->"Info3539356428-4065218",
  CellID->1967918314]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[183563, 4721, 260, 7, 50, "Input",
+Cell[191120, 4930, 260, 7, 50, "Input",
  CellID->2076419721],
-Cell[183826, 4730, 521, 11, 126, "Output",
+Cell[191383, 4939, 521, 11, 126, "Output",
  CellID->762369429]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[184384, 4746, 270, 5, 23, "Computation",
+Cell[191941, 4955, 270, 5, 23, "Computation",
  CellID->1893908966],
-Cell[184657, 4753, 10400, 244, 15, "ComputationInfo",
+Cell[192214, 4962, 10400, 244, 15, "ComputationInfo",
  CellID->1575277035],
-Cell[195060, 4999, 131, 4, 16, "ComputationResult",
+Cell[202617, 5208, 131, 4, 16, "ComputationResult",
  CellID->109592331]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[195228, 5008, 379, 6, 23, "Computation",
+Cell[202785, 5217, 379, 6, 23, "Computation",
  CellID->88945358],
-Cell[195610, 5016, 10585, 245, 15, "ComputationInfo",
+Cell[203167, 5225, 10585, 245, 15, "ComputationInfo",
  CellID->662960668],
-Cell[206198, 5263, 154, 5, 16, "ComputationResult",
+Cell[213755, 5472, 154, 5, 16, "ComputationResult",
  CellID->95754422]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[206389, 5273, 219, 4, 23, "Computation",
+Cell[213946, 5482, 219, 4, 23, "Computation",
  CellID->1868443842],
-Cell[206611, 5279, 10585, 245, 15, "ComputationInfo",
+Cell[214168, 5488, 10585, 245, 15, "ComputationInfo",
  CellID->670983249],
-Cell[217199, 5526, 156, 5, 16, "ComputationResult",
+Cell[224756, 5735, 156, 5, 16, "ComputationResult",
  CellID->1294992259]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[217392, 5536, 145, 3, 23, "Computation",
+Cell[224949, 5745, 145, 3, 23, "Computation",
  CellID->546509625],
-Cell[217540, 5541, 10586, 245, 15, "ComputationInfo",
+Cell[225097, 5750, 10586, 245, 15, "ComputationInfo",
  CellID->1241332751],
-Cell[228129, 5788, 156, 5, 16, "ComputationResult",
+Cell[235686, 5997, 156, 5, 16, "ComputationResult",
  CellID->1029595611]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[228322, 5798, 145, 3, 30, "Input",
+Cell[235879, 6007, 145, 3, 30, "Input",
  CellID->1330495127],
-Cell[228470, 5803, 148, 4, 30, "Output",
+Cell[236027, 6012, 148, 4, 30, "Output",
  CellID->582396549]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[228655, 5812, 119, 2, 30, "Input",
+Cell[236212, 6021, 119, 2, 30, "Input",
  CellID->36095736],
-Cell[228777, 5816, 105, 2, 30, "Output",
+Cell[236334, 6025, 105, 2, 30, "Output",
  CellID->1692759908]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[228919, 5823, 125, 2, 30, "Input",
+Cell[236476, 6032, 125, 2, 30, "Input",
  CellID->2025658266],
-Cell[229047, 5827, 257, 6, 30, "Output",
+Cell[236604, 6036, 257, 6, 30, "Output",
  CellID->837323898]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[229353, 5839, 117, 2, 74, "Section",
+Cell[236910, 6048, 117, 2, 74, "Section",
  CellID->1498334619],
 Cell[CellGroupData[{
-Cell[229495, 5845, 429, 10, 29, "Computation",
+Cell[237052, 6054, 429, 10, 29, "Computation",
  CellID->98487382],
-Cell[229927, 5857, 9812, 235, 15, "ComputationInfo",
+Cell[237484, 6066, 9812, 235, 15, "ComputationInfo",
  CellID->1479163346],
-Cell[239742, 6094, 363, 12, 24, "ComputationResult",
+Cell[247299, 6303, 363, 12, 24, "ComputationResult",
  CellID->1504671994]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[240142, 6111, 241, 7, 29, "Computation",
+Cell[247699, 6320, 241, 7, 29, "Computation",
  CellID->1791385580],
-Cell[240386, 6120, 9810, 235, 15, "ComputationInfo",
+Cell[247943, 6329, 9810, 235, 15, "ComputationInfo",
  CellID->14065605],
-Cell[250199, 6357, 385, 12, 24, "ComputationResult",
+Cell[257756, 6566, 385, 12, 24, "ComputationResult",
  CellID->1201509063]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[250621, 6374, 315, 9, 29, "Computation",
+Cell[258178, 6583, 315, 9, 29, "Computation",
  CellID->1674073568],
-Cell[250939, 6385, 9811, 235, 15, "ComputationInfo",
+Cell[258496, 6594, 9811, 235, 15, "ComputationInfo",
  CellID->449726254],
-Cell[260753, 6622, 515, 13, 15, "ComputationResult",
+Cell[268310, 6831, 515, 13, 15, "ComputationResult",
  CellID->754137009]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[261305, 6640, 315, 9, 29, "Computation",
+Cell[268862, 6849, 315, 9, 29, "Computation",
  CellID->1845651749],
-Cell[261623, 6651, 9776, 235, 15, "ComputationInfo",
+Cell[269180, 6860, 9776, 235, 15, "ComputationInfo",
  CellID->108509328],
-Cell[271402, 6888, 412, 13, 24, "ComputationResult",
+Cell[278959, 7097, 412, 13, 24, "ComputationResult",
  CellID->737506521]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[271851, 6906, 390, 11, 33, "Computation",
+Cell[279408, 7115, 390, 11, 33, "Computation",
  CellID->1431049582],
-Cell[272244, 6919, 9811, 235, 15, "ComputationInfo",
+Cell[279801, 7128, 9811, 235, 15, "ComputationInfo",
  CellID->1185581040],
-Cell[282058, 7156, 319, 8, 15, "ComputationResult",
+Cell[289615, 7365, 319, 8, 15, "ComputationResult",
  CellID->582741343]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[282414, 7169, 336, 9, 29, "Computation",
+Cell[289971, 7378, 336, 9, 29, "Computation",
  CellID->203455808],
-Cell[282753, 7180, 9810, 235, 15, "ComputationInfo",
+Cell[290310, 7389, 9810, 235, 15, "ComputationInfo",
  CellID->145952955],
-Cell[292566, 7417, 336, 8, 15, "ComputationResult",
+Cell[300123, 7626, 336, 8, 15, "ComputationResult",
  CellID->1753205452]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[292939, 7430, 384, 10, 29, "Computation",
+Cell[300496, 7639, 384, 10, 29, "Computation",
  CellID->30211731],
-Cell[293326, 7442, 9812, 235, 15, "ComputationInfo",
+Cell[300883, 7651, 9812, 235, 15, "ComputationInfo",
  CellID->2129720458],
-Cell[303141, 7679, 409, 13, 24, "ComputationResult",
+Cell[310698, 7888, 409, 13, 24, "ComputationResult",
  CellID->754575839]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[303587, 7697, 341, 10, 29, "Computation",
+Cell[311144, 7906, 341, 10, 29, "Computation",
  CellID->1873687787],
-Cell[303931, 7709, 9812, 235, 15, "ComputationInfo",
+Cell[311488, 7918, 9812, 235, 15, "ComputationInfo",
  CellID->1253293235],
-Cell[313746, 7946, 541, 14, 15, "ComputationResult",
+Cell[321303, 8155, 541, 14, 15, "ComputationResult",
  CellID->1218379290]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[314324, 7965, 340, 10, 29, "Computation",
+Cell[321881, 8174, 340, 10, 29, "Computation",
  CellID->811697226],
-Cell[314667, 7977, 9777, 235, 15, "ComputationInfo",
+Cell[322224, 8186, 9777, 235, 15, "ComputationInfo",
  CellID->1518608613],
-Cell[324447, 8214, 436, 14, 24, "ComputationResult",
+Cell[332004, 8423, 436, 14, 24, "ComputationResult",
  CellID->825684985]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[324920, 8233, 142, 3, 23, "Computation",
+Cell[332477, 8442, 142, 3, 23, "Computation",
  CellID->1011115407],
-Cell[325065, 8238, 9776, 235, 15, "ComputationInfo",
+Cell[332622, 8447, 9776, 235, 15, "ComputationInfo",
  CellID->445048633],
-Cell[334844, 8475, 196, 4, 15, "ComputationResult",
+Cell[342401, 8684, 196, 4, 15, "ComputationResult",
  CellID->1204156752]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[335077, 8484, 141, 3, 23, "Computation",
+Cell[342634, 8693, 141, 3, 23, "Computation",
  CellID->277393357],
-Cell[335221, 8489, 9812, 235, 15, "ComputationInfo",
+Cell[342778, 8698, 9812, 235, 15, "ComputationInfo",
  CellID->1246334821],
-Cell[345036, 8726, 148, 3, 15, "ComputationResult",
+Cell[352593, 8935, 148, 3, 15, "ComputationResult",
  CellID->280699869]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[345221, 8734, 439, 12, 33, "Computation",
+Cell[352778, 8943, 439, 12, 33, "Computation",
  CellID->2073870508],
-Cell[345663, 8748, 9812, 235, 15, "ComputationInfo",
+Cell[353220, 8957, 9812, 235, 15, "ComputationInfo",
  CellID->1700297099],
-Cell[355478, 8985, 332, 9, 15, "ComputationResult",
+Cell[363035, 9194, 332, 9, 15, "ComputationResult",
  CellID->778293369]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[355847, 8999, 805, 21, 41, "Computation",
+Cell[363404, 9208, 805, 21, 41, "Computation",
  CellID->1152856210],
-Cell[356655, 9022, 9776, 235, 15, "ComputationInfo",
+Cell[364212, 9231, 9776, 235, 15, "ComputationInfo",
  CellID->960157500],
-Cell[366434, 9259, 2100, 55, 36, "ComputationResult",
+Cell[373991, 9468, 2100, 55, 36, "ComputationResult",
  CellID->690517246]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[368571, 9319, 256, 7, 30, "Computation",
+Cell[376128, 9528, 256, 7, 30, "Computation",
  CellID->1615862783],
-Cell[368830, 9328, 9776, 235, 15, "ComputationInfo",
+Cell[376387, 9537, 9776, 235, 15, "ComputationInfo",
  CellID->944167556],
-Cell[378609, 9565, 203, 4, 15, "ComputationResult",
+Cell[386166, 9774, 203, 4, 15, "ComputationResult",
  CellID->1238531527]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[378849, 9574, 297, 8, 30, "Computation",
+Cell[386406, 9783, 297, 8, 30, "Computation",
  CellID->1201037010],
-Cell[379149, 9584, 9775, 235, 15, "ComputationInfo",
+Cell[386706, 9793, 9775, 235, 15, "ComputationInfo",
  CellID->540673537],
-Cell[388927, 9821, 128, 2, 15, "ComputationResult",
+Cell[396484, 10030, 128, 2, 15, "ComputationResult",
  CellID->807696050]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[389092, 9828, 273, 7, 30, "Computation",
+Cell[396649, 10037, 273, 7, 30, "Computation",
  CellID->921769592],
-Cell[389368, 9837, 9777, 235, 15, "ComputationInfo",
+Cell[396925, 10046, 9777, 235, 15, "ComputationInfo",
  CellID->1465305827],
-Cell[399148, 10074, 104, 2, 15, "ComputationResult",
+Cell[406705, 10283, 104, 2, 15, "ComputationResult",
  CellID->168737142]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[399289, 10081, 449, 12, 41, "Computation",
+Cell[406846, 10290, 449, 12, 41, "Computation",
  CellID->165054078],
-Cell[399741, 10095, 9777, 235, 15, "ComputationInfo",
+Cell[407298, 10304, 9777, 235, 15, "ComputationInfo",
  CellID->1604596859],
-Cell[409521, 10332, 200, 4, 15, "ComputationResult",
+Cell[417078, 10541, 200, 4, 15, "ComputationResult",
  CellID->244870717]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[409758, 10341, 495, 12, 43, "Computation",
+Cell[417315, 10550, 495, 12, 43, "Computation",
  CellID->514390584],
-Cell[410256, 10355, 9777, 235, 15, "ComputationInfo",
+Cell[417813, 10564, 9777, 235, 15, "ComputationInfo",
  CellID->1113360533],
-Cell[420036, 10592, 695, 23, 18, "ComputationResult",
+Cell[427593, 10801, 695, 23, 18, "ComputationResult",
  CellID->1682361377]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[420768, 10620, 521, 12, 43, "Computation",
+Cell[428325, 10829, 521, 12, 43, "Computation",
  CellID->1089040068],
-Cell[421292, 10634, 9777, 235, 15, "ComputationInfo",
+Cell[428849, 10843, 9777, 235, 15, "ComputationInfo",
  CellID->1098517706],
-Cell[431072, 10871, 438, 15, 18, "ComputationResult",
+Cell[438629, 11080, 438, 15, 18, "ComputationResult",
  CellID->902180314]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[431547, 10891, 737, 18, 40, "Computation",
+Cell[439104, 11100, 737, 18, 40, "Computation",
  CellID->1030427555],
-Cell[432287, 10911, 9812, 235, 15, "ComputationInfo",
+Cell[439844, 11120, 9812, 235, 15, "ComputationInfo",
  CellID->2099805360],
-Cell[442102, 11148, 102, 2, 15, "ComputationResult",
+Cell[449659, 11357, 102, 2, 15, "ComputationResult",
  CellID->993919463]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[442241, 11155, 725, 18, 40, "Computation",
+Cell[449798, 11364, 725, 18, 40, "Computation",
  CellID->626819530],
-Cell[442969, 11175, 9811, 235, 15, "ComputationInfo",
+Cell[450526, 11384, 9811, 235, 15, "ComputationInfo",
  CellID->1982206321],
-Cell[452783, 11412, 105, 2, 15, "ComputationResult",
+Cell[460340, 11621, 105, 2, 15, "ComputationResult",
  CellID->468602894]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[452925, 11419, 829, 20, 40, "Computation",
+Cell[460482, 11628, 829, 20, 40, "Computation",
  CellID->1118177723],
-Cell[453757, 11441, 9812, 235, 15, "ComputationInfo",
+Cell[461314, 11650, 9812, 235, 15, "ComputationInfo",
  CellID->1426088242],
-Cell[463572, 11678, 106, 2, 15, "ComputationResult",
+Cell[471129, 11887, 106, 2, 15, "ComputationResult",
  CellID->1300723109]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[463715, 11685, 802, 19, 40, "Computation",
+Cell[471272, 11894, 802, 19, 40, "Computation",
  CellID->2063520275],
-Cell[464520, 11706, 9811, 235, 15, "ComputationInfo",
+Cell[472077, 11915, 9811, 235, 15, "ComputationInfo",
  CellID->663247889],
-Cell[474334, 11943, 376, 11, 15, "ComputationResult",
+Cell[481891, 12152, 376, 11, 15, "ComputationResult",
  CellID->725979512]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[474747, 11959, 828, 20, 40, "Computation",
+Cell[482304, 12168, 828, 20, 40, "Computation",
  CellID->941369956],
-Cell[475578, 11981, 9812, 235, 15, "ComputationInfo",
+Cell[483135, 12190, 9812, 235, 15, "ComputationInfo",
  CellID->1592498020],
-Cell[485393, 12218, 787, 27, 35, "ComputationResult",
+Cell[492950, 12427, 787, 27, 35, "ComputationResult",
  CellID->1882998958]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[486217, 12250, 759, 18, 30, "Computation",
+Cell[493774, 12459, 759, 18, 30, "Computation",
  CellID->952406679],
-Cell[486979, 12270, 9812, 235, 15, "ComputationInfo",
+Cell[494536, 12479, 9812, 235, 15, "ComputationInfo",
  CellID->1956997315],
-Cell[496794, 12507, 1255, 41, 54, "ComputationResult",
+Cell[504351, 12716, 1255, 41, 54, "ComputationResult",
  CellID->515926111]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[498086, 12553, 790, 19, 30, "Computation",
+Cell[505643, 12762, 790, 19, 30, "Computation",
  CellID->1263723114],
-Cell[498879, 12574, 9746, 234, 15, "ComputationInfo",
+Cell[506436, 12783, 9746, 234, 15, "ComputationInfo",
  CellID->1865004037],
-Cell[508628, 12810, 755, 24, 25, "ComputationResult",
+Cell[516185, 13019, 755, 24, 25, "ComputationResult",
  CellID->627422604]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[509420, 12839, 312, 10, 31, "Computation",
+Cell[516977, 13048, 312, 10, 31, "Computation",
  CellID->574544294],
-Cell[509735, 12851, 10385, 244, 15, "ComputationInfo",
+Cell[517292, 13060, 10385, 244, 15, "ComputationInfo",
  CellID->701678887],
-Cell[520123, 13097, 634, 18, 26, "ComputationResult",
+Cell[527680, 13306, 634, 18, 26, "ComputationResult",
  CellID->699868854]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[520794, 13120, 424, 13, 30, "Computation",
+Cell[528351, 13329, 424, 13, 30, "Computation",
  CellID->500928076],
-Cell[521221, 13135, 10400, 244, 15, "ComputationInfo",
+Cell[528778, 13344, 10400, 244, 15, "ComputationInfo",
  CellID->1158250773],
-Cell[531624, 13381, 804, 23, 35, "ComputationResult",
+Cell[539181, 13590, 804, 23, 35, "ComputationResult",
  CellID->79214255]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[532465, 13409, 416, 10, 23, "Computation",
+Cell[540022, 13618, 416, 10, 23, "Computation",
  CellID->1853937483],
-Cell[532884, 13421, 10523, 245, 15, "ComputationInfo",
+Cell[540441, 13630, 10523, 245, 15, "ComputationInfo",
  CellID->1916739404],
-Cell[543410, 13668, 269, 6, 15, "ComputationResult",
+Cell[550967, 13877, 269, 6, 15, "ComputationResult",
  CellID->559235197]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[543716, 13679, 502, 11, 23, "Computation",
+Cell[551273, 13888, 502, 11, 23, "Computation",
  CellID->1648032914],
-Cell[544221, 13692, 10522, 245, 15, "ComputationInfo",
+Cell[551778, 13901, 10522, 245, 15, "ComputationInfo",
  CellID->1856435548],
-Cell[554746, 13939, 189, 5, 15, "ComputationResult",
+Cell[562303, 14148, 189, 5, 15, "ComputationResult",
  CellID->186024610]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[554972, 13949, 892, 22, 47, "Computation",
+Cell[562529, 14158, 892, 22, 47, "Computation",
  CellID->1589954603],
-Cell[555867, 13973, 10522, 245, 15, "ComputationInfo",
+Cell[563424, 14182, 10522, 245, 15, "ComputationInfo",
  CellID->340008834],
-Cell[566392, 14220, 934, 28, 35, "ComputationResult",
+Cell[573949, 14429, 934, 28, 35, "ComputationResult",
  CellID->2010995085]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[567363, 14253, 897, 21, 40, "Computation",
+Cell[574920, 14462, 897, 21, 40, "Computation",
  CellID->124492887],
-Cell[568263, 14276, 10523, 245, 15, "ComputationInfo",
+Cell[575820, 14485, 10523, 245, 15, "ComputationInfo",
  CellID->1940060739],
-Cell[578789, 14523, 775, 26, 35, "ComputationResult",
+Cell[586346, 14732, 775, 26, 35, "ComputationResult",
  CellID->597532123]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[579601, 14554, 140, 3, 30, "Input",
+Cell[587158, 14763, 140, 3, 30, "Input",
  CellID->1706377894],
 Cell[CellGroupData[{
-Cell[579766, 14561, 827, 17, 82, "Print",
+Cell[587323, 14770, 827, 17, 82, "Print",
  CellTags->"Info3539683012-7308960",
  CellID->1687617131],
-Cell[580596, 14580, 21691, 549, 3073, "Print",
+Cell[588153, 14789, 21691, 549, 3073, "Print",
  CellTags->"Info3539683012-7308960",
  CellID->835166288]
 }, Closed]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[602336, 15135, 148, 3, 30, "Input",
+Cell[609893, 15344, 148, 3, 30, "Input",
  CellID->452348970],
-Cell[602487, 15140, 834, 18, 254, "Output",
+Cell[610044, 15349, 834, 18, 254, "Output",
  CellID->399279262]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[603358, 15163, 426, 13, 30, "Computation",
+Cell[610915, 15372, 426, 13, 30, "Computation",
  CellID->1923940186],
-Cell[603787, 15178, 10357, 244, 15, "ComputationInfo",
+Cell[611344, 15387, 10357, 244, 15, "ComputationInfo",
  CellID->652674330],
-Cell[614147, 15424, 702, 22, 25, "ComputationResult",
+Cell[621704, 15633, 702, 22, 25, "ComputationResult",
  CellID->1971377609]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[614886, 15451, 149, 3, 30, "Input",
+Cell[622443, 15660, 149, 3, 30, "Input",
  CellID->1411710637],
-Cell[615038, 15456, 969, 21, 286, "Output",
+Cell[622595, 15665, 969, 21, 286, "Output",
  CellID->391066088]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[616044, 15482, 214, 5, 23, "Computation",
+Cell[623601, 15691, 214, 5, 23, "Computation",
  CellID->1392099689],
-Cell[616261, 15489, 10400, 244, 15, "ComputationInfo",
+Cell[623818, 15698, 10400, 244, 15, "ComputationInfo",
  CellID->1373321664],
-Cell[626664, 15735, 288, 6, 15, "ComputationResult",
+Cell[634221, 15944, 288, 6, 15, "ComputationResult",
  CellID->2011074225]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[626989, 15746, 320, 8, 23, "Computation",
+Cell[634546, 15955, 320, 8, 23, "Computation",
  CellID->1094429406],
-Cell[627312, 15756, 10400, 244, 15, "ComputationInfo",
+Cell[634869, 15965, 10400, 244, 15, "ComputationInfo",
  CellID->1455835425],
-Cell[637715, 16002, 290, 5, 15, "ComputationResult",
+Cell[645272, 16211, 290, 5, 15, "ComputationResult",
  CellID->380662198]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[638042, 16012, 165, 4, 23, "Computation",
+Cell[645599, 16221, 165, 4, 23, "Computation",
  CellID->1236848492],
-Cell[638210, 16018, 10399, 244, 15, "ComputationInfo",
+Cell[645767, 16227, 10399, 244, 15, "ComputationInfo",
  CellID->690458640],
-Cell[648612, 16264, 130, 2, 15, "ComputationResult",
+Cell[656169, 16473, 130, 2, 15, "ComputationResult",
  CellID->2049673273]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[648791, 16272, 115, 2, 74, "Section",
+Cell[656348, 16481, 115, 2, 74, "Section",
  CellID->332513239],
 Cell[CellGroupData[{
-Cell[648931, 16278, 58, 1, 38, "OpenEnvironment",
+Cell[656488, 16487, 58, 1, 38, "OpenEnvironment",
  CellID->1770062998],
-Cell[648992, 16281, 260, 5, 29, "EnvironmentDeclaration",
+Cell[656549, 16490, 260, 5, 29, "EnvironmentDeclaration",
  CellID->1574886120],
-Cell[649255, 16288, 1173, 29, 40, "FormalTextInputFormula",
+Cell[656812, 16497, 1173, 29, 40, "FormalTextInputFormula",
  CellTags->{
   "ID:412145113", 
    "Source:/home/wwindste/Theorema.2/Theorema/Test/Language.nb", "9"},
  CellID->412145113],
-Cell[650431, 16319, 66, 1, 24, "EndEnvironmentMarker",
+Cell[657988, 16528, 66, 1, 24, "EndEnvironmentMarker",
  CellID->1300223080]
 }, Open  ]],
-Cell[650512, 16323, 49, 1, 10, "CloseEnvironment",
+Cell[658069, 16532, 49, 1, 10, "CloseEnvironment",
  CellID->1068241259],
 Cell[CellGroupData[{
-Cell[650586, 16328, 162, 3, 30, "Input",
+Cell[658143, 16537, 162, 3, 30, "Input",
  CellID->1565406460],
-Cell[650751, 16333, 9706, 282, 697, "Output",
+Cell[658308, 16542, 9706, 282, 697, "Output",
  CellID->1874911000]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[660494, 16620, 167, 3, 24, "Input",
+Cell[668051, 16829, 167, 3, 24, "Input",
  CellID->1391707244],
-Cell[660664, 16625, 829, 16, 142, "Output",
+Cell[668221, 16834, 829, 16, 142, "Output",
  CellID->365102397]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[661530, 16646, 215, 4, 30, "Input",
+Cell[669087, 16855, 215, 4, 30, "Input",
  CellID->2124154183],
 Cell[CellGroupData[{
-Cell[661770, 16654, 166, 3, 42, "Print",
+Cell[669327, 16863, 166, 3, 42, "Print",
  CellTags->"Info3538898227-6972375",
  CellID->1804662456],
-Cell[661939, 16659, 1569, 44, 62, "Print",
+Cell[669496, 16868, 1569, 44, 62, "Print",
  CellTags->"Info3538898227-6972375",
  CellID->1518304074]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[663557, 16709, 320, 7, 30, "Input",
+Cell[671114, 16918, 320, 7, 30, "Input",
  CellID->209530079],
-Cell[663880, 16718, 1085, 24, 318, "Output",
+Cell[671437, 16927, 1085, 24, 318, "Output",
  CellID->389968434]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[665002, 16747, 266, 6, 17, "Computation",
+Cell[672559, 16956, 266, 6, 17, "Computation",
  CellID->205321431],
-Cell[665271, 16755, 10400, 244, 15, "ComputationInfo",
+Cell[672828, 16964, 10400, 244, 15, "ComputationInfo",
  CellID->2049777050],
-Cell[675674, 17001, 412, 8, 15, "ComputationResult",
+Cell[683231, 17210, 412, 8, 15, "ComputationResult",
  CellID->666721698]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[676123, 17014, 240, 5, 23, "Computation",
+Cell[683680, 17223, 240, 5, 23, "Computation",
  CellID->2121083924],
-Cell[676366, 17021, 10639, 247, 15, "ComputationInfo",
+Cell[683923, 17230, 10639, 247, 15, "ComputationInfo",
  CellID->803931086],
-Cell[687008, 17270, 554, 16, 15, "ComputationResult",
+Cell[694565, 17479, 554, 16, 15, "ComputationResult",
  CellID->2082819044]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[687599, 17291, 266, 6, 23, "Computation",
+Cell[695156, 17500, 266, 6, 23, "Computation",
  CellID->533105519],
-Cell[687868, 17299, 10603, 248, 15, "ComputationInfo",
+Cell[695425, 17508, 10603, 248, 15, "ComputationInfo",
  CellID->2082900615],
-Cell[698474, 17549, 545, 18, 15, "ComputationResult",
+Cell[706031, 17758, 545, 18, 15, "ComputationResult",
  CellID->863356687]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[699056, 17572, 292, 6, 23, "Computation",
+Cell[706613, 17781, 292, 6, 23, "Computation",
  CellID->1034884285],
-Cell[699351, 17580, 10611, 247, 15, "ComputationInfo",
+Cell[706908, 17789, 10611, 247, 15, "ComputationInfo",
  CellID->1612224523],
-Cell[709965, 17829, 171, 4, 15, "ComputationResult",
+Cell[717522, 18038, 171, 4, 15, "ComputationResult",
  CellID->2141439813]
 }, Open  ]]
 }, Open  ]]

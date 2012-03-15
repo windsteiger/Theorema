@@ -33,25 +33,17 @@ initProver[] :=
 		$registeredRuleSets = {};
 		$registeredStrategies = {};
 		ruleAct[_] := True;
+		$proofCellStatus = Open;
 	]
 
-callProver[ rules_, strategy_, goal_, kb_] :=
+callProver[ rules_, strategy_, goal_, kb_, searchDepth_] :=
 	Module[{},
 		$TMAproofObject = makeInitialProofObject[ goal, kb, rules, strategy];
 		$TMAproofNotebook = makeInitialProofNotebook[ $TMAproofObject];
-		$TMAproofTree = makeInitialProofTree[ ];
-		proofSearch[ ];
-		Pause[1];
-		$TMAproofTree = {{"Initial", "pending", "andNode"} -> {"new1", "pending", "prfsit"},
-  			{"Initial", "pending", "andNode"} -> {"new2", "pending", "prfsit"}};
-  		Pause[2];
-  		$TMAproofTree = $TMAproofTree /. {"new2", _, _} -> {"new2", "pending", "andNode"};
-  		AppendTo[ $TMAproofTree, {"new2", "pending", "andNode"} -> {"new3", "proved", "terminalNode"}];
-  		Pause[2];
-  		$TMAproofTree = $TMAproofTree /. {id_, "pending", "andNode"} -> {id, "proved", "andNode"};
-  		Pause[4];
+		$TMAproofTree = makeInitialProofTree[];
+		proofSearch[ searchDepth];
   		$proofInProgressMarker = {};
-		{$Failed, $TMAproofObject}
+		{getProofValue[ $TMAproofObject], $TMAproofObject}
 	]
 callProver[ args___] := unexpected[ callProver, {args}]
 
@@ -59,47 +51,164 @@ callProver[ args___] := unexpected[ callProver, {args}]
 (* ::Subsubsection:: *)
 (* proofSearch *)
 
-proofSearch[ ] :=
-	Module[{openPS, openPSpos, selPSpos, selPS},
-		openPSpos = Position[ $TMAproofObject, PRFSIT$[ _, _, _, "pending", ___]];
-		openPS = Extract[ $TMAproofObject, openPSpos];
-		selPSpos = chooseNextPS[ openPS, openPSpos];
-	]
+proofSearch[ searchDepth_] :=
+    Module[ {openPS, openPSpos, selPSpos, selPS, pStrat, newSteps},
+        While[ getProofValue[] === pending && (openPSpos = Position[ $TMAproofObject, _PRFSIT$]) =!= {},
+            openPS = Extract[ $TMAproofObject, openPSpos];
+            {selPS, selPSpos} = chooseNextPS[ openPS, openPSpos];
+            If[ Length[ selPSpos] > searchDepth,
+            	newSteps = searchDepthExceeded[ selPS],
+            	(* else *)
+            	pStrat = getStrategy[ selPS];
+            	newSteps = pStrat[ getRules[ selPS], selPS]
+            ];
+            $TMAproofObject = replaceProofSit[ $TMAproofObject, selPSpos -> newSteps];
+            $TMAproofObject = propagateProofValues[ $TMAproofObject];
+            (*Pause[0.5] *)         
+        ]
+    ]
 proofSearch[ args___] := unexpected[ proofSearch, {args}]
+
+chooseNextPS[ ps_List, psPos_List] :=
+	Module[{},
+		{First[ ps], First[ psPos]}
+	]
+chooseNextPS[ args___] := unexpected[ chooseNextPS, {args}]
+
+replaceProofSit[ po_PRFOBJ$, pos_ -> new:node_[___]] :=
+	Module[{parentID = getNodeID[ Extract[ po, pos]], newVal = getProofValue[ new], treeNode, sub},
+		treeNode = {parentID, newVal, node};
+		$TMAproofTree = $TMAproofTree /. {parentID, pending, PRFSIT$} -> treeNode;
+		sub = Map[ (treeNode -> poNodeToTreeNode[#])&, getSubgoals[ new]];
+		$TMAproofTree = Join[ $TMAproofTree, sub];
+		ReplacePart[ po, pos -> new]
+	]
+replaceProofSit[ args___] := unexpected[ replaceProofSit, {args}]
+
+
+(* ::Section:: *)
+(* Proof object data structures *)
+
+getGoal[ PRFSIT$[ g_, kb_, af_, ___]] := g
+getGoal[ args___] := unexpected[ getGoal, {args}]
+
+getKB[ PRFSIT$[ g_, kb_, af_, ___]] := kb
+getKB[ args___] := unexpected[ getKB, {args}]
+
+getRules[ PRFSIT$[ g_, kb_, af_, ___, "InferenceRules" -> r_, ___]] := r
+getRules[ args___] := unexpected[ getRules, {args}]
+
+getStrategy[ PRFSIT$[ g_, kb_, af_, ___, "Strategy" -> s_, ___]] := s
+getStrategy[ args___] := unexpected[ getStrategy, {args}]
+
+getPrincipalData[ PRFSIT$[ g_, kb_, af_, ___]] := {g, kb, af}
+getPrincipalData[ args___] := unexpected[ getPrincipalData, {args}]
+
+getProofValue[ ] := Last[ $TMAproofObject]
+getProofValue[ _PRFSIT$] := pending
+getProofValue[ node_] := Last[ node]
+getProofValue[ args___] := unexpected[ getProofValue, {args}]
+
+getNodeID[ (PRFSIT$|PRFINFO$)[ ___, "ID" -> id_, ___]] := id
+getNodeID[ args___] := unexpected[ getNodeID, {args}]
+
+makePRFINFO[ name_String, g_, k_] := PRFINFO$[ name, g, k, "ID" -> ToString[ Unique[ name]]]
+makePRFINFO[ name_String, g_, k_, id_String] := PRFINFO$[ name, g, k, "ID" -> id]
+makePRFINFO[ args___] := unexpected[ makePRFINFO, {args}]
+
+makePRFSIT[ g_, k_, af_, rest___Rule] := PRFSIT$[ g, k, af, rest, "ID" -> ToString[ Unique[ "PRFSIT$"]]]
+makePRFSIT[ g_, k_, af_, id_String, rest___Rule] := PRFSIT$[ g, k, af, rest, "ID" -> id]
+makePRFSIT[ args___] := unexpected[ makePRFSIT, {args}]
+
+proveAll[ pi_PRFINFO$, subnodes__] := ANDNODE$[ pi, subnodes, pending]
+proveAll[ args___] := unexpected[ proveAll, {args}]
+
+proveSome[ pi_PRFINFO$, subnodes__] := ORNODE$[ pi, subnodes, pending]
+proveSome[ args___] := unexpected[ proveSome, {args}]
+
+getSubgoals[ _[ _PRFINFO$, subnodes___, _]] := {subnodes}
+getSubgoals[ args___] := unexpected[ getSubgoals, {args}]
+
+poNodeToTreeNode[ ps_PRFSIT$] := { getNodeID[ ps], pending, PRFSIT$}
+poNodeToTreeNode[ node_[ pi_PRFINFO$, ___, val_]] := { getNodeID[ pi], val, node}
+poNodeToTreeNode[ args___] := unexpected[ poNodeToTreeNode, {args}]
+
+propagateProofValues[ poNode:node_[ pi_PRFINFO$, subnodes__, pending]] :=
+	Module[ {updSub, subVal, newVal},
+		updSub = Map[ propagateProofValues, {subnodes}];
+		subVal = Map[ getProofValue, updSub];
+		newVal = nodeValue[ node, subVal];
+		If[ newVal =!= pending,
+			$TMAproofTree = With[ {id = getNodeID[ pi]},
+				$TMAproofTree /. {id, pending, t_} -> {id, newVal, t}
+			]
+		];
+		node[ pi, Apply[ Sequence, updSub], newVal]
+	]
+propagateProofValues[ node_] := node
+propagateProofValues[ args___] := unexpected[ propagateProofValues, {args}]
+
+nodeValue[ ANDNODE$, {___, failed, ___}] := failed
+nodeValue[ ANDNODE$, { proved..}] := proved
+nodeValue[ ANDNODE$, {___, disproved, ___}] := disproved
+nodeValue[ ANDNODE$, _List] := pending
+nodeValue[ ORNODE$, {___, proved, ___}] := proved
+nodeValue[ ORNODE$, { failed..}] := failed
+nodeValue[ ORNODE$, { disproved..}] := disproved
+nodeValue[ ORNODE$, _List] := pending
+nodeValue[ PRFOBJ$, {v_}] := v
+nodeValue[ args___] := unexpected[ nodeValue, {args}]
+
+searchDepthExceeded[ ps_PRFSIT$] :=
+	TERMINALNODE$[
+		makePRFINFO[ "SearchDepth", getGoal[ ps], getKB[ ps]],
+		failed
+	]
+searchDepthExceeded[ args___] := unexpected[ searchDepthExceeded, {args}]
+
 
 (* ::Subsubsection:: *)
 (* showProofNavigation *)
 
-showProofNavigation[ {node:{id_, status_, type_}}] := Graphics[ makeNode[ node, {0, 0}], ImageSize -> {350, 450}, PlotRegion -> {{0.45, 0.55}, {0.9, 1}}]
+showProofNavigation[ {}, geometry_List] := Graphics[ makeNode[ {"Initial", pending, PRFSIT$}, {0, 0}, 17], ImageSize -> geometry, PlotRegion -> {{0.4, 0.6}, {0.4, 0.6}}]
 
-showProofNavigation[ p:{__Rule}] := TreePlot[ p, VertexRenderingFunction -> proofStepNode,
-	EdgeRenderingFunction -> ({Dashed, GrayLevel[0.5], Line[#1]}&), ImageSize -> Max[{1, Length[p]/100}]*{350, 450}, AspectRatio -> Automatic]
+showProofNavigation[ p:{__Rule}, geometry_List] :=
+    Module[ {root = Cases[ p, {"Initial", __}, {2}], font = 18-Ceiling[ Apply[ Times, geometry]/(350*450)]},
+        If[ root === {},
+            translate[ "noRoot"],
+            TreePlot[ p, Automatic, First[ root], VertexRenderingFunction -> (proofStepNode[ #1, #2, font]&),
+            EdgeRenderingFunction -> ({Dashed, GrayLevel[0.5], Line[#1]}&), ImageSize -> geometry, AspectRatio -> 1/Apply[ Divide, geometry]]
+        ]
+    ]
 showProofNavigation[ p_] := ""
 showProofNavigation[ args___] := unexpected[ showProofNavigation, {args}]
 
-proofStepNode[ pos_, node:{_, _, _}, ___] := makeNode[ node, pos]
+proofStepNode[ pos_, node:{_, _, _}, font_, ___] := makeNode[ node, pos, font]
 proofStepNode[ args___] := unexpected[ proofStepNode, {args}]
 
-makeNode[ node:{ id_, status_, type_}, pos_List] := 
+makeNode[ node:{ id_, status_, type_}, pos_List, font_] := 
 	{
 		Switch[ status,
-			"pending", RGBColor[0.360784, 0.67451, 0.933333] (* steelblue *),
-			"failed", RGBColor[1, 0.270588, 0] (* orangered *),
-			"proved", RGBColor[0, 0.780392, 0.54902] (* turquoiseblue *),
+			pending, RGBColor[0.360784, 0.67451, 0.933333] (* steelblue *),
+			failed, RGBColor[1, 0.270588, 0] (* orangered *),
+			proved, RGBColor[0, 0.780392, 0.54902] (* turquoiseblue *),
 			_, Black],
 		Switch[ type,
-			"prfsit", Disk[ pos, 0.1],
-			"terminalNode", Map[ (pos + 0.1*#)&, Rectangle[ {-Sqrt[Pi]/2, -Sqrt[Pi]/2}, {Sqrt[Pi]/2, Sqrt[Pi]/2}]],
+			PRFSIT$, Disk[ pos, 0.1],
+			TERMINALNODE$, Map[ (pos + 0.1*#)&, Rectangle[ {-Sqrt[Pi]/2, -Sqrt[Pi]/2}, {Sqrt[Pi]/2, Sqrt[Pi]/2}]],
 			_, Polygon[ Map[ (pos + 0.125*#)&, {{0,1}, {Cos[7*Pi/6], Sin[7*Pi/6]}, {Cos[11*Pi/6], Sin[11*Pi/6]}}]]],
 		{Black, Dynamic[ Text[ 
-			Hyperlink[ 
-				Switch[ type, 
-					"prfsit", "?",
-					"andNode", "\[Wedge]",
-					"orNode", "\[Vee]",
-					"terminalNode", Switch[ status, "proved", "\[CheckmarkedBox]", "disproved", "\[Times]", "failed", "\[WarningSign]", _, "\[DownQuestion]"]], 
+			Hyperlink[
+				If[ id === "Initial",
+    				id,
+    				Switch[ type, 
+       					PRFSIT$, "?",
+        				ANDNODE$, "\[Wedge]",
+        				ORNODE$, "\[Vee]",
+        				TERMINALNODE$, Switch[ status, proved, "\[CheckmarkedBox]", disproved, "\[Times]", failed, "\[WarningSign]", _, "\[DownQuestion]"]]
+				], 
 				{CurrentValue[ $TMAproofNotebook, "NotebookFileName"], id},
-				BaseStyle -> {FontSize -> 14}], pos]]}
+				BaseStyle -> {FontSize -> font}], pos]]}
 	}
 makeNode[ args___] := unexpected[ makeNode, {args}]
 
@@ -108,8 +217,9 @@ makeNode[ args___] := unexpected[ makeNode, {args}]
 
 makeInitialProofObject[ goal_, kb_, rules_, strategy_] :=
 	PRFOBJ$[
-		PRFINFO$[ "ID" -> "Initial", goal, kb],
-		PRFSIT$[ "ID" -> "Initial", goal, kb, "pending", "InferenceRules" -> preprocessRules[ strategy, rules], "Strategy" -> strategy]
+		makePRFINFO[ "Initial", goal, kb, "Initial"],
+		makePRFSIT[ goal, kb, {}(*additional facts*), "Initial", "InferenceRules" -> rules, "Strategy" -> strategy],
+		pending
 	]
 makeInitialProofObject[ args___] := unexpected[ makeInitialProofObject, {args}]
 
@@ -120,15 +230,15 @@ makeInitialProofObject[ args___] := unexpected[ makeInitialProofObject, {args}]
 makeInitialProofNotebook[ p_PRFOBJ$] :=
     Module[ { cells, t, nb},
         cells = proofObjectToCell[ p];
-        $proofInProgressMarker = {Cell[BoxData[
+        $proofInProgressMarker = With[ {v1 = RandomReal[{1,5}], v2 = RandomReal[{1,5}]}, 
+        	{Cell[BoxData[
         				DynamicBox[ ToBoxes[ Graphics[{Circle[{0, 0}, 1],
         					Table[Text[ToString[t], 0.8*{Cos[Pi/2 - (Pi/6)*t], Sin[Pi/2 - (Pi/6)*t]}, BaseStyle -> {FontSize -> 5}], {t, 1, 12}],
-        					{Thick, Line[{{0, 0}, {Cos[Pi/2 - 2*Pi*Clock[]], Sin[Pi/2 - 2*Pi*Clock[]]}}],
-        						Line[{{0, 0}, {Cos[Pi/4 - 2*Pi*Clock[]], Sin[Pi/4 - 2*Pi*Clock[]]}}]},
-        					{Hue[ Clock[], 1, Clock[]], Opacity[0.5], Disk[{0, 0}, 1, {Pi/2 - 2*Pi*Clock[], Pi/4 - 2*Pi*Clock[]}]},
+        					{Hue[ Clock[], 1, Clock[]], Opacity[0.5], Disk[{0, 0}, 1, {Pi/2 - 2/v1*Pi*Clock[v1], Pi/4 - 2/v1*Pi*Clock[v1]}]},
+        					{Hue[ Clock[], 1, Clock[]], Opacity[0.5], Disk[{0, 0}, 1, {Pi/2 + 2/v2*Pi*Clock[v2], Pi/4 + 2/v2*Pi*Clock[v2]}]},
         					{White, Disk[{0, 0}, 0.7]}}, ImageSize -> {50, 50}], 
         					StandardForm], ImageSizeCache -> {50., {23., 27.}}]],
-        				"Output", TextAlignment -> Center]};
+        				"Output", TextAlignment -> Center]}];
         nb = NotebookPut[
             	Notebook[ cells, Visible -> False, StyleDefinitions -> FileNameJoin[{"Theorema", "Proof.nb"}]]];
         nb
@@ -139,7 +249,7 @@ makeInitialProofNotebook[ args___] := unexpected[ makeInitialProofNotebook, {arg
 (* ::Subsubsection:: *)
 (* makeInitialProofTree *)
 
-makeInitialProofTree[ ] := {{"Initial", "pending", "prfsit"}}
+makeInitialProofTree[ ] := {}
 makeInitialProofTree[ args___] := unexpected[ makeInitialProofTree, {args}]
 
 (* ::Subsubsection:: *)
@@ -157,12 +267,20 @@ displayProof[ args___] := unexpected[ displayProof, {args}]
 (* ::Subsubsection:: *)
 (* proofObjectToCell *)
 
-proofObjectToCell[ p_PRFOBJ$] := 
-	Module[{ cellList = proofObjectToCell[ p[[1]]]},
-		Join[ cellList, proofObjectToCell[ p[[2]]]]
+proofObjectToCell[ PRFOBJ$[ pi_PRFINFO$, sub_, pVal_]] := 
+	Module[{ cellList = proofObjectToCell[ pi, pVal]},
+		Append[ cellList, proofObjectToCell[ sub]]
 	]
-proofObjectToCell[ PRFINFO$[ id:("ID" -> "Initial"), goal_, kb_]] := proofStepText[ id, "Initial", $Language, goal, kb]
-proofObjectToCell[ PRFSIT$[ id:("ID" -> _), g_, ___]] := proofStepText[ id, "Proof Situation", $Language, g]
+proofObjectToCell[ PRFINFO$[ name_String, rest___, "ID" -> id_], pVal_] := proofStepText[ "ID" -> id, name, $Language, rest, pVal]
+proofObjectToCell[ PRFSIT$[ g_, kb_, ___, "ID" -> id_]] := Cell[ CellGroupData[ proofStepText[ "ID" -> id, "ProofSituation", $Language, g, kb], $proofCellStatus]]
+proofObjectToCell[ (ANDNODE$|ORNODE$)[ pi_PRFINFO$, subnodes__, pVal_]] := 
+	Module[{header, sub},
+		header = proofObjectToCell[ pi, pVal];
+		sub = Map[ proofObjectToCell, {subnodes}];
+		Cell[ CellGroupData[ Join[ header, sub], $proofCellStatus]]
+	]
+proofObjectToCell[ TERMINALNODE$[ pi_PRFINFO$, pVal_]] := 
+	Cell[ CellGroupData[ proofObjectToCell[ pi, pVal], $proofCellStatus]]
 	
 proofObjectToCell[ args___] := unexpected[ proofObjectToCell, {args}]
 
@@ -184,9 +302,6 @@ Module[ {},
 		$registeredStrategies = Union[ $registeredStrategies, {s -> n}];
 	]
 registerStrategy[ args___] := unexpected[ registerStrategy, {args}]
-
-preprocessRules[ s_, r_] := r
-preprocessRules[ args___] := unexpected[ preprocessRules, {args}]
 
 
 (* ::Section:: *)

@@ -25,7 +25,7 @@ Map[ Get, FileNames[ "*.m", ToFileName[{$TheoremaDirectory, "Theorema", "Provers
 
 Begin["`Private`"]
 
-proofStepText[ "ID" -> id_, step_, lang_, rest___] := 
+proofStepText[ "ID" -> id_, step_String, lang_String, rest___] := 
 	Block[ {$proofStepID = id},
 		proofStepText[ step, lang, rest]
 	]
@@ -50,6 +50,10 @@ assumptionCell[ {k_, a_, t_}, punct_String:""] :=
 	]
 assumptionCell[ args___] := unexpected[ assumptionCell, {args}]
 
+assumptionListCells[ {}, sep_String, punct_String] := 
+	Cell[ BoxData[ RowBox[ {ToBoxes[{}], punct}]], "Assumption",
+		CellTags -> {$proofStepID}
+	]
 assumptionListCells[ {f___, l_}, sep_String, punct_String] :=
 	Module[{initial, term},
 		initial = Map[ assumptionCell[ #, sep]&, {f}];

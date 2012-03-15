@@ -1,0 +1,1403 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 8.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       157,          7]
+NotebookDataLength[     61970,       1394]
+NotebookOptionsPosition[     59337,       1307]
+NotebookOutlinePosition[     60960,       1357]
+CellTagsIndexPosition[     60688,       1348]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Theorem", "OpenEnvironment",
+ CellID->1242024658],
+
+Cell[BoxData[
+ RowBox[{"P", "\[Wedge]", "Q"}]], "FormalTextInputFormula",
+ CellFrameLabels->{{None, "(1)"}, {None, None}},
+ ShowCellTags->False,
+ CellChangeTimes->{{3.540650095744594*^9, 3.540650110599246*^9}, 
+   3.54065015233294*^9},
+ CellTags->{
+  "ID:1627981589", "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb",
+    "1"},
+ CellID->1627981589],
+
+Cell["\[GraySquare]", "EndEnvironmentMarker",
+ CellID->914402093]
+}, Open  ]],
+
+Cell["", "CloseEnvironment",
+ CellID->2105876669],
+
+Cell[CellGroupData[{
+
+Cell["Proof of (1): Theorema`Provers`Common`Private`failed", "OpenProof",
+ CellTags->
+  "Proof|ID:1627981589|Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.\
+nb",
+ CellID->1359017668],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ ButtonBox["\<\"Show proof\"\>",
+  Appearance->Automatic,
+  ButtonFunction:>Theorema`Common`displayProof[
+    Theorema`Provers`Common`Private`PRFOBJ$[
+     Theorema`Provers`Common`Private`PRFINFO$[
+     "Initial", {{
+       "ID:1627981589", 
+        "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+       Theorema`Language`And$TM[
+       Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, "ID" -> 
+      "Initial"], 
+     Theorema`Provers`Common`Private`ORNODE$[
+      Theorema`Provers`Common`Private`PRFINFO$[
+      "applyOnce", {{
+        "ID:1627981589", 
+         "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+        Theorema`Language`And$TM[
+        Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, "ID" -> 
+       "Initial"], 
+      Theorema`Provers`Common`Private`ORNODE$[
+       Theorema`Provers`Common`Private`PRFINFO$[
+       "applyOnce", {{
+         "ID:1627981589", 
+          "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+         Theorema`Language`And$TM[
+         Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, "ID" -> 
+        "PRFSIT$3"], 
+       Theorema`Provers`Common`Private`ORNODE$[
+        Theorema`Provers`Common`Private`PRFINFO$[
+        "applyOnce", {{
+          "ID:1627981589", 
+           "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+          Theorema`Language`And$TM[
+          Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, "ID" -> 
+         "PRFSIT$5"], 
+        Theorema`Provers`Common`Private`ORNODE$[
+         Theorema`Provers`Common`Private`PRFINFO$[
+         "applyOnce", {{
+           "ID:1627981589", 
+            "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+           Theorema`Language`And$TM[
+           Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+          "ID" -> "PRFSIT$7"], 
+         Theorema`Provers`Common`Private`ORNODE$[
+          Theorema`Provers`Common`Private`PRFINFO$[
+          "applyOnce", {{
+            "ID:1627981589", 
+             "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+            Theorema`Language`And$TM[
+            Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+           "ID" -> "PRFSIT$9"], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth13"], Theorema`Provers`Common`Private`failed], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth14"], Theorema`Provers`Common`Private`failed],
+           Theorema`Provers`Common`Private`failed], 
+         Theorema`Provers`Common`Private`ORNODE$[
+          Theorema`Provers`Common`Private`PRFINFO$[
+          "applyOnce", {{
+            "ID:1627981589", 
+             "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+            Theorema`Language`And$TM[
+            Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+           "ID" -> "PRFSIT$10"], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth17"], Theorema`Provers`Common`Private`failed], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth18"], Theorema`Provers`Common`Private`failed],
+           Theorema`Provers`Common`Private`failed], 
+         Theorema`Provers`Common`Private`failed], 
+        Theorema`Provers`Common`Private`ORNODE$[
+         Theorema`Provers`Common`Private`PRFINFO$[
+         "applyOnce", {{
+           "ID:1627981589", 
+            "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+           Theorema`Language`And$TM[
+           Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+          "ID" -> "PRFSIT$8"], 
+         Theorema`Provers`Common`Private`ORNODE$[
+          Theorema`Provers`Common`Private`PRFINFO$[
+          "applyOnce", {{
+            "ID:1627981589", 
+             "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+            Theorema`Language`And$TM[
+            Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+           "ID" -> "PRFSIT$19"], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth23"], Theorema`Provers`Common`Private`failed], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth24"], Theorema`Provers`Common`Private`failed],
+           Theorema`Provers`Common`Private`failed], 
+         Theorema`Provers`Common`Private`ORNODE$[
+          Theorema`Provers`Common`Private`PRFINFO$[
+          "applyOnce", {{
+            "ID:1627981589", 
+             "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+            Theorema`Language`And$TM[
+            Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+           "ID" -> "PRFSIT$20"], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth27"], Theorema`Provers`Common`Private`failed], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth28"], Theorema`Provers`Common`Private`failed],
+           Theorema`Provers`Common`Private`failed], 
+         Theorema`Provers`Common`Private`failed], 
+        Theorema`Provers`Common`Private`failed], 
+       Theorema`Provers`Common`Private`ORNODE$[
+        Theorema`Provers`Common`Private`PRFINFO$[
+        "applyOnce", {{
+          "ID:1627981589", 
+           "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+          Theorema`Language`And$TM[
+          Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, "ID" -> 
+         "PRFSIT$6"], 
+        Theorema`Provers`Common`Private`ORNODE$[
+         Theorema`Provers`Common`Private`PRFINFO$[
+         "applyOnce", {{
+           "ID:1627981589", 
+            "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+           Theorema`Language`And$TM[
+           Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+          "ID" -> "PRFSIT$29"], 
+         Theorema`Provers`Common`Private`ORNODE$[
+          Theorema`Provers`Common`Private`PRFINFO$[
+          "applyOnce", {{
+            "ID:1627981589", 
+             "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+            Theorema`Language`And$TM[
+            Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+           "ID" -> "PRFSIT$31"], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth35"], Theorema`Provers`Common`Private`failed], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth36"], Theorema`Provers`Common`Private`failed],
+           Theorema`Provers`Common`Private`failed], 
+         Theorema`Provers`Common`Private`ORNODE$[
+          Theorema`Provers`Common`Private`PRFINFO$[
+          "applyOnce", {{
+            "ID:1627981589", 
+             "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+            Theorema`Language`And$TM[
+            Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+           "ID" -> "PRFSIT$32"], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth39"], Theorema`Provers`Common`Private`failed], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth40"], Theorema`Provers`Common`Private`failed],
+           Theorema`Provers`Common`Private`failed], 
+         Theorema`Provers`Common`Private`failed], 
+        Theorema`Provers`Common`Private`ORNODE$[
+         Theorema`Provers`Common`Private`PRFINFO$[
+         "applyOnce", {{
+           "ID:1627981589", 
+            "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+           Theorema`Language`And$TM[
+           Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+          "ID" -> "PRFSIT$30"], 
+         Theorema`Provers`Common`Private`ORNODE$[
+          Theorema`Provers`Common`Private`PRFINFO$[
+          "applyOnce", {{
+            "ID:1627981589", 
+             "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+            Theorema`Language`And$TM[
+            Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+           "ID" -> "PRFSIT$41"], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth45"], Theorema`Provers`Common`Private`failed], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth46"], Theorema`Provers`Common`Private`failed],
+           Theorema`Provers`Common`Private`failed], 
+         Theorema`Provers`Common`Private`ORNODE$[
+          Theorema`Provers`Common`Private`PRFINFO$[
+          "applyOnce", {{
+            "ID:1627981589", 
+             "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+            Theorema`Language`And$TM[
+            Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+           "ID" -> "PRFSIT$42"], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth49"], Theorema`Provers`Common`Private`failed], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth50"], Theorema`Provers`Common`Private`failed],
+           Theorema`Provers`Common`Private`failed], 
+         Theorema`Provers`Common`Private`failed], 
+        Theorema`Provers`Common`Private`failed], 
+       Theorema`Provers`Common`Private`failed], 
+      Theorema`Provers`Common`Private`ORNODE$[
+       Theorema`Provers`Common`Private`PRFINFO$[
+       "applyOnce", {{
+         "ID:1627981589", 
+          "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+         Theorema`Language`And$TM[
+         Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, "ID" -> 
+        "PRFSIT$4"], 
+       Theorema`Provers`Common`Private`ORNODE$[
+        Theorema`Provers`Common`Private`PRFINFO$[
+        "applyOnce", {{
+          "ID:1627981589", 
+           "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+          Theorema`Language`And$TM[
+          Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, "ID" -> 
+         "PRFSIT$51"], 
+        Theorema`Provers`Common`Private`ORNODE$[
+         Theorema`Provers`Common`Private`PRFINFO$[
+         "applyOnce", {{
+           "ID:1627981589", 
+            "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+           Theorema`Language`And$TM[
+           Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+          "ID" -> "PRFSIT$53"], 
+         Theorema`Provers`Common`Private`ORNODE$[
+          Theorema`Provers`Common`Private`PRFINFO$[
+          "applyOnce", {{
+            "ID:1627981589", 
+             "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+            Theorema`Language`And$TM[
+            Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+           "ID" -> "PRFSIT$55"], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth59"], Theorema`Provers`Common`Private`failed], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth60"], Theorema`Provers`Common`Private`failed],
+           Theorema`Provers`Common`Private`failed], 
+         Theorema`Provers`Common`Private`ORNODE$[
+          Theorema`Provers`Common`Private`PRFINFO$[
+          "applyOnce", {{
+            "ID:1627981589", 
+             "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+            Theorema`Language`And$TM[
+            Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+           "ID" -> "PRFSIT$56"], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth63"], Theorema`Provers`Common`Private`failed], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth64"], Theorema`Provers`Common`Private`failed],
+           Theorema`Provers`Common`Private`failed], 
+         Theorema`Provers`Common`Private`failed], 
+        Theorema`Provers`Common`Private`ORNODE$[
+         Theorema`Provers`Common`Private`PRFINFO$[
+         "applyOnce", {{
+           "ID:1627981589", 
+            "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+           Theorema`Language`And$TM[
+           Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+          "ID" -> "PRFSIT$54"], 
+         Theorema`Provers`Common`Private`ORNODE$[
+          Theorema`Provers`Common`Private`PRFINFO$[
+          "applyOnce", {{
+            "ID:1627981589", 
+             "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+            Theorema`Language`And$TM[
+            Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+           "ID" -> "PRFSIT$65"], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth69"], Theorema`Provers`Common`Private`failed], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth70"], Theorema`Provers`Common`Private`failed],
+           Theorema`Provers`Common`Private`failed], 
+         Theorema`Provers`Common`Private`ORNODE$[
+          Theorema`Provers`Common`Private`PRFINFO$[
+          "applyOnce", {{
+            "ID:1627981589", 
+             "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+            Theorema`Language`And$TM[
+            Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+           "ID" -> "PRFSIT$66"], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth73"], Theorema`Provers`Common`Private`failed], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth74"], Theorema`Provers`Common`Private`failed],
+           Theorema`Provers`Common`Private`failed], 
+         Theorema`Provers`Common`Private`failed], 
+        Theorema`Provers`Common`Private`failed], 
+       Theorema`Provers`Common`Private`ORNODE$[
+        Theorema`Provers`Common`Private`PRFINFO$[
+        "applyOnce", {{
+          "ID:1627981589", 
+           "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+          Theorema`Language`And$TM[
+          Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, "ID" -> 
+         "PRFSIT$52"], 
+        Theorema`Provers`Common`Private`ORNODE$[
+         Theorema`Provers`Common`Private`PRFINFO$[
+         "applyOnce", {{
+           "ID:1627981589", 
+            "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+           Theorema`Language`And$TM[
+           Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+          "ID" -> "PRFSIT$75"], 
+         Theorema`Provers`Common`Private`ORNODE$[
+          Theorema`Provers`Common`Private`PRFINFO$[
+          "applyOnce", {{
+            "ID:1627981589", 
+             "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+            Theorema`Language`And$TM[
+            Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+           "ID" -> "PRFSIT$77"], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth81"], Theorema`Provers`Common`Private`failed], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth82"], Theorema`Provers`Common`Private`failed],
+           Theorema`Provers`Common`Private`failed], 
+         Theorema`Provers`Common`Private`ORNODE$[
+          Theorema`Provers`Common`Private`PRFINFO$[
+          "applyOnce", {{
+            "ID:1627981589", 
+             "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+            Theorema`Language`And$TM[
+            Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+           "ID" -> "PRFSIT$78"], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth85"], Theorema`Provers`Common`Private`failed], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth86"], Theorema`Provers`Common`Private`failed],
+           Theorema`Provers`Common`Private`failed], 
+         Theorema`Provers`Common`Private`failed], 
+        Theorema`Provers`Common`Private`ORNODE$[
+         Theorema`Provers`Common`Private`PRFINFO$[
+         "applyOnce", {{
+           "ID:1627981589", 
+            "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+           Theorema`Language`And$TM[
+           Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+          "ID" -> "PRFSIT$76"], 
+         Theorema`Provers`Common`Private`ORNODE$[
+          Theorema`Provers`Common`Private`PRFINFO$[
+          "applyOnce", {{
+            "ID:1627981589", 
+             "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+            Theorema`Language`And$TM[
+            Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+           "ID" -> "PRFSIT$87"], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth91"], Theorema`Provers`Common`Private`failed], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth92"], Theorema`Provers`Common`Private`failed],
+           Theorema`Provers`Common`Private`failed], 
+         Theorema`Provers`Common`Private`ORNODE$[
+          Theorema`Provers`Common`Private`PRFINFO$[
+          "applyOnce", {{
+            "ID:1627981589", 
+             "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+            Theorema`Language`And$TM[
+            Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+           "ID" -> "PRFSIT$88"], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth95"], Theorema`Provers`Common`Private`failed], 
+          Theorema`Provers`Common`Private`TERMINALNODE$[
+           Theorema`Provers`Common`Private`PRFINFO$[
+           "SearchDepth", {{
+             "ID:1627981589", 
+              "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+             Theorema`Language`And$TM[
+             Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, 
+            "ID" -> "SearchDepth96"], Theorema`Provers`Common`Private`failed],
+           Theorema`Provers`Common`Private`failed], 
+         Theorema`Provers`Common`Private`failed], 
+        Theorema`Provers`Common`Private`failed], 
+       Theorema`Provers`Common`Private`failed], 
+      Theorema`Provers`Common`Private`failed], 
+     Theorema`Provers`Common`Private`failed]],
+  Evaluator->Automatic,
+  ImageSize->Automatic,
+  Method->"Queued"]], "ProofDisplay",
+ CellID->384814991],
+
+Cell[BoxData[
+ DynamicModuleBox[{Typeset`var$$ = False}, 
+  InterpretationBox[
+   StyleBox[
+    PaneSelectorBox[{False->GridBox[{
+       {
+        OpenerBox[Dynamic[Typeset`var$$],
+         Appearance->Automatic,
+         AutoAction->False,
+         ContinuousAction->False,
+         Enabled->Automatic], "\<\"\"\>"}
+      },
+      AutoDelete->False,
+      BaselinePosition->{1, 1},
+      GridBoxAlignment->{"Columns" -> {{Left}}},
+      GridBoxBackground->{"Columns" -> {{Automatic}}},
+      GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+      GridBoxSpacings->{"Columns" -> {{0.2}}, "Rows" -> {{0.5}}}], True->
+     GridBox[{
+       {
+        OpenerBox[Dynamic[Typeset`var$$],
+         Appearance->Automatic,
+         AutoAction->False,
+         ContinuousAction->False,
+         Enabled->Automatic], "\<\"\"\>"},
+       {"", 
+        PaneBox[
+         TagBox[GridBox[{
+            {
+             TagBox[
+              DynamicModuleBox[{Typeset`var$$ = False}, 
+               InterpretationBox[
+                StyleBox[
+                 PaneSelectorBox[{False->GridBox[{
+                    {
+                    OpenerBox[Dynamic[Typeset`var$$],
+                    Appearance->Automatic,
+                    AutoAction->False,
+                    ContinuousAction->False,
+                    Enabled->Automatic], 
+                    StyleBox["\<\"Proof goal\"\>", "PIContent",
+                    StripOnInput->False]}
+                   },
+                   AutoDelete->False,
+                   BaselinePosition->{1, 1},
+                   GridBoxAlignment->{"Columns" -> {{Left}}},
+                   GridBoxBackground->{"Columns" -> {{Automatic}}},
+                   
+                   GridBoxItemSize->{
+                    "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+                   
+                   GridBoxSpacings->{
+                    "Columns" -> {{0.2}}, "Rows" -> {{0.5}}}], True->
+                  GridBox[{
+                    {
+                    OpenerBox[Dynamic[Typeset`var$$],
+                    Appearance->Automatic,
+                    AutoAction->False,
+                    ContinuousAction->False,
+                    Enabled->Automatic], 
+                    StyleBox["\<\"Proof goal\"\>", "PIContent",
+                    StripOnInput->False]},
+                    {"", 
+                    PaneBox[
+                    StyleBox["\<\"(1)\"\>", "PIContent",
+                    StripOnInput->False],
+                    ImageMargins->0]}
+                   },
+                   AutoDelete->False,
+                   BaselinePosition->{1, 1},
+                   GridBoxAlignment->{"Columns" -> {{Left}}},
+                   GridBoxBackground->{"Columns" -> {{Automatic}}},
+                   
+                   GridBoxItemSize->{
+                    "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+                   
+                   GridBoxSpacings->{
+                    "Columns" -> {{0.2}}, "Rows" -> {{0.5}}}]}, Dynamic[
+                  Typeset`var$$],
+                  Alignment->Automatic,
+                  BaselinePosition->Baseline,
+                  DefaultBaseStyle->"OpenerView",
+                  ImageMargins->0,
+                  ImageSize->Automatic],
+                 Deployed->False,
+                 StripOnInput->False],
+                OpenerView[{
+                  Style["Proof goal", "PIContent"], 
+                  Style["(1)", "PIContent"]}, False]],
+               DynamicModuleValues:>Automatic],
+              Setting[#, {0}]& ]},
+            {
+             TagBox[
+              DynamicModuleBox[{Typeset`var$$ = False}, 
+               InterpretationBox[
+                StyleBox[
+                 PaneSelectorBox[{False->GridBox[{
+                    {
+                    OpenerBox[Dynamic[Typeset`var$$],
+                    Appearance->Automatic,
+                    AutoAction->False,
+                    ContinuousAction->False,
+                    Enabled->Automatic], 
+                    StyleBox["\<\"Knowledge used in proof\"\>", "PIContent",
+                    StripOnInput->False]}
+                   },
+                   AutoDelete->False,
+                   BaselinePosition->{1, 1},
+                   GridBoxAlignment->{"Columns" -> {{Left}}},
+                   GridBoxBackground->{"Columns" -> {{Automatic}}},
+                   
+                   GridBoxItemSize->{
+                    "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+                   
+                   GridBoxSpacings->{
+                    "Columns" -> {{0.2}}, "Rows" -> {{0.5}}}], True->
+                  GridBox[{
+                    {
+                    OpenerBox[Dynamic[Typeset`var$$],
+                    Appearance->Automatic,
+                    AutoAction->False,
+                    ContinuousAction->False,
+                    Enabled->Automatic], 
+                    StyleBox["\<\"Knowledge used in proof\"\>", "PIContent",
+                    StripOnInput->False]},
+                    {"", 
+                    PaneBox[
+                    StyleBox[
+                    RowBox[{"{", "}"}], "PIContent",
+                    StripOnInput->False],
+                    ImageMargins->0]}
+                   },
+                   AutoDelete->False,
+                   BaselinePosition->{1, 1},
+                   GridBoxAlignment->{"Columns" -> {{Left}}},
+                   GridBoxBackground->{"Columns" -> {{Automatic}}},
+                   
+                   GridBoxItemSize->{
+                    "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+                   
+                   GridBoxSpacings->{
+                    "Columns" -> {{0.2}}, "Rows" -> {{0.5}}}]}, Dynamic[
+                  Typeset`var$$],
+                  Alignment->Automatic,
+                  BaselinePosition->Baseline,
+                  DefaultBaseStyle->"OpenerView",
+                  ImageMargins->0,
+                  ImageSize->Automatic],
+                 Deployed->False,
+                 StripOnInput->False],
+                OpenerView[{
+                  Style["Knowledge used in proof", "PIContent"], 
+                  Style[{}, "PIContent"]}, False]],
+               DynamicModuleValues:>Automatic],
+              Setting[#, {0}]& ]},
+            {
+             TagBox[
+              DynamicModuleBox[{Typeset`var$$ = False}, 
+               InterpretationBox[
+                StyleBox[
+                 PaneSelectorBox[{False->GridBox[{
+                    {
+                    OpenerBox[Dynamic[Typeset`var$$],
+                    Appearance->Automatic,
+                    AutoAction->False,
+                    ContinuousAction->False,
+                    Enabled->Automatic], 
+                    StyleBox["\<\"Builtins used in proof\"\>", "PIContent",
+                    StripOnInput->False]}
+                   },
+                   AutoDelete->False,
+                   BaselinePosition->{1, 1},
+                   GridBoxAlignment->{"Columns" -> {{Left}}},
+                   GridBoxBackground->{"Columns" -> {{Automatic}}},
+                   
+                   GridBoxItemSize->{
+                    "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+                   
+                   GridBoxSpacings->{
+                    "Columns" -> {{0.2}}, "Rows" -> {{0.5}}}], True->
+                  GridBox[{
+                    {
+                    OpenerBox[Dynamic[Typeset`var$$],
+                    Appearance->Automatic,
+                    AutoAction->False,
+                    ContinuousAction->False,
+                    Enabled->Automatic], 
+                    StyleBox["\<\"Builtins used in proof\"\>", "PIContent",
+                    StripOnInput->False]},
+                    {"", 
+                    PaneBox[
+                    StyleBox[
+                    RowBox[{"{", "}"}], "PIContent",
+                    StripOnInput->False],
+                    ImageMargins->0]}
+                   },
+                   AutoDelete->False,
+                   BaselinePosition->{1, 1},
+                   GridBoxAlignment->{"Columns" -> {{Left}}},
+                   GridBoxBackground->{"Columns" -> {{Automatic}}},
+                   
+                   GridBoxItemSize->{
+                    "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+                   
+                   GridBoxSpacings->{
+                    "Columns" -> {{0.2}}, "Rows" -> {{0.5}}}]}, Dynamic[
+                  Typeset`var$$],
+                  Alignment->Automatic,
+                  BaselinePosition->Baseline,
+                  DefaultBaseStyle->"OpenerView",
+                  ImageMargins->0,
+                  ImageSize->Automatic],
+                 Deployed->False,
+                 StripOnInput->False],
+                OpenerView[{
+                  Style["Builtins used in proof", "PIContent"], 
+                  Style[{}, "PIContent"]}, False]],
+               DynamicModuleValues:>Automatic],
+              Setting[#, {0}]& ]},
+            {
+             TagBox[
+              DynamicModuleBox[{Typeset`var$$ = False}, 
+               InterpretationBox[
+                StyleBox[
+                 PaneSelectorBox[{False->GridBox[{
+                    {
+                    OpenerBox[Dynamic[Typeset`var$$],
+                    Appearance->Automatic,
+                    AutoAction->False,
+                    ContinuousAction->False,
+                    Enabled->Automatic], 
+                    StyleBox["\<\"Selected prover\"\>", "PIContent",
+                    StripOnInput->False]}
+                   },
+                   AutoDelete->False,
+                   BaselinePosition->{1, 1},
+                   GridBoxAlignment->{"Columns" -> {{Left}}},
+                   GridBoxBackground->{"Columns" -> {{Automatic}}},
+                   
+                   GridBoxItemSize->{
+                    "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+                   
+                   GridBoxSpacings->{
+                    "Columns" -> {{0.2}}, "Rows" -> {{0.5}}}], True->
+                  GridBox[{
+                    {
+                    OpenerBox[Dynamic[Typeset`var$$],
+                    Appearance->Automatic,
+                    AutoAction->False,
+                    ContinuousAction->False,
+                    Enabled->Automatic], 
+                    StyleBox["\<\"Selected prover\"\>", "PIContent",
+                    StripOnInput->False]},
+                    {"", 
+                    PaneBox[
+                    StyleBox[
+                    RowBox[{"{", 
+                    RowBox[{
+                    RowBox[{
+                    "Hold", "[", "Theorema`Provers`basicProver", "]"}], ",", 
+                    "Theorema`Provers`applyOnce"}], "}"}], "PIContent",
+                    StripOnInput->False],
+                    ImageMargins->0]}
+                   },
+                   AutoDelete->False,
+                   BaselinePosition->{1, 1},
+                   GridBoxAlignment->{"Columns" -> {{Left}}},
+                   GridBoxBackground->{"Columns" -> {{Automatic}}},
+                   
+                   GridBoxItemSize->{
+                    "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+                   
+                   GridBoxSpacings->{
+                    "Columns" -> {{0.2}}, "Rows" -> {{0.5}}}]}, Dynamic[
+                  Typeset`var$$],
+                  Alignment->Automatic,
+                  BaselinePosition->Baseline,
+                  DefaultBaseStyle->"OpenerView",
+                  ImageMargins->0,
+                  ImageSize->Automatic],
+                 Deployed->False,
+                 StripOnInput->False],
+                OpenerView[{
+                  Style["Selected prover", "PIContent"], 
+                  Style[{
+                    Hold[Theorema`Provers`basicProver], 
+                    Theorema`Provers`applyOnce}, "PIContent"]}, False]],
+               DynamicModuleValues:>Automatic],
+              Setting[#, {0}]& ]},
+            {
+             ButtonBox["\<\"Reset environment\"\>",
+              Appearance->Automatic,
+              
+              ButtonFunction:>
+               Theorema`Interface`GUI`Private`setProveEnv[{{
+                 "ID:1627981589", 
+                  "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+                 Theorema`Language`And$TM[
+                 Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], 
+                 "(1)"}, {}, {{"And", False}, {"Do", False}, {
+                 "Equal", False}, {"Exists", False}, {"For", False}, {
+                 "Forall", False}, {"Greater", False}, {
+                 "GreaterEqual", False}, {"Iff", False}, {"Implies", False}, {
+                 "Intersection", False}, {"Less", False}, {
+                 "LessEqual", False}, {"Module", False}, {"Not", False}, {
+                 "Or", False}, {"Plus", False}, {"SequenceOf", False}, {
+                 "SetEqual", False}, {"Switch", False}, {"Times", False}, {
+                 "Union", False}, {"Which", False}, {"While", False}}, 
+                Hold[Theorema`Provers`basicProver], 
+                Theorema`Provers`applyOnce, {}],
+              Evaluator->Automatic,
+              ImageSize->Automatic,
+              Method->"Preemptive"]}
+           },
+           GridBoxAlignment->{"Columns" -> {{Left}}},
+           
+           GridBoxItemSize->{
+            "Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}}],
+          "Column"],
+         ImageMargins->0]}
+      },
+      AutoDelete->False,
+      BaselinePosition->{1, 1},
+      GridBoxAlignment->{"Columns" -> {{Left}}},
+      GridBoxBackground->{"Columns" -> {{Automatic}}},
+      GridBoxItemSize->{"Columns" -> {{Automatic}}, "Rows" -> {{Automatic}}},
+      GridBoxSpacings->{"Columns" -> {{0.2}}, "Rows" -> {{0.5}}}]}, Dynamic[
+     Typeset`var$$],
+     Alignment->Automatic,
+     BaselinePosition->Baseline,
+     DefaultBaseStyle->"OpenerView",
+     ImageMargins->0,
+     ImageSize->Automatic],
+    Deployed->False,
+    StripOnInput->False],
+   OpenerView[{"", 
+     Column[{
+       OpenerView[{
+         Style["Proof goal", "PIContent"], 
+         Style["(1)", "PIContent"]}], 
+       OpenerView[{
+         Style["Knowledge used in proof", "PIContent"], 
+         Style[{}, "PIContent"]}], 
+       OpenerView[{
+         Style["Builtins used in proof", "PIContent"], 
+         Style[{}, "PIContent"]}], 
+       OpenerView[{
+         Style["Selected prover", "PIContent"], 
+         Style[{
+           Hold[Theorema`Provers`basicProver], Theorema`Provers`applyOnce}, 
+          "PIContent"]}], 
+       Button["Reset environment", 
+        Theorema`Interface`GUI`Private`setProveEnv[{{
+          "ID:1627981589", 
+           "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"}, 
+          Theorema`Language`And$TM[
+          Theorema`Knowledge`P$TM, Theorema`Knowledge`Q$TM], "(1)"}, {}, {{
+          "And", False}, {"Do", False}, {"Equal", False}, {"Exists", False}, {
+          "For", False}, {"Forall", False}, {"Greater", False}, {
+          "GreaterEqual", False}, {"Iff", False}, {"Implies", False}, {
+          "Intersection", False}, {"Less", False}, {"LessEqual", False}, {
+          "Module", False}, {"Not", False}, {"Or", False}, {"Plus", False}, {
+          "SequenceOf", False}, {"SetEqual", False}, {"Switch", False}, {
+          "Times", False}, {"Union", False}, {"Which", False}, {
+          "While", False}}, 
+         Hold[Theorema`Provers`basicProver], Theorema`Provers`applyOnce, {}], 
+        ImageSize -> Automatic]}]}, False]],
+  DynamicModuleValues:>{}]], "ProofInfo",
+ CellID->1193851986]
+}, Open  ]],
+
+Cell["\[EmptySquare]", "CloseProof",
+ CellID->1503037705]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData["Theorema`Common`$TMAproofObject"], "Input",
+ CellChangeTimes->{{3.540802214099554*^9, 3.540802247959427*^9}},
+ CellID->820855182],
+
+Cell[BoxData[
+ RowBox[{"Theorema`Provers`Common`Private`PRFOBJ$", "[", 
+  RowBox[{
+   RowBox[{"Theorema`Provers`Common`Private`PRFINFO$", "[", 
+    RowBox[{"\<\"Initial\"\>", ",", 
+     RowBox[{"{", 
+      RowBox[{
+       RowBox[{"{", 
+        RowBox[{"\<\"ID:1627981589\"\>", 
+         ",", "\<\"Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb\"\
+\>"}], "}"}], ",", 
+       RowBox[{"And$TM", "[", 
+        RowBox[{"Theorema`Knowledge`P$TM", ",", "Theorema`Knowledge`Q$TM"}], 
+        "]"}], ",", "\<\"(1)\"\>"}], "}"}], ",", 
+     RowBox[{"{", "}"}], ",", 
+     RowBox[{"\<\"ID\"\>", "\[Rule]", "\<\"Initial\"\>"}]}], "]"}], ",", 
+   RowBox[{"Theorema`Provers`Common`Private`ORNODE$", "[", 
+    RowBox[{
+     RowBox[{"Theorema`Provers`Common`Private`PRFINFO$", "[", 
+      RowBox[{"\<\"applyOnce\"\>", ",", 
+       RowBox[{"{", 
+        RowBox[{
+         RowBox[{"{", 
+          
+          RowBox[{"\<\"ID:1627981589\"\>", 
+           ",", "\<\"Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb\
+\"\>"}], "}"}], ",", 
+         RowBox[{"And$TM", "[", 
+          RowBox[{"Theorema`Knowledge`P$TM", ",", "Theorema`Knowledge`Q$TM"}],
+           "]"}], ",", "\<\"(1)\"\>"}], "}"}], ",", 
+       RowBox[{"{", "}"}], ",", 
+       RowBox[{"\<\"ID\"\>", "\[Rule]", "\<\"Initial\"\>"}]}], "]"}], ",", 
+     RowBox[{"Theorema`Provers`Common`Private`ORNODE$", "[", 
+      RowBox[{
+       RowBox[{"Theorema`Provers`Common`Private`PRFINFO$", "[", 
+        RowBox[{"\<\"applyOnce\"\>", ",", 
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"{", 
+            
+            RowBox[{"\<\"ID:1627981589\"\>", 
+             ",", "\<\"Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.\
+nb\"\>"}], "}"}], ",", 
+           RowBox[{"And$TM", "[", 
+            RowBox[{
+            "Theorema`Knowledge`P$TM", ",", "Theorema`Knowledge`Q$TM"}], 
+            "]"}], ",", "\<\"(1)\"\>"}], "}"}], ",", 
+         RowBox[{"{", "}"}], ",", 
+         RowBox[{"\<\"ID\"\>", "\[Rule]", "\<\"PRFSIT$49\"\>"}]}], "]"}], ",", 
+       RowBox[{"Theorema`Provers`Common`Private`ORNODE$", "[", 
+        RowBox[{
+         RowBox[{"Theorema`Provers`Common`Private`PRFINFO$", "[", 
+          RowBox[{"\<\"applyOnce\"\>", ",", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"{", 
+              
+              RowBox[{"\<\"ID:1627981589\"\>", 
+               ",", "\<\"Source:/home/wwindste/Theorema.2/Theorema/Test/\
+Prover.nb\"\>"}], "}"}], ",", 
+             RowBox[{"And$TM", "[", 
+              RowBox[{
+              "Theorema`Knowledge`P$TM", ",", "Theorema`Knowledge`Q$TM"}], 
+              "]"}], ",", "\<\"(1)\"\>"}], "}"}], ",", 
+           RowBox[{"{", "}"}], ",", 
+           RowBox[{"\<\"ID\"\>", "\[Rule]", "\<\"PRFSIT$51\"\>"}]}], "]"}], 
+         ",", 
+         RowBox[{"Theorema`Provers`Common`Private`TERMINALNODE$", "[", 
+          RowBox[{
+           RowBox[{"Theorema`Provers`Common`Private`PRFINFO$", "[", 
+            RowBox[{"\<\"SearchDepth\"\>", ",", 
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"{", 
+                
+                RowBox[{"\<\"ID:1627981589\"\>", 
+                 ",", "\<\"Source:/home/wwindste/Theorema.2/Theorema/Test/\
+Prover.nb\"\>"}], "}"}], ",", 
+               RowBox[{"And$TM", "[", 
+                RowBox[{
+                "Theorema`Knowledge`P$TM", ",", "Theorema`Knowledge`Q$TM"}], 
+                "]"}], ",", "\<\"(1)\"\>"}], "}"}], ",", 
+             RowBox[{"{", "}"}], ",", 
+             RowBox[{"\<\"ID\"\>", "\[Rule]", "\<\"SearchDepth55\"\>"}]}], 
+            "]"}], ",", "Theorema`Provers`Common`Private`failed"}], "]"}], 
+         ",", 
+         RowBox[{"Theorema`Provers`Common`Private`TERMINALNODE$", "[", 
+          RowBox[{
+           RowBox[{"Theorema`Provers`Common`Private`PRFINFO$", "[", 
+            RowBox[{"\<\"SearchDepth\"\>", ",", 
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"{", 
+                
+                RowBox[{"\<\"ID:1627981589\"\>", 
+                 ",", "\<\"Source:/home/wwindste/Theorema.2/Theorema/Test/\
+Prover.nb\"\>"}], "}"}], ",", 
+               RowBox[{"And$TM", "[", 
+                RowBox[{
+                "Theorema`Knowledge`P$TM", ",", "Theorema`Knowledge`Q$TM"}], 
+                "]"}], ",", "\<\"(1)\"\>"}], "}"}], ",", 
+             RowBox[{"{", "}"}], ",", 
+             RowBox[{"\<\"ID\"\>", "\[Rule]", "\<\"SearchDepth56\"\>"}]}], 
+            "]"}], ",", "Theorema`Provers`Common`Private`failed"}], "]"}], 
+         ",", "Theorema`Provers`Common`Private`failed"}], "]"}], ",", 
+       RowBox[{"Theorema`Provers`Common`Private`ORNODE$", "[", 
+        RowBox[{
+         RowBox[{"Theorema`Provers`Common`Private`PRFINFO$", "[", 
+          RowBox[{"\<\"applyOnce\"\>", ",", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"{", 
+              
+              RowBox[{"\<\"ID:1627981589\"\>", 
+               ",", "\<\"Source:/home/wwindste/Theorema.2/Theorema/Test/\
+Prover.nb\"\>"}], "}"}], ",", 
+             RowBox[{"And$TM", "[", 
+              RowBox[{
+              "Theorema`Knowledge`P$TM", ",", "Theorema`Knowledge`Q$TM"}], 
+              "]"}], ",", "\<\"(1)\"\>"}], "}"}], ",", 
+           RowBox[{"{", "}"}], ",", 
+           RowBox[{"\<\"ID\"\>", "\[Rule]", "\<\"PRFSIT$52\"\>"}]}], "]"}], 
+         ",", 
+         RowBox[{"Theorema`Provers`Common`Private`TERMINALNODE$", "[", 
+          RowBox[{
+           RowBox[{"Theorema`Provers`Common`Private`PRFINFO$", "[", 
+            RowBox[{"\<\"SearchDepth\"\>", ",", 
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"{", 
+                
+                RowBox[{"\<\"ID:1627981589\"\>", 
+                 ",", "\<\"Source:/home/wwindste/Theorema.2/Theorema/Test/\
+Prover.nb\"\>"}], "}"}], ",", 
+               RowBox[{"And$TM", "[", 
+                RowBox[{
+                "Theorema`Knowledge`P$TM", ",", "Theorema`Knowledge`Q$TM"}], 
+                "]"}], ",", "\<\"(1)\"\>"}], "}"}], ",", 
+             RowBox[{"{", "}"}], ",", 
+             RowBox[{"\<\"ID\"\>", "\[Rule]", "\<\"SearchDepth59\"\>"}]}], 
+            "]"}], ",", "Theorema`Provers`Common`Private`failed"}], "]"}], 
+         ",", 
+         RowBox[{"Theorema`Provers`Common`Private`TERMINALNODE$", "[", 
+          RowBox[{
+           RowBox[{"Theorema`Provers`Common`Private`PRFINFO$", "[", 
+            RowBox[{"\<\"SearchDepth\"\>", ",", 
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"{", 
+                
+                RowBox[{"\<\"ID:1627981589\"\>", 
+                 ",", "\<\"Source:/home/wwindste/Theorema.2/Theorema/Test/\
+Prover.nb\"\>"}], "}"}], ",", 
+               RowBox[{"And$TM", "[", 
+                RowBox[{
+                "Theorema`Knowledge`P$TM", ",", "Theorema`Knowledge`Q$TM"}], 
+                "]"}], ",", "\<\"(1)\"\>"}], "}"}], ",", 
+             RowBox[{"{", "}"}], ",", 
+             RowBox[{"\<\"ID\"\>", "\[Rule]", "\<\"SearchDepth60\"\>"}]}], 
+            "]"}], ",", "Theorema`Provers`Common`Private`failed"}], "]"}], 
+         ",", "Theorema`Provers`Common`Private`failed"}], "]"}], ",", 
+       "Theorema`Provers`Common`Private`failed"}], "]"}], ",", 
+     RowBox[{"Theorema`Provers`Common`Private`ORNODE$", "[", 
+      RowBox[{
+       RowBox[{"Theorema`Provers`Common`Private`PRFINFO$", "[", 
+        RowBox[{"\<\"applyOnce\"\>", ",", 
+         RowBox[{"{", 
+          RowBox[{
+           RowBox[{"{", 
+            
+            RowBox[{"\<\"ID:1627981589\"\>", 
+             ",", "\<\"Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.\
+nb\"\>"}], "}"}], ",", 
+           RowBox[{"And$TM", "[", 
+            RowBox[{
+            "Theorema`Knowledge`P$TM", ",", "Theorema`Knowledge`Q$TM"}], 
+            "]"}], ",", "\<\"(1)\"\>"}], "}"}], ",", 
+         RowBox[{"{", "}"}], ",", 
+         RowBox[{"\<\"ID\"\>", "\[Rule]", "\<\"PRFSIT$50\"\>"}]}], "]"}], ",", 
+       RowBox[{"Theorema`Provers`Common`Private`ORNODE$", "[", 
+        RowBox[{
+         RowBox[{"Theorema`Provers`Common`Private`PRFINFO$", "[", 
+          RowBox[{"\<\"applyOnce\"\>", ",", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"{", 
+              
+              RowBox[{"\<\"ID:1627981589\"\>", 
+               ",", "\<\"Source:/home/wwindste/Theorema.2/Theorema/Test/\
+Prover.nb\"\>"}], "}"}], ",", 
+             RowBox[{"And$TM", "[", 
+              RowBox[{
+              "Theorema`Knowledge`P$TM", ",", "Theorema`Knowledge`Q$TM"}], 
+              "]"}], ",", "\<\"(1)\"\>"}], "}"}], ",", 
+           RowBox[{"{", "}"}], ",", 
+           RowBox[{"\<\"ID\"\>", "\[Rule]", "\<\"PRFSIT$61\"\>"}]}], "]"}], 
+         ",", 
+         RowBox[{"Theorema`Provers`Common`Private`TERMINALNODE$", "[", 
+          RowBox[{
+           RowBox[{"Theorema`Provers`Common`Private`PRFINFO$", "[", 
+            RowBox[{"\<\"SearchDepth\"\>", ",", 
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"{", 
+                
+                RowBox[{"\<\"ID:1627981589\"\>", 
+                 ",", "\<\"Source:/home/wwindste/Theorema.2/Theorema/Test/\
+Prover.nb\"\>"}], "}"}], ",", 
+               RowBox[{"And$TM", "[", 
+                RowBox[{
+                "Theorema`Knowledge`P$TM", ",", "Theorema`Knowledge`Q$TM"}], 
+                "]"}], ",", "\<\"(1)\"\>"}], "}"}], ",", 
+             RowBox[{"{", "}"}], ",", 
+             RowBox[{"\<\"ID\"\>", "\[Rule]", "\<\"SearchDepth65\"\>"}]}], 
+            "]"}], ",", "Theorema`Provers`Common`Private`failed"}], "]"}], 
+         ",", 
+         RowBox[{"Theorema`Provers`Common`Private`TERMINALNODE$", "[", 
+          RowBox[{
+           RowBox[{"Theorema`Provers`Common`Private`PRFINFO$", "[", 
+            RowBox[{"\<\"SearchDepth\"\>", ",", 
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"{", 
+                
+                RowBox[{"\<\"ID:1627981589\"\>", 
+                 ",", "\<\"Source:/home/wwindste/Theorema.2/Theorema/Test/\
+Prover.nb\"\>"}], "}"}], ",", 
+               RowBox[{"And$TM", "[", 
+                RowBox[{
+                "Theorema`Knowledge`P$TM", ",", "Theorema`Knowledge`Q$TM"}], 
+                "]"}], ",", "\<\"(1)\"\>"}], "}"}], ",", 
+             RowBox[{"{", "}"}], ",", 
+             RowBox[{"\<\"ID\"\>", "\[Rule]", "\<\"SearchDepth66\"\>"}]}], 
+            "]"}], ",", "Theorema`Provers`Common`Private`failed"}], "]"}], 
+         ",", "Theorema`Provers`Common`Private`failed"}], "]"}], ",", 
+       RowBox[{"Theorema`Provers`Common`Private`ORNODE$", "[", 
+        RowBox[{
+         RowBox[{"Theorema`Provers`Common`Private`PRFINFO$", "[", 
+          RowBox[{"\<\"applyOnce\"\>", ",", 
+           RowBox[{"{", 
+            RowBox[{
+             RowBox[{"{", 
+              
+              RowBox[{"\<\"ID:1627981589\"\>", 
+               ",", "\<\"Source:/home/wwindste/Theorema.2/Theorema/Test/\
+Prover.nb\"\>"}], "}"}], ",", 
+             RowBox[{"And$TM", "[", 
+              RowBox[{
+              "Theorema`Knowledge`P$TM", ",", "Theorema`Knowledge`Q$TM"}], 
+              "]"}], ",", "\<\"(1)\"\>"}], "}"}], ",", 
+           RowBox[{"{", "}"}], ",", 
+           RowBox[{"\<\"ID\"\>", "\[Rule]", "\<\"PRFSIT$62\"\>"}]}], "]"}], 
+         ",", 
+         RowBox[{"Theorema`Provers`Common`Private`TERMINALNODE$", "[", 
+          RowBox[{
+           RowBox[{"Theorema`Provers`Common`Private`PRFINFO$", "[", 
+            RowBox[{"\<\"SearchDepth\"\>", ",", 
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"{", 
+                
+                RowBox[{"\<\"ID:1627981589\"\>", 
+                 ",", "\<\"Source:/home/wwindste/Theorema.2/Theorema/Test/\
+Prover.nb\"\>"}], "}"}], ",", 
+               RowBox[{"And$TM", "[", 
+                RowBox[{
+                "Theorema`Knowledge`P$TM", ",", "Theorema`Knowledge`Q$TM"}], 
+                "]"}], ",", "\<\"(1)\"\>"}], "}"}], ",", 
+             RowBox[{"{", "}"}], ",", 
+             RowBox[{"\<\"ID\"\>", "\[Rule]", "\<\"SearchDepth69\"\>"}]}], 
+            "]"}], ",", "Theorema`Provers`Common`Private`failed"}], "]"}], 
+         ",", 
+         RowBox[{"Theorema`Provers`Common`Private`TERMINALNODE$", "[", 
+          RowBox[{
+           RowBox[{"Theorema`Provers`Common`Private`PRFINFO$", "[", 
+            RowBox[{"\<\"SearchDepth\"\>", ",", 
+             RowBox[{"{", 
+              RowBox[{
+               RowBox[{"{", 
+                
+                RowBox[{"\<\"ID:1627981589\"\>", 
+                 ",", "\<\"Source:/home/wwindste/Theorema.2/Theorema/Test/\
+Prover.nb\"\>"}], "}"}], ",", 
+               RowBox[{"And$TM", "[", 
+                RowBox[{
+                "Theorema`Knowledge`P$TM", ",", "Theorema`Knowledge`Q$TM"}], 
+                "]"}], ",", "\<\"(1)\"\>"}], "}"}], ",", 
+             RowBox[{"{", "}"}], ",", 
+             RowBox[{"\<\"ID\"\>", "\[Rule]", "\<\"SearchDepth70\"\>"}]}], 
+            "]"}], ",", "Theorema`Provers`Common`Private`failed"}], "]"}], 
+         ",", "Theorema`Provers`Common`Private`failed"}], "]"}], ",", 
+       "Theorema`Provers`Common`Private`failed"}], "]"}], ",", 
+     "Theorema`Provers`Common`Private`failed"}], "]"}], ",", 
+   "Theorema`Provers`Common`Private`failed"}], "]"}]], "Output",
+ CellChangeTimes->{3.540650359452852*^9, 3.540651197417868*^9, 
+  3.540703397698646*^9, 3.540707009395194*^9, 3.540730026395489*^9, 
+  3.540730381144147*^9, 3.540730643167959*^9, 3.540789784265851*^9, 
+  3.540800994891657*^9, 3.5408014614564*^9},
+ CellID->868893433]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData["Theorema`Common`$TMAproofTree"], "Input",
+ CellChangeTimes->{{3.540653839312639*^9, 3.540653842348168*^9}, {
+  3.540812049098738*^9, 3.540812066022035*^9}, {3.540812736494505*^9, 
+  3.540812752135017*^9}, {3.540812987596679*^9, 3.540812987980738*^9}},
+ CellID->626390336],
+
+Cell[BoxData[
+ RowBox[{"{", "}"}]], "Output",
+ CellChangeTimes->{
+  3.540653843469072*^9, 3.540706943297491*^9, 3.540707022691655*^9, 
+   3.540730305053396*^9, 3.540730722124744*^9, 3.540807650927451*^9, 
+   3.540808570101102*^9, 3.540811710850501*^9, {3.540812045326086*^9, 
+   3.54081206033868*^9}, 3.540812257760061*^9, {3.540812738041869*^9, 
+   3.540812753785956*^9}},
+ CellID->1182136736]
+}, Open  ]]
+},
+WindowSize->{891, 870},
+WindowMargins->{{Automatic, 209}, {81, Automatic}},
+ShowSelection->True,
+CounterAssignments->{{"TheoremaFormulaCounter" -> 1}},
+FrontEndVersion->"8.0 for Linux x86 (32-bit) (February 23, 2011)",
+StyleDefinitions->FrontEnd`FileName[{"Theorema"}, "TheoremaNotebook.nb", 
+  CharacterEncoding -> "UTF-8"]
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{
+ "ID:1627981589"->{
+  Cell[637, 25, 358, 9, 19, "FormalTextInputFormula",
+   CellTags->{
+    "ID:1627981589", 
+     "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb", "1"},
+   CellID->1627981589]},
+ "Proof|ID:1627981589|Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.\
+nb"->{
+  Cell[1152, 45, 190, 4, 21, "OpenProof",
+   CellTags->
+    "Proof|ID:1627981589|Source:/home/wwindste/Theorema.2/Theorema/Test/\
+Prover.nb",
+   CellID->1359017668]},
+ "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb"->{
+  Cell[637, 25, 358, 9, 19, "FormalTextInputFormula",
+   CellTags->{
+    "ID:1627981589", 
+     "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb", "1"},
+   CellID->1627981589]},
+ "1"->{
+  Cell[637, 25, 358, 9, 19, "FormalTextInputFormula",
+   CellTags->{
+    "ID:1627981589", 
+     "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb", "1"},
+   CellID->1627981589]}
+ }
+*)
+(*CellTagsIndex
+CellTagsIndex->{
+ {"ID:1627981589", 59781, 1320},
+ {"Proof|ID:1627981589|Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.\
+nb", 60053, 1327},
+ {"Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb", 60283, 1333},
+ {"1", 60478, 1339}
+ }
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[579, 22, 55, 1, 38, "OpenEnvironment",
+ CellID->1242024658],
+Cell[637, 25, 358, 9, 19, "FormalTextInputFormula",
+ CellTags->{
+  "ID:1627981589", "Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.nb",
+    "1"},
+ CellID->1627981589],
+Cell[998, 36, 65, 1, 24, "EndEnvironmentMarker",
+ CellID->914402093]
+}, Open  ]],
+Cell[1078, 40, 49, 1, 10, "CloseEnvironment",
+ CellID->2105876669],
+Cell[CellGroupData[{
+Cell[1152, 45, 190, 4, 21, "OpenProof",
+ CellTags->
+  "Proof|ID:1627981589|Source:/home/wwindste/Theorema.2/Theorema/Test/Prover.\
+nb",
+ CellID->1359017668],
+Cell[CellGroupData[{
+Cell[1367, 53, 27933, 551, 32, "ProofDisplay",
+ CellID->384814991],
+Cell[29303, 606, 15600, 368, 15, "ProofInfo",
+ CellID->1193851986]
+}, Open  ]],
+Cell[44918, 977, 57, 1, 24, "CloseProof",
+ CellID->1503037705]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[45012, 983, 143, 2, 30, "Input",
+ CellID->820855182],
+Cell[45158, 987, 13444, 298, 1532, "Output",
+ CellID->868893433]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[58639, 1290, 285, 4, 24, "Input",
+ CellID->626390336],
+Cell[58927, 1296, 394, 8, 30, "Output",
+ CellID->1182136736]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)
