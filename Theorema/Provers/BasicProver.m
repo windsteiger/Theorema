@@ -57,7 +57,7 @@ applyOnce[ args___] := unexpected[ applyOnce, {args}]
 
 trySeveral[ rules_, ps_] :=
     Module[ {id = getNodeID[ ps]},
-        proveSome[ makePRFINFO[ "ProofAlternatives", {getGoal[ ps]}, {getKB[ ps]}, id],
+        proveSome[ makePRFINFO[ "ProofAlternatives", {ps[[1]]}, {ps[[2]]}, id],
         	Apply[ makePRFSIT, Drop[ ps, -1]], Apply[ makePRFSIT, Drop[ ps, -1]]]
     ]
 trySeveral[ args___] := unexpected[ trySeveral, {args}]

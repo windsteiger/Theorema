@@ -86,6 +86,7 @@ With[ {lang = "English"},
 	translate["proofCellStatus", lang] = "Initial status of nested proof cells";
 	translate["open", lang] = "all open";
 	translate["closed", lang] = "all closed";
+	translate["abort", lang] = "Abort proof";
 	    
     translate["Sets", lang] = "Sets";
     translate["Tuples", lang] = "Tuples";

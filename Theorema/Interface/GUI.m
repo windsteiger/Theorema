@@ -338,7 +338,6 @@ structView[file_, {head:Cell[sec_, "Title"|"Section"|"Subsection"|"Subsubsection
         compTags = Apply[Union, sub[[2]]];
         (* generate an opener view with the view of the header and the content as a column
            a global symbol with unique name is generated, whose value stores the state of the opener *)
-        (* TODO: Use TaggingRules to store the state -> Tutorial "Storing and Tracking Palette States" *)
         {OpenerView[{headerView[file, head, compTags, task], Column[sub[[1]]]}, 
         	ToExpression[StringReplace["Dynamic[NEWSYM]", 
         		"NEWSYM" -> "$kbStructState$"<>ToString[Hash[FileBaseName[file]]]<>"$"<>ToString[CellID/.{opts}]]]], 
@@ -688,9 +687,12 @@ execProveCall[ goal_, kb_, ruleSet_, strategy_, searchDepth_] :=
 execProveCall[ args___] := unexpected[ execProveCall, {args}]
 
 proofNavigation[ po_] :=
-    Module[ {geom = {Max[ Count[ po, _ -> {__, Theorema`Provers`Common`Private`TERMINALNODE$|Theorema`Provers`Common`Private`PRFSIT$}]*20, 350], Max[ $selectedSearchDepth*15, 450]}},
-        Pane[ showProofNavigation[ po, geom], {350, 450},
-              ImageSizeAction -> "Scrollable", Scrollbars -> Automatic, ScrollPosition -> geom/2-{350,450}/2]
+    Module[ {geom = {Max[ Count[ po, _ -> {__, Theorema`Provers`Common`Private`TERMINALNODE$|Theorema`Provers`Common`Private`PRFSIT$}]*20, 350], Max[ $selectedSearchDepth*15, 420]}},
+        Pane[ Column[{
+        	Pane[ showProofNavigation[ po, geom],
+        		{350, 420}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic, ScrollPosition -> geom/2-{350,420}/2],
+        	Button[ translate["abort"], Theorema`Provers`Common`Private`$proofAborted = True]
+        }], {350, 450}]	
     ]
 proofNavigation[ args___] := unexpected[ proofNavigation, {args}]
 

@@ -57,7 +57,8 @@ callProver[ args___] := unexpected[ callProver, {args}]
 
 proofSearch[ searchDepth_] :=
     Module[ {openPS, openPSpos, selPSpos, selPS, pStrat, newSteps},
-        While[ getProofValue[] === pending && (openPSpos = Position[ $TMAproofObject, _PRFSIT$]) =!= {},
+    	$proofAborted = False;
+        While[ !$proofAborted && getProofValue[] === pending && (openPSpos = Position[ $TMAproofObject, _PRFSIT$]) =!= {},
             openPS = Extract[ $TMAproofObject, openPSpos];
             {selPS, selPSpos} = chooseNextPS[ openPS, openPSpos];
             If[ Length[ selPSpos] > searchDepth,
@@ -71,7 +72,6 @@ proofSearch[ searchDepth_] :=
 			];
             $TMAproofObject = replaceProofSit[ $TMAproofObject, selPSpos -> newSteps];
             $TMAproofObject = propagateProofValues[ $TMAproofObject];
-            (*Pause[0.5] *)         
         ]
     ]
 proofSearch[ args___] := unexpected[ proofSearch, {args}]
