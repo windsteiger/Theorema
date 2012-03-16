@@ -32,6 +32,7 @@ initProver[] :=
 		$TMAproofTree = {};
 		$registeredRuleSets = {};
 		$registeredStrategies = {};
+		Clear[ ruleAct];
 		ruleAct[_] := True;
 		$proofCellStatus = Open;
 	]
@@ -43,6 +44,9 @@ callProver[ rules_, strategy_, goal_, kb_, searchDepth_] :=
 		$TMAproofTree = makeInitialProofTree[];
 		proofSearch[ searchDepth];
   		$proofInProgressMarker = {};
+  		If[ $TMAproofTree === {},
+  			$TMAproofTree = {poNodeToTreeNode[ $TMAproofObject]}
+  		];
 		{getProofValue[ $TMAproofObject], $TMAproofObject}
 	]
 callProver[ args___] := unexpected[ callProver, {args}]
@@ -62,6 +66,9 @@ proofSearch[ searchDepth_] :=
             	pStrat = getStrategy[ selPS];
             	newSteps = pStrat[ getRules[ selPS], selPS]
             ];
+            If[ !isProofNode[ newSteps],
+            	newSteps = noProofNode[ newSteps, getNodeID[ selPS]];
+			];
             $TMAproofObject = replaceProofSit[ $TMAproofObject, selPSpos -> newSteps];
             $TMAproofObject = propagateProofValues[ $TMAproofObject];
             (*Pause[0.5] *)         
@@ -112,6 +119,18 @@ getProofValue[ args___] := unexpected[ getProofValue, {args}]
 getNodeID[ (PRFSIT$|PRFINFO$)[ ___, "ID" -> id_, ___]] := id
 getNodeID[ args___] := unexpected[ getNodeID, {args}]
 
+getUsed[ PRFINFO$[ _, used_List, _, ___]] := used
+getUsed[ args___] := unexpected[ getUsed, {args}]
+
+getGenerated[ PRFINFO$[ _, _, generated_List, ___]] := generated
+getGenerated[ args___] := unexpected[ getGenerated, {args}]
+
+getActiveRules[ Hold[ rules_], op_:Identity] := DeleteDuplicates[ DeleteCases[ op[ rules], _String|_?(ruleAct[#]===False&), Infinity]]
+getActiveRules[ args___] := unexpected[ getActiveRules, {args}]
+
+isProofNode[ obj_] := MatchQ[ obj, _ANDNODE$|_ORNODE$|_TERMINALNODE$]
+isProofNode[ args___] := unexpected[ isProofNode, {args}]
+
 makePRFINFO[ name_String, g_, k_] := PRFINFO$[ name, g, k, "ID" -> ToString[ Unique[ name]]]
 makePRFINFO[ name_String, g_, k_, id_String] := PRFINFO$[ name, g, k, "ID" -> id]
 makePRFINFO[ args___] := unexpected[ makePRFINFO, {args}]
@@ -159,18 +178,26 @@ nodeValue[ ORNODE$, _List] := pending
 nodeValue[ PRFOBJ$, {v_}] := v
 nodeValue[ args___] := unexpected[ nodeValue, {args}]
 
-searchDepthExceeded[ ps_PRFSIT$] :=
-	TERMINALNODE$[
-		makePRFINFO[ "SearchDepth", getGoal[ ps], getKB[ ps], getNodeID[ ps]],
-		failed
-	]
+searchDepthExceeded[ ps_PRFSIT$] := proofFails[ makePRFINFO[ "SearchDepth", getGoal[ ps], getKB[ ps], getNodeID[ ps]]]
 searchDepthExceeded[ args___] := unexpected[ searchDepthExceeded, {args}]
 
+noProofNode[ expr_, id_] := proofFails[ makePRFINFO[ "NoPNode", expr, {}, id]]
+noProofNode[ args___] := unexpected[ noProofNode, {args}]
+
+proofFails[ pi_PRFINFO$] := TERMINALNODE$[ pi, failed]
+proofFails[ args___] := unexpected[ proofFails, {args}]
+
+proofSucceeds[ pi_PRFINFO$] := TERMINALNODE$[ pi, proved]
+proofSucceeds[ args___] := unexpected[ proofSucceeds, {args}]
+
+proofDisproved[ pi_PRFINFO$] := TERMINALNODE$[ pi, disproved]
+proofDisproved[ args___] := unexpected[ proofDisproved, {args}]
 
 (* ::Subsubsection:: *)
 (* showProofNavigation *)
 
 showProofNavigation[ {}, geometry_List] := ""
+showProofNavigation[ {node_List}, geometry_List] := Graphics[ proofStepNode[ {0, 0}, node, 18], ImageSize -> geometry, PlotRegion -> {{0.4, 0.6}, {0.6, 0.8}}]
 
 showProofNavigation[ p:{__Rule}, geometry_List] :=
     Module[ {root = Cases[ p, {"Initial", __}, {2}], font = 18-Ceiling[ Apply[ Times, geometry]/(350*450)]},
@@ -191,7 +218,7 @@ proofStepNode[ pos_List, node:{ id_, status_, type_}, font_] :=
 			_, Black],
 		Switch[ type,
 			PRFSIT$, Disk[ pos, 0.1],
-			TERMINALNODE$, Map[ (pos + 0.1*#)&, Rectangle[ {-Sqrt[Pi]/2, -Sqrt[Pi]/2}, {Sqrt[Pi]/2, Sqrt[Pi]/2}]],
+			TERMINALNODE$|PRFOBJ$, Map[ (pos + 0.1*#)&, Rectangle[ {-Sqrt[Pi]/2, -Sqrt[Pi]/2}, {Sqrt[Pi]/2, Sqrt[Pi]/2}]],
 			_, Polygon[ Map[ (pos + 0.125*#)&, {{0,1}, {Cos[7*Pi/6], Sin[7*Pi/6]}, {Cos[11*Pi/6], Sin[11*Pi/6]}}]]],
 		{Black, Dynamic[ Text[ 
 			Hyperlink[
@@ -199,7 +226,7 @@ proofStepNode[ pos_List, node:{ id_, status_, type_}, font_] :=
        					PRFSIT$, "?",
         				ANDNODE$, "\[Wedge]",
         				ORNODE$, "\[Vee]",
-        				TERMINALNODE$, Switch[ status, proved, "\[CheckmarkedBox]", disproved, "\[Times]", failed, "\[WarningSign]", _, "\[DownQuestion]"]], 
+        				TERMINALNODE$|PRFOBJ$, Switch[ status, proved, "\[CheckmarkedBox]", disproved, "\[Times]", failed, "\[WarningSign]", _, "\[DownQuestion]"]], 
 				{CurrentValue[ $TMAproofNotebook, "NotebookFileName"], id},
 				BaseStyle -> {FontSize -> font}], pos]]}
 	}
@@ -270,7 +297,7 @@ proofObjectToCell[ (ANDNODE$|ORNODE$)[ pi_PRFINFO$, subnodes__, pVal_]] :=
 	Module[{header, sub},
 		header = proofObjectToCell[ pi, pVal];
 		(*sub = Map[ proofObjectToCell, {subnodes}];*)
-		sub = MapIndexed[ subProofToCell[ pi[[1]], #1, #2]&, {subnodes}];
+		sub = MapIndexed[ subProofToCell[ pi, #1, #2]&, {subnodes}];
 		Cell[ CellGroupData[ Join[ header, sub], $proofCellStatus]]
 	]
 proofObjectToCell[ TERMINALNODE$[ pi_PRFINFO$, pVal_]] := 
@@ -278,8 +305,8 @@ proofObjectToCell[ TERMINALNODE$[ pi_PRFINFO$, pVal_]] :=
 	
 proofObjectToCell[ args___] := unexpected[ proofObjectToCell, {args}]
 
-subProofToCell[ name_String, node_, pos_List] :=
-		Cell[ CellGroupData[ Append[ subProofHeader[ name, $Language, pos], proofObjectToCell[ node]], $proofCellStatus]]
+subProofToCell[ PRFINFO$[ name_, used_, gen_, ___], node_, pos_List] :=
+		Cell[ CellGroupData[ Append[ subProofHeader[ name, $Language, used, gen, pos], proofObjectToCell[ node]], $proofCellStatus]]
 subProofToCell[ args___] := unexpected[ subProofToCell, {args}]
 
 

@@ -88,5 +88,11 @@ With[ {lang = "English"},
 	MessageName[makePRFINFO, "usage", lang] = "makePRFINFO[ ...] constructor for PRFINFO$ data staructure.";
 	MessageName[makePRFSIT, "usage", lang] = "makePRFSIT[ ...] constructor for PRFSIT$ data staructure.";
 	MessageName[getNodeID, "usage", lang] = "getNodeID[ ...] .";
+	MessageName[getUsed, "usage", lang] = "getUsed[ ...] .";
+	MessageName[getGenerated, "usage", lang] = "getGenerated[ ...] .";
+	MessageName[proofFails, "usage", lang] = "proofFails[ ...] .";
+	MessageName[proofSucceeds, "usage", lang] = "proofSucceeds[ ...] .";
+	MessageName[proofDisproved, "usage", lang] = "proofDisproved[ ...] .";
+	MessageName[getActiveRules, "usage", lang] = "getActiveRules[ ...] .";
 
 ]
