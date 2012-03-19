@@ -680,9 +680,10 @@ execProveCall[ goal_, kb_, ruleSet_, strategy_, searchDepth_] :=
 			SelectionMove[ nb, All, CellGroup]
 		];
 		SetSelectedNotebook[ nb];
+		NotebookWrite[ nb, Cell[ translate[ "Proof of"]<>" "<>goal[[3]]<>": \[Ellipsis]", "OpenProof", CellTags -> makeProofIDTag[ goal]]];
 
 		proof = callProver[ ruleSet, strategy, goal, kb, searchDepth];
-		printProveInfo[ goal, kb, ruleSet, strategy, proof];
+		printProveInfo[ goal, kb, ruleSet, strategy, proof, searchDepth];
 	]
 execProveCall[ args___] := unexpected[ execProveCall, {args}]
 
@@ -732,12 +733,13 @@ setCompEnv[ args___] := unexpected[ setCompEnv, {args}]
 (* ::Subsubsection:: *)
 (* printProofInfo *)
 
-printProveInfo[ goal_, kb_, rules_, strategy_, { pVal_, proofObj_}] :=
+printProveInfo[ goal_, kb_, rules_, strategy_, { pVal_, proofObj_}, searchDepth_] :=
     Module[ {kbAct, bui, buiAct},
         kbAct = Map[ Part[ #, 3]&, kb];
         bui = Cases[ DownValues[ Theorema`Computation`Language`Private`buiActProve],
         	HoldPattern[ Verbatim[HoldPattern][ Theorema`Computation`Language`Private`buiActProve[ op_String]] :> v_] -> {op, v}];
         buiAct = Cases[ bui, { op_, True} -> op];
+        NotebookFind[ $proofInitNotebook, makeProofIDTag[ goal], All, CellTags];
         NotebookWrite[ $proofInitNotebook, Cell[ translate[ "Proof of"]<>" "<>goal[[3]]<>": "<>ToString[pVal], "OpenProof", CellTags -> makeProofIDTag[ goal]]];
         (* Use Method -> "Queued" so that no time limit for proof display applies *)
         NotebookWrite[ $proofInitNotebook, Cell[ BoxData[ ToBoxes[
@@ -752,14 +754,14 @@ printProveInfo[ goal_, kb_, rules_, strategy_, { pVal_, proofObj_}] :=
                 	HoldPattern[ Verbatim[HoldPattern][ kbSelectProve[ k_List]] :> v_] -> {k, v}],
                     allBui = bui, allRules = Cases[ DownValues[ Theorema`Provers`Common`Private`ruleAct],
                 	HoldPattern[ Verbatim[HoldPattern][ Theorema`Provers`Common`Private`ruleAct[ r_Symbol]] :> v_] -> {r, v}]},
-                    Button[ translate["SetEnv"], setProveEnv[ goal, allKB, allBui, rules, strategy, allRules], ImageSize -> Automatic]
+                    Button[ translate["SetEnv"], setProveEnv[ goal, allKB, allBui, rules, strategy, allRules, searchDepth], ImageSize -> Automatic]
                 ]}
             ]}, False]], "ProofInfo"]];
         NotebookWrite[ $proofInitNotebook, Cell[ "\[EmptySquare]", "CloseProof"]];
     ]
 printProveInfo[args___] := unexcpected[ printProveInfo, {args}]
 
-setProveEnv[ goal_, kb_List, bui_List, ruleSet_, strategy_, allRules_List] :=
+setProveEnv[ goal_, kb_List, bui_List, ruleSet_, strategy_, allRules_List, searchDepth_] :=
 	Module[{},
 		$selectedProofGoal = goal;
 		NotebookLocate[ goal[[1,1]]];
@@ -772,6 +774,7 @@ setProveEnv[ goal_, kb_List, bui_List, ruleSet_, strategy_, allRules_List] :=
 		Scan[(Theorema`Computation`Language`Private`buiActProve[#[[1]]] = #[[2]])&, bui];
 		$selectedRuleSet = ruleSet;
 		$selectedStrategy = strategy;
+		$selectedSearchDepth = searchDepth;
 	]
 setProveEnv[ args___] := unexpected[ setProveEnv, {args}]
 
