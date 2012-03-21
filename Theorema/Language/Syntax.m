@@ -257,7 +257,15 @@ MakeBoxes[ (op_?isNonStandardOperatorName)[ arg__], TheoremaForm] :=
 
 MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
     With[ {b = tmaToInputOperator[ op]},
-        MakeBoxes[ b[ arg], TheoremaForm]
+    	(* Special cases, because otherwise And uses && and Or uses || *)
+    	Switch[ b,
+    		And,
+    		tmaInfixBox[ {arg}, "\[And]"],
+    		Or,
+    		tmaInfixBox[ {arg}, "\[Or]"],
+    		_,
+        	MakeBoxes[ b[ arg], TheoremaForm]
+    	]
     ]
 
 MakeBoxes[ s_Symbol, TheoremaForm] := 
@@ -268,6 +276,8 @@ MakeBoxes[ s_Symbol, TheoremaForm] :=
 		]
 	]
 
+tmaInfixBox[ args_List, op_String] := RowBox[ Riffle[ Map[ MakeBoxes[ #, TheoremaForm]&, args], op]]
+tmaInfixBox[ args___] := unexpected[ tmaInfixBox, {args}]
 
 (*
 
