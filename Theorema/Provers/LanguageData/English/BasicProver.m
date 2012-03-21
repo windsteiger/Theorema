@@ -1,10 +1,23 @@
 
+(* ::Section:: *)
+(* Public Declaration Part: executes in Theorema`Provers` *)
+
 With[ {lang = "English"},
 
 MessageName[ basicProver, "usage", lang] := "The prover that handles the basic language constructs from the Theorema language, standard propositional and predicate logic.";
 MessageName[ quantifierRules, "usage", lang] := "The prover that handles quantifiers.";
 MessageName[ applyOnce, "usage", lang] := "This strategy applies a matching inference rule once.";
 MessageName[ trySeveral, "usage", lang] := "This strategy tries several rules at the same time.";
+
+] (* With *)
+
+
+(* ::Section:: *)
+(* Private Implementation Part: executes in Theorema`Provers`Private` *)
+
+Begin["`Private`"]
+
+With[ {lang = "English"},
 
 translate[ "Quantifier Rules", lang] := "Quantifier Rules";
 translate[ "Basic Prover", lang] := "Basic Prover";
@@ -19,7 +32,7 @@ subProofHeader[ "andGoal", lang, used_, generated_, {p_}] := {textCell[ "Proof o
 	textCell[ "We need to prove "],
 	goalCell[ Part[ generated, p], "."]
 	};
- 
 
 ] (* With *)
 
+End[]

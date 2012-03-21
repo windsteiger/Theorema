@@ -1,3 +1,11 @@
+(* ::Section:: *)
+(* Public Declaration Part: executes in Theorema`Provers` *)
+
+
+(* ::Section:: *)
+(* Private Implementation Part: executes in Theorema`Provers`Private` *)
+
+Begin["`Private`"]
 
 With[ {lang = "German"},
 
@@ -13,3 +21,4 @@ proofStepText[ step_, lang, goal_, ___] := {textCell[ StringForm[ "Es steht kein
 
 ] (* With *)
 
+End[]

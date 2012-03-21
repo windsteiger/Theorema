@@ -1,3 +1,11 @@
+(* ::Section:: *)
+(* Public Declaration Part: executes in Theorema`Provers` *)
+
+
+(* ::Section:: *)
+(* Private Implementation Part: executes in Theorema`Provers`Private` *)
+
+Begin["`Private`"]
 
 With[ {lang = "English"},
 
@@ -45,3 +53,4 @@ subProofHeader[ step_String, lang, ___] := {
 
 ] (* With *)
 
+End[]

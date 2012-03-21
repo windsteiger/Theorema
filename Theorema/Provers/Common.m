@@ -55,8 +55,8 @@ callProver[ args___] := unexpected[ callProver, {args}]
 (* ::Subsubsection:: *)
 (* proofSearch *)
 
-proofSearch[ searchDepth_] :=
-    Module[ {openPS, openPSpos, selPSpos, selPS, pStrat, newSteps},
+proofSearch[ searchDepth_Integer] :=
+    Module[ {openPSpos, openPS, selPSpos, selPS, pStrat, newSteps},
     	$proofAborted = False;
         While[ !$proofAborted && getProofValue[] === pending && (openPSpos = Position[ $TMAproofObject, _PRFSIT$]) =!= {},
             openPS = Extract[ $TMAproofObject, openPSpos];
@@ -75,6 +75,40 @@ proofSearch[ searchDepth_] :=
         ]
     ]
 proofSearch[ args___] := unexpected[ proofSearch, {args}]
+
+
+(* ::Subsection:: *)
+(* Experimental feature: prallel proof search *)
+
+(* This needs more thoughts, how to update the proof tree when parallel modifications may take place.
+   Just as a starting point ... *)
+proofSearchParallel[ searchDepth_Integer] :=
+    Module[ {openPSpos},
+    	$proofAborted = False;
+    	SetSharedVariable[$TMAproofObject, $TMAproofTree];
+        While[ !$proofAborted && getProofValue[] === pending && (openPSpos = Position[ $TMAproofObject, _PRFSIT$]) =!= {},
+        	ParallelTry[ proofSearchAtPos[ #, searchDepth]&, openPSpos];
+        ]
+    ]
+proofSearchParallel[ args___] := unexpected[ proofSearchParallel, {args}]
+
+Clear[ proofSearchAtPos];
+proofSearchAtPos[ selPSpos_List, searchDepth_Integer] :=
+    Module[ {selPS, pStrat, newSteps},
+        selPS = Extract[ $TMAproofObject, selPSpos];
+        If[ Length[ selPSpos] > searchDepth,
+            newSteps = searchDepthExceeded[ selPS],
+                (* else *)
+            pStrat = getStrategy[ selPS];
+            newSteps = pStrat[ getRules[ selPS], selPS]
+        ];
+        If[ !isProofNode[ newSteps],
+            newSteps = noProofNode[ newSteps, getNodeID[ selPS]];
+        ];
+        $TMAproofObject = replaceProofSit[ $TMAproofObject, selPSpos -> newSteps];
+        $TMAproofObject = propagateProofValues[ $TMAproofObject]
+    ]
+proofSearchAtPos[ args___] := unexpected[ proofSearchAtPos, {args}]
 
 chooseNextPS[ ps_List, psPos_List] :=
 	Module[{},

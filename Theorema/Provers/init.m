@@ -17,6 +17,8 @@
 
 BeginPackage["Theorema`Provers`", {"Theorema`"}]
 
+(*$NewSymbol = If[ #1 === "pVal", Print[$Input, ":", $Line, #2]]&*)
+
 Needs["Theorema`Common`"]
 Get["Theorema`Provers`Common`"]
 
