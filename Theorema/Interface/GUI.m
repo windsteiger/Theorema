@@ -360,7 +360,7 @@ structView[file_, item_List, tags_, task_] :=
         (* generate a column and return the collected tags also *)
         {Column[sub[[1]]], compTags}
     ]
-
+  
 (* input cell with cell tags *)
 structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cellTags_, b___], 
   tags_, task_] :=
@@ -399,9 +399,11 @@ structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cel
                              	theoremaDisplay[ Extract[ $tmaEnv, Append[ formPos[[1]], 2]]],
                              	displayCellContent[ content]]
                     ],
-                    Button[ Style[formulaLabel, "FormalTextInputFormula"], 
-                        CreateDialog[{Cell[ content, "Output"], CancelButton[ translate[ "OK"], NotebookClose[ButtonNotebook[]]]}],
-                        Appearance->None]
+                    With[ {magOpt = Options[ Replace[ "Theorema Commander", $theoremaGUI], Magnification]},
+                    	Button[ Style[formulaLabel, "FormalTextInputFormula"], 
+                        	CreateDialog[{Cell[ content, "Output"], CancelButton[ translate[ "OK"], NotebookClose[ButtonNotebook[]]]}, First[ magOpt]],
+                        	Appearance -> None]
+                    ]
                 ]},
                 Spacer[10]],
             "compute",
@@ -415,9 +417,11 @@ structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cel
                              	theoremaDisplay[ Extract[ $tmaEnv, Append[ formPos[[1]], 2]]],
                              	displayCellContent[ content]]
                     ],
-                    Button[ Style[formulaLabel, "FormalTextInputFormula"],
-                        CreateDialog[{Cell[ content, "Output"], CancelButton["OK", NotebookClose[ButtonNotebook[]]]}],
-                        Appearance->None]
+                    With[ {magOpt = Options[ Replace[ "Theorema Commander", $theoremaGUI], Magnification]},
+                    	Button[ Style[formulaLabel, "FormalTextInputFormula"], 
+                        	CreateDialog[{Cell[ content, "Output"], CancelButton[ translate[ "OK"], NotebookClose[ButtonNotebook[]]]}, First[ magOpt]],
+                        	Appearance -> None]
+                    ]
                 ]},
                 Spacer[10]],
             "solve",
@@ -431,9 +435,11 @@ structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cel
                              	theoremaDisplay[ Extract[ $tmaEnv, Append[ formPos[[1]], 2]]],
                              	displayCellContent[ content]]
                     ],
-                    Button[ Style[formulaLabel, "FormalTextInputFormula"], 
-                        CreateDialog[{Cell[ content, "Output"], CancelButton["OK", NotebookClose[ButtonNotebook[]]]}],
-                        Appearance->None]
+                    With[ {magOpt = Options[ Replace[ "Theorema Commander", $theoremaGUI], Magnification]},
+                    	Button[ Style[formulaLabel, "FormalTextInputFormula"], 
+                        	CreateDialog[{Cell[ content, "Output"], CancelButton[ translate[ "OK"], NotebookClose[ButtonNotebook[]]]}, First[ magOpt]],
+                        	Appearance -> None]
+                    ]
                 ]},
                 Spacer[10]]    
             ], {keyTags}}
@@ -671,7 +677,7 @@ submitProveTask[ dummy_] :=
 submitProveTask[ args___] := unexpected[ submitProveTask, {args}]
 
 execProveCall[ goal_, kb_, ruleSet_, strategy_, searchDepth_] :=
-	Module[{nb = InputNotebook[], proof},
+	Module[{nb = $proofInitNotebook, proof},
 		$tcProveTab++;
 		If[ NotebookFind[ nb, makeProofIDTag[ goal], All, CellTags] === $Failed,
 			NotebookFind[ nb, goal[[1,1]], All, CellTags];
@@ -745,7 +751,7 @@ printProveInfo[ goal_, kb_, rules_, strategy_, { pVal_, proofObj_}, searchDepth_
         NotebookWrite[ $proofInitNotebook, Cell[ BoxData[ ToBoxes[
         	Button[ translate["ShowProof"], displayProof[ proofObj], ImageSize -> Automatic, Method -> "Queued"]]], "ProofDisplay"]];
         NotebookWrite[ $proofInitNotebook, Cell[ ToBoxes[
-        	OpenerView[ {"", 
+        	OpenerView[ {Spacer[10], 
             Column[ {OpenerView[ {Style[ translate[ "GoalProve"], "PIContent"], Style[ goal[[3]], "PIContent"]}],
             	OpenerView[ {Style[ translate[ "KBprove"], "PIContent"], Style[ kbAct, "PIContent"]}],
                 OpenerView[ {Style[ translate[ "BuiProve"], "PIContent"], Style[ buiAct, "PIContent"]}],
