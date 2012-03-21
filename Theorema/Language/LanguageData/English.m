@@ -3,10 +3,10 @@ With[ {lang = "English"},
 	MessageName[QU$, "usage", lang] = "A marker introduced during the parsing process that temporarily marks quantified variables.";
 	MessageName[VAR$, "usage", lang] = "";
 	MessageName[RNG$, "usage", lang] = "";
-	MessageName[SIMPRNG$, "usage", lang] = "SIMPRNG$[ x_] usually denotes that the variable x ranges over the universe.";
-	MessageName[SETRNG$, "usage", lang] = "SETRNG$[ x_, s_] denotes that the variable x ranges over the set s.";
-	MessageName[PREDRNG$, "usage", lang] = "PREDRNG$[ x_, p_] denotes that the variable x satisfies the predicate p.";
-	MessageName[STEPRNG$, "usage", lang] = "STEPRNG$[ x_, low_, high_, step_] denotes that the variable x steps from low to high in steps of step.";
+	MessageName[SIMPRNG$, "usage", lang] = "SIMPRNG$[ x] usually denotes that the variable x ranges over the universe.";
+	MessageName[SETRNG$, "usage", lang] = "SETRNG$[ x, s] denotes that the variable x ranges over the set s.";
+	MessageName[PREDRNG$, "usage", lang] = "PREDRNG$[ x, p] denotes that the variable x satisfies the predicate p.";
+	MessageName[STEPRNG$, "usage", lang] = "STEPRNG$[ x, low, high, step] denotes that the variable x steps from low to high in steps of step.";
 	MessageName[EqualDef$TM, "usage", lang] = "";
 	MessageName[IffDef$TM, "usage", lang] = "";
 	MessageName[Equal$TM, "usage", lang] = "";
@@ -44,10 +44,10 @@ With[ {lang = "English"},
 	MessageName[Switch$TM, "usage", lang] = "";	
 	MessageName[List$TM, "usage", lang] = "";
 	(* Global declarations *)	
-	MessageName[globalForall$TM, "usage", lang] = "globalForall$TM[ rng_, cond_, decl_] is a datastructure representing a (nested) global universal variable, where 
-	\*StyleBox[\"decl\", FontSlant -> \"Italic\"] contains further global declarations. globalForall$TM[ rng_, cond_] is a single global universal variable.";
-	MessageName[globalImplies$TM, "usage", lang] = "globalImplies$TM[ cond_, decl_] is a datastructure representing a (nested) global condition, where
-	\*StyleBox[\"decl\", FontSlant -> \"Italic\"] contains further global declarations. globalImplies$TM[ cond_] is a single global condition.";
+	MessageName[globalForall$TM, "usage", lang] = "globalForall$TM[ rng, cond, decl] is a datastructure representing a (nested) global universal variable, where 
+	decl contains further global declarations. globalForall$TM[ rng, cond] is a single global universal variable.";
+	MessageName[globalImplies$TM, "usage", lang] = "globalImplies$TM[ cond, decl] is a datastructure representing a (nested) global condition, where
+	decl contains further global declarations. globalImplies$TM[ cond] is a single global condition.";
 	
 ]
 

@@ -1,6 +1,6 @@
 (* Paclet Info File *)
 
-(* created 2011/12/23*)
+(* created 2012/03/20*)
 
 Paclet[
     Name -> "Theorema",
@@ -10,7 +10,7 @@ Paclet[
     Creator -> "The Theorema Group / RISC",
     Extensions -> 
         {
-            {"Documentation", Language -> "English", MainPage -> "Tutorials/Theorema Tutorial"}
+            {"Documentation", Language -> "English", MainPage -> "Tutorials/TheoremaMain"}
         }
 ]
 

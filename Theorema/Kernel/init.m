@@ -87,4 +87,8 @@ Pause[5];
 If[$Notebooks && MemberQ[Notebooks[], Theorema`priv`welcomeScreen],
 	NotebookClose[Theorema`priv`welcomeScreen]];
 
-	
+(* For documentation generation with Workbench include the following packages,
+   so that their symbols appear without context *)
+(*   
+Needs["Theorema`Common`"]
+*)
