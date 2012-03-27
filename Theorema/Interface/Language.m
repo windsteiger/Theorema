@@ -26,7 +26,7 @@ allLanguageFiles[] := FileNames[ "*.m", ToFileName[{$TheoremaDirectory, "Theorem
 
 translate[ s_String] := translate[ s, $Language];
 Map[ Get, allLanguageFiles[]];
-translate[ s_String, lang_String] := (Message[ Theorema::missingTranslation, s, lang]; s)
+translate[ s_String, lang_String] := "???" <> s <> "???"
 
 End[] (* End Private Context *)
 
