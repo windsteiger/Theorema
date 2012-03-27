@@ -864,18 +864,26 @@ makeEnvButton[ bname_String] :=
 makeEnvButton[args___] :=
     unexpected[makeEnvButton, {args}]
 
-makeFormButton[] :=
+makeFormButton[] := {
     Button[ translate["tcLangTabEnvTabButtonFormLabel"], insertNewFormulaCell[ "Env"], Alignment -> {Left, Top}]
+}
 makeFormButton[args___] :=
     unexpected[makeFormButton, {args}]
-    
+
+makeDeclButton[] := {
+	Button[ translate["tcLangTabEnvTabButtonDeclLabel"], Theorema`Language`Session`Private`displayGlobalDeclarations[ InputNotebook[]]]
+}
+makeDeclButton[args___] :=
+    unexpected[makeDeclButton, {args}]
+   
 allEnvironments = {"DEF", "THM", "LMA", "PRP", "COR", "CNJ", "ALG", "EXM"};
 
 envButtons[] :=
     Pane[ 
     Column[{
     Grid[ Partition[ Map[ makeEnvButton, allEnvironments], 2]],
-    Grid[ {{makeFormButton[]}}]
+    Column[ makeFormButton[]],
+    Column[ makeDeclButton[]]
     }, Center, Dividers->Center]]
 envButtons[args___] :=
     unexpected[envButtons, {args}]

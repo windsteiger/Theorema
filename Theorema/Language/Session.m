@@ -123,7 +123,9 @@ markVariables[args___] := unexpected[ markVariables, {args}]
 openGlobalDeclaration[ expr_] :=
     Module[ {},
         $parseTheoremaGlobals = True;
-        PrependTo[ $ContextPath, "Theorema`Language`"];
+		(* Remember context path *)
+		$origContextPath = $ContextPath;
+        $ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
         If[ !inArchive[], Begin["Theorema`Knowledge`"]];
         expr
     ]
@@ -132,7 +134,8 @@ openGlobalDeclaration[ args___] := unexpected[ openGlobalDeclaration, {args}]
 closeGlobalDeclaration[] :=
     Module[ {},
 		If[ !inArchive[], End[]];
-		$ContextPath = DeleteCases[ $ContextPath, "Theorema`Language`"];
+		(* Restore context path that has been modified in openEnvironment *)
+		$ContextPath = $origContextPath;
         $parseTheoremaGlobals = False;
     ]
 closeGlobalDeclaration[ args___] := unexpected[ closeGlobalDeclaration, {args}]
@@ -348,6 +351,26 @@ applicableGlobalDeclarations[ nb_NotebookObject, raw_Notebook, pos_List] :=
 	]
 applicableGlobalDeclarations[ args___] := unexpected[ applicableGlobalDeclarations, {args}]
 
+displayGlobalDeclarations[ nb_NotebookObject] :=
+	Module[{ globDecl, pos, raw, magOpt = Options[ nb, Magnification], availDecl},
+		raw = NotebookGet[ nb];
+		pos = First[ Position[ raw, NotebookRead[ nb]]];
+		availDecl = applicableGlobalDeclarations[ nb, raw, pos];
+		If[ availDecl =!= {},
+			globDecl = ExpressionCell[ theoremaDisplay[ applyGlobalDeclaration[ "\[SelectionPlaceholder]", availDecl]], 
+				"DisplayFormula", ShowSyntaxStyles -> False],
+			globDecl = TextCell[ translate[ "None"]]
+		];
+		CreateDialog[ Join[
+			{
+				Cell[ translate["Global Declarations"], "Title"],
+				globDecl
+			},
+			{CancelButton[ translate[ "OK"], NotebookClose[ButtonNotebook[]]]}],
+			First[ magOpt]]
+	]
+displayGlobalDeclarations[ args___] := unexpected[ displayGlobalDeclarations, {args}]
+
 occursBelow[ {a___, p_}, {a___, q_, ___}] /; q > p := True
 occursBelow[ x_, y_] := False
 occursBelow[args___] := unexpected[ occursBelow, {args}]
@@ -415,7 +438,9 @@ getFormulaCounter[args___] := unexpected[ getFormulaCounter, {args}]
  
 openEnvironment[expr_] :=
     Module[{},
-		$parseTheoremaExpressions = True; 
+		$parseTheoremaExpressions = True;
+		(* Remember context path *)
+		$origContextPath = $ContextPath;
         $ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
         (* Set default context when not in an archive *)
         If[ !inArchive[], Begin["Theorema`Knowledge`"]];
@@ -427,7 +452,8 @@ closeEnvironment[] :=
 	Module[{},
 		(* Leave "Theorema`Knowledge`" context when not in an archive *)
 		If[ !inArchive[], End[]];
-		$ContextPath = Select[ $ContextPath, (!StringMatchQ[ #, "Theorema`Knowledge`" ~~ __] || # =!= "Theorema`Language`")&];
+		(* Restore context path that has been modified in openEnvironment *)
+		$ContextPath = $origContextPath;
 		$parseTheoremaExpressions = False; 
         updateKBBrowser[];
 	]

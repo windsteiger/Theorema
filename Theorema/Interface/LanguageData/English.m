@@ -41,6 +41,7 @@ With[ {lang = "English"},
     		translate["tcLangTabEnvTabButtonAlgLabel", lang] = "Algorithm";
     		translate["tcLangTabEnvTabButtonExmLabel", lang] = "Example";
     		translate["tcLangTabEnvTabButtonFormLabel", lang] = "New Formula";
+    		translate["tcLangTabEnvTabButtonDeclLabel", lang] = "Identify global declarations";
     	translate["tcLangTabArchTabLabel", lang] = "archives";
     		translate["tcLangTabArchTabSectionCreate", lang] = "Creating Archives";
     		translate["tcLangTabArchTabButtonNewLabel", lang] = "New Archive";
@@ -117,6 +118,8 @@ With[ {lang = "English"},
     translate["notUniqueLabel", lang] = "These labels are not unique in the notebook: ``\n\nThis is just a warning, you can continue,\nbut referencing formulae from this notebook\nmight turn out to be confusing.";
     translate["fileTypeArchive", lang] = "Theorema archive";
     translate["noArchName", lang] = "No archive name available for chosen archive. Check file content.";
+    translate["Global Declarations"] = "Global Declarations valid at this cell";
+    translate["None"] = "None";
 
 (* Theorema`Language`Parser` *)
     translate["tupleOfRange", lang] = "The tuple quantifier can only be used with step-ranges, not with ``.";
