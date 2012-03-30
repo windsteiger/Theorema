@@ -359,15 +359,18 @@ displayGlobalDeclarations[ nb_NotebookObject] :=
 		If[ availDecl =!= {},
 			globDecl = ExpressionCell[ theoremaDisplay[ applyGlobalDeclaration[ "\[SelectionPlaceholder]", availDecl]], 
 				"DisplayFormula", ShowSyntaxStyles -> False],
-			globDecl = TextCell[ translate[ "None"]]
+			globDecl = TextCell[ translate[ "None"], "Text"]
 		];
-		CreateDialog[ Join[
+		CreateDocument[ Join[
 			{
 				Cell[ translate["Global Declarations"], "Title"],
 				globDecl
 			},
-			{CancelButton[ translate[ "OK"], NotebookClose[ButtonNotebook[]]]}],
-			First[ magOpt]]
+			{Cell[ BoxData[ ButtonBox[ translate[ "OK"], ButtonFunction :> NotebookClose[ButtonNotebook[]],
+				Appearance -> "CancelButton", Evaluator -> Automatic, Method -> "Preemptive"]], "ButtonBar"]}],
+			First[ magOpt], WindowTitle -> translate["Global Declarations"],
+			WindowElements -> {"StatusArea", "MagnificationPopUp"},
+			StyleDefinitions -> FileNameJoin[ {"Theorema", "TheoremaDialog.nb"}]]
 	]
 displayGlobalDeclarations[ args___] := unexpected[ displayGlobalDeclarations, {args}]
 

@@ -109,10 +109,10 @@ theoremaCommander[] /; $Notebooks :=
     Module[ {style = Replace[ ScreenStyleEnvironment, Options[InputNotebook[], ScreenStyleEnvironment]]},
         CreatePalette[ Dynamic[Refresh[
         	TabView[{
-        		translate["tcLangTabLabel"]->TabView[{
-        			translate["tcLangTabEnvTabLabel"]->envButtons[],
-        			translate["tcLangTabMathTabLabel"]->Dynamic[Refresh[ langButtons[], TrackedSymbols :> {$buttonNat}]],
-        			translate["tcLangTabArchTabLabel"]->archButtons[]}, Dynamic[$tcLangTab],
+        		translate["tcSessionTabLabel"]->TabView[{
+        			translate["tcSessTabStructTabLabel"]->structButtons[],
+        			translate["tcSessTabMathTabLabel"]->Dynamic[Refresh[ langButtons[], TrackedSymbols :> {$buttonNat}]],
+        			translate["tcSessTabArchTabLabel"]->archButtons[]}, Dynamic[$tcLangTab],
         			LabelStyle->"TabLabel2", ControlPlacement->Top],
         		translate["tcProveTabLabel"]->TabView[{
         			translate["tcProveTabGoalTabLabel"]->Dynamic[ Refresh[ displaySelectedGoal[], UpdateInterval -> 2]],
@@ -179,9 +179,13 @@ displaySelectedGoal[args___] :=
     unexpected[displaySelectedGoal, {args}]
 
 displayLabeledFormula[ {key_, form_, lab_}] := 
-	Module[ {link},
-		link = { StringReplace[ key[[2]], "Source"<>$cellTagKeySeparator -> "", 1], key[[1]]};
-		{Hyperlink[ Style[ lab, "FormulaLabel"], link], Style[ theoremaDisplay[ form], "DisplayFormula"]}
+	Module[ {src, nb},
+		src = StringReplace[ key[[2]], "Source"<>$cellTagKeySeparator -> "", 1];
+		nb = sourceToNotebookFile[ src];
+		{ If[ nb =!= $Failed,
+			Hyperlink[ Style[ lab, "FormulaLabel"], {nb, key[[1]]}],
+			Tooltip[ Style[ lab, "FormulaLabel"], translate[ "noNB"] <> src]],
+		Style[ theoremaDisplay[ form], "DisplayFormula"]}
 	]
 displayLabeledFormula[ args___] := unexpected[ displayLabeledFormula, {args}]
 
@@ -197,6 +201,19 @@ displaySelectedKB[ args___] := unexpected[ displaySelectedKB, {args}]
 
 displayLabeledFormulaList[ l_List] := Map[ displayLabeledFormula, l]
 displayLabeledFormulaList[ args___] := unexpected[ displayLabeledFormulaList, {args}]
+
+sourceToNotebookFile[ s_String] :=
+	Module[ {fn, absfn},
+        Which[ FileExtension[ s] === "nb",
+            fn = s,
+            StringQ[ fn = Quiet[ ContextToFileName[ s]]],
+            fn = StringReplacePart[ Last[ FileNameSplit[ fn]], "nb", -1],
+            True,
+            Return[ $Failed]
+        ];
+        absfn = Block[ {$Path = $TheoremaArchivePath}, FindFile[ fn]]
+    ]
+sourceToNotebookFile[ args___] := unexpected[ sourceToNotebookFile, {args}]
 
  
 (* ::Subsubsection:: *)
@@ -846,14 +863,14 @@ newCloseEnvCell[args___] :=
 (* ::Subsection:: *)
 (* Buttons *)
 
-envButtonData["DEF"] := "tcLangTabEnvTabButtonDefLabel";
-envButtonData["THM"] := "tcLangTabEnvTabButtonThmLabel";
-envButtonData["LMA"] := "tcLangTabEnvTabButtonLmaLabel";
-envButtonData["PRP"] := "tcLangTabEnvTabButtonPrpLabel";
-envButtonData["COR"] := "tcLangTabEnvTabButtonCorLabel";
-envButtonData["CNJ"] := "tcLangTabEnvTabButtonCnjLabel";
-envButtonData["ALG"] := "tcLangTabEnvTabButtonAlgLabel";
-envButtonData["EXM"] := "tcLangTabEnvTabButtonExmLabel";
+envButtonData["DEF"] := "tcSessTabEnvTabButtonDefLabel";
+envButtonData["THM"] := "tcSessTabEnvTabButtonThmLabel";
+envButtonData["LMA"] := "tcSessTabEnvTabButtonLmaLabel";
+envButtonData["PRP"] := "tcSessTabEnvTabButtonPrpLabel";
+envButtonData["COR"] := "tcSessTabEnvTabButtonCorLabel";
+envButtonData["CNJ"] := "tcSessTabEnvTabButtonCnjLabel";
+envButtonData["ALG"] := "tcSessTabEnvTabButtonAlgLabel";
+envButtonData["EXM"] := "tcSessTabEnvTabButtonExmLabel";
 envButtonData[args___] :=
     unexpected[envButtonData, {args}]
 
@@ -861,31 +878,92 @@ makeEnvButton[ bname_String] :=
     With[ { bd = envButtonData[bname]},
 			Button[ translate[bd], insertNewEnv[ translate[bd]], Alignment -> {Left, Top}]
     ]
-makeEnvButton[args___] :=
-    unexpected[makeEnvButton, {args}]
+makeEnvButton[args___] := unexpected[makeEnvButton, {args}]
 
-makeFormButton[] := {
-    Button[ translate["tcLangTabEnvTabButtonFormLabel"], insertNewFormulaCell[ "Env"], Alignment -> {Left, Top}]
-}
-makeFormButton[args___] :=
-    unexpected[makeFormButton, {args}]
+makeFormButton[] := Button[ translate["tcSessTabEnvTabButtonFormLabel"], insertNewFormulaCell[ "Env"], Alignment -> {Left, Top}]
+makeFormButton[args___] := unexpected[makeFormButton, {args}]
 
-makeDeclButton[] := {
-	Button[ translate["tcLangTabEnvTabButtonDeclLabel"], Theorema`Language`Session`Private`displayGlobalDeclarations[ InputNotebook[]]]
-}
-makeDeclButton[args___] :=
-    unexpected[makeDeclButton, {args}]
+makeDeclButtons[] := Column[ {
+	Grid[ Map[ makeDeclBut, {"VAR", "VARCOND", "COND"}]],
+	Button[ translate["tcSessTabEnvTabButtonDeclLabel"], Theorema`Language`Session`Private`displayGlobalDeclarations[ InputNotebook[]]]
+	}, Center]
+makeDeclButtons[args___] := unexpected[makeDeclButtons, {args}]
+
+declButtonData["VAR", style_String] := 
+	{
+		DisplayForm[ UnderscriptBox[ "\[ForAll]", Placeholder[ "rg"]]], 
+		UnderscriptBox[ "\[ForAll]", "\[Placeholder]"],
+		If[ style == "GlobalDeclaration",
+			translate[ "GVARTooltip"],
+			translate[ "EVARTooltip"]
+		]
+	}
+
+declButtonData["VARCOND", style_String] := 
+	{
+		DisplayForm[ UnderscriptBox[ UnderscriptBox[ "\[ForAll]", Placeholder[ "rg"]], Placeholder[ "cond"]]],
+		UnderscriptBox[ UnderscriptBox[ "\[ForAll]", "\[Placeholder]"], "\[Placeholder]"],
+		If[ style == "GlobalDeclaration",
+			translate[ "GVARCONDTooltip"],
+			translate[ "EVARCONDTooltip"]
+		]
+	}
+
+declButtonData["COND", style_String] := 
+	{
+		DisplayForm[ RowBox[ {Placeholder[ "cond"], "\[Implies]"}]],
+		RowBox[ {"\[Placeholder]", "\[Implies]"}],
+		If[ style == "GlobalDeclaration",
+			translate[ "GCONDTooltip"],
+			translate[ "ECONDTooltip"]
+		]
+	}
+makeDeclBut[ bname_String] := Map[ makeDeclBut[ bname, #]&, {"GlobalDeclaration", "EnvironmentDeclaration"}]
+	
+makeDeclBut[ bname_String, style_String] :=
+    With[ { bd = declButtonData[ bname, style]},
+			Tooltip[ Button[ bd[[1]], 
+				FrontEndExecute[
+					NotebookWrite[ InputNotebook[], Cell[ BoxData[ bd[[2]]], style], All];
+					If[ MatchQ[ NotebookRead[ InputNotebook[]], _Cell],
+						SelectionMove[ InputNotebook[], All, CellContents]
+					]
+				],
+				Appearance -> "DialogBox", Alignment -> {Left, Top}, ImageSize -> All],
+				bd[[3]], TooltipDelay -> 0.5]
+    ]
+makeDeclBut[args___] := unexpected[ makeDeclBut, {args}]
+
+showEnvButton[ ] := Button[ translate["tcSessTabEnvTabButtonAllFormLabel"], displayEnv[]]
+showEnvButton[ args___] := unexpected[ showEnvButton, {args}]
+
+displayEnv[ ] :=
+	Module[{magOpt = Options[ ButtonNotebook[], Magnification], env},
+		env = Map[ Cell[ BoxData[ ToBoxes[ Row[ displayLabeledFormula[ #], Spacer[5]]]], "DisplayFormula"]&, $tmaEnv];
+		CreateDocument[ Join[
+			{ Cell[ translate["Theorema Environment"], "Title"]},
+			env,
+			{ Cell[ BoxData[ ButtonBox[ translate[ "OK"], ButtonFunction :> NotebookClose[ButtonNotebook[]],
+				Appearance -> "CancelButton", Evaluator -> Automatic, Method -> "Preemptive"]], "ButtonBar"]}],
+			First[ magOpt], WindowTitle -> translate["Theorema Environment"],
+			StyleDefinitions -> FileNameJoin[ {"Theorema", "TheoremaDialog.nb"}],
+			WindowElements -> {"StatusArea", "MagnificationPopUp", "HorizontalScrollBar", "VerticalScrollBar"}]
+	]
+displayEnv[ args___] := unexpected[ displayEnv, {args}]
    
 allEnvironments = {"DEF", "THM", "LMA", "PRP", "COR", "CNJ", "ALG", "EXM"};
 
-envButtons[] :=
+structButtons[] :=
     Pane[ 
     Column[{
-    Grid[ Partition[ Map[ makeEnvButton, allEnvironments], 2]],
-    Column[ makeFormButton[]],
-    Column[ makeDeclButton[]]
-    }, Center, Dividers->Center]]
-envButtons[args___] :=
+    	Labeled[ Grid[ Partition[ Map[ makeEnvButton, allEnvironments], 2]],
+    		Style[ translate[ "Environments"], "CellLabel"], {{Top, Left}}],
+    	Labeled[ Row[ {makeFormButton[], showEnvButton[]}, Spacer[5]],
+    		Style[ translate[ "Formulae"], "CellLabel"], {{Top, Left}}],
+    	Labeled[ makeDeclButtons[],
+    		Style[ translate[ "Declarations"], "CellLabel"], {{Top, Left}}]
+    }]]
+structButtons[args___] :=
     unexpected[envButtons, {args}]
 
 (* ::Section:: *)
@@ -899,9 +977,9 @@ archButtons[] :=
         		makeArchCreateButton[],
         		makeArchNewButton[],
         		makeArchInfoButton[],
-        		makeArchCloseButton[]}]}],
+        		makeArchCloseButton[]}]}, True],
         		OpenerView[{Style[translate["tcLangTabArchTabSectionLoad"],"Section"], Column[{
-        		makeArchLoadButton[]}]}]}
+        		makeArchLoadButton[]}]}, True]}
         	]
         ]
     ]
@@ -968,8 +1046,9 @@ makeArchLoadButton[] :=
     DynamicModule[ {arch = $TheoremaArchiveDirectory},
         Column[{
             Dynamic[showSelectedArchives[arch]], 
-            Row[{FileNameSetter[Dynamic[arch], "OpenList", {translate["fileTypeArchive"]->{"*.ta"}}, Appearance -> translate["tcLangTabArchTabButtonSelectLabel"]],
-            Button[ translate["tcLangTabArchTabButtonLoadLabel"], (loadArchive[arch];arch=$TheoremaArchiveDirectory;), Alignment -> {Left, Top}]}]}]
+            Row[ {FileNameSetter[Dynamic[arch], "OpenList", {translate["fileTypeArchive"]->{"*.ta"}}, Appearance -> translate["tcLangTabArchTabButtonSelectLabel"]],
+            	Button[ translate["tcLangTabArchTabButtonLoadLabel"], (If[ loadInPlace, loadArchiveInPlace[ arch], loadArchive[ arch]];arch=$TheoremaArchiveDirectory;), Alignment -> {Left, Top}],
+            	Row[ {Checkbox[ Dynamic[ loadInPlace]], translate[ "in place"]}, Spacer[1]]}, Spacer[2]]}]
     ]
 makeArchLoadButton[args___] := unexpected[makeArchLoadButton, {args}]
 
@@ -978,6 +1057,13 @@ showSelectedArchives[ l_List] :=
 showSelectedArchives[ s_String] :=
     translate["tcLangTabArchTabNoArchSel"]
 showSelectedArchives[args___] := unexpected[showSelectedArchives, {args}]
+
+loadArchiveInPlace[ arch_List] := 
+	Module[ {archNames = Map[ archiveName[ #, Short]&, arch]},
+		NotebookWrite[ InputNotebook[], Cell[ BoxData[ ToBoxes[ archNames]], "IncludeArchive"], All];
+		SelectionEvaluate[ InputNotebook[]]
+	]
+loadArchiveInPlace[ args___] := unexpected[ loadArchiveInPlace, {args}]
 
 (* ::Section:: *)
 (* Math Tab *)
@@ -1182,9 +1268,9 @@ makeButtonCategory[ args___] := unexpected[ makeButtonCategory, {args}]
 langButtons[] := Pane[ 
 	Column[{
 		Column[ Map[ makeButtonCategory, allFormulae]],
-		Row[{translate["tcLangTabMathTabBS"], 
-			Row[{RadioButton[Dynamic[$buttonNat], False], translate["tcLangTabMathTabBSform"]}, Spacer[2]], 
-			Row[{RadioButton[Dynamic[$buttonNat], True], translate["tcLangTabMathTabBSnat"]}, Spacer[2]]}, Spacer[10]]
+		Row[{translate["tcSessTabMathTabBS"], 
+			Row[{RadioButton[Dynamic[$buttonNat], False], translate["tcSessTabMathTabBSform"]}, Spacer[2]], 
+			Row[{RadioButton[Dynamic[$buttonNat], True], translate["tcSessTabMathTabBSnat"]}, Spacer[2]]}, Spacer[10]]
 	}, Dividers -> Center, Spacings -> 2]]
 langButtons[args___] :=
     unexpected[langButtons, {args}]
