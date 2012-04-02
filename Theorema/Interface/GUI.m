@@ -21,6 +21,7 @@ BeginPackage["Theorema`Interface`GUI`"];
 (* Exported symbols added here with SymbolName::usage *)  
 
 Needs["Theorema`Common`"]
+Needs["Theorema`Language`"]
 Needs["Theorema`Provers`"]
 Needs["Theorema`Interface`Language`"]
 
@@ -178,7 +179,7 @@ displaySelectedGoal[ goal_] :=
 displaySelectedGoal[args___] :=
     unexpected[displaySelectedGoal, {args}]
 
-displayLabeledFormula[ {key_, form_, lab_}] := 
+displayLabeledFormula[ FML$[ key_, form_, lab_]] := 
 	Module[ {src, nb},
 		src = StringReplace[ key[[2]], "Source"<>$cellTagKeySeparator -> "", 1];
 		nb = sourceToNotebookFile[ src];
@@ -386,7 +387,7 @@ structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cel
         (* keyTags are those cell tags that are used to uniquely identify the formula in the KB *)
         keyTags = getKeyTags[ cellTags];
         (* check whether cell has been evaluated -> formula is in KB? *)
-        formPos = Position[ $tmaEnv, {keyTags, _, _}, 1, 1];
+        formPos = Position[ $tmaEnv, FML$[ keyTags, _, _], 1, 1];
         isEval = formPos =!= {};
         (* Join list of CellTags, use $labelSeparator. *)
         If[ cleanCellTags === {},
@@ -801,7 +802,7 @@ setProveEnv[ goal_, kb_List, bui_List, ruleSet_, strategy_, allRules_List, searc
 	]
 setProveEnv[ args___] := unexpected[ setProveEnv, {args}]
 
-makeProofIDTag[ { id_, _,_}] := Apply[ StringJoin, Riffle[ Prepend[ id, "Proof"], "|"]]
+makeProofIDTag[ FML$[ id_, _,_]] := Apply[ StringJoin, Riffle[ Prepend[ id, "Proof"], "|"]]
 makeProofIDTag[ args___] := unexpected[ makeProofIDTag, {args}]
 
 

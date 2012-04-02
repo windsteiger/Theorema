@@ -381,16 +381,16 @@ occursBelow[args___] := unexpected[ occursBelow, {args}]
 updateKnowledgeBase[ form_, key_, glob_, tags_] :=
     Module[ {newForm = applyGlobalDeclaration[ form, glob]},
     	transferToComputation[ newForm, key];
-        $tmaEnv = joinKB[ {{key, newForm, cellTagsToString[ tags]}}, $tmaEnv];
+        $tmaEnv = joinKB[ {FML$[ key, newForm, cellTagsToString[ tags]]}, $tmaEnv];
         If[ inArchive[],
-            $tmaArch = joinKB[ {{key, newForm, tags}}, $tmaArch];
+            $tmaArch = joinKB[ {FML$[ key, newForm, tags]}, $tmaArch];
         ]
     ]
 updateKnowledgeBase[args___] := unexpected[ updateKnowledgeBase, {args}]
 
 findSelectedFormula[ Cell[ _, ___, CellTags -> t_, ___]] :=
 	Module[ { key = getKeyTags[ t]},
-		Cases[ $tmaEnv, {key, form_, tag_}, {1}, 1]
+		Cases[ $tmaEnv, FML$[ key, form_, tag_], {1}, 1]
 	]	
 findSelectedFormula[ sel_] := {}
 findSelectedFormula[args___] := unexpected[ findSelectedFormula, {args}]

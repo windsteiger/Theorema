@@ -15,12 +15,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-BeginPackage["Theorema`Provers`", {"Theorema`"}]
+BeginPackage[ "Theorema`Provers`", {"Theorema`"}]
 
 (*$NewSymbol = If[ #1 === "pVal", Print[$Input, ":", $Line, #2]]&*)
 
-Needs["Theorema`Common`"]
-Get["Theorema`Provers`Common`"]
+Needs[ "Theorema`Common`"]
+Needs[ "Theorema`Language`"]
+Get[ "Theorema`Provers`Common`"]
 
 (* Load the language dependent proof texts and prover descriptions*)
 Map[ Get, FileNames[ "*.m", ToFileName[{$TheoremaDirectory, "Theorema", "Provers", "LanguageData"}], 2]];
@@ -38,14 +39,14 @@ proofStepText[ args___] := unexpected[ proofStepText, {args}]
 (* ::Section:: *)
 (* Proof Cells *)
 
-goalCell[ {k_, g_, t_}, punct_String:""] := 
+goalCell[ FML$[ k_, g_, t_], punct_String:""] := 
 	Cell[ BoxData[ RowBox[ {ToBoxes[ g, TheoremaForm], punct}]], "Goal", 
 		CellFrameLabels->{{None, Cell[ t, "GoalLabel"]}, {None, None}}, 
 		CellTags -> {getCellIDLabel[ k], $proofStepID}
 	]
 goalCell[ args___] := unexpected[ goalCell, {args}]
 
-assumptionCell[ {k_, a_, t_}, punct_String:""] := 
+assumptionCell[ FML$[ k_, a_, t_], punct_String:""] := 
 	Cell[ BoxData[ RowBox[ {ToBoxes[ a, TheoremaForm], punct}]], "Assumption", 
 		CellFrameLabels->{{None, Cell[ t, "AssumptionLabel"]}, {None, None}}, 
 		CellTags -> {getCellIDLabel[ k], $proofStepID}
@@ -67,7 +68,7 @@ assumptionListCells[ args___] := unexpected[ assumptionListCells, {args}]
 textCell[ t__] := Cell[ TextData[ Riffle[ {t}, " "]], "Text", CellTags -> {$proofStepID}]
 textCell[ args___] := unexpected[ textCell, {args}]
 
-referenceCell[ {k_, form_, label_}] :=
+referenceCell[ FML$[ k_, form_, label_]] :=
 	With[{ tag = getCellIDLabel[k]},
         Cell[ BoxData[ ToBoxes[
             Button[ Tooltip[ Mouseover[ Style[ label, "Reference"], Style[ label, "ReferenceHover"]], theoremaDisplay[ form]],
@@ -79,9 +80,9 @@ referenceCell[ {k_, form_, label_}] :=
 	]
 referenceCell[ args___] := unexpected[ referenceCell, {args}]
 
-
 End[]
 
-Get["Theorema`Provers`BasicProver`"]
+Get[ "Theorema`Provers`Strategies`"]
+Get[ "Theorema`Provers`BasicProver`"]
 
 EndPackage[]

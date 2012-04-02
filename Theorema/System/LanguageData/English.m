@@ -70,8 +70,8 @@ With[ {lang = "English"},
 	MessageName[availableLanguages, "usage", lang] = "availableLanguages[] gives all available languages.";
 
 (* Theorema`Provers` *)
-	MessageName[proofStepText, "usage", lang] = "proofStepText[ stepID_, lang_, data___] generates the cell expression explaining the proof step stepID in language lang.";
-	MessageName[subProofHeader, "usage", lang] = "subProofHeader[ name_, lang_, pos_] generates the cell expression used as header for the subproof at position pos.";
+	MessageName[ proofStepText, "usage", lang] = "proofStepText[ stepID_, lang_, data___] generates the cell expression explaining the proof step stepID in language lang.";
+	MessageName[ subProofHeader, "usage", lang] = "subProofHeader[ name_, lang_, pos_] generates the cell expression used as header for the subproof at position pos.";
 
 (* Theorema`Provers`Common` *)
 	MessageName[callProver, "usage", lang] = "callProver[ prover_, goal_, kb_] calls prover with goal and kb, returns a proof value and proof object.";
@@ -94,5 +94,8 @@ With[ {lang = "English"},
 	MessageName[proofSucceeds, "usage", lang] = "proofSucceeds[ ...] .";
 	MessageName[proofDisproved, "usage", lang] = "proofDisproved[ ...] .";
 	MessageName[getActiveRules, "usage", lang] = "getActiveRules[ ...] .";
+	MessageName[ PRFOBJ$, "usage", lang] = "PRFOBJ$[ ...] represents a Theorema proof situation.";
+	MessageName[ PRFSIT$, "usage", lang] = "PRFSIT$[ ...] represents a Theorema proof situation.";
+	MessageName[ inferenceRule, "usage", lang] = "inferenceRule[ name] stores the inference rule named name.";
 
 ]

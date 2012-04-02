@@ -1,6 +1,7 @@
 
 With[ {lang = "English"},
-	MessageName[QU$, "usage", lang] = "A marker introduced during the parsing process that temporarily marks quantified variables.";
+	MessageName[FML$, "usage", lang] = "FML$[ key, form, lab] represents a Theorema formula including its key and label.";
+	MessageName[QU$, "usage", lang] = "QU$[ expr] temporarily marks quantified variables in expr.";
 	MessageName[VAR$, "usage", lang] = "";
 	MessageName[RNG$, "usage", lang] = "";
 	MessageName[SIMPRNG$, "usage", lang] = "SIMPRNG$[ x] usually denotes that the variable x ranges over the universe.";

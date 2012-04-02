@@ -18,6 +18,7 @@
 BeginPackage["Theorema`Provers`Common`"]
 
 Needs[ "Theorema`Common`"]
+Needs[ "Theorema`Provers`"]
 
 Begin["`Private`"]
 
@@ -361,7 +362,6 @@ Module[ {},
 		$registeredStrategies = Union[ $registeredStrategies, {s -> n}];
 	]
 registerStrategy[ args___] := unexpected[ registerStrategy, {args}]
-
 
 (* ::Section:: *)
 (* Package Initialization *)
