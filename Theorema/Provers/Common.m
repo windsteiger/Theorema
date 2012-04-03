@@ -43,6 +43,7 @@ callProver[ rules_, strategy_, goal_, kb_, searchDepth_] :=
 		$TMAproofObject = makeInitialProofObject[ goal, kb, rules, strategy];
 		$TMAproofNotebook = makeInitialProofNotebook[ $TMAproofObject];
 		$TMAproofTree = makeInitialProofTree[];
+		initFormulaLabel[];
 		proofSearch[ searchDepth];
   		$proofInProgressMarker = {};
   		If[ $TMAproofTree === {},

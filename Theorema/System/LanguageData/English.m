@@ -43,7 +43,9 @@ With[ {lang = "English"},
 	MessageName[makeDisjunction, "usage", lang] = "";	
 	MessageName[substituteFree, "usage", lang] = "";	
 	MessageName[transferToComputation, "usage", lang] = "";	
-
+	MessageName[FML$, "usage", lang] = "FML$[ key, form, lab] represents a Theorema formula including its key and label.";
+	MessageName[makeFML, "usage", lang] = "makeFML[ fmldata] is the constructor for the FML$ datastructure.";
+	MessageName[initFormulaLabel, "usage", lang] = "initFormulaLabel[ ] iinitializes the formula labels used in a proof.";
 
 (* Theorema`Computation`Language` *)
 	MessageName[setComputationContext, "usage", lang] = "setComputationContext[ c] sets the context for the next computation to c.";

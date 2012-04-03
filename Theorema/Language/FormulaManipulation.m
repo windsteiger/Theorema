@@ -180,6 +180,30 @@ execRight[ e_Hold] :=
 execRight[ args___] := unexpected[ execRight, {args}]
 
 
+(* ::Section:: *)
+(* FML$ datastructure *)
+
+Options[ makeFML] = {"key" :> defKey[], "formula" -> True, "label" :> defLabel[]};
+
+makeFML[ data__?OptionQ] :=
+	Module[{key, form, label},
+		{key, form, label} = {"key", "formula", "label"} /. {data} /. Options[ makeFML];
+		makeTmaFml[ key, form, label]
+	]
+makeFML[ args___] := unexpected[ makeFML, {args}]
+
+makeTmaFml[ key_List, fml_, label_String] := FML$[ key, fml, label]
+makeTmaFml[ args___] := unexpected[ makeTmaFml, {args}]
+
+defKey[ ] := {"ID" <> $cellTagKeySeparator <> ToString[ Unique[ "formula"]], "Source" <> $cellTagKeySeparator <> "none"}
+defKey[ args___] := unexpected[ defKey, {args}]
+
+defLabel[ ] := ToString[ $formulaLabel++]
+defLabel[ args___] := unexpected[ defLabel, {args}]
+
+initFormulaLabel[ ] := $formulaLabel = 1;
+initFormulaLabel[ args___] := unexpected[ initFormulaLabel, {args}]
+
 End[]
 
 EndPackage[]
