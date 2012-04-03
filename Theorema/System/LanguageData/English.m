@@ -29,6 +29,7 @@ With[ {lang = "English"},
 	MessageName[cellTagsToString,"usage", lang] = "cellTagsToString[cellTags] converts a list of cell tags into a single string.";
 	MessageName[inArchive,"usage",lang] = "inArchive[] returns True when we are currently processing an archive.";
 	MessageName[archiveName,"usage",lang] = "archiveName[f] returns the short archive name (=context name) for an archive stored in file \*StyleBox[\"f\", \"TI\"].";
+	MessageName[loadArchive, "usage", lang] = "loadArchive[name] loads the specified archive into the current session.";
 	MessageName[processEnvironment, "usage", lang] = "processEnvironment[ expr] ...";
 	MessageName[processComputation, "usage", lang] = "processComputation[ expr] ...";
 	MessageName[findSelectedFormula, "usage", lang] = "findSelectedFormula[ sel] ...";
