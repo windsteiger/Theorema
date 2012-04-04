@@ -32,8 +32,13 @@ proofStepText[ "ID" -> id_, step_String, lang_String, rest___] :=
 	Block[ {$proofStepID = id},
 		proofStepText[ step, lang, rest]
 	]
-	
 proofStepText[ args___] := unexpected[ proofStepText, {args}]
+
+subProofHeader[ "ID" -> id_, step_String, lang_String, rest___] :=
+	Block[ {$proofStepID = id},
+		subProofHeader[ step, lang, rest]
+	]
+subProofHeader[ args___] := unexpected[ subProofHeader, {args}]
 
 
 (* ::Section:: *)

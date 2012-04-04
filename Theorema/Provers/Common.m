@@ -153,6 +153,7 @@ getProofValue[ node_] := Last[ node]
 getProofValue[ args___] := unexpected[ getProofValue, {args}]
 
 getNodeID[ (PRFSIT$|PRFINFO$)[ ___, "ID" -> id_, ___]] := id
+getNodeID[ node_?isProofNode] := getNodeID[ First[ node]]
 getNodeID[ args___] := unexpected[ getNodeID, {args}]
 
 getUsed[ PRFINFO$[ _, used_List, _, ___]] := used
@@ -342,7 +343,7 @@ proofObjectToCell[ TERMINALNODE$[ pi_PRFINFO$, pVal_]] :=
 proofObjectToCell[ args___] := unexpected[ proofObjectToCell, {args}]
 
 subProofToCell[ PRFINFO$[ name_, used_, gen_, ___], node_, pos_List] :=
-		Cell[ CellGroupData[ Append[ subProofHeader[ name, $Language, used, gen, pos], proofObjectToCell[ node]], $proofCellStatus]]
+		Cell[ CellGroupData[ Append[ subProofHeader[ "ID" -> getNodeID[ node], name, $Language, used, gen, pos], proofObjectToCell[ node]], $proofCellStatus]]
 subProofToCell[ args___] := unexpected[ subProofToCell, {args}]
 
 
