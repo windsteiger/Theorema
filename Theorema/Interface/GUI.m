@@ -180,12 +180,12 @@ displaySelectedGoal[args___] :=
     unexpected[displaySelectedGoal, {args}]
 
 displayLabeledFormula[ FML$[ key_, form_, lab_]] := 
-	Module[ {src, nb},
+	Module[ {src, nb, labDisp = makeLabel[ lab]},
 		src = StringReplace[ key[[2]], "Source"<>$cellTagKeySeparator -> "", 1];
 		nb = sourceToNotebookFile[ src];
 		{ If[ nb =!= $Failed,
-			Hyperlink[ Style[ lab, "FormulaLabel"], {nb, key[[1]]}],
-			Tooltip[ Style[ lab, "FormulaLabel"], translate[ "noNB"] <> src]],
+			Hyperlink[ Style[ labDisp, "FormulaLabel"], {nb, key[[1]]}],
+			Tooltip[ Style[ labDisp, "FormulaLabel"], translate[ "noNB"] <> src]],
 		Style[ theoremaDisplay[ form], "DisplayFormula"]}
 	]
 displayLabeledFormula[ args___] := unexpected[ displayLabeledFormula, {args}]
@@ -663,12 +663,12 @@ displayBuiltinBrowser[args___] := unexcpected[ displayBuiltinBrowser, {args}]
 selectProver[ ] :=
     Pane[ Column[{
     	Row[ {Labeled[ PopupMenu[ Dynamic[ $selectedRuleSet], Map[ MapAt[ translate, #, {2}]&, $registeredRuleSets]], 
-    		Style[ translate[ "pRules"], "CellLabel"], {{ Top, Left}}], Spacer[5],
+    		Style[ translate[ "pRules"], "ItemLabel"], {{ Top, Left}}], Spacer[5],
     		Tooltip[ Graphics[{{RGBColor[0.485988, 0.555312, 1], Disk[{0, 0}, 1]}, Text[ "?", BaseStyle -> "Section"]}, ImageSize -> {20, 20}], 
     			Apply[ Function[ rs, MessageName[ rs, "usage"], {HoldFirst}], $selectedRuleSet]]}],
     	structViewRules[ $selectedRuleSet],
     	Row[ {Labeled[ PopupMenu[ Dynamic[ $selectedStrategy], Map[ MapAt[ translate, #, {2}]&, $registeredStrategies]], 
-    		Style[ translate[ "pStrat"], "CellLabel"], {{ Top, Left}}], Spacer[5],
+    		Style[ translate[ "pStrat"], "ItemLabel"], {{ Top, Left}}], Spacer[5],
     		Tooltip[ Graphics[{{RGBColor[0.485988, 0.555312, 1], Disk[{0, 0}, 1]}, Text[ "?", BaseStyle -> "Section"]}, ImageSize -> {20, 20}], 
     			With[ {ss = $selectedStrategy}, MessageName[ ss, "usage"]]]}],
     	Labeled[ Dynamic[ Row[ {Slider[ Dynamic[ $selectedSearchDepth], {2, $maxSearchDepth, 1}],
@@ -676,18 +676,18 @@ selectProver[ ] :=
     		Button[ "-", $selectedSearchDepth--],
     		Button[ "+", $selectedSearchDepth++],
     		Button[ "\[LeftSkeleton]", $maxSearchDepth/=2],
-    		Button[ "\[RightSkeleton]", $maxSearchDepth*=2]}]], Style[ translate[ "sDepth"], "CellLabel"], {{ Top, Left}}],
+    		Button[ "\[RightSkeleton]", $maxSearchDepth*=2]}]], Style[ translate[ "sDepth"], "ItemLabel"], {{ Top, Left}}],
     	Labeled[ RadioButtonBar[ 
     		Dynamic[Theorema`Provers`Common`Private`$proofCellStatus], {Open -> translate[ "open"], Closed -> translate[ "closed"]}], 
-    		Style[ translate[ "proofCellStatus"], "CellLabel"], {{ Top, Left}}]	
+    		Style[ translate[ "proofCellStatus"], "ItemLabel"], {{ Top, Left}}]	
     	}], {350, 450}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
 selectProver[ args___] := unexpected[ selectRuleSet, {args}]
 
 submitProveTask[ dummy_] := 
 	Module[ {},
 		Column[{
-			Labeled[ displaySelectedGoal[ $selectedProofGoal], Style[ translate["selGoal"], "CellLabel"], {{ Top, Left}}],
-			Labeled[ displaySelectedKB[], Style[ translate["selKB"], "CellLabel"], {{ Top, Left}}],
+			Labeled[ displaySelectedGoal[ $selectedProofGoal], Style[ translate["selGoal"], "ItemLabel"], {{ Top, Left}}],
+			Labeled[ displaySelectedKB[], Style[ translate["selKB"], "ItemLabel"], {{ Top, Left}}],
 			(* Method -> "Queued" so that no time limit is set for proof to complete *)
 			Button[ translate["prove"], execProveCall[ $selectedProofGoal, $selectedProofKB, $selectedRuleSet, $selectedStrategy, $selectedSearchDepth], Method -> "Queued"]
 		}]
@@ -728,7 +728,7 @@ proofNavigation[ args___] := unexpected[ proofNavigation, {args}]
    effect: print a cell containg information about the environment settings for that computation *)
 printComputationInfo[] :=
     Module[ {kbAct, bui, buiAct},
-        kbAct = Cases[ $tmaEnv, {k_, _, l_} /; Theorema`Computation`Language`Private`activeComputationKB[k] -> l];
+        kbAct = Cases[ $tmaEnv, FML$[ k_, _, l_] /; Theorema`Computation`Language`Private`activeComputationKB[k] -> l];
         bui = Cases[ DownValues[ Theorema`Computation`Language`Private`buiActComputation],
         	HoldPattern[ Verbatim[HoldPattern][ Theorema`Computation`Language`Private`buiActComputation[ op_String]] :> v_] -> {op, v}];
         buiAct = Cases[ bui, { op_, True} -> op];
@@ -738,7 +738,7 @@ printComputationInfo[] :=
                 With[ {kb = Cases[ DownValues[ Theorema`Computation`Language`Private`activeComputationKB],
                 	HoldPattern[ Verbatim[HoldPattern][ Theorema`Computation`Language`Private`activeComputationKB[ k_List]] :> v_] -> {k, v}],
                     allBui = bui},
-                    Button[ Style[ translate["SetEnv"], "CellLabel"], setCompEnv[ kb, allBui], ImageSize -> Automatic]
+                    Button[ translate["SetEnv"], setCompEnv[ kb, allBui], ImageSize -> Automatic]
                 ]}
             ]}, False]], "ComputationInfo"]];
     ]
@@ -958,11 +958,11 @@ structButtons[] :=
     Pane[ 
     Column[{
     	Labeled[ Grid[ Partition[ Map[ makeEnvButton, allEnvironments], 2]],
-    		Style[ translate[ "Environments"], "CellLabel"], {{Top, Left}}],
+    		Style[ translate[ "Environments"], "ItemLabel"], {{Top, Left}}],
     	Labeled[ Row[ {makeFormButton[], showEnvButton[]}, Spacer[5]],
-    		Style[ translate[ "Formulae"], "CellLabel"], {{Top, Left}}],
+    		Style[ translate[ "Formulae"], "ItemLabel"], {{Top, Left}}],
     	Labeled[ makeDeclButtons[],
-    		Style[ translate[ "Declarations"], "CellLabel"], {{Top, Left}}]
+    		Style[ translate[ "Declarations"], "ItemLabel"], {{Top, Left}}]
     }]]
 structButtons[args___] :=
     unexpected[envButtons, {args}]
