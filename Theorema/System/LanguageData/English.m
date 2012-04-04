@@ -27,6 +27,7 @@ With[ {lang = "English"},
 	MessageName[getCleanCellTags,"usage", lang] = "getCleanCellTags[cellTags] returns all CellTags except tags used as cell/formula keys in cell/formula identification.";
 	MessageName[getKeyTags,"usage", lang] = "getKeyTags[cellTags] returns all CellTags used as cell/formula keys in cell/formula identification.";
 	MessageName[cellTagsToString,"usage", lang] = "cellTagsToString[cellTags] converts a list of cell tags into a single string.";
+	MessageName[makeLabel,"usage", lang] = "makeLabel[s] formats a string as a formula label.";
 	MessageName[inArchive,"usage",lang] = "inArchive[] returns True when we are currently processing an archive.";
 	MessageName[archiveName,"usage",lang] = "archiveName[f] returns the short archive name (=context name) for an archive stored in file \*StyleBox[\"f\", \"TI\"].";
 	MessageName[loadArchive, "usage", lang] = "loadArchive[name] loads the specified archive into the current session.";
@@ -45,6 +46,9 @@ With[ {lang = "English"},
 	MessageName[transferToComputation, "usage", lang] = "";	
 	MessageName[FML$, "usage", lang] = "FML$[ key, form, lab] represents a Theorema formula including its key and label.";
 	MessageName[makeFML, "usage", lang] = "makeFML[ fmldata] is the constructor for the FML$ datastructure.";
+	MessageName[key, "usage", lang] = "key is an option for the formula constructor makeFML.";
+	MessageName[formula, "usage", lang] = "formula is an option for the formula constructor makeFML.";
+	MessageName[label, "usage", lang] = "label is an option for the formula constructor makeFML.";
 	MessageName[initFormulaLabel, "usage", lang] = "initFormulaLabel[ ] iinitializes the formula labels used in a proof.";
 
 (* Theorema`Computation`Language` *)

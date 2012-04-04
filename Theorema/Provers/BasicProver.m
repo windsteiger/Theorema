@@ -26,8 +26,8 @@ Begin["`Private`"]
 inferenceRule[ andGoal] = 
 PRFSIT$[ goal:FML$[ k_, And$TM[ P_, Q_], lab_], kb_, af_, rest___, "ID" -> id_] :> 
 	Module[ { left, right},
-		left = makeFML[ "formula" -> P];
-		right = makeFML[ "formula" -> Q];
+		left = makeFML[ formula -> P, label -> lab <> ".1"];
+		right = makeFML[ formula -> Q, label -> lab <> ".2"];
 		proveAll[ makePRFINFO[ "andGoal", {goal}, {left, right}, id], makePRFSIT[ left, kb, af, rest], makePRFSIT[ right, kb, af, rest]]
 	]
 

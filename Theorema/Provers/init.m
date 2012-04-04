@@ -73,10 +73,10 @@ assumptionListCells[ args___] := unexpected[ assumptionListCells, {args}]
 textCell[ t__] := Cell[ TextData[ Riffle[ {t}, " "]], "Text", CellTags -> {$proofStepID}]
 textCell[ args___] := unexpected[ textCell, {args}]
 
-referenceCell[ FML$[ k_, form_, label_]] :=
-	With[{ tag = getCellIDLabel[k]},
+referenceCell[ FML$[ k_List, form_, label_String]] :=
+	With[{ tag = getCellIDLabel[k], labelDisp = makeLabel[ label]},
         Cell[ BoxData[ ToBoxes[
-            Button[ Tooltip[ Mouseover[ Style[ label, "Reference"], Style[ label, "ReferenceHover"]], theoremaDisplay[ form]],
+            Button[ Tooltip[ Mouseover[ Style[ labelDisp, "Reference"], Style[ labelDisp, "ReferenceHover"]], theoremaDisplay[ form]],
             	Module[ {cell},
         			NotebookFind[ SelectedNotebook[], tag, Previous, CellTags, AutoScroll -> False];
         			cell = NotebookRead[ SelectedNotebook[]];

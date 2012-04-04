@@ -183,12 +183,12 @@ execRight[ args___] := unexpected[ execRight, {args}]
 (* ::Section:: *)
 (* FML$ datastructure *)
 
-Options[ makeFML] = {"key" :> defKey[], "formula" -> True, "label" :> defLabel[]};
+Options[ makeFML] = {key :> defKey[], formula -> True, label :> defLabel[]};
 
 makeFML[ data__?OptionQ] :=
-	Module[{key, form, label},
-		{key, form, label} = {"key", "formula", "label"} /. {data} /. Options[ makeFML];
-		makeTmaFml[ key, form, label]
+	Module[{k, f, l},
+		{k, f, l} = {key, formula, label} /. {data} /. Options[ makeFML];
+		makeTmaFml[ k, f, l]
 	]
 makeFML[ args___] := unexpected[ makeFML, {args}]
 

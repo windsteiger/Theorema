@@ -185,7 +185,7 @@ processEnvironment[x_] :=
 		(* extract the global declarations that are applicable in the current evaluation *)
 		globDec = applicableGlobalDeclarations[ nb, rawNotebook, evaluationPosition[ nb, rawNotebook]];
 		(* process the expression according the Theorema syntax rules and add it to the KB *)
-        Catch[ updateKnowledgeBase[ReleaseHold[ freshNames[ markVariables[ Hold[x]]]], key, globDec, tags]];
+        Catch[ updateKnowledgeBase[ReleaseHold[ freshNames[ markVariables[ Hold[x]]]], key, globDec, cellTagsToString[ tags]]];
         SelectionMove[ nb, After, Cell];
     ]
 processEnvironment[args___] := unexcpected[ processEnvironment, {args}]
@@ -252,8 +252,8 @@ getCellIDLabel[ args___] := unexpected[ getCellIDLabel, {args}]
 getCellSourceLabel[ cellTags_] := getCellLabel[ cellTags, "Source"]
 getCellSourceLabel[ args___] := unexpected[ getCellSourceLabel, {args}]
 
-cellTagsToString[ cellTags_ /; VectorQ[ cellTags, StringQ]] := makeLabel[ Apply[ StringJoin, Riffle[ cellTags, $labelSeparator]]]
-cellTagsToString[ ct_String] := makeLabel[ ct]
+cellTagsToString[ cellTags_ /; VectorQ[ cellTags, StringQ]] := Apply[ StringJoin, Riffle[ cellTags, $labelSeparator]]
+cellTagsToString[ ct_String] := ct
 cellTagsToString[ args___] := unexpected[cellTagsToString, {args}]
 
 makeLabel[ s_String] := "(" <> s <> ")"
@@ -262,11 +262,11 @@ makeLabel[ args___] := unexpected[ makeLabel, {args}]
 relabelCell[nb_NotebookObject, cellTags_List, cellID_Integer] :=
 	Module[{ newFrameLabel, newCellTags, autoTags},
 		(* Join list of CellTags, use $labelSeparator *)
-		newFrameLabel = cellTagsToString[ cellTags];
+		newFrameLabel = makeLabel[ cellTagsToString[ cellTags]];
 		(* Keep cleaned CellTags and add identification (ID) *)
 		autoTags = {cellIDLabel[ cellID], sourceLabel[ nb]};
 		newCellTags = Join[ autoTags, cellTags];
-		SetOptions[NotebookSelection[nb], CellFrameLabels->{{None,newFrameLabel},{None,None}}, CellTags->newCellTags, ShowCellTags->False];
+		SetOptions[ NotebookSelection[nb], CellFrameLabels -> {{None, newFrameLabel}, {None, None}}, CellTags -> newCellTags, ShowCellTags -> False];
 		(* return autoTags to be used as key for formula in KB *)
 		autoTags
 	]
@@ -378,19 +378,19 @@ occursBelow[ {a___, p_}, {a___, q_, ___}] /; q > p := True
 occursBelow[ x_, y_] := False
 occursBelow[args___] := unexpected[ occursBelow, {args}]
 
-updateKnowledgeBase[ form_, key_, glob_, tags_] :=
+updateKnowledgeBase[ form_, k_, glob_, tags_String] :=
     Module[ {newForm = applyGlobalDeclaration[ form, glob]},
-    	transferToComputation[ newForm, key];
-        $tmaEnv = joinKB[ {FML$[ key, newForm, cellTagsToString[ tags]]}, $tmaEnv];
+    	transferToComputation[ newForm, k];
+        $tmaEnv = joinKB[ {makeFML[ key -> k, formula -> newForm, label -> tags]}, $tmaEnv];
         If[ inArchive[],
-            $tmaArch = joinKB[ {FML$[ key, newForm, tags]}, $tmaArch];
+            $tmaArch = joinKB[ {makeFML[ key -> k, formula -> newForm, label -> tags]}, $tmaArch];
         ]
     ]
 updateKnowledgeBase[args___] := unexpected[ updateKnowledgeBase, {args}]
 
 findSelectedFormula[ Cell[ _, ___, CellTags -> t_, ___]] :=
 	Module[ { key = getKeyTags[ t]},
-		Cases[ $tmaEnv, FML$[ key, form_, tag_], {1}, 1]
+		Cases[ $tmaEnv, FML$[ key, form_, tag_String], {1}, 1]
 	]	
 findSelectedFormula[ sel_] := {}
 findSelectedFormula[args___] := unexpected[ findSelectedFormula, {args}]
