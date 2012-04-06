@@ -46,14 +46,14 @@ subProofHeader[ args___] := unexpected[ subProofHeader, {args}]
 
 goalCell[ FML$[ k_, g_, t_], punct_String:""] := 
 	Cell[ BoxData[ RowBox[ {ToBoxes[ g, TheoremaForm], punct}]], "Goal", 
-		CellFrameLabels->{{None, Cell[ t, "GoalLabel"]}, {None, None}}, 
+		CellFrameLabels->{{None, Cell[ makeLabel[ t], "GoalLabel"]}, {None, None}}, 
 		CellTags -> {getCellIDLabel[ k], $proofStepID}
 	]
 goalCell[ args___] := unexpected[ goalCell, {args}]
-
+ 
 assumptionCell[ FML$[ k_, a_, t_], punct_String:""] := 
 	Cell[ BoxData[ RowBox[ {ToBoxes[ a, TheoremaForm], punct}]], "Assumption", 
-		CellFrameLabels->{{None, Cell[ t, "AssumptionLabel"]}, {None, None}}, 
+		CellFrameLabels->{{None, Cell[ makeLabel[ t], "AssumptionLabel"]}, {None, None}}, 
 		CellTags -> {getCellIDLabel[ k], $proofStepID}
 	]
 assumptionCell[ args___] := unexpected[ assumptionCell, {args}]
