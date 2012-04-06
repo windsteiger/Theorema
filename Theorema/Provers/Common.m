@@ -119,11 +119,9 @@ chooseNextPS[ ps_List, psPos_List] :=
 chooseNextPS[ args___] := unexpected[ chooseNextPS, {args}]
 
 replaceProofSit[ po_PRFOBJ$, pos_ -> new:node_[___]] :=
-	Module[{parentID = getNodeID[ Extract[ po, pos]], newVal = getProofValue[ new], treeNode, sub},
-		treeNode = {parentID, newVal, node};
-		$TMAproofTree = $TMAproofTree /. {parentID, pending, PRFSIT$} -> treeNode;
-		sub = Map[ (treeNode -> poNodeToTreeNode[#])&, getSubgoals[ new]];
-		$TMAproofTree = Join[ $TMAproofTree, sub];
+	Module[{parentID = getNodeID[ Extract[ po, pos]], newVal = getProofValue[ new], sub},
+		sub = poToTree[ new];
+		$TMAproofTree = Join[ $TMAproofTree /. {parentID, pending, PRFSIT$} -> {parentID, newVal, node}, sub];
 		ReplacePart[ po, pos -> new]
 	]
 replaceProofSit[ args___] := unexpected[ replaceProofSit, {args}]
@@ -184,6 +182,16 @@ proveSome[ args___] := unexpected[ proveSome, {args}]
 
 getSubgoals[ _[ _PRFINFO$, subnodes___, _]] := {subnodes}
 getSubgoals[ args___] := unexpected[ getSubgoals, {args}]
+
+poToTree[ _TERMINALNODE$|_PRFSIT$] := {}
+poToTree[ node_[ pi_PRFINFO$, sub___, val_]] :=
+	Module[{root, subTrees, topLevel},
+		root = { getNodeID[ pi], val, node};
+		subTrees = Flatten[ Map[ poToTree, {sub}]];
+		topLevel = Map[ (root -> poNodeToTreeNode[#])&, {sub}];
+		Join[ topLevel, subTrees]
+	]
+poToTree[ args___] := unexpected[ poToTree, {args}]
 
 poNodeToTreeNode[ ps_PRFSIT$] := { getNodeID[ ps], pending, PRFSIT$}
 poNodeToTreeNode[ node_[ pi_PRFINFO$, ___, val_]] := { getNodeID[ pi], val, node}
