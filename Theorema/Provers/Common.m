@@ -18,6 +18,7 @@
 BeginPackage["Theorema`Provers`Common`"]
 
 Needs[ "Theorema`Common`"]
+Needs[ "Theorema`Language`"]
 Needs[ "Theorema`Provers`"]
 
 Begin["`Private`"]
@@ -155,9 +156,11 @@ getNodeID[ node_?isProofNode] := getNodeID[ First[ node]]
 getNodeID[ args___] := unexpected[ getNodeID, {args}]
 
 getUsed[ PRFINFO$[ _, used_List, _, ___]] := used
+getUsed[ node_] := Apply[ Union, Map[ getUsed, Cases[ node, _PRFINFO$, Infinity]]]
 getUsed[ args___] := unexpected[ getUsed, {args}]
 
 getGenerated[ PRFINFO$[ _, _, generated_List, ___]] := generated
+getGenerated[ node_] := Apply[ Union, Map[ getGenerated, Cases[ node, _PRFINFO$, Infinity]]]
 getGenerated[ args___] := unexpected[ getGenerated, {args}]
 
 getActiveRules[ Hold[ rules_], op_:Identity] := DeleteDuplicates[ DeleteCases[ op[ rules], _String|_?(ruleAct[#]===False&), Infinity]]
@@ -170,9 +173,26 @@ makePRFINFO[ name_String, g_, k_] := PRFINFO$[ name, g, k, "ID" -> ToString[ Uni
 makePRFINFO[ name_String, g_, k_, id_String] := PRFINFO$[ name, g, k, "ID" -> id]
 makePRFINFO[ args___] := unexpected[ makePRFINFO, {args}]
 
-makePRFSIT[ g_, k_, af_, rest___Rule] := PRFSIT$[ g, k, af, rest, "ID" -> ToString[ Unique[ "PRFSIT$"]]]
-makePRFSIT[ g_, k_, af_, id_String, rest___Rule] := PRFSIT$[ g, k, af, rest, "ID" -> id]
+makePRFSIT[ g_, k_, af_, rest___Rule] := makePRFSIT[ g, k, af, ToString[ Unique[ "PRFSIT$"]], rest]
+makePRFSIT[ g_, k_, af_, id_String, rest___Rule] := 
+	Module[ {succ, pi},
+		{succ, pi} = checkProofSuccess[ g, k, af, id];
+		If[ succ,
+			proofSucceeds[ pi],
+			PRFSIT$[ g, k, af, rest, "ID" -> id]
+		]
+	]
 makePRFSIT[ args___] := unexpected[ makePRFSIT, {args}]
+
+renewID[ node_[ PRFINFO$[ name_, u_, g_, ___], sub___, val_]] := node[ makePRFINFO[ name, u, g], sub, val]
+renewID[ args___] := unexpected[ renewID, {args}]
+
+checkProofSuccess[ goal_, {___, k:FML$[ _, phi_, _], ___, c:FML$[ _, Not$TM[ phi_], _], ___}, af_, id_String] := {True, makePRFINFO[ "contradictionKB", {k, c}, {}, id]}
+checkProofSuccess[ goal_, {___, k:FML$[ _, Not$TM[ phi_], _], ___, c:FML$[ _, phi_, _], ___}, af_, id_String] := {True, makePRFINFO[ "contradictionKB", {k, c}, {}, id]}
+checkProofSuccess[ goal_, {___, k:FML$[ _, False, _], ___}, af_, id_String] := {True, makePRFINFO[ "falseInKB", {k}, {}, id]}
+checkProofSuccess[ goal:FML$[ _, g_, _], {___, k:FML$[ _, g_, _], ___}, af_, id_String] := {True, makePRFINFO[ "goalInKB", {goal, k}, {}, id]}
+checkProofSuccess[ goal_, kb_, af_, id_String] := {False, PRFINFO$[]}
+checkProofSuccess[ args___] := unexpected[ checkProofSuccess, {args}]
 
 proveAll[ pi_PRFINFO$, subnodes__] := ANDNODE$[ pi, subnodes, pending]
 proveAll[ args___] := unexpected[ proveAll, {args}]
@@ -339,10 +359,13 @@ proofObjectToCell[ PRFOBJ$[ pi_PRFINFO$, sub_, pVal_]] :=
 proofObjectToCell[ PRFINFO$[ name_String, rest___, "ID" -> id_], pVal_] := proofStepText[ "ID" -> id, name, $Language, rest, pVal]
 proofObjectToCell[ PRFSIT$[ g_, kb_, ___, "ID" -> id_]] := Cell[ CellGroupData[ proofStepText[ "ID" -> id, "ProofSituation", $Language, g, kb], $proofCellStatus]]
 proofObjectToCell[ (ANDNODE$|ORNODE$)[ pi_PRFINFO$, subnodes__, pVal_]] := 
-	Module[{header, sub},
+	Module[{header, sub = {}},
 		header = proofObjectToCell[ pi, pVal];
-		(*sub = Map[ proofObjectToCell, {subnodes}];*)
-		sub = MapIndexed[ subProofToCell[ pi, #1, #2]&, {subnodes}];
+		If[ Length[ {subnodes}] == 1,
+			sub = {proofObjectToCell[ subnodes]},
+			(* else *)
+			sub = MapIndexed[ subProofToCell[ pi, #1, #2]&, {subnodes}]
+		];
 		Cell[ CellGroupData[ Join[ header, sub], $proofCellStatus]]
 	]
 proofObjectToCell[ TERMINALNODE$[ pi_PRFINFO$, pVal_]] := 
@@ -351,7 +374,7 @@ proofObjectToCell[ TERMINALNODE$[ pi_PRFINFO$, pVal_]] :=
 proofObjectToCell[ args___] := unexpected[ proofObjectToCell, {args}]
 
 subProofToCell[ PRFINFO$[ name_, used_, gen_, ___], node_, pos_List] :=
-		Cell[ CellGroupData[ Append[ subProofHeader[ "ID" -> getNodeID[ node], name, $Language, used, gen, pos], proofObjectToCell[ node]], $proofCellStatus]]
+	Cell[ CellGroupData[ Append[ subProofHeader[ "ID" -> getNodeID[ node], name, $Language, used, gen, pos], proofObjectToCell[ node]], $proofCellStatus]]
 subProofToCell[ args___] := unexpected[ subProofToCell, {args}]
 
 

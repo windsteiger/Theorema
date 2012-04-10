@@ -43,6 +43,18 @@ proofStepText[ "NoPNode", lang, expr_, ___] := {textCell[ "The expression return
 
 proofStepText[ "noApplicableRule", lang, ___] := {textCell[ "It seems there is no proof rule to apply."]};
 
+proofStepText[ "contradictionKB", lang, {k_, c_}, {}, pVal_] := {textCell[ "The proof is finished, because ", referenceCell[ k], 
+	" contradicts ", referenceCell[ c], "."]
+    };
+
+proofStepText[ "falseInKB", lang, {k_}, {}, pVal_] := {textCell[ "The proof is finished, because ", referenceCell[ k], 
+	" is a contradiction in the knowledge base."]
+    };
+
+proofStepText[ "goalInKB", lang, {goal_, k_}, {}, pVal_] := {textCell[ "Now we are done, since the goal ", referenceCell[ goal], 
+	" is identical to formula ", referenceCell[ k], "in the knowledge base."]
+    };
+
 proofStepText[ step_String, lang, ___] := {
 	textCell[ ToString[ StringForm[ "We have no explanatory text for step '``'. Please implement the respective case for the function 'proofStepText'.", step]]]
 	};

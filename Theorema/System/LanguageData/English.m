@@ -94,6 +94,7 @@ With[ {lang = "English"},
 	MessageName[proveSome, "usage", lang] = "proveSome[ info_, subgoals_] constructs a node in the proof tree using proofinfo info to prove at least one of the given subgoals.";
 	MessageName[makePRFINFO, "usage", lang] = "makePRFINFO[ ...] constructor for PRFINFO$ data staructure.";
 	MessageName[makePRFSIT, "usage", lang] = "makePRFSIT[ ...] constructor for PRFSIT$ data staructure.";
+	MessageName[renewID, "usage", lang] = "renewID[ node] assigns a new and unique ID to node.";
 	MessageName[getNodeID, "usage", lang] = "getNodeID[ ...] .";
 	MessageName[getUsed, "usage", lang] = "getUsed[ ...] .";
 	MessageName[getGenerated, "usage", lang] = "getGenerated[ ...] .";

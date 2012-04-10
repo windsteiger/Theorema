@@ -601,9 +601,6 @@ structViewBuiltin[args___] :=
 (* structViewRules *)
 Clear[structViewRules];
 
-(* structured view for builtin operators
-   follows the ideas of the structured view of the KB *)
-
 structViewRules[ Hold[ rs_]] := structViewRules[ rs, {}][[1]]
 
 structViewRules[{category_String, r__}, tags_] :=
@@ -618,7 +615,7 @@ structViewRules[{category_String, r__}, tags_] :=
   
 structViewRules[ r_Symbol, tags_] :=
     Module[ { },
-        {Row[{Checkbox[ Dynamic[ Theorema`Provers`Common`Private`ruleAct[ r]]], r}, 
+        {Row[{Checkbox[ Dynamic[ Theorema`Provers`Common`Private`ruleAct[ r]]], MessageName[ r, "usage"]}, 
                 Spacer[10]], {r}}
     ]
 

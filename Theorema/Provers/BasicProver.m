@@ -15,7 +15,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-BeginPackage[ "BasicProver`"]
+BeginPackage[ "Theorema`Provers`BasicProver`"]
 
 Needs[ "Theorema`Provers`"]
 Needs[ "Theorema`Common`"]
@@ -31,8 +31,24 @@ PRFSIT$[ goal:FML$[ k_, And$TM[ P_, Q_], lab_], kb_, af_, rest___, "ID" -> id_] 
 		proveAll[ makePRFINFO[ "andGoal", {goal}, {left, right}, id], makePRFSIT[ left, kb, af, rest], makePRFSIT[ right, kb, af, rest]]
 	]
 
+inferenceRule[ implGoalDirect] = 
+PRFSIT$[ goal:FML$[ k_, Implies$TM[ P_, Q_], lab_], kb_, af_, rest___, "ID" -> id_] :> 
+	Module[ { left, right},
+		left = makeFML[ formula -> P];
+		right = makeFML[ formula -> Q];
+		proveAll[ makePRFINFO[ "implGoalDirect", {goal}, {left, right}, id], makePRFSIT[ right, Prepend[ kb, left], af, rest]]
+	]
 
-connectiveRules = {"connectives", andGoal, andKB, implGoalMP, implGoalCP};
+inferenceRule[ implGoalCP] = 
+PRFSIT$[ goal:FML$[ k_, Implies$TM[ P_, Q_], lab_], kb_, af_, rest___, "ID" -> id_] :> 
+	Module[ { negLeft, negRight},
+		negLeft = makeFML[ formula -> Not$TM[ P]];
+		negRight = makeFML[ formula -> Not$TM[ Q]];
+		proveAll[ makePRFINFO[ "implGoalCP", {goal}, {negLeft, negRight}, id], makePRFSIT[ negLeft, Prepend[ kb, negRight], af, rest]]
+	]
+
+
+connectiveRules = {"connectives", andGoal, andKB, implGoalDirect, implGoalCP};
 equalityRules = {"equality", eqGoal, eqKB};
 
 registerRuleSet[ "Quantifier Rules", quantifierRules, {forallGoal, forallKB, existsGoal, existsKB}]

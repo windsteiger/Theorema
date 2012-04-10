@@ -35,6 +35,7 @@ applyOnce[ rules_, ps_] :=
 			1,
 			First[ newPSits],
 			_,
+			newPSits = Map[ renewID, newPSits];
 			proveSome[ 
 				makePRFINFO[ "ProofAlternatives", Apply[ Union, Map[ getUsed, newPSits]], Apply[ Union, Map[ getGenerated, newPSits]], id],
 				Apply[ Sequence, newPSits]]
