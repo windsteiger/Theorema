@@ -263,6 +263,8 @@ MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
     		tmaInfixBox[ {arg}, "\[And]"],
     		Or,
     		tmaInfixBox[ {arg}, "\[Or]"],
+    		Not,
+    		RowBox[{ "\[Not]", MakeBoxes[ arg, TheoremaForm]}],
     		_,
         	MakeBoxes[ b[ arg], TheoremaForm]
     	]

@@ -204,6 +204,21 @@ defLabel[ args___] := unexpected[ defLabel, {args}]
 initFormulaLabel[ ] := $formulaLabel = 1;
 initFormulaLabel[ args___] := unexpected[ initFormulaLabel, {args}]
 
+FML$ /: Dot[ FML$[ k_, _, _], key] := k
+FML$ /: Dot[ FML$[ _, fml_, _], formula] := fml
+FML$ /: Dot[ FML$[ _, _, l_], label] := l
+FML$ /: Dot[ FML$[ k_, _, _], id] := k[[1]]
+FML$ /: Dot[ FML$[ k_, _, _], source] := k[[2]]
+
+formulaReference[ fml_FML$] :=
+    With[ { tag = fml.id, labelDisp = makeLabel[ fml.label], fmlDisp = theoremaDisplay[ fml.formula]},
+        Cell[ BoxData[ ToBoxes[
+            Button[ Tooltip[ Mouseover[ Style[ labelDisp, "Reference"], Style[ labelDisp, "ReferenceHover"]], fmlDisp],
+               NotebookLocate[ tag], Appearance->None]
+        ]]]
+       ]
+formulaReference[ args___] := unexpected[ formulaReference, {args}]
+
 End[]
 
 EndPackage[]

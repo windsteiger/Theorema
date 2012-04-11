@@ -100,6 +100,14 @@ With[ {lang = "English"},
 	translate["open", lang] = "all open";
 	translate["closed", lang] = "all closed";
 	translate["abort", lang] = "Abort proof";
+	translate["proved", lang] = "proved";
+	translate["failed", lang] = "failed";
+	translate["pending", lang] = "pending";
+	translate["disproved", lang] = "disproved";
+	translate["open proof situation", lang] = "open proof situation";
+	translate["conjunction of subproofs", lang] = "conjunction of subproofs";
+	translate["disjunction of subproofs", lang] = "disjunction of subproofs";
+	translate["unknown proof node", lang] = "unknown proof node";
 	    
     translate["Sets", lang] = "Sets";
     translate["Tuples", lang] = "Tuples";

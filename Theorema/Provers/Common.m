@@ -288,14 +288,36 @@ proofStepNode[ pos_List, node:{ id_, status_, type_}, font_] :=
 		{Black, Dynamic[ Text[ 
 			Hyperlink[
 				Switch[ type, 
-       					PRFSIT$, "?",
-        				ANDNODE$, "\[Wedge]",
-        				ORNODE$, "\[Vee]",
-        				TERMINALNODE$|PRFOBJ$, Switch[ status, proved, "\[CheckmarkedBox]", disproved, "\[Times]", failed, "\[WarningSign]", _, "\[DownQuestion]"]], 
+        				TERMINALNODE$|PRFOBJ$, proofStatusIndicator[ status],
+        				_, proofNodeIndicator[ status, type]], 
 				{CurrentValue[ $TMAproofNotebook, "NotebookFileName"], id},
 				BaseStyle -> {FontSize -> font}], pos]]}
 	}
 proofStepNode[ args___] := unexpected[ proofStepNode, {args}]
+
+proofStatusIndicator[ status_] :=
+	Module[ {label},
+		label = Switch[ status, 
+			proved, "\[CheckmarkedBox]",
+			disproved, "\[Times]",
+			failed, "\[WarningSign]",
+			_, "\[DownQuestion]"
+		];
+		Tooltip[ Style[ label, ShowStringCharacters -> False], translate[ SymbolName[ status]]]
+	]
+proofStatusIndicator[ args___] := unexpected[ proofStatusIndicator, {args}]
+
+proofNodeIndicator[ status_, type_] :=
+	Module[ {label, description},
+		{label, description} = Switch[ type,
+			PRFSIT$, {"?", "open proof situation"},
+        	ANDNODE$, {"\[Wedge]", "conjunction of subproofs"},
+        	ORNODE$, {"\[Vee]", "disjunction of subproofs"},
+        	_, {"\[DownQuestion]", "unknown proof node"}
+		];
+		Tooltip[ Style[ label, ShowStringCharacters -> False], translate[ description] <> ": " <> translate[ SymbolName[ status]]]
+	]
+proofNodeIndicator[ args___] := unexpected[ proofNodeIndicator, {args}]
 
 (* ::Subsubsection:: *)
 (* makeInitialProofObject *)
@@ -374,7 +396,7 @@ proofObjectToCell[ TERMINALNODE$[ pi_PRFINFO$, pVal_]] :=
 proofObjectToCell[ args___] := unexpected[ proofObjectToCell, {args}]
 
 subProofToCell[ PRFINFO$[ name_, used_, gen_, ___], node_, pos_List] :=
-	Cell[ CellGroupData[ Append[ subProofHeader[ "ID" -> getNodeID[ node], name, $Language, used, gen, pos], proofObjectToCell[ node]], $proofCellStatus]]
+	Cell[ CellGroupData[ Append[ subProofHeader[ "ID" -> getNodeID[ node], name, $Language, used, gen, getProofValue[ node], pos], proofObjectToCell[ node]], $proofCellStatus]]
 subProofToCell[ args___] := unexpected[ subProofToCell, {args}]
 
 

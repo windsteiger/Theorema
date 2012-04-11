@@ -28,7 +28,7 @@ proofStepText[ "ProofSituation", lang, goal_, kb_, ___] := {textCell[ "Open proo
 
 proofStepText[ "ProofAlternatives", lang, ___] := {textCell[ "We have several alternatives to continue the proof."]};
 
-subProofHeader[ "ProofAlternatives", lang, ___, {p_}] := {textCell[ ToString[ StringForm[ "Alternative ``:", p]]]};
+subProofHeader[ "ProofAlternatives", lang, ___, pVal_, {p_}] := {textCell[ ToString[ StringForm[ "Alternative ``:", p]]]};
  
 
 proofStepText[ "SearchDepth", lang, goal_, kb_, ___] := {textCell[ "Search depth exceeded! The open proof situation is:"], 
@@ -43,16 +43,16 @@ proofStepText[ "NoPNode", lang, expr_, ___] := {textCell[ "The expression return
 
 proofStepText[ "noApplicableRule", lang, ___] := {textCell[ "It seems there is no proof rule to apply."]};
 
-proofStepText[ "contradictionKB", lang, {k_, c_}, {}, pVal_] := {textCell[ "The proof is finished, because ", referenceCell[ k], 
-	" contradicts ", referenceCell[ c], "."]
+proofStepText[ "contradictionKB", lang, {k_, c_}, {}, pVal_] := {textCell[ "The proof is finished, because ", formulaReference[ k], 
+	" contradicts ", formulaReference[ c], "."]
     };
 
-proofStepText[ "falseInKB", lang, {k_}, {}, pVal_] := {textCell[ "The proof is finished, because ", referenceCell[ k], 
+proofStepText[ "falseInKB", lang, {k_}, {}, pVal_] := {textCell[ "The proof is finished, because ", formulaReference[ k], 
 	" is a contradiction in the knowledge base."]
     };
 
-proofStepText[ "goalInKB", lang, {goal_, k_}, {}, pVal_] := {textCell[ "Now we are done, since the goal ", referenceCell[ goal], 
-	" is identical to formula ", referenceCell[ k], "in the knowledge base."]
+proofStepText[ "goalInKB", lang, {goal_, k_}, {}, pVal_] := {textCell[ "Now we are done, since the goal ", formulaReference[ goal], 
+	" is identical to formula ", formulaReference[ k], "in the knowledge base."]
     };
 
 proofStepText[ step_String, lang, ___] := {

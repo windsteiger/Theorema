@@ -34,9 +34,10 @@ proofStepText[ "ID" -> id_, step_String, lang_String, rest___] :=
 	]
 proofStepText[ args___] := unexpected[ proofStepText, {args}]
 
-subProofHeader[ "ID" -> id_, step_String, lang_String, rest___] :=
+subProofHeader[ "ID" -> id_, step_String, lang_String, rest___, pVal_, pos_List] :=
 	Block[ {$proofStepID = id},
-		subProofHeader[ step, lang, rest]
+		MapAt[ Append[ #, CellDingbat -> ToBoxes[ proofStatusIndicator[ pVal]]]&, 
+			subProofHeader[ step, lang, rest, pVal, pos], 1]
 	]
 subProofHeader[ args___] := unexpected[ subProofHeader, {args}]
 
@@ -72,18 +73,6 @@ assumptionListCells[ args___] := unexpected[ assumptionListCells, {args}]
 
 textCell[ t__] := Cell[ TextData[ Riffle[ {t}, " "]], "Text", CellTags -> {$proofStepID}]
 textCell[ args___] := unexpected[ textCell, {args}]
-
-referenceCell[ FML$[ k_List, form_, label_String]] :=
-	With[{ tag = getCellIDLabel[k], labelDisp = makeLabel[ label]},
-        Cell[ BoxData[ ToBoxes[
-            Button[ Tooltip[ Mouseover[ Style[ labelDisp, "Reference"], Style[ labelDisp, "ReferenceHover"]], theoremaDisplay[ form]],
-            	Module[ {cell},
-        			NotebookFind[ SelectedNotebook[], tag, Previous, CellTags, AutoScroll -> False];
-        			cell = NotebookRead[ SelectedNotebook[]];
-                	CreateDialog[{cell, CancelButton["OK", NotebookClose[ButtonNotebook[]]]}]], Appearance->None]
-        ]]]
-	]
-referenceCell[ args___] := unexpected[ referenceCell, {args}]
 
 End[]
 

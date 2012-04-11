@@ -44,7 +44,7 @@ PRFSIT$[ goal:FML$[ k_, Implies$TM[ P_, Q_], lab_], kb_, af_, rest___, "ID" -> i
 	Module[ { negLeft, negRight},
 		negLeft = makeFML[ formula -> Not$TM[ P]];
 		negRight = makeFML[ formula -> Not$TM[ Q]];
-		proveAll[ makePRFINFO[ "implGoalCP", {goal}, {negLeft, negRight}, id], makePRFSIT[ negLeft, Prepend[ kb, negRight], af, rest]]
+		proveAll[ makePRFINFO[ "implGoalCP", {goal}, {negRight, negLeft}, id], makePRFSIT[ negLeft, Prepend[ kb, negRight], af, rest]]
 	]
 
 

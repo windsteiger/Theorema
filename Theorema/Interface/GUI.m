@@ -754,20 +754,22 @@ setCompEnv[ args___] := unexpected[ setCompEnv, {args}]
 (* ::Subsubsection:: *)
 (* printProofInfo *)
 
-printProveInfo[ goal_, kb_, rules_, strategy_, { pVal_, proofObj_}, searchDepth_] :=
+printProveInfo[ goal_, kb_, rules_, strategy_, {pVal_, proofObj_}, searchDepth_] :=
     Module[ {kbAct, bui, buiAct},
-        kbAct = Map[ Part[ #, 3]&, kb];
+        kbAct = Map[ makeLabel[ #.label]&, kb];
         bui = Cases[ DownValues[ Theorema`Computation`Language`Private`buiActProve],
         	HoldPattern[ Verbatim[HoldPattern][ Theorema`Computation`Language`Private`buiActProve[ op_String]] :> v_] -> {op, v}];
         buiAct = Cases[ bui, { op_, True} -> op];
         NotebookFind[ $proofInitNotebook, makeProofIDTag[ goal], All, CellTags];
-        NotebookWrite[ $proofInitNotebook, Cell[ translate[ "Proof of"]<>" "<>goal[[3]]<>": "<>ToString[pVal], "OpenProof", CellTags -> makeProofIDTag[ goal]]];
+        NotebookWrite[ $proofInitNotebook, Cell[ TextData[ {translate[ "Proof of"]<>" ", formulaReference[ goal], ": ", 
+        	Cell[ BoxData[ ToBoxes[ proofStatusIndicator[ pVal]]]]}],
+        	"OpenProof", CellTags -> makeProofIDTag[ goal]]];
         (* Use Method -> "Queued" so that no time limit for proof display applies *)
         NotebookWrite[ $proofInitNotebook, Cell[ BoxData[ ToBoxes[
         	Button[ translate["ShowProof"], displayProof[ proofObj], ImageSize -> Automatic, Method -> "Queued"]]], "ProofDisplay"]];
         NotebookWrite[ $proofInitNotebook, Cell[ ToBoxes[
         	OpenerView[ {Spacer[10], 
-            Column[ {OpenerView[ {Style[ translate[ "GoalProve"], "PIContent"], Style[ goal[[3]], "PIContent"]}],
+            Column[ {OpenerView[ {Style[ translate[ "GoalProve"], "PIContent"], Style[ makeLabel[ goal.label], "PIContent"]}],
             	OpenerView[ {Style[ translate[ "KBprove"], "PIContent"], Style[ kbAct, "PIContent"]}],
                 OpenerView[ {Style[ translate[ "BuiProve"], "PIContent"], Style[ buiAct, "PIContent"]}],
                 OpenerView[ {Style[ translate[ "selProver"], "PIContent"], Style[ {rules, strategy}, "PIContent"]}],

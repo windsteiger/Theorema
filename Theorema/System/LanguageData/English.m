@@ -46,10 +46,13 @@ With[ {lang = "English"},
 	MessageName[transferToComputation, "usage", lang] = "";	
 	MessageName[FML$, "usage", lang] = "FML$[ key, form, lab] represents a Theorema formula including its key and label.";
 	MessageName[makeFML, "usage", lang] = "makeFML[ fmldata] is the constructor for the FML$ datastructure.";
-	MessageName[key, "usage", lang] = "key is an option for the formula constructor makeFML.";
-	MessageName[formula, "usage", lang] = "formula is an option for the formula constructor makeFML.";
-	MessageName[label, "usage", lang] = "label is an option for the formula constructor makeFML.";
-	MessageName[initFormulaLabel, "usage", lang] = "initFormulaLabel[ ] iinitializes the formula labels used in a proof.";
+	MessageName[key, "usage", lang] = "key is an option for the formula constructor makeFML and a selector for the FML$ datastructure.";
+	MessageName[formula, "usage", lang] = "formula is an option for the formula constructor makeFML and a selector for the FML$ datastructure.";
+	MessageName[label, "usage", lang] = "label is an option for the formula constructor makeFML and a selector for the FML$ datastructure.";
+	MessageName[id, "usage", lang] = "id is a selector for the FML$ datastructure.";
+	MessageName[source, "usage", lang] = "source is a selector for the FML$ datastructure.";
+	MessageName[initFormulaLabel, "usage", lang] = "initFormulaLabel[ ] initializes the formula labels used in a proof.";
+	MessageName[formulaReference, "usage", lang] = "formulaReference[ fml] gives a hyperlink to the formula.";
 
 (* Theorema`Computation`Language` *)
 	MessageName[setComputationContext, "usage", lang] = "setComputationContext[ c] sets the context for the next computation to c.";
@@ -105,5 +108,6 @@ With[ {lang = "English"},
 	MessageName[ PRFOBJ$, "usage", lang] = "PRFOBJ$[ ...] represents a Theorema proof situation.";
 	MessageName[ PRFSIT$, "usage", lang] = "PRFSIT$[ ...] represents a Theorema proof situation.";
 	MessageName[ inferenceRule, "usage", lang] = "inferenceRule[ name] stores the inference rule named name.";
+	MessageName[ proofStatusIndicator, "usage", lang] = "proofStatusIndicator[ status] gives a graphical indication of the proof status.";
 
 ]
