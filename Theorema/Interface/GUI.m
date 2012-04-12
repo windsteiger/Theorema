@@ -85,6 +85,7 @@ initGUI[] :=
 		$selectedSearchDepth = 30;
 		$maxSearchDepth = 200;
 		initBuiltins[ {"prove", "compute", "solve"}];
+		$selectedRuleSet = Hold[ basicProver];
 		$theoremaGUI = {"Theorema Commander" -> theoremaCommander[]};
 	]
 

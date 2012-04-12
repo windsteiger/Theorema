@@ -23,7 +23,7 @@ Needs["Theorema`Common`"];
 Needs["Theorema`Language`"];
 Needs["Theorema`Interface`Language`"];
 
-Begin["`Private`"] (* Begin Private Context *) 
+Begin["`Private`"]
 
 
 (* ::Section:: *)
@@ -284,7 +284,7 @@ sourceLabel[ args___] := unexpected[ sourceLabel, {args}]
 	
 ensureNotebookIntegrity[ nb_NotebookObject, rawNotebook_Notebook, cellTags_List] :=
     Module[ {allCellTags, selectedCellTags, duplicateCellTags, srcTags, sl, outdPos, updNb},
-    	sl = sourceLabel[];
+    	sl = sourceLabel[ nb];
         (* Collect all CellTags from document. *)
         allCellTags = Flatten[Cases[rawNotebook,Cell[___,CellTags -> tags_,___] -> tags, Infinity]];
         (* We look only for the duplicates to elements of current CellTags list.*)
@@ -687,6 +687,6 @@ displayBoxes[ args___] := unexpected[ displayBoxes, {args}]
 
 initSession[];
   
-End[] (* End Private Context *)
+End[]
 
 EndPackage[];
