@@ -53,17 +53,13 @@ goalCell[ g_FML$, punct_String:""] :=
 	]
 goalCell[ args___] := unexpected[ goalCell, {args}]
  
-assumptionCell[ FML$[ k_, a_, t_], punct_String:""] := 
-	Cell[ BoxData[ RowBox[ {ToBoxes[ a, TheoremaForm], punct}]], "Assumption", 
-		CellFrameLabels->{{None, Cell[ makeLabel[ t], "AssumptionLabel"]}, {None, None}}, 
-		CellTags -> {getCellIDLabel[ k], $proofStepID}
+assumptionCell[ a_FML$, punct_String:""] := 
+	Cell[ BoxData[ RowBox[ {ToBoxes[ a.formula, TheoremaForm], punct}]], "Assumption", 
+		CellFrameLabels->{{None, Cell[ makeLabel[ a.label], "AssumptionLabel"]}, {None, None}}, 
+		CellTags -> {a.id, $proofStepID}
 	]
 assumptionCell[ args___] := unexpected[ assumptionCell, {args}]
 
-assumptionListCells[ {}, sep_String, punct_String] := 
-	Cell[ BoxData[ RowBox[ {ToBoxes[{}], punct}]], "Assumption",
-		CellTags -> {$proofStepID}
-	]
 assumptionListCells[ {f___, l_}, sep_String, punct_String] :=
 	Module[{initial, term},
 		initial = Map[ assumptionCell[ #, sep]&, {f}];
