@@ -21,21 +21,22 @@ BeginPackage[ "Theorema`Provers`", {"Theorema`"}]
 
 Needs[ "Theorema`Common`"]
 Needs[ "Theorema`Language`"]
-Get[ "Theorema`Provers`Common`"]
 
 (* Load the language dependent proof texts and prover descriptions*)
 Map[ Get, FileNames[ "*.m", ToFileName[{$TheoremaDirectory, "Theorema", "Provers", "LanguageData"}], 2]];
 
+Get[ "Theorema`Provers`Common`"]
+
 Begin["`Private`"]
 
-proofStepText[ "ID" -> id_, step_String, lang_String, rest___] := 
-	Block[ {$proofStepID = id},
+proofStepText[ id -> i_, step_, lang_String, rest___] := 
+	Block[ {$proofStepID = i},
 		proofStepText[ step, lang, rest]
 	]
 proofStepText[ args___] := unexpected[ proofStepText, {args}]
 
-subProofHeader[ "ID" -> id_, step_String, lang_String, rest___, pVal_, pos_List] :=
-	Block[ {$proofStepID = id},
+subProofHeader[ id -> i_, step_, lang_String, rest___, pVal_, pos_List] :=
+	Block[ {$proofStepID = i},
 		MapAt[ Append[ #, CellDingbat -> ToBoxes[ proofStatusIndicator[ pVal]]]&, 
 			subProofHeader[ step, lang, rest, pVal, pos], 1]
 	]
@@ -45,10 +46,10 @@ subProofHeader[ args___] := unexpected[ subProofHeader, {args}]
 (* ::Section:: *)
 (* Proof Cells *)
 
-goalCell[ FML$[ k_, g_, t_], punct_String:""] := 
-	Cell[ BoxData[ RowBox[ {ToBoxes[ g, TheoremaForm], punct}]], "Goal", 
-		CellFrameLabels->{{None, Cell[ makeLabel[ t], "GoalLabel"]}, {None, None}}, 
-		CellTags -> {getCellIDLabel[ k], $proofStepID}
+goalCell[ g_FML$, punct_String:""] := 
+	Cell[ BoxData[ RowBox[ {ToBoxes[ g.formula, TheoremaForm], punct}]], "Goal", 
+		CellFrameLabels->{{None, Cell[ makeLabel[ g.label], "GoalLabel"]}, {None, None}}, 
+		CellTags -> {g.id, $proofStepID}
 	]
 goalCell[ args___] := unexpected[ goalCell, {args}]
  

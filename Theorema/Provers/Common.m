@@ -151,7 +151,8 @@ getProofValue[ _PRFSIT$] := pending
 getProofValue[ node_] := Last[ node]
 getProofValue[ args___] := unexpected[ getProofValue, {args}]
 
-getNodeID[ (PRFSIT$|PRFINFO$)[ ___, "ID" -> id_, ___]] := id
+getNodeID[ PRFINFO$[ ___, id_String]] := id
+getNodeID[ PRFSIT$[ _FML$, _List, _, id_String, ___Rule]] := id
 getNodeID[ node_?isProofNode] := getNodeID[ First[ node]]
 getNodeID[ args___] := unexpected[ getNodeID, {args}]
 
@@ -169,29 +170,50 @@ getActiveRules[ args___] := unexpected[ getActiveRules, {args}]
 isProofNode[ obj_] := MatchQ[ obj, _ANDNODE$|_ORNODE$|_TERMINALNODE$]
 isProofNode[ args___] := unexpected[ isProofNode, {args}]
 
-makePRFINFO[ name_String, g_, k_] := PRFINFO$[ name, g, k, "ID" -> ToString[ Unique[ name]]]
-makePRFINFO[ name_String, g_, k_, id_String] := PRFINFO$[ name, g, k, "ID" -> id]
+Options[ makePRFINFO] = {name -> "???", used -> {}, generated -> {}, id -> ""};
+makePRFINFO[ data___?OptionQ] :=
+	Module[{n, u, g, i},
+		{n, u, g, i} = {name, used, generated, id} /. {data} /. Options[ makePRFINFO];
+		makeRealPRFINFO[ n, u, g, i]
+	]
 makePRFINFO[ args___] := unexpected[ makePRFINFO, {args}]
 
-makePRFSIT[ g_, k_, af_, rest___Rule] := makePRFSIT[ g, k, af, ToString[ Unique[ "PRFSIT$"]], rest]
-makePRFSIT[ g_, k_, af_, id_String, rest___Rule] := 
+makeRealPRFINFO[ name_, u_FML$, g_, id_String] := makeRealPRFINFO[ name, {u}, g, id]
+makeRealPRFINFO[ name_, u_, g_FML$, id_String] := makeRealPRFINFO[ name, u, {g}, id]
+makeRealPRFINFO[ name_, u_List, g_List, ""] := PRFINFO$[ name, u, g, ToString[ Unique[ name]]]
+makeRealPRFINFO[ name_, u_List, g_List, id_String] := PRFINFO$[ name, u, g, id]
+makeRealPRFINFO[ args___] := unexpected[ makeRealPRFINFO, {args}]
+
+Options[ makePRFSIT] = {goal -> {}, kb -> {}, facts -> {}, id :> ToString[ Unique[ "PRFSIT$"]]};
+makePRFSIT[ data___?OptionQ] :=
+	Module[{g, k, f, i},
+		{g, k, f, i} = {goal, kb, facts, id} /. {data} /. Options[ makePRFSIT];
+		makeRealPRFSIT[ g, k, f, i, Apply[ Sequence, Cases[ {data}, HoldPattern[ _String -> _]]]]
+	]
+makePRFSIT[ args___] := unexpected[ makePRFINFO, {args}]
+
+makeRealPRFSIT[ g_FML$, k_List, af_, id_String, rest___Rule] := 
 	Module[ {succ, pi},
 		{succ, pi} = checkProofSuccess[ g, k, af, id];
 		If[ succ,
 			proofSucceeds[ pi],
-			PRFSIT$[ g, k, af, rest, "ID" -> id]
+			PRFSIT$[ g, k, af, id, rest]
 		]
 	]
-makePRFSIT[ args___] := unexpected[ makePRFSIT, {args}]
+makeRealPRFSIT[ args___] := unexpected[ makeRealPRFSIT, {args}]
 
-renewID[ node_[ PRFINFO$[ name_, u_, g_, ___], sub___, val_]] := node[ makePRFINFO[ name, u, g], sub, val]
+renewID[ node_[ PRFINFO$[ n_, u_, g_, _], sub___, val_]] := node[ makeRealPRFINFO[ n, u, g, ""], sub, val]
 renewID[ args___] := unexpected[ renewID, {args}]
 
-checkProofSuccess[ goal_, {___, k:FML$[ _, phi_, _], ___, c:FML$[ _, Not$TM[ phi_], _], ___}, af_, id_String] := {True, makePRFINFO[ "contradictionKB", {k, c}, {}, id]}
-checkProofSuccess[ goal_, {___, k:FML$[ _, Not$TM[ phi_], _], ___, c:FML$[ _, phi_, _], ___}, af_, id_String] := {True, makePRFINFO[ "contradictionKB", {k, c}, {}, id]}
-checkProofSuccess[ goal_, {___, k:FML$[ _, False, _], ___}, af_, id_String] := {True, makePRFINFO[ "falseInKB", {k}, {}, id]}
-checkProofSuccess[ goal:FML$[ _, g_, _], {___, k:FML$[ _, g_, _], ___}, af_, id_String] := {True, makePRFINFO[ "goalInKB", {goal, k}, {}, id]}
-checkProofSuccess[ goal_, kb_, af_, id_String] := {False, PRFINFO$[]}
+checkProofSuccess[ goal_FML$, {___, k:FML$[ _, phi_, _], ___, c:FML$[ _, Not$TM[ phi_], _], ___}, af_, i_String] := 
+	{True, makePRFINFO[ name -> contradictionKB, used -> {k, c}, id -> i]}
+checkProofSuccess[ goal_FML$, {___, k:FML$[ _, Not$TM[ phi_], _], ___, c:FML$[ _, phi_, _], ___}, af_, i_String] := 
+	{True, makePRFINFO[ name -> contradictionKB, used -> {k, c}, id -> i]}
+checkProofSuccess[ goal_FML$, {___, k:FML$[ _, False, _], ___}, af_, i_String] := 
+	{True, makePRFINFO[ name -> falseInKB, used -> k, id -> i]}
+checkProofSuccess[ goal:FML$[ _, g_, _], {___, k:FML$[ _, g_, _], ___}, af_, i_String] := 
+	{True, makePRFINFO[ name -> goalInKB, used -> {goal, k}, id -> i]}
+checkProofSuccess[ goal_FML$, kb_, af_, id_String] := {False, PRFINFO$[]}
 checkProofSuccess[ args___] := unexpected[ checkProofSuccess, {args}]
 
 proveAll[ pi_PRFINFO$, subnodes__] := ANDNODE$[ pi, subnodes, pending]
@@ -243,10 +265,10 @@ nodeValue[ ORNODE$, _List] := pending
 nodeValue[ PRFOBJ$, {v_}] := v
 nodeValue[ args___] := unexpected[ nodeValue, {args}]
 
-searchDepthExceeded[ ps_PRFSIT$] := proofFails[ makePRFINFO[ "SearchDepth", getGoal[ ps], getKB[ ps], getNodeID[ ps]]]
+searchDepthExceeded[ ps_PRFSIT$] := proofFails[ makePRFINFO[ name -> searchDepthLimit, used -> {getGoal[ ps], getKB[ ps]}, id -> getNodeID[ ps]]]
 searchDepthExceeded[ args___] := unexpected[ searchDepthExceeded, {args}]
 
-noProofNode[ expr_, id_] := proofFails[ makePRFINFO[ "NoPNode", expr, {}, id]]
+noProofNode[ expr_, i_] := proofFails[ makePRFINFO[ name -> invalidProofNode, used -> {expr}, id -> i]]
 noProofNode[ args___] := unexpected[ noProofNode, {args}]
 
 proofFails[ pi_PRFINFO$] := TERMINALNODE$[ pi, failed]
@@ -265,7 +287,7 @@ showProofNavigation[ {}, geometry_List] := ""
 showProofNavigation[ {node_List}, geometry_List] := Graphics[ proofStepNode[ {0, 0}, node, 18], ImageSize -> geometry, PlotRegion -> {{0.4, 0.6}, {0.6, 0.8}}]
 
 showProofNavigation[ p:{__Rule}, geometry_List] :=
-    Module[ {root = Cases[ p, {"Initial", __}, {2}], font = 18-Ceiling[ Apply[ Times, geometry]/(350*450)]},
+    Module[ {root = Cases[ p, {"InitPS", __}, {2}], font = 18-Ceiling[ Apply[ Times, geometry]/(350*450)]},
         If[ root === {},
             translate[ "noRoot"],
             TreePlot[ p, Automatic, First[ root], VertexRenderingFunction -> (proofStepNode[ #1, #2, font]&),
@@ -274,7 +296,7 @@ showProofNavigation[ p:{__Rule}, geometry_List] :=
     ]
 showProofNavigation[ args___] := unexpected[ showProofNavigation, {args}]
 
-proofStepNode[ pos_List, node:{ id_, status_, type_}, font_] := 
+proofStepNode[ pos_List, node:{ id_String, status_, type_}, font_] := 
 	{
 		Switch[ status,
 			pending, RGBColor[0.360784, 0.67451, 0.933333] (* steelblue *),
@@ -301,6 +323,7 @@ proofStatusIndicator[ status_] :=
 			proved, "\[CheckmarkedBox]",
 			disproved, "\[Times]",
 			failed, "\[WarningSign]",
+			pending, "?",
 			_, "\[DownQuestion]"
 		];
 		Tooltip[ Style[ label, ShowStringCharacters -> False], translate[ SymbolName[ status]]]
@@ -322,10 +345,10 @@ proofNodeIndicator[ args___] := unexpected[ proofNodeIndicator, {args}]
 (* ::Subsubsection:: *)
 (* makeInitialProofObject *)
 
-makeInitialProofObject[ goal_, kb_, rules_, strategy_] :=
+makeInitialProofObject[ g_FML$, k_List, rules_Hold, strategy_] :=
 	PRFOBJ$[
-		makePRFINFO[ "Initial", goal, kb, "Initial"],
-		makePRFSIT[ goal, kb, {}(*additional facts*), "Initial", "InferenceRules" -> rules, "Strategy" -> strategy],
+		makePRFINFO[ name -> initialProofSituation, used -> {g, k}, id -> "InitPS"],
+		makePRFSIT[ goal -> g, kb -> k, id -> "InitPS", "InferenceRules" -> rules, "Strategy" -> strategy],(*additional facts {}*)
 		pending
 	]
 makeInitialProofObject[ args___] := unexpected[ makeInitialProofObject, {args}]
@@ -378,8 +401,8 @@ proofObjectToCell[ PRFOBJ$[ pi_PRFINFO$, sub_, pVal_]] :=
 	Module[{ cellList = proofObjectToCell[ pi, pVal]},
 		Append[ cellList, proofObjectToCell[ sub]]
 	]
-proofObjectToCell[ PRFINFO$[ name_String, rest___, "ID" -> id_], pVal_] := proofStepText[ "ID" -> id, name, $Language, rest, pVal]
-proofObjectToCell[ PRFSIT$[ g_, kb_, ___, "ID" -> id_]] := Cell[ CellGroupData[ proofStepText[ "ID" -> id, "ProofSituation", $Language, g, kb], $proofCellStatus]]
+proofObjectToCell[ PRFINFO$[ name_, rest___, i_String], pVal_] := proofStepText[ id -> i, name, $Language, rest, pVal]
+proofObjectToCell[ PRFSIT$[ g_FML$, kb_List, _, i_String, ___]] := Cell[ CellGroupData[ proofStepText[ id -> i, openProofSituation, $Language, {g, kb}, {}], $proofCellStatus]]
 proofObjectToCell[ (ANDNODE$|ORNODE$)[ pi_PRFINFO$, subnodes__, pVal_]] := 
 	Module[{header, sub = {}},
 		header = proofObjectToCell[ pi, pVal];
@@ -395,8 +418,8 @@ proofObjectToCell[ TERMINALNODE$[ pi_PRFINFO$, pVal_]] :=
 	
 proofObjectToCell[ args___] := unexpected[ proofObjectToCell, {args}]
 
-subProofToCell[ PRFINFO$[ name_, used_, gen_, ___], node_, pos_List] :=
-	Cell[ CellGroupData[ Append[ subProofHeader[ "ID" -> getNodeID[ node], name, $Language, used, gen, getProofValue[ node], pos], proofObjectToCell[ node]], $proofCellStatus]]
+subProofToCell[ PRFINFO$[ name_, used_List, gen_List, ___], node_, pos_List] :=
+	Cell[ CellGroupData[ Append[ subProofHeader[ id -> getNodeID[ node], name, $Language, used, gen, getProofValue[ node], pos], proofObjectToCell[ node]], $proofCellStatus]]
 subProofToCell[ args___] := unexpected[ subProofToCell, {args}]
 
 

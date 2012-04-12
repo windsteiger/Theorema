@@ -24,27 +24,31 @@ Needs[ "Theorema`Language`"]
 Begin["`Private`"]
 
 inferenceRule[ andGoal] = 
-PRFSIT$[ goal:FML$[ k_, And$TM[ P_, Q_], lab_], kb_, af_, rest___, "ID" -> id_] :> 
-	Module[ { left, right},
+PRFSIT$[ g:FML$[ _, And$TM[ P_, Q_], lab_], k_List, af_, i_String, rest___Rule] :> 
+	Module[ {left, right},
 		left = makeFML[ formula -> P, label -> lab <> ".1"];
 		right = makeFML[ formula -> Q, label -> lab <> ".2"];
-		proveAll[ makePRFINFO[ "andGoal", {goal}, {left, right}, id], makePRFSIT[ left, kb, af, rest], makePRFSIT[ right, kb, af, rest]]
+		proveAll[ makePRFINFO[ name -> andGoal, used -> g, generated -> {left, right}, id -> i], 
+			makePRFSIT[ goal -> left, kb -> k, facts -> af, rest], 
+			makePRFSIT[ goal -> right, kb -> k, facts -> af, rest]]
 	]
 
 inferenceRule[ implGoalDirect] = 
-PRFSIT$[ goal:FML$[ k_, Implies$TM[ P_, Q_], lab_], kb_, af_, rest___, "ID" -> id_] :> 
-	Module[ { left, right},
+PRFSIT$[ g:FML$[ _, Implies$TM[ P_, Q_], _], k_, af_, i_String, rest___Rule] :> 
+	Module[ {left, right},
 		left = makeFML[ formula -> P];
 		right = makeFML[ formula -> Q];
-		proveAll[ makePRFINFO[ "implGoalDirect", {goal}, {left, right}, id], makePRFSIT[ right, Prepend[ kb, left], af, rest]]
+		proveAll[ makePRFINFO[ name -> implGoalDirect, used -> g, generated -> {left, right}, id -> i], 
+			makePRFSIT[ goal -> right, kb -> Prepend[ k, left], facts -> af, rest]]
 	]
 
 inferenceRule[ implGoalCP] = 
-PRFSIT$[ goal:FML$[ k_, Implies$TM[ P_, Q_], lab_], kb_, af_, rest___, "ID" -> id_] :> 
-	Module[ { negLeft, negRight},
+PRFSIT$[ g:FML$[ _, Implies$TM[ P_, Q_], _], k_, af_, i_String, rest___Rule] :> 
+	Module[ {negLeft, negRight},
 		negLeft = makeFML[ formula -> Not$TM[ P]];
 		negRight = makeFML[ formula -> Not$TM[ Q]];
-		proveAll[ makePRFINFO[ "implGoalCP", {goal}, {negRight, negLeft}, id], makePRFSIT[ negLeft, Prepend[ kb, negRight], af, rest]]
+		proveAll[ makePRFINFO[ name -> implGoalCP, used -> g, generated -> {negRight, negLeft}, id -> i], 
+			makePRFSIT[ goal -> negLeft, kb -> Prepend[ k, negRight], facts -> af, rest]]
 	]
 
 
