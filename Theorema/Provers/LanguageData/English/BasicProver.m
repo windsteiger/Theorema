@@ -26,23 +26,23 @@ translate[ "Basic Prover", lang] = "Basic Prover";
 translate[ "connectives", lang] = "Logical connectives";
 translate[ "equality", lang] = "Logical equality";
 
-proofStepText[ andGoal, lang, used_, generated_, ___] := {textCell[ "For proving ", formulaReference[ First[ used]], " we prove the individual conjuncts."]};
+proofStepText[ andGoal, lang, {g_}, generated_, ___] := {textCell[ "For proving ", formulaReference[ g], " we prove the individual conjuncts."]};
 
-subProofHeader[ andGoal, lang, used_, generated_, pVal_, {p_}] := {textCell[ "Proof of ", formulaReference[ Part[ generated, p]], ":"],
+subProofHeader[ andGoal, lang, used_List, generated_List, pVal_, {p_}] := {textCell[ "Proof of ", formulaReference[ Part[ generated, p]], ":"],
 	textCell[ "We need to prove"],
 	goalCell[ Part[ generated, p], "."]
 	};
 
-proofStepText[ implGoalDirect, lang, used_, generated_, ___] := {textCell[ "In order to prove ", formulaReference[ First[ used]], " we assume"],
-	assumptionCell[ First[ generated]],
+proofStepText[ implGoalDirect, lang, {g_}, {l_, r_}, ___] := {textCell[ "In order to prove ", formulaReference[ g], " we assume"],
+	assumptionCell[ l],
 	textCell[ "and then prove"],
-	goalCell[ generated[[2]], "."]
+	goalCell[ r, "."]
 	};
 
-proofStepText[ implGoalCP, lang, used_, generated_, ___] := {textCell[ "We prove ", formulaReference[ First[ used]], " by contraposition, i.e. we assume"],
-	assumptionCell[ First[ generated]],
+proofStepText[ implGoalCP, lang, {g_}, {nr_, nl_}, ___] := {textCell[ "We prove ", formulaReference[ g], " by contraposition, i.e. we assume"],
+	assumptionCell[ nr],
 	textCell[ "and prove"],
-	goalCell[ generated[[2]], "."]
+	goalCell[ nl, "."]
 	};
 
 
