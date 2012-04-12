@@ -5,8 +5,13 @@ With[ {lang = "English"},
 	MessageName[Theorema, "unexpectedArgs", lang] = "Function `1` called with unexpected arguments `2`.";
 	MessageName[Theorema, "missingTranslation", lang] = "Missing translation for string `1` into language `2`.";
 
-(* Theorema`System`Messages` *)
-	MessageName[unexpected, "usage", lang] = "unexpected[ f, {args}] terminates the evaluation of f[args] due to unexpected arguments.";
+(* Theorema`System`Utilities` *)
+	MessageName[unexpected, "usage", lang] = "unexpected[ f, {args}] terminates the evaluation of f[args] due to unexpected/invalid arguments.";
+	MessageName[replaceAllExcept, "usage", lang] = "replaceAllExcept[ expr, rules, expt] applies rule(s) to all subparts of 'expr' except those contained in the list 'expt'.";
+	MessageName[joinHold, "usage", lang] = "joinHold[Hold[a],Hold[b]] produces Hold[a,b].";
+	MessageName[applyHold, "usage", lang] = "applyHold[Hold[a],Hold[b]] produces Hold[a[b]].";
+	MessageName[joinKB, "usage", lang] = "joinKB[ kb1_List, kb2_List] joins the two knowledge bases and deletes duplicate entries.";
+	MessageName[notification, "usage", lang] = "notification[text] displays 'text' as a user notification.";
 
 (* Theorema`Language`Syntax` *)
 	MessageName[theoremaDisplay, "usage", lang] = "theoremaDisplay[expr] displays expr in Theorema syntax using the definitions for MakeBoxes[ expr, TheoremaForm].";	
@@ -58,13 +63,6 @@ With[ {lang = "English"},
 	MessageName[setComputationContext, "usage", lang] = "setComputationContext[ c] sets the context for the next computation to c.";
 	MessageName[cleanupComputation, "usage", lang] = "cleanupComputation[ ] removes all user defined function from computation context.";
 	
-(* Theorema`Utilities` *)
-	MessageName[replaceAllExcept, "usage", lang] = "replaceAllExcept[ expr, rules, expt] applies rule(s) to all subparts of 'expr' except those contained in the list 'expt'.";
-	MessageName[joinHold, "usage", lang] = "joinHold[Hold[a],Hold[b]] produces Hold[a,b].";
-	MessageName[applyHold, "usage", lang] = "applyHold[Hold[a],Hold[b]] produces Hold[a[b]].";
-	MessageName[joinKB, "usage", lang] = "joinKB[ kb1_List, kb2_List] joins the two knowledge bases and deletes duplicate entries.";
-	MessageName[notification, "usage", lang] = "notification[text] displays 'text' as a user notification.";
-
 (* Theorema`Interface`GUI` *)
 	MessageName[$theoremaGUI, "usage", lang] = "Theorema GUI structure";
 	MessageName[$kbStruct, "usage", lang] = "Structured knowledge base to be displayed in the KB browser";

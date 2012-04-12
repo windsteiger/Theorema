@@ -63,6 +63,7 @@ If[ TrueQ[$Notebooks],
 
 
 Get["Theorema`Common`"]
+Get["Theorema`System`"]
 
 (* The package "Theorema`Computation`Language`" introduces the same names as "Theorema`Language`".
    Therefore, we load them from different Theorema`-contexts in order to avoid "shadowing" messages during startup.
@@ -76,7 +77,6 @@ EndPackage[]
 BeginPackage["Theorema`"]
 
 Get["Theorema`Language`"]
-Get["Theorema`Utilities`"]
 Get["Theorema`Provers`"]
 Get["Theorema`Interface`GUI`"]
 
