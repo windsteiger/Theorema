@@ -25,26 +25,26 @@ Begin["`Private`"]
 (* ::Section:: *)
 (* Proof strategies *)
 
-applyOnce[ rules_, ps_] := 
-	Module[ {i = getNodeID[ ps], ruleSyms = getActiveRules[ rules, Flatten], allRules, newPSits},
+applyOnce[ rules_Hold, ps_PRFSIT$] := 
+	Module[ {i = ps.id, ruleSyms = getActiveRules[ rules, Flatten], allRules, newNodes},
 		allRules = DeleteCases[ Map[ inferenceRule, ruleSyms], _inferenceRule];
-		newPSits = ReplaceList[ ps, allRules];
-		Switch[ Length[ newPSits],
+		newNodes = ReplaceList[ ps, allRules];
+		Switch[ Length[ newNodes],
 			0,
 			proofFails[ makePRFINFO[ name -> noApplicableRule, id -> i]],
 			1,
-			First[ newPSits],
+			First[ newNodes],
 			_,
-			newPSits = Map[ renewID, newPSits];
+			newNodes = Map[ renewID, newNodes];
 			proveSome[ 
-				makePRFINFO[ name -> proofAlternatives, used -> Apply[ Union, Map[ getUsed, newPSits]], generated -> Apply[ Union, Map[ getGenerated, newPSits]], id -> i],
-				Apply[ Sequence, newPSits]]
+				makePRFINFO[ name -> proofAlternatives, used -> newNodes.used, generated -> newNodes.generated, id -> i],
+				Apply[ Sequence, newNodes]]
 		]
 	]
 applyOnce[ args___] := unexpected[ applyOnce, {args}]
 
-trySeveral[ rules_, ps_] :=
-    Module[ {i = getNodeID[ ps]},
+trySeveral[ rules_Hold, ps_PRFSIT$] :=
+    Module[ {i = ps.id},
         proveSome[ makePRFINFO[ name -> proofAlternatives, used -> {ps[[1]]}, generated -> {ps[[2]]}, id -> i],
         	Apply[ makePRFSIT[ goal -> #1, kb -> #2, facts -> #3, Apply[ Sequence, Cases[ ps, HoldPattern[ _String -> _]]]]&, ps], 
         	Apply[ makePRFSIT[ goal -> #1, kb -> #2, facts -> #3, Apply[ Sequence, Cases[ ps, HoldPattern[ _String -> _]]]]&, ps]

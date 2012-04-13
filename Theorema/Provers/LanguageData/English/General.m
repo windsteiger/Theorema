@@ -50,12 +50,10 @@ proofStepText[ proofAlternatives, lang, ___] := {textCell[ "We have several alte
 subProofHeader[ proofAlternatives, lang, ___, pVal_, {p_}] := {textCell[ ToString[ StringForm[ "Alternative ``:", p]]]};
  
 
-proofStepText[ searchDepthLimit, lang, {goal_FML$, kb_List}, {}, ___] := {textCell[ "Search depth exceeded! The open proof situation is:"], 
-		textCell[ "We have to prove:"],
-		goalCell[ goal],
-    	textCell[ "under the assumptions:"], 
-        assumptionListCells[ kb, ",", "."]
-		};
+proofStepText[ searchDepthLimit, lang, {goal_FML$, kb_List}, {}, ___] :=
+	Join[{textCell[ "Search depth exceeded! The open proof situation is:"]}, 
+		proofStepText[ openProofSituation, lang, {goal, kb}, {}]
+	];
 
 proofStepText[ invalidProofNode, lang, expr_, ___] := {textCell[ "The expression returned by the selected proof strategy is not a valid proof tree node."],
 	Cell[ BoxData[ ToBoxes[ expr]], "Print"]};
