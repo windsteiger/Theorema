@@ -108,6 +108,8 @@ With[ {lang = "English"},
 	translate["conjunction of subproofs", lang] = "conjunction of subproofs";
 	translate["disjunction of subproofs", lang] = "disjunction of subproofs";
 	translate["unknown proof node", lang] = "unknown proof node";
+
+	translate["Virtual Keyboard", lang] = "Virtual Keyboard";
 	    
     translate["Sets", lang] = "Sets";
     translate["Tuples", lang] = "Tuples";

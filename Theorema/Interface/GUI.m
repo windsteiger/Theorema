@@ -86,6 +86,8 @@ initGUI[] :=
 		$maxSearchDepth = 200;
 		initBuiltins[ {"prove", "compute", "solve"}];
 		$selectedRuleSet = Hold[ basicProver];
+		$CtrlActive = 0;
+		$ShiftActive = 0;
 		$theoremaGUI = {"Theorema Commander" -> theoremaCommander[]};
 	]
 
@@ -153,6 +155,96 @@ emptyPane[ text_String:""] := Pane[ text, Alignment -> {Center, Center}]
 emptyPane[ text_String:"", size_] := Pane[ text, size, Alignment -> {Left, Top}]
 emptyPane[ args___] := unexpected[ emptyPane, {args}]
 
+
+(* ::Subsubsection:: *)
+(* virtualKeyboard *)
+
+virtualKeyboard[ ] /; $Notebooks :=
+        CreatePalette[ Dynamic[ Column[{
+        	Grid[ Table[ vkbButton[ i, j, FromDigits[ {$CtrlActive, $ShiftActive}, 2]], {i, 3}, {j, 13}], Spacings -> 0],
+        	Row[ {Button[ "\[ShiftKey]", $ShiftActive = Mod[ $ShiftActive+1, 2], Appearance -> If[ $ShiftActive === 1, "Pressed", Automatic], Alignment -> Center],
+        		Button[ "\[ControlKey]", $CtrlActive = Mod[ $CtrlActive+1, 2], Appearance -> If[ $CtrlActive === 1, "Pressed", Automatic], Alignment -> Center]}]
+        }]],
+        WindowTitle -> translate["Virtual Keyboard"]]
+virtualKeyboard[ args___] := unexpected[ virtualKeyboard, {args}]
+
+vkbButton[ i_Integer, j_Integer, code_Integer] :=
+	Module[ {key = Replace[ {i,j}, $vkbMap]},
+    	With[ {bd = Part[ key, code+1]},
+    		Switch[ Length[ bd],
+    			0,
+    			Pane[ "", {30, 30}],
+    			1,
+    			Button[ Pane[ bd[[1]], ImageSize -> {28, 28}, Alignment -> Center, ImageSizeAction -> "ShrinkToFit"], 
+					FrontEndExecute[{NotebookApply[ InputNotebook[], bd[[1]], Placeholder]}], Alignment -> Center, ImageSize -> {30, 30}],
+    			2,
+    			Button[ Pane[ bd[[1]], ImageSize -> {28, 28}, Alignment -> Center, ImageSizeAction -> "ShrinkToFit"], 
+					FrontEndExecute[{NotebookApply[ InputNotebook[], bd[[2]], Placeholder]}], Alignment -> Center, ImageSize -> {30, 30}],
+				3,
+				Tooltip[ Button[ Pane[ bd[[1]], ImageSize -> {28, 28}, Alignment -> Center, ImageSizeAction -> "ShrinkToFit"], 
+					FrontEndExecute[{NotebookApply[ InputNotebook[], bd[[2]], Placeholder]}], Alignment -> Center, ImageSize -> {30, 30}],
+					bd[[3]], TooltipDelay -> 0.5]
+        	]
+		]
+	]
+
+vkbButton[ args___] := unexpected[ vkbButton, {args}]
+
+$vkbMap = {
+	{1, 1} -> { {"q"}, {"Q"}, langButtonData["FORALL1"], {}},
+	{1, 2} -> { {"w"}, {"W"}, {}, {}},
+	{1, 3} -> { {"e"}, {"E"}, {}, {}},
+	{1, 4} -> { {"r"}, {"R"}, {}, {}},
+	{1, 5} -> { {"t"}, {"T"}, {}, {}},
+	{1, 6} -> { {"y"}, {"Y"}, {}, {}},
+	{1, 7} -> { {"u"}, {"U"}, {}, {}},
+	{1, 8} -> { {"i"}, {"I"}, {}, {}},
+	{1, 9} -> { {"o"}, {"O"}, {}, {}},
+	{1, 10} -> { {"p"}, {"P"}, {}, {}},
+	{1, 11} -> { {"["}, {"{"}, {}, {}},
+	{1, 12} -> { {"]"}, {"}"}, {}, {}},
+	{1, 13} -> { {"\\"}, {"|"}, {}, {}},
+	{2, 1} -> { {}, {}, {}, {}},
+	{2, 2} -> { {"a"}, {"A"}, langButtonData["FORALL1"], {}},
+	{2, 3} -> { {"s"}, {"S"}, {}, {}},
+	{2, 4} -> { {"d"}, {"D"}, {}, {}},
+	{2, 5} -> { {"f"}, {"F"}, {}, {}},
+	{2, 6} -> { {"g"}, {"G"}, {}, {}},
+	{2, 7} -> { {"h"}, {"H"}, {}, {}},
+	{2, 8} -> { {"j"}, {"J"}, {}, {}},
+	{2, 9} -> { {"k"}, {"K"}, {}, {}},
+	{2, 10} -> { {"l"}, {"L"}, {}, {}},
+	{2, 11} -> { {";"}, {":"}, {}, {}},
+	{2, 12} -> { {"'"}, {"\""}, {}, {}},
+	{2, 13} -> { {}, {}, {}, {}},
+	{3, 1} -> { {}, {}, {}, {}},
+	{3, 2} -> { {"z"}, {"Z"}, langButtonData["FORALL2"], {}},
+	{3, 3} -> { {"x"}, {"X"}, {}, {}},
+	{3, 4} -> { {"c"}, {"C"}, {}, {}},
+	{3, 5} -> { {"v"}, {"V"}, {}, {}},
+	{3, 6} -> { {"b"}, {"B"}, {}, {}},
+	{3, 7} -> { {"n"}, {"N"}, {}, {}},
+	{3, 8} -> { {"m"}, {"M"}, {}, {}},
+	{3, 9} -> { {","}, {"<"}, {}, {}},
+	{3, 10} -> { {"."}, {">"}, {}, {}},
+	{3, 11} -> { {"/"}, {"?"}, {}, {}},
+	{3, 12} -> { {}, {}, {}, {}},
+	{3, 13} -> { {}, {}, {}, {}},
+	{1, 1} -> { {"`"}, {"~"}, {}, {}},
+	{1, 2} -> { {1}, {"!"}, {}, {}},
+	{1, 3} -> { {2}, {"@"}, {}, {}},
+	{1, 4} -> { {3}, {"#"}, {}, {}},
+	{1, 5} -> { {4}, {"$"}, {}, {}},
+	{1, 6} -> { {5}, {"%"}, {}, {}},
+	{1, 7} -> { {6}, {"^"}, {}, {}},
+	{1, 8} -> { {7}, {"&"}, {}, {}},
+	{1, 9} -> { {8}, {"*"}, {}, {}},
+	{1, 10} -> { {9}, {"("}, {}, {}},
+	{1, 11} -> { {0}, {")"}, {}, {}},
+	{1, 12} -> { {"-"}, {"_"}, {}, {}},
+	{1, 13} -> { {"="}, {"+"}, {}, {}},
+	{i_, j_} -> Table[ {}, {4}]
+};
 (* ::Subsubsection:: *)
 (* displaySelectedGoal *)
    
