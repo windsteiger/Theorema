@@ -160,52 +160,135 @@ emptyPane[ args___] := unexpected[ emptyPane, {args}]
 (* virtualKeyboard *)
 
 virtualKeyboard[ ] /; $Notebooks :=
-        CreatePalette[ Dynamic[ Column[{
-        	Grid[ Table[ vkbButton[ i, j, FromDigits[ {$CtrlActive, $ShiftActive}, 2]], {i, 3}, {j, 13}], Spacings -> 0],
-        	Row[ {Button[ "\[ShiftKey]", $ShiftActive = Mod[ $ShiftActive+1, 2], Appearance -> If[ $ShiftActive === 1, "Pressed", Automatic], Alignment -> Center],
-        		Button[ "\[ControlKey]", $CtrlActive = Mod[ $CtrlActive+1, 2], Appearance -> If[ $CtrlActive === 1, "Pressed", Automatic], Alignment -> Center]}]
-        }]],
+        CreatePalette[ Dynamic[ 
+        	Row[{
+        		Grid[ Table[ formButton[ i, j, FromDigits[ {$CtrlActive, $ShiftActive}, 2]], {i, 2}, {j, 5}], Spacings -> {0.2, 0.25}],
+        		Column[{
+        			Grid[ Table[ charButton[ i, j, FromDigits[ {$CtrlActive, $ShiftActive}, 2]], {i, 3}, {j, 11}], Spacings -> {0.2, 0.25}],
+        			Row[ {Button[ "\[ShiftKey]", $ShiftActive = Mod[ $ShiftActive+1, 2], BaseStyle -> If[ $ShiftActive === 1, "KBButtonPress", "KBButton"], ImageSize -> {61, 30}],
+        				Button[ "\[ControlKey]", $CtrlActive = Mod[ $CtrlActive+1, 2], BaseStyle -> If[ $CtrlActive === 1, "KBButtonPress", "KBButton"], ImageSize -> {61, 30}],
+        				makeVkbButton[ "\[SpaceKey]", " ", ImageSize -> {80, 30}],
+        				Button[ "\[ControlKey]", $CtrlActive = Mod[ $CtrlActive+1, 2], BaseStyle -> If[ $CtrlActive === 1, "KBButtonPress", "KBButton"], ImageSize -> {61, 30}],
+        				Button[ "\[ShiftKey]", $ShiftActive = Mod[ $ShiftActive+1, 2], BaseStyle -> If[ $ShiftActive === 1, "KBButtonPress", "KBButton"], ImageSize -> {61, 30}]
+        				}, Spacer[1]]
+        			}],
+        		Grid[ Table[ numButton[ i, j, FromDigits[ {$CtrlActive, $ShiftActive}, 2]], {i, 4}, {j, 4}], Spacings -> {0.2, 0.25}],
+        		Grid[ Table[ symButton[ i, j, FromDigits[ {$CtrlActive, $ShiftActive}, 2]], {i, 4}, {j, 4}], Spacings -> {0.2, 0.25}]
+        }, Spacer[5]]],
+        StyleDefinitions -> ToFileName[{"Theorema"}, "Keyboard.nb"],
         WindowTitle -> translate["Virtual Keyboard"]]
 virtualKeyboard[ args___] := unexpected[ virtualKeyboard, {args}]
 
-vkbButton[ i_Integer, j_Integer, code_Integer] :=
-	Module[ {key = Replace[ {i,j}, $vkbMap]},
-    	With[ {bd = Part[ key, code+1]},
-    		Switch[ Length[ bd],
-    			0,
-    			Pane[ "", {30, 30}],
-    			1,
-    			Button[ Pane[ bd[[1]], ImageSize -> {28, 28}, Alignment -> Center, ImageSizeAction -> "ShrinkToFit"], 
-					FrontEndExecute[{NotebookApply[ InputNotebook[], bd[[1]], Placeholder]}], Alignment -> Center, ImageSize -> {30, 30}],
-    			2,
-    			Button[ Pane[ bd[[1]], ImageSize -> {28, 28}, Alignment -> Center, ImageSizeAction -> "ShrinkToFit"], 
-					FrontEndExecute[{NotebookApply[ InputNotebook[], bd[[2]], Placeholder]}], Alignment -> Center, ImageSize -> {30, 30}],
-				3,
-				Tooltip[ Button[ Pane[ bd[[1]], ImageSize -> {28, 28}, Alignment -> Center, ImageSizeAction -> "ShrinkToFit"], 
-					FrontEndExecute[{NotebookApply[ InputNotebook[], bd[[2]], Placeholder]}], Alignment -> Center, ImageSize -> {30, 30}],
-					bd[[3]], TooltipDelay -> 0.5]
-        	]
-		]
-	]
+formButton[ i_Integer, j_Integer, code_Integer] := vkbButton[ i, j, code, $formBlockMap, ImageSize -> {80, 60}]
+formButton[ args___] := unexpected[ formButton, {args}]
 
+charButton[ i_Integer, j_Integer, code_Integer] := vkbButton[ i, j, code, $charBlockMap]
+charButton[ args___] := unexpected[ charButton, {args}]
+
+numButton[ i_Integer, j_Integer, code_Integer] := vkbButton[ i, j, code, $numBlockMap]
+numButton[ args___] := unexpected[ numButton, {args}]
+
+symButton[ i_Integer, j_Integer, code_Integer] := vkbButton[ i, j, code, $symBlockMap]
+symButton[ args___] := unexpected[ symButton, {args}]
+
+vkbButton[ i_Integer, j_Integer, code_Integer, map_List, opts___?OptionQ] :=
+	Module[ {key = Replace[ {i,j}, map]},
+    	Apply[ makeVkbButton[ ##, opts]&, Part[ key, code+1]]
+	]
 vkbButton[ args___] := unexpected[ vkbButton, {args}]
 
-$vkbMap = {
-	{1, 1} -> { {"q"}, {"Q"}, langButtonData["FORALL1"], {}},
-	{1, 2} -> { {"w"}, {"W"}, {}, {}},
-	{1, 3} -> { {"e"}, {"E"}, {}, {}},
-	{1, 4} -> { {"r"}, {"R"}, {}, {}},
-	{1, 5} -> { {"t"}, {"T"}, {}, {}},
-	{1, 6} -> { {"y"}, {"Y"}, {}, {}},
-	{1, 7} -> { {"u"}, {"U"}, {}, {}},
-	{1, 8} -> { {"i"}, {"I"}, {}, {}},
-	{1, 9} -> { {"o"}, {"O"}, {}, {}},
-	{1, 10} -> { {"p"}, {"P"}, {}, {}},
-	{1, 11} -> { {"["}, {"{"}, {}, {}},
-	{1, 12} -> { {"]"}, {"}"}, {}, {}},
-	{1, 13} -> { {"\\"}, {"|"}, {}, {}},
-	{2, 1} -> { {}, {}, {}, {}},
-	{2, 2} -> { {"a"}, {"A"}, langButtonData["FORALL1"], {}},
+Options[ makeVkbButton] = {ImageSize -> {30, 30}};
+SetAttributes[ makeVkbButton, HoldAll]
+
+makeVkbButton[ opts___?OptionQ] := 
+	Module[ {size},
+		{size} = {ImageSize} /. {opts} /. Options[ makeVkbButton];
+		Pane[ "", size]
+	]
+makeVkbButton[ "EnterKey", opts___?OptionQ] :=
+	makeVkbButton[ "\[ReturnIndicator]", 
+		buttonOp -> FrontEndExecute[ SelectionMove[ InputNotebook[], All, Cell]; SelectionEvaluate[ InputNotebook[]]],
+		opts]
+    
+makeVkbButton[ "DeleteKey", opts___?OptionQ] := 
+	makeVkbButton[ "\[DeleteKey]", 
+		buttonOp -> FrontEndExecute[ SelectionMove[ InputNotebook[], Previous, Character]; SelectionMove[ InputNotebook[], All, Character]; NotebookDelete[ InputNotebook[]]],
+		opts]
+
+makeVkbButton[ label_, buttonOp -> buttonFun_, opts___?OptionQ] :=
+    DynamicModule[ {bs = "KBButton", size},
+    	{size} = {ImageSize} /. {opts} /. Options[ makeVkbButton];
+    	EventHandler[
+    		Annotation[
+    			Button[ Pane[ label, ImageSizeAction -> "ShrinkToFit", ImageSize -> size-2],
+    				buttonFun,
+    				BaseStyle -> Dynamic[ If[ MouseAnnotation[] === label && bs === "KBButton",
+    					"KBButtonOver",
+    					bs]],
+    				ImageSize -> size
+    				],
+    			label, "Mouse"],
+    		{"MouseDown" :> (bs = "KBButtonPress";),
+    		 "MouseUp" :> (bs = "KBButton";)},
+    		PassEventsDown -> True
+    	]
+    ]
+
+makeVkbButton[ label_, opts___?OptionQ] := makeVkbButton[ label, label, opts]
+
+makeVkbButton[ label_, insert_, opts___?OptionQ] :=
+	makeVkbButton[ label, 
+		buttonOp -> FrontEndExecute[ NotebookApply[ InputNotebook[], insert, Placeholder]],
+		opts]
+    
+makeVkbButton[ label_, insert_, tooltip_, opts___?OptionQ] :=
+    DynamicModule[ {bs = "KBButton", size},
+    	{size} = {ImageSize} /. {opts} /. Options[ makeVkbButton];
+    	EventHandler[
+    		Tooltip[ Annotation[
+    			Button[ Pane[ label, ImageSizeAction -> "ShrinkToFit", ImageSize -> size-2],
+    				FrontEndExecute[ NotebookApply[ InputNotebook[], insert, Placeholder]],
+    				BaseStyle -> Dynamic[ If[ MouseAnnotation[] === label && bs === "KBButton",
+    					"KBButtonOver",
+    					bs]],
+    				ImageSize -> size
+    				],
+    			label, "Mouse"],
+    		tooltip, TooltipDelay -> 0.5],
+    		{"MouseDown" :> (bs = "KBButtonPress";),
+    		 "MouseUp" :> (bs = "KBButton";)},
+    		PassEventsDown -> True
+    	]
+    ]
+makeVkbButton[ args___] := unexpected[ makeVkbButton, {args}]
+
+$formBlockMap = {
+	{1, 1} -> { langButtonData["FORALL1"], {}, {}, {}},
+	{1, 2} -> { langButtonData["FORALL2"], {}, {}, {}},
+	{1, 3} -> { langButtonData["AND1"], {}, {}, {}},
+	{1, 4} -> { langButtonData["IMPL1"], {}, {}, {}},
+	{1, 5} -> { langButtonData["EQDEF"], {}, {}, {}},
+	{2, 1} -> { langButtonData["EXISTS1"], {}, {}, {}},
+	{2, 2} -> { langButtonData["EXISTS2"], {}, {}, {}},
+	{2, 3} -> { langButtonData["OR1"], {}, {}, {}},
+	{2, 4} -> { langButtonData["EQUIV1"], {}, {}, {}},
+	{2, 5} -> { langButtonData["EQUIVDEF"], {}, {}, {}},
+	{i_, j_} -> Table[ {}, {4}]
+};
+
+$charBlockMap = {
+	{1, 1} -> { {"\[EscapeKey]", "\[AliasDelimiter]"}, {"\[EscapeKey]", "\[AliasDelimiter]"}, {"\[EscapeKey]", "\[AliasDelimiter]"}, {"\[EscapeKey]", "\[AliasDelimiter]"}},
+	{1, 2} -> { {"q"}, {"Q"}, {}, {}},
+	{1, 3} -> { {"w"}, {"W"}, {}, {}},
+	{1, 4} -> { {"e"}, {"E"}, {}, {}},
+	{1, 5} -> { {"r"}, {"R"}, {}, {}},
+	{1, 6} -> { {"t"}, {"T"}, {}, {}},
+	{1, 7} -> { {"y"}, {"Y"}, {}, {}},
+	{1, 8} -> { {"u"}, {"U"}, {}, {}},
+	{1, 9} -> { {"i"}, {"I"}, {}, {}},
+	{1, 10} -> { {"o"}, {"O"}, {}, {}},
+	{1, 11} -> { {"p"}, {"P"}, {}, {}},
+	{2, 2} -> { {"a"}, {"A"}, {}, {}},
 	{2, 3} -> { {"s"}, {"S"}, {}, {}},
 	{2, 4} -> { {"d"}, {"D"}, {}, {}},
 	{2, 5} -> { {"f"}, {"F"}, {}, {}},
@@ -214,37 +297,53 @@ $vkbMap = {
 	{2, 8} -> { {"j"}, {"J"}, {}, {}},
 	{2, 9} -> { {"k"}, {"K"}, {}, {}},
 	{2, 10} -> { {"l"}, {"L"}, {}, {}},
-	{2, 11} -> { {";"}, {":"}, {}, {}},
-	{2, 12} -> { {"'"}, {"\""}, {}, {}},
-	{2, 13} -> { {}, {}, {}, {}},
-	{3, 1} -> { {}, {}, {}, {}},
-	{3, 2} -> { {"z"}, {"Z"}, langButtonData["FORALL2"], {}},
+	{2, 11} -> { {"EnterKey"}, {"EnterKey"}, {"EnterKey"}, {"EnterKey"}},
+	{3, 2} -> { {"z"}, {"Z"}, {}, {}},
 	{3, 3} -> { {"x"}, {"X"}, {}, {}},
 	{3, 4} -> { {"c"}, {"C"}, {}, {}},
 	{3, 5} -> { {"v"}, {"V"}, {}, {}},
 	{3, 6} -> { {"b"}, {"B"}, {}, {}},
 	{3, 7} -> { {"n"}, {"N"}, {}, {}},
 	{3, 8} -> { {"m"}, {"M"}, {}, {}},
-	{3, 9} -> { {","}, {"<"}, {}, {}},
-	{3, 10} -> { {"."}, {">"}, {}, {}},
-	{3, 11} -> { {"/"}, {"?"}, {}, {}},
-	{3, 12} -> { {}, {}, {}, {}},
-	{3, 13} -> { {}, {}, {}, {}},
-	{1, 1} -> { {"`"}, {"~"}, {}, {}},
-	{1, 2} -> { {1}, {"!"}, {}, {}},
-	{1, 3} -> { {2}, {"@"}, {}, {}},
-	{1, 4} -> { {3}, {"#"}, {}, {}},
-	{1, 5} -> { {4}, {"$"}, {}, {}},
-	{1, 6} -> { {5}, {"%"}, {}, {}},
-	{1, 7} -> { {6}, {"^"}, {}, {}},
-	{1, 8} -> { {7}, {"&"}, {}, {}},
-	{1, 9} -> { {8}, {"*"}, {}, {}},
-	{1, 10} -> { {9}, {"("}, {}, {}},
-	{1, 11} -> { {0}, {")"}, {}, {}},
-	{1, 12} -> { {"-"}, {"_"}, {}, {}},
-	{1, 13} -> { {"="}, {"+"}, {}, {}},
+	{3, 9} -> { {"["}, {"{"}, {}, {}},
+	{3, 10} -> { {"]"}, {"}"}, {}, {}},
+	{3, 11} -> { {"DeleteKey"}, {"DeleteKey"}, {"DeleteKey"}, {"DeleteKey"}},
 	{i_, j_} -> Table[ {}, {4}]
 };
+
+$numBlockMap = {
+	{1, 1} -> { {7}, {"!"}, {}, {}},
+	{1, 2} -> { {8}, {"@"}, {}, {}},
+	{1, 3} -> { {9}, {"#"}, {}, {}},
+	{1, 4} -> { {"+"}, {"#"}, {}, {}},
+	{2, 1} -> { {4}, {"$"}, {}, {}},
+	{2, 2} -> { {5}, {"%"}, {}, {}},
+	{2, 3} -> { {6}, {"^"}, {}, {}},
+	{2, 4} -> { {"-"}, {"^"}, {}, {}},
+	{3, 1} -> { {1}, {"&"}, {}, {}},
+	{3, 2} -> { {2}, {"*"}, {}, {}},
+	{3, 3} -> { {3}, {"("}, {}, {}},
+	{3, 4} -> { {"*"}, {"("}, {}, {}},
+	{4, 1} -> { {0}, {")"}, {}, {}},
+	{4, 2} -> { {"."}, {"_"}, {}, {}},
+	{4, 4} -> { {"/"}, {"+"}, {}, {}},
+	{i_, j_} -> Table[ {}, {4}]
+
+};
+
+$symBlockMap = {
+	{1, 1} -> { {"/"}, {"?"}, {}, {}},
+	{1, 2} -> { {","}, {"<"}, {}, {}},
+	{1, 3} -> { {"."}, {">"}, {}, {}},
+	{1, 4} -> { {}, {}, {}, {}},
+	{2, 1} -> { {}, {}, {}, {}},
+	{2, 2} -> { {"\\"}, {"|"}, {}, {}},
+	{2, 3} -> { {";"}, {":"}, {}, {}},
+	{2, 4} -> { {"'"}, {"\""}, {}, {}},
+	{3, 1} -> { {"`"}, {"~"}, {}, {}},
+	{i_, j_} -> Table[ {}, {4}]
+};
+
 (* ::Subsubsection:: *)
 (* displaySelectedGoal *)
    
@@ -578,13 +677,22 @@ headerView[file_, Cell[ content_String, style_, ___], tags_, task_] :=
         "solve",
         Row[{Checkbox[Dynamic[allTrue[tags, kbSelectSolve], setAll[tags, kbSelectSolve, #] &]], Style[ content, style]}, Spacer[10]]        
     ]
-headerView[args___] :=
-    unexpected[headerView, {args}]
+headerView[ file_, Cell[ content_TextData, style_, ___], tags_, task_] := headerView[ file, Cell[ formattedCellToString[ content], style], tags, task]
+headerView[args___] := unexpected[headerView, {args}]
 
 displayCellContent[ BoxData[ b_]] := DisplayForm[ b]
 displayCellContent[ c_] := DisplayForm[ c]
 displayCellContent[ args___] := unexpected[ displayCellContent, {args}]
 
+formattedCellToString[ TextData[ l_List]] := Apply[ StringJoin, Map[ textDataToString, l]]
+formattedCellToString[ d_] := textDataToString[ d]
+formattedCellToString[ args___] := unexpected[ formattedCellToString, {args}]
+
+textDataToString[ s_String] := StringReplace[ s, "\n" -> " "]
+textDataToString[ StyleBox[ s_String, ___]] := textDataToString[ s]
+textDataToString[ Cell[ BoxData[ b_], ___]] := "\!\(" <> ToString[ InputForm[ b]] <> "\)"
+textDataToString[ _] := "\[DownQuestion]?"
+textDataToString[ args___] := unexpected[ textDataToString, {args}]
 
 (* ::Subsubsection:: *)
 (* updateKBBrowser *)
@@ -1360,6 +1468,7 @@ makeButtonCategory[ args___] := unexpected[ makeButtonCategory, {args}]
 
 langButtons[] := Pane[ 
 	Column[{
+		Button[ translate[ "Virtual Keyboard"], virtualKeyboard[]],
 		Column[ Map[ makeButtonCategory, allFormulae]],
 		Row[{translate["tcSessTabMathTabBS"], 
 			Row[{RadioButton[Dynamic[$buttonNat], False], translate["tcSessTabMathTabBSform"]}, Spacer[2]], 

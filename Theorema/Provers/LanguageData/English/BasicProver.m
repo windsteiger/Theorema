@@ -7,7 +7,8 @@ With[ {lang = "English"},
 MessageName[ basicProver, "usage", lang] = "Rules for the basic language constructs from the Theorema language, standard propositional and predicate logic.";
 MessageName[ quantifierRules, "usage", lang] = "Rules for quantifiers.";
 
-MessageName[ andGoal, "usage", lang] = "Split a conjunction in the goal into several subgoals.";
+MessageName[ andGoal, "usage", lang] = "Split a conjunction in the goal.";
+MessageName[ andKB, "usage", lang] = "Split a conjunction in the knowledge base.";
 MessageName[ implGoalDirect, "usage", lang] = "Prove implication directly.";
 MessageName[ implGoalCP, "usage", lang] = "Prove implication using contraposition.";
 
