@@ -22,7 +22,7 @@ Needs["Theorema`Common`"];
 Begin["`Private`"] (* Begin Private Context *) 
 
 availableLanguages[] := Map[ FileBaseName, allLanguageFiles[]]
-allLanguageFiles[] := FileNames[ "*.m", ToFileName[{$TheoremaDirectory, "Theorema", "Interface", "LanguageData"}]]
+allLanguageFiles[] := FileNames[ "*.m", FileNameJoin[{$TheoremaDirectory, "Theorema", "Interface", "LanguageData"}]]
 
 translate[ s_String] := translate[ s, $Language];
 Map[ Get, allLanguageFiles[]];

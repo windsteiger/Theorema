@@ -17,7 +17,7 @@
 
 BeginPackage["Theorema`Language`", {"Theorema`"}]
 
-Map[ Get, FileNames[ "*.m", ToFileName[{$TheoremaDirectory, "Theorema", "Language", "LanguageData"}]]];
+Map[ Get, FileNames[ "*.m", FileNameJoin[{$TheoremaDirectory, "Theorema", "Language", "LanguageData"}]]];
 
 Get["Theorema`Language`FormulaManipulation`"]
 Get["Theorema`Language`Syntax`"]

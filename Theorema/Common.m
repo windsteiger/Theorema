@@ -7,6 +7,6 @@ BeginPackage["Theorema`Common`", {"Theorema`"}]
   The sole task of this package is to export symbols that other packages want to share
 *)
 
-Map[ Get, FileNames[ "*.m", ToFileName[{$TheoremaDirectory, "Theorema", "System", "LanguageData"}]]];
+Map[ Get, FileNames[ "*.m", FileNameJoin[{$TheoremaDirectory, "Theorema", "System", "LanguageData"}]]];
 
 EndPackage[]

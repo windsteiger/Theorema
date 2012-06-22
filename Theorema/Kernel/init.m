@@ -29,12 +29,12 @@ On[ Assert]
 BeginPackage["Theorema`"];
 
 Which[!ValueQ[$TheoremaDirectory],
-	$TheoremaDirectory=With[{`priv`possibleDirs=Select[$Path,(FileType[ToFileName[{#,"Theorema","Kernel"},"init.m"]]===File)&]},
+	$TheoremaDirectory=With[{`priv`possibleDirs=Select[$Path,(FileType[FileNameJoin[{#,"Theorema","Kernel","init.m"}]]===File)&]},
 		If[`priv`possibleDirs==={},
 			Print["The Theorema Directory is not installed properly.\nPlease consult the installation guide."];
 			Exit[],
 			`priv`possibleDirs[[1]]]],
-	FileType[ToFileName[{$TheoremaDirectory,"Theorema","Kernel"},"init.m"]]=!=File,
+	FileType[FileNameJoin[{$TheoremaDirectory,"Theorema","Kernel","init.m"}]]=!=File,
 	Print[StringForm["$TheoremaDirectory=``.\nThe Theorema Directory is not installed in this directory.\nPlease consult the installation guide.",$TheoremaDirectory]];
 	Exit[]
 ];
@@ -45,16 +45,16 @@ If[ FreeQ[ $BoxForms, System`TheoremaForm],
 	ParentForm[ System`TheoremaForm] ^= StandardForm;
 ]
 
-Map[ Get, FileNames[ "*.m", ToFileName[{$TheoremaDirectory, "Theorema", "Kernel", "LanguageData"}]]];
+Map[ Get, FileNames[ "*.m", FileNameJoin[{$TheoremaDirectory, "Theorema", "Kernel", "LanguageData"}]]];
 
 Protect[$TheoremaDirectory]; 
 
-$TheoremaArchiveDirectory = ToFileName[{$TheoremaDirectory,"Theorema","Knowledge"}];
+$TheoremaArchiveDirectory = FileNameJoin[{$TheoremaDirectory,"Theorema","Knowledge"}];
 $TheoremaArchivePath = {$TheoremaArchiveDirectory, $HomeDirectory};
 
 If[ TrueQ[$Notebooks],
     If[!ValueQ[`priv`welcomeScreen],
-    	`priv`welcomeScreen = NotebookOpen[ToFileName[{$TheoremaDirectory,"Theorema","FrontEnd"},"Startup.nb"],
+    	`priv`welcomeScreen = NotebookOpen[FileNameJoin[{$TheoremaDirectory,"Theorema","FrontEnd","Startup.nb"}],
         WindowElements -> {}, WindowSize -> All, WindowFrame -> "Frameless", Deployed -> True];
         SelectionMove[ `priv`welcomeScreen, Next, Cell]],
     Print["Theorema Copyright (C) 2010 The Theorema Group.\n

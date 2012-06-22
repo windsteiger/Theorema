@@ -139,7 +139,7 @@ theoremaCommander[] /; $Notebooks :=
         			LabelStyle->"TabLabel2", ControlPlacement->Top],
         		translate["tcPreferencesTabLabel"]->TabView[{
         			translate["tcPrefLanguage"]->PopupMenu[Dynamic[$Language], availableLanguages[]],
-        			translate["tcPrefArchiveDir"]->Row[{Dynamic[Tooltip[ToFileName[Take[FileNameSplit[$TheoremaArchiveDirectory], -2]], $TheoremaArchiveDirectory]],
+        			translate["tcPrefArchiveDir"]->Row[{Dynamic[Tooltip[FileNameJoin[Take[FileNameSplit[$TheoremaArchiveDirectory], -2]], $TheoremaArchiveDirectory]],
         				FileNameSetter[Dynamic[$TheoremaArchiveDirectory], "Directory"]}, Spacer[10]]},
         			LabelStyle->"TabLabel2", ControlPlacement->Top]},
         		Dynamic[$tcTopLevelTab],
@@ -175,7 +175,7 @@ virtualKeyboard[ ] /; $Notebooks :=
         		Grid[ Table[ numButton[ i, j, FromDigits[ {$CtrlActive, $ShiftActive}, 2]], {i, 4}, {j, 4}], Spacings -> {0.2, 0.25}],
         		Grid[ Table[ symButton[ i, j, FromDigits[ {$CtrlActive, $ShiftActive}, 2]], {i, 4}, {j, 4}], Spacings -> {0.2, 0.25}]
         }, Spacer[5]]],
-        StyleDefinitions -> ToFileName[{"Theorema"}, "Keyboard.nb"],
+        StyleDefinitions -> FileNameJoin[{"Theorema", "Keyboard.nb"}],
         WindowTitle -> translate["Virtual Keyboard"]]
 virtualKeyboard[ args___] := unexpected[ virtualKeyboard, {args}]
 

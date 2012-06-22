@@ -23,7 +23,7 @@ Needs[ "Theorema`Common`"]
 Needs[ "Theorema`Language`"]
 
 (* Load the language dependent proof texts and prover descriptions*)
-Map[ Get, FileNames[ "*.m", ToFileName[{$TheoremaDirectory, "Theorema", "Provers", "LanguageData"}], 2]];
+Map[ Get, FileNames[ "*.m", FileNameJoin[{$TheoremaDirectory, "Theorema", "Provers", "LanguageData"}], 2]];
 
 Get[ "Theorema`Provers`Common`"]
 

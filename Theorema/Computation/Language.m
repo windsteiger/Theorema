@@ -5,7 +5,7 @@ Needs[ "Theorema`Common`"]
 (*
    Load the same symbols like in Theorema`Language` so that all language constructs will be
    available in Computation context as well *)
-Map[ Get, FileNames[ "*.m", ToFileName[{$TheoremaDirectory, "Theorema", "Language", "LanguageData"}]]];
+Map[ Get, FileNames[ "*.m", FileNameJoin[{$TheoremaDirectory, "Theorema", "Language", "LanguageData"}]]];
 
 Begin[ "`Private`"]
 
