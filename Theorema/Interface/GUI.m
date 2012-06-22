@@ -145,7 +145,7 @@ theoremaCommander[] /; $Notebooks :=
         		Dynamic[$tcTopLevelTab],
         		LabelStyle->"TabLabel1", ControlPlacement->Left
         	], TrackedSymbols :> {$Language}]],
-        	StyleDefinitions -> ToFileName[{"Theorema"}, "GUI.nb"],
+        	StyleDefinitions -> FileNameJoin[{"Theorema", "GUI.nb"}],
         	WindowTitle -> translate["Theorema Commander"],
         	ScreenStyleEnvironment -> style,
         	WindowElements -> {"StatusArea"}]
