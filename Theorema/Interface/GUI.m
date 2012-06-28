@@ -137,11 +137,13 @@ theoremaCommander[] /; $Notebooks :=
         			translate["tcSolveTabKBTabLabel"]->Dynamic[Refresh[displayKBBrowser["solve"], TrackedSymbols :> {$kbStruct}]],
         			translate["tcSolveTabBuiltinTabLabel"]->displayBuiltinBrowser["solve"]}, Dynamic[$tcSolveTab],
         			LabelStyle->"TabLabel2", ControlPlacement->Top],
-        		translate["tcPreferencesTabLabel"]->TabView[{
+        		translate["tcPreferencesTabLabel"]->Column[ Join[{TabView[{
         			translate["tcPrefLanguage"]->PopupMenu[Dynamic[$Language], availableLanguages[]],
         			translate["tcPrefArchiveDir"]->Row[{Dynamic[Tooltip[FileNameJoin[Take[FileNameSplit[$TheoremaArchiveDirectory], -2]], $TheoremaArchiveDirectory]],
-        				FileNameSetter[Dynamic[$TheoremaArchiveDirectory], "Directory"]}, Spacer[10]]},
+        				FileNameSetter[Dynamic[$TheoremaArchiveDirectory], "Directory"]}, Spacer[10]],
+        			translate["tcPrefAppear"]->setAppearance[]},
         			LabelStyle->"TabLabel2", ControlPlacement->Top]},
+        			savePreferencesButton[]]]},
         		Dynamic[$tcTopLevelTab],
         		LabelStyle->"TabLabel1", ControlPlacement->Left
         	], TrackedSymbols :> {$Language}]],
@@ -1265,6 +1267,50 @@ loadArchiveInPlace[ arch_List] :=
 		SelectionEvaluate[ InputNotebook[]]
 	]
 loadArchiveInPlace[ args___] := unexpected[ loadArchiveInPlace, {args}]
+
+
+(* ::Section:: *)
+(* Preferences Tab *)
+
+setAppearance[ ] :=
+    Pane[ Column[{
+    	Labeled[ PopupMenu[ Dynamic[ $TheoremaColorScheme], $availableColorSchemes], 
+    		Style[ translate[ "tcPrefAppearColorSchemes"], "ItemLabel"], {{ Top, Left}}],
+    	Labeled[ Row[{Checkbox[ Dynamic[ $suppressWelcomeScreen]], translate["tcPrefAppearSuppressWelcome"]}, Spacer[2]], 
+    		Style[ translate[ "tcPrefAppearWelcome"], "ItemLabel"], {{ Top, Left}}]
+    	}], {350, 450}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic
+    ]
+setAppearance[ args___] := unexpected[ setAppearance, {args}]
+
+savePreferencesButton[ ] :=
+    Module[ {},
+        $prefsSaveStatus = DateString[ FileDate[ FileNameJoin[{$UserBaseDirectory, "Applications", "Theorema", "Kernel", "TheoremaPreferences.m"}]]];
+        {Dynamic[ Refresh[ Row[{
+        	translate["preferences last saved: "],
+            $prefsSaveStatus <> If[ {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen} === $savedValues,
+                                        " \[Checkmark]",
+                                        ""
+                                    ]}], TrackedSymbols :> {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen, $prefsSaveStatus}]],
+         Button[ translate["save current settings"], savePreferences[]]
+        }
+    ]
+savePreferencesButton[ args___] := unexpected[ savePreferencesButton, {args}]
+    
+savePreferences[ ] :=
+	Module[{prefsDir = FileNameJoin[{$UserBaseDirectory, "Applications", "Theorema", "Kernel"}], prefsFile},
+		prefsFile = FileNameJoin[{prefsDir, "TheoremaPreferences.m"}];
+		If[ !DirectoryQ[ prefsDir],
+			CreateDirectory[ prefsDir, CreateIntermediateDirectories -> True],
+		(* else *)
+			If[ FileExistsQ[ prefsFile],
+				DeleteFile[ prefsFile]
+			]
+		];
+		$savedValues = {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen};
+		Save[ prefsFile, {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen, $savedValues}];
+		$prefsSaveStatus = DateString[ FileDate[ FileNameJoin[{$UserBaseDirectory, "Applications", "Theorema", "Kernel", "TheoremaPreferences.m"}]]];
+	]
+savePreferences[ args___] := unexpected[ savePreferences, {args}]
 
 (* ::Section:: *)
 (* Math Tab *)

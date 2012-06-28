@@ -82,6 +82,10 @@ With[ {lang = "English"},
     translate["tcPreferencesTabLabel", lang] = "Preferences";
 	    translate["tcPrefLanguage", lang] = "Language";
 	    translate["tcPrefArchiveDir", lang] = "Archive Directory";
+	    translate["tcPrefAppear", lang] = "Appearance";
+	    	translate["tcPrefAppearColorSchemes", lang] = "Color Schemes";
+	    	translate["tcPrefAppearWelcome", lang] = "Welcome Screen";
+	    	translate["tcPrefAppearSuppressWelcome", lang] = "Suppress Welcome Screen";
     translate["nA", lang] = "not available";
 	translate["pRules", lang] = "Proof rules";
 	translate["pStrat", lang] = "Proof strategy";
@@ -108,6 +112,8 @@ With[ {lang = "English"},
 	translate["conjunction of subproofs", lang] = "conjunction of subproofs";
 	translate["disjunction of subproofs", lang] = "disjunction of subproofs";
 	translate["unknown proof node", lang] = "unknown proof node";
+	translate["save current settings", lang] = "Save current settings";
+	translate["preferences last saved: ", lang] = "Preferences last saved: ";
 
 	translate["Virtual Keyboard", lang] = "Virtual Keyboard";
 	    
