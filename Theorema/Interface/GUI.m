@@ -1283,8 +1283,10 @@ setAppearance[ ] :=
 setAppearance[ args___] := unexpected[ setAppearance, {args}]
 
 savePreferencesButton[ ] :=
-    Module[ {},
-        $prefsSaveStatus = DateString[ FileDate[ FileNameJoin[{$UserBaseDirectory, "Applications", "Theorema", "Kernel", "TheoremaPreferences.m"}]]];
+    Module[ {prefsFile = FileNameJoin[{$UserBaseDirectory, "Applications", "Theorema", "Kernel", "TheoremaPreferences.m"}]},
+        $prefsSaveStatus = If[FileExistsQ[ prefsFile],
+        	DateString[ FileDate[ prefsFile]],
+        	"\[LongDash]"];
         {Dynamic[ Refresh[ Row[{
         	translate["preferences last saved: "],
             $prefsSaveStatus <> If[ {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen} === $savedValues,
