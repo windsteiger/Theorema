@@ -1274,7 +1274,8 @@ loadArchiveInPlace[ args___] := unexpected[ loadArchiveInPlace, {args}]
 
 setAppearance[ ] :=
     Pane[ Column[{
-    	Labeled[ PopupMenu[ Dynamic[ $TheoremaColorScheme], $availableColorSchemes], 
+    	Labeled[ Row[{PopupMenu[ Dynamic[ $TheoremaColorScheme], $availableColorSchemes], 
+    				  Dynamic[ TMAcolorScheme[ $TheoremaColorScheme, ImageSize -> {25,25}]]}, Spacer[2]], 
     		Style[ translate[ "tcPrefAppearColorSchemes"], "ItemLabel"], {{ Top, Left}}],
     	Labeled[ Row[{Checkbox[ Dynamic[ $suppressWelcomeScreen]], translate["tcPrefAppearSuppressWelcome"]}, Spacer[2]], 
     		Style[ translate[ "tcPrefAppearWelcome"], "ItemLabel"], {{ Top, Left}}]
