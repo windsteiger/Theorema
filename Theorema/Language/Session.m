@@ -352,9 +352,17 @@ applicableGlobalDeclarations[ nb_NotebookObject, raw_Notebook, pos_List] :=
 applicableGlobalDeclarations[ args___] := unexpected[ applicableGlobalDeclarations, {args}]
 
 displayGlobalDeclarations[ nb_NotebookObject] :=
-	Module[{ globDecl, pos, raw, magOpt = Options[ nb, Magnification], availDecl},
+	Module[{ globDecl, pos, raw, sel, magOpt = Options[ nb, Magnification], availDecl},
 		raw = NotebookGet[ nb];
-		pos = First[ Position[ raw, NotebookRead[ nb]]];
+		(* If nothing is selected, i.e. the cursor is between cells, or not an entire cell is selected, then select some cell *)
+		Do[ 
+			If[ Head[ sel = NotebookRead[ nb]] === Cell,
+				Break[]
+			];
+			SelectionMove[ nb, dir, Cell],
+			{dir, {All, Next, Previous}}
+		];
+		pos = First[ Position[ raw, sel]];
 		availDecl = applicableGlobalDeclarations[ nb, raw, pos];
 		If[ availDecl =!= {},
 			globDecl = ExpressionCell[ theoremaDisplay[ applyGlobalDeclaration[ "\[SelectionPlaceholder]", availDecl]], 
