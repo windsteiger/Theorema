@@ -67,7 +67,9 @@ Forall$TM[ RNG$[ r_, s__], cond_, form_]/; buiActive["Forall"] :=
 	]
 
 Forall$TM[ RNG$[ r:_SETRNG$|_STEPRNG$], cond_, form_]/; buiActive["Forall"] :=
-   	forallIteration[ rangeToIterator[ r], cond, form] 
+	Module[ {iter},
+   		forallIteration[ iter, cond, form] /; (iter = rangeToIterator[ r]) =!= $Failed
+	]
 
 (* We introduce local variables for the iteration so that we can substitute only for free occurrences.
    Technically, Mathematica coulf iterate the VAR$[..] directly, but it would substitute ALL occurrences then *)
@@ -104,7 +106,9 @@ Exists$TM[ RNG$[ r_, s__], cond_, form_]/; buiActive["Exists"] :=
 	]
 
 Exists$TM[ RNG$[ r:_SETRNG$|_STEPRNG$], cond_, form_]/; buiActive["Exists"] :=
-   	existsIteration[ rangeToIterator[ r], cond, form] 
+	Module[ {iter},
+   		existsIteration[ iter, cond, form] /; (iter = rangeToIterator[ r]) =!= $Failed
+	]
 
 SetAttributes[ existsIteration, HoldRest]
 existsIteration[ {x_, iter__}, cond_, form_] :=
