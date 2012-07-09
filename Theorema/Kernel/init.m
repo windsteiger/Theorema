@@ -63,7 +63,7 @@ Map[ Get, FileNames["TheoremaPreferences.m", {
     
 `priv`arrowShape = {{0, 0}, {94, 0}, {107, 40}, {70, 40}, {156, 126}, {126, 156}, {40, 70}, {40, 107}, {0, 94}, {0, 0}};
 
-`priv`RISCLogo[a_] := {TMAcolor["LogoFG"], 
+`priv`RISCLogo[a_] := {TMAcolor[1], 
    Rotate[Disk[{194, 0}, 17], a, {0, 0}], 
    Rotate[Disk[{-194, 0}, 17], a, {0, 0}], 
    Rotate[Disk[{0, 194}, 17], a, {0, 0}], 
@@ -79,31 +79,31 @@ Map[ Get, FileNames["TheoremaPreferences.m", {
       Map[#.{{Cos[Pi/2], Sin[Pi/2]}, {-Sin[Pi/2], Cos[Pi/2]}} + {175, 
           19} &, `priv`arrowShape]], a, {0, 0}]}};
 
-`priv`topleft = {TMAcolor["LogoText"], 
+`priv`topleft = {TMAcolor[4], 
    Text["Original Concept by", {-230, 202}, {-1, 0}, 
     BaseStyle -> {FontFamily -> "Helvetica", FontSize -> 18}], 
    Text["Bruno Buchberger", {-230, 172}, {-1, 0}, 
     BaseStyle -> {FontFamily -> "Helvetica", FontSize -> 18}]};
 
 
-`priv`topright = {TMAcolor["LogoText"], 
+`priv`topright = {TMAcolor[4], 
    Text["Developed by the", {230, 202}, {1, 0}, 
     BaseStyle -> {FontFamily -> "Helvetica", FontSize -> 18}], 
    Text["Theorema Group", {230, 172}, {1, 0}, 
     BaseStyle -> {FontFamily -> "Helvetica", FontSize -> 18}]};
 
 
-`priv`bottomright = {TMAcolor["LogoText"], 
+`priv`bottomright = {TMAcolor[4], 
    Text["Version " <> Riffle[{$TheoremaVersion, $TheoremaRelease}, "."] <> " \[Copyright] 2010-" <> 
      ToString[Date[][[1]]], {230, -202}, {1, 0}, 
     BaseStyle -> {FontFamily -> "Helvetica", FontSize -> 12}]};
 
 
-`priv`bottomleft = {TMAcolor["LogoText"], 
+`priv`bottomleft = {TMAcolor[4], 
    Text["www.risc.jku.at/research/theorema", {-230, -202}, {-1, 0}, 
     BaseStyle -> {FontFamily -> "Helvetica", FontSize -> 11}]};
 
-`priv`center = {TMAcolor["LogoTMA"], 
+`priv`center = {TMAcolor[3], 
     Text["T h e o r e m a  " <> $TheoremaVersion, {0, -3}, 
      BaseStyle -> {FontWeight -> Bold, FontSize -> 36}]};
 
@@ -111,7 +111,7 @@ showWelcomeScreen[] /; !ValueQ[`priv`welcomeScreen] && !TrueQ[$suppressWelcomeSc
     `priv`welcomeScreen = CreatePalette[
     	Dynamic[ Graphics[{`priv`RISCLogo[Clock[2 Pi, 2, 3]], `priv`topleft, `priv`topright, `priv`bottomright, `priv`bottomleft,
     		{Opacity[Clock[1, 5, 1]], `priv`center}},
-    		PlotRange -> {-280, 280}, ImageSize -> {560, 560}, Background -> TMAcolor["LogoBG"]]],
+    		PlotRange -> {-280, 280}, ImageSize -> {560, 560}, Background -> TMAcolor[2]]],
     	WindowFrame -> "Frameless", WindowMargins -> Automatic
     ];
     Pause[5];
@@ -119,7 +119,8 @@ showWelcomeScreen[] /; !ValueQ[`priv`welcomeScreen] && !TrueQ[$suppressWelcomeSc
     		
 If[ TrueQ[$Notebooks],
     showWelcomeScreen[],
-    Print["Theorema Copyright (C) 2010 The Theorema Group.\n
+    Print["Theorema Version " <> Riffle[{$TheoremaVersion, $TheoremaRelease}, "."] <> " (C) 2010-" <> 
+     ToString[Date[][[1]]] <> " The Theorema Group.\n
     This program comes with ABSOLUTELY NO WARRANTY;\n\n    This is free software, and you are welcome to\n    redistribute it under the conditions of the\n    GNU General Public License, see <http://www.gnu.org/licenses/>."]
 ];
 

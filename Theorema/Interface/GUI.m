@@ -147,7 +147,7 @@ theoremaCommander[] /; $Notebooks :=
         		Dynamic[$tcTopLevelTab],
         		LabelStyle->"TabLabel1", ControlPlacement->Left
         	], TrackedSymbols :> {$Language}]],
-        	StyleDefinitions -> FileNameJoin[{"Theorema", "GUI.nb"}],
+        	StyleDefinitions -> FileNameJoin[{"Theorema", "GUI-"<>$TheoremaColorScheme<>".nb"}],
         	WindowTitle -> translate["Theorema Commander"],
         	ScreenStyleEnvironment -> style,
         	WindowElements -> {"StatusArea"}]
@@ -862,32 +862,30 @@ displayBuiltinBrowser[args___] := unexcpected[ displayBuiltinBrowser, {args}]
 
 selectProver[ ] :=
     Pane[ Column[{
-    	Row[ {Labeled[ PopupMenu[ Dynamic[ $selectedRuleSet], Map[ MapAt[ translate, #, {2}]&, $registeredRuleSets]], 
-    		Style[ translate[ "pRules"], "ItemLabel"], {{ Top, Left}}], Spacer[5],
-    		Tooltip[ Graphics[{{RGBColor[0.485988, 0.555312, 1], Disk[{0, 0}, 1]}, Text[ "?", BaseStyle -> "Section"]}, ImageSize -> {20, 20}], 
-    			Apply[ Function[ rs, MessageName[ rs, "usage"], {HoldFirst}], $selectedRuleSet]]}],
+    	Labeled[ Tooltip[ PopupMenu[ Dynamic[ $selectedRuleSet], Map[ MapAt[ translate, #, {2}]&, $registeredRuleSets]],
+    			Apply[ Function[ rs, MessageName[ rs, "usage"], {HoldFirst}], $selectedRuleSet]], 
+    		translate[ "pRules"], {{ Top, Left}}],
     	structViewRules[ $selectedRuleSet],
-    	Row[ {Labeled[ PopupMenu[ Dynamic[ $selectedStrategy], Map[ MapAt[ translate, #, {2}]&, $registeredStrategies]], 
-    		Style[ translate[ "pStrat"], "ItemLabel"], {{ Top, Left}}], Spacer[5],
-    		Tooltip[ Graphics[{{RGBColor[0.485988, 0.555312, 1], Disk[{0, 0}, 1]}, Text[ "?", BaseStyle -> "Section"]}, ImageSize -> {20, 20}], 
-    			With[ {ss = $selectedStrategy}, MessageName[ ss, "usage"]]]}],
+    	Labeled[ Tooltip[ PopupMenu[ Dynamic[ $selectedStrategy], Map[ MapAt[ translate, #, {2}]&, $registeredStrategies]],
+    		With[ {ss = $selectedStrategy}, MessageName[ ss, "usage"]]], 
+    		translate[ "pStrat"], {{ Top, Left}}],
     	Labeled[ Dynamic[ Row[ {Slider[ Dynamic[ $selectedSearchDepth], {2, $maxSearchDepth, 1}],
     		InputField[ Dynamic[ $selectedSearchDepth], Number, FieldSize -> 3], 
     		Button[ "-", $selectedSearchDepth--],
     		Button[ "+", $selectedSearchDepth++],
     		Button[ "\[LeftSkeleton]", $maxSearchDepth/=2],
-    		Button[ "\[RightSkeleton]", $maxSearchDepth*=2]}]], Style[ translate[ "sDepth"], "ItemLabel"], {{ Top, Left}}],
+    		Button[ "\[RightSkeleton]", $maxSearchDepth*=2]}]], translate[ "sDepth"], {{ Top, Left}}],
     	Labeled[ RadioButtonBar[ 
     		Dynamic[Theorema`Provers`Common`Private`$proofCellStatus], {Open -> translate[ "open"], Closed -> translate[ "closed"]}], 
-    		Style[ translate[ "proofCellStatus"], "ItemLabel"], {{ Top, Left}}]	
+    		translate[ "proofCellStatus"], {{ Top, Left}}]	
     	}], {350, 450}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
 selectProver[ args___] := unexpected[ selectRuleSet, {args}]
 
 submitProveTask[ dummy_] := 
 	Module[ {},
 		Column[{
-			Labeled[ displaySelectedGoal[ $selectedProofGoal], Style[ translate["selGoal"], "ItemLabel"], {{ Top, Left}}],
-			Labeled[ displaySelectedKB[], Style[ translate["selKB"], "ItemLabel"], {{ Top, Left}}],
+			Labeled[ displaySelectedGoal[ $selectedProofGoal], translate["selGoal"], {{ Top, Left}}],
+			Labeled[ displaySelectedKB[], translate["selKB"], {{ Top, Left}}],
 			(* Method -> "Queued" so that no time limit is set for proof to complete *)
 			Button[ translate["prove"], execProveCall[ $selectedProofGoal, $selectedProofKB, $selectedRuleSet, $selectedStrategy, $selectedSearchDepth], Method -> "Queued"]
 		}]
@@ -1160,11 +1158,11 @@ structButtons[] :=
     Pane[ 
     Column[{
     	Labeled[ Grid[ Partition[ Map[ makeEnvButton, allEnvironments], 2]],
-    		Style[ translate[ "Environments"], "ItemLabel"], {{Top, Left}}],
+    		translate[ "Environments"], {{Top, Left}}],
     	Labeled[ Row[ {makeFormButton[], showEnvButton[]}, Spacer[5]],
-    		Style[ translate[ "Formulae"], "ItemLabel"], {{Top, Left}}],
+    		translate[ "Formulae"], {{Top, Left}}],
     	Labeled[ makeDeclButtons[],
-    		Style[ translate[ "Declarations"], "ItemLabel"], {{Top, Left}}]
+    		translate[ "Declarations"], {{Top, Left}}]
     }]]
 structButtons[args___] :=
     unexpected[envButtons, {args}]
@@ -1274,14 +1272,23 @@ loadArchiveInPlace[ args___] := unexpected[ loadArchiveInPlace, {args}]
 
 setAppearance[ ] :=
     Pane[ Column[{
-    	Labeled[ Row[{PopupMenu[ Dynamic[ $TheoremaColorScheme], $availableColorSchemes], 
-    				  Dynamic[ TMAcolorScheme[ $TheoremaColorScheme, ImageSize -> {25,25}]]}, Spacer[2]], 
-    		Style[ translate[ "tcPrefAppearColorSchemes"], "ItemLabel"], {{ Top, Left}}],
+    	Labeled[ Row[{PopupMenu[ Dynamic[ $TheoremaColorScheme], $availableColorSchemes, BaselinePosition -> Center], 
+    				  Dynamic[ setColorScheme[$TheoremaColorScheme]]}, Spacer[2]], 
+    		translate[ "tcPrefAppearColorSchemes"], {{ Top, Left}}],
     	Labeled[ Row[{Checkbox[ Dynamic[ $suppressWelcomeScreen]], translate["tcPrefAppearSuppressWelcome"]}, Spacer[2]], 
-    		Style[ translate[ "tcPrefAppearWelcome"], "ItemLabel"], {{ Top, Left}}]
+    		translate[ "tcPrefAppearWelcome"], {{ Top, Left}}]
     	}], {350, 450}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic
     ]
 setAppearance[ args___] := unexpected[ setAppearance, {args}]
+
+setColorScheme[ color_String] :=
+	Module[{},
+		If[ ValueQ[ $theoremaGUI],
+			SetOptions["Theorema Commander" /. $theoremaGUI, StyleDefinitions -> FileNameJoin[{"Theorema", "GUI-"<>color<>".nb"}]]
+		];
+		TMAcolorScheme[ color, ImageSize -> {28, 28}, BaselinePosition -> Center]
+	]
+setColorScheme[ args___] := unexpected[ setColorScheme, {args}]
 
 savePreferencesButton[ ] :=
     Module[ {prefsFile = FileNameJoin[{$UserBaseDirectory, "Applications", "Theorema", "Kernel", "TheoremaPreferences.m"}]},
@@ -1461,7 +1468,7 @@ langButtonData["FORALL1"] :=
 	{
 		If[ $buttonNat, 
 			translate["FORALL1"], 
-			DisplayForm[RowBox[{UnderscriptBox["\[ForAll]", Placeholder["rg"]], TagBox[ FrameBox["expr"], "SelectionPlaceholder"]}]]],
+			DisplayForm[RowBox[{UnderscriptBox[StyleBox["\[ForAll]", FontSize->14], Placeholder["rg"]], TagBox[ FrameBox["expr"], "SelectionPlaceholder"]}]]],
 		RowBox[{UnderscriptBox["\[ForAll]", "\[Placeholder]"], "\[SelectionPlaceholder]"}],
 		translate["QUANT1Tooltip"]
 	}
@@ -1470,7 +1477,7 @@ langButtonData["FORALL2"] :=
 	{
 		If[ $buttonNat, 
 			translate["FORALL2"], 
-			DisplayForm[RowBox[{UnderscriptBox[ UnderscriptBox["\[ForAll]", Placeholder["rg"]], Placeholder["cond"]], TagBox[ FrameBox["expr"], "SelectionPlaceholder"]}]]],
+			DisplayForm[RowBox[{UnderscriptBox[ UnderscriptBox[StyleBox["\[ForAll]", FontSize->14], Placeholder["rg"]], Placeholder["cond"]], TagBox[ FrameBox["expr"], "SelectionPlaceholder"]}]]],
 		RowBox[{UnderscriptBox[ UnderscriptBox["\[ForAll]", "\[Placeholder]"], "\[Placeholder]"], "\[SelectionPlaceholder]"}],
 		translate["QUANT2Tooltip"]
 	}
@@ -1479,7 +1486,7 @@ langButtonData["EXISTS1"] :=
 	{
 		If[ $buttonNat, 
 			translate["EXISTS1"], 
-			DisplayForm[RowBox[{UnderscriptBox["\[Exists]", Placeholder["rg"]], TagBox[ FrameBox["expr"], "SelectionPlaceholder"]}]]],
+			DisplayForm[RowBox[{UnderscriptBox[StyleBox["\[Exists]", FontSize->14], Placeholder["rg"]], TagBox[ FrameBox["expr"], "SelectionPlaceholder"]}]]],
 		RowBox[{UnderscriptBox["\[Exists]", "\[Placeholder]"], "\[SelectionPlaceholder]"}],
 		translate["QUANT1Tooltip"]
 	}
@@ -1488,7 +1495,7 @@ langButtonData["EXISTS2"] :=
 	{
 		If[ $buttonNat, 
 			translate["EXISTS2"], 
-			DisplayForm[RowBox[{UnderscriptBox[ UnderscriptBox["\[Exists]", Placeholder["rg"]], Placeholder["cond"]], TagBox[ FrameBox["expr"], "SelectionPlaceholder"]}]]],
+			DisplayForm[RowBox[{UnderscriptBox[ UnderscriptBox[StyleBox["\[Exists]", FontSize->14], Placeholder["rg"]], Placeholder["cond"]], TagBox[ FrameBox["expr"], "SelectionPlaceholder"]}]]],
 		RowBox[{UnderscriptBox[ UnderscriptBox["\[Exists]", "\[Placeholder]"], "\[Placeholder]"], "\[SelectionPlaceholder]"}],
 		translate["QUANT2Tooltip"]
 	}
