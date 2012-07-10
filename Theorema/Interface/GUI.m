@@ -1048,7 +1048,10 @@ newFormulaCell[ style_, label_:$initLabel] = Cell[BoxData["\[SelectionPlaceholde
 newFormulaCell[args___] :=
     unexpected[newFormulaCell, {args}]
 
-newOpenEnvCell[ type_String] := Cell[ type, "OpenEnvironment"]
+newOpenEnvCell[ type_String] := Cell[ type, "OpenEnvironment",
+	CellFrameLabels -> {{None, 
+    	Cell[ BoxData[ ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None,
+    		ButtonFunction :> Theorema`Language`Session`Private`removeEnvironment[ ButtonNotebook[]]]]]}, {None, None}}]
 newOpenEnvCell[args___] :=
     unexpected[newOpenEnvCell, {args}]
 

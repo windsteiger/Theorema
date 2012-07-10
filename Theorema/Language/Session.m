@@ -261,16 +261,56 @@ makeLabel[ args___] := unexpected[ makeLabel, {args}]
 
 relabelCell[nb_NotebookObject, cellTags_List, cellID_Integer] :=
 	Module[{ newFrameLabel, newCellTags, autoTags},
-		(* Join list of CellTags, use $labelSeparator *)
-		newFrameLabel = makeLabel[ cellTagsToString[ cellTags]];
 		(* Keep cleaned CellTags and add identification (ID) *)
 		autoTags = {cellIDLabel[ cellID], sourceLabel[ nb]};
 		newCellTags = Join[ autoTags, cellTags];
+		(* Join list of CellTags, use $labelSeparator *)
+		newFrameLabel = With[ {key = autoTags}, 
+			Cell[ BoxData[ RowBox[{
+				StyleBox[ makeLabel[ cellTagsToString[ cellTags]], "FrameLabel"], "  ",
+				ButtonBox["\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeFormula[ key]]}]]]];
 		SetOptions[ NotebookSelection[nb], CellFrameLabels -> {{None, newFrameLabel}, {None, None}}, CellTags -> newCellTags, ShowCellTags -> False];
 		(* return autoTags to be used as key for formula in KB *)
 		autoTags
 	]
 relabelCell[args___] := unexpected[ relabelCell,{args}]
+
+removeEnvironment[ nb_NotebookObject] :=
+	Module[{keys},
+		SelectionMove[ nb, All, ButtonCell];
+		SelectionMove[ nb, All, CellGroup];
+		keys = Map[ getKeyTags,
+			Cases[ NotebookRead[ nb],
+				Cell[_, "FormalTextInputFormula", ___, CellTags -> tags_, ___] -> tags, Infinity]];
+		NotebookDelete[ nb];
+		NotebookFind[ nb, "CloseEnvironment", Next, CellStyle];
+		SelectionMove[ nb, All, Cell];
+		NotebookDelete[ nb];
+		Scan[ removeFromEnv, keys];
+		updateKBBrowser[];	
+	]
+removeEnvironment[ args___] := unexpected[ removeEnvironment, {args}]
+
+removeFormula[ key_List] :=
+	Module[{},
+		SelectionMove[ ButtonNotebook[], All, ButtonCell];
+		NotebookDelete[ ButtonNotebook[]];
+		removeFromEnv[ key];
+		updateKBBrowser[];
+	]
+removeFormula[ args___] := unexpected[ removeFormula, {args}]
+
+removeFromEnv[ key_List] :=
+	Module[{p},
+		$tmaEnv = DeleteCases[ $tmaEnv, FML$[ key, ___]];
+		p = Position[ DownValues[ Theorema`Interface`GUI`Private`kbSelectProve], key];
+		If[ p =!= {},
+			Unset[ Theorema`Interface`GUI`Private`kbSelectProve[ key]]];
+		p = Position[ DownValues[ Theorema`Computation`Language`Private`activeComputationKB], key];
+		If[ p =!= {},
+			Unset[ Theorema`Computation`Language`Private`activeComputationKB[ key]]];			
+	]
+removeFromEnv[ args___] := unexpected[ removeFromEnv, {args}]
 
 cellLabel[ l_, key_String] := key <> $cellTagKeySeparator <> ToString[l]
 cellLabel[ args___] := unexpected[ cellLabel, {args}]
