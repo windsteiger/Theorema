@@ -28,14 +28,18 @@
 `admin`makeColorScheme[ ] := `admin`makeColorScheme[ $availableColorSchemes]
 `admin`makeColorScheme[ names_List] := Scan[ `admin`makeColorScheme, names]
 `admin`makeColorScheme[ name_String] :=
-	Module[{styles, file},
-		styles = NotebookGet[ NotebookOpen[ 
+	Module[{tmp, styles, file},
+		tmp = NotebookOpen[ 
 			FileNameJoin[ {$TheoremaDirectory, "Theorema", "FrontEnd", "StyleSheets", "Theorema", "GUIColors-Template.nb"}],
-			Visible -> False]];
+			Visible -> False];
+		styles = NotebookGet[ tmp];
 		file = FileNameJoin[ {$TheoremaDirectory, "Theorema", "FrontEnd", "StyleSheets", "Theorema", "GUI-"<>name<>".nb"}];
 		If[ FileExistsQ[ file], DeleteFile[ file]];
 		Print[ file];
-		Put[ styles /. Table[Apply[CMYKColor, IntegerDigits[i, 2, 4]] -> TMAcolor[i, name], {i, 0, 15}], file];
+		styles = NotebookPut[ styles /. Table[Apply[CMYKColor, IntegerDigits[i, 2, 4]] -> TMAcolor[i, name], {i, 0, 15}]];
+		SetOptions[ styles, MenuSortingValue -> None];
+		NotebookSave[ styles, file];
+		Scan[ NotebookClose, {tmp, styles}];
 	]
 `admin`makeColorScheme[ args___] := unexpected[ `admin`makeColorScheme, {args}]
 	
