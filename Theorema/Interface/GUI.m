@@ -125,7 +125,7 @@ theoremaCommander[] /; $Notebooks :=
         			translate["tcProveTabProverTabLabel"]->Dynamic[ Refresh[ selectProver[], TrackedSymbols :> {$selectedRuleSet, $selectedStrategy}]],
         			translate["tcProveTabSubmitTabLabel"]->Dynamic[ Refresh[ submitProveTask[ $tcProveTab],
         				TrackedSymbols :> {$tcProveTab, $selectedProofGoal, $selectedProofKB, $selectedProver}]],
-        			translate["tcProveTabNavigateTabLabel"]->Dynamic[ Refresh[ proofNavigation[ $TMAproofTree],
+        			translate["tcProveTabInspectTabLabel"]->Dynamic[ Refresh[ proofNavigation[ $TMAproofTree],
         				TrackedSymbols :> {$TMAproofTree}]]}, Dynamic[$tcProveTab],
         			LabelStyle->"TabLabel2", ControlPlacement->Top],
         		translate["tcComputeTabLabel"]->TabView[{
@@ -425,7 +425,7 @@ extractKBStruct[nb_Notebook] :=
       posSubsec = Cases[Position[nb, Cell[_, "Subsection", ___]], {a___, 1}], 
       posSubsubsec = Cases[Position[nb, Cell[_, "Subsubsection", ___]], {a___, 1}], 
       posSubsubsubsec = Cases[Position[nb, Cell[_, "Subsubsubsection", ___]], {a___, 1}], 
-      posEnv = Cases[Position[nb, Cell[_, "OpenEnvironment", ___]], {a___, 1}], 
+      posEnv = Cases[Position[nb, Cell[_, "EnvironmentHeader", ___]], {a___, 1}], 
       posInp = Position[nb, Cell[_, "FormalTextInputFormula", ___]], inputs, depth, sub, root, heads, isolated},
       (* extract all positions of relevant cells
          join possible containers with decreasing level of nesting *)
@@ -540,7 +540,7 @@ Clear[structView];
    parameter 'task' decides whether the view is generated for the prove tab or the compute tab *)
    
 (* group with header and content *)   
-structView[file_, {head:Cell[sec_, "Title"|"Section"|"Subsection"|"Subsubsection"|"Subsubsubsection"|"OpenEnvironment", opts___], rest__}, tags_, task_] :=
+structView[file_, {head:Cell[sec_, "Title"|"Section"|"Subsection"|"Subsubsection"|"Subsubsubsection"|"EnvironmentHeader", opts___], rest__}, tags_, task_] :=
     Module[ {sub, compTags},
     	(* process content componentwise
     	   during recursion, we collect all cell tags from cells contained in that group 
@@ -557,7 +557,7 @@ structView[file_, {head:Cell[sec_, "Title"|"Section"|"Subsection"|"Subsubsection
     ]
     
 (* group with header and no content -> ignore *)   
-structView[file_, {Cell[sec_, "Title"|"Section"|"Subsection"|"Subsubsection"|"Subsubsubsection"|"OpenEnvironment", ___]}, tags_, task_] :=
+structView[file_, {Cell[sec_, "Title"|"Section"|"Subsection"|"Subsubsection"|"Subsubsubsection"|"EnvironmentHeader", ___]}, tags_, task_] :=
 	Sequence[]
 
 (* list processed componentwise *) 
@@ -991,7 +991,8 @@ makeProofIDTag[ args___] := unexpected[ makeProofIDTag, {args}]
 insertNewEnv[type_String] :=
     Module[ {nb = InputNotebook[]},
         NotebookWrite[
-         nb, {newOpenEnvCell[ type], 
+         nb, {newOpenEnvCell[],
+          newEnvHeaderCell[ type],
           newFormulaCell[ type],
           newEndEnvCell[],
           newCloseEnvCell[]}];
@@ -1001,7 +1002,8 @@ insertNewEnv[args___] :=
 
 openNewEnv[type_String] :=
     Module[ {},
-        NotebookWrite[ InputNotebook[], newOpenEnvCell[ type]];
+        NotebookWrite[ InputNotebook[], newOpenEnvCell[]];
+        NotebookWrite[ InputNotebook[], newEnvHeaderCell[ type]];
     ]
 openNewEnv[args___] :=
     unexpected[openNewEnv, {args}]
@@ -1027,12 +1029,16 @@ newFormulaCell[ style_, label_:$initLabel] = Cell[BoxData["\[SelectionPlaceholde
 newFormulaCell[args___] :=
     unexpected[newFormulaCell, {args}]
 
-newOpenEnvCell[ type_String] := Cell[ type, "OpenEnvironment",
+newOpenEnvCell[] := Cell[ "", "OpenEnvironment"]
+newOpenEnvCell[args___] :=
+    unexpected[newOpenEnvCell, {args}]
+
+newEnvHeaderCell[ type_String] := Cell[ type, "EnvironmentHeader",
 	CellFrameLabels -> {{None, 
     	Cell[ BoxData[ ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None,
     		ButtonFunction :> Theorema`Language`Session`Private`removeEnvironment[ ButtonNotebook[]]]]]}, {None, None}}]
-newOpenEnvCell[args___] :=
-    unexpected[newOpenEnvCell, {args}]
+newEnvHeaderCell[args___] :=
+    unexpected[newEnvHeaderCell, {args}]
 
 newEndEnvCell[] := Cell[ "\[GraySquare]", "EndEnvironmentMarker"]
 newEndEnvCell[args___] :=
@@ -1067,44 +1073,35 @@ makeFormButton[] := Button[ translate["tcSessTabEnvTabButtonFormLabel"], insertN
 makeFormButton[args___] := unexpected[makeFormButton, {args}]
 
 makeDeclButtons[] := Column[ {
-	Grid[ Map[ makeDeclBut, {"VAR", "VARCOND", "COND"}]],
+	Row[ Map[ makeDeclBut, {"VAR", "VARCOND", "COND"}], Spacer[5]],
 	Button[ translate["tcSessTabEnvTabButtonDeclLabel"], Theorema`Language`Session`Private`displayGlobalDeclarations[ InputNotebook[]]]
 	}, Center]
 makeDeclButtons[args___] := unexpected[makeDeclButtons, {args}]
 
-declButtonData["VAR", style_String] := 
+declButtonData["VAR"] := 
 	{
 		DisplayForm[ UnderscriptBox[ "\[ForAll]", Placeholder[ "rg"]]], 
 		UnderscriptBox[ "\[ForAll]", "\[Placeholder]"],
-		If[ style == "GlobalDeclaration",
-			translate[ "GVARTooltip"],
-			translate[ "EVARTooltip"]
-		]
+		translate[ "GVARTooltip"]
 	}
 
-declButtonData["VARCOND", style_String] := 
+declButtonData["VARCOND"] := 
 	{
 		DisplayForm[ UnderscriptBox[ UnderscriptBox[ "\[ForAll]", Placeholder[ "rg"]], Placeholder[ "cond"]]],
 		UnderscriptBox[ UnderscriptBox[ "\[ForAll]", "\[Placeholder]"], "\[Placeholder]"],
-		If[ style == "GlobalDeclaration",
-			translate[ "GVARCONDTooltip"],
-			translate[ "EVARCONDTooltip"]
-		]
+		translate[ "GVARCONDTooltip"]
 	}
 
-declButtonData["COND", style_String] := 
+declButtonData["COND"] := 
 	{
 		DisplayForm[ RowBox[ {Placeholder[ "cond"], "\[Implies]"}]],
 		RowBox[ {"\[Placeholder]", "\[Implies]"}],
-		If[ style == "GlobalDeclaration",
-			translate[ "GCONDTooltip"],
-			translate[ "ECONDTooltip"]
-		]
+		translate[ "GCONDTooltip"]
 	}
-makeDeclBut[ bname_String] := Map[ makeDeclBut[ bname, #]&, {"GlobalDeclaration", "EnvironmentDeclaration"}]
+makeDeclBut[ bname_String] := makeDeclBut[ bname, "GlobalDeclaration"]
 	
 makeDeclBut[ bname_String, style_String] :=
-    With[ { bd = declButtonData[ bname, style]},
+    With[ { bd = declButtonData[ bname]},
 			Tooltip[ Button[ bd[[1]], 
 				FrontEndExecute[
 					NotebookWrite[ InputNotebook[], Cell[ BoxData[ bd[[2]]], style], All];

@@ -286,6 +286,9 @@ removeEnvironment[ nb_NotebookObject] :=
 		NotebookFind[ nb, "CloseEnvironment", Next, CellStyle];
 		SelectionMove[ nb, All, Cell];
 		NotebookDelete[ nb];
+		NotebookFind[ nb, "OpenEnvironment", Previous, CellStyle];
+		SelectionMove[ nb, All, Cell];
+		NotebookDelete[ nb];
 		Scan[ removeFromEnv, keys];
 		updateKBBrowser[];	
 	]
@@ -383,7 +386,7 @@ applicableGlobalDeclarations[ nb_NotebookObject, raw_Notebook, pos_List] :=
 	Module[{ globDeclID},
 		(* Find global declarations that apply to the cell at position pos, i.e. those that occur "above" (incl. nesting)
 		   from those cells collect the CellIDs *)
-		globDeclID = Cases[ raw, c:Cell[ _, "GlobalDeclaration"|"EnvironmentDeclaration", ___, CellID -> id_, ___] /; occursBelow[ Position[ raw, c][[1]], pos] -> id, Infinity];
+		globDeclID = Cases[ raw, c:Cell[ _, "GlobalDeclaration", ___, CellID -> id_, ___] /; occursBelow[ Position[ raw, c][[1]], pos] -> id, Infinity];
 		(* Lookup the ids in the global declarations in the current notebook
 		   Due to the way the ids are searched, they are sorted by the order how they occur in the notebook
 		   -> this is how they have to be applied to the expression *)
