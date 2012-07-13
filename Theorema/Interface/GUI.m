@@ -601,58 +601,37 @@ structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cel
            label is a hyperlink to the notebook or a button that opens a new window displaying the formula *)
         {Switch[ task,
             "prove",
-            Row[{Checkbox[Dynamic[kbSelectProve["KEY"]], Enabled->isEval] /. "KEY" -> keyTags, 
-                If[ nbAvail,
-                    Tooltip[ Hyperlink[ Style[formulaLabel, If[ isEval,
+            Row[{Checkbox[Dynamic[kbSelectProve["KEY"]], Enabled -> isEval] /. "KEY" -> keyTags, 
+                Tooltip[ Hyperlink[ Style[formulaLabel, If[ isEval,
                                                        "FormalTextInputFormula",
                                                        "FormalTextInputFormulaUneval"
-                                                   ]], {file, idLabel}],
+                                                   ]], {file, idLabel}, Enabled -> nbAvail, ActiveStyle -> If[ nbAvail, "HyperlinkActive", None]],
                              If[ isEval,
                              	theoremaDisplay[ Extract[ $tmaEnv, Append[ formPos[[1]], 2]]],
                              	displayCellContent[ content]]
-                    ],
-                    With[ {magOpt = Options[ Replace[ "Theorema Commander", $theoremaGUI], Magnification]},
-                    	Button[ Style[formulaLabel, "FormalTextInputFormula"], 
-                        	CreateDialog[{Cell[ content, "Output"], CancelButton[ translate[ "OK"], NotebookClose[ButtonNotebook[]]]}, First[ magOpt]],
-                        	Appearance -> None]
-                    ]
-                ]},
+                    ]},
                 Spacer[10]],
             "compute",
             Row[{Checkbox[Dynamic[Theorema`Computation`Language`Private`activeComputationKB["KEY"]], Enabled->isEval] /. "KEY" -> keyTags,
-                If[ nbAvail,
-                    Tooltip[ Hyperlink[ Style[formulaLabel, If[ isEval,
+                Tooltip[ Hyperlink[ Style[formulaLabel, If[ isEval,
                                                        "FormalTextInputFormula",
                                                        "FormalTextInputFormulaUneval"
-                                                   ]], {file, idLabel}],
+                                                   ]], {file, idLabel}, Enabled -> nbAvail, ActiveStyle -> If[ nbAvail, "HyperlinkActive", None]],
                              If[ isEval,
                              	theoremaDisplay[ Extract[ $tmaEnv, Append[ formPos[[1]], 2]]],
                              	displayCellContent[ content]]
-                    ],
-                    With[ {magOpt = Options[ Replace[ "Theorema Commander", $theoremaGUI], Magnification]},
-                    	Button[ Style[formulaLabel, "FormalTextInputFormula"], 
-                        	CreateDialog[{Cell[ content, "Output"], CancelButton[ translate[ "OK"], NotebookClose[ButtonNotebook[]]]}, First[ magOpt]],
-                        	Appearance -> None]
-                    ]
-                ]},
+                    ]},
                 Spacer[10]],
             "solve",
             Row[{Checkbox[Dynamic[kbSelectSolve["KEY"]], Enabled->isEval] /. "KEY" -> keyTags, 
-                If[ nbAvail,
-                    Tooltip[ Hyperlink[ Style[formulaLabel, If[ isEval,
+                Tooltip[ Hyperlink[ Style[formulaLabel, If[ isEval,
                                                        "FormalTextInputFormula",
                                                        "FormalTextInputFormulaUneval"
-                                                   ]], {file, idLabel}],
+                                                   ]], {file, idLabel}, Enabled -> nbAvail, ActiveStyle -> If[ nbAvail, "HyperlinkActive", None]],
                              If[ isEval,
                              	theoremaDisplay[ Extract[ $tmaEnv, Append[ formPos[[1]], 2]]],
                              	displayCellContent[ content]]
-                    ],
-                    With[ {magOpt = Options[ Replace[ "Theorema Commander", $theoremaGUI], Magnification]},
-                    	Button[ Style[formulaLabel, "FormalTextInputFormula"], 
-                        	CreateDialog[{Cell[ content, "Output"], CancelButton[ translate[ "OK"], NotebookClose[ButtonNotebook[]]]}, First[ magOpt]],
-                        	Appearance -> None]
-                    ]
-                ]},
+                    ]},
                 Spacer[10]]    
             ], {keyTags}}
     ]
