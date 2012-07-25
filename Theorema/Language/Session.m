@@ -65,7 +65,7 @@ freshSymbol[ s_Symbol] :=
         	AngleBracket, makeTuple,
         	_,
         	name = ToString[s];
-        	If[ StringTake[ name, -1] === "$",
+        	If[ StringTake[ name, -1] === "$" || (StringLength[ name] >= 3 && StringTake[ name, -3] === "$TM"),
             	s,
             	ToExpression[ name <> "$TM"]
         	]
@@ -706,7 +706,7 @@ processComputation[x_] := Module[ { procSynt, res},
 	(*NotebookWrite[ EvaluationNotebook[], Cell[ ToBoxes[ res, TheoremaForm], "ComputationResult", CellLabel -> "Out["<>ToString[$Line]<>"]="]];*)
 	(* We force the MakeBoxes[ ..., TheoremaForm] to apply by setting $PrePrint=displayBoxes in the CellProlog of a computation cell.
 	   Unsetting $PrePrint in the CellEpilog ensures this behaviour only for Theorema computation *)
-	res
+	renameToStandardContext[ res]
 ]
 processComputation[args___] := unexcpected[ processComputation, {args}]
 
@@ -731,6 +731,16 @@ closeComputation[args___] := unexcpected[ closeComputation, {args}]
 
 displayBoxes[ expr_] := RawBoxes[ ToBoxes[ expr, TheoremaForm]]
 displayBoxes[ args___] := unexpected[ displayBoxes, {args}]
+
+renameToStandardContext[ expr_] :=
+	Block[{$ContextPath = {"System`"}, $Context = "System`", stringExpr},
+		stringExpr = ToString[ expr];
+		stringExpr = StringReplace[ stringExpr, "Theorema`Computation`" -> "Theorema`"];
+		$ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
+        (* Set default context when not in an archive *)
+        ReleaseHold[ freshNames[ Hold["EXPR"] /. "EXPR" -> ToExpression[ stringExpr]]]
+	]
+renameToStandardContext[ args___] := unexpected[ renameToStandardContext, {args}]
 
 
 (* ::Section:: *)

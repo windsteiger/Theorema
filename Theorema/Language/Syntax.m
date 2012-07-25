@@ -58,7 +58,6 @@ isQuantifierSymbol[ _] := False
 isQuantifierSymbol[ args___] := unexpected[ isQuantifierSymbol, {args}]
 
 isQuantifierName[ f_] := MemberQ[ $tmaQuantifierNames, f]
-isQuantifierName[ _] := False
 isQuantifierName[ args___] := unexpected[ isQuantifierName, {args}]
 
 (* $tmaNonStandardOperators is defined in Expression.m *)
@@ -66,7 +65,6 @@ $tmaNonStandardOperatorNames = Transpose[ $tmaNonStandardOperators][[1]];
 $tmaNonStandardOperatorToBuiltin = Dispatch[ Apply[ Rule, $tmaNonStandardOperators, {1}]];
 
 isNonStandardOperatorName[ f_] := MemberQ[ $tmaNonStandardOperatorNames, f]
-isNonStandardOperatorName[ _] := False
 isNonStandardOperatorName[ args___] := unexpected[ isNonStandardOperatorName, {args}]
 
 isStandardOperatorName[ f_Symbol] :=
