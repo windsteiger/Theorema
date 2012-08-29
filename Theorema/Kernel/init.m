@@ -110,7 +110,7 @@ Map[ Get, FileNames["TheoremaPreferences.m", {
 showWelcomeScreen[] /; !ValueQ[`priv`welcomeScreen] && !TrueQ[$suppressWelcomeScreen] := Module[{},
     `priv`welcomeScreen = CreatePalette[
     	Dynamic[ Graphics[{`priv`RISCLogo[Clock[2 Pi, 2, 3]], `priv`topleft, `priv`topright, `priv`bottomright, `priv`bottomleft,
-    		{Opacity[Clock[1, 5, 1]], `priv`center}},
+    		{With[{o = Clock[1, 5, 1]}, Opacity[ If[ o < 0.4, 0.1, 3/2*o-1/2]]], `priv`center}},
     		PlotRange -> {-280, 280}, ImageSize -> {560, 560}, Background -> TMAcolor[2]]],
     	WindowFrame -> "Frameless", WindowMargins -> Automatic
     ];
@@ -144,6 +144,7 @@ Get["Theorema`Interface`GUI`"]
 
 EndPackage[]
 	
+
 If[$Notebooks && MemberQ[Notebooks[], Theorema`priv`welcomeScreen],
 	NotebookClose[Theorema`priv`welcomeScreen]];
 
