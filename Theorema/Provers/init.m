@@ -74,6 +74,6 @@ textCell[ args___] := unexpected[ textCell, {args}]
 End[]
 
 Get[ "Theorema`Provers`Strategies`"]
-Get[ "Theorema`Provers`BasicProver`"]
+Get[ "Theorema`Provers`BasicTheoremaLanguage`"]
 
 EndPackage[]

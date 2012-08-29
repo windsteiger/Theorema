@@ -86,7 +86,7 @@ initGUI[] :=
 		$selectedSearchDepth = 30;
 		$maxSearchDepth = 200;
 		initBuiltins[ {"prove", "compute", "solve"}];
-		$selectedRuleSet = Hold[ basicProver];
+		$selectedRuleSet = Hold[ basicTheoremaLanguageRules];
 		$CtrlActive = 0;
 		$ShiftActive = 0;
 		If[ $Notebooks,

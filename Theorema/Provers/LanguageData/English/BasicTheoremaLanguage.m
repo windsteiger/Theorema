@@ -4,7 +4,7 @@
 
 With[ {lang = "English"},
 
-MessageName[ basicProver, "usage", lang] = "Rules for the basic language constructs from the Theorema language, standard propositional and predicate logic.";
+MessageName[ basicTheoremaLanguageRules, "usage", lang] = "Rules for the basic language constructs from the Theorema language, standard propositional and predicate logic.";
 MessageName[ quantifierRules, "usage", lang] = "Rules for quantifiers.";
 
 MessageName[ andGoal, "usage", lang] = "Split a conjunction in the goal.";
@@ -23,7 +23,7 @@ Begin["`Private`"]
 With[ {lang = "English"},
 
 translate[ "Quantifier Rules", lang] = "Quantifier Rules";
-translate[ "Basic Prover", lang] = "Basic Prover";
+translate[ "Basic Theorema Language Rules", lang] = "Basic Theorema Language Rules";
 translate[ "connectives", lang] = "Logical connectives";
 translate[ "equality", lang] = "Logical equality";
 

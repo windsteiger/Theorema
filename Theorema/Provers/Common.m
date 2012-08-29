@@ -241,11 +241,11 @@ subgoals /: Dot[ _[ _PRFINFO$, subnodes___, _], subgoals] := {subnodes}
 renewID[ node_[ PRFINFO$[ n_, u_, g_, _], sub___, val_]] := node[ makeRealPRFINFO[ n, u, g, ""], sub, val]
 renewID[ args___] := unexpected[ renewID, {args}]
 
-proveAll[ pi_PRFINFO$, subnodes__] := ANDNODE$[ pi, subnodes, pending]
-proveAll[ args___] := unexpected[ proveAll, {args}]
+makeANDNODE[ pi_PRFINFO$, {subnodes__}] := ANDNODE$[ pi, subnodes, pending]
+makeANDNODE[ args___] := unexpected[ makeANDNODE, {args}]
 
-proveSome[ pi_PRFINFO$, subnodes__] := ORNODE$[ pi, subnodes, pending]
-proveSome[ args___] := unexpected[ proveSome, {args}]
+makeORNODE[ pi_PRFINFO$, {subnodes__}] := ORNODE$[ pi, subnodes, pending]
+makeORNODE[ args___] := unexpected[ makeORNODE, {args}]
 
 poToTree[ _TERMINALNODE$|_PRFSIT$] := {}
 poToTree[ node_[ pi_PRFINFO$, sub___, val_]] :=
