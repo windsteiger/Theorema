@@ -64,7 +64,6 @@ With[ {lang = "English"},
 	MessageName[cleanupComputation, "usage", lang] = "cleanupComputation[ ] removes all user defined function from computation context.";
 	
 (* Theorema`Interface`GUI` *)
-	MessageName[$theoremaGUI, "usage", lang] = "Theorema GUI structure";
 	MessageName[$kbStruct, "usage", lang] = "Structured knowledge base to be displayed in the KB browser";
 	MessageName[updateKBBrowser, "usage", lang] = "";
 	MessageName[displayKBBrowser, "usage", lang] = "";

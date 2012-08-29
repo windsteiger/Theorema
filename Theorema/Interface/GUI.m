@@ -32,7 +32,10 @@ Begin["`Private`"] (* Begin Private Context *)
 (* initGUI *)
 
 initGUI[] := 
-	Module[{ tc},
+	Module[{},
+		If[ $Notebooks,
+			closeTheoremaCommander[]
+		];
 		(*
 		   In $tmaBuiltins
 		   o) nesting gives the nested structure for display
@@ -76,8 +79,6 @@ initGUI[] :=
 		$initLabel = "???";
 		$labelSeparator = ",";
 		$cellTagKeySeparator = ":";
-		If[ ValueQ[$theoremaGUI], tc = "Theorema Commander" /. $theoremaGUI];
-		If[ $Notebooks && MemberQ[Notebooks[], tc], NotebookClose[tc]];
 		Clear[ kbSelectProve, kbSelectSolve];
 		kbSelectProve[_] := False;
 		kbSelectSolve[_] := False;
@@ -88,7 +89,9 @@ initGUI[] :=
 		$selectedRuleSet = Hold[ basicProver];
 		$CtrlActive = 0;
 		$ShiftActive = 0;
-		$theoremaGUI = {"Theorema Commander" -> theoremaCommander[]};
+		If[ $Notebooks,
+			openTheoremaCommander[]
+		];
 	]
 
 initBuiltins[ l_List] :=
@@ -109,7 +112,7 @@ initBuiltins[ args___] := unexpected[ initBuiltins, {args}]
 (* ::Section:: *)
 (* theoremaCommander *)
 
-theoremaCommander[] /; $Notebooks :=
+openTheoremaCommander[ ] /; $Notebooks :=
     Module[ {style = Replace[ ScreenStyleEnvironment, Options[InputNotebook[], ScreenStyleEnvironment]]},
         CreatePalette[ Dynamic[Refresh[
         	TabView[{
@@ -141,21 +144,30 @@ theoremaCommander[] /; $Notebooks :=
         			translate["tcPrefLanguage"]->PopupMenu[Dynamic[$Language], availableLanguages[]],
         			translate["tcPrefArchiveDir"]->Row[{Dynamic[Tooltip[FileNameJoin[Take[FileNameSplit[$TheoremaArchiveDirectory], -2]], $TheoremaArchiveDirectory]],
         				FileNameSetter[Dynamic[$TheoremaArchiveDirectory], "Directory"]}, Spacer[10]],
-        			translate["tcPrefAppear"]->setAppearance[]},
+        			translate["tcPrefAppear"]->setAppearance[]}, Dynamic[$tcPrefTab],
         			LabelStyle->"TabLabel2", ControlPlacement->Top]},
         			savePreferencesButton[]]]},
         		Dynamic[$tcTopLevelTab],
         		LabelStyle->"TabLabel1", ControlPlacement->Left
         	], TrackedSymbols :> {$Language}]],
-        	StyleDefinitions -> FileNameJoin[{"Theorema", "GUI-"<>$TheoremaColorScheme<>".nb"}],
+        	StyleDefinitions -> makeGUIStylesheet[ $TheoremaColorScheme],
         	WindowTitle -> translate["Theorema Commander"],
         	ScreenStyleEnvironment -> style,
         	WindowElements -> {"StatusArea"}]
     ]
+openTheoremaCommander[ args___] := unexpected[ openTheoremaCommander, {args}]
 
 emptyPane[ text_String:""] := Pane[ text, Alignment -> {Center, Center}]
 emptyPane[ text_String:"", size_] := Pane[ text, size, Alignment -> {Left, Top}]
 emptyPane[ args___] := unexpected[ emptyPane, {args}]
+
+getTheoremaCommander[ ] := 
+	Select[ Notebooks[], (WindowTitle /. Options[ #, WindowTitle]) === translate["Theorema Commander"]&]
+getTheoremaCommander[ args___] := unexpected[ getTheoremaCommander, {args}]
+
+closeTheoremaCommander[ ] :=
+	Scan[ NotebookClose, getTheoremaCommander[ ]]
+closeTheoremaCommander[ args___] := unexpected[ closeTheoremaCommander, {args}]
 
 
 (* ::Subsubsection:: *)
@@ -1252,7 +1264,8 @@ loadArchiveInPlace[ args___] := unexpected[ loadArchiveInPlace, {args}]
 setAppearance[ ] :=
     Pane[ Column[{
     	Labeled[ Row[{PopupMenu[ Dynamic[ $TheoremaColorScheme], $availableColorSchemes, BaselinePosition -> Center], 
-    				  Dynamic[ setColorScheme[$TheoremaColorScheme]]}, Spacer[2]], 
+    				  Dynamic[ TMAcolorScheme[ $TheoremaColorScheme, ImageSize -> {28, 28}, BaselinePosition -> Center]],
+    				  Button[ translate[ "apply color scheme"], applyColorScheme[ ], BaselinePosition -> Center]}, Spacer[2]], 
     		translate[ "tcPrefAppearColorSchemes"], {{ Top, Left}}],
     	Labeled[ Row[{Checkbox[ Dynamic[ $suppressWelcomeScreen]], translate["tcPrefAppearSuppressWelcome"]}, Spacer[2]], 
     		translate[ "tcPrefAppearWelcome"], {{ Top, Left}}]
@@ -1260,14 +1273,24 @@ setAppearance[ ] :=
     ]
 setAppearance[ args___] := unexpected[ setAppearance, {args}]
 
-setColorScheme[ color_String] :=
+applyColorScheme[ ] :=
 	Module[{},
-		If[ ValueQ[ $theoremaGUI],
-			SetOptions["Theorema Commander" /. $theoremaGUI, StyleDefinitions -> FileNameJoin[{"Theorema", "GUI-"<>color<>".nb"}]]
-		];
-		TMAcolorScheme[ color, ImageSize -> {28, 28}, BaselinePosition -> Center]
+		closeTheoremaCommander[];
+		openTheoremaCommander[];
 	]
-setColorScheme[ args___] := unexpected[ setColorScheme, {args}]
+
+applyColorScheme[ args___] := unexpected[ applyColorScheme, {args}]
+
+makeGUIStylesheet[ color_] :=
+	Module[{tmp, styles},
+		tmp = NotebookOpen[ 
+			FileNameJoin[ {$TheoremaDirectory, "Theorema", "FrontEnd", "StyleSheets", "Theorema", "GUI-Template.nb"}],
+			Visible -> False];
+		styles = NotebookGet[ tmp];
+		NotebookClose[ tmp];
+		styles /. Table[Apply[CMYKColor, IntegerDigits[i, 2, 4]] -> TMAcolor[i, color], {i, 0, 15}]
+	]
+makeGUIStylesheet[ args___] := unexpected[ makeGUIStylesheet, {args}]
 
 savePreferencesButton[ ] :=
     Module[ {prefsFile = FileNameJoin[{$UserBaseDirectory, "Applications", "Theorema", "Kernel", "TheoremaPreferences.m"}]},

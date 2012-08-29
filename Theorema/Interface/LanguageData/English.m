@@ -112,6 +112,7 @@ With[ {lang = "English"},
 	translate["conjunction of subproofs", lang] = "conjunction of subproofs";
 	translate["disjunction of subproofs", lang] = "disjunction of subproofs";
 	translate["unknown proof node", lang] = "unknown proof node";
+	translate["apply color scheme", lang] = "Apply color scheme";
 	translate["save current settings", lang] = "Save current settings";
 	translate["preferences last saved: ", lang] = "Preferences last saved: ";
 
