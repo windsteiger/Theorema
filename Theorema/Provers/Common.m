@@ -216,6 +216,33 @@ PRFINFO$ /: Dot[ PRFINFO$[ _, _, g_List, _, ___], generated] := g
 PRFINFO$ /: Dot[ PRFINFO$[ _, _, _, i_String, ___], id] := i
 PRFINFO$ /: Dot[ p:PRFINFO$[ _, _, _, _, ___], s_] := unexpected[ Dot, {p, s}]
 
+
+(* ::Subsection:: *)
+(* Addidional Facts datastructure *)
+
+(*
+	Addidional Facts datastructure is just a list of Mathematica options, i.e. {key1 -> val1, ..., keyn -> valn}
+*)
+
+getAddFact[ af_List, key_] :=
+	Module[{val = Replace[ key, af]},
+		If[ val === key,
+			$Failed,
+			val
+		]
+	]
+getAddFact[ args___] := unexpected[ getAddFact, {args}]
+
+putAddFact[ af_List, key_, val_, type_:Rule] :=
+	Module[{p = Position[ af, (Rule|RuleDelayed)[ key, _]]},
+		If[ p === {},
+			Append[ af, type[ key, val]],
+			ReplacePart[ af, p[[1]] -> type[ key, val]]
+		]
+	]
+putAddFact[ args___] := unexpected[ putAddFact, {args}]
+
+
 (* ::Subsection:: *)
 (* Proof nodes *)
 
@@ -241,10 +268,12 @@ subgoals /: Dot[ _[ _PRFINFO$, subnodes___, _], subgoals] := {subnodes}
 renewID[ node_[ PRFINFO$[ n_, u_, g_, _], sub___, val_]] := node[ makeRealPRFINFO[ n, u, g, ""], sub, val]
 renewID[ args___] := unexpected[ renewID, {args}]
 
-makeANDNODE[ pi_PRFINFO$, {subnodes__}] := ANDNODE$[ pi, subnodes, pending]
+makeANDNODE[ pi_PRFINFO$, subnode_PRFSIT$] := ANDNODE$[ pi, subnode, pending]
+makeANDNODE[ pi_PRFINFO$, {subnodes__PRFSIT$}] := ANDNODE$[ pi, subnodes, pending]
 makeANDNODE[ args___] := unexpected[ makeANDNODE, {args}]
 
-makeORNODE[ pi_PRFINFO$, {subnodes__}] := ORNODE$[ pi, subnodes, pending]
+makeORNODE[ pi_PRFINFO$, subnode_PRFSIT$] := ORNODE$[ pi, subnode, pending]
+makeORNODE[ pi_PRFINFO$, {subnodes__PRFSIT$}] := ORNODE$[ pi, subnodes, pending]
 makeORNODE[ args___] := unexpected[ makeORNODE, {args}]
 
 poToTree[ _TERMINALNODE$|_PRFSIT$] := {}
