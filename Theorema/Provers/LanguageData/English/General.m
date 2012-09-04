@@ -58,7 +58,7 @@ proofStepText[ searchDepthLimit, lang, {goal_FML$, kb_List}, {}, ___] :=
 proofStepText[ invalidProofNode, lang, expr_, ___] := {textCell[ "The expression returned by the selected proof strategy is not a valid proof tree node."],
 	Cell[ BoxData[ ToBoxes[ expr]], "Print"]};
 
-proofStepText[ noApplicableRule, lang, ___] := {textCell[ "It seems there is no proof rule to apply."]};
+proofStepText[ noApplicableRule, lang, ___] := {textCell[ "There is no proof rule to apply."]};
 
 proofStepText[ contradictionKB, lang, {k_, c_}, {}, pVal_] := {textCell[ "The proof is finished, because ", formulaReference[ k], 
 	" contradicts ", formulaReference[ c], "."]
