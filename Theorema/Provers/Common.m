@@ -34,8 +34,10 @@ initProver[] :=
 		$TMAproofTree = {};
 		$registeredRuleSets = {};
 		$registeredStrategies = {};
-		Clear[ ruleAct];
-		ruleAct[_] := True;
+		Clear[ ruleActive, ruleTextActive, rulePriority];
+		ruleActive[_] := True;
+		ruleTextActive[_] := True;
+		rulePriority[_] := 100;
 		$proofCellStatus = Open;
 	]
 
@@ -326,7 +328,9 @@ noProofNode[ args___] := unexpected[ noProofNode, {args}]
 (* ::Subsubsection:: *)
 (* getActiveRules *)
 
-getActiveRules[ Hold[ rules_], op_:Identity] := DeleteDuplicates[ DeleteCases[ op[ rules], _String|_?(ruleAct[#]===False&), Infinity]]
+getActiveRules[ Hold[ rules_], op_:Identity] := 
+	Sort[ DeleteDuplicates[ DeleteCases[ op[ rules], _String|_?(ruleActive[#]===False&), Infinity]], 
+		rulePriority[#1] < rulePriority[#2]&]
 getActiveRules[ args___] := unexpected[ getActiveRules, {args}]
 
 
@@ -464,9 +468,10 @@ displayProof[ args___] := unexpected[ displayProof, {args}]
 
 proofObjectToCell[ PRFOBJ$[ pi_PRFINFO$, sub_, pVal_]] := 
 	Module[{ cellList = proofObjectToCell[ pi, pVal]},
-		Append[ cellList, proofObjectToCell[ sub]]
+		Join[ cellList, {proofObjectToCell[ sub]}]
 	]
-proofObjectToCell[ PRFINFO$[ name_, rest___, i_String], pVal_] := proofStepText[ id -> i, name, $Language, rest, pVal]
+proofObjectToCell[ PRFINFO$[ name_?ruleTextActive, rest___, i_String], pVal_] := proofStepText[ id -> i, name, $Language, rest, pVal]
+proofObjectToCell[ PRFINFO$[ name_, rest___, i_String], pVal_] := {}
 proofObjectToCell[ PRFSIT$[ g_FML$, kb_List, _, i_String, ___]] := Cell[ CellGroupData[ proofStepText[ id -> i, openProofSituation, $Language, {g, kb}, {}], $proofCellStatus]]
 proofObjectToCell[ (ANDNODE$|ORNODE$)[ pi_PRFINFO$, subnodes__, pVal_]] := 
 	Module[{header, sub = {}},
@@ -476,7 +481,11 @@ proofObjectToCell[ (ANDNODE$|ORNODE$)[ pi_PRFINFO$, subnodes__, pVal_]] :=
 			(* else *)
 			sub = MapIndexed[ subProofToCell[ pi, #1, #2]&, {subnodes}]
 		];
-		Cell[ CellGroupData[ Join[ header, sub], $proofCellStatus]]
+		If[ header === {},
+			Apply[ Sequence, sub],
+			(* else *)
+			Cell[ CellGroupData[ Join[ header, sub], $proofCellStatus]]
+		]
 	]
 proofObjectToCell[ TERMINALNODE$[ pi_PRFINFO$, pVal_]] := 
 	Cell[ CellGroupData[ proofObjectToCell[ pi, pVal], $proofCellStatus]]
@@ -491,6 +500,15 @@ subProofToCell[ args___] := unexpected[ subProofToCell, {args}]
 (* ::Section:: *)
 (* register provers *)
 
+(*
+  The list of rules 'l' has the format {l1, ..., ln}, where each li is either
+  	o) a symbol standing for a previously defined rule list OR
+  	o) a list {rulename, active, activeText, priority}, where
+  		- rulename is the name of the rule,
+  		- active is the default value for rule activation (True|False),
+  		- activeText is the default value for proof text activation (True|False),
+  		- priority is the default value for the rule priority (1-100).
+*)
 SetAttributes[ registerRuleSet, HoldAll]
 
 registerRuleSet[ n_String, r_, l_List] := 

@@ -88,6 +88,7 @@ With[ {lang = "English"},
 	    	translate["tcPrefAppearSuppressWelcome", lang] = "Suppress Welcome Screen";
     translate["nA", lang] = "not available";
 	translate["pRules", lang] = "Proof rules";
+	translate["pRulesSetup", lang] = "Proof rules setup";
 	translate["pStrat", lang] = "Proof strategy";
 	translate["sDepth", lang] = "Search depth";
     translate["noKnowl", lang] = "No knowledge available";

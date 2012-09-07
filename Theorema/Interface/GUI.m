@@ -806,18 +806,43 @@ structViewRules[{category_String, r__}, tags_] :=
         		"NEWSYM" -> "$ruleStructState$" <> ToString[ Hash[ category]]]]], 
          compTags}
     ]
-  
-structViewRules[ r_Symbol, tags_] :=
-    Module[ { },
-        {Row[{Checkbox[ Dynamic[ Theorema`Provers`Common`Private`ruleAct[ r]]], MessageName[ r, "usage"]}, 
-                Spacer[10]], {r}}
+
+showProofTextPic[ active_] = Graphics[ {If[ active, GrayLevel[0], GrayLevel[0.7]], 
+	{Thin, Line[{{0, 0}, {4, 0}, {4, 4}, {0, 4}, {0, 0}}], Table[ Line[{{1, i}, {3, i}}], {i, 1, 3}]}}, ImageSize -> {15, 15}, PlotRange -> {{-1, 5}, {-1, 5}}];
+ 
+structViewRules[ {r_Symbol, active:(True|False), textActive:(True|False), p_Integer}, tags_] :=
+    Module[ {align = Baseline},
+    	ruleActive[ r] = active;
+    	ruleTextActive[ r] = textActive;
+    	rulePriority[ r] = p;
+        {Style[ 
+         Row[{
+            Row[{Tooltip[ 
+            		Checkbox[ Dynamic[ ruleActive[ r]], BaselinePosition -> align],
+            		MessageName[ ruleActive, "usage"]], 
+            	Tooltip[
+                    Toggler[ Dynamic[ ruleTextActive[ r]],
+                    	{False -> showProofTextPic[ False],
+                    	True -> showProofTextPic[ True]}, BaselinePosition -> align],
+                	MessageName[ ruleTextActive, "usage"]],
+                Tooltip[ 
+                	PopupMenu[ Dynamic[ rulePriority[ r]], Table[ i, {i,1,100}], BaselinePosition -> align, ImageSize -> {45, 16}],
+                    MessageName[ rulePriority, "usage"]]}
+            ],
+            MessageName[ r, "usage"]}, Spacer[7]], LineBreakWithin -> False], {r}}
     ]
 
 structViewRules[ category_String, tags_] :=
-    Module[ {},
-    	Row[{Checkbox[ Dynamic[ allTrue[ tags, Theorema`Provers`Common`Private`ruleAct], 
-        		setAll[ tags, Theorema`Provers`Common`Private`ruleAct, #] &]], 
-          		Style[ translate[ category], "Section"]}, Spacer[10]]
+    Module[ {align = Baseline},
+    	Row[{
+    		Row[{
+    			Checkbox[ 
+    				Dynamic[ allTrue[ tags, ruleActive], setAll[ tags, ruleActive, #] &], BaselinePosition -> align],
+        		Toggler[ Dynamic[ allTrue[ tags, ruleTextActive], setAll[ tags, ruleTextActive, #] &],
+                    	{False -> showProofTextPic[ False],
+                    	True -> showProofTextPic[ True]}, BaselinePosition -> align]
+    		}], 
+          	Style[ translate[ category], "Section"]}, Spacer[5]]
     ]
 
 structViewRules[args___] :=
@@ -856,7 +881,7 @@ selectProver[ ] :=
     	Labeled[ Tooltip[ PopupMenu[ Dynamic[ $selectedRuleSet], Map[ MapAt[ translate, #, {2}]&, $registeredRuleSets]],
     			Apply[ Function[ rs, MessageName[ rs, "usage"], {HoldFirst}], $selectedRuleSet]], 
     		translate[ "pRules"], {{ Top, Left}}],
-    	structViewRules[ $selectedRuleSet],
+    	Labeled[ structViewRules[ $selectedRuleSet], translate[ "pRulesSetup"], {{ Top, Left}}],
     	Labeled[ Tooltip[ PopupMenu[ Dynamic[ $selectedStrategy], Map[ MapAt[ translate, #, {2}]&, $registeredStrategies]],
     		With[ {ss = $selectedStrategy}, MessageName[ ss, "usage"]]], 
     		translate[ "pStrat"], {{ Top, Left}}],
@@ -967,8 +992,8 @@ printProveInfo[ goal_, kb_, rules_, strategy_, {pVal_, proofObj_}, searchDepth_]
                 OpenerView[ {Style[ translate[ "selProver"], "PIContent"], Style[ {rules, strategy}, "PIContent"]}],
                 With[ {allKB = Cases[ DownValues[ kbSelectProve],
                 	HoldPattern[ Verbatim[HoldPattern][ kbSelectProve[ k_List]] :> v_] -> {k, v}],
-                    allBui = bui, allRules = Cases[ DownValues[ Theorema`Provers`Common`Private`ruleAct],
-                	HoldPattern[ Verbatim[HoldPattern][ Theorema`Provers`Common`Private`ruleAct[ r_Symbol]] :> v_] -> {r, v}]},
+                    allBui = bui, allRules = Cases[ DownValues[ ruleActive],
+                	HoldPattern[ Verbatim[HoldPattern][ ruleActive[ r_Symbol]] :> v_] -> {r, v}]},
                     Button[ translate["SetEnv"], setProveEnv[ goal, allKB, allBui, rules, strategy, allRules, searchDepth], ImageSize -> Automatic]
                 ]}
             ]}, False]], "ProofInfo"]];
@@ -983,9 +1008,9 @@ setProveEnv[ goal_, kb_List, bui_List, ruleSet_, strategy_, allRules_List, searc
 		Clear[kbSelectProve];
 		kbSelectProve[_] := False;
 		Scan[(kbSelectProve[#[[1]]] = #[[2]])&, kb];
-		Clear[Theorema`Provers`Common`Private`ruleAct];
-		Theorema`Provers`Common`Private`ruleAct[_] := True;
-		Scan[(Theorema`Provers`Common`Private`ruleAct[#[[1]]] = #[[2]])&, allRules];
+		Clear[ruleActive];
+		ruleActive[_] := True;
+		Scan[(ruleActive[#[[1]]] = #[[2]])&, allRules];
 		Scan[(Theorema`Computation`Language`Private`buiActProve[#[[1]]] = #[[2]])&, bui];
 		$selectedRuleSet = ruleSet;
 		$selectedStrategy = strategy;

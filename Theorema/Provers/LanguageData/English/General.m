@@ -72,11 +72,11 @@ proofStepText[ goalInKB, lang, {goal_, k_}, {}, pVal_] := {textCell[ "Now we are
 	" is identical to formula ", formulaReference[ k], "in the knowledge base."]
     };
 
-proofStepText[ step_String, lang, ___] := {
+proofStepText[ step_Symbol, lang, ___] := {
 	textCell[ ToString[ StringForm[ "We have no explanatory text for step '``'. Please implement the respective case for the function 'proofStepText'.", step]]]
 	};
 
-subProofHeader[ step_String, lang, ___] := {
+subProofHeader[ step_Symbol, lang, ___] := {
 	textCell[ ToString[ StringForm[ "We have no explanatory header text for subproofs of step '``'. Please implement the respective case for the function 'subProofHeader'.", step]]]
 	};
 

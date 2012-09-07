@@ -51,11 +51,28 @@ PRFSIT$[ g:FML$[ _, Implies$TM[ P_, Q_], _], k_, af_, i_String, rest___Rule] :>
 	]
 
 
-connectiveRules = {"connectives", andGoal, andKB, implGoalDirect, implGoalCP};
-equalityRules = {"equality", eqGoal, eqKB};
+connectiveRules = {"connectives", 
+	{andGoal, True, True, 5},
+	{andKB, True, False, 5},
+	{implGoalDirect, True, True, 5},
+	{implGoalCP, False, False, 10}
+	};
+equalityRules = {"equality", 
+	{eqGoal, False, False, 20},
+	{eqKB, True, True, 15}
+	};
 
-registerRuleSet[ "Quantifier Rules", quantifierRules, {forallGoal, forallKB, existsGoal, existsKB}]
-registerRuleSet[ "Basic Theorema Language Rules", basicTheoremaLanguageRules, {quantifierRules, connectiveRules, equalityRules}]
+registerRuleSet[ "Quantifier Rules", quantifierRules, {
+	{forallGoal, True, True, 10},
+	{forallKB, True, True, 70},
+	{existsGoal, True, True, 50},
+	{existsKB, True, True, 11}
+	}]
+registerRuleSet[ "Basic Theorema Language Rules", basicTheoremaLanguageRules, {
+	quantifierRules, 
+	connectiveRules, 
+	equalityRules
+	}]
 
 End[]
 
