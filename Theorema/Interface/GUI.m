@@ -552,8 +552,8 @@ Clear[structView];
    parameter 'task' decides whether the view is generated for the prove tab or the compute tab *)
    
 (* group with header and content *)   
-structView[file_, {head:Cell[sec_, "Title"|"Section"|"Subsection"|"Subsubsection"|"Subsubsubsection"|"EnvironmentHeader", opts___], rest__}, tags_, task_] :=
-    Module[ {sub, compTags},
+structView[file_, {head:Cell[sec_, style:"Title"|"Section"|"Subsection"|"Subsubsection"|"Subsubsubsection"|"EnvironmentHeader", opts___], rest__}, tags_, task_] :=
+    Module[ {sub, compTags, structControl},
     	(* process content componentwise
     	   during recursion, we collect all cell tags from cells contained in that group 
     	   Transpose -> pos 1 contains the list of subviews
@@ -561,10 +561,15 @@ structView[file_, {head:Cell[sec_, "Title"|"Section"|"Subsection"|"Subsubsection
         sub = Transpose[Map[structView[file, #, tags, task] &, {rest}]];
         compTags = Apply[Union, sub[[2]]];
         (* generate an opener view with the view of the header and the content as a column
-           a global symbol with unique name is generated, whose value stores the state of the opener *)
+           a global symbol with unique name is generated, whose value stores the state of the opener.
+           The default for Title/Section groups is "open", deeper levels are closed by default. *)
+        structControl = "Theorema`Interface`GUI`Private`$kbStructState$"<>ToString[Hash[FileBaseName[file]]]<>"$"<>ToString[CellID/.{opts}];
+        If[ MemberQ[ {"Title", "Section"}, style] && MatchQ[ ToExpression[ structControl], _Symbol],
+        	ToExpression[ structControl <> "=True"]
+        ];
         {OpenerView[{headerView[file, head, compTags, task], Column[sub[[1]]]}, 
         	ToExpression[StringReplace["Dynamic[NEWSYM]", 
-        		"NEWSYM" -> "$kbStructState$"<>ToString[Hash[FileBaseName[file]]]<>"$"<>ToString[CellID/.{opts}]]]], 
+        		"NEWSYM" -> structControl]]], 
          compTags}
     ]
     
@@ -795,15 +800,19 @@ structViewBuiltin[args___] :=
 (* structViewRules *)
 Clear[structViewRules];
 
-structViewRules[ Hold[ rs_]] := structViewRules[ rs, {}][[1]]
+structViewRules[ Hold[ rs_]] := structViewRules[ rs, {}, True][[1]]
 
-structViewRules[{category_String, r__}, tags_] :=
-    Module[ {sub, compTags},
+structViewRules[{category_String, r__}, tags_, open_:False] :=
+    Module[ {sub, compTags, structControl},
         sub = Transpose[Map[structViewRules[#, tags] &, {r}]];
         compTags = Apply[Union, sub[[2]]];
+        structControl = "Theorema`Interface`GUI`Private`$ruleStructState$" <> ToString[ Hash[ category]];
+        If[ open && MatchQ[ ToExpression[ structControl], _Symbol],
+        	ToExpression[ structControl <> "=True"]
+        ];
         {OpenerView[{structViewRules[category, compTags], Column[sub[[1]]]}, 
         	ToExpression[StringReplace["Dynamic[NEWSYM]", 
-        		"NEWSYM" -> "$ruleStructState$" <> ToString[ Hash[ category]]]]], 
+        		"NEWSYM" -> structControl]]], 
          compTags}
     ]
 
