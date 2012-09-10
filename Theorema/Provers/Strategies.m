@@ -36,18 +36,18 @@ applyOnce[ rules_Hold, ps_PRFSIT$] :=
 			First[ newNodes],
 			_,
 			newNodes = Map[ renewID, newNodes];
-			proveSome[ 
+			makeORNODE[ 
 				makePRFINFO[ name -> proofAlternatives, used -> newNodes.used, generated -> newNodes.generated, id -> i],
-				Apply[ Sequence, newNodes]]
+				newNodes]
 		]
 	]
 applyOnce[ args___] := unexpected[ applyOnce, {args}]
 
 trySeveral[ rules_Hold, ps_PRFSIT$] :=
     Module[ {i = ps.id},
-        proveSome[ makePRFINFO[ name -> proofAlternatives, used -> {ps[[1]]}, generated -> {ps[[2]]}, id -> i],
-        	Apply[ makePRFSIT[ goal -> #1, kb -> #2, facts -> #3, Apply[ Sequence, Cases[ ps, HoldPattern[ _String -> _]]]]&, ps], 
-        	Apply[ makePRFSIT[ goal -> #1, kb -> #2, facts -> #3, Apply[ Sequence, Cases[ ps, HoldPattern[ _String -> _]]]]&, ps]
+        makeORNODE[ makePRFINFO[ name -> proofAlternatives, used -> {ps[[1]]}, generated -> {ps[[2]]}, id -> i],
+        	{Apply[ makePRFSIT[ goal -> #1, kb -> #2, facts -> #3, Apply[ Sequence, Cases[ ps, HoldPattern[ _String -> _]]]]&, ps], 
+        	Apply[ makePRFSIT[ goal -> #1, kb -> #2, facts -> #3, Apply[ Sequence, Cases[ ps, HoldPattern[ _String -> _]]]]&, ps]}
         	]
     ]
 trySeveral[ args___] := unexpected[ trySeveral, {args}]

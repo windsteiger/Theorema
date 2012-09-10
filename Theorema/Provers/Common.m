@@ -271,11 +271,10 @@ renewID[ node_[ PRFINFO$[ n_, u_, g_, _], sub___, val_]] := node[ makeRealPRFINF
 renewID[ args___] := unexpected[ renewID, {args}]
 
 makeANDNODE[ pi_PRFINFO$, subnode_PRFSIT$] := ANDNODE$[ pi, subnode, pending]
-makeANDNODE[ pi_PRFINFO$, {subnodes__PRFSIT$}] := ANDNODE$[ pi, subnodes, pending]
+makeANDNODE[ pi_PRFINFO$, {subnodes__}] := ANDNODE$[ pi, subnodes, pending]
 makeANDNODE[ args___] := unexpected[ makeANDNODE, {args}]
 
-makeORNODE[ pi_PRFINFO$, subnode_PRFSIT$] := ORNODE$[ pi, subnode, pending]
-makeORNODE[ pi_PRFINFO$, {subnodes__PRFSIT$}] := ORNODE$[ pi, subnodes, pending]
+makeORNODE[ pi_PRFINFO$, {subnodes__}] := ORNODE$[ pi, subnodes, pending]
 makeORNODE[ args___] := unexpected[ makeORNODE, {args}]
 
 poToTree[ _TERMINALNODE$|_PRFSIT$] := {}
@@ -466,6 +465,9 @@ displayProof[ args___] := unexpected[ displayProof, {args}]
 (* ::Subsubsection:: *)
 (* proofObjectToCell *)
 
+(* 
+	If proof text is deactivated, the result is {}. Proof textx are composed in such a way that {} simply cancels and therfore no text appears.
+*)
 proofObjectToCell[ PRFOBJ$[ pi_PRFINFO$, sub_, pVal_]] := 
 	Module[{ cellList = proofObjectToCell[ pi, pVal]},
 		Join[ cellList, {proofObjectToCell[ sub]}]
