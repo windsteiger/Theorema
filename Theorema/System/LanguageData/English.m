@@ -58,6 +58,7 @@ With[ {lang = "English"},
 	MessageName[source, "usage", lang] = "source is a selector for the FML$ datastructure.";
 	MessageName[initFormulaLabel, "usage", lang] = "initFormulaLabel[ ] initializes the formula labels used in a proof.";
 	MessageName[formulaReference, "usage", lang] = "formulaReference[ fml] gives a hyperlink to the formula.";
+	MessageName[arbitraryButFixed, "usage", lang] = "arbitraryButFixed[ expr, rng] substitutes all free occurrences of variables specified by the range rng in expr by a new constant.";
 
 (* Theorema`Computation`Language` *)
 	MessageName[setComputationContext, "usage", lang] = "setComputationContext[ c] sets the context for the next computation to c.";
@@ -107,6 +108,7 @@ With[ {lang = "English"},
 	MessageName[proofSucceeds, "usage", lang] = "proofSucceeds[ ...] .";
 	MessageName[proofDisproved, "usage", lang] = "proofDisproved[ ...] .";
 	MessageName[getActiveRules, "usage", lang] = "getActiveRules[ ...] .";
+	MessageName[applyAllRules, "usage", lang] = "applyAllRules[ ...] .";
 	MessageName[ruleActive, "usage", lang] = "Activates/deactivates the rule. (ruleActive)";
 	MessageName[ruleTextActive, "usage", lang] = "Specifies, whether the proof text for the rule will be activated. (ruleTextActive)";
 	MessageName[rulePriority, "usage", lang] = "The priority of the rule as an integer between 1 and 100. Lower value means higher priority. (rulePriority)";

@@ -23,14 +23,78 @@ Needs[ "Theorema`Language`"]
 
 Begin["`Private`"]
 
+
+(* ::Section:: *)
+(* Connectives *)
+
+(* ::Subsection:: *)
+(* NOT *)
+
+inferenceRule[ notGoal] = 
+PRFSIT$[ g:FML$[ _, Not$TM[ a_], lab_], k_List, af_, i_String, rest___Rule] :> 
+	Module[ {opp},
+		opp = makeFML[ formula -> a];
+		makeANDNODE[ makePRFINFO[ name -> notGoal, used -> g, generated -> opp, id -> i], 
+			makePRFSIT[ goal -> makeFML[ formula -> False, label -> "F"], kb -> Prepend[ k, opp], facts -> af, rest]
+		]
+	]
+
+inferenceRule[ contradiction] = 
+PRFSIT$[ g:FML$[ _, a_, lab_] /; !TrueQ[ !a] && FreeQ[ g, _META$], k_List, af_, i_String, rest___Rule] :> 
+	Module[ {opp},
+		opp = makeFML[ formula -> Not$TM[ a]];
+		makeANDNODE[ makePRFINFO[ name -> contradiction, used -> g, generated -> opp, id -> i], 
+			makePRFSIT[ goal -> makeFML[ formula -> False, label -> "F"], kb -> Prepend[ k, opp], facts -> af, rest]
+		]
+	]
+	
+(* ::Subsection:: *)
+(* AND *)
+
 inferenceRule[ andGoal] = 
-PRFSIT$[ g:FML$[ _, And$TM[ c__], lab_], k_List, af_, i_String, rest___Rule] :> 
+PRFSIT$[ g:FML$[ _, And$TM[ c__], lab_] /; FreeQ[ g, _META$], k_List, af_, i_String, rest___Rule] :> 
 	Module[ {conj},
 		conj = MapIndexed[ makeFML[ formula -> #1, label -> lab <> "." <> ToString[ #2[[1]]]]&, {c}];
 		makeANDNODE[ makePRFINFO[ name -> andGoal, used -> g, generated -> conj, id -> i], 
 			Map[ makePRFSIT[ goal -> #, kb -> k, facts -> af, rest]&, conj]
 		]
 	]
+
+inferenceRule[ andKB] = 
+PRFSIT$[ g_, {pre___, k:FML$[ _, And$TM[ c__], lab_], post___}, af_, i_String, rest___Rule] :> 
+	Module[ {conj},
+		conj = MapIndexed[ makeFML[ formula -> #1, label -> lab <> "." <> ToString[ #2[[1]]]]&, {c}];
+		makeANDNODE[ makePRFINFO[ name -> andKB, used -> k, generated -> conj, id -> i], 
+			makePRFSIT[ goal -> g, kb -> Join[ {pre}, conj, {post}], facts -> af, rest]
+		]
+	]
+
+
+(* ::Subsection:: *)
+(* OR *)
+
+inferenceRule[ orGoal] = 
+PRFSIT$[ g:FML$[ _, Or$TM[ a__, b_], lab_], k_List, af_, i_String, rest___Rule] :> 
+	Module[ {negAssum, newG},
+		negAssum = MapIndexed[ makeFML[ formula -> Not$TM[#1], label -> lab <> "." <> ToString[ #2[[1]]]]&, {a}];
+		newG = makeFML[ formula -> b];
+		makeANDNODE[ makePRFINFO[ name -> orGoal, used -> g, generated -> Append[ negAssum, newG], id -> i], 
+			makePRFSIT[ goal -> newG, kb -> Join[ negAssum, k], facts -> af, rest]
+		]
+	]
+
+inferenceRule[ orKB] = 
+PRFSIT$[ g_, {pre___, k:FML$[ _, Or$TM[ c__], lab_], post___}, af_, i_String, rest___Rule] :> 
+	Module[ {caseAssum},
+		caseAssum = MapIndexed[ makeFML[ formula -> #1, label -> lab <> "." <> ToString[ #2[[1]]]]&, {c}];
+		makeANDNODE[ makePRFINFO[ name -> orKB, used -> k, generated -> caseAssum, id -> i], 
+			Map[ makePRFSIT[ goal -> g, kb -> {#, pre, post}, facts -> af, rest]&, caseAssum]
+		]
+	]
+
+
+(* ::Subsection:: *)
+(* Implication *)
 
 inferenceRule[ implGoalDirect] = 
 PRFSIT$[ g:FML$[ _, Implies$TM[ P_, Q_], _], k_, af_, i_String, rest___Rule] :> 
@@ -50,14 +114,20 @@ PRFSIT$[ g:FML$[ _, Implies$TM[ P_, Q_], _], k_, af_, i_String, rest___Rule] :>
 			makePRFSIT[ goal -> negLeft, kb -> Prepend[ k, negRight], facts -> af, rest]]
 	]
 
+(* ::Subsection:: *)
+(* Equivalence *)
 
-connectiveRules = {"connectives", 
+
+connectiveRules = {"Connectives Rules", 
+	{notGoal, True, True, 30},
 	{andGoal, True, True, 5},
 	{andKB, True, False, 5},
+	{orGoal, True, True, 5},
+	{orKB, True, True, 19},
 	{implGoalDirect, True, True, 5},
 	{implGoalCP, False, False, 10}
 	};
-equalityRules = {"equality", 
+equalityRules = {"Equality Rules", 
 	{eqGoal, False, False, 20},
 	{eqKB, True, True, 15}
 	};
@@ -71,7 +141,8 @@ registerRuleSet[ "Quantifier Rules", quantifierRules, {
 registerRuleSet[ "Basic Theorema Language Rules", basicTheoremaLanguageRules, {
 	quantifierRules, 
 	connectiveRules, 
-	equalityRules
+	equalityRules,
+	{contradiction, True, True, 100}
 	}]
 
 End[]

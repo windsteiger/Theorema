@@ -159,7 +159,7 @@ makePRFSIT[ data___?OptionQ] :=
 	]
 makePRFSIT[ args___] := unexpected[ makePRFINFO, {args}]
 
-makeRealPRFSIT[ g_FML$, k_List, af_, id_String, rest___Rule] := 
+makeRealPRFSIT[ g_FML$, k:{___FML$}, af_, id_String, rest___Rule] := 
 	Module[ {succ, pi},
 		{succ, pi} = checkProofSuccess[ g, k, af, id];
 		If[ succ,
@@ -270,7 +270,7 @@ subgoals /: Dot[ _[ _PRFINFO$, subnodes___, _], subgoals] := {subnodes}
 renewID[ node_[ PRFINFO$[ n_, u_, g_, _], sub___, val_]] := node[ makeRealPRFINFO[ n, u, g, ""], sub, val]
 renewID[ args___] := unexpected[ renewID, {args}]
 
-makeANDNODE[ pi_PRFINFO$, subnode_PRFSIT$] := ANDNODE$[ pi, subnode, pending]
+makeANDNODE[ pi_PRFINFO$, subnode_] := ANDNODE$[ pi, subnode, pending]
 makeANDNODE[ pi_PRFINFO$, {subnodes__}] := ANDNODE$[ pi, subnodes, pending]
 makeANDNODE[ args___] := unexpected[ makeANDNODE, {args}]
 
@@ -327,10 +327,28 @@ noProofNode[ args___] := unexpected[ noProofNode, {args}]
 (* ::Subsubsection:: *)
 (* getActiveRules *)
 
+(*
+	If op =!= Flatten, i.e. we keep a structured list of rules, we need to clarify the role of rulePriority, maybe sort sublists recursively? *)
 getActiveRules[ Hold[ rules_], op_:Identity] := 
-	Sort[ DeleteDuplicates[ DeleteCases[ op[ rules], _String|_?(ruleActive[#]===False&), Infinity]], 
-		rulePriority[#1] < rulePriority[#2]&]
+	Module[{names = op[ rules /. {{r_?ruleActive, _, _, _Integer} -> r, _String | {r_Symbol, _, _, _Integer} -> Sequence[]}]},
+		(* Select names of active rules, delete strings (category names) and inactive rules, finally apply op *) 
+		If[ Depth[ names] == 2,
+			(* we have a flat list of rule names *)
+			names = Sort[ DeleteDuplicates[ names], rulePriority[#1] < rulePriority[#2]&];
+			DeleteCases[ Map[ inferenceRule, names], _inferenceRule],
+			(* else *)
+			DeleteCases[ MapAt[ inferenceRule, names, Position[ names, _Symbol, Heads -> False]], _inferenceRule, Infinity]
+		]
+	]	
 getActiveRules[ args___] := unexpected[ getActiveRules, {args}]
+
+
+(* ::Subsubsection:: *)
+(* applyAllRules *)
+
+applyAllRules[ ps_PRFSIT$, rules_List] :=
+	DeleteCases[ ReplaceList[ ps, rules], $Failed]
+applyAllRules[ args___] := unexpected[ applyAllRules, {args}]
 
 
 (* ::Section:: *)
@@ -495,7 +513,7 @@ proofObjectToCell[ TERMINALNODE$[ pi_PRFINFO$, pVal_]] :=
 proofObjectToCell[ args___] := unexpected[ proofObjectToCell, {args}]
 
 subProofToCell[ PRFINFO$[ name_, used_List, gen_List, ___], node_, pos_List] :=
-	Cell[ CellGroupData[ Append[ subProofHeader[ id -> node.id, name, $Language, used, gen, node.proofValue, pos], proofObjectToCell[ node]], $proofCellStatus]]
+	Cell[ CellGroupData[ Join[ subProofHeader[ id -> node.id, name, $Language, used, gen, node.proofValue, pos], {proofObjectToCell[ node]}], $proofCellStatus]]
 subProofToCell[ args___] := unexpected[ subProofToCell, {args}]
 
 

@@ -26,9 +26,8 @@ Begin["`Private`"]
 (* Proof strategies *)
 
 applyOnce[ rules_Hold, ps_PRFSIT$] := 
-	Module[ {i = ps.id, ruleSyms = getActiveRules[ rules, Flatten], allRules, newNodes},
-		allRules = DeleteCases[ Map[ inferenceRule, ruleSyms], _inferenceRule];
-		newNodes = ReplaceList[ ps, allRules];
+	Module[ {i = ps.id, allRules = getActiveRules[ rules, Flatten], newNodes},
+		newNodes = applyAllRules[ ps, allRules];
 		Switch[ Length[ newNodes],
 			0,
 			proofFails[ makePRFINFO[ name -> noApplicableRule, id -> i]],
