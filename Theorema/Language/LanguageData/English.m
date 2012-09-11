@@ -1,5 +1,7 @@
 
 With[ {lang = "English"},
+	MessageName[FIX$, "usage", lang] = "";
+	MessageName[META$, "usage", lang] = "";
 	MessageName[QU$, "usage", lang] = "QU$[ expr] temporarily marks quantified variables in expr.";
 	MessageName[VAR$, "usage", lang] = "";
 	MessageName[RNG$, "usage", lang] = "";

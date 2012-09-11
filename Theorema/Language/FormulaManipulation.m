@@ -219,6 +219,21 @@ formulaReference[ fml_FML$] :=
        ]
 formulaReference[ args___] := unexpected[ formulaReference, {args}]
 
+
+(* ::Section:: *)
+(* arbitraryButFixed *)
+
+arbitraryButFixed[ expr_, rng_Theorema`Language`RNG$, kb_List:{}] :=
+	(*
+		Select all variable symbols from rng, then (for each v of them) find all FIX$[ v, n] constants in kb and take the maximal n, say n'.
+		A new constant then has the form FIX$[ v, n'+1], hence, we substitute all free VAR$[v] by FIX$[ v, n+1].
+		If no FIX$[ v, n] occurs in kb, then n'+1 is -Infinity, we take 0 instead to create the first new constant FIX$[ v, 0]. *)
+	Module[{vars = specifiedVariables[ rng], subs},
+		subs = Map[ Theorema`Language`VAR$[ #] -> Theorema`Language`FIX$[ #, Max[ Cases[ kb, Theorema`Language`FIX$[ #, n_] -> n, Infinity]] + 1]&, vars] /. -Infinity -> 0;
+		substituteFree[ expr, subs] 
+	]
+arbitraryButFixed[ args___] := unexpected[ arbitraryButFixed, {args}]
+
 End[]
 
 EndPackage[]
