@@ -22,16 +22,18 @@ Begin["`Private`"]
 
 With[ {lang = "English"},
 
-proofStepText[ initialProofSituation, lang, {goal_FML$, {}}, {}, pVal_] := {textCell[ "We have to prove:"], 
+proofStepText[ initialProofSituation, lang, {goal_FML$, {}}, {}, pVal_] := {If[ pVal === proved, textCell[ "We prove:"], textCell[ "We have to prove:"]], 
          goalCell[ goal],
          textCell[ "with no assumptions."]
          };
-proofStepText[ initialProofSituation, lang, {goal_FML$, kb_List}, {}, pVal_] := {textCell[ "We have to prove:"], 
+proofStepText[ initialProofSituation, lang, {goal_FML$, kb_List}, {}, pVal_] := {If[ pVal === proved, textCell[ "We prove:"], textCell[ "We have to prove:"]], 
          goalCell[ goal],
          textCell[ "under the assumptions:"], 
          assumptionListCells[ kb, ",", "."]
          };
-         
+
+(* The data for openProofSituation comes from a PRFSIT$, which has no proofValue yet. Hence, we cannot pass a pVal as last parameter,
+   like we do it in all other proofStepText cases. This is no problem, since we don't need a pVal here anyway. *)         
 proofStepText[ openProofSituation, lang, {goal_FML$, {}}, {}] := {textCell[ "Open proof situation"], 
 		textCell[ "We have to prove:"],
 		goalCell[ goal],

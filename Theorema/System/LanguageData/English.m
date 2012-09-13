@@ -78,8 +78,8 @@ With[ {lang = "English"},
 	MessageName[availableLanguages, "usage", lang] = "availableLanguages[] gives all available languages.";
 
 (* Theorema`Provers` *)
-	MessageName[proofStepText, "usage", lang] = "proofStepText[ stepID_, lang_, data___] generates the cell expression explaining the proof step stepID in language lang.";
-	MessageName[subProofHeader, "usage", lang] = "subProofHeader[ name_, lang_, pos_] generates the cell expression used as header for the subproof at position pos.";
+	MessageName[proofStepTextId, "usage", lang] = "proofStepTextId[ stepID_, lang_, data___] generates the cell expression explaining the proof step stepID in language lang.";
+	MessageName[subProofHeaderId, "usage", lang] = "subProofHeaderId[ name_, lang_, pos_] generates the cell expression used as header for the subproof at position pos.";
 
 (* Theorema`Provers`Common` *)
 	MessageName[callProver, "usage", lang] = "callProver[ prover_, goal_, kb_] calls prover with goal and kb, returns a proof value and proof object.";
@@ -100,6 +100,7 @@ With[ {lang = "English"},
 	MessageName[getAddFact, "usage", lang] = "getAddFact[ af, key] reads the value of fact 'key' from the additional facts datastructure 'af'.";
 	MessageName[putAddFact, "usage", lang] = "putAddFact[ af, key, val] replaces the value of fact 'key' in the additional facts datastructure 'af' with 'val'. If the value does not exist yet in 'af', it is added.";
 	MessageName[makePRFSIT, "usage", lang] = "makePRFSIT[ ...] constructor for PRFSIT$ data staructure.";
+	MessageName[type, "usage", lang] = "type is a selector for proof node datastructures.";
 	MessageName[goal, "usage", lang] = "goal is an option for the constructor makePRFSIT and a selector for the PRFSIT$ datastructure.";
 	MessageName[kb, "usage", lang] = "kb is an option for the constructor makePRFSIT and a selector for the PRFSIT$ datastructure.";
 	MessageName[facts, "usage", lang] = "facts is an option for the constructor makePRFSIT and a selector for the PRFSIT$ datastructure.";
@@ -116,5 +117,9 @@ With[ {lang = "English"},
 	MessageName[PRFSIT$, "usage", lang] = "PRFSIT$[ ...] represents a Theorema proof situation.";
 	MessageName[inferenceRule, "usage", lang] = "inferenceRule[ name] stores the inference rule named name.";
 	MessageName[proofStatusIndicator, "usage", lang] = "proofStatusIndicator[ status] gives a graphical indication of the proof status.";
+	MessageName[proved, "usage", lang] = "proved is a possible proof value.";
+	MessageName[disproved, "usage", lang] = "disproved is a possible proof value.";
+	MessageName[failed, "usage", lang] = "failed is a possible proof value.";
+	MessageName[pending, "usage", lang] = "pending is a possible proof value.";
 
 ]

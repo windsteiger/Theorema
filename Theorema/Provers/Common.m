@@ -63,7 +63,7 @@ callProver[ args___] := unexpected[ callProver, {args}]
 proofSearch[ searchDepth_Integer] :=
     Module[ {openPSpos, openPS, selPSpos, selPS, pStrat, newSteps},
     	$proofAborted = False;
-        While[ !$proofAborted && $TMAproofObject.proofValue === pending && (openPSpos = Position[ $TMAproofObject, _PRFSIT$]) =!= {},
+        While[ !$proofAborted && $TMAproofObject.proofValue === pending && (openPSpos = positionRelevantSits[ $TMAproofObject]) =!= {},
             openPS = Extract[ $TMAproofObject, openPSpos];
             {selPS, selPSpos} = chooseNextPS[ openPS, openPSpos];
             If[ Length[ selPSpos] > searchDepth,
@@ -91,7 +91,7 @@ proofSearchParallel[ searchDepth_Integer] :=
     Module[ {openPSpos},
     	$proofAborted = False;
     	SetSharedVariable[$TMAproofObject, $TMAproofTree];
-        While[ !$proofAborted && $TMAproofObject.proofValue === pending && (openPSpos = Position[ $TMAproofObject, _PRFSIT$]) =!= {},
+        While[ !$proofAborted && $TMAproofObject.proofValue === pending && (openPSpos = positionRelevantSits[ $TMAproofObject]) =!= {},
         	ParallelTry[ proofSearchAtPos[ #, searchDepth]&, openPSpos];
         ]
     ]
@@ -114,6 +114,33 @@ proofSearchAtPos[ selPSpos_List, searchDepth_Integer] :=
         $TMAproofObject = propagateProofValues[ $TMAproofObject]
     ]
 proofSearchAtPos[ args___] := unexpected[ proofSearchAtPos, {args}]
+
+(*
+	An open proof situation under a failing ANDNODE$ or a proved ORNODE$ is not relevant (in the remaining proof search).
+	positionRelevantSits[ po] searches all open positions and then selects only the relevant ones.
+	We can assume, that the proof value of po is pending, otherwise we would not call this function.
+*)
+positionRelevantSits[ po_PRFOBJ$] :=
+	Module[{allPending},
+		allPending = Position[ po, _PRFSIT$];
+		Select[ allPending, stillRelevant[ #, po]&]
+	]
+positionRelevantSits[ args___] := unexpected[ positionRelevantSits, {args}]
+
+stillRelevant[ pos_List, po_PRFOBJ$] :=
+	Module[{path = Drop[ pos, -1], node},
+		(* Given the node at position pos, we follow the path upwards and check all parent nodes *)
+		While[ path =!= {},
+			node = Extract[ po, path];
+			If[ (node.type === ANDNODE$ && node.proofValue === failed) ||
+				(node.type === ORNODE$ && node.proofValue === proved),
+				Return[ False]
+			];
+			path = Drop[ path, -1];
+		];
+		True
+	]
+stillRelevant[ args___] := unexpected[ stillRelevant, {args}]
 
 chooseNextPS[ ps_List, psPos_List] :=
 	Module[{},
@@ -191,9 +218,10 @@ getPrincipalData[ args___] := unexpected[ getPrincipalData, {args}]
 (* PRFINFO$ *)
 
 (*
-  PRFINFO$[ name_$, used_List, generated_List, id_String]
+  PRFINFO$[ name_, used_List, generated_List, id_String, addInfo___?OptionQ]
   
-	The consturctor understands options name->, used->, generated->, id-> .
+	The consturctor understands options name->, used->, generated->, id->, and p."key" (for an
+  	arbitrary string "key").
   	The selectors for the datastructure are p.goal, p.kb, p.facts, p.id, and p."key" (for an
   	arbitrary string "key").
 *)
@@ -202,20 +230,27 @@ Options[ makePRFINFO] = {name -> "???", used -> {}, generated -> {}, id -> ""};
 makePRFINFO[ data___?OptionQ] :=
 	Module[{n, u, g, i},
 		{n, u, g, i} = {name, used, generated, id} /. {data} /. Options[ makePRFINFO];
-		makeRealPRFINFO[ n, u, g, i]
+		makeRealPRFINFO[ n, u, g, i, Apply[ Sequence, Cases[ {data}, HoldPattern[ _String -> _]]]]
 	]
 makePRFINFO[ args___] := unexpected[ makePRFINFO, {args}]
 
-makeRealPRFINFO[ name_, u_FML$, g_, id_String] := makeRealPRFINFO[ name, {u}, g, id]
-makeRealPRFINFO[ name_, u_, g_FML$, id_String] := makeRealPRFINFO[ name, u, {g}, id]
-makeRealPRFINFO[ name_, u_List, g_List, ""] := PRFINFO$[ name, u, g, ToString[ Unique[ name]]]
-makeRealPRFINFO[ name_, u_List, g_List, id_String] := PRFINFO$[ name, u, g, id]
+makeRealPRFINFO[ name_, u_FML$, g_, id_String, rest___?OptionQ] := makeRealPRFINFO[ name, {u}, g, id, rest]
+makeRealPRFINFO[ name_, u_, g_FML$, id_String, rest___?OptionQ] := makeRealPRFINFO[ name, u, {g}, id, rest]
+makeRealPRFINFO[ name_, u_List, g_List, "", rest___?OptionQ] := PRFINFO$[ name, u, g, ToString[ Unique[ name]], rest]
+makeRealPRFINFO[ name_, u_List, g_List, id_String, rest___?OptionQ] := PRFINFO$[ name, u, g, id, rest]
 makeRealPRFINFO[ args___] := unexpected[ makeRealPRFINFO, {args}]
 
 PRFINFO$ /: Dot[ PRFINFO$[ n_, _, _, _, ___], name] := n
 PRFINFO$ /: Dot[ PRFINFO$[ _, u_List, _, _, ___], used] := u
 PRFINFO$ /: Dot[ PRFINFO$[ _, _, g_List, _, ___], generated] := g
 PRFINFO$ /: Dot[ PRFINFO$[ _, _, _, i_String, ___], id] := i
+PRFINFO$ /: Dot[ p_PRFINFO$, s_String] := 
+	Module[ {val = Cases[ p, HoldPattern[ s -> v_] -> v]},
+		If[ Length[ val] == 1,
+			First[ val],
+			unexpected[ Dot, {p, s}]
+		]
+	]
 PRFINFO$ /: Dot[ p:PRFINFO$[ _, _, _, _, ___], s_] := unexpected[ Dot, {p, s}]
 
 
@@ -260,6 +295,7 @@ proofSucceeds[ args___] := unexpected[ proofSucceeds, {args}]
 proofDisproved[ pi_PRFINFO$] := TERMINALNODE$[ pi, disproved]
 proofDisproved[ args___] := unexpected[ proofDisproved, {args}]
 
+type /: Dot[ node_?isProofNode, type] := Head[ node]
 id /: Dot[ node_?isProofNode, id] := First[ node].id
 used /: Dot[ node_, used] := Apply[ Union, Map[ #.used&, Cases[ node, _PRFINFO$, Infinity]]]
 generated /: Dot[ node_, generated] := Apply[ Union, Map[ #.generated&, Cases[ node, _PRFINFO$, Infinity]]]
@@ -484,15 +520,15 @@ displayProof[ args___] := unexpected[ displayProof, {args}]
 (* proofObjectToCell *)
 
 (* 
-	If proof text is deactivated, the result is {}. Proof textx are composed in such a way that {} simply cancels and therfore no text appears.
+	If proof text is deactivated, the result is {}. Proof texts are composed in such a way that {} simply cancels out and therfore no text appears.
 *)
 proofObjectToCell[ PRFOBJ$[ pi_PRFINFO$, sub_, pVal_]] := 
 	Module[{ cellList = proofObjectToCell[ pi, pVal]},
 		Join[ cellList, {proofObjectToCell[ sub]}]
 	]
-proofObjectToCell[ PRFINFO$[ name_?ruleTextActive, rest___, i_String], pVal_] := proofStepText[ id -> i, name, $Language, rest, pVal]
-proofObjectToCell[ PRFINFO$[ name_, rest___, i_String], pVal_] := {}
-proofObjectToCell[ PRFSIT$[ g_FML$, kb_List, _, i_String, ___]] := Cell[ CellGroupData[ proofStepText[ id -> i, openProofSituation, $Language, {g, kb}, {}], $proofCellStatus]]
+proofObjectToCell[ PRFINFO$[ name_?ruleTextActive, u_, g_, id_String, rest___?OptionQ], pVal_] := proofStepTextId[ id, name, u, g, rest, pVal]
+proofObjectToCell[ PRFINFO$[ _, _, _, _String, ___?OptionQ], _] := {}
+proofObjectToCell[ PRFSIT$[ g_FML$, kb_List, _, id_String, ___]] := Cell[ CellGroupData[ proofStepTextId[ id, openProofSituation, {g, kb}, {}], $proofCellStatus]]
 proofObjectToCell[ (ANDNODE$|ORNODE$)[ pi_PRFINFO$, subnodes__, pVal_]] := 
 	Module[{header, sub = {}},
 		header = proofObjectToCell[ pi, pVal];
@@ -513,7 +549,7 @@ proofObjectToCell[ TERMINALNODE$[ pi_PRFINFO$, pVal_]] :=
 proofObjectToCell[ args___] := unexpected[ proofObjectToCell, {args}]
 
 subProofToCell[ PRFINFO$[ name_, used_List, gen_List, ___], node_, pos_List] :=
-	Cell[ CellGroupData[ Join[ subProofHeader[ id -> node.id, name, $Language, used, gen, node.proofValue, pos], {proofObjectToCell[ node]}], $proofCellStatus]]
+	Cell[ CellGroupData[ Join[ subProofHeaderId[ node.id, name, used, gen, node.proofValue, pos], {proofObjectToCell[ node]}], $proofCellStatus]]
 subProofToCell[ args___] := unexpected[ subProofToCell, {args}]
 
 

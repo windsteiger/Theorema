@@ -22,25 +22,36 @@ BeginPackage[ "Theorema`Provers`", {"Theorema`"}]
 Needs[ "Theorema`Common`"]
 Needs[ "Theorema`Language`"]
 
-(* Load the language dependent proof texts and prover descriptions*)
+(* Load the language dependent proof texts and prover descriptions *)
 Map[ Get, FileNames[ "*.m", FileNameJoin[{$TheoremaDirectory, "Theorema", "Provers", "LanguageData"}], 2]];
 
 Get[ "Theorema`Provers`Common`"]
 
 Begin["`Private`"]
 
-proofStepText[ id -> i_, step_, lang_String, rest___] := 
-	Block[ {$proofStepID = i},
-		proofStepText[ step, lang, rest]
-	]
+(*
+	The default cases to be added after all proof texts have been loaded above.
+	
+	The standard call is:
+	proofStepText[ step, language, used_List, generated_List, addInfo___?OptionQ, pVal_Symbol], where
+		addInfo is a sequence of options of the form _String->val_
+		pVal is the proof node's value, i.e. the last argument is always the proof value.
+*)
 proofStepText[ args___] := unexpected[ proofStepText, {args}]
-
-subProofHeader[ id -> i_, step_, lang_String, rest___, pVal_, pos_List] :=
-	Block[ {$proofStepID = i},
-		MapAt[ Append[ #, CellDingbat -> ToBoxes[ proofStatusIndicator[ pVal]]]&, 
-			subProofHeader[ step, lang, rest, pVal, pos], 1]
-	]
 subProofHeader[ args___] := unexpected[ subProofHeader, {args}]
+
+proofStepTextId[ id_, step_, rest___] := 
+	Block[ {$proofStepID = id},
+		proofStepText[ step, $Language, rest]
+	]
+proofStepTextId[ args___] := unexpected[ proofStepTextId, {args}]
+
+subProofHeaderId[ id_, step_, rest___, pVal_, pos_List] :=
+	Block[ {$proofStepID = id},
+		MapAt[ Append[ #, CellDingbat -> ToBoxes[ proofStatusIndicator[ pVal]]]&, 
+			subProofHeader[ step, $Language, rest, pVal, pos], 1]
+	]
+subProofHeaderId[ args___] := unexpected[ subProofHeaderId, {args}]
 
 
 (* ::Section:: *)
