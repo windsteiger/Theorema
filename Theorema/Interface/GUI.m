@@ -27,15 +27,16 @@ Needs["Theorema`Interface`Language`"]
 
 Begin["`Private`"] (* Begin Private Context *) 
 
+If[ $Notebooks,
+	closeTheoremaCommander[]
+];
+
 
 (* ::Section:: *)
 (* initGUI *)
 
 initGUI[] := 
 	Module[{},
-		If[ $Notebooks,
-			closeTheoremaCommander[]
-		];
 		(*
 		   In $tmaBuiltins
 		   o) nesting gives the nested structure for display
