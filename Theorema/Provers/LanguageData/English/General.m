@@ -3,15 +3,15 @@
 
 With[ {lang = "English"},
 	
-MessageName[ initialProofSituation, "usage", lang] = "The initial proof situation at the beginning of a proof.";
-MessageName[ openProofSituation, "usage", lang] = "An open proof situation in a proof.";
-MessageName[ proofAlternatives, "usage", lang] = "Alternatives to continue a proof when multiple inference rules apply.";
-MessageName[ searchDepthLimit, "usage", lang] = "Proof terminates due to search depth limitation.";
-MessageName[ invalidProofNode, "usage", lang] = "A proof strategy returns an invalid proof node.";
-MessageName[ noApplicableRule, "usage", lang] = "Proof fails since there is no applicable rule.";
-MessageName[ contradictionKB, "usage", lang] = "Knowledge base contains contradicting formulae.";
-MessageName[ falseInKB, "usage", lang] = "Knowledge base contains a formula False.";
-MessageName[ goalInKB, "usage", lang] = "Knowledge base contains the proof goal.";
+MessageName[ initialProofSituation, "usage", lang] = "The initial proof situation at the beginning of a proof";
+MessageName[ openProofSituation, "usage", lang] = "An open proof situation in a proof";
+MessageName[ proofAlternatives, "usage", lang] = "Alternatives to continue a proof when multiple inference rules apply";
+MessageName[ searchDepthLimit, "usage", lang] = "Proof terminates due to search depth limitation";
+MessageName[ invalidProofNode, "usage", lang] = "A proof strategy returns an invalid proof node";
+MessageName[ noApplicableRule, "usage", lang] = "Proof fails since there is no applicable rule";
+MessageName[ contradictionKB, "usage", lang] = "Knowledge base contains contradicting formulae";
+MessageName[ falseInKB, "usage", lang] = "Knowledge base contains a formula False";
+MessageName[ goalInKB, "usage", lang] = "Knowledge base contains the proof goal";
 
 ] (* With *)
 

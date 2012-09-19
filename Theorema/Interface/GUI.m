@@ -90,6 +90,7 @@ initGUI[] :=
 		$selectedRuleSet = Hold[ basicTheoremaLanguageRules];
 		$CtrlActive = 0;
 		$ShiftActive = 0;
+		$proofTreeScale = 1;
 		If[ $Notebooks,
 			openTheoremaCommander[]
 		];
@@ -113,6 +114,11 @@ initBuiltins[ args___] := unexpected[ initBuiltins, {args}]
 (* ::Section:: *)
 (* theoremaCommander *)
 
+(*
+	The style sheet defines Deployed->False unlike in usual palettes. This is necessary in order make Button[ ..., Active->False] or
+	Hyperlink[ ..., Active->False] work. Deployed->True would force all links and buttons to be active.
+	We have to keep an eye on that whether Deployed->False has other negative effects on the window's behaviour.
+*)
 openTheoremaCommander[ ] /; $Notebooks :=
     Module[ {style = Replace[ ScreenStyleEnvironment, Options[InputNotebook[], ScreenStyleEnvironment]]},
         CreatePalette[ Dynamic[Refresh[
@@ -130,7 +136,7 @@ openTheoremaCommander[ ] /; $Notebooks :=
         			translate["tcProveTabSubmitTabLabel"]->Dynamic[ Refresh[ submitProveTask[ $tcProveTab],
         				TrackedSymbols :> {$tcProveTab, $selectedProofGoal, $selectedProofKB, $selectedProver}]],
         			translate["tcProveTabInspectTabLabel"]->Dynamic[ Refresh[ proofNavigation[ $TMAproofTree],
-        				TrackedSymbols :> {$TMAproofTree}]]}, Dynamic[$tcProveTab],
+        				TrackedSymbols :> {$TMAproofTree, ruleTextActive, $proofTreeScale}]]}, Dynamic[$tcProveTab],
         			LabelStyle->"TabLabel2", ControlPlacement->Top],
         		translate["tcComputeTabLabel"]->TabView[{
         			translate["tcComputeTabSetupTabLabel"]->Dynamic[Refresh[ compSetup[], TrackedSymbols :> {$buttonNat}]],
@@ -801,7 +807,18 @@ structViewBuiltin[args___] :=
 (* structViewRules *)
 Clear[structViewRules];
 
-structViewRules[ Hold[ rs_]] := structViewRules[ rs, {}, True][[1]]
+(*
+	Go through the nested rule list recursively and bulid up the nested opener view for rule selection.
+	Return a list {op, rules}, where
+		op is the main OpenerView and
+		rules is a list of all inference rule names contained in it.
+	As side effects, interactive elements contained in the view set the initial values for
+	each rule's activity (ruleActive), textActivity (ruleTextActive), and priority (rulePriority).
+	ruleActive and rulePriority are GUI-private symbols, their values are only needed as initial
+	values and go into the initial proof object (settings can be changed during the proof).
+	ruleTextActive is a global symbol, it does not go into the proof object and can be modified globally.
+*)
+structViewRules[ Hold[ rs_]] := structViewRules[ rs, {}, True]
 
 structViewRules[{category_String, r__}, tags_, open_:False] :=
     Module[ {sub, compTags, structControl},
@@ -829,7 +846,7 @@ structViewRules[ {r_Symbol, active:(True|False), textActive:(True|False), p_Inte
          Row[{
             Row[{Tooltip[ 
             		Checkbox[ Dynamic[ ruleActive[ r]], BaselinePosition -> align],
-            		MessageName[ ruleActive, "usage"]], 
+            		translate[ "ruleActive"]], 
             	Tooltip[
                     Toggler[ Dynamic[ ruleTextActive[ r]],
                     	{False -> showProofTextPic[ False],
@@ -837,7 +854,7 @@ structViewRules[ {r_Symbol, active:(True|False), textActive:(True|False), p_Inte
                 	MessageName[ ruleTextActive, "usage"]],
                 Tooltip[ 
                 	PopupMenu[ Dynamic[ rulePriority[ r]], Table[ i, {i,1,100}], BaselinePosition -> align, ImageSize -> {45, 16}],
-                    MessageName[ rulePriority, "usage"]]}
+                    translate[ "rulePriority"]]}
             ],
             MessageName[ r, "usage"]}, Spacer[7]], LineBreakWithin -> False], {r}}
     ]
@@ -891,7 +908,9 @@ selectProver[ ] :=
     	Labeled[ Tooltip[ PopupMenu[ Dynamic[ $selectedRuleSet], Map[ MapAt[ translate, #, {2}]&, $registeredRuleSets]],
     			Apply[ Function[ rs, MessageName[ rs, "usage"], {HoldFirst}], $selectedRuleSet]], 
     		translate[ "pRules"], {{ Top, Left}}],
-    	Labeled[ structViewRules[ $selectedRuleSet], translate[ "pRulesSetup"], {{ Top, Left}}],
+    	Module[ {view},
+    		{view, $allRules} = structViewRules[ $selectedRuleSet];
+    		Labeled[ view, translate[ "pRulesSetup"], {{ Top, Left}}]],
     	Labeled[ Tooltip[ PopupMenu[ Dynamic[ $selectedStrategy], Map[ MapAt[ translate, #, {2}]&, $registeredStrategies]],
     		With[ {ss = $selectedStrategy}, MessageName[ ss, "usage"]]], 
     		translate[ "pStrat"], {{ Top, Left}}],
@@ -913,12 +932,16 @@ submitProveTask[ dummy_] :=
 			Labeled[ displaySelectedGoal[ $selectedProofGoal], translate["selGoal"], {{ Top, Left}}],
 			Labeled[ displaySelectedKB[], translate["selKB"], {{ Top, Left}}],
 			(* Method -> "Queued" so that no time limit is set for proof to complete *)
-			Button[ translate["prove"], execProveCall[ $selectedProofGoal, $selectedProofKB, $selectedRuleSet, $selectedStrategy, $selectedSearchDepth], Method -> "Queued"]
+			Button[ translate["prove"], 
+				execProveCall[ $selectedProofGoal, $selectedProofKB, 
+					{$selectedRuleSet, Map[ # -> ruleActive[#]&, $allRules], Map[ # -> rulePriority[#]&, $allRules]},
+					$selectedStrategy, $selectedSearchDepth], 
+				Method -> "Queued", Active -> ($selectedProofGoal =!= {})]
 		}]
 	]
 submitProveTask[ args___] := unexpected[ submitProveTask, {args}]
 
-execProveCall[ goal_, kb_, ruleSet_, strategy_, searchDepth_] :=
+execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, strategy_, searchDepth_] :=
 	Module[{nb = $proofInitNotebook, proof},
 		$tcProveTab++;
 		If[ NotebookFind[ nb, makeProofIDTag[ goal], All, CellTags] === $Failed,
@@ -930,18 +953,23 @@ execProveCall[ goal_, kb_, ruleSet_, strategy_, searchDepth_] :=
 		SetSelectedNotebook[ nb];
 		NotebookWrite[ nb, Cell[ translate[ "Proof of"]<>" "<>goal[[3]]<>": \[Ellipsis]", "OpenProof", CellTags -> makeProofIDTag[ goal]]];
 
-		proof = callProver[ ruleSet, strategy, goal, kb, searchDepth];
+		proof = callProver[ rules, strategy, goal, kb, searchDepth];
 		printProveInfo[ goal, kb, ruleSet, strategy, proof, searchDepth];
 	]
 execProveCall[ args___] := unexpected[ execProveCall, {args}]
 
 proofNavigation[ po_] :=
-    Module[ {geom = {Max[ Count[ po, _ -> {__, Theorema`Provers`Common`Private`TERMINALNODE$|Theorema`Provers`Common`Private`PRFSIT$}]*20, 350], Max[ $selectedSearchDepth*15, 420]}},
+    Module[ {proofTree = showProofNavigation[ po, $proofTreeScale], geom},
+    	geom = Replace[ ImageSize, Options[ proofTree, ImageSize]];
+    	(* Putting the frame around the inner Pane is a work-around, otherwise the pane is not positioned correctly when the proof tree is higher than 420 *)
         Pane[ Column[{
-        	Pane[ showProofNavigation[ po, geom],
-        		{350, 420}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic, ScrollPosition -> geom/2-{350,420}/2],
+        	(*Slider[ Dynamic[$proofTreeScale], {{0.1, 0.2, 0.5, 1, 2, 5, 10}}]*)
+        	ButtonBar[ {"+" :> ($proofTreeScale *= 2), "\[FivePointedStar]" :> ($proofTreeScale = 1), "\[DottedSquare]" :> ($proofTreeScale = Fit), "-" :> ($proofTreeScale /= 2)},
+        		FrameMargins -> {{15, 15}, {2, 0}}],
+        	Framed[ Pane[ proofTree,
+        		{350, 420}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic, ScrollPosition -> {geom[[1]]/2-175, 0}], FrameStyle -> None],
         	Button[ translate["abort"], Theorema`Provers`Common`Private`$proofAborted = True]
-        }], {350, 450}]	
+        	}, Center], {360, 500}]	
     ]
 proofNavigation[ args___] := unexpected[ proofNavigation, {args}]
 

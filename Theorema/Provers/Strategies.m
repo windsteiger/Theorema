@@ -25,8 +25,8 @@ Begin["`Private`"]
 (* ::Section:: *)
 (* Proof strategies *)
 
-applyOnce[ rules_Hold, ps_PRFSIT$] := 
-	Module[ {i = ps.id, allRules = getActiveRules[ rules, Flatten], newNodes},
+applyOnce[ ps_PRFSIT$] := 
+	Module[ {i = ps.id, allRules = getActiveRules[ ps, Flatten], newNodes},
 		newNodes = applyAllRules[ ps, allRules];
 		Switch[ Length[ newNodes],
 			0,
@@ -42,11 +42,17 @@ applyOnce[ rules_Hold, ps_PRFSIT$] :=
 	]
 applyOnce[ args___] := unexpected[ applyOnce, {args}]
 
-trySeveral[ rules_Hold, ps_PRFSIT$] :=
-    Module[ {i = ps.id},
-        makeORNODE[ makePRFINFO[ name -> proofAlternatives, used -> {ps[[1]]}, generated -> {ps[[2]]}, id -> i],
-        	{Apply[ makePRFSIT[ goal -> #1, kb -> #2, facts -> #3, Apply[ Sequence, Cases[ ps, HoldPattern[ _String -> _]]]]&, ps], 
-        	Apply[ makePRFSIT[ goal -> #1, kb -> #2, facts -> #3, Apply[ Sequence, Cases[ ps, HoldPattern[ _String -> _]]]]&, ps]}
+(*
+	This is not serious, it just duplicates the proof situation into two children. Should be a test case for exhaustive search
+	until search depth is reached.
+*)
+trySeveral[ ps_PRFSIT$] :=
+    Module[ {},
+        makeORNODE[ makePRFINFO[ name -> proofAlternatives, used -> {ps.goal}, generated -> {ps.kb}, id -> ps.id],
+        	{Apply[ makePRFSIT[ goal -> #1, kb -> #2, #4, #5, #6, #7, #8,
+        		Apply[ Sequence, Cases[ ps, HoldPattern[ (Rule|RuleDelayed)[_String, _]]]]]&, ps], 
+        	Apply[ makePRFSIT[ goal -> #1, kb -> #2, #4, #5, #6, #7, #8,
+        		Apply[ Sequence, Cases[ ps, HoldPattern[ (Rule|RuleDelayed)[_String, _]]]]]&, ps]}
         	]
     ]
 trySeveral[ args___] := unexpected[ trySeveral, {args}]

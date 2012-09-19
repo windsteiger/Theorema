@@ -4,18 +4,22 @@
 
 With[ {lang = "English"},
 
-MessageName[ basicTheoremaLanguageRules, "usage", lang] = "Rules for the basic language constructs from the Theorema language, standard propositional and predicate logic.";
-MessageName[ quantifierRules, "usage", lang] = "Rules for quantifiers.";
+MessageName[ basicTheoremaLanguageRules, "usage", lang] = "Rules for the basic language constructs from the Theorema language, standard propositional and predicate logic";
+MessageName[ quantifierRules, "usage", lang] = "Rules for quantifiers";
 
-MessageName[ notGoal, "usage", lang] = "Prove negation by contradiction.";
-MessageName[ andGoal, "usage", lang] = "Split a conjunction in the goal.";
-MessageName[ andKB, "usage", lang] = "Split a conjunction in the knowledge base.";
-MessageName[ orGoal, "usage", lang] = "Handle a disjunction in the goal.";
-MessageName[ orKB, "usage", lang] = "Case distinction based on a disjunction in the knowledge base.";
-MessageName[ implGoalDirect, "usage", lang] = "Prove implication directly.";
-MessageName[ implGoalCP, "usage", lang] = "Prove implication using contraposition.";
-MessageName[ equivGoal, "usage", lang] = "Prove equivalence by double implication.";
-MessageName[ contradiction, "usage", lang] = "Prove by contradiction.";
+MessageName[ notGoal, "usage", lang] = "Prove negation by contradiction";
+MessageName[ andGoal, "usage", lang] = "Split a conjunction in the goal";
+MessageName[ andKB, "usage", lang] = "Split a conjunction in the knowledge base";
+MessageName[ orGoal, "usage", lang] = "Handle a disjunction in the goal";
+MessageName[ orKB, "usage", lang] = "Case distinction based on a disjunction in the knowledge base";
+MessageName[ implGoalDirect, "usage", lang] = "Prove implication directly";
+MessageName[ implGoalCP, "usage", lang] = "Prove implication using contraposition";
+MessageName[ equivGoal, "usage", lang] = "Prove equivalence by double implication";
+MessageName[ contradiction, "usage", lang] = "Prove by contradiction";
+MessageName[ forallGoal, "usage", lang] = "Prove universally quantified goal";
+MessageName[ forallKB, "usage", lang] = "Instantiate universally quantified formula";
+MessageName[ existsGoal, "usage", lang] = "Handle existentially quantified goal by introducing meta variables";
+MessageName[ existsKB, "usage", lang] = "Instantiate existentially quantified formula";
 
 ] (* With *)
 
@@ -37,14 +41,14 @@ proofStepText[ notGoal|contradiction, lang, {g_}, {opp_, ___}, ___] := {textCell
 	textCell[ "and derive a contradiction."]
 	};
 
-proofStepText[ andGoal, lang, {g_}, generated_, ___] := {textCell[ "For proving ", formulaReference[ g], " we prove the individual conjuncts."]};
+proofStepText[ andGoal, lang, {g_}, generated_List, ___] := {textCell[ "For proving ", formulaReference[ g], " we prove the individual conjuncts."]};
 
 subProofHeader[ andGoal, lang, used_List, generated_List, pVal_, {p_}] := {textCell[ "Proof of ", formulaReference[ Part[ generated, p]], ":"],
 	textCell[ "We need to prove"],
 	goalCell[ Part[ generated, p], "."]
 	};
 
-proofStepText[ andKB, lang, {g_}, generated_, ___] := {textCell[ "We split the conjunction ", formulaReference[ g], " and add"],
+proofStepText[ andKB, lang, {g_}, generated_List, ___] := {textCell[ "We split the conjunction ", formulaReference[ g], " and add"],
 	assumptionListCells[ generated, ",", ""],
 	textCell[ "to the knowledge base."]
 	};
@@ -53,9 +57,9 @@ proofStepText[ orGoal, lang, {g_}, {negAssum__, newG_}, ___] := {textCell[ "For 
 	assumptionListCells[ {negAssum}, ",", ""],
 	textCell[ "and show"],
 	goalCell[ newG, "."]
-};
+	};
 
-proofStepText[ orKB, lang, {g_}, generated_, ___] := {textCell[ "Based on the assumption ", formulaReference[ g], " we distinguish several cases:"]};
+proofStepText[ orKB, lang, {g_}, generated_List, ___] := {textCell[ "Based on the assumption ", formulaReference[ g], " we distinguish several cases:"]};
 
 subProofHeader[ orKB, lang, used_List, generated_List, pVal_, {p_}] := {textCell[ "Case ", ToString[p], ": we assume"],
 	assumptionCell[ Part[ generated, p], "."]
@@ -73,7 +77,14 @@ proofStepText[ implGoalCP, lang, {g_}, {nr_, nl_}, ___] := {textCell[ "We prove 
 	goalCell[ nl, "."]
 	};
 
+proofStepText[ equivGoal, lang, {g_}, generated_List, ___] := {textCell[ "We prove both directions of ", formulaReference[ g], "."]};
 
+subProofHeader[ equivGoal, lang, used_List, generated_List, pVal_, {p_}] := {textCell[ Switch[ p, 1, "\[RightArrow]", 2, "\[LeftArrow]"], ":"]};
+
+proofStepText[ forallGoal, lang, {g_}, {a_}, ___, "abf"->{v_}, ___] := {textCell[ "For proving ", formulaReference[ g], " we choose ", ExpressionCell[v], "arbitrary but fixed and prove"],
+	goalCell[ a, "."]
+	};
+	
 ] (* With *)
 
 End[]

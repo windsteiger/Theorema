@@ -34,16 +34,14 @@ initProver[] :=
 		$TMAproofTree = {};
 		$registeredRuleSets = {};
 		$registeredStrategies = {};
-		Clear[ ruleActive, ruleTextActive, rulePriority];
-		ruleActive[_] := True;
+		Clear[ ruleTextActive];
 		ruleTextActive[_] := True;
-		rulePriority[_] := 100;
 		$proofCellStatus = Open;
 	]
 
-callProver[ rules_, strategy_, goal_, kb_, searchDepth_] :=
+callProver[ ruleSetup:{_Hold, _List, _List}, strategy_, goal_FML$, kb_List, searchDepth_Integer] :=
 	Module[{},
-		$TMAproofObject = makeInitialProofObject[ goal, kb, rules, strategy];
+		$TMAproofObject = makeInitialProofObject[ goal, kb, ruleSetup, strategy];
 		$TMAproofNotebook = makeInitialProofNotebook[ $TMAproofObject];
 		$TMAproofTree = makeInitialProofTree[];
 		initFormulaLabel[];
@@ -52,6 +50,7 @@ callProver[ rules_, strategy_, goal_, kb_, searchDepth_] :=
   		If[ $TMAproofTree === {},
   			$TMAproofTree = {poNodeToTreeNode[ $TMAproofObject]}
   		];
+  		PrependTo[ $TMAproofTree, Depth -> Max[ 5, Max[ Map[ Length, Position[ $TMAproofObject, _TERMINALNODE$|_PRFSIT$]]]]];
 		{ $TMAproofObject.proofValue, $TMAproofObject}
 	]
 callProver[ args___] := unexpected[ callProver, {args}]
@@ -69,8 +68,8 @@ proofSearch[ searchDepth_Integer] :=
             If[ Length[ selPSpos] > searchDepth,
             	newSteps = searchDepthExceeded[ selPS],
             	(* else *)
-            	pStrat = selPS."strategy";
-            	newSteps = pStrat[ selPS."rules", selPS]
+            	pStrat = selPS.strategy;
+            	newSteps = pStrat[ selPS]
             ];
             If[ !isProofNode[ newSteps],
             	newSteps = noProofNode[ newSteps, selPS.id];
@@ -104,8 +103,8 @@ proofSearchAtPos[ selPSpos_List, searchDepth_Integer] :=
         If[ Length[ selPSpos] > searchDepth,
             newSteps = searchDepthExceeded[ selPS],
             (* else *)
-            pStrat = selPS."strategy";
-            newSteps = pStrat[ selPS."rules", selPS]
+            pStrat = selPS.strategy;
+            newSteps = pStrat[ selPS]
         ];
         If[ !isProofNode[ newSteps],
             newSteps = noProofNode[ newSteps, selPS.id];
@@ -151,11 +150,18 @@ chooseNextPS[ args___] := unexpected[ chooseNextPS, {args}]
 replaceProofSit[ po_PRFOBJ$, pos_ -> new:node_[___]] :=
 	Module[{parentID = Extract[ po, pos].id, newVal = new.proofValue, sub},
 		sub = poToTree[ new];
-		$TMAproofTree = Join[ $TMAproofTree /. {parentID, pending, PRFSIT$} -> {parentID, newVal, node}, sub];
+		$TMAproofTree = Join[ $TMAproofTree /. {parentID, pending, PRFSIT$, None} -> {parentID, newVal, node, new.name}, sub];
 		ReplacePart[ po, pos -> new]
 	]
 replaceProofSit[ args___] := unexpected[ replaceProofSit, {args}]
 
+
+(* ::Subsection:: *)
+(* isOptComponent *)
+
+isOptComponent[ (Rule|RuleDelayed)[ _String, _]] := True
+isOptComponent[ _] := False
+isOptComponent[ args___] := unexpected[ isOptComponent, {args}]
 
 (* ::Section:: *)
 (* Proof object data structures *)
@@ -165,52 +171,54 @@ replaceProofSit[ args___] := unexpected[ replaceProofSit, {args}]
 (* PRFSIT$ *)
 
 (*
-  PRFSIT$[ goal_FML$, kb_List, facts_, id_String, rest___Rule], where
-  
-  	rest is a sequence of rules of type "key"->val. As a start, we provide
-  	"rules"->... and 
-  	"startegy"->...
-  	for representing the available inference rules and strategy, respectively.
-  	The datastructure can be expanded by additional components of this type at any time.
-	The consturctor understands options goal->, kb->, facts->, id->, and "key"-> (for an
-  	arbitrary string "key").
-  	The selectors for the datastructure are p.goal, p.kb, p.facts, p.id, and p."key" (for an
-  	arbitrary string "key").
+  PRFSIT$[ goal_FML$, kb_List, id_String, addInfo___?OptionQ], where
+
+	addInfo consists of required fields (in this order):
+	local->...  for local proof info,
+	rules->...  for the collection of proof rules to be used,
+	ruleActivity->... for a list representing the rules' activity,
+	rulePriority->... for a list representing the rules' priorities,
+	strategy->... for the strategy to be used.
+	
+	In addition, there are optional fields
+  	"key"-> for arbitrary strings "key" (the datastructure can be expanded by additional components of this type at any time)
+  	
+	The consturctor understands options goal->, kb->, local->, id->, rules->, ruleActivity->, rulePriority->, strategy->, and 
+	"key"-> (for an arbitrary string "key").
+  	The selectors for the datastructure are p.goal, p.kb, p.id, p.local, p.rules, p.ruleActivity, p.rulePriority, p.strategy, and p."key" (for an
+  	arbitrary string "key"). The special selector p.ruleSetup is a combination of p.rules, p.ruleActivity, and p.rulePriority.
 *)
 
-Options[ makePRFSIT] = {goal -> {}, kb -> {}, facts -> {}, id :> ToString[ Unique[ "PRFSIT$"]]};
+Options[ makePRFSIT] = {goal -> {}, kb -> {}, id :> ToString[ Unique[ "PRFSIT$"]], local -> {}, rules -> Hold[], ruleActivity -> {}, rulePriority -> {}, strategy -> Identity};
 makePRFSIT[ data___?OptionQ] :=
-	Module[{g, k, f, i},
-		{g, k, f, i} = {goal, kb, facts, id} /. {data} /. Options[ makePRFSIT];
-		makeRealPRFSIT[ g, k, f, i, Apply[ Sequence, Cases[ {data}, HoldPattern[ _String -> _]]]]
+	Module[{g, k, i, l, r, a, p, s},
+		{g, k, i, l, r, a, p, s} = {goal, kb, id, local, rules, ruleActivity, rulePriority, strategy} /. {data} /. Options[ makePRFSIT];
+		makeRealPRFSIT[ g, k, i, l, r, a, p, s, Apply[ Sequence, Select[ {data}, isOptComponent]]]
 	]
 makePRFSIT[ args___] := unexpected[ makePRFINFO, {args}]
 
-makeRealPRFSIT[ g_FML$, k:{___FML$}, af_, id_String, rest___Rule] := 
+makeRealPRFSIT[ g_FML$, k:{___FML$}, id_String, li_, r_Hold, act_List, prio_List, s_, rest___?OptionQ] := 
 	Module[ {succ, pi},
-		{succ, pi} = checkProofSuccess[ g, k, af, id];
+		{succ, pi} = checkProofSuccess[ g, k, id, li];
 		If[ succ,
 			proofSucceeds[ pi],
-			PRFSIT$[ g, k, af, id, rest]
+			PRFSIT$[ g, k, id, local -> li, rules -> r, ruleActivity -> act, rulePriority -> prio, strategy -> s, rest]
 		]
 	]
 makeRealPRFSIT[ args___] := unexpected[ makeRealPRFSIT, {args}]
 
+(*
+	The selector p.rules immediately strips the Hold
+*)
 PRFSIT$ /: Dot[ PRFSIT$[ g_FML$, _, _, _, ___], goal] := g
 PRFSIT$ /: Dot[ PRFSIT$[ _, k_List, _, _, ___], kb] := k
-PRFSIT$ /: Dot[ PRFSIT$[ _, _, af_, _, ___], facts] := af
-PRFSIT$ /: Dot[ PRFSIT$[ _, _, _, i_String, ___], id] := i
-PRFSIT$ /: Dot[ PRFSIT$[ _, _, _, _, ___], proofValue] := pending
-PRFSIT$ /: Dot[ p_PRFSIT$, s_String] := 
-	Module[ {val = Cases[ p, HoldPattern[ s -> v_] -> v]},
-		If[ Length[ val] == 1,
-			First[ val],
-			unexpected[ Dot, {p, s}]
-		]
-	]
-PRFSIT$ /: Dot[ p:PRFSIT$[ _, _, _, _, ___], s_] := unexpected[ Dot, {p, s}]
+PRFSIT$ /: Dot[ PRFSIT$[ _, _, i_String, ___], id] := i
+PRFSIT$ /: Dot[ PRFSIT$[ _, _, _, _, rules -> Hold[r_], ruleActivity -> act_, rulePriority -> prio_, ___], ruleSetup] := {r, act, prio}
+PRFSIT$ /: Dot[ PRFSIT$[ _, _, _, _, rules -> Hold[r_], ___], rules] := r
+PRFSIT$ /: Dot[ PRFSIT$[ _, _, _, ___, (Rule|RuleDelayed)[ key_, val_], ___], key_] := val
+PRFSIT$ /: Dot[ _PRFSIT$, proofValue] := pending
+PRFSIT$ /: Dot[ p_PRFSIT$, s___] := unexpected[ Dot, {p, s}]
 
-getPrincipalData[ PRFSIT$[ g_, kb_, af_, ___]] := {g, kb, af}
 getPrincipalData[ args___] := unexpected[ getPrincipalData, {args}]
 
 
@@ -222,7 +230,7 @@ getPrincipalData[ args___] := unexpected[ getPrincipalData, {args}]
   
 	The consturctor understands options name->, used->, generated->, id->, and p."key" (for an
   	arbitrary string "key").
-  	The selectors for the datastructure are p.goal, p.kb, p.facts, p.id, and p."key" (for an
+  	The selectors for the datastructure are p.name, p.used, p.generated, p.id, and p."key" (for an
   	arbitrary string "key").
 *)
 
@@ -230,7 +238,7 @@ Options[ makePRFINFO] = {name -> "???", used -> {}, generated -> {}, id -> ""};
 makePRFINFO[ data___?OptionQ] :=
 	Module[{n, u, g, i},
 		{n, u, g, i} = {name, used, generated, id} /. {data} /. Options[ makePRFINFO];
-		makeRealPRFINFO[ n, u, g, i, Apply[ Sequence, Cases[ {data}, HoldPattern[ _String -> _]]]]
+		makeRealPRFINFO[ n, u, g, i, Apply[ Sequence, Select[ {data}, isOptComponent]]]
 	]
 makePRFINFO[ args___] := unexpected[ makePRFINFO, {args}]
 
@@ -244,40 +252,35 @@ PRFINFO$ /: Dot[ PRFINFO$[ n_, _, _, _, ___], name] := n
 PRFINFO$ /: Dot[ PRFINFO$[ _, u_List, _, _, ___], used] := u
 PRFINFO$ /: Dot[ PRFINFO$[ _, _, g_List, _, ___], generated] := g
 PRFINFO$ /: Dot[ PRFINFO$[ _, _, _, i_String, ___], id] := i
-PRFINFO$ /: Dot[ p_PRFINFO$, s_String] := 
-	Module[ {val = Cases[ p, HoldPattern[ s -> v_] -> v]},
-		If[ Length[ val] == 1,
-			First[ val],
-			unexpected[ Dot, {p, s}]
-		]
-	]
-PRFINFO$ /: Dot[ p:PRFINFO$[ _, _, _, _, ___], s_] := unexpected[ Dot, {p, s}]
+PRFINFO$ /: Dot[ PRFINFO$[ _, _, _, _, ___, (Rule|RuleDelayed)[ key_String, val_], ___], key_] := val
+PRFINFO$ /: Dot[ p_PRFINFO$, s___] := unexpected[ Dot, {p, s}]
 
 
 (* ::Subsection:: *)
-(* Addidional Facts datastructure *)
+(* Local Info datastructure *)
 
 (*
-	Addidional Facts datastructure is just a list of Mathematica options, i.e. {key1 -> val1, ..., keyn -> valn}
+	Local Info datastructure is just a list of Mathematica options, i.e. {key1 -> val1, ..., keyn -> valn}
+	Also :> can be used
 *)
 
-getAddFact[ af_List, key_] :=
-	Module[{val = Replace[ key, af]},
+getLocalInfo[ li_List, key_] :=
+	Module[{val = Replace[ key, li]},
 		If[ val === key,
 			$Failed,
 			val
 		]
 	]
-getAddFact[ args___] := unexpected[ getAddFact, {args}]
+getLocalInfo[ args___] := unexpected[ getLocalInfo, {args}]
 
-putAddFact[ af_List, key_, val_, type_:Rule] :=
-	Module[{p = Position[ af, (Rule|RuleDelayed)[ key, _]]},
+putLocalInfo[ li_List, type_[key_, val_]] :=
+	Module[{p = Position[ li, (Rule|RuleDelayed)[ key, _]]},
 		If[ p === {},
-			Append[ af, type[ key, val]],
-			ReplacePart[ af, p[[1]] -> type[ key, val]]
+			Append[ li, type[ key, val]],
+			ReplacePart[ li, p[[1]] -> type[ key, val]]
 		]
 	]
-putAddFact[ args___] := unexpected[ putAddFact, {args}]
+putLocalInfo[ args___] := unexpected[ putLocalInfo, {args}]
 
 
 (* ::Subsection:: *)
@@ -297,13 +300,14 @@ proofDisproved[ args___] := unexpected[ proofDisproved, {args}]
 
 type /: Dot[ node_?isProofNode, type] := Head[ node]
 id /: Dot[ node_?isProofNode, id] := First[ node].id
+name /: Dot[ node_?isProofNode, name] := First[ node].name
 used /: Dot[ node_, used] := Apply[ Union, Map[ #.used&, Cases[ node, _PRFINFO$, Infinity]]]
 generated /: Dot[ node_, generated] := Apply[ Union, Map[ #.generated&, Cases[ node, _PRFINFO$, Infinity]]]
 proofValue /: Dot[ node_?isProofNode, proofValue] := Last[ node]
 proofValue /: Dot[ po_PRFOBJ$, proofValue] := Last[ po]
 subgoals /: Dot[ _[ _PRFINFO$, subnodes___, _], subgoals] := {subnodes}
 
-renewID[ node_[ PRFINFO$[ n_, u_, g_, _], sub___, val_]] := node[ makeRealPRFINFO[ n, u, g, ""], sub, val]
+renewID[ node_[ PRFINFO$[ n_, u_, g_, _, rest___?OptionQ], sub___, val_]] := node[ makeRealPRFINFO[ n, u, g, "", rest], sub, val]
 renewID[ args___] := unexpected[ renewID, {args}]
 
 makeANDNODE[ pi_PRFINFO$, subnode_] := ANDNODE$[ pi, subnode, pending]
@@ -316,15 +320,15 @@ makeORNODE[ args___] := unexpected[ makeORNODE, {args}]
 poToTree[ _TERMINALNODE$|_PRFSIT$] := {}
 poToTree[ node_[ pi_PRFINFO$, sub___, val_]] :=
 	Module[{root, subTrees, topLevel},
-		root = { pi.id, val, node};
+		root = {pi.id, val, node, pi.name};
 		subTrees = Flatten[ Map[ poToTree, {sub}]];
 		topLevel = Map[ (root -> poNodeToTreeNode[#])&, {sub}];
 		Join[ topLevel, subTrees]
 	]
 poToTree[ args___] := unexpected[ poToTree, {args}]
 
-poNodeToTreeNode[ ps_PRFSIT$] := { ps.id, pending, PRFSIT$}
-poNodeToTreeNode[ node_[ pi_PRFINFO$, ___, val_]] := { pi.id, val, node}
+poNodeToTreeNode[ ps_PRFSIT$] := { ps.id, pending, PRFSIT$, None}
+poNodeToTreeNode[ node_[ pi_PRFINFO$, ___, val_]] := { pi.id, val, node, pi.name}
 poNodeToTreeNode[ args___] := unexpected[ poNodeToTreeNode, {args}]
 
 propagateProofValues[ poNode:node_[ pi_PRFINFO$, subnodes__, pending]] :=
@@ -334,7 +338,7 @@ propagateProofValues[ poNode:node_[ pi_PRFINFO$, subnodes__, pending]] :=
 		newVal = nodeValue[ node, subVal];
 		If[ newVal =!= pending,
 			$TMAproofTree = With[ {id = pi.id},
-				$TMAproofTree /. {id, pending, t_} -> {id, newVal, t}
+				$TMAproofTree /. {id, pending, t_, n_} -> {id, newVal, t, n}
 			]
 		];
 		node[ pi, Apply[ Sequence, updSub], newVal]
@@ -365,12 +369,14 @@ noProofNode[ args___] := unexpected[ noProofNode, {args}]
 
 (*
 	If op =!= Flatten, i.e. we keep a structured list of rules, we need to clarify the role of rulePriority, maybe sort sublists recursively? *)
-getActiveRules[ Hold[ rules_], op_:Identity] := 
-	Module[{names = op[ rules /. {{r_?ruleActive, _, _, _Integer} -> r, _String | {r_Symbol, _, _, _Integer} -> Sequence[]}]},
-		(* Select names of active rules, delete strings (category names) and inactive rules, finally apply op *) 
+getActiveRules[ ps_PRFSIT$, op_:Identity] := 
+	Module[{rules, act, prio, names},
+		(* Select names of active rules, delete strings (category names) and inactive rules, finally apply op *)
+		{rules, act, prio} = ps.ruleSetup;
+		names = op[ rules /. {{r_ /; Replace[ r, act], _, _, _Integer} -> r, _String | {r_Symbol, _, _, _Integer} -> Sequence[]}];
 		If[ Depth[ names] == 2,
 			(* we have a flat list of rule names *)
-			names = Sort[ DeleteDuplicates[ names], rulePriority[#1] < rulePriority[#2]&];
+			names = Sort[ DeleteDuplicates[ names], Replace[ #1, prio] < Replace[ #2, prio] &];
 			DeleteCases[ Map[ inferenceRule, names], _inferenceRule],
 			(* else *)
 			DeleteCases[ MapAt[ inferenceRule, names, Position[ names, _Symbol, Heads -> False]], _inferenceRule, Infinity]
@@ -390,87 +396,106 @@ applyAllRules[ args___] := unexpected[ applyAllRules, {args}]
 (* ::Section:: *)
 (* Proof termination *)
 
-checkProofSuccess[ goal_FML$, {___, k:FML$[ _, phi_, _], ___, c:FML$[ _, Not$TM[ phi_], _], ___}, af_, i_String] := 
+checkProofSuccess[ goal_FML$, {___, k:FML$[ _, phi_, _], ___, c:FML$[ _, Not$TM[ phi_], _], ___}, i_String, _] := 
 	{True, makePRFINFO[ name -> contradictionKB, used -> {k, c}, id -> i]}
-checkProofSuccess[ goal_FML$, {___, k:FML$[ _, Not$TM[ phi_], _], ___, c:FML$[ _, phi_, _], ___}, af_, i_String] := 
+checkProofSuccess[ goal_FML$, {___, k:FML$[ _, Not$TM[ phi_], _], ___, c:FML$[ _, phi_, _], ___}, i_String, _] := 
 	{True, makePRFINFO[ name -> contradictionKB, used -> {k, c}, id -> i]}
-checkProofSuccess[ goal_FML$, {___, k:FML$[ _, False, _], ___}, af_, i_String] := 
+checkProofSuccess[ goal_FML$, {___, k:FML$[ _, False, _], ___}, i_String, _] := 
 	{True, makePRFINFO[ name -> falseInKB, used -> k, id -> i]}
-checkProofSuccess[ goal:FML$[ _, g_, _], {___, k:FML$[ _, g_, _], ___}, af_, i_String] := 
+checkProofSuccess[ goal:FML$[ _, g_, _], {___, k:FML$[ _, g_, _], ___}, i_String, _] := 
 	{True, makePRFINFO[ name -> goalInKB, used -> {goal, k}, id -> i]}
-checkProofSuccess[ goal_FML$, kb_, af_, id_String] := {False, PRFINFO$[]}
+checkProofSuccess[ goal_FML$, kb_, id_String, _] := {False, PRFINFO$[]}
 checkProofSuccess[ args___] := unexpected[ checkProofSuccess, {args}]
 
 
 (* ::Subsubsection:: *)
 (* showProofNavigation *)
 
-showProofNavigation[ {}, geometry_List] := ""
-showProofNavigation[ {node_List}, geometry_List] := Graphics[ proofStepNode[ {0, 0}, node, 18], ImageSize -> geometry, PlotRegion -> {{0.4, 0.6}, {0.6, 0.8}}]
+showProofNavigation[ {}, scale_] := Graphics[ {}, ImageSize -> {350,420}]
+showProofNavigation[ {Depth -> _, node_List}, scale_] := Graphics[ proofStepNode[ {0, 0}, node, 18], ImageSize -> {350,420}, PlotRegion -> {{0.4, 0.6}, {0.6, 0.8}}]
 
-showProofNavigation[ p:{__Rule}, geometry_List] :=
-    Module[ {root = Cases[ p, {"InitPS", __}, {2}], font = 18-Ceiling[ Apply[ Times, geometry]/(350*450)]},
+showProofNavigation[ {Depth -> depth_, p__Rule}, scale_] :=
+    Module[ {root = Cases[ {p}, {"InitPS", __}, {2}], geometry, font},
+    	If[ scale === Fit,
+    		geometry = {350,420},
+    		(* else *)
+    		geometry = {Max[ Count[ {p}, _ -> {__, TERMINALNODE$|PRFSIT$, _}]*20, 350], Max[ depth*15, 420]}*scale
+    	];
+    	font = 18-Ceiling[ Apply[ Times, geometry]/(350*420)];
         If[ root === {},
             translate[ "noRoot"],
-            TreePlot[ p, Automatic, First[ root], VertexRenderingFunction -> (proofStepNode[ #1, #2, font]&),
+            TreePlot[ {p}, Automatic, First[ root], VertexRenderingFunction -> (proofStepNode[ #1, #2, font]&),
             EdgeRenderingFunction -> ({Dashed, GrayLevel[0.5], Line[#1]}&), ImageSize -> geometry, AspectRatio -> 1/Apply[ Divide, geometry]]
         ]
     ]
 showProofNavigation[ args___] := unexpected[ showProofNavigation, {args}]
 
-proofStepNode[ pos_List, node:{ id_String, status_, type_}, font_] := 
-	{
+proofStepNode[ pos_List, node:{ id_String, status_, type_, name_}, font_] := 
+	Module[{opacity = If[ TrueQ[ ruleTextActive[ name]], 1, 0.3]},
+		{
 		Switch[ status,
-			pending, RGBColor[0.360784, 0.67451, 0.933333] (* steelblue *),
-			failed, RGBColor[1, 0.270588, 0] (* orangered *),
-			proved, RGBColor[0, 0.780392, 0.54902] (* turquoiseblue *),
+			pending, RGBColor[0.360784, 0.67451, 0.933333, opacity] (* steelblue *),
+			failed, RGBColor[1, 0.270588, 0, opacity] (* orangered *),
+			proved, RGBColor[0, 0.780392, 0.54902, opacity] (* turquoiseblue *),
 			_, Black],
 		Switch[ type,
 			PRFSIT$, Disk[ pos, 0.1],
 			TERMINALNODE$|PRFOBJ$, Map[ (pos + 0.1*#)&, Rectangle[ {-Sqrt[Pi]/2, -Sqrt[Pi]/2}, {Sqrt[Pi]/2, Sqrt[Pi]/2}]],
-			_, Polygon[ Map[ (pos + 0.125*#)&, {{0,1}, {Cos[7*Pi/6], Sin[7*Pi/6]}, {Cos[11*Pi/6], Sin[11*Pi/6]}}]]],
+			ANDNODE$, Polygon[ Map[ (pos + 0.125*#)&, {{0,1}, {Cos[7*Pi/6], Sin[7*Pi/6]}, {Cos[11*Pi/6], Sin[11*Pi/6]}}]],
+			ORNODE$, Polygon[ Map[ (pos + 0.125*#)&, {{0,-1}, {Cos[Pi/6], Sin[Pi/6]}, {Cos[5*Pi/6], Sin[5*Pi/6]}}]],
+			_, Map[ (pos + 0.1*#)&, Rectangle[ {-Sqrt[Pi]/2, -Sqrt[Pi]/2}, {Sqrt[Pi]/2, Sqrt[Pi]/2}]]],
 		{Black, Dynamic[ Text[ 
 			Hyperlink[
 				Switch[ type, 
-        				TERMINALNODE$|PRFOBJ$, proofStatusIndicator[ status],
-        				_, proofNodeIndicator[ status, type]], 
+        				TERMINALNODE$|PRFOBJ$, proofStatusIndicator[ status, name],
+        				_, proofNodeIndicator[ status, type, name]], 
 				{CurrentValue[ $TMAproofNotebook, "NotebookFileName"], id},
-				BaseStyle -> {FontSize -> font}], pos]]}
-	}
+				BaseStyle -> {FontSize -> font}, Active -> ruleTextActive[ name]], pos]]}
+		}
+	]
 proofStepNode[ args___] := unexpected[ proofStepNode, {args}]
 
 proofStatusIndicator[ status_] :=
-	Module[ {label},
-		label = Switch[ status, 
-			proved, "\[CheckmarkedBox]",
-			disproved, "\[Times]",
-			failed, "\[WarningSign]",
-			pending, "?",
-			_, "\[DownQuestion]"
-		];
-		Tooltip[ Style[ label, ShowStringCharacters -> False], translate[ SymbolName[ status]]]
-	]
+    Style[
+        Switch[ status, 
+            proved, "\[CheckmarkedBox]",
+        	disproved, "\[Times]",
+        	failed, "\[WarningSign]",
+        	pending, "?",
+        	_, "\[DownQuestion]"
+    	], ShowStringCharacters -> False
+    ]
+	
+proofStatusIndicator[ status_, name_] := Tooltip[ 
+	proofStatusIndicator[ status],
+	translate[ SymbolName[ status]] <> If[ status =!= pending, " (" <> MessageName[ name, "usage"] <> ")", ""]]
+	
 proofStatusIndicator[ args___] := unexpected[ proofStatusIndicator, {args}]
 
-proofNodeIndicator[ status_, type_] :=
+proofNodeIndicator[ status_, type_, name_] :=
 	Module[ {label, description},
 		{label, description} = Switch[ type,
-			PRFSIT$, {"?", "open proof situation"},
-        	ANDNODE$, {"\[Wedge]", "conjunction of subproofs"},
-        	ORNODE$, {"\[Vee]", "disjunction of subproofs"},
-        	_, {"\[DownQuestion]", "unknown proof node"}
+			PRFSIT$, {"?", translate[ "open proof situation"]},
+        	ANDNODE$, {"\[Wedge]", MessageName[ name, "usage"]},
+        	ORNODE$, {"\[Vee]", MessageName[ name, "usage"]},
+        	_, {"\[DownQuestion]", translate[ "unknown proof node"]}
 		];
-		Tooltip[ Style[ label, ShowStringCharacters -> False], translate[ description] <> ": " <> translate[ SymbolName[ status]]]
+		Tooltip[ Style[ label, ShowStringCharacters -> False], description <> " (" <> translate[ SymbolName[ status]] <> ")"]
 	]
 proofNodeIndicator[ args___] := unexpected[ proofNodeIndicator, {args}]
 
 (* ::Subsubsection:: *)
 (* makeInitialProofObject *)
 
-makeInitialProofObject[ g_FML$, k_List, rules_Hold, strategy_] :=
+(*
+	localInfo remains {} in the initial proof object
+*)
+makeInitialProofObject[ g_FML$, k_List, {r_Hold, act_List, prio_List}, s_] :=
 	PRFOBJ$[
 		makePRFINFO[ name -> initialProofSituation, used -> {g, k}, id -> "InitPS"],
-		makePRFSIT[ goal -> g, kb -> k, id -> "InitPS", "rules" -> rules, "strategy" -> strategy],(*additional facts {}*)
+		makePRFSIT[ goal -> g, kb -> k, id -> "InitPS",
+			rules -> r, ruleActivity -> act, rulePriority -> prio,
+			strategy -> s],
 		pending
 	]
 makeInitialProofObject[ args___] := unexpected[ makeInitialProofObject, {args}]
@@ -528,7 +553,7 @@ proofObjectToCell[ PRFOBJ$[ pi_PRFINFO$, sub_, pVal_]] :=
 	]
 proofObjectToCell[ PRFINFO$[ name_?ruleTextActive, u_, g_, id_String, rest___?OptionQ], pVal_] := proofStepTextId[ id, name, u, g, rest, pVal]
 proofObjectToCell[ PRFINFO$[ _, _, _, _String, ___?OptionQ], _] := {}
-proofObjectToCell[ PRFSIT$[ g_FML$, kb_List, _, id_String, ___]] := Cell[ CellGroupData[ proofStepTextId[ id, openProofSituation, {g, kb}, {}], $proofCellStatus]]
+proofObjectToCell[ PRFSIT$[ g_FML$, kb_List, id_String, ___]] := Cell[ CellGroupData[ proofStepTextId[ id, openProofSituation, {g, kb}, {}], $proofCellStatus]]
 proofObjectToCell[ (ANDNODE$|ORNODE$)[ pi_PRFINFO$, subnodes__, pVal_]] := 
 	Module[{header, sub = {}},
 		header = proofObjectToCell[ pi, pVal];
