@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       145,          7]
-NotebookDataLength[     12990,        500]
-NotebookOptionsPosition[      8430,        377]
-NotebookOutlinePosition[      8921,        398]
-CellTagsIndexPosition[      8878,        395]
+NotebookDataLength[     13008,        501]
+NotebookOptionsPosition[      8448,        378]
+NotebookOutlinePosition[      8939,        399]
+CellTagsIndexPosition[      8896,        396]
 MenuPosition->0
 WindowFrame->Normal*)
 
@@ -28,7 +28,8 @@ Make modifications to any definition using commands in the Format menu.\
 \>", "Text"],
 
 Cell[StyleData["Notebook"],
- Editable->True],
+ Editable->True,
+ Deployed->False],
 
 Cell[CellGroupData[{
 
@@ -399,108 +400,108 @@ CellTagsIndex->{}
 Notebook[{
 Cell[561, 21, 49, 0, 40, 49, 0, "StyleData", "StyleDefinitions", ""],
 Cell[613, 23, 191, 4, 65, "Text"],
-Cell[807, 29, 44, 1, 32, 27, 0, "StyleData", "Notebook", "All"],
+Cell[807, 29, 62, 2, 32, 27, 0, "StyleData", "Notebook", "All"],
 Cell[CellGroupData[{
-Cell[876, 34, 42, 0, 54, "Section"],
-Cell[921, 36, 31, 0, 40, 31, 0, "StyleData", "All", "Working"],
-Cell[955, 38, 36, 0, 40, 36, 0, "StyleData", "All", "Presentation"]
+Cell[894, 35, 42, 0, 54, "Section"],
+Cell[939, 37, 31, 0, 40, 31, 0, "StyleData", "All", "Working"],
+Cell[973, 39, 36, 0, 40, 36, 0, "StyleData", "All", "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[1028, 43, 53, 0, 54, "Section"],
+Cell[1046, 44, 53, 0, 54, "Section"],
 Cell[CellGroupData[{
-Cell[1106, 47, 124, 4, 39, 31, 0, "StyleData", "NotebookName", "All"],
-Cell[1233, 53, 62, 1, 44, 47, 0, "StyleData", "NotebookName", "Presentation"]
+Cell[1124, 48, 124, 4, 39, 31, 0, "StyleData", "NotebookName", "All"],
+Cell[1251, 54, 62, 1, 44, 47, 0, "StyleData", "NotebookName", "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[1332, 59, 219, 7, 60, 24, 0, "StyleData", "Title", "All"],
-Cell[1554, 68, 76, 2, 96, 40, 0, "StyleData", "Title", "Presentation"]
+Cell[1350, 60, 219, 7, 60, 24, 0, "StyleData", "Title", "All"],
+Cell[1572, 69, 76, 2, 96, 40, 0, "StyleData", "Title", "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[1667, 75, 269, 10, 77, 26, 0, "StyleData", "Section", "All",
+Cell[1685, 76, 269, 10, 77, 26, 0, "StyleData", "Section", "All",
  MenuSortingValue->1250,
  MenuCommandKey->"4"],
-Cell[1939, 87, 78, 2, 109, 42, 0, "StyleData", "Section", "Presentation"]
+Cell[1957, 88, 78, 2, 109, 42, 0, "StyleData", "Section", "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[2054, 94, 315, 11, 50, 29, 0, "StyleData", "Subsection", "All",
+Cell[2072, 95, 315, 11, 50, 29, 0, "StyleData", "Subsection", "All",
  MenuSortingValue->1300,
  MenuCommandKey->"5"],
-Cell[2372, 107, 198, 6, 65, 45, 0, "StyleData", "Subsection", "Presentation"]
+Cell[2390, 108, 198, 6, 65, 45, 0, "StyleData", "Subsection", "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[2607, 118, 318, 11, 42, 32, 0, "StyleData", "Subsubsection", "All",
+Cell[2625, 119, 318, 11, 42, 32, 0, "StyleData", "Subsubsection", "All",
  MenuSortingValue->1350,
  MenuCommandKey->"6"],
-Cell[2928, 131, 201, 6, 53, 48, 0, "StyleData", "Subsubsection", \
+Cell[2946, 132, 201, 6, 53, 48, 0, "StyleData", "Subsubsection", \
 "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[3166, 142, 342, 10, 36, 36, 0, "StyleData", "EnvironmentHeader", "All",
+Cell[3184, 143, 342, 10, 36, 36, 0, "StyleData", "EnvironmentHeader", "All",
  MenuSortingValue->1350,
  MenuCommandKey->"6"],
-Cell[3511, 154, 184, 5, 41, 52, 0, "StyleData", "EnvironmentHeader", \
+Cell[3529, 155, 184, 5, 41, 52, 0, "StyleData", "EnvironmentHeader", \
 "Presentation"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[3744, 165, 38, 0, 54, "Section"],
+Cell[3762, 166, 38, 0, 54, "Section"],
 Cell[CellGroupData[{
-Cell[3807, 169, 223, 7, 36, 41, 0, "StyleData", "FormalTextInputFormula", \
+Cell[3825, 170, 223, 7, 36, 41, 0, "StyleData", "FormalTextInputFormula", \
 "All"],
-Cell[4033, 178, 204, 6, 41, 57, 0, "StyleData", "FormalTextInputFormula", \
+Cell[4051, 179, 204, 6, 41, 57, 0, "StyleData", "FormalTextInputFormula", \
 "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[4274, 189, 229, 7, 36, 47, 0, "StyleData", \
+Cell[4292, 190, 229, 7, 36, 47, 0, "StyleData", \
 "FormalTextInputFormulaUneval", "All"],
-Cell[4506, 198, 210, 6, 41, 63, 0, "StyleData", \
+Cell[4524, 199, 210, 6, 41, 63, 0, "StyleData", \
 "FormalTextInputFormulaUneval", "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[4753, 209, 535, 16, 40, 33, 0, "StyleData", "DisplayFormula", "All"],
-Cell[5291, 227, 152, 3, 63, 49, 0, "StyleData", "DisplayFormula", \
+Cell[4771, 210, 535, 16, 40, 33, 0, "StyleData", "DisplayFormula", "All"],
+Cell[5309, 228, 152, 3, 63, 49, 0, "StyleData", "DisplayFormula", \
 "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[5480, 235, 82, 2, 56, 31, 0, "StyleData", "FormulaLabel", "All"],
-Cell[5565, 239, 62, 1, 53, 47, 0, "StyleData", "FormulaLabel", \
+Cell[5498, 236, 82, 2, 56, 31, 0, "StyleData", "FormulaLabel", "All"],
+Cell[5583, 240, 62, 1, 53, 47, 0, "StyleData", "FormulaLabel", \
 "Presentation"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[5676, 246, 32, 0, 54, "Section"],
-Cell[5711, 248, 180, 6, 38, 32, 0, "StyleData", "GenericButton", "All"]
+Cell[5694, 247, 32, 0, 54, "Section"],
+Cell[5729, 249, 180, 6, 38, 32, 0, "StyleData", "GenericButton", "All"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[5928, 259, 31, 0, 54, "Section"],
+Cell[5946, 260, 31, 0, 54, "Section"],
 Cell[CellGroupData[{
-Cell[5984, 263, 43, 1, 36, 28, 0, "StyleData", "Hyperlink", "All"],
-Cell[6030, 266, 59, 1, 41, 44, 0, "StyleData", "Hyperlink", "Presentation"]
+Cell[6002, 264, 43, 1, 36, 28, 0, "StyleData", "Hyperlink", "All"],
+Cell[6048, 267, 59, 1, 41, 44, 0, "StyleData", "Hyperlink", "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[6126, 272, 70, 1, 56, 34, 0, "StyleData", "HyperlinkActive", "All"],
-Cell[6199, 275, 65, 1, 41, 50, 0, "StyleData", "HyperlinkActive", \
+Cell[6144, 273, 70, 1, 56, 34, 0, "StyleData", "HyperlinkActive", "All"],
+Cell[6217, 276, 65, 1, 41, 50, 0, "StyleData", "HyperlinkActive", \
 "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[6301, 281, 494, 18, 51, 39, 0, "StyleData", "SelectionPlaceholder", "All",
+Cell[6319, 282, 494, 18, 51, 39, 0, "StyleData", "SelectionPlaceholder", "All",
  StyleMenuListing->None],
-Cell[6798, 301, 70, 1, 45, 55, 0, "StyleData", "SelectionPlaceholder", \
+Cell[6816, 302, 70, 1, 45, 55, 0, "StyleData", "SelectionPlaceholder", \
 "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[6905, 307, 485, 18, 51, 30, 0, "StyleData", "Placeholder", "All",
+Cell[6923, 308, 485, 18, 51, 30, 0, "StyleData", "Placeholder", "All",
  StyleMenuListing->None],
-Cell[7393, 327, 61, 1, 45, 46, 0, "StyleData", "Placeholder", "Presentation"]
+Cell[7411, 328, 61, 1, 45, 46, 0, "StyleData", "Placeholder", "Presentation"]
 }, Open  ]],
-Cell[7469, 331, 274, 11, 41, 23, 0, "StyleData", "Pane", "All"],
-Cell[7746, 344, 66, 2, 40, 26, 0, "StyleData", "TabView", "All"],
-Cell[7815, 348, 186, 6, 38, 31, 0, "StyleData", "TabViewLabel", "All"],
-Cell[8004, 356, 49, 1, 40, 28, 0, "StyleData", "TabLabel1", "All"],
-Cell[8056, 359, 49, 1, 40, 28, 0, "StyleData", "TabLabel2", "All"],
-Cell[8108, 362, 151, 4, 38, 31, 0, "StyleData", "LabeledLabel", "All"],
-Cell[8262, 368, 74, 2, 38, 33, 0, "StyleData", "PopupMenuLabel", "All"],
-Cell[8339, 372, 75, 2, 38, 34, 0, "StyleData", "FileNameSetters", "All"]
+Cell[7487, 332, 274, 11, 41, 23, 0, "StyleData", "Pane", "All"],
+Cell[7764, 345, 66, 2, 40, 26, 0, "StyleData", "TabView", "All"],
+Cell[7833, 349, 186, 6, 38, 31, 0, "StyleData", "TabViewLabel", "All"],
+Cell[8022, 357, 49, 1, 40, 28, 0, "StyleData", "TabLabel1", "All"],
+Cell[8074, 360, 49, 1, 40, 28, 0, "StyleData", "TabLabel2", "All"],
+Cell[8126, 363, 151, 4, 38, 31, 0, "StyleData", "LabeledLabel", "All"],
+Cell[8280, 369, 74, 2, 38, 33, 0, "StyleData", "PopupMenuLabel", "All"],
+Cell[8357, 373, 75, 2, 38, 34, 0, "StyleData", "FileNameSetters", "All"]
 }, Open  ]]
 }
 ]
