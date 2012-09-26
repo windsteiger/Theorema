@@ -7,6 +7,10 @@ With[ {lang = "English"},
 MessageName[ basicTheoremaLanguageRules, "usage", lang] = "Rules for the basic language constructs from the Theorema language, standard propositional and predicate logic";
 MessageName[ quantifierRules, "usage", lang] = "Rules for quantifiers";
 
+MessageName[ contradictionKB, "usage", lang] = "Knowledge base contains contradicting formulae";
+MessageName[ falseInKB, "usage", lang] = "Knowledge base contains a formula False";
+MessageName[ goalInKB, "usage", lang] = "Knowledge base contains the proof goal";
+MessageName[ trueGoal, "usage", lang] = "The proof goal is True";
 MessageName[ notGoal, "usage", lang] = "Prove negation by contradiction";
 MessageName[ andGoal, "usage", lang] = "Split a conjunction in the goal";
 MessageName[ andKB, "usage", lang] = "Split a conjunction in the knowledge base";
@@ -35,6 +39,23 @@ translate[ "Quantifier Rules", lang] = "Quantifier Rules";
 translate[ "Basic Theorema Language Rules", lang] = "Basic Theorema Language Rules";
 translate[ "Connectives Rules", lang] = "Rules for Logical Connectives";
 translate[ "Equality Rules", lang] = "Rules for Equality";
+translate[ "Termination Rules", lang] = "Rules for Proof Termination";
+
+proofStepText[ contradictionKB, lang, {k_, c_}, {}, pVal_] := {textCell[ "The proof is finished, because ", formulaReference[ k], 
+	" contradicts ", formulaReference[ c], "."]
+    };
+
+proofStepText[ falseInKB, lang, {k_}, {}, pVal_] := {textCell[ "The proof is finished, because ", formulaReference[ k], 
+	" is a contradiction in the knowledge base."]
+    };
+
+proofStepText[ goalInKB, lang, {goal_, k_}, {}, pVal_] := {textCell[ "The goal ", formulaReference[ goal], 
+	" is identical to formula ", formulaReference[ k], " in the knowledge base. Thus, the proof is finished."]
+    };
+
+proofStepText[ trueGoal, lang, {goal_}, {}, pVal_] := {textCell[ "The proof is finished, because the goal ", formulaReference[ goal], 
+	" is true."]
+    };
 
 proofStepText[ notGoal|contradiction, lang, {g_}, {opp_, ___}, ___] := {textCell[ "We prove ", formulaReference[ g], " by contradiction, i.e. we assume"],
 	assumptionCell[ opp],

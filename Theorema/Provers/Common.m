@@ -223,16 +223,15 @@ getPrincipalData[ args___] := unexpected[ getPrincipalData, {args}]
 (* newSubgoal *)
 
 Options[ newSubgoal] = Options[ makePRFSIT];
-newSubgoal[ data___?OptionQ] := 
-	Module[ {g, k, i, l, succ, pi},
-		{g, k, i, l} = {goal, kb, id, local} /. {data} /. Options[ newSubgoal];
-		{succ, pi} = checkProofSuccess[ g, k, i, l];
-		If[ succ,
-			proofSucceeds[ pi],
-			makePRFSIT[ data]
-		]
-	]
+newSubgoal[ data___?OptionQ] := checkProofSuccess[ makePRFSIT[ data]]
 newSubgoal[ args___] := unexpected[ newSubgoal, {args}]
+
+checkProofSuccess[ ps_PRFSIT$] := 
+	Module[{termRules = getActiveTermRules[ ps]}, 
+		Replace[ ps, termRules]
+	]
+checkProofSuccess[ args___] := unexpected[ checkProofSuccess, {args}]
+
 
 
 (* ::Subsection:: *)
@@ -384,9 +383,10 @@ noProofNode[ args___] := unexpected[ noProofNode, {args}]
 	If op =!= Flatten, i.e. we keep a structured list of rules, we need to clarify the role of rulePriority, maybe sort sublists recursively? *)
 getActiveRules[ ps_PRFSIT$, op_:Identity] := 
 	Module[{rules, act, prio, names},
-		(* Select names of active rules, delete strings (category names) and inactive rules, finally apply op *)
+		(* Select names of active rules, delete termination rules, strings (category names) and inactive rules, finally apply op *)
 		{rules, act, prio} = ps.ruleSetup;
-		names = op[ rules /. {{r_ /; Replace[ r, act], _, _, _Integer} -> r, _String | {r_Symbol, _, _, _Integer} -> Sequence[]}];
+		names = op[ rules /. {{r_, _, _, _Integer, "term"} -> Sequence[],
+			{r_ /; Replace[ r, act], _, _, _Integer, ___} -> r, _String | {r_Symbol, _, _, _Integer, ___} -> Sequence[]}];
 		If[ Depth[ names] == 2,
 			(* we have a flat list of rule names *)
 			names = Sort[ DeleteDuplicates[ names], Replace[ #1, prio] < Replace[ #2, prio] &];
@@ -397,6 +397,18 @@ getActiveRules[ ps_PRFSIT$, op_:Identity] :=
 	]	
 getActiveRules[ args___] := unexpected[ getActiveRules, {args}]
 
+getActiveTermRules[ ps_PRFSIT$] :=
+	Module[{rules, act, prio, names},
+		(* Select names of active rules, delete strings (category names) and inactive rules, finally apply op *)
+		{rules, act, prio} = ps.ruleSetup;
+		names = Cases[ rules, {r_ /; Replace[ r, act], _, _, _Integer, "term"} -> r, Infinity];
+		Assert[ MatchQ[ names, {__Symbol}]];
+		(* we have a flat list of rule names *)
+		names = Sort[ DeleteDuplicates[ names], Replace[ #1, prio] < Replace[ #2, prio] &];
+		DeleteCases[ Map[ inferenceRule, names], _inferenceRule]
+	]
+getActiveTermRules[ args___] := unexpected[ getActiveTermRules, {args}]
+
 
 (* ::Subsubsection:: *)
 (* applyAllRules *)
@@ -404,21 +416,6 @@ getActiveRules[ args___] := unexpected[ getActiveRules, {args}]
 applyAllRules[ ps_PRFSIT$, rules_List] :=
 	DeleteCases[ ReplaceList[ ps, rules], $Failed]
 applyAllRules[ args___] := unexpected[ applyAllRules, {args}]
-
-
-(* ::Section:: *)
-(* Proof termination *)
-
-checkProofSuccess[ goal_FML$, {___, k:FML$[ _, phi_, _], ___, c:FML$[ _, Not$TM[ phi_], _], ___}, i_String, _] := 
-	{True, makePRFINFO[ name -> contradictionKB, used -> {k, c}, id -> i]}
-checkProofSuccess[ goal_FML$, {___, k:FML$[ _, Not$TM[ phi_], _], ___, c:FML$[ _, phi_, _], ___}, i_String, _] := 
-	{True, makePRFINFO[ name -> contradictionKB, used -> {k, c}, id -> i]}
-checkProofSuccess[ goal_FML$, {___, k:FML$[ _, False, _], ___}, i_String, _] := 
-	{True, makePRFINFO[ name -> falseInKB, used -> k, id -> i]}
-checkProofSuccess[ goal:FML$[ _, g_, _], {___, k:FML$[ _, g_, _], ___}, i_String, _] := 
-	{True, makePRFINFO[ name -> goalInKB, used -> {goal, k}, id -> i]}
-checkProofSuccess[ goal_FML$, kb_, id_String, _] := {False, PRFINFO$[]}
-checkProofSuccess[ args___] := unexpected[ checkProofSuccess, {args}]
 
 
 (* ::Subsubsection:: *)

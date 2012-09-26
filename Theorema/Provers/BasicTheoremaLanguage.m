@@ -25,6 +25,25 @@ Begin["`Private`"]
 
 
 (* ::Section:: *)
+(* Termination rules *)
+
+inferenceRule[ goalInKB] = 
+PRFSIT$[ goal:FML$[ _, g_, _], {___, k:FML$[ _, g_, _], ___}, i_String, ___] :> 
+	proofSucceeds[ makePRFINFO[ name -> goalInKB, used -> {goal, k}, id -> i]]
+
+inferenceRule[ contradictionKB] = 
+PRFSIT$[ goal_FML$, {___, k:FML$[ _, phi_, _], ___, c:FML$[ _, Not$TM[ phi_], _], ___} | {___, k:FML$[ _, Not$TM[ phi_], _], ___, c:FML$[ _, phi_, _], ___}, i_String, ___] :> 
+	proofSucceeds[ makePRFINFO[ name -> contradictionKB, used -> {k, c}, id -> i]]
+
+inferenceRule[ falseInKB] =
+PRFSIT$[ goal_FML$, {___, k:FML$[ _, False | Not$TM[ True], _], ___}, i_String, ___] :> 
+	proofSucceeds[ makePRFINFO[ name -> falseInKB, used -> k, id -> i]]
+
+inferenceRule[ trueGoal] =
+PRFSIT$[ goal:FML$[ _, True | Not$TM[ False], _], _List, i_String, ___] :> 
+	proofSucceeds[ makePRFINFO[ name -> trueGoal, used -> goal, id -> i]]
+	
+(* ::Section:: *)
 (* Connectives *)
 
 (* ::Subsection:: *)
@@ -202,6 +221,13 @@ PRFSIT$[ g_, k:{pre___, e:FML$[ _, u:Exists$TM[ rng_, cond_, A_], _], post___}, 
 (* ::Section:: *)
 (* Rule composition *)
 
+terminationRules = {"Termination Rules",
+	{goalInKB, True, True, 1, "term"},
+	{falseInKB, True, True, 1, "term"},
+	{trueGoal, True, True, 1, "term"},
+	{contradictionKB, True, True, 1, "term"}
+	};
+
 connectiveRules = {"Connectives Rules", 
 	{notGoal, True, True, 30},
 	{andGoal, True, True, 5},
@@ -226,6 +252,7 @@ registerRuleSet[ "Quantifier Rules", quantifierRules, {
 	}]
 
 registerRuleSet[ "Basic Theorema Language Rules", basicTheoremaLanguageRules, {
+	terminationRules,
 	quantifierRules, 
 	connectiveRules, 
 	equalityRules,

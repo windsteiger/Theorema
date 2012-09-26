@@ -837,7 +837,7 @@ structViewRules[{category_String, r__}, tags_, open_:False] :=
 showProofTextPic[ active_] = Graphics[ {If[ active, GrayLevel[0], GrayLevel[0.7]], 
 	{Thin, Line[{{0, 0}, {4, 0}, {4, 4}, {0, 4}, {0, 0}}], Table[ Line[{{1, i}, {3, i}}], {i, 1, 3}]}}, ImageSize -> {15, 15}, PlotRange -> {{-1, 5}, {-1, 5}}];
  
-structViewRules[ {r_Symbol, active:(True|False), textActive:(True|False), p_Integer}, tags_] :=
+structViewRules[ {r_Symbol, active:(True|False), textActive:(True|False), p_Integer, ___}, tags_] :=
     Module[ {align = Baseline},
     	ruleActive[ r] = active;
     	ruleTextActive[ r] = textActive;

@@ -9,9 +9,6 @@ MessageName[ proofAlternatives, "usage", lang] = "Alternatives to continue a pro
 MessageName[ searchDepthLimit, "usage", lang] = "Proof terminates due to search depth limitation";
 MessageName[ invalidProofNode, "usage", lang] = "A proof strategy returns an invalid proof node";
 MessageName[ noApplicableRule, "usage", lang] = "Proof fails since there is no applicable rule";
-MessageName[ contradictionKB, "usage", lang] = "Knowledge base contains contradicting formulae";
-MessageName[ falseInKB, "usage", lang] = "Knowledge base contains a formula False";
-MessageName[ goalInKB, "usage", lang] = "Knowledge base contains the proof goal";
 
 ] (* With *)
 
@@ -61,18 +58,6 @@ proofStepText[ invalidProofNode, lang, expr_, ___] := {textCell[ "The expression
 	Cell[ BoxData[ ToBoxes[ expr]], "Print"]};
 
 proofStepText[ noApplicableRule, lang, ___] := {textCell[ "There is no proof rule to apply."]};
-
-proofStepText[ contradictionKB, lang, {k_, c_}, {}, pVal_] := {textCell[ "The proof is finished, because ", formulaReference[ k], 
-	" contradicts ", formulaReference[ c], "."]
-    };
-
-proofStepText[ falseInKB, lang, {k_}, {}, pVal_] := {textCell[ "The proof is finished, because ", formulaReference[ k], 
-	" is a contradiction in the knowledge base."]
-    };
-
-proofStepText[ goalInKB, lang, {goal_, k_}, {}, pVal_] := {textCell[ "The goal ", formulaReference[ goal], 
-	" is identical to formula ", formulaReference[ k], " in the knowledge base. Thus, the proof is finished."]
-    };
 
 proofStepText[ step_Symbol, lang, ___] := {
 	textCell[ ToString[ StringForm[ "We have no explanatory text for step '``'. Please implement the respective case for the function 'proofStepText'.", step]]]
