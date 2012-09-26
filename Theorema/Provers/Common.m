@@ -37,21 +37,19 @@ initProver[] :=
 		Clear[ ruleTextActive];
 		ruleTextActive[_] := True;
 		$proofCellStatus = Open;
+		$TMAcurrentDepth = 1;
 	]
 
 callProver[ ruleSetup:{_Hold, _List, _List}, strategy_, goal_FML$, kb_List, searchDepth_Integer] :=
 	Module[{},
+		$TMAcurrentDepth = 2;
+		$TMAproofTree = makeInitialProofTree[ ];
 		$TMAproofObject = makeInitialProofObject[ goal, kb, ruleSetup, strategy];
 		$TMAproofNotebook = makeInitialProofNotebook[ $TMAproofObject];
-		$TMAproofTree = makeInitialProofTree[];
 		initFormulaLabel[];
 		proofSearch[ searchDepth];
   		$proofInProgressMarker = {};
-  		If[ $TMAproofTree === {},
-  			$TMAproofTree = {poNodeToTreeNode[ $TMAproofObject]}
-  		];
-  		PrependTo[ $TMAproofTree, Depth -> Max[ 5, Max[ Map[ Length, Position[ $TMAproofObject, _TERMINALNODE$|_PRFSIT$]]]]];
-		{ $TMAproofObject.proofValue, $TMAproofObject}
+		{$TMAproofObject.proofValue, $TMAproofObject}
 	]
 callProver[ args___] := unexpected[ callProver, {args}]
 
@@ -65,7 +63,8 @@ proofSearch[ searchDepth_Integer] :=
         While[ !$proofAborted && $TMAproofObject.proofValue === pending && (openPSpos = positionRelevantSits[ $TMAproofObject]) =!= {},
             openPS = Extract[ $TMAproofObject, openPSpos];
             {selPS, selPSpos} = chooseNextPS[ openPS, openPSpos];
-            If[ Length[ selPSpos] > searchDepth,
+            $TMAcurrentDepth = Length[ selPSpos];
+            If[ $TMAcurrentDepth > searchDepth,
             	newSteps = searchDepthExceeded[ selPS],
             	(* else *)
             	pStrat = selPS.strategy;
@@ -147,6 +146,14 @@ chooseNextPS[ ps_List, psPos_List] :=
 	]
 chooseNextPS[ args___] := unexpected[ chooseNextPS, {args}]
 
+replaceProofSit[ po_PRFOBJ$, pos_ -> p_PRFSIT$] :=
+	(* 
+	This is a special case needed when building up the initial proof object.
+	It can happen that the initial PS consists of a TERMINALNODE$ (namely, if the proof succeeds immediately).
+	Hence, we want to call replaceProofSit there in order to update the proof tree correspondingly.
+	*)
+	ReplacePart[ po, pos -> p]
+	
 replaceProofSit[ po_PRFOBJ$, pos_ -> new:node_[___]] :=
 	Module[{parentID = Extract[ po, pos].id, newVal = new.proofValue, sub},
 		sub = poToTree[ new];
@@ -193,19 +200,9 @@ Options[ makePRFSIT] = {goal -> {}, kb -> {}, id :> ToString[ Unique[ "PRFSIT$"]
 makePRFSIT[ data___?OptionQ] :=
 	Module[{g, k, i, l, r, a, p, s},
 		{g, k, i, l, r, a, p, s} = {goal, kb, id, local, rules, ruleActivity, rulePriority, strategy} /. {data} /. Options[ makePRFSIT];
-		makeRealPRFSIT[ g, k, i, l, r, a, p, s, Apply[ Sequence, Select[ {data}, isOptComponent]]]
+		PRFSIT$[ g, k, i, local -> l, rules -> r, ruleActivity -> a, rulePriority -> p, strategy -> s, Apply[ Sequence, Select[ {data}, isOptComponent]]]
 	]
 makePRFSIT[ args___] := unexpected[ makePRFINFO, {args}]
-
-makeRealPRFSIT[ g_FML$, k:{___FML$}, id_String, li_, r_Hold, act_List, prio_List, s_, rest___?OptionQ] := 
-	Module[ {succ, pi},
-		{succ, pi} = checkProofSuccess[ g, k, id, li];
-		If[ succ,
-			proofSucceeds[ pi],
-			PRFSIT$[ g, k, id, local -> li, rules -> r, ruleActivity -> act, rulePriority -> prio, strategy -> s, rest]
-		]
-	]
-makeRealPRFSIT[ args___] := unexpected[ makeRealPRFSIT, {args}]
 
 (*
 	The selector p.rules immediately strips the Hold
@@ -220,6 +217,22 @@ PRFSIT$ /: Dot[ _PRFSIT$, proofValue] := pending
 PRFSIT$ /: Dot[ p_PRFSIT$, s___] := unexpected[ Dot, {p, s}]
 
 getPrincipalData[ args___] := unexpected[ getPrincipalData, {args}]
+
+
+(* ::Subsection:: *)
+(* newSubgoal *)
+
+Options[ newSubgoal] = Options[ makePRFSIT];
+newSubgoal[ data___?OptionQ] := 
+	Module[ {g, k, i, l, succ, pi},
+		{g, k, i, l} = {goal, kb, id, local} /. {data} /. Options[ newSubgoal];
+		{succ, pi} = checkProofSuccess[ g, k, i, l];
+		If[ succ,
+			proofSucceeds[ pi],
+			makePRFSIT[ data]
+		]
+	]
+newSubgoal[ args___] := unexpected[ newSubgoal, {args}]
 
 
 (* ::Subsection:: *)
@@ -412,14 +425,19 @@ checkProofSuccess[ args___] := unexpected[ checkProofSuccess, {args}]
 (* showProofNavigation *)
 
 showProofNavigation[ {}, scale_] := Graphics[ {}, ImageSize -> {350,420}]
-showProofNavigation[ {Depth -> _, node_List}, scale_] := Graphics[ proofStepNode[ {0, 0}, node, 18], ImageSize -> {350,420}, PlotRegion -> {{0.4, 0.6}, {0.6, 0.8}}]
 
-showProofNavigation[ {Depth -> depth_, p__Rule}, scale_] :=
-    Module[ {root = Cases[ {p}, {"InitPS", __}, {2}], geometry, font},
+(*
+The initial proof tree already has an edge from original PS to initial PS, so this should not be called anymore
+
+showProofNavigation[ {Depth -> _, node_List}, scale_] := Graphics[ proofStepNode[ {0, 0}, node, 18], ImageSize -> {350,420}, PlotRegion -> {{0.4, 0.6}, {0.6, 0.8}}]
+*)
+
+showProofNavigation[ {p__Rule}, scale_] :=
+    Module[ {root = Cases[ {p}, {"OriginalPS", __}, {2}], geometry, font},
     	If[ scale === Fit,
     		geometry = {350,420},
     		(* else *)
-    		geometry = {Max[ Count[ {p}, _ -> {__, TERMINALNODE$|PRFSIT$, _}]*20, 350], Max[ depth*15, 420]}*scale
+    		geometry = {Max[ Count[ {p}, _ -> {__, TERMINALNODE$|PRFSIT$, _}]*20, 350], Max[ $TMAcurrentDepth*15, 420]}*scale
     	];
     	font = 18-Ceiling[ Apply[ Times, geometry]/(350*420)];
         If[ root === {},
@@ -439,16 +457,17 @@ proofStepNode[ pos_List, node:{ id_String, status_, type_, name_}, font_] :=
 			proved, RGBColor[0, 0.780392, 0.54902, opacity] (* turquoiseblue *),
 			_, Black],
 		Switch[ type,
-			PRFSIT$, Disk[ pos, 0.1],
-			TERMINALNODE$|PRFOBJ$, Map[ (pos + 0.1*#)&, Rectangle[ {-Sqrt[Pi]/2, -Sqrt[Pi]/2}, {Sqrt[Pi]/2, Sqrt[Pi]/2}]],
+			PRFSIT$|PRFOBJ$, Disk[ pos, 0.1],
+			TERMINALNODE$, Map[ (pos + 0.1*#)&, Rectangle[ {-Sqrt[Pi]/2, -Sqrt[Pi]/2}, {Sqrt[Pi]/2, Sqrt[Pi]/2}]],
 			ANDNODE$, Polygon[ Map[ (pos + 0.125*#)&, {{0,1}, {Cos[7*Pi/6], Sin[7*Pi/6]}, {Cos[11*Pi/6], Sin[11*Pi/6]}}]],
 			ORNODE$, Polygon[ Map[ (pos + 0.125*#)&, {{0,-1}, {Cos[Pi/6], Sin[Pi/6]}, {Cos[5*Pi/6], Sin[5*Pi/6]}}]],
 			_, Map[ (pos + 0.1*#)&, Rectangle[ {-Sqrt[Pi]/2, -Sqrt[Pi]/2}, {Sqrt[Pi]/2, Sqrt[Pi]/2}]]],
 		{Black, Dynamic[ Text[ 
 			Hyperlink[
 				Switch[ type, 
-        				TERMINALNODE$|PRFOBJ$, proofStatusIndicator[ status, name],
-        				_, proofNodeIndicator[ status, type, name]], 
+        				TERMINALNODE$, proofStatusIndicator[ status, name],
+         				PRFOBJ$, proofStatusIndicator[ status],
+       				_, proofNodeIndicator[ status, type, name]], 
 				{CurrentValue[ $TMAproofNotebook, "NotebookFileName"], id},
 				BaseStyle -> {FontSize -> font}, Active -> ruleTextActive[ name]], pos]]}
 		}
@@ -491,13 +510,19 @@ proofNodeIndicator[ args___] := unexpected[ proofNodeIndicator, {args}]
 	localInfo remains {} in the initial proof object
 *)
 makeInitialProofObject[ g_FML$, k_List, {r_Hold, act_List, prio_List}, s_] :=
-	PRFOBJ$[
-		makePRFINFO[ name -> initialProofSituation, used -> {g, k}, id -> "InitPS"],
-		makePRFSIT[ goal -> g, kb -> k, id -> "InitPS",
-			rules -> r, ruleActivity -> act, rulePriority -> prio,
-			strategy -> s],
-		pending
-	]
+    Module[ {dummyPO},
+        dummyPO = PRFOBJ$[
+            makePRFINFO[ name -> initialProofSituation, used -> {g, k}, id -> "OriginalPS"],
+            PRFSIT$[ g, k, "InitialPS"],
+            pending
+        ];
+        (* Use propagateProofValues and replaceProofSit in order to update the proof tree correspondingly *)
+        propagateProofValues[ 
+            replaceProofSit[ dummyPO,
+            	{2} -> newSubgoal[ goal -> g, kb -> k, id -> "InitialPS",
+                	rules -> r, ruleActivity -> act, rulePriority -> prio, strategy -> s]]
+        ]
+    ]
 makeInitialProofObject[ args___] := unexpected[ makeInitialProofObject, {args}]
 
 
@@ -526,7 +551,7 @@ makeInitialProofNotebook[ args___] := unexpected[ makeInitialProofNotebook, {arg
 (* ::Subsubsection:: *)
 (* makeInitialProofTree *)
 
-makeInitialProofTree[ ] := {}
+makeInitialProofTree[ ] := {{"OriginalPS", pending, PRFOBJ$, None} -> {"InitialPS", pending, PRFSIT$, None}}
 makeInitialProofTree[ args___] := unexpected[ makeInitialProofTree, {args}]
 
 (* ::Subsubsection:: *)

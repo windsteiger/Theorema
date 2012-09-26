@@ -18,7 +18,7 @@ MessageName[ equivGoal, "usage", lang] = "Prove equivalence by double implicatio
 MessageName[ contradiction, "usage", lang] = "Prove by contradiction";
 MessageName[ forallGoal, "usage", lang] = "Prove universally quantified goal";
 MessageName[ forallKB, "usage", lang] = "Instantiate universally quantified formula";
-MessageName[ existsGoal, "usage", lang] = "Handle existentially quantified goal by introducing meta variables";
+MessageName[ existsGoal, "usage", lang] = "Prove existentially quantified goal by introducing meta variables";
 MessageName[ existsKB, "usage", lang] = "Instantiate existentially quantified formula";
 
 ] (* With *)
@@ -53,7 +53,7 @@ proofStepText[ andKB, lang, {g_}, generated_List, ___] := {textCell[ "We split t
 	textCell[ "to the knowledge base."]
 	};
 
-proofStepText[ orGoal, lang, {g_}, {negAssum__, newG_}, ___] := {textCell[ "For proving the disjunction", formulaReference[ g], " we assume"],
+proofStepText[ orGoal, lang, {g_}, {negAssum__, newG_}, ___] := {textCell[ "For proving the disjunction ", formulaReference[ g], " we assume"],
 	assumptionListCells[ {negAssum}, ",", ""],
 	textCell[ "and show"],
 	goalCell[ newG, "."]
@@ -81,8 +81,39 @@ proofStepText[ equivGoal, lang, {g_}, generated_List, ___] := {textCell[ "We pro
 
 subProofHeader[ equivGoal, lang, used_List, generated_List, pVal_, {p_}] := {textCell[ Switch[ p, 1, "\[RightArrow]", 2, "\[LeftArrow]"], ":"]};
 
-proofStepText[ forallGoal, lang, {g_}, {a_}, ___, "abf"->{v_}, ___] := {textCell[ "For proving ", formulaReference[ g], " we choose ", ExpressionCell[v], "arbitrary but fixed and prove"],
-	goalCell[ a, "."]
+proofStepText[ forallGoal, lang, {g_}, {newG_}, ___, "abf" -> v_List, ___] := {textCell[ "For proving ", formulaReference[ g], " we choose ", 
+	inlineTheoremaExpressionSeq[ v], " arbitrary but fixed and show"],
+	goalCell[ newG, "."]
+	};
+
+proofStepText[ forallGoal, lang, {g_}, {newG_, assum__}, ___, "abf" -> v_List, ___] := {textCell[ "For proving ", formulaReference[ g], " we choose ", 
+	inlineTheoremaExpressionSeq[ v], " arbitrary but fixed and assume"],
+	assumptionListCells[ {assum}, ",", "."],
+	textCell[ "We have to show"],
+	goalCell[ newG, "."]
+	};
+
+proofStepText[ forallGoal, lang, {g_}, {simpG_}, ___] := {textCell[ "The universally quantified goal ", formulaReference[ g], " simplifies to"],
+	goalCell[ simpG, "."]
+	};
+
+proofStepText[ existsGoal, lang, {g_}, {newG_}, ___, "meta" -> v_List, ___] := {textCell[ "For proving ", formulaReference[ g], " we have to find ",
+	If[ Length[v] == 1, "an appropriate value for ", "appropriate values for "],
+	inlineTheoremaExpressionSeq[ v], ", such that we can prove"],
+	goalCell[ newG, "."]
+	};
+
+proofStepText[ existsGoal, lang, {g_}, {simpG_}, ___] := {textCell[ "The existentially quantified goal ", formulaReference[ g], " simplifies to"],
+	goalCell[ simpG, "."]
+	};
+	
+proofStepText[ existsKB, lang, {e_}, new_List, ___, "abf" -> v_List, ___] := {textCell[ "From ", formulaReference[ e], " we know "], 
+	assumptionListCells[ new, ",", ""],
+	textCell[ " for arbitrary but fixed ", inlineTheoremaExpressionSeq[ v], "."]
+	};
+
+proofStepText[ existsKB, lang, {g_}, {simpG_}, ___] := {textCell[ "The universally quantified goal ", formulaReference[ g], " simplifies to"],
+	goalCell[ simpG, "."]
 	};
 	
 ] (* With *)

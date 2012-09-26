@@ -35,6 +35,8 @@ makeTuple[ x___] := ToExpression[ "Tuple$TM"][x]
 (* ::Section:: *)
 (* MakeBoxes *)
 
+MakeBoxes[ \[DoubleStruckCapitalN]0$TM, TheoremaForm] := SubscriptBox[ "\[DoubleStruckCapitalN]", "0"]
+
 MakeBoxes[ Set$TM[ arg__], TheoremaForm] := MakeBoxes[ {arg}, TheoremaForm]
 MakeBoxes[ Set$TM[ ], TheoremaForm] := MakeBoxes[ "\[EmptySet]", TheoremaForm]
 

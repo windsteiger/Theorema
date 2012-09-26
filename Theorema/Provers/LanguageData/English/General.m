@@ -70,8 +70,8 @@ proofStepText[ falseInKB, lang, {k_}, {}, pVal_] := {textCell[ "The proof is fin
 	" is a contradiction in the knowledge base."]
     };
 
-proofStepText[ goalInKB, lang, {goal_, k_}, {}, pVal_] := {textCell[ "Now we are done, since the goal ", formulaReference[ goal], 
-	" is identical to formula ", formulaReference[ k], "in the knowledge base."]
+proofStepText[ goalInKB, lang, {goal_, k_}, {}, pVal_] := {textCell[ "The goal ", formulaReference[ goal], 
+	" is identical to formula ", formulaReference[ k], " in the knowledge base. Thus, the proof is finished."]
     };
 
 proofStepText[ step_Symbol, lang, ___] := {

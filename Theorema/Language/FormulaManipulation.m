@@ -221,18 +221,75 @@ formulaReference[ args___] := unexpected[ formulaReference, {args}]
 
 
 (* ::Section:: *)
+(* ranges *)
+
+
+(* ::Subsection:: *)
 (* arbitraryButFixed *)
 
 arbitraryButFixed[ expr_, rng_Theorema`Language`RNG$, kb_List:{}] :=
 	(*
 		Select all variable symbols from rng, then (for each v of them) find all FIX$[ v, n] constants in kb and take the maximal n, say n'.
-		A new constant then has the form FIX$[ v, n'+1], hence, we substitute all free VAR$[v] by FIX$[ v, n+1].
+		A new constant then has the form FIX$[ v, n'+1], hence, we substitute all free VAR$[v] by FIX$[ v, n'+1].
 		If no FIX$[ v, n] occurs in kb, then n'+1 is -Infinity, we take 0 instead to create the first new constant FIX$[ v, 0]. *)
 	Module[{vars = specifiedVariables[ rng], subs},
 		subs = Map[ Theorema`Language`VAR$[ #] -> Theorema`Language`FIX$[ #, Max[ Cases[ kb, Theorema`Language`FIX$[ #, n_] -> n, Infinity]] + 1]&, vars] /. -Infinity -> 0;
-		substituteFree[ expr, subs] 
+		{substituteFree[ expr, subs], Map[ Part[ #, 2]&, subs]} 
 	]
 arbitraryButFixed[ args___] := unexpected[ arbitraryButFixed, {args}]
+
+(* ::Subsection:: *)
+(* introduceMeta *)
+
+introduceMeta[ expr_, rng_Theorema`Language`RNG$, kb_List:{}] :=
+	(*
+		Select all variable symbols from rng, then (for each v of them) find all META$[ v, n, ...] in kb and take the maximal n, say n'.
+		A new meta variable then has the form META$[ v, n'+1, c], hence, we substitute all free VAR$[v] by META$[ v, n'+1, c].
+		If no META$[ v, n, ...] occurs in kb, then n'+1 is -Infinity, we take 0 instead to create the first new meta variable META$[ v, 0, c]. *)
+	Module[{vars = specifiedVariables[ rng], const, subs},
+		const = Union[ Cases[ kb, Theorema`Language`FIX$[ #, n_], Infinity]];
+		subs = Map[ Theorema`Language`VAR$[ #] -> Theorema`Language`META$[ #, Max[ Cases[ kb, Theorema`Language`META$[ #, n_] -> n, Infinity]] + 1, const]&, vars] /. -Infinity -> 0;
+		{substituteFree[ expr, subs], Map[ Part[ #, 2]&, subs]} 
+	]
+introduceMeta[ args___] := unexpected[ introduceMeta, {args}]
+
+
+
+(* ::Subsection:: *)
+(* rngToCondition *)
+
+rngToCondition[ Theorema`Language`RNG$[ r__]] := Apply[ Join, Map[ singleRngToCondition, {r}]]
+rngToCondition[ args___] := unexpected[ rngToCondition, {args}]
+
+singleRngToCondition[ Theorema`Language`SIMPRNG$[ v_]] := {}
+singleRngToCondition[ Theorema`Language`SETRNG$[ v_, S_]] := {Theorema`Language`Element$TM[ v, S]}
+singleRngToCondition[ Theorema`Language`STEPRNG$[ v_, l_Integer?NonNegative, h_Integer, 1]] := 
+	{Theorema`Language`GreaterEqual$TM[ v, l], Theorema`Language`LessEqual$TM[ v, h], Theorema`Language`Element$TM[ v, Theorema`Language`\[DoubleStruckCapitalN]0$TM]}
+singleRngToCondition[ Theorema`Language`STEPRNG$[ v_, l_Integer, h_Integer, 1]] := 
+	{Theorema`Language`GreaterEqual$TM[ v, l], Theorema`Language`LessEqual$TM[ v, h], Theorema`Language`Element$TM[ v, Theorema`Language`\[DoubleStruckCapitalZ]$TM]}
+singleRngToCondition[ Theorema`Language`STEPRNG$[ v_, l_, h_, s_Integer]] := 
+	Module[ {new},
+		{Theorema`Language`Exists$TM[ Theorema`Language`RNG$[ Theorema`Language`SETRNG$[ new, Theorema`Language`\[DoubleStruckCapitalN]0$TM]], True, 
+			Theorema`Language`And$TM[ Theorema`Language`Equal$TM[ v, Theorema`Language`Plus$TM[ l, Theorema`Language`Times$TM[ new, s]]],
+				If[ NonNegative[ s], Theorema`Language`LessEqual$TM, Theorema`Language`GreaterEqual$TM][ v, h]]]}
+	]
+singleRngToCondition[ Theorema`Language`PREDRNG$[ v_, P_]] := {P[ v]}
+singleRngToCondition[ u_] := {$Failed}
+singleRngToCondition[ args___] := unexpected[ singleRngToCondition, {args}]
+
+
+(* ::Section:: *)
+(* Computation within proving *)
+
+computeInProof[ expr_] :=
+	Module[{simp},
+		setComputationContext[ "prove"];
+		simp = ToExpression[ StringReplace[ ToString[ expr], "Theorema`Language`" -> "Theorema`Computation`Language`"]];
+		setComputationContext[ "none"];
+		ToExpression[ StringReplace[ ToString[ simp], "Theorema`Computation`" -> "Theorema`"]]
+	]
+computeInProof[ args___] := unexpected[ computeInProof, {args}]
+
 
 End[]
 

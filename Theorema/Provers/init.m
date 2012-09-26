@@ -79,8 +79,17 @@ assumptionListCells[ {f___, l_}, sep_String, punct_String] :=
 	]
 assumptionListCells[ args___] := unexpected[ assumptionListCells, {args}]
 
-textCell[ t__] := Cell[ TextData[ Riffle[ {t}, " "]], "Text", CellTags -> {$proofStepID}]
+textCell[ t__] := Cell[ TextData[ {t}], "Text", CellTags -> {$proofStepID}]
 textCell[ args___] := unexpected[ textCell, {args}]
+
+(*
+	Inline Theorema formulae inside a textCell
+*)
+inlineTheoremaExpression[ expr_] := Cell[ ToBoxes[ expr, TheoremaForm]]
+inlineTheoremaExpression[ args___] := unexpected[ inlineTheoremaExpression, {args}]
+
+inlineTheoremaExpressionSeq[ expr_List] := Sequence[ Riffle[ Map[ inlineTheoremaExpression, expr], ", "]]
+inlineTheoremaExpressionSeq[ args___] := unexpected[ inlineTheoremaExpressionSeq, {args}]
 
 End[]
 

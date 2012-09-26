@@ -32,6 +32,12 @@ With[ {lang = "English"},
 	MessageName[Set$TM, "usage", lang] = "";	
 	MessageName[SetOf$TM, "usage", lang] = "";	
 	MessageName[SequenceOf$TM, "usage", lang] = "";	
+	MessageName[\[DoubleStruckCapitalN]$TM, "usage", lang] = "";	
+	MessageName[\[DoubleStruckCapitalN]0$TM, "usage", lang] = "";	
+	MessageName[\[DoubleStruckCapitalZ]$TM, "usage", lang] = "";	
+	MessageName[\[DoubleStruckCapitalQ]$TM, "usage", lang] = "";	
+	MessageName[\[DoubleStruckCapitalR]$TM, "usage", lang] = "";	
+	MessageName[\[DoubleStruckCapitalC]$TM, "usage", lang] = "";	
     (* Mathematica programming language *)
 	MessageName[Program, "usage", lang] = "";	
 	MessageName[Module$TM, "usage", lang] = "";	

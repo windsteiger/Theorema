@@ -49,9 +49,9 @@ applyOnce[ args___] := unexpected[ applyOnce, {args}]
 trySeveral[ ps_PRFSIT$] :=
     Module[ {},
         makeORNODE[ makePRFINFO[ name -> proofAlternatives, used -> {ps.goal}, generated -> {ps.kb}, id -> ps.id],
-        	{Apply[ makePRFSIT[ goal -> #1, kb -> #2, #4, #5, #6, #7, #8,
+        	{Apply[ newSubgoal[ goal -> #1, kb -> #2, #4, #5, #6, #7, #8,
         		Apply[ Sequence, Cases[ ps, HoldPattern[ (Rule|RuleDelayed)[_String, _]]]]]&, ps], 
-        	Apply[ makePRFSIT[ goal -> #1, kb -> #2, #4, #5, #6, #7, #8,
+        	Apply[ newSubgoal[ goal -> #1, kb -> #2, #4, #5, #6, #7, #8,
         		Apply[ Sequence, Cases[ ps, HoldPattern[ (Rule|RuleDelayed)[_String, _]]]]]&, ps]}
         	]
     ]

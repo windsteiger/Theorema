@@ -963,7 +963,6 @@ proofNavigation[ po_] :=
     	geom = Replace[ ImageSize, Options[ proofTree, ImageSize]];
     	(* Putting the frame around the inner Pane is a work-around, otherwise the pane is not positioned correctly when the proof tree is higher than 420 *)
         Pane[ Column[{
-        	(*Slider[ Dynamic[$proofTreeScale], {{0.1, 0.2, 0.5, 1, 2, 5, 10}}]*)
         	ButtonBar[ {"+" :> ($proofTreeScale *= 2), "\[FivePointedStar]" :> ($proofTreeScale = 1), "\[DottedSquare]" :> ($proofTreeScale = Fit), "-" :> ($proofTreeScale /= 2)},
         		FrameMargins -> {{15, 15}, {2, 0}}],
         	Framed[ Pane[ proofTree,
@@ -1376,7 +1375,7 @@ savePreferences[ ] :=
 		prefsFile = FileNameJoin[{prefsDir, "TheoremaPreferences.m"}];
 		If[ !DirectoryQ[ prefsDir],
 			CreateDirectory[ prefsDir, CreateIntermediateDirectories -> True],
-		(* else *)
+			(* else *)
 			If[ FileExistsQ[ prefsFile],
 				DeleteFile[ prefsFile]
 			]
