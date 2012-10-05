@@ -103,7 +103,7 @@ Map[ Get, FileNames["TheoremaPreferences.m", {
    Text["www.risc.jku.at/research/theorema", {-230, -202}, {-1, 0}, 
     BaseStyle -> {FontFamily -> "Helvetica", FontSize -> 11}]};
 
-`priv`center = {TMAcolor[3], 
+`priv`center = {TMAcolor[8], 
     Text["T h e o r e m a  " <> $TheoremaVersion, {0, -3}, 
      BaseStyle -> {FontWeight -> Bold, FontSize -> 36}]};
 

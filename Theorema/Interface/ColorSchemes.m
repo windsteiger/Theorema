@@ -1,48 +1,24 @@
 
 (* Usage of colors:
-	0 -> Notebook background
-	1 -> Logo foreground
+	0 -> Logo Theorema, GUI BG, main GUI pane BG
+	1 -> Logo foreground, GUI button bar BG (GUI frame)
 	2 -> Logo background
-	3 -> Logo Theorema
-	4 -> Logo text
-	5 -> Placeholder BG
-	6 -> 
-	7 -> GUI Tab names
-	8 -> Placeholder frame
-	9 -> GUI Formula uneval, SelectionPlaceholder BG
-	10 ->
-	11 -> SelectionPlaceholder FG
-	12 -> GUI Formula eval
+	3 -> Notebook background
+	4 -> Archive info BG
+	5 -> Placeholder BG, div. notebook cell brackets, Archive header BG
+	6 -> Info cells label FG
+	7 -> GUI labels FG, notebook computation marker
+	8 -> Logo text, Placeholder frame, notebook env header BG
+	9 -> GUI Formula uneval, SelectionPlaceholder BG, Global decl. marker
+	10 -> notebook frame labels
+	11 -> SelectionPlaceholder FG, Notebook (Sub(Sub))Title FG, notebook computation FG, Info cells content FG, Button text
+	12 -> GUI Formula eval, notebook env formula FG
 	13 ->
-	14 ->
-	15 ->
+	14 -> Notebook SubSub(Sub(Sub))Section FG, notebook env delimiters borderline
+	15 -> Notebook (Sub)Section FG
 	
 	Table[Apply[CMYKColor, IntegerDigits[i, 2, 4]] -> TMAcolor[i], {i,0,15}]
 *)
-
-(* HOWTO: 
-
-	1) After adding a new color scheme, run `admin`makeColorScheme[newName] in order to generate the necessary stylesheets.
-	2) After modifying one of the template stylesheets, run `admin`makeColorScheme[] in order to re-generate all stylesheets. *)
-
-`admin`makeColorScheme[ ] := `admin`makeColorScheme[ $availableColorSchemes]
-`admin`makeColorScheme[ names_List] := Scan[ `admin`makeColorScheme, names]
-`admin`makeColorScheme[ name_String] :=
-	Module[{tmp, styles, file},
-		tmp = NotebookOpen[ 
-			FileNameJoin[ {$TheoremaDirectory, "Theorema", "FrontEnd", "StyleSheets", "Theorema", "GUIColors-Template.nb"}],
-			Visible -> False];
-		styles = NotebookGet[ tmp];
-		file = FileNameJoin[ {$TheoremaDirectory, "Theorema", "FrontEnd", "StyleSheets", "Theorema", "GUI-"<>name<>".nb"}];
-		If[ FileExistsQ[ file], DeleteFile[ file]];
-		Print[ file];
-		styles = NotebookPut[ styles /. Table[Apply[CMYKColor, IntegerDigits[i, 2, 4]] -> TMAcolor[i, name], {i, 0, 15}]];
-		SetOptions[ styles, MenuSortingValue -> None];
-		NotebookSave[ styles, file];
-		Scan[ NotebookClose, {tmp, styles}];
-	]
-`admin`makeColorScheme[ args___] := unexpected[ `admin`makeColorScheme, {args}]
-	
 
 TMAcolor[ n_Integer] := TMAcolor[ n, $TheoremaColorScheme]
 TMAcolorScheme[ name_String, opts___] := Graphics[ Raster[ Partition[ Apply[ List, Array[ TMAcolor[ #, name]&, 16, 0], {1}], 4]], opts]
@@ -53,11 +29,11 @@ TMAcolorScheme[ name_String, opts___] := Graphics[ Raster[ Partition[ Apply[ Lis
 TMAcolor[ 0, "Milano"] = RGBColor[ 0.91, 0.90, 0.85]; (* beige *)
 TMAcolor[ 1, "Milano"] = RGBColor[0.29, 0.46, 0.60]; (* strong blue *)
 TMAcolor[ 2, "Milano"] = RGBColor[0.36, 0.54, 0.69]; (* light blue grey *)
-TMAcolor[ 3, "Milano"] = RGBColor[ 0.84, 0.70, 0.55]; (* gold *)
+TMAcolor[ 3, "Milano"] = RGBColor[0.957, 0.96, 0.97]; (* grey96 *)
 TMAcolor[ 4, "Milano"] = RGBColor[ 0.88, 0.88, 0.92]; (* grey90 *)
 TMAcolor[ 5, "Milano"] = RGBColor[ 0.73, 0.74, 0.84]; (* grey75 *)
-TMAcolor[ 6, "Milano"] = RGBColor[ 0.10, 0.44, 0.41]; (* green *)
-TMAcolor[ 7, "Milano"] = RGBColor[ 0.72, 0.35, 0.48]; (* red *)
+TMAcolor[ 6, "Milano"] = RGBColor[0.404, 0.43, 0.545]; (* blue *)
+TMAcolor[ 7, "Milano"] = RGBColor[0.486, 0.33, 0.32]; (* brown *)
 TMAcolor[ 8, "Milano"] = RGBColor[ 0.89, 0.80, 0.69]; (* light brown *)
 TMAcolor[ 9, "Milano"] = RGBColor[ 0.73, 0.65, 0.61]; (* medium brown *)
 TMAcolor[ 10, "Milano"] = RGBColor[ 0.55, 0.44, 0.42]; (* choko *)

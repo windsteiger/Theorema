@@ -75,6 +75,7 @@ With[ {lang = "English"},
 	MessageName[$labelSeparator, "usage", lang] = "Separator between different labels assigned to one formula.";
 	MessageName[$cellTagKeySeparator, "usage", lang] = "Separator between key and value in a cellTag.";
 	MessageName[printComputationInfo, "usage", lang] = "Print info about global knowledge used inside a computation";
+	MessageName[makeColoredStylesheet, "usage", lang] = "Generate a colored stylesheet from a template using the color scheme chosen in the preferences.";
 	
 (* Theorema`Interface`Language` *)
 	MessageName[translate, "usage", lang] = "translate[s_String,lang_String] gives string s in language lang.";

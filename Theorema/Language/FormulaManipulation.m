@@ -213,7 +213,7 @@ FML$ /: Dot[ FML$[ k_, _, _], source] := k[[2]]
 formulaReference[ fml_FML$] :=
     With[ { tag = fml.id, labelDisp = makeLabel[ fml.label], fmlDisp = theoremaDisplay[ fml.formula]},
         Cell[ BoxData[ ToBoxes[
-            Button[ Tooltip[ Mouseover[ Style[ labelDisp, "Reference"], Style[ labelDisp, "ReferenceHover"]], fmlDisp],
+            Button[ Tooltip[ Mouseover[ Style[ labelDisp, "FormReference"], Style[ labelDisp, "FormReferenceHover"]], fmlDisp],
                NotebookLocate[ tag], Appearance->None]
         ]]]
        ]

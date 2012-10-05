@@ -17,7 +17,7 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-BeginPackage["Theorema`Interface`GUI`"];
+BeginPackage["Theorema`Interface`GUI`", {"Theorema`"}];
 (* Exported symbols added here with SymbolName::usage *)  
 
 Needs["Theorema`Common`"]
@@ -76,6 +76,8 @@ initGUI[] :=
         		{"Which", RowBox[{"Which","[","\[Ellipsis]","]"}], False, True, False},
         		{"Switch", RowBox[{"Switch","[","\[Ellipsis]","]"}], False, True, False}}
         };
+        $tcActivitiesView = 1;
+        $tcActionView = 1;
 		$kbStruct = {};
 		$initLabel = "???";
 		$labelSeparator = ",";
@@ -120,46 +122,39 @@ initBuiltins[ args___] := unexpected[ initBuiltins, {args}]
 	We have to keep an eye on that whether Deployed->False has other negative effects on the window's behaviour.
 *)
 openTheoremaCommander[ ] /; $Notebooks :=
-    Module[ {style = Replace[ ScreenStyleEnvironment, Options[InputNotebook[], ScreenStyleEnvironment]]},
+    Module[ {},
         CreatePalette[ Dynamic[Refresh[
-        	TabView[{
-        		translate["tcSessionTabLabel"]->TabView[{
-        			translate["tcSessTabStructTabLabel"]->structButtons[],
-        			translate["tcSessTabMathTabLabel"]->Dynamic[Refresh[ langButtons[], TrackedSymbols :> {$buttonNat}]],
-        			translate["tcSessTabArchTabLabel"]->archButtons[]}, Dynamic[$tcLangTab],
-        			LabelStyle->"TabLabel2", ControlPlacement->Top],
-        		translate["tcProveTabLabel"]->TabView[{
-        			translate["tcProveTabGoalTabLabel"]->Dynamic[ Refresh[ displaySelectedGoal[], UpdateInterval -> 2]],
-        			translate["tcProveTabKBTabLabel"]->Dynamic[Refresh[displayKBBrowser["prove"], TrackedSymbols :> {$kbStruct}]],
-        			translate["tcProveTabBuiltinTabLabel"]->displayBuiltinBrowser["prove"],
-        			translate["tcProveTabProverTabLabel"]->Dynamic[ Refresh[ selectProver[], TrackedSymbols :> {$selectedRuleSet, $selectedStrategy}]],
-        			translate["tcProveTabSubmitTabLabel"]->Dynamic[ Refresh[ submitProveTask[ $tcProveTab],
-        				TrackedSymbols :> {$tcProveTab, $selectedProofGoal, $selectedProofKB, $selectedProver}]],
-        			translate["tcProveTabInspectTabLabel"]->Dynamic[ Refresh[ proofNavigation[ $TMAproofTree],
-        				TrackedSymbols :> {$TMAproofTree, ruleTextActive, $proofTreeScale}]]}, Dynamic[$tcProveTab],
-        			LabelStyle->"TabLabel2", ControlPlacement->Top],
-        		translate["tcComputeTabLabel"]->TabView[{
-        			translate["tcComputeTabSetupTabLabel"]->Dynamic[Refresh[ compSetup[], TrackedSymbols :> {$buttonNat}]],
-        			translate["tcComputeTabKBTabLabel"]->Dynamic[Refresh[displayKBBrowser["compute"], TrackedSymbols :> {$kbStruct}]],
-        			translate["tcComputeTabBuiltinTabLabel"]->displayBuiltinBrowser["compute"]}, Dynamic[$tcCompTab],
-        			LabelStyle->"TabLabel2", ControlPlacement->Top],
-        		translate["tcSolveTabLabel"]->TabView[{
-        			translate["tcSolveTabKBTabLabel"]->Dynamic[Refresh[displayKBBrowser["solve"], TrackedSymbols :> {$kbStruct}]],
-        			translate["tcSolveTabBuiltinTabLabel"]->displayBuiltinBrowser["solve"]}, Dynamic[$tcSolveTab],
-        			LabelStyle->"TabLabel2", ControlPlacement->Top],
-        		translate["tcPreferencesTabLabel"]->Column[ Join[{TabView[{
-        			translate["tcPrefLanguage"]->PopupMenu[Dynamic[$Language], availableLanguages[]],
-        			translate["tcPrefArchiveDir"]->Row[{Dynamic[Tooltip[FileNameJoin[Take[FileNameSplit[$TheoremaArchiveDirectory], -2]], $TheoremaArchiveDirectory]],
-        				FileNameSetter[Dynamic[$TheoremaArchiveDirectory], "Directory"]}, Spacer[10]],
-        			translate["tcPrefAppear"]->setAppearance[]}, Dynamic[$tcPrefTab],
-        			LabelStyle->"TabLabel2", ControlPlacement->Top]},
-        			savePreferencesButton[]]]},
-        		Dynamic[$tcTopLevelTab],
-        		LabelStyle->"TabLabel1", ControlPlacement->Left
+        	activitiesView[
+        		(* activities buttons *)
+        		{translate["tcSessionTabLabel"], translate["tcProveTabLabel"], translate["tcComputeTabLabel"], translate["tcSolveTabLabel"], translate["tcPreferencesTabLabel"]},
+        		(* for each activity the respective action buttons *)
+        		{
+        			(* session *){translate["tcSessTabStructTabLabel"], translate["tcSessTabMathTabLabel"], translate["tcSessTabArchTabLabel"]},
+        			(* prove *)  {translate["tcProveTabGoalTabLabel"], translate["tcProveTabKBTabLabel"], translate["tcProveTabBuiltinTabLabel"],
+        				translate["tcProveTabProverTabLabel"], translate["tcProveTabSubmitTabLabel"], translate["tcProveTabInspectTabLabel"]},
+        			(* compute *){translate["tcComputeTabSetupTabLabel"], translate["tcComputeTabKBTabLabel"], translate["tcComputeTabBuiltinTabLabel"]},
+        			(* solve *)  {translate["tcSolveTabKBTabLabel"], translate["tcSolveTabBuiltinTabLabel"]},
+        			(* prefs *)  {(*, , *)}
+        		},
+        		(* for each activity and each action the respective content *)
+        		{
+        			(* session *){structButtons[], Dynamic[ Refresh[ langButtons[], TrackedSymbols :> {$buttonNat}]], archButtons[]},
+        			(* prove *)  {Dynamic[ Refresh[ displaySelectedGoal[], UpdateInterval -> 2]],
+        				Dynamic[Refresh[displayKBBrowser["prove"], TrackedSymbols :> {$kbStruct}]],
+        				displayBuiltinBrowser["prove"],
+        				Dynamic[ Refresh[ selectProver[], TrackedSymbols :> {$selectedRuleSet, $selectedStrategy}]],
+        				Dynamic[ Refresh[ submitProveTask[ $tcProveTab], TrackedSymbols :> {$tcProveTab, $selectedProofGoal, $selectedProofKB, $selectedProver}]],
+        				Dynamic[ Refresh[ proofNavigation[ $TMAproofTree], TrackedSymbols :> {$TMAproofTree, ruleTextActive, $proofTreeScale}]]},
+        			(* compute *){Dynamic[Refresh[ compSetup[], TrackedSymbols :> {$buttonNat}]],
+        				Dynamic[Refresh[displayKBBrowser["compute"], TrackedSymbols :> {$kbStruct}]],
+        				displayBuiltinBrowser["compute"]},
+        			(* solve *)  {Dynamic[Refresh[displayKBBrowser["solve"], TrackedSymbols :> {$kbStruct}]],
+        				displayBuiltinBrowser["solve"]},
+        			(* prefs *)  {setPreferences[ ]}
+        		}
         	], TrackedSymbols :> {$Language}]],
-        	StyleDefinitions -> makeGUIStylesheet[ $TheoremaColorScheme],
+        	StyleDefinitions -> makeColoredStylesheet[ "GUI"],
         	WindowTitle -> translate["Theorema Commander"],
-        	ScreenStyleEnvironment -> style,
         	WindowElements -> {"StatusArea"}]
     ]
 openTheoremaCommander[ args___] := unexpected[ openTheoremaCommander, {args}]
@@ -175,6 +170,23 @@ getTheoremaCommander[ args___] := unexpected[ getTheoremaCommander, {args}]
 closeTheoremaCommander[ ] :=
 	Scan[ NotebookClose, getTheoremaCommander[ ]]
 closeTheoremaCommander[ args___] := unexpected[ closeTheoremaCommander, {args}]
+
+activitiesView[ activitiesLab:{__String}, actionLabs:{{___String}..}, views:{{__}..}] :=
+        Dynamic[
+        Grid[{{Button[ "", Background -> TMAcolor[1], Appearance -> Frameless, FrameMargins -> 5], 
+        	Row[ MapIndexed[
+                Button[ Mouseover[ Style[ #1, "TabLabel2"], Style[ #1, "TabLabel2Over"]], $tcActionView = #2[[1]],
+                	Background -> If[ $tcActionView === #2[[1]], TMAcolor[0], TMAcolor[5]]] &,
+                actionLabs[[ $tcActivitiesView]]]]},
+        	{Column[ MapIndexed[
+                Button[ Mouseover[ Style[ #1, "TabLabel1"], Style[ #1, "TabLabel1Over"]], ($tcActionView = 1; $tcActivitiesView = #2[[1]]),
+                	Background -> If[ $tcActivitiesView === #2[[1]], TMAcolor[0], TMAcolor[5]]] &,
+                activitiesLab], Center, 0],
+                Pane[ views[[$tcActivitiesView, $tcActionView]], {400, 600}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic,
+                    ImageMargins -> 0, FrameMargins -> 10]}},
+            Alignment -> {{Center, Left}, {Center, Top}}, Spacings -> {0, 0}, Background -> TMAcolor[1]]
+        ]
+activitiesView[ args___] := unexpected[ activitiesView, {args}]
 
 
 (* ::Subsubsection:: *)
@@ -374,19 +386,19 @@ displaySelectedGoal[ ] :=
     	sel = NotebookRead[ $proofInitNotebook];
     	goal = findSelectedFormula[ sel];
         If[ goal === {},
-            emptyPane[ translate["noGoal"], 350],
+            translate["noGoal"],
             With[ {selGoal = goal[[1]]},
-            	Pane[ Column[ {
+            	Column[ {
             		Row[ displayLabeledFormula[ selGoal], Spacer[5]],
-            		Button[ translate[ "OKnext"], $selectedProofGoal = selGoal; $tcProveTab++]}], 350, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
+            		Button[ translate[ "OKnext"], $selectedProofGoal = selGoal; $tcProveTab++]}]
             ]
         ]
     ]
 displaySelectedGoal[ goal_] :=
     Module[ { },
         If[ goal === {},
-            emptyPane[ translate["noGoal"], 350],
-            Pane[ Row[ displayLabeledFormula[ goal], Spacer[5]], 350, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
+            translate["noGoal"],
+            Row[ displayLabeledFormula[ goal], Spacer[5]]
         ]
     ]
 displaySelectedGoal[args___] :=
@@ -407,14 +419,17 @@ displaySelectedKB[ ] :=
 	Module[ {},
     	$selectedProofKB = Select[ $tmaEnv, kbSelectProve[#[[1]]]&];
         If[ $selectedProofKB === {},
-            emptyPane[ translate["noKB"], {350, 350}],
-            Pane[ Grid[ displayLabeledFormulaList[ $selectedProofKB]], {350, 350}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
+            translate["noKB"],
+            Grid[ displayLabeledFormulaListGrid[ $selectedProofKB]]
         ]
     ]
 displaySelectedKB[ args___] := unexpected[ displaySelectedKB, {args}]
 
 displayLabeledFormulaList[ l_List] := Map[ displayLabeledFormula, l]
 displayLabeledFormulaList[ args___] := unexpected[ displayLabeledFormulaList, {args}]
+
+displayLabeledFormulaListGrid[ l_List] := Grid[ displayLabeledFormulaList[ l], Alignment -> {{Center, Left}, Automatic}]
+displayLabeledFormulaListGrid[ args___] := unexpected[ displayLabeledFormulaListGrid, {args}]
 
 sourceToNotebookFile[ s_String] :=
 	Module[ {fn, absfn},
@@ -436,16 +451,18 @@ sourceToNotebookFile[ args___] := unexpected[ sourceToNotebookFile, {args}]
 extract hierarchically structured knowledge from a notebook
 *)
 
-extractKBStruct[nb_NotebookObject] := extractKBStruct[ NotebookGet[nb]];
+extractKBStruct[ nb_NotebookObject] := extractKBStruct[ NotebookGet[nb]]
 
-extractKBStruct[nb_Notebook] :=
-    Module[ {posTit = Cases[Position[nb, Cell[_, "Title", ___]], {a___, 1}],
-      posSec =  Cases[Position[nb, Cell[_, "Section", ___]], {a___, 1}], 
-      posSubsec = Cases[Position[nb, Cell[_, "Subsection", ___]], {a___, 1}], 
-      posSubsubsec = Cases[Position[nb, Cell[_, "Subsubsection", ___]], {a___, 1}], 
-      posSubsubsubsec = Cases[Position[nb, Cell[_, "Subsubsubsection", ___]], {a___, 1}], 
-      posEnv = Cases[Position[nb, Cell[_, "EnvironmentHeader", ___]], {a___, 1}], 
-      posInp = Position[nb, Cell[_, "FormalTextInputFormula", ___]], inputs, depth, sub, root, heads, isolated},
+extractKBStruct[ Notebook[ l_List, __?OptionQ]] := extractKBStruct[ Notebook[ l]] (* process the notebook cells only, without any notebook options *)
+	
+extractKBStruct[ nb_Notebook] :=
+    Module[ {posTit = Cases[ Position[ nb, Cell[_, "Title", ___]], {a___, 1}],
+      posSec =  Cases[ Position[ nb, Cell[_, "Section", ___]], {a___, 1}], 
+      posSubsec = Cases[ Position[ nb, Cell[_, "Subsection", ___]], {a___, 1}], 
+      posSubsubsec = Cases[ Position[ nb, Cell[_, "Subsubsection", ___]], {a___, 1}], 
+      posSubsubsubsec = Cases[ Position[ nb, Cell[_, "Subsubsubsection", ___]], {a___, 1}], 
+      posEnv = Cases[ Position[ nb, Cell[_, "EnvironmentHeader", ___]], {a___, 1}], 
+      posInp = Position[ nb, Cell[_, "FormalTextInputFormula", ___]], inputs, depth, sub, root, heads, isolated},
       (* extract all positions of relevant cells
          join possible containers with decreasing level of nesting *)
         heads = Join[posEnv, posSubsubsubsec, posSubsubsec, posSubsec, posSec, posTit];
@@ -467,8 +484,8 @@ extractKBStruct[nb_Notebook] :=
         Join[isolated, inputs]
     ]
 
-extractKBStruct[args___] :=
-    unexpected[extractKBStruct, {args}]
+extractKBStruct[ args___] :=
+    unexpected[ extractKBStruct, {args}]
 
 
 (* ::Subsubsection:: *)
@@ -896,15 +913,14 @@ setAll[l_, test_, val_] :=
 (* see displayKBBrowser *)
 
 displayBuiltinBrowser[ task_String] :=
-  Pane[ Column[{
+  Column[{
   	Button[ translate[ "ResetBui"], initBuiltins[ {task}]],
   	structViewBuiltin[ $tmaBuiltins, {}, task][[1]]
-  }],
-  	ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
+  }]
 displayBuiltinBrowser[args___] := unexcpected[ displayBuiltinBrowser, {args}]
 
 selectProver[ ] :=
-    Pane[ Column[{
+    Column[{
     	Labeled[ Tooltip[ PopupMenu[ Dynamic[ $selectedRuleSet], Map[ MapAt[ translate, #, {2}]&, $registeredRuleSets]],
     			Apply[ Function[ rs, MessageName[ rs, "usage"], {HoldFirst}], $selectedRuleSet]], 
     		translate[ "pRules"], {{ Top, Left}}],
@@ -923,7 +939,7 @@ selectProver[ ] :=
     	Labeled[ RadioButtonBar[ 
     		Dynamic[Theorema`Provers`Common`Private`$proofCellStatus], {Open -> translate[ "open"], Closed -> translate[ "closed"]}], 
     		translate[ "proofCellStatus"], {{ Top, Left}}]	
-    	}], {350, 450}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
+    	}]
 selectProver[ args___] := unexpected[ selectRuleSet, {args}]
 
 submitProveTask[ dummy_] := 
@@ -1126,6 +1142,18 @@ newCloseEnvCell[args___] :=
 (* ::Subsection:: *)
 (* Buttons *)
 
+makeNbNewButton[] :=
+	Button[ translate["tcSessTabNbTabButtonNewLabel"],
+		NotebookCreate[ StyleDefinitions -> makeColoredStylesheet[ "Notebook"]],
+		Alignment -> {Left, Top}, Method -> "Queued"]
+makeNbNewButton[ args___] := unexpected[ makeNbNewButton, {args}]
+		
+makeNbOpenButton[ ] :=
+	Button[ translate["tcSessTabNbTabButtonOpenLabel"],
+		NotebookOpen[ SystemDialogInput["FileOpen"], StyleDefinitions -> makeColoredStylesheet[ "Notebook"]]
+	]
+makeNbOpenButton[ args___] := unexpected[ makeNbOpenButton, {args}]
+
 envButtonData["DEF"] := "tcSessTabEnvTabButtonDefLabel";
 envButtonData["THM"] := "tcSessTabEnvTabButtonThmLabel";
 envButtonData["LMA"] := "tcSessTabEnvTabButtonLmaLabel";
@@ -1143,7 +1171,7 @@ makeEnvButton[ bname_String] :=
     ]
 makeEnvButton[args___] := unexpected[makeEnvButton, {args}]
 
-makeFormButton[] := Button[ translate["tcSessTabEnvTabButtonFormLabel"], insertNewFormulaCell[ "Env"], Alignment -> {Left, Top}]
+makeFormButton[] := Button[ translate["tcSessTabEnvTabButtonFormLabel"], insertNewFormulaCell[ "Env"], Alignment -> {Left, Top}, ImageSize -> Automatic]
 makeFormButton[args___] := unexpected[makeFormButton, {args}]
 
 makeDeclButtons[] := Column[ {
@@ -1188,11 +1216,15 @@ makeDeclBut[ bname_String, style_String] :=
     ]
 makeDeclBut[args___] := unexpected[ makeDeclBut, {args}]
 
-showEnvButton[ ] := Button[ translate["tcSessTabEnvTabButtonAllFormLabel"], displayEnv[]]
-showEnvButton[ args___] := unexpected[ showEnvButton, {args}]
+showEnv[ ] := OpenerView[ {Style[ translate["tcSessTabEnvTabButtonAllFormLabel"], "Section"], displayEnv[]}, Dynamic[$tcAllFormulaeOpener]]
+showEnv[ args___] := unexpected[ showEnv, {args}]
 
 displayEnv[ ] :=
-	Module[{magOpt = Options[ ButtonNotebook[], Magnification], env},
+	If[ $tmaEnv === {},
+		emptyPane[ "", {350, 30}],
+		Pane[ displayLabeledFormulaListGrid[ $tmaEnv], {300, 100}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
+	]
+(*	Module[{magOpt = Options[ ButtonNotebook[], Magnification], env},
 		env = Map[ Cell[ BoxData[ ToBoxes[ Row[ displayLabeledFormula[ #], Spacer[5]]]], "DisplayFormula"]&, $tmaEnv];
 		CreateDocument[ Join[
 			{ Cell[ translate["Theorema Environment"], "Title"]},
@@ -1203,20 +1235,22 @@ displayEnv[ ] :=
 			StyleDefinitions -> FileNameJoin[ {"Theorema", "TheoremaDialog.nb"}],
 			WindowElements -> {"StatusArea", "MagnificationPopUp", "HorizontalScrollBar", "VerticalScrollBar"}]
 	]
+	*)
 displayEnv[ args___] := unexpected[ displayEnv, {args}]
    
 allEnvironments = {"DEF", "THM", "LMA", "PRP", "COR", "CNJ", "ALG", "EXM"};
 
 structButtons[] :=
-    Pane[ 
     Column[{
+    	Labeled[ Row[ {makeNbNewButton[], makeNbOpenButton[]}, Spacer[5]],
+    		translate[ "Notebooks"], {{Top, Left}}],
     	Labeled[ Grid[ Partition[ Map[ makeEnvButton, allEnvironments], 2]],
     		translate[ "Environments"], {{Top, Left}}],
-    	Labeled[ Row[ {makeFormButton[], showEnvButton[]}, Spacer[5]],
+    	Labeled[ Column[ {makeFormButton[], Dynamic[ showEnv[]]}, Left, Spacer[2]],
     		translate[ "Formulae"], {{Top, Left}}],
     	Labeled[ makeDeclButtons[],
     		translate[ "Declarations"], {{Top, Left}}]
-    }]]
+    }]
 structButtons[args___] :=
     unexpected[envButtons, {args}]
 
@@ -1224,23 +1258,19 @@ structButtons[args___] :=
 (* Archives Tab *)
 
 archButtons[] :=
-    Module[ {},
-        Pane[
-        	Column[{
-        		OpenerView[{Style[translate["tcLangTabArchTabSectionCreate"],"Section"], Column[{
-        		makeArchCreateButton[],
-        		makeArchNewButton[],
-        		makeArchInfoButton[],
-        		makeArchCloseButton[]}]}, True],
-        		OpenerView[{Style[translate["tcLangTabArchTabSectionLoad"],"Section"], Column[{
-        		makeArchLoadButton[]}]}, True]}
-        	]
-        ]
+    Column[{
+        OpenerView[{Style[translate["tcLangTabArchTabSectionCreate"],"Section"], Column[{
+            makeArchCreateButton[],
+            makeArchNewButton[],
+            makeArchInfoButton[],
+            makeArchCloseButton[]}]}, True],
+        OpenerView[{Style[translate["tcLangTabArchTabSectionLoad"],"Section"], Column[{
+            makeArchLoadButton[]}]}, True]}
     ]
 archButtons[args___] := unexpected[archButtons, {args}]
 
 makeArchCreateButton[] :=
-	Button[ translate["tcLangTabArchTabButtonNewLabel"], insertNewArchive[ NotebookCreate[ StyleDefinitions -> FileNameJoin[{ "Theorema", "TheoremaNotebook.nb"}]]], Alignment -> {Left, Top}, Method -> "Queued"]
+	Button[ translate["tcLangTabArchTabButtonNewLabel"], insertNewArchive[ NotebookCreate[ StyleDefinitions -> makeColoredStylesheet[ "Notebook"]]], Alignment -> {Left, Top}, Method -> "Queued"]
 makeArchNewButton[args___] := unexpected[makeArchNewButton, {args}]
 
 makeArchNewButton[] :=
@@ -1323,50 +1353,65 @@ loadArchiveInPlace[ args___] := unexpected[ loadArchiveInPlace, {args}]
 (* ::Section:: *)
 (* Preferences Tab *)
 
-setAppearance[ ] :=
-    Pane[ Column[{
-    	Labeled[ Row[{PopupMenu[ Dynamic[ $TheoremaColorScheme], $availableColorSchemes, BaselinePosition -> Center], 
+setPreferences[ ] :=
+	Column[ {
+	Column[ {
+		Labeled[ PopupMenu[Dynamic[$Language], availableLanguages[]], translate["tcPrefLanguage"], {{Top, Left}}],
+		Labeled[ Row[ {Dynamic[ Tooltip[ FileNameJoin[ Take[ FileNameSplit[$TheoremaArchiveDirectory], -2]], $TheoremaArchiveDirectory]],
+				FileNameSetter[Dynamic[$TheoremaArchiveDirectory], "Directory"]}, Spacer[10]], translate["tcPrefArchiveDir"], {{Top, Left}}],
+		Labeled[ Row[{PopupMenu[ Dynamic[ $TheoremaColorScheme], $availableColorSchemes, BaselinePosition -> Center], 
     				  Dynamic[ TMAcolorScheme[ $TheoremaColorScheme, ImageSize -> {28, 28}, BaselinePosition -> Center]],
     				  Button[ translate[ "apply color scheme"], applyColorScheme[ ], BaselinePosition -> Center]}, Spacer[2]], 
-    		translate[ "tcPrefAppearColorSchemes"], {{ Top, Left}}],
-    	Labeled[ Row[{Checkbox[ Dynamic[ $suppressWelcomeScreen]], translate["tcPrefAppearSuppressWelcome"]}, Spacer[2]], 
-    		translate[ "tcPrefAppearWelcome"], {{ Top, Left}}]
-    	}], {350, 450}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic
-    ]
-setAppearance[ args___] := unexpected[ setAppearance, {args}]
+    		translate[ "tcPrefAppearColorSchemes"], {{Top, Left}}],
+		Labeled[ Row[{Checkbox[ Dynamic[ $suppressWelcomeScreen]], translate["tcPrefAppearSuppressWelcome"]}, Spacer[2]], 
+    		translate[ "tcPrefAppearWelcome"], {{Top, Left}}]
+    	}],
+    	Spacer[{1,300}],
+		savePreferencesButton[]
+	}
+	]
+setPreferences[ args___] := unexpected[ setPreferences, {args}]
 
 applyColorScheme[ ] :=
 	Module[{},
 		closeTheoremaCommander[];
 		openTheoremaCommander[];
+		Map[ SetOptions[ #, StyleDefinitions -> makeColoredStylesheet[ "Notebook"]]&,
+			Select[ Notebooks[], isTheoremaNotebook]];
 	]
 
 applyColorScheme[ args___] := unexpected[ applyColorScheme, {args}]
 
-makeGUIStylesheet[ color_] :=
+makeColoredStylesheet[ type_String, color_:$TheoremaColorScheme] :=
 	Module[{tmp, styles},
 		tmp = NotebookOpen[ 
-			FileNameJoin[ {$TheoremaDirectory, "Theorema", "FrontEnd", "StyleSheets", "Theorema", "GUI-Template.nb"}],
+			FileNameJoin[ {$TheoremaDirectory, "Theorema", "Interface", "Templates", type <> "-Template.nb"}],
 			Visible -> False];
 		styles = NotebookGet[ tmp];
 		NotebookClose[ tmp];
 		styles /. Table[Apply[CMYKColor, IntegerDigits[i, 2, 4]] -> TMAcolor[i, color], {i, 0, 15}]
 	]
-makeGUIStylesheet[ args___] := unexpected[ makeGUIStylesheet, {args}]
+makeColoredStylesheet[ args___] := unexpected[ makeColoredStylesheet, {args}]
+
+isTheoremaNotebook[ nb_NotebookObject] := Not[ FreeQ[ Options[ nb, CounterAssignments], "TheoremaFormulaCounter" -> _Integer]]
+isTheoremaNotebook[ args___] := unexpected[ isTheoremaNotebook, {args}]
+
 
 savePreferencesButton[ ] :=
     Module[ {prefsFile = FileNameJoin[{$UserBaseDirectory, "Applications", "Theorema", "Kernel", "TheoremaPreferences.m"}]},
         $prefsSaveStatus = If[FileExistsQ[ prefsFile],
         	DateString[ FileDate[ prefsFile]],
         	"\[LongDash]"];
-        {Dynamic[ Refresh[ Row[{
+        Column[{
+        	Dynamic[ Refresh[ Row[{
         	translate["preferences last saved: "],
             $prefsSaveStatus <> If[ {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen} === $savedValues,
                                         " \[Checkmark]",
                                         ""
                                     ]}], TrackedSymbols :> {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen, $prefsSaveStatus}]],
          Button[ translate["save current settings"], savePreferences[]]
-        }
+        }, Center, ItemSize -> {28.2,1}, Dividers -> {{False}, 1 -> True}
+        ]
     ]
 savePreferencesButton[ args___] := unexpected[ savePreferencesButton, {args}]
     
@@ -1586,21 +1631,21 @@ makeButtonCategory[ {category_String, buttons_List}] :=
 			Grid[ Partition[ Map[ makeLangButton, buttons], 2], Alignment -> {Left, Top}]}]
 makeButtonCategory[ args___] := unexpected[ makeButtonCategory, {args}]
 
-langButtons[] := Pane[ 
+langButtons[] := 
 	Column[{
 		Button[ translate[ "Virtual Keyboard"], virtualKeyboard[]],
 		Column[ Map[ makeButtonCategory, allFormulae]],
 		Row[{translate["tcSessTabMathTabBS"], 
 			Row[{RadioButton[Dynamic[$buttonNat], False], translate["tcSessTabMathTabBSform"]}, Spacer[2]], 
 			Row[{RadioButton[Dynamic[$buttonNat], True], translate["tcSessTabMathTabBSnat"]}, Spacer[2]]}, Spacer[10]]
-	}, Dividers -> Center, Spacings -> 2]]
+	}, Dividers -> Center, Spacings -> 2]
 langButtons[args___] :=
     unexpected[langButtons, {args}]
     
-compSetup[] := Pane[ 
+compSetup[] := 
 	Column[{
 		makeCompButton[]
-	}, Dividers -> Center, Spacings -> 4]]
+	}, Dividers -> Center, Spacings -> 4]
 compSetup[args___] :=
     unexpected[compSetup, {args}]
 

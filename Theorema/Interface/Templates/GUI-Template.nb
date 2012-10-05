@@ -10,15 +10,17 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       145,          7]
-NotebookDataLength[     12722,        476]
-NotebookOptionsPosition[      8568,        362]
-NotebookOutlinePosition[      9060,        383]
-CellTagsIndexPosition[      9017,        380]
+NotebookDataLength[     13408,        513]
+NotebookOptionsPosition[      8702,        388]
+NotebookOutlinePosition[      9194,        409]
+CellTagsIndexPosition[      9151,        406]
 MenuPosition->0
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
 Notebook[{
+Cell[StyleData[StyleDefinitions -> "Palette.nb"]],
+
 Cell["\<\
 Modify the definitions below to change the default appearance of all cells in \
 a given style. 
@@ -26,14 +28,34 @@ Make modifications to any definition using commands in the Format menu.\
 \>", "Text"],
 
 Cell[StyleData["Notebook"],
- Editable->True],
+ Editable->True,
+ Deployed->False,
+ Background->CMYKColor[0, 0, 0, 0]],
+
+Cell[CellGroupData[{
+
+Cell["Style Environment Names", "Section"],
+
+Cell[StyleData[All, "Working"]],
+
+Cell[StyleData[All, "Presentation"]]
+}, Open  ]],
 
 Cell[CellGroupData[{
 
 Cell["Styles for Title and Section Cells", "Section"],
 
+Cell[CellGroupData[{
+
 Cell[StyleData["NotebookName"],
- FontColor->RGBColor[0, 0, 0]],
+ FontFamily->"Arial",
+ FontSize->12,
+ FontWeight->"Bold",
+ FontColor->CMYKColor[0, 1, 1, 1]],
+
+Cell[StyleData["NotebookName", "Presentation"],
+ FontSize->16]
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -120,7 +142,7 @@ Cell[StyleData["Subsubsection", "Presentation"],
 
 Cell[CellGroupData[{
 
-Cell[StyleData["OpenEnvironment"],
+Cell[StyleData["EnvironmentHeader"],
  CellDingbat->None,
  ShowGroupOpener->True,
  CellMargins->{{24, Inherited}, {Inherited, Inherited}},
@@ -132,7 +154,7 @@ Cell[StyleData["OpenEnvironment"],
  FontSlant->"Plain",
  FontVariations->{"CapsType"->"SmallCaps"}],
 
-Cell[StyleData["OpenEnvironment", "Presentation"],
+Cell[StyleData["EnvironmentHeader", "Presentation"],
  FontFamily->"Times New Roman",
  FontSize->14,
  FontSlant->"Plain",
@@ -148,7 +170,13 @@ Cell["Styles for formulae", "Section"],
 Cell[CellGroupData[{
 
 Cell[StyleData["FormalTextInputFormula"],
- FontColor->RGBColor[0, 0.2784313725490196, 0.5254901960784314]],
+ FontFamily->"Courier",
+ FontSize->10,
+ FontWeight->"Plain",
+ FontSlant->"Italic",
+ FontVariations->{"StrikeThrough"->False,
+ "Underline"->False},
+ FontColor->CMYKColor[1, 1, 0, 0]],
 
 Cell[StyleData["FormalTextInputFormula", "Presentation"],
  FontFamily->"Courier",
@@ -168,7 +196,7 @@ Cell[StyleData["FormalTextInputFormulaUneval"],
  FontSlant->"Italic",
  FontVariations->{"StrikeThrough"->False,
  "Underline"->False},
- FontColor->GrayLevel[0.5]],
+ FontColor->CMYKColor[0, 1, 0, 1]],
 
 Cell[StyleData["FormalTextInputFormulaUneval", "Presentation"],
  FontFamily->"Courier",
@@ -209,7 +237,7 @@ Cell[CellGroupData[{
 
 Cell[StyleData["FormulaLabel"],
  FontSize->12,
- Background->RGBColor[0.94, 0.91, 0.88]],
+ Background->CMYKColor[0, 1, 0, 0]],
 
 Cell[StyleData["FormulaLabel", "Presentation"],
  FontSize->24]
@@ -221,24 +249,7 @@ Cell[CellGroupData[{
 Cell["Button styles", "Section"],
 
 Cell[StyleData["GenericButton"],
- FontFamily->"Verdana",
- FontSize->10,
- FontWeight->"Plain",
- FontSlant->"Plain",
- FontVariations->{"StrikeThrough"->False,
- "Underline"->False}],
-
-Cell[StyleData["EnvButton", StyleDefinitions -> StyleData["Button"]],
- FontFamily->"Verdana",
- FontSize->10,
- FontWeight->"Plain",
- FontSlant->"Plain",
- FontVariations->{"StrikeThrough"->False,
- "Underline"->False},
- Appearance -> "FramedPalette"],
-
-Cell[StyleData["LangButton", StyleDefinitions -> StyleData["Button"]],
- FontFamily->"Verdana",
+ FontFamily->"Helvetica",
  FontSize->10,
  FontWeight->"Plain",
  FontSlant->"Plain",
@@ -262,7 +273,7 @@ Cell[StyleData["Hyperlink", "Presentation"],
 Cell[CellGroupData[{
 
 Cell[StyleData["HyperlinkActive"],
- Background->RGBColor[1, 1, 1]],
+ Background->CMYKColor[0, 1, 0, 1]],
 
 Cell[StyleData["HyperlinkActive", "Presentation"],
  FontSize->14]
@@ -270,7 +281,7 @@ Cell[StyleData["HyperlinkActive", "Presentation"],
 
 Cell[CellGroupData[{
 
-Cell[StyleData["SelectionPlaceholder", StyleDefinitions -> StyleData["Label"]],
+Cell[StyleData["SelectionPlaceholder"],
  ShowSyntaxStyles->False,
  Placeholder->True,
  ShowStringCharacters->False,
@@ -278,15 +289,13 @@ Cell[StyleData["SelectionPlaceholder", StyleDefinitions -> StyleData["Label"]],
  FontSize->9,
  FontWeight->"Plain",
  FontSlant->"Italic",
- FontColor->RGBColor[
-  0.3058823529411765, 0.3058823529411765, 0.3058823529411765],
- Background->RGBColor[
-  0.9607843137254902, 0.8705882352941177, 0.7019607843137254],
+ FontColor->CMYKColor[1, 0, 1, 1],
+ Background->CMYKColor[1, 0, 0, 1],
  FrameBoxOptions->{BaselinePosition->Baseline,
- FrameMargins->2,
+ FrameMargins->1,
  FrameStyle->{
    Directive[
-    GrayLevel[0.79185], 
+    CMYKColor[1, 0, 0, 0], 
     Dashing[0.1]]}},
  TagBoxOptions->{Editable->False,
  Selectable->False,
@@ -298,7 +307,7 @@ Cell[StyleData["SelectionPlaceholder", "Presentation"],
 
 Cell[CellGroupData[{
 
-Cell[StyleData["Placeholder", StyleDefinitions -> StyleData["Label"]],
+Cell[StyleData["Placeholder"],
  ShowSyntaxStyles->False,
  Placeholder->True,
  ShowStringCharacters->False,
@@ -306,15 +315,14 @@ Cell[StyleData["Placeholder", StyleDefinitions -> StyleData["Label"]],
  FontSize->9,
  FontWeight->"Plain",
  FontSlant->"Italic",
- FontColor->RGBColor[
-  0.49321736476691846`, 0.49321736476691846`, 0.49321736476691846`],
- Background->RGBColor[1., 0.9724879835202563, 0.7976806286717022],
+ FontColor->CMYKColor[1, 0, 1, 1],
+ Background->CMYKColor[0, 1, 0, 1],
  FrameBoxOptions->{BaselinePosition->Baseline,
- FrameMargins->2,
+ FrameMargins->1,
  FrameStyle->{
    Directive[
-    GrayLevel[0.79185], 
-    Dashing[{0, Small}]]}},
+    CMYKColor[1, 0, 0, 0], 
+    Dashing[0.1]]}},
  TagBoxOptions->{Editable->False,
  Selectable->False,
  StripWrapperBoxes->False}],
@@ -334,7 +342,8 @@ Cell[StyleData["Pane"],
  "Outline"->False,
  "Shadow"->False,
  "StrikeThrough"->False,
- "Underline"->False}],
+ "Underline"->False},
+ Background->CMYKColor[0, 0, 0, 0]],
 
 Cell[StyleData["TabView"],
  ImageMargins->10,
@@ -354,10 +363,27 @@ Cell[StyleData["TabLabel1"],
 Cell[StyleData["TabLabel2"],
  FontWeight->"Bold"],
 
-Cell[StyleData["ItemLabel", StyleDefinitions -> StyleData["CellLabel"]],
+Cell[StyleData["TabLabel1Over"],
+ FontWeight->"Bold",
+ FontColor->CMYKColor[0, 0, 0, 0]],
+
+Cell[StyleData["TabLabel2Over"],
+ FontWeight->"Bold",
+ FontColor->CMYKColor[0, 0, 0, 0]],
+
+Cell[StyleData["LabeledLabel"],
+ FontFamily->"Helvetica",
  FontSize->10,
  FontVariations->{"CapsType"->"SmallCaps"},
- FontColor->RGBColor[0., 0.39215686274509803`, 0.30980392156862746`]]
+ FontColor->CMYKColor[1, 0, 1, 1]],
+
+Cell[StyleData["PopupMenuLabel"],
+ FontFamily->"Helvetica",
+ FontSize->10],
+
+Cell[StyleData["FileNameSetters"],
+ FontFamily->"Helvetica",
+ FontSize->10]
 }, Open  ]]
 },
 FileChangeProtection->None,
@@ -365,7 +391,7 @@ AutoGeneratedPackage->None,
 Editable->True,
 Saveable->True,
 WindowSize->{890, 805},
-WindowMargins->{{267, Automatic}, {84, Automatic}},
+WindowMargins->{{Automatic, 130}, {96, Automatic}},
 TrackCellChangeTimes->False,
 MenuSortingValue->None,
 FrontEndVersion->"8.0 for Linux x86 (32-bit) (February 23, 2011)",
@@ -382,101 +408,112 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[561, 21, 191, 4, 65, "Text"],
-Cell[755, 27, 44, 1, 40, 27, 0, "StyleData", "Notebook", "All"],
+Cell[561, 21, 49, 0, 40, 49, 0, "StyleData", "StyleDefinitions", ""],
+Cell[613, 23, 191, 4, 65, "Text"],
+Cell[807, 29, 98, 3, 48, 27, 0, "StyleData", "Notebook", "All"],
 Cell[CellGroupData[{
-Cell[824, 32, 53, 0, 54, "Section"],
-Cell[880, 34, 62, 1, 40, 31, 0, "StyleData", "NotebookName", "All"],
-Cell[CellGroupData[{
-Cell[967, 39, 219, 7, 60, 24, 0, "StyleData", "Title", "All"],
-Cell[1189, 48, 76, 2, 44, 40, 0, "StyleData", "Title", "Presentation"]
+Cell[930, 36, 42, 0, 54, "Section"],
+Cell[975, 38, 31, 0, 40, 31, 0, "StyleData", "All", "Working"],
+Cell[1009, 40, 36, 0, 40, 36, 0, "StyleData", "All", "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[1302, 55, 269, 10, 38, 26, 0, "StyleData", "Section", "All",
+Cell[1082, 45, 53, 0, 54, "Section"],
+Cell[CellGroupData[{
+Cell[1160, 49, 124, 4, 39, 31, 0, "StyleData", "NotebookName", "All"],
+Cell[1287, 55, 62, 1, 44, 47, 0, "StyleData", "NotebookName", "Presentation"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[1386, 61, 219, 7, 60, 24, 0, "StyleData", "Title", "All"],
+Cell[1608, 70, 76, 2, 96, 40, 0, "StyleData", "Title", "Presentation"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[1721, 77, 269, 10, 77, 26, 0, "StyleData", "Section", "All",
  MenuSortingValue->1250,
  MenuCommandKey->"4"],
-Cell[1574, 67, 78, 2, 44, 42, 0, "StyleData", "Section", "Presentation"]
+Cell[1993, 89, 78, 2, 109, 42, 0, "StyleData", "Section", "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[1689, 74, 315, 11, 50, 29, 0, "StyleData", "Subsection", "All",
+Cell[2108, 96, 315, 11, 50, 29, 0, "StyleData", "Subsection", "All",
  MenuSortingValue->1300,
  MenuCommandKey->"5"],
-Cell[2007, 87, 198, 6, 43, 45, 0, "StyleData", "Subsection", "Presentation"]
+Cell[2426, 109, 198, 6, 65, 45, 0, "StyleData", "Subsection", "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[2242, 98, 318, 11, 42, 32, 0, "StyleData", "Subsubsection", "All",
+Cell[2661, 120, 318, 11, 42, 32, 0, "StyleData", "Subsubsection", "All",
  MenuSortingValue->1350,
  MenuCommandKey->"6"],
-Cell[2563, 111, 201, 6, 43, 48, 0, "StyleData", "Subsubsection", \
+Cell[2982, 133, 201, 6, 53, 48, 0, "StyleData", "Subsubsection", \
 "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[2801, 122, 340, 10, 36, 34, 0, "StyleData", "OpenEnvironment", "All",
+Cell[3220, 144, 342, 10, 36, 36, 0, "StyleData", "EnvironmentHeader", "All",
  MenuSortingValue->1350,
  MenuCommandKey->"6"],
-Cell[3144, 134, 182, 5, 41, 50, 0, "StyleData", "OpenEnvironment", \
+Cell[3565, 156, 184, 5, 41, 52, 0, "StyleData", "EnvironmentHeader", \
 "Presentation"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[3375, 145, 38, 0, 54, "Section"],
+Cell[3798, 167, 38, 0, 54, "Section"],
 Cell[CellGroupData[{
-Cell[3438, 149, 106, 1, 40, 41, 0, "StyleData", "FormalTextInputFormula", \
+Cell[3861, 171, 223, 7, 36, 41, 0, "StyleData", "FormalTextInputFormula", \
 "All"],
-Cell[3547, 152, 204, 6, 41, 57, 0, "StyleData", "FormalTextInputFormula", \
+Cell[4087, 180, 204, 6, 41, 57, 0, "StyleData", "FormalTextInputFormula", \
 "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[3788, 163, 222, 7, 36, 47, 0, "StyleData", \
+Cell[4328, 191, 229, 7, 36, 47, 0, "StyleData", \
 "FormalTextInputFormulaUneval", "All"],
-Cell[4013, 172, 210, 6, 41, 63, 0, "StyleData", \
+Cell[4560, 200, 210, 6, 41, 63, 0, "StyleData", \
 "FormalTextInputFormulaUneval", "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[4260, 183, 535, 16, 40, 33, 0, "StyleData", "DisplayFormula", "All"],
-Cell[4798, 201, 152, 3, 63, 49, 0, "StyleData", "DisplayFormula", \
+Cell[4807, 211, 535, 16, 40, 33, 0, "StyleData", "DisplayFormula", "All"],
+Cell[5345, 229, 152, 3, 63, 49, 0, "StyleData", "DisplayFormula", \
 "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[4987, 209, 87, 2, 56, 31, 0, "StyleData", "FormulaLabel", "All"],
-Cell[5077, 213, 62, 1, 53, 47, 0, "StyleData", "FormulaLabel", \
+Cell[5534, 237, 82, 2, 56, 31, 0, "StyleData", "FormulaLabel", "All"],
+Cell[5619, 241, 62, 1, 53, 47, 0, "StyleData", "FormulaLabel", \
 "Presentation"]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[5188, 220, 32, 0, 54, "Section"],
-Cell[5223, 222, 178, 6, 37, 32, 0, "StyleData", "GenericButton", "All"],
-Cell[5404, 230, 247, 7, 37, 69, 0, "StyleData", "EnvButton", "All"],
-Cell[5654, 239, 216, 6, 37, 70, 0, "StyleData", "LangButton", "All"]
+Cell[5730, 248, 32, 0, 54, "Section"],
+Cell[5765, 250, 180, 6, 38, 32, 0, "StyleData", "GenericButton", "All"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[5907, 250, 31, 0, 54, "Section"],
+Cell[5982, 261, 31, 0, 54, "Section"],
 Cell[CellGroupData[{
-Cell[5963, 254, 43, 1, 36, 28, 0, "StyleData", "Hyperlink", "All"],
-Cell[6009, 257, 59, 1, 41, 44, 0, "StyleData", "Hyperlink", "Presentation"]
+Cell[6038, 265, 43, 1, 36, 28, 0, "StyleData", "Hyperlink", "All"],
+Cell[6084, 268, 59, 1, 41, 44, 0, "StyleData", "Hyperlink", "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[6105, 263, 66, 1, 56, 34, 0, "StyleData", "HyperlinkActive", "All"],
-Cell[6174, 266, 65, 1, 41, 50, 0, "StyleData", "HyperlinkActive", \
+Cell[6180, 274, 70, 1, 56, 34, 0, "StyleData", "HyperlinkActive", "All"],
+Cell[6253, 277, 65, 1, 41, 50, 0, "StyleData", "HyperlinkActive", \
 "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[6276, 272, 631, 20, 51, 79, 0, "StyleData", "SelectionPlaceholder", "All",
+Cell[6355, 283, 494, 18, 51, 39, 0, "StyleData", "SelectionPlaceholder", "All",
  StyleMenuListing->None],
-Cell[6910, 294, 70, 1, 45, 55, 0, "StyleData", "SelectionPlaceholder", \
+Cell[6852, 303, 70, 1, 45, 55, 0, "StyleData", "SelectionPlaceholder", \
 "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[7017, 300, 616, 19, 51, 70, 0, "StyleData", "Placeholder", "All",
+Cell[6959, 309, 485, 18, 51, 30, 0, "StyleData", "Placeholder", "All",
  StyleMenuListing->None],
-Cell[7636, 321, 61, 1, 45, 46, 0, "StyleData", "Placeholder", "Presentation"]
+Cell[7447, 329, 61, 1, 45, 46, 0, "StyleData", "Placeholder", "Presentation"]
 }, Open  ]],
-Cell[7712, 325, 274, 11, 41, 23, 0, "StyleData", "Pane", "All"],
-Cell[7989, 338, 66, 2, 40, 26, 0, "StyleData", "TabView", "All"],
-Cell[8058, 342, 186, 6, 38, 31, 0, "StyleData", "TabViewLabel", "All"],
-Cell[8247, 350, 49, 1, 40, 28, 0, "StyleData", "TabLabel1", "All"],
-Cell[8299, 353, 49, 1, 40, 28, 0, "StyleData", "TabLabel2", "All"],
-Cell[8351, 356, 201, 3, 38, 72, 0, "StyleData", "ItemLabel", "All"]
+Cell[7523, 333, 310, 12, 57, 23, 0, "StyleData", "Pane", "All"],
+Cell[7836, 347, 66, 2, 40, 26, 0, "StyleData", "TabView", "All"],
+Cell[7905, 351, 186, 6, 38, 31, 0, "StyleData", "TabViewLabel", "All"],
+Cell[8094, 359, 49, 1, 40, 28, 0, "StyleData", "TabLabel1", "All"],
+Cell[8146, 362, 49, 1, 40, 28, 0, "StyleData", "TabLabel2", "All"],
+Cell[8198, 365, 88, 2, 40, 32, 0, "StyleData", "TabLabel1Over", "All"],
+Cell[8289, 369, 88, 2, 40, 32, 0, "StyleData", "TabLabel2Over", "All"],
+Cell[8380, 373, 151, 4, 38, 31, 0, "StyleData", "LabeledLabel", "All"],
+Cell[8534, 379, 74, 2, 38, 33, 0, "StyleData", "PopupMenuLabel", "All"],
+Cell[8611, 383, 75, 2, 38, 34, 0, "StyleData", "FileNameSetters", "All"]
 }, Open  ]]
 }
 ]

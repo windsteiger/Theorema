@@ -539,7 +539,7 @@ makeInitialProofNotebook[ p_PRFOBJ$] :=
         					StandardForm], ImageSizeCache -> {50., {23., 27.}}]],
         				"Output", TextAlignment -> Center]}];
         nb = NotebookPut[
-            	Notebook[ cells, Visible -> False, StyleDefinitions -> FileNameJoin[{"Theorema", "Proof.nb"}]]];
+            	Notebook[ cells, Visible -> False, StyleDefinitions -> makeColoredStylesheet[ "Proof"]]];
         nb
     ]
 makeInitialProofNotebook[ args___] := unexpected[ makeInitialProofNotebook, {args}]
@@ -558,7 +558,7 @@ displayProof[ p_PRFOBJ$] :=
 	Module[{ cells},
 		cells = proofObjectToCell[ p];
 		NotebookClose[ $TMAproofNotebook];
-		$TMAproofNotebook = NotebookPut[ Notebook[ cells, StyleDefinitions -> FileNameJoin[{"Theorema", "Proof.nb"}]]]
+		$TMAproofNotebook = NotebookPut[ Notebook[ cells, StyleDefinitions -> makeColoredStylesheet[ "Proof"]]]
 	]
 displayProof[ args___] := unexpected[ displayProof, {args}]
 
