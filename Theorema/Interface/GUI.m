@@ -143,8 +143,8 @@ openTheoremaCommander[ ] /; $Notebooks :=
         				Dynamic[Refresh[displayKBBrowser["prove"], TrackedSymbols :> {$kbStruct}]],
         				displayBuiltinBrowser["prove"],
         				Dynamic[ Refresh[ selectProver[], TrackedSymbols :> {$selectedRuleSet, $selectedStrategy}]],
-        				Dynamic[ Refresh[ submitProveTask[ $tcProveTab], TrackedSymbols :> {$tcProveTab, $selectedProofGoal, $selectedProofKB, $selectedProver}]],
-        				Dynamic[ Refresh[ proofNavigation[ $TMAproofTree], TrackedSymbols :> {$TMAproofTree, ruleTextActive, $proofTreeScale}]]},
+        				Dynamic[ Refresh[ submitProveTask[ ], TrackedSymbols :> {$selectedProofGoal, $selectedProofKB, $selectedProver}]],
+        				Dynamic[ Refresh[ proofNavigation[ $TMAproofTree], TrackedSymbols :> {$TMAproofTree, $TMAproofNotebook, ruleTextActive, $proofTreeScale}]]},
         			(* compute *){Dynamic[Refresh[ compSetup[], TrackedSymbols :> {$buttonNat}]],
         				Dynamic[Refresh[displayKBBrowser["compute"], TrackedSymbols :> {$kbStruct}]],
         				displayBuiltinBrowser["compute"]},
@@ -390,7 +390,7 @@ displaySelectedGoal[ ] :=
             With[ {selGoal = goal[[1]]},
             	Column[ {
             		Row[ displayLabeledFormula[ selGoal], Spacer[5]],
-            		Button[ translate[ "OKnext"], $selectedProofGoal = selGoal; $tcProveTab++]}]
+            		Button[ translate[ "OKnext"], $selectedProofGoal = selGoal; $tcActionView++]}]
             ]
         ]
     ]
@@ -420,7 +420,7 @@ displaySelectedKB[ ] :=
     	$selectedProofKB = Select[ $tmaEnv, kbSelectProve[#[[1]]]&];
         If[ $selectedProofKB === {},
             translate["noKB"],
-            Grid[ displayLabeledFormulaListGrid[ $selectedProofKB]]
+            displayLabeledFormulaListGrid[ $selectedProofKB]
         ]
     ]
 displaySelectedKB[ args___] := unexpected[ displaySelectedKB, {args}]
@@ -942,7 +942,7 @@ selectProver[ ] :=
     	}]
 selectProver[ args___] := unexpected[ selectRuleSet, {args}]
 
-submitProveTask[ dummy_] := 
+submitProveTask[ ] := 
 	Module[ {},
 		Column[{
 			Labeled[ displaySelectedGoal[ $selectedProofGoal], translate["selGoal"], {{ Top, Left}}],
@@ -959,7 +959,7 @@ submitProveTask[ args___] := unexpected[ submitProveTask, {args}]
 
 execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, strategy_, searchDepth_] :=
 	Module[{nb = $proofInitNotebook, proof},
-		$tcProveTab++;
+		$tcActionView++;
 		If[ NotebookFind[ nb, makeProofIDTag[ goal], All, CellTags] === $Failed,
 			NotebookFind[ nb, goal[[1,1]], All, CellTags];
 			NotebookFind[ nb, "CloseEnvironment", Next, CellStyle];
@@ -978,13 +978,13 @@ proofNavigation[ po_] :=
     Module[ {proofTree = showProofNavigation[ po, $proofTreeScale], geom},
     	geom = Replace[ ImageSize, Options[ proofTree, ImageSize]];
     	(* Putting the frame around the inner Pane is a work-around, otherwise the pane is not positioned correctly when the proof tree is higher than 420 *)
-        Pane[ Column[{
+        Column[{
         	ButtonBar[ {"+" :> ($proofTreeScale *= 2), "\[FivePointedStar]" :> ($proofTreeScale = 1), "\[DottedSquare]" :> ($proofTreeScale = Fit), "-" :> ($proofTreeScale /= 2)},
         		FrameMargins -> {{15, 15}, {2, 0}}],
         	Framed[ Pane[ proofTree,
-        		{350, 420}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic, ScrollPosition -> {geom[[1]]/2-175, 0}], FrameStyle -> None],
+        		{360, 510}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic, ScrollPosition -> {geom[[1]]/2-175, 0}], FrameStyle -> None],
         	Button[ translate["abort"], Theorema`Provers`Common`Private`$proofAborted = True]
-        	}, Center], {360, 500}]	
+        	}, Center]	
     ]
 proofNavigation[ args___] := unexpected[ proofNavigation, {args}]
 
@@ -1224,18 +1224,7 @@ displayEnv[ ] :=
 		emptyPane[ "", {350, 30}],
 		Pane[ displayLabeledFormulaListGrid[ $tmaEnv], {300, 100}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
 	]
-(*	Module[{magOpt = Options[ ButtonNotebook[], Magnification], env},
-		env = Map[ Cell[ BoxData[ ToBoxes[ Row[ displayLabeledFormula[ #], Spacer[5]]]], "DisplayFormula"]&, $tmaEnv];
-		CreateDocument[ Join[
-			{ Cell[ translate["Theorema Environment"], "Title"]},
-			env,
-			{ Cell[ BoxData[ ButtonBox[ translate[ "OK"], ButtonFunction :> NotebookClose[ButtonNotebook[]],
-				Appearance -> "CancelButton", Evaluator -> Automatic, Method -> "Preemptive"]], "ButtonBar"]}],
-			First[ magOpt], WindowTitle -> translate["Theorema Environment"],
-			StyleDefinitions -> FileNameJoin[ {"Theorema", "TheoremaDialog.nb"}],
-			WindowElements -> {"StatusArea", "MagnificationPopUp", "HorizontalScrollBar", "VerticalScrollBar"}]
-	]
-	*)
+
 displayEnv[ args___] := unexpected[ displayEnv, {args}]
    
 allEnvironments = {"DEF", "THM", "LMA", "PRP", "COR", "CNJ", "ALG", "EXM"};

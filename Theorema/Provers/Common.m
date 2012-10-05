@@ -45,7 +45,6 @@ callProver[ ruleSetup:{_Hold, _List, _List}, strategy_, goal_FML$, kb_List, sear
 		$TMAcurrentDepth = 2;
 		$TMAproofTree = makeInitialProofTree[ ];
 		$TMAproofObject = makeInitialProofObject[ goal, kb, ruleSetup, strategy];
-		$TMAproofNotebook = makeInitialProofNotebook[ $TMAproofObject];
 		initFormulaLabel[];
 		proofSearch[ searchDepth];
   		$proofInProgressMarker = {};
@@ -432,11 +431,11 @@ showProofNavigation[ {Depth -> _, node_List}, scale_] := Graphics[ proofStepNode
 showProofNavigation[ {p__Rule}, scale_] :=
     Module[ {root = Cases[ {p}, {"OriginalPS", __}, {2}], geometry, font},
     	If[ scale === Fit,
-    		geometry = {350,420},
+    		geometry = {350,500},
     		(* else *)
-    		geometry = {Max[ Count[ {p}, _ -> {__, TERMINALNODE$|PRFSIT$, _}]*20, 350], Max[ $TMAcurrentDepth*15, 420]}*scale
+    		geometry = {Max[ Count[ {p}, _ -> {__, TERMINALNODE$|PRFSIT$, _}]*20, 350], Max[ $TMAcurrentDepth*15, 500]}*scale
     	];
-    	font = 18-Ceiling[ Apply[ Times, geometry]/(350*420)];
+    	font = 18-Ceiling[ Apply[ Times, geometry]/(350*500)];
         If[ root === {},
             translate[ "noRoot"],
             TreePlot[ {p}, Automatic, First[ root], VertexRenderingFunction -> (proofStepNode[ #1, #2, font]&),
@@ -466,7 +465,7 @@ proofStepNode[ pos_List, node:{ id_String, status_, type_, name_}, font_] :=
          				PRFOBJ$, proofStatusIndicator[ status],
        				_, proofNodeIndicator[ status, type, name]], 
 				{CurrentValue[ $TMAproofNotebook, "NotebookFileName"], id},
-				BaseStyle -> {FontSize -> font}, Active -> ruleTextActive[ name]], pos]]}
+				BaseStyle -> {FontSize -> font}, Active -> ValueQ[ $TMAproofNotebook] && ruleTextActive[ name]], pos]]}
 		}
 	]
 proofStepNode[ args___] := unexpected[ proofStepNode, {args}]
@@ -524,28 +523,6 @@ makeInitialProofObject[ args___] := unexpected[ makeInitialProofObject, {args}]
 
 
 (* ::Subsubsection:: *)
-(* makeInitialProofNotebook *)
-
-makeInitialProofNotebook[ p_PRFOBJ$] :=
-    Module[ { cells, t, nb},
-        cells = proofObjectToCell[ p];
-        $proofInProgressMarker = With[ {v1 = RandomReal[{1,5}], v2 = RandomReal[{1,5}]}, 
-        	{Cell[BoxData[
-        				DynamicBox[ ToBoxes[ Graphics[{Circle[{0, 0}, 1],
-        					Table[Text[ToString[t], 0.8*{Cos[Pi/2 - (Pi/6)*t], Sin[Pi/2 - (Pi/6)*t]}, BaseStyle -> {FontSize -> 5}], {t, 1, 12}],
-        					{Hue[ Clock[], 1, Clock[]], Opacity[0.5], Disk[{0, 0}, 1, {Pi/2 - 2/v1*Pi*Clock[v1], Pi/4 - 2/v1*Pi*Clock[v1]}]},
-        					{Hue[ Clock[], 1, Clock[]], Opacity[0.5], Disk[{0, 0}, 1, {Pi/2 + 2/v2*Pi*Clock[v2], Pi/4 + 2/v2*Pi*Clock[v2]}]},
-        					{White, Disk[{0, 0}, 0.7]}}, ImageSize -> {50, 50}], 
-        					StandardForm], ImageSizeCache -> {50., {23., 27.}}]],
-        				"Output", TextAlignment -> Center]}];
-        nb = NotebookPut[
-            	Notebook[ cells, Visible -> False, StyleDefinitions -> makeColoredStylesheet[ "Proof"]]];
-        nb
-    ]
-makeInitialProofNotebook[ args___] := unexpected[ makeInitialProofNotebook, {args}]
-
-
-(* ::Subsubsection:: *)
 (* makeInitialProofTree *)
 
 makeInitialProofTree[ ] := {{"OriginalPS", pending, PRFOBJ$, None} -> {"InitialPS", pending, PRFSIT$, None}}
@@ -555,10 +532,14 @@ makeInitialProofTree[ args___] := unexpected[ makeInitialProofTree, {args}]
 (* displayProof *)
 
 displayProof[ p_PRFOBJ$] :=
-	Module[{ cells},
+	Module[{ cells, tree = poToTree[ p]},
 		cells = proofObjectToCell[ p];
-		NotebookClose[ $TMAproofNotebook];
-		$TMAproofNotebook = NotebookPut[ Notebook[ cells, StyleDefinitions -> makeColoredStylesheet[ "Proof"]]]
+		$TMAproofNotebook = NotebookPut[ Notebook[ cells, StyleDefinitions -> makeColoredStylesheet[ "Proof"]]];
+		$TMAproofTree = tree;
+		With[ {nb = $TMAproofNotebook, tr = tree},
+			SetOptions[ $TMAproofNotebook, NotebookEventActions -> {"MouseClicked" :> ($TMAproofNotebook = nb; $TMAproofTree = tr;),
+				"WindowClose" :> ($TMAproofTree = {};)}]
+		]
 	]
 displayProof[ args___] := unexpected[ displayProof, {args}]
 
