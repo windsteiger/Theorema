@@ -58,16 +58,22 @@ subProofHeaderId[ args___] := unexpected[ subProofHeaderId, {args}]
 (* Proof Cells *)
 
 goalCell[ g_FML$, punct_String:""] := 
-	Cell[ BoxData[ RowBox[ {ToBoxes[ g.formula, TheoremaForm], punct}]], "Goal", 
-		CellFrameLabels->{{None, Cell[ makeLabel[ g.label], "GoalLabel"]}, {None, None}}, 
-		CellTags -> {g.id, $proofStepID}
+	With[ {pid = $proofStepID}, 
+		Cell[ BoxData[ RowBox[ {ToBoxes[ g.formula, TheoremaForm], punct}]], "Goal", 
+			CellFrameLabels->{{None, Cell[ makeLabel[ g.label], "GoalLabel"]}, {None, None}}, 
+			CellTags -> {g.id, pid},
+			CellEventActions -> {"MouseClicked" :> ($selectedProofStep = pid), PassEventsDown -> True}
+		]
 	]
 goalCell[ args___] := unexpected[ goalCell, {args}]
  
 assumptionCell[ a_FML$, punct_String:""] := 
-	Cell[ BoxData[ RowBox[ {ToBoxes[ a.formula, TheoremaForm], punct}]], "Assumption", 
-		CellFrameLabels->{{None, Cell[ makeLabel[ a.label], "AssumptionLabel"]}, {None, None}}, 
-		CellTags -> {a.id, $proofStepID}
+	With[ {pid = $proofStepID}, 
+		Cell[ BoxData[ RowBox[ {ToBoxes[ a.formula, TheoremaForm], punct}]], "Assumption", 
+			CellFrameLabels->{{None, Cell[ makeLabel[ a.label], "AssumptionLabel"]}, {None, None}}, 
+			CellTags -> {a.id, pid},
+			CellEventActions -> {"MouseClicked" :> ($selectedProofStep = pid), PassEventsDown -> True}
+		]
 	]
 assumptionCell[ args___] := unexpected[ assumptionCell, {args}]
 
@@ -79,7 +85,12 @@ assumptionListCells[ {f___, l_}, sep_String, punct_String] :=
 	]
 assumptionListCells[ args___] := unexpected[ assumptionListCells, {args}]
 
-textCell[ t__] := Cell[ TextData[ {t}], "Text", CellTags -> {$proofStepID}]
+textCell[ t__] := 
+		With[ {pid = $proofStepID}, 
+			Cell[ TextData[ {t}], "Text", CellTags -> {pid},
+				CellEventActions -> {"MouseClicked" :> ($selectedProofStep = pid), PassEventsDown -> True}
+			]
+		]
 textCell[ args___] := unexpected[ textCell, {args}]
 
 (*

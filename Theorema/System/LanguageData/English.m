@@ -129,5 +129,6 @@ With[ {lang = "English"},
 	MessageName[disproved, "usage", lang] = "disproved is a possible proof value.";
 	MessageName[failed, "usage", lang] = "failed is a possible proof value.";
 	MessageName[pending, "usage", lang] = "pending is a possible proof value.";
+	MessageName[$selectedProofStep, "usage", lang] = "$selectedProofStep refers to the id of the proof step that is selected in the current proof notebook.";
 
 ]

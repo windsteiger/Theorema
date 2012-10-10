@@ -144,7 +144,7 @@ openTheoremaCommander[ ] /; $Notebooks :=
         				displayBuiltinBrowser["prove"],
         				Dynamic[ Refresh[ selectProver[], TrackedSymbols :> {$selectedRuleSet, $selectedStrategy}]],
         				Dynamic[ Refresh[ submitProveTask[ ], TrackedSymbols :> {$selectedProofGoal, $selectedProofKB, $selectedProver}]],
-        				Dynamic[ Refresh[ proofNavigation[ $TMAproofTree], TrackedSymbols :> {$TMAproofTree, $TMAproofNotebook, ruleTextActive, $proofTreeScale}]]},
+        				Dynamic[ Refresh[ proofNavigation[ $TMAproofTree], TrackedSymbols :> {$TMAproofTree, $TMAproofNotebook, ruleTextActive, $proofTreeScale, $selectedProofStep}]]},
         			(* compute *){Dynamic[Refresh[ compSetup[], TrackedSymbols :> {$buttonNat}]],
         				Dynamic[Refresh[displayKBBrowser["compute"], TrackedSymbols :> {$kbStruct}]],
         				displayBuiltinBrowser["compute"]},

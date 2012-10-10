@@ -445,28 +445,34 @@ showProofNavigation[ {p__Rule}, scale_] :=
 showProofNavigation[ args___] := unexpected[ showProofNavigation, {args}]
 
 proofStepNode[ pos_List, node:{ id_String, status_, type_, name_}, font_] := 
-	Module[{opacity = If[ TrueQ[ ruleTextActive[ name]], 1, 0.3]},
-		{
-		Switch[ status,
-			pending, RGBColor[0.360784, 0.67451, 0.933333, opacity] (* steelblue *),
-			failed, RGBColor[1, 0.270588, 0, opacity] (* orangered *),
-			proved, RGBColor[0, 0.780392, 0.54902, opacity] (* turquoiseblue *),
-			_, Black],
-		Switch[ type,
-			PRFSIT$|PRFOBJ$, Disk[ pos, 0.1],
-			TERMINALNODE$, Map[ (pos + 0.1*#)&, Rectangle[ {-Sqrt[Pi]/2, -Sqrt[Pi]/2}, {Sqrt[Pi]/2, Sqrt[Pi]/2}]],
-			ANDNODE$, Polygon[ Map[ (pos + 0.125*#)&, {{0,1}, {Cos[7*Pi/6], Sin[7*Pi/6]}, {Cos[11*Pi/6], Sin[11*Pi/6]}}]],
-			ORNODE$, Polygon[ Map[ (pos + 0.125*#)&, {{0,-1}, {Cos[Pi/6], Sin[Pi/6]}, {Cos[5*Pi/6], Sin[5*Pi/6]}}]],
-			_, Map[ (pos + 0.1*#)&, Rectangle[ {-Sqrt[Pi]/2, -Sqrt[Pi]/2}, {Sqrt[Pi]/2, Sqrt[Pi]/2}]]],
-		{Black, Dynamic[ Text[ 
-			Hyperlink[
-				Switch[ type, 
+	Module[{opacity = If[ TrueQ[ ruleTextActive[ name]], 1, 0.3], selectionMarker},
+		If[ id === $selectedProofStep,
+			selectionMarker = {Text[ "\[LeftPointer]", pos + {0.1,0}, {-1,0}]},
+			selectionMarker = {}
+		];
+		Join[ selectionMarker,
+			{
+			Switch[ status,
+				pending, RGBColor[0.360784, 0.67451, 0.933333, opacity] (* steelblue *),
+				failed, RGBColor[1, 0.270588, 0, opacity] (* orangered *),
+				proved, RGBColor[0, 0.780392, 0.54902, opacity] (* turquoiseblue *),
+				_, Black],
+			Switch[ type,
+				PRFSIT$|PRFOBJ$, Disk[ pos, 0.1],
+				TERMINALNODE$, Map[ (pos + 0.1*#)&, Rectangle[ {-Sqrt[Pi]/2, -Sqrt[Pi]/2}, {Sqrt[Pi]/2, Sqrt[Pi]/2}]],
+				ANDNODE$, Polygon[ Map[ (pos + 0.125*#)&, {{0,1}, {Cos[7*Pi/6], Sin[7*Pi/6]}, {Cos[11*Pi/6], Sin[11*Pi/6]}}]],
+				ORNODE$, Polygon[ Map[ (pos + 0.125*#)&, {{0,-1}, {Cos[Pi/6], Sin[Pi/6]}, {Cos[5*Pi/6], Sin[5*Pi/6]}}]],
+				_, Map[ (pos + 0.1*#)&, Rectangle[ {-Sqrt[Pi]/2, -Sqrt[Pi]/2}, {Sqrt[Pi]/2, Sqrt[Pi]/2}]]],
+			{Black, Dynamic[ Text[ 
+				Hyperlink[
+					Switch[ type, 
         				TERMINALNODE$, proofStatusIndicator[ status, name],
          				PRFOBJ$, proofStatusIndicator[ status],
-       				_, proofNodeIndicator[ status, type, name]], 
-				{CurrentValue[ $TMAproofNotebook, "NotebookFileName"], id},
-				BaseStyle -> {FontSize -> font}, Active -> ValueQ[ $TMAproofNotebook] && ruleTextActive[ name]], pos]]}
-		}
+       					_, proofNodeIndicator[ status, type, name]], 
+					{CurrentValue[ $TMAproofNotebook, "NotebookFileName"], id},
+					BaseStyle -> {FontSize -> font}, Active -> ValueQ[ $TMAproofNotebook] && ruleTextActive[ name]], pos]]}
+			}
+		]
 	]
 proofStepNode[ args___] := unexpected[ proofStepNode, {args}]
 
@@ -535,10 +541,11 @@ displayProof[ p_PRFOBJ$] :=
 	Module[{ cells, tree = poToTree[ p]},
 		cells = proofObjectToCell[ p];
 		$TMAproofNotebook = NotebookPut[ Notebook[ cells, StyleDefinitions -> makeColoredStylesheet[ "Proof"]]];
-		$TMAproofTree = tree;
+		$TMAproofTree = tree; 
+		$selectedProofStep = "OriginalPS";
 		With[ {nb = $TMAproofNotebook, tr = tree},
 			SetOptions[ $TMAproofNotebook, NotebookEventActions -> {"MouseClicked" :> ($TMAproofNotebook = nb; $TMAproofTree = tr;),
-				"WindowClose" :> ($TMAproofTree = {};)}]
+				"WindowClose" :> ($TMAproofTree = {};), PassEventsDown -> True}]
 		]
 	]
 displayProof[ args___] := unexpected[ displayProof, {args}]
