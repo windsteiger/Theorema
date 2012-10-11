@@ -142,7 +142,7 @@ openTheoremaCommander[ ] /; $Notebooks :=
         			(* prove *)  {Dynamic[ Refresh[ displaySelectedGoal[], UpdateInterval -> 2]],
         				Dynamic[Refresh[displayKBBrowser["prove"], TrackedSymbols :> {$kbStruct}]],
         				displayBuiltinBrowser["prove"],
-        				Dynamic[ Refresh[ selectProver[], TrackedSymbols :> {$selectedRuleSet, $selectedStrategy}]],
+        				Dynamic[ Refresh[ selectProver[], TrackedSymbols :> {$selectedRuleSet}]],
         				Dynamic[ Refresh[ submitProveTask[ ], TrackedSymbols :> {$selectedProofGoal, $selectedProofKB, $selectedProver}]],
         				Dynamic[ Refresh[ proofNavigation[ $TMAproofTree], TrackedSymbols :> {$TMAproofTree, $TMAproofNotebook, ruleTextActive, $proofTreeScale, $selectedProofStep}]]},
         			(* compute *){Dynamic[Refresh[ compSetup[], TrackedSymbols :> {$buttonNat}]],
@@ -936,6 +936,12 @@ selectProver[ ] :=
     		Button[ "+", $selectedSearchDepth++],
     		Button[ "\[LeftSkeleton]", $maxSearchDepth/=2],
     		Button[ "\[RightSkeleton]", $maxSearchDepth*=2]}]], translate[ "sDepth"], {{ Top, Left}}],
+    	Labeled[ Grid[{
+    		{Checkbox[ Dynamic[ $eliminateBranches]], translate[ "elimBranches"]},
+    		{Checkbox[ Dynamic[ $eliminateSteps]], translate[ "elimSteps"]},
+    		{Checkbox[ Dynamic[ $eliminateFormulae]], translate[ "elimForm"]}
+    		}, Alignment -> {Left}], 
+    		translate[ "pSimp"], {{ Top, Left}}],
     	Labeled[ RadioButtonBar[ 
     		Dynamic[Theorema`Provers`Common`Private`$proofCellStatus], {Open -> translate[ "open"], Closed -> translate[ "closed"]}], 
     		translate[ "proofCellStatus"], {{ Top, Left}}]	
@@ -951,14 +957,15 @@ submitProveTask[ ] :=
 			Button[ translate["prove"], 
 				execProveCall[ $selectedProofGoal, $selectedProofKB, 
 					{$selectedRuleSet, Map[ # -> ruleActive[#]&, $allRules], Map[ # -> rulePriority[#]&, $allRules]},
-					$selectedStrategy, $selectedSearchDepth], 
+					$selectedStrategy, $selectedSearchDepth,
+					{$eliminateBranches, $eliminateSteps, $eliminateFormulae}], 
 				Method -> "Queued", Active -> ($selectedProofGoal =!= {})]
 		}]
 	]
 submitProveTask[ args___] := unexpected[ submitProveTask, {args}]
 
-execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, strategy_, searchDepth_] :=
-	Module[{nb = $proofInitNotebook, proof},
+execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, strategy_, searchDepth_, simplification_List] :=
+	Module[{nb = $proofInitNotebook, po, pv},
 		$tcActionView++;
 		If[ NotebookFind[ nb, makeProofIDTag[ goal], All, CellTags] === $Failed,
 			NotebookFind[ nb, goal[[1,1]], All, CellTags];
@@ -969,8 +976,9 @@ execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, str
 		SetSelectedNotebook[ nb];
 		NotebookWrite[ nb, Cell[ translate[ "Proof of"]<>" "<>goal[[3]]<>": \[Ellipsis]", "OpenProof", CellTags -> makeProofIDTag[ goal]]];
 
-		proof = callProver[ rules, strategy, goal, kb, searchDepth];
-		printProveInfo[ goal, kb, ruleSet, strategy, proof, searchDepth];
+		{pv, po} = callProver[ rules, strategy, goal, kb, searchDepth];
+		po = simplifyProof[ po, simplification];
+		printProveInfo[ goal, kb, ruleSet, strategy, {pv, po}, searchDepth];
 	]
 execProveCall[ args___] := unexpected[ execProveCall, {args}]
 

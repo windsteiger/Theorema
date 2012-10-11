@@ -24,13 +24,14 @@ Needs[ "Theorema`Provers`"]
 Begin["`Private`"]
 
 
+(* ::Section:: *)
+(* Prover call *)
+
 (* ::Subsubsection:: *)
 (* callProver *)
 
 initProver[] :=
 	Module[ {},
-		(* $proofInProgressMarker is used in the docked cells in stylesheet for displaying proofs *)
-		$proofInProgressMarker = {};
 		$TMAproofTree = {};
 		$registeredRuleSets = {};
 		$registeredStrategies = {};
@@ -45,9 +46,9 @@ callProver[ ruleSetup:{_Hold, _List, _List}, strategy_, goal_FML$, kb_List, sear
 		$TMAcurrentDepth = 2;
 		$TMAproofTree = makeInitialProofTree[ ];
 		$TMAproofObject = makeInitialProofObject[ goal, kb, ruleSetup, strategy];
+		Clear[ $TMAproofNotebook];
 		initFormulaLabel[];
 		proofSearch[ searchDepth];
-  		$proofInProgressMarker = {};
 		{$TMAproofObject.proofValue, $TMAproofObject}
 	]
 callProver[ args___] := unexpected[ callProver, {args}]
@@ -79,7 +80,7 @@ proofSearch[ searchDepth_Integer] :=
 proofSearch[ args___] := unexpected[ proofSearch, {args}]
 
 
-(* ::Subsection:: *)
+(* ::Subsubsection:: *)
 (* Experimental feature: prallel proof search *)
 
 (* This needs more thoughts, how to update the proof tree when parallel modifications may take place.
@@ -162,12 +163,57 @@ replaceProofSit[ po_PRFOBJ$, pos_ -> new:node_[___]] :=
 replaceProofSit[ args___] := unexpected[ replaceProofSit, {args}]
 
 
-(* ::Subsection:: *)
+(* ::Subsubsection:: *)
 (* isOptComponent *)
 
 isOptComponent[ (Rule|RuleDelayed)[ _String, _]] := True
 isOptComponent[ _] := False
 isOptComponent[ args___] := unexpected[ isOptComponent, {args}]
+
+
+(* ::Section:: *)
+(* Proof simplification *)
+
+(*
+	simplifyProof[ PRFOBJ$[ pi_, sub_, proved], simp_List] simplifies the proof object according to the settings given in simp.
+	*)
+simplifyProof[ PRFOBJ$[ pi_, sub_, proved], simp_List /; Apply[ Or, simp]] := 
+	Module[{simpPo, sn, used},
+		{sn, used} = simpNodes[ sub, simp];
+		simpPo = PRFOBJ$[ pi, sn, proved];
+		$TMAproofTree = poToTree[ simpPo];
+		simpPo
+	]
+simplifyProof[ po_PRFOBJ$, simp_List] := po
+simplifyProof[ args___] := unexpected[ simplifyProof, {args}]
+
+(*
+	simpNodes[ tree] computes {simpTree, used}, where
+		simpTree is the simplified proof tree and
+		used is a list of formula ids that are used within the simplified tree
+	*)
+simpNodes[ ORNODE$[ pi_, ___, p_ /; p.proofValue === proved, ___, proved], simp:{True, _, _}] :=
+	simpNodes[ p, simp]
+simpNodes[ ORNODE$[ pi_, a___, p_ /; p.proofValue === proved, b___, proved], simp:{False, _, _}] :=
+	Module[{sn, used},
+		{sn, used} = simpNodes[ p, simp];
+		{ORNODE$[ pi, a, sn, b, proved], used}
+	]
+simpNodes[ ANDNODE$[ pi_, sub_, proved], simp_List] :=
+	Module[{sn, u, usedGen},
+		{sn, u} = simpNodes[ sub, simp];
+		usedGen = Select[ pi.generated, MemberQ[ u, #.id]&];
+		
+		{Apply[ ANDNODE$[ pi, ##, proved]&, simpSub[[1]]], Apply[ Union, simpSub[[2]]]}
+	]
+(* AndNode with more than one successor cannot be eliminated *)
+simpNodes[ ANDNODE$[ pi_, fsub_, rsub__, proved], simp_List] :=
+	Module[{simpSub},
+		simpSub = Transpose[ Map[ simpNodes[ #, simp]&, {fsub, rsub}]];
+		{Apply[ ANDNODE$[ pi, ##, proved]&, simpSub[[1]]], Apply[ Union, simpSub[[2]]]}
+	]
+simpNodes[ node:TERMINALNODE$[ pi_, proved], simp_List] := {node, Map[ #.id &, pi.used]}
+simpNodes[ args___] := unexpected[ simpNodes, {args}]
 
 (* ::Section:: *)
 (* Proof object data structures *)
@@ -189,7 +235,7 @@ isOptComponent[ args___] := unexpected[ isOptComponent, {args}]
 	In addition, there are optional fields
   	"key"-> for arbitrary strings "key" (the datastructure can be expanded by additional components of this type at any time)
   	
-	The consturctor understands options goal->, kb->, local->, id->, rules->, ruleActivity->, rulePriority->, strategy->, and 
+	The constructor understands options goal->, kb->, local->, id->, rules->, ruleActivity->, rulePriority->, strategy->, and 
 	"key"-> (for an arbitrary string "key").
   	The selectors for the datastructure are p.goal, p.kb, p.id, p.local, p.rules, p.ruleActivity, p.rulePriority, p.strategy, and p."key" (for an
   	arbitrary string "key"). The special selector p.ruleSetup is a combination of p.rules, p.ruleActivity, and p.rulePriority.
@@ -463,14 +509,15 @@ proofStepNode[ pos_List, node:{ id_String, status_, type_, name_}, font_] :=
 				ANDNODE$, Polygon[ Map[ (pos + 0.125*#)&, {{0,1}, {Cos[7*Pi/6], Sin[7*Pi/6]}, {Cos[11*Pi/6], Sin[11*Pi/6]}}]],
 				ORNODE$, Polygon[ Map[ (pos + 0.125*#)&, {{0,-1}, {Cos[Pi/6], Sin[Pi/6]}, {Cos[5*Pi/6], Sin[5*Pi/6]}}]],
 				_, Map[ (pos + 0.1*#)&, Rectangle[ {-Sqrt[Pi]/2, -Sqrt[Pi]/2}, {Sqrt[Pi]/2, Sqrt[Pi]/2}]]],
-			{Black, Dynamic[ Text[ 
+			{Black, Dynamic[ Text[ EventHandler[
 				Hyperlink[
 					Switch[ type, 
         				TERMINALNODE$, proofStatusIndicator[ status, name],
          				PRFOBJ$, proofStatusIndicator[ status],
        					_, proofNodeIndicator[ status, type, name]], 
 					{CurrentValue[ $TMAproofNotebook, "NotebookFileName"], id},
-					BaseStyle -> {FontSize -> font}, Active -> ValueQ[ $TMAproofNotebook] && ruleTextActive[ name]], pos]]}
+					BaseStyle -> {FontSize -> font}, Active -> ValueQ[ $TMAproofNotebook] && ruleTextActive[ name]],
+					{"MouseClicked" :> ($selectedProofStep = id)}, PassEventsDown -> True], pos]]}
 			}
 		]
 	]

@@ -87,6 +87,7 @@ With[ {lang = "English"},
 
 (* Theorema`Provers`Common` *)
 	MessageName[callProver, "usage", lang] = "callProver[ prover_, goal_, kb_] calls prover with goal and kb, returns a proof value and proof object.";
+	MessageName[simplifyProof, "usage", lang] = "simplifyProof[ proof_, {branches_, steps_, formulae_}] simplifies 'proof' according to the specified settings.";
 	MessageName[displayProof, "usage", lang] = "displayProof[ proofObject_] displays proofObject.";
 	MessageName[$TMAproofObject, "usage", lang] = "$TMAproofObject is the global proof object.";
 	MessageName[$TMAproofTree, "usage", lang] = "$TMAproofTree is the global proof tree for visualization.";
