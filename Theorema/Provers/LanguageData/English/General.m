@@ -19,29 +19,29 @@ Begin["`Private`"]
 
 With[ {lang = "English"},
 
-proofStepText[ initialProofSituation, lang, {goal_FML$, {}}, {}, pVal_] := {If[ pVal === proved, textCell[ "We prove:"], textCell[ "We have to prove:"]], 
+proofStepText[ initialProofSituation, lang, {}, {{goal_FML$}}, pVal_] := {If[ pVal === proved, textCell[ "We prove:"], textCell[ "We have to prove:"]], 
          goalCell[ goal],
          textCell[ "with no assumptions."]
          };
-proofStepText[ initialProofSituation, lang, {goal_FML$, kb_List}, {}, pVal_] := {If[ pVal === proved, textCell[ "We prove:"], textCell[ "We have to prove:"]], 
+proofStepText[ initialProofSituation, lang, {}, {{goal_FML$, kb__FML$}}, pVal_] := {If[ pVal === proved, textCell[ "We prove:"], textCell[ "We have to prove:"]], 
          goalCell[ goal],
          textCell[ "under the assumptions:"], 
-         assumptionListCells[ kb, ",", "."]
+         assumptionListCells[ {kb}, ",", "."]
          };
 
 (* The data for openProofSituation comes from a PRFSIT$, which has no proofValue yet. Hence, we cannot pass a pVal as last parameter,
    like we do it in all other proofStepText cases. This is no problem, since we don't need a pVal here anyway. *)         
-proofStepText[ openProofSituation, lang, {goal_FML$, {}}, {}] := {textCell[ "Open proof situation"], 
+proofStepText[ openProofSituation, lang, {{goal_FML$}}, {}] := {textCell[ "Open proof situation"], 
 		textCell[ "We have to prove:"],
 		goalCell[ goal],
     	textCell[ "with no assumptions."]
 		};
 
-proofStepText[ openProofSituation, lang, {goal_FML$, kb_List}, {}] := {textCell[ "Open proof situation"], 
+proofStepText[ openProofSituation, lang, {{goal_FML$, kb__FML$}}, {}] := {textCell[ "Open proof situation"], 
 		textCell[ "We have to prove:"],
 		goalCell[ goal],
     	textCell[ "under the assumptions:"], 
-        assumptionListCells[ kb, ",", "."]
+        assumptionListCells[ {kb}, ",", "."]
 		};
 
 proofStepText[ proofAlternatives, lang, ___] := {textCell[ "We have several alternatives to continue the proof."]};
@@ -49,7 +49,7 @@ proofStepText[ proofAlternatives, lang, ___] := {textCell[ "We have several alte
 subProofHeader[ proofAlternatives, lang, ___, pVal_, {p_}] := {textCell[ ToString[ StringForm[ "Alternative ``:", p]]]};
  
 
-proofStepText[ searchDepthLimit, lang, {goal_FML$, kb_List}, {}, ___] :=
+proofStepText[ searchDepthLimit, lang, {{goal_FML$, kb___FML$}}, {}, ___] :=
 	Join[{textCell[ "Search depth exceeded! The open proof situation is:"]}, 
 		proofStepText[ openProofSituation, lang, {goal, kb}, {}]
 	];

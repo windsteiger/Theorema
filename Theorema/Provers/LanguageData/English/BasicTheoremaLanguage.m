@@ -41,99 +41,99 @@ translate[ "Connectives Rules", lang] = "Rules for Logical Connectives";
 translate[ "Equality Rules", lang] = "Rules for Equality";
 translate[ "Termination Rules", lang] = "Rules for Proof Termination";
 
-proofStepText[ contradictionKB, lang, {k_, c_}, {}, pVal_] := {textCell[ "The proof is finished, because ", formulaReference[ k], 
+proofStepText[ contradictionKB, lang, {{k_, c_}}, {}, pVal_] := {textCell[ "The proof is finished, because ", formulaReference[ k], 
 	" contradicts ", formulaReference[ c], "."]
     };
 
-proofStepText[ falseInKB, lang, {k_}, {}, pVal_] := {textCell[ "The proof is finished, because ", formulaReference[ k], 
+proofStepText[ falseInKB, lang, {{k_}}, {}, pVal_] := {textCell[ "The proof is finished, because ", formulaReference[ k], 
 	" is a contradiction in the knowledge base."]
     };
 
-proofStepText[ goalInKB, lang, {goal_, k_}, {}, pVal_] := {textCell[ "The goal ", formulaReference[ goal], 
+proofStepText[ goalInKB, lang, {{goal_, k_}}, {}, pVal_] := {textCell[ "The goal ", formulaReference[ goal], 
 	" is identical to formula ", formulaReference[ k], " in the knowledge base. Thus, the proof is finished."]
     };
 
-proofStepText[ trueGoal, lang, {goal_}, {}, pVal_] := {textCell[ "The proof is finished, because the goal ", formulaReference[ goal], 
+proofStepText[ trueGoal, lang, {{goal_}}, {}, pVal_] := {textCell[ "The proof is finished, because the goal ", formulaReference[ goal], 
 	" is true."]
     };
 
-proofStepText[ notGoal|contradiction, lang, {g_}, {opp_, ___}, ___] := {textCell[ "We prove ", formulaReference[ g], " by contradiction, i.e. we assume"],
+proofStepText[ notGoal|contradiction, lang, {{g_}}, {{opp_}}, ___] := {textCell[ "We prove ", formulaReference[ g], " by contradiction, i.e. we assume"],
 	assumptionCell[ opp],
 	textCell[ "and derive a contradiction."]
 	};
 
-proofStepText[ andGoal, lang, {g_}, generated_List, ___] := {textCell[ "For proving ", formulaReference[ g], " we prove the individual conjuncts."]};
+proofStepText[ andGoal, lang, {{g_}}, _, ___] := {textCell[ "For proving ", formulaReference[ g], " we prove the individual conjuncts."]};
 
-subProofHeader[ andGoal, lang, used_List, generated_List, pVal_, {p_}] := {textCell[ "Proof of ", formulaReference[ Part[ generated, p]], ":"],
+subProofHeader[ andGoal, lang, _, {generated_List}, pVal_, {p_}] := {textCell[ "Proof of ", formulaReference[ Part[ generated, p]], ":"],
 	textCell[ "We need to prove"],
 	goalCell[ Part[ generated, p], "."]
 	};
 
-proofStepText[ andKB, lang, {g_}, generated_List, ___] := {textCell[ "We split the conjunction ", formulaReference[ g], " and add"],
+proofStepText[ andKB, lang, {{g_}}, {generated_List}, ___] := {textCell[ "We split the conjunction ", formulaReference[ g], " and add"],
 	assumptionListCells[ generated, ",", ""],
 	textCell[ "to the knowledge base."]
 	};
 
-proofStepText[ orGoal, lang, {g_}, {negAssum__, newG_}, ___] := {textCell[ "For proving the disjunction ", formulaReference[ g], " we assume"],
+proofStepText[ orGoal, lang, {{g_}}, {{negAssum__, newG_}}, ___] := {textCell[ "For proving the disjunction ", formulaReference[ g], " we assume"],
 	assumptionListCells[ {negAssum}, ",", ""],
 	textCell[ "and show"],
 	goalCell[ newG, "."]
 	};
 
-proofStepText[ orKB, lang, {g_}, generated_List, ___] := {textCell[ "Based on the assumption ", formulaReference[ g], " we distinguish several cases:"]};
+proofStepText[ orKB, lang, {{g_}}, {generated_List}, ___] := {textCell[ "Based on the assumption ", formulaReference[ g], " we distinguish several cases:"]};
 
-subProofHeader[ orKB, lang, used_List, generated_List, pVal_, {p_}] := {textCell[ "Case ", ToString[p], ": we assume"],
+subProofHeader[ orKB, lang, _, {generated_List}, pVal_, {p_}] := {textCell[ "Case ", ToString[p], ": we assume"],
 	assumptionCell[ Part[ generated, p], "."]
 	};
 
-proofStepText[ implGoalDirect, lang, {g_}, {l_, r_}, ___] := {textCell[ "In order to prove ", formulaReference[ g], " we assume"],
+proofStepText[ implGoalDirect, lang, {{g_}}, {{l_, r_}}, ___] := {textCell[ "In order to prove ", formulaReference[ g], " we assume"],
 	assumptionCell[ l],
 	textCell[ "and then prove"],
 	goalCell[ r, "."]
 	};
 
-proofStepText[ implGoalCP, lang, {g_}, {nr_, nl_}, ___] := {textCell[ "We prove ", formulaReference[ g], " by contraposition, i.e. we assume"],
+proofStepText[ implGoalCP, lang, {{g_}}, {{nr_, nl_}}, ___] := {textCell[ "We prove ", formulaReference[ g], " by contraposition, i.e. we assume"],
 	assumptionCell[ nr],
 	textCell[ "and prove"],
 	goalCell[ nl, "."]
 	};
 
-proofStepText[ equivGoal, lang, {g_}, generated_List, ___] := {textCell[ "We prove both directions of ", formulaReference[ g], "."]};
+proofStepText[ equivGoal, lang, {{g_}}, _, ___] := {textCell[ "We prove both directions of ", formulaReference[ g], "."]};
 
-subProofHeader[ equivGoal, lang, used_List, generated_List, pVal_, {p_}] := {textCell[ Switch[ p, 1, "\[RightArrow]", 2, "\[LeftArrow]"], ":"]};
+subProofHeader[ equivGoal, lang, _, _, pVal_, {p_}] := {textCell[ Switch[ p, 1, "\[RightArrow]", 2, "\[LeftArrow]"], ":"]};
 
-proofStepText[ forallGoal, lang, {g_}, {newG_}, ___, "abf" -> v_List, ___] := {textCell[ "For proving ", formulaReference[ g], " we choose ", 
+proofStepText[ forallGoal, lang, {{g_}}, {{newG_}}, ___, "abf" -> v_List, ___] := {textCell[ "For proving ", formulaReference[ g], " we choose ", 
 	inlineTheoremaExpressionSeq[ v], " arbitrary but fixed and show"],
 	goalCell[ newG, "."]
 	};
 
-proofStepText[ forallGoal, lang, {g_}, {newG_, assum__}, ___, "abf" -> v_List, ___] := {textCell[ "For proving ", formulaReference[ g], " we choose ", 
+proofStepText[ forallGoal, lang, {{g_}}, {{newG_, assum__}}, ___, "abf" -> v_List, ___] := {textCell[ "For proving ", formulaReference[ g], " we choose ", 
 	inlineTheoremaExpressionSeq[ v], " arbitrary but fixed and assume"],
 	assumptionListCells[ {assum}, ",", "."],
 	textCell[ "We have to show"],
 	goalCell[ newG, "."]
 	};
 
-proofStepText[ forallGoal, lang, {g_}, {simpG_}, ___] := {textCell[ "The universally quantified goal ", formulaReference[ g], " simplifies to"],
+proofStepText[ forallGoal, lang, {{g_}}, {{simpG_}}, ___] := {textCell[ "The universally quantified goal ", formulaReference[ g], " simplifies to"],
 	goalCell[ simpG, "."]
 	};
 
-proofStepText[ existsGoal, lang, {g_}, {newG_}, ___, "meta" -> v_List, ___] := {textCell[ "For proving ", formulaReference[ g], " we have to find ",
+proofStepText[ existsGoal, lang, {{g_}}, {{newG_}}, ___, "meta" -> v_List, ___] := {textCell[ "For proving ", formulaReference[ g], " we have to find ",
 	If[ Length[v] == 1, "an appropriate value for ", "appropriate values for "],
 	inlineTheoremaExpressionSeq[ v], ", such that we can prove"],
 	goalCell[ newG, "."]
 	};
 
-proofStepText[ existsGoal, lang, {g_}, {simpG_}, ___] := {textCell[ "The existentially quantified goal ", formulaReference[ g], " simplifies to"],
+proofStepText[ existsGoal, lang, {{g_}}, {{simpG_}}, ___] := {textCell[ "The existentially quantified goal ", formulaReference[ g], " simplifies to"],
 	goalCell[ simpG, "."]
 	};
 	
-proofStepText[ existsKB, lang, {e_}, new_List, ___, "abf" -> v_List, ___] := {textCell[ "From ", formulaReference[ e], " we know "], 
+proofStepText[ existsKB, lang, {{e_}}, {new_List}, ___, "abf" -> v_List, ___] := {textCell[ "From ", formulaReference[ e], " we know "], 
 	assumptionListCells[ new, ",", ""],
 	textCell[ " for arbitrary but fixed ", inlineTheoremaExpressionSeq[ v], "."]
 	};
 
-proofStepText[ existsKB, lang, {g_}, {simpG_}, ___] := {textCell[ "The universally quantified goal ", formulaReference[ g], " simplifies to"],
+proofStepText[ existsKB, lang, {{g_}}, {{simpG_}}, ___] := {textCell[ "The universally quantified goal ", formulaReference[ g], " simplifies to"],
 	goalCell[ simpG, "."]
 	};
 	
