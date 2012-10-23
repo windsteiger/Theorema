@@ -143,6 +143,9 @@ With[ {lang = "English"},
 
     translate["noNB", lang] = "No notebook file available: ";
 
+    translate["fileTypeArchive", lang] = "Theorema archive";
+    translate["fileTypeNotebook", lang] = "Theorema notebook";
+
 (* General *)
 	translate["outsideSession", lang] = "An evaluation of this type of cell is not expected in the current type of session";
 	translate["archLabelBegin", lang] = "Begin Archive";
@@ -155,7 +158,6 @@ With[ {lang = "English"},
 	    
 (* Theorema`Language`Session` *)
     translate["notUniqueLabel", lang] = "These labels are not unique in the notebook: ``\n\nThis is just a warning, you can continue,\nbut referencing formulae from this notebook\nmight turn out to be confusing.";
-    translate["fileTypeArchive", lang] = "Theorema archive";
     translate["noArchName", lang] = "No archive name available for chosen archive. Check file content.";
     translate["Global Declarations"] = "Global Declarations valid at this cell";
     translate["None"] = "None";

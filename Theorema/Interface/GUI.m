@@ -1158,9 +1158,24 @@ makeNbNewButton[ args___] := unexpected[ makeNbNewButton, {args}]
 		
 makeNbOpenButton[ ] :=
 	Button[ translate["tcSessTabNbTabButtonOpenLabel"],
-		NotebookOpen[ SystemDialogInput["FileOpen"], StyleDefinitions -> makeColoredStylesheet[ "Notebook"]]
+		openFileRememberLocation[ ],
+		Method -> "Queued"
 	]
 makeNbOpenButton[ args___] := unexpected[ makeNbOpenButton, {args}]
+
+openFileRememberLocation[ ] :=
+	Module[{file, dir},
+		If[ ValueQ[ $dirLastOpened],
+			dir = $dirLastOpened,
+			dir = $HomeDirectory
+		];
+		file = SystemDialogInput[ "FileOpen", {dir, {translate["fileTypeNotebook"] -> {"*.nb"}}}];
+		If[ StringQ[ file] && FileExistsQ[ file],
+			$dirLastOpened = DirectoryName[ file];
+			NotebookOpen[ file, StyleDefinitions -> makeColoredStylesheet[ "Notebook"]]
+		]
+	]
+openFileRememberLocation[ args___] := unexpected[ openFileRememberLocation, {args}]
 
 envButtonData["DEF"] := "tcSessTabEnvTabButtonDefLabel";
 envButtonData["THM"] := "tcSessTabEnvTabButtonThmLabel";
