@@ -56,6 +56,7 @@ With[ {lang = "English"},
      		translate["GCONDTooltip", lang] = "Global condition";   	
      		translate["ECONDTooltip", lang] = "Environment condition";   	
     		translate["tcSessTabEnvTabButtonDeclLabel", lang] = "Identify global declarations";
+    		translate["tcSessTabEnvTabButtonAllDeclLabel", lang] = "All Declarations";
     	translate["tcSessTabArchTabLabel", lang] = "archives";
     		translate["tcLangTabArchTabSectionCreate", lang] = "Creating Archives";
     		translate["tcLangTabArchTabButtonNewLabel", lang] = "New";

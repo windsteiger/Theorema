@@ -92,6 +92,7 @@ initGUI[] :=
 		$selectedRuleSet = Hold[ basicTheoremaLanguageRules];
 		$CtrlActive = 0;
 		$ShiftActive = 0;
+		$TMAactDecl = translate[ "None"];
 		$proofTreeScale = 1;
 		If[ $Notebooks,
 			openTheoremaCommander[]
@@ -1197,11 +1198,18 @@ makeEnvButton[args___] := unexpected[makeEnvButton, {args}]
 makeFormButton[] := Button[ translate["tcSessTabEnvTabButtonFormLabel"], insertNewFormulaCell[ "Env"], Alignment -> {Left, Top}, ImageSize -> Automatic]
 makeFormButton[args___] := unexpected[makeFormButton, {args}]
 
-makeDeclButtons[] := Column[ {
-	Row[ Map[ makeDeclBut, {"VAR", "VARCOND", "COND"}], Spacer[5]],
-	Button[ translate["tcSessTabEnvTabButtonDeclLabel"], Theorema`Language`Session`Private`displayGlobalDeclarations[ InputNotebook[]]]
-	}, Center]
-makeDeclButtons[args___] := unexpected[makeDeclButtons, {args}]
+makeDeclButtons[] := Row[ Map[ makeDeclBut, {"VAR", "VARCOND", "COND"}], Spacer[5]]
+makeDeclButtons[args___] := unexpected[ makeDeclButtons, {args}]
+
+showDecl[ ] := OpenerView[ {Style[ translate["tcSessTabEnvTabButtonAllDeclLabel"], "Section"], displayDecl[]}, Dynamic[$tcAllDeclOpener]]
+showDecl[ args___] := unexpected[ showDecl, {args}]
+
+displayDecl[ ] :=
+	Row[ {
+		Pane[ $TMAactDecl, {300, 30}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic],
+		Tooltip[ Button[ Style[ "\[LightBulb]", {Medium, Bold}], $TMAactDecl = Theorema`Language`Session`Private`displayGlobalDeclarations[ InputNotebook[]]], translate[ "tcSessTabEnvTabButtonDeclLabel"]]
+		}, Spacer[5]]
+displayDecl[ args___] := unexpected[ displayDecl, {args}]
 
 declButtonData["VAR"] := 
 	{
@@ -1247,7 +1255,6 @@ displayEnv[ ] :=
 		emptyPane[ "", {350, 30}],
 		Pane[ displayLabeledFormulaListGrid[ $tmaEnv], {300, 100}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
 	]
-
 displayEnv[ args___] := unexpected[ displayEnv, {args}]
    
 allEnvironments = {"DEF", "THM", "LMA", "PRP", "COR", "CNJ", "ALG", "EXM"};
@@ -1260,7 +1267,7 @@ structButtons[] :=
     		translate[ "Environments"], {{Top, Left}}],
     	Labeled[ Column[ {makeFormButton[], Dynamic[ showEnv[]]}, Left, Spacer[2]],
     		translate[ "Formulae"], {{Top, Left}}],
-    	Labeled[ makeDeclButtons[],
+    	Labeled[ Column[ {makeDeclButtons[], Dynamic[ showDecl[]]}, Left, Spacer[2]],
     		translate[ "Declarations"], {{Top, Left}}]
     }]
 structButtons[args___] :=

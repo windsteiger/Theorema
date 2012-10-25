@@ -395,7 +395,7 @@ applicableGlobalDeclarations[ nb_NotebookObject, raw_Notebook, pos_List] :=
 applicableGlobalDeclarations[ args___] := unexpected[ applicableGlobalDeclarations, {args}]
 
 displayGlobalDeclarations[ nb_NotebookObject] :=
-	Module[{ globDecl, pos, raw, sel, magOpt = Options[ nb, Magnification], availDecl},
+	Module[{ globDecl, pos, raw, sel, availDecl},
 		raw = NotebookGet[ nb];
 		(* If nothing is selected, i.e. the cursor is between cells, or not an entire cell is selected, then select some cell *)
 		Do[ 
@@ -408,20 +408,10 @@ displayGlobalDeclarations[ nb_NotebookObject] :=
 		pos = First[ Position[ raw, sel]];
 		availDecl = applicableGlobalDeclarations[ nb, raw, pos];
 		If[ availDecl =!= {},
-			globDecl = ExpressionCell[ theoremaDisplay[ applyGlobalDeclaration[ "\[SelectionPlaceholder]", availDecl]], 
-				"DisplayFormula", ShowSyntaxStyles -> False],
-			globDecl = TextCell[ translate[ "None"], "Text"]
+			globDecl = theoremaDisplay[ applyGlobalDeclaration[ "\[Ellipsis]", availDecl]],
+			globDecl = translate[ "None"]
 		];
-		CreateDocument[ Join[
-			{
-				Cell[ translate["Global Declarations"], "Title"],
-				globDecl
-			},
-			{Cell[ BoxData[ ButtonBox[ translate[ "OK"], ButtonFunction :> NotebookClose[ButtonNotebook[]],
-				Appearance -> "CancelButton", Evaluator -> Automatic, Method -> "Preemptive"]], "ButtonBar"]}],
-			First[ magOpt], WindowTitle -> translate["Global Declarations"],
-			WindowElements -> {"StatusArea", "MagnificationPopUp"},
-			StyleDefinitions -> FileNameJoin[ {"Theorema", "TheoremaDialog.nb"}]]
+		globDecl
 	]
 displayGlobalDeclarations[ args___] := unexpected[ displayGlobalDeclarations, {args}]
 
