@@ -174,6 +174,11 @@ processGlobalDeclaration[ args___] := unexpected[ processGlobalDeclaration, {arg
 SetAttributes[processEnvironment,HoldAll];
 
 processEnvironment[ Theorema`Language`nE] := Null
+processEnvironment[ functorDefinition[ lhs_, rng_]] := 
+	Module[ {},
+		putGlobalDeclaration[ CurrentValue["NotebookFullFileName"], CurrentValue["CellID"], ReleaseHold[ freshNames[ Hold[ functor[ lhs, rng]]]]];
+	]
+
 processEnvironment[x_] :=
     Module[ {nb = EvaluationNotebook[], rawNotebook, key, tags, globDec},
     	(* select current cell: we need to refer to this selection when we set the cell options *)
@@ -385,8 +390,8 @@ automatedFormulaLabel[args___] := unexpected[ automatedFormulaLabel, {args}]
 applicableGlobalDeclarations[ nb_NotebookObject, raw_Notebook, pos_List] :=
 	Module[{ globDeclID},
 		(* Find global declarations that apply to the cell at position pos, i.e. those that occur "above" (incl. nesting)
-		   from those cells collect the CellIDs *)
-		globDeclID = Cases[ raw, c:Cell[ _, "GlobalDeclaration", ___, CellID -> id_, ___] /; occursBelow[ Position[ raw, c][[1]], pos] -> id, Infinity];
+		   from those cells collect the CellIDs, also consider FormalTextInputFormula in order to find functor definitions *)
+		globDeclID = Cases[ raw, c:Cell[ _, "GlobalDeclaration"|"FormalTextInputFormula", ___, CellID -> id_, ___] /; occursBelow[ Position[ raw, c][[1]], pos] -> id, Infinity];
 		(* Lookup the ids in the global declarations in the current notebook
 		   Due to the way the ids are searched, they are sorted by the order how they occur in the notebook
 		   -> this is how they have to be applied to the expression *)
@@ -445,6 +450,7 @@ applyGlobalDeclaration[ expr_, globalForall$TM[ r_, c_, d_]] :=
 	]
 applyGlobalDeclaration[ expr_, globalImplies$TM[ c_]] := Implies$TM[ c, expr]
 applyGlobalDeclaration[ expr_, globalImplies$TM[ c_, d_]] := Implies$TM[ c, applyGlobalDeclaration[ expr, d]]
+applyGlobalDeclaration[ expr_, functor$TM[ lhs_, rng_Symbol]] := substituteFree[ ReleaseHold[ markVariables[ Hold[ QU$[ RNG$[ SIMPRNG$[ rng]], expr]]]], {VAR$[ rng] -> lhs}]
 applyGlobalDeclaration[ args___] := unexpected[ applyGlobalDeclaration, {args}]
 
 initSession[] :=
