@@ -117,9 +117,6 @@ MakeExpression[ RowBox[{left_, RowBox[{":", "\[NegativeThickSpace]\[NegativeThin
 
 MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalN]", "0"], fmt_] := MakeExpression[ "\[DoubleStruckCapitalN]0", fmt] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{lhs_, ":=", UnderscriptBox[ "\[CapitalDelta]", rng_]}], fmt_] := 
-	MakeExpression[ RowBox[{"Theorema`Language`Session`Private`functorDefinition", "[", RowBox[{lhs, ",", rng}], "]"}], fmt] /; $parseTheoremaExpressions
-
 (* ::Subsection:: *)
 (* Global Declarations *)
 
@@ -140,7 +137,15 @@ MakeExpression[ RowBox[ {UnderscriptBox[ UnderscriptBox[ "\[ForAll]", rng_], con
 
 MakeExpression[ RowBox[ {cond_, "\[Implies]"|"\[DoubleLongRightArrow]"|"\[DoubleRightArrow]"}], fmt_] := 
 	MakeExpression[ RowBox[{ "globalImplies", "[", cond, "]"}], fmt] /; $parseTheoremaGlobals
-	
+
+MakeExpression[ RowBox[{lhs_, ":=", UnderscriptBox[ "\[CapitalDelta]", rng_]}], fmt_] := 
+	With[ {r = toDomSpecRangeBox[ rng]},
+		MakeExpression[ RowBox[{ "domainConstruct", "[", RowBox[{lhs, ",", RowBox[ {"QU$", "[", RowBox[{r, ",", r}], "]"}]}], "]"}], fmt]
+	] /; $parseTheoremaGlobals
+
+toDomSpecRangeBox[ RowBox[{v_, "\[Superset]", d_}]] := RowBox[ {"RNG$", "[", RowBox[ {"DOMEXTRNG$", "[", RowBox[ {v, ",", d}], "]"}], "]"}]
+toDomSpecRangeBox[ v_String] := RowBox[ {"RNG$", "[", makeRangeSequence[ v], "]"}]
+toDomSpecRangeBox[args___] := unexpected[ toDomSpecRangeBox, {args}]
 
 (* ::Subsection:: *)
 (* Auxiliary parsing functions *)

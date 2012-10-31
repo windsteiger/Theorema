@@ -9,6 +9,7 @@ With[ {lang = "English"},
 	MessageName[SETRNG$, "usage", lang] = "SETRNG$[ x, s] denotes that the variable x ranges over the set s.";
 	MessageName[PREDRNG$, "usage", lang] = "PREDRNG$[ x, p] denotes that the variable x satisfies the predicate p.";
 	MessageName[STEPRNG$, "usage", lang] = "STEPRNG$[ x, low, high, step] denotes that the variable x steps from low to high in steps of step.";
+	MessageName[DOMEXTRNG$, "usage", lang] = "DOMEXTRNG$[ x, dom] denotes that the variable x extends domain dom (in a domain extension definition).";
 	MessageName[EqualDef$TM, "usage", lang] = "";
 	MessageName[IffDef$TM, "usage", lang] = "";
 	MessageName[Equal$TM, "usage", lang] = "";
@@ -56,6 +57,7 @@ With[ {lang = "English"},
 	decl contains further global declarations. globalForall$TM[ rng, cond] is a single global universal variable.";
 	MessageName[globalImplies$TM, "usage", lang] = "globalImplies$TM[ cond, decl] is a datastructure representing a (nested) global condition, where
 	decl contains further global declarations. globalImplies$TM[ cond] is a single global condition.";
+	MessageName[domainConstruct$TM, "usage", lang] = "domainConstruct$TM[ dom, rng] is a datastructure representing a domain constructor for domain dom being 'the rng such that ...'.";
 	
 ]
 
