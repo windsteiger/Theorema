@@ -63,21 +63,21 @@ Map[ Get, FileNames["TheoremaPreferences.m", {
     
 `priv`arrowShape = {{0, 0}, {94, 0}, {107, 40}, {70, 40}, {156, 126}, {126, 156}, {40, 70}, {40, 107}, {0, 94}, {0, 0}};
 
-`priv`RISCLogo[a_] := {TMAcolor[1], 
-   Rotate[Disk[{194, 0}, 17], a, {0, 0}], 
-   Rotate[Disk[{-194, 0}, 17], a, {0, 0}], 
-   Rotate[Disk[{0, 194}, 17], a, {0, 0}], 
-   Rotate[Disk[{0, -194}, 17], a, {0, 0}], 
+`priv`RISCLogo[`priv`a_] := {TMAcolor[1], 
+   Rotate[Disk[{194, 0}, 17], `priv`a, {0, 0}], 
+   Rotate[Disk[{-194, 0}, 17], `priv`a, {0, 0}], 
+   Rotate[Disk[{0, 194}, 17], `priv`a, {0, 0}], 
+   Rotate[Disk[{0, -194}, 17], `priv`a, {0, 0}], 
    Rotate[Polygon[Map[# + {35, -175} &, `priv`arrowShape]], 
-    a, {0, 0}], {AbsoluteThickness[8], 
+    `priv`a, {0, 0}], {AbsoluteThickness[8], 
     Rotate[Line[
       Map[#.{{Cos[Pi/2], Sin[Pi/2]}, {-Sin[Pi/2], 
             Cos[Pi/2]}} + {-35, -175} &, `priv`arrowShape]], 
-     a, {0, 0}], 
-    Rotate[Line[Map[# + {-175, 19} &, `priv`arrowShape]], a, {0, 0}], 
+     `priv`a, {0, 0}], 
+    Rotate[Line[Map[# + {-175, 19} &, `priv`arrowShape]], `priv`a, {0, 0}], 
     Rotate[Line[
       Map[#.{{Cos[Pi/2], Sin[Pi/2]}, {-Sin[Pi/2], Cos[Pi/2]}} + {175, 
-          19} &, `priv`arrowShape]], a, {0, 0}]}};
+          19} &, `priv`arrowShape]], `priv`a, {0, 0}]}};
 
 `priv`topleft = {TMAcolor[4], 
    Text["Original Concept by", {-230, 202}, {-1, 0}, 
@@ -110,7 +110,7 @@ Map[ Get, FileNames["TheoremaPreferences.m", {
 showWelcomeScreen[] /; !ValueQ[`priv`welcomeScreen] && !TrueQ[$suppressWelcomeScreen] := Module[{},
     `priv`welcomeScreen = CreatePalette[
     	Dynamic[ Graphics[{`priv`RISCLogo[Clock[2 Pi, 2, 3]], `priv`topleft, `priv`topright, `priv`bottomright, `priv`bottomleft,
-    		{With[{o = Clock[1, 5, 1]}, Opacity[ If[ o < 0.4, 0.1, 3/2*o-1/2]]], `priv`center}},
+    		{With[{`priv`o = Clock[1, 5, 1]}, Opacity[ If[ `priv`o < 0.4, 0.1, 3/2*`priv`o-1/2]]], `priv`center}},
     		PlotRange -> {-280, 280}, ImageSize -> {560, 560}, Background -> TMAcolor[2]]],
     	WindowFrame -> "Frameless", WindowMargins -> Automatic
     ];
