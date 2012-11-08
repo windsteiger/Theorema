@@ -34,6 +34,9 @@ setComputationContext[ c_String] :=
     ]
 setComputationContext[ args___] := unexpected[ setComputationContext, {args}]
 
+
+(* ::Section:: *)
+(* Arithmetic *)
    
 Plus$TM[ a__] /; buiActive["Plus"] := Plus[ a]
 Times$TM[ a__] /; buiActive["Times"] := Times[ a]
@@ -42,6 +45,9 @@ Less$TM[ a__] /; buiActive["Less"] := Less[ a]
 LessEqual$TM[ a__] /; buiActive["LessEqual"] := LessEqual[ a]
 Greater$TM[ a__] /; buiActive["Greater"] := Greater[ a]
 GreaterEqual$TM[ a__] /; buiActive["GreaterEqual"] := GreaterEqual[ a]
+
+(* ::Section:: *)
+(* Logic *)
 
 Not$TM[ a_] /; buiActive["Not"] := Not[ a]
 And$TM[ a__] /; buiActive["And"] := And[ a]
@@ -165,6 +171,18 @@ sequenceOfIteration[ iter:{__List}, cond_, form_] :=
 sequenceOfIteration[ iter_List, cond_, form_] := $Failed
 sequenceOfIteration[ args___] := unexpected[ sequenceOfIteration, {args}]
 
+
+(* ::Section:: *)
+(* Sets *)
+
+
+(* ::Section:: *)
+(* Tuples *)
+
+Tuple$TM /: BracketingBar$TM[ a_Tuple$TM] /; buiActive["Length"] && isSequenceFree[a] := Length[ a]
+Tuple$TM /: Subscript$TM[ a_Tuple$TM, p__Integer] /; buiActive["Subscript"] && isSequenceFree[a] := Part[ a, p]
+Tuple$TM /: Subscript$TM[ a_Tuple$TM, p__LeftArrow$TM] /; buiActive["ReplacePart"] && isSequenceFree[a] :=
+	ReplacePart[ a, {p /. {LeftArrow$TM -> Rule, Tuple$TM -> List}}]
 
 (* ::Section:: *)
 (* Mathematica programming constructs *)
