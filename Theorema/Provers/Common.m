@@ -318,7 +318,10 @@ PRFSIT$ /: Dot[ PRFSIT$[ _, k_List, _, _, ___], kb] := k
 PRFSIT$ /: Dot[ PRFSIT$[ _, _, i_String, ___], id] := i
 PRFSIT$ /: Dot[ PRFSIT$[ _, _, _, _, rules -> Hold[r_], ruleActivity -> act_, rulePriority -> prio_, ___], ruleSetup] := {r, act, prio}
 PRFSIT$ /: Dot[ PRFSIT$[ _, _, _, _, rules -> Hold[r_], ___], rules] := r
+(* The following access should work for both standard (e.g. local, ruleActivity, rulePriority, strategy) and optional components, hence, key need not be a string *)
 PRFSIT$ /: Dot[ PRFSIT$[ _, _, _, ___, (Rule|RuleDelayed)[ key_, val_], ___], key_] := val
+(* Non-existing components should give {} *)
+PRFSIT$ /: Dot[ PRFSIT$[ _, _, _, ___], key_String] := {}
 PRFSIT$ /: Dot[ _PRFSIT$, proofValue] := pending
 PRFSIT$ /: Dot[ p_PRFSIT$, s___] := unexpected[ Dot, {p, s}]
 
@@ -333,7 +336,7 @@ newSubgoal[ data___?OptionQ] := checkProofSuccess[ makePRFSIT[ data]]
 newSubgoal[ args___] := unexpected[ newSubgoal, {args}]
 
 checkProofSuccess[ ps_PRFSIT$] := 
-	Module[{termRules = getActiveTermRules[ ps]}, 
+	Module[{termRules = getActiveRulesType[ ps, "term"]}, 
 		Replace[ ps, termRules]
 	]
 checkProofSuccess[ args___] := unexpected[ checkProofSuccess, {args}]
@@ -375,6 +378,7 @@ PRFINFO$ /: Dot[ PRFINFO$[ _, u_List, _, _, ___], used] := u
 PRFINFO$ /: Dot[ PRFINFO$[ _, _, g_List, _, ___], generated] := g
 PRFINFO$ /: Dot[ PRFINFO$[ _, _, _, i_String, ___], id] := i
 PRFINFO$ /: Dot[ PRFINFO$[ _, _, _, _, ___, (Rule|RuleDelayed)[ key_String, val_], ___], key_] := val
+PRFINFO$ /: Dot[ PRFINFO$[ _, _, _, _, ___], key_String] := {}
 PRFINFO$ /: Dot[ p_PRFINFO$, s___] := unexpected[ Dot, {p, s}]
 
 
@@ -491,11 +495,11 @@ noProofNode[ args___] := unexpected[ noProofNode, {args}]
 
 (*
 	If op =!= Flatten, i.e. we keep a structured list of rules, we need to clarify the role of rulePriority, maybe sort sublists recursively? *)
-getActiveRules[ ps_PRFSIT$, op_:Identity] := 
+getActiveRulesFilter[ ps_PRFSIT$, filter_, op_:Identity] := 
 	Module[{rules, act, prio, names},
-		(* Select names of active rules, delete termination rules, strings (category names) and inactive rules, finally apply op *)
+		(* Select names of active rules, delete rules of type filter, strings (category names) and inactive rules, finally apply op *)
 		{rules, act, prio} = ps.ruleSetup;
-		names = op[ rules /. {{r_, _, _, _Integer, "term"} -> Sequence[],
+		names = op[ rules /. {{r_, _, _, _Integer, filter} -> Sequence[],
 			{r_ /; Replace[ r, act], _, _, _Integer, ___} -> r, _String | {r_Symbol, _, _, _Integer, ___} -> Sequence[]}];
 		If[ Depth[ names] == 2,
 			(* we have a flat list of rule names *)
@@ -505,19 +509,18 @@ getActiveRules[ ps_PRFSIT$, op_:Identity] :=
 			DeleteCases[ MapAt[ inferenceRule, names, Position[ names, _Symbol, Heads -> False]], _inferenceRule, Infinity]
 		]
 	]	
-getActiveRules[ args___] := unexpected[ getActiveRules, {args}]
+getActiveRulesFilter[ args___] := unexpected[ getActiveRulesFilter, {args}]
 
-getActiveTermRules[ ps_PRFSIT$] :=
+getActiveRulesType[ ps_PRFSIT$, type_] :=
 	Module[{rules, act, prio, names},
-		(* Select names of active rules, delete strings (category names) and inactive rules, finally apply op *)
+		(* Select flat list of names of active rules, delete strings (category names) and inactive rules *)
 		{rules, act, prio} = ps.ruleSetup;
-		names = Cases[ rules, {r_ /; Replace[ r, act], _, _, _Integer, "term"} -> r, Infinity];
-		Assert[ MatchQ[ names, {__Symbol}]];
+		names = Cases[ rules, {r_ /; Replace[ r, act], _, _, _Integer, type} -> r, Infinity];
 		(* we have a flat list of rule names *)
 		names = Sort[ DeleteDuplicates[ names], Replace[ #1, prio] < Replace[ #2, prio] &];
 		DeleteCases[ Map[ inferenceRule, names], _inferenceRule]
 	]
-getActiveTermRules[ args___] := unexpected[ getActiveTermRules, {args}]
+getActiveRulesType[ args___] := unexpected[ getActiveRulesType, {args}]
 
 
 (* ::Subsubsection:: *)

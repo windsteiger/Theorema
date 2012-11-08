@@ -26,7 +26,7 @@ Begin["`Private`"]
 (* Proof strategies *)
 
 applyOnce[ ps_PRFSIT$] := 
-	Module[ {i = ps.id, allRules = getActiveRules[ ps, Flatten], newNodes},
+	Module[ {i = ps.id, allRules = getActiveRulesFilter[ ps, "term", Flatten], newNodes},
 		newNodes = applyAllRules[ ps, allRules];
 		Switch[ Length[ newNodes],
 			0,
@@ -41,6 +41,47 @@ applyOnce[ ps_PRFSIT$] :=
 		]
 	]
 applyOnce[ args___] := unexpected[ applyOnce, {args}]
+
+applyOnceAndLevelSaturation[ ps_PRFSIT$] :=
+	Module[ {i = ps.id, allRules = getActiveRulesFilter[ ps, "term"|"levelSat1"|"levelSat2", Flatten], 
+		sat1 = getActiveRulesType[ ps, "levelSat1"], 
+		sat2 = getActiveRulesType[ ps, "levelSat2"], newNodes},
+		newNodes = applyAllRules[ ps, allRules];
+		newNodes = MapAt[ levelSaturation[ #, sat1, sat2]&, newNodes, Position[ newNodes, _PRFSIT$]];
+		Switch[ Length[ newNodes],
+			0,
+			proofFails[ makePRFINFO[ name -> noApplicableRule, id -> i]],
+			1,
+			First[ newNodes],
+			_,
+			newNodes = Map[ renewID, newNodes];
+			makeORNODE[ 
+				makePRFINFO[ name -> proofAlternatives, used -> newNodes.used, generated -> newNodes.generated, id -> i],
+				newNodes]
+		]
+	]
+applyOnceAndLevelSaturation[ args___] := unexpected[ applyOnceAndLevelSaturation, {args}]
+
+levelSaturation[ ps_PRFSIT$, sat1rules_List, sat2Rules_List] :=
+	Module[{locInfo = ps.local, satKB, psKB = ps.kb, l, posNew, posRearrKB, pairs = {}, i, j, newForms, newPairs},
+		l = Length[ psKB];
+		satKB = Replace[ "lastSat", locInfo];
+		(* flat list of positions of new forms in KB since last saturation run
+		   Since KB is a plain unstructured list all positions are specified by exactly 1 integer *)
+		posNew = Flatten[ Position[ psKB, _?(!MemberQ[ satKB, #.id]&), {1}, Heads -> False]];
+		(* we build a list with pos of new forms followed by pos of the remaining (old) forms *)
+		posRearrKB = Join[ posNew, Complement[ Range[ l], posNew]];
+		(* we form a list of new forms and a list of pairs involving the new forms just based on the positions *)
+		Do[
+			Do[ 
+				AppendTo[ pairs, {{posRearrKB[[j]]}, {posRearrKB[[i]]}}],
+				{i, j+1, l}], 
+			{j, Length[ posNew]}];
+		newForms = Extract[ psKB, posNew];
+		newPairs = Map[ Extract[ psKB, #]&, pairs];
+		ps
+	]
+levelSaturation[ args___] := unexpected[ levelSaturation, {args}]
 
 (*
 	This is not serious, it just duplicates the proof situation into two children. Should be a test case for exhaustive search
@@ -58,6 +99,7 @@ trySeveral[ ps_PRFSIT$] :=
 trySeveral[ args___] := unexpected[ trySeveral, {args}]
 
 registerStrategy[ "Apply once", applyOnce]
+registerStrategy[ "Apply once + Level saturation", applyOnceAndLevelSaturation]
 registerStrategy[ "Try several", trySeveral]
 
 End[]
