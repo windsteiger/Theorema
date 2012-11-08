@@ -55,6 +55,9 @@ MakeBoxes[ SetOf$TM[ rng_, cond_, form_], TheoremaForm] :=
 MakeBoxes[ TupleOf$TM[ rng_, cond_, form_], TheoremaForm] :=
 	RowBox[ { "\[LeftAngleBracket]", MakeBoxes[ SequenceOf$TM[ rng, cond, form], TheoremaForm], "\[RightAngleBracket]"}]
 
+MakeBoxes[ Abbrev$TM[ rng_, form_], TheoremaForm] :=
+	RowBox[ {UnderscriptBox[ "where", makeRangeBox[ rng, TheoremaForm]], MakeBoxes[ form, TheoremaForm]}]
+
 MakeBoxes[ IffDef$TM[ l_, r_], TheoremaForm] :=
     RowBox[ {MakeBoxes[ l, TheoremaForm],
         TagBox[ RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], Identity, SyntaxForm->"a\[Implies]b"], 
@@ -83,6 +86,7 @@ makeRangeBox[ SETRNG$[ v_, s_], fmt_] := RowBox[ {MakeBoxes[v, fmt], "\[Element]
 makeRangeBox[ PREDRNG$[ v_, p_], fmt_] := RowBox[ {MakeBoxes[ p, fmt], "[", MakeBoxes[v, fmt], "]"}]
 makeRangeBox[ STEPRNG$[ v_, lower_, upper_, step_], fmt_] := 
 	RowBox[ {RowBox[ {MakeBoxes[v, fmt], "=", MakeBoxes[ lower, fmt]}], ",", makeEllipsisBox[ step, fmt], ",", MakeBoxes[ upper, fmt]}]
+makeRangeBox[ ABBRVRNG$[ a_, e_], fmt_] := RowBox[ {MakeBoxes[ a, fmt], "=", MakeBoxes[ e, fmt]}]
 makeRangeBox[ SIMPRNG$[ v_], fmt_] := MakeBoxes[ v, fmt]
 makeRangeBox[args___] := unexpected[ makeRangeBox, {args}]
 

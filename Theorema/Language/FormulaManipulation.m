@@ -107,6 +107,17 @@ substituteFree[ args___] := unexpected[ substituteFree, {args}]
 
 
 (* ::Subsubsection:: *)
+(* sequenceFree *)
+
+isSequenceFree[ expr_] := 
+	FreeQ[ expr,
+		_Theorema`Language`SEQ$|
+		_Theorema`Computation`Language`SEQ$|
+		Theorema`Language`VAR$[_Theorema`Language`SEQ$]|
+		Theorema`Language`Computation`VAR$[_Theorema`Language`Computation`SEQ$], {1}]
+isSequenceFree[ args___] := unexpected[ isSequenceFree, {args}]
+
+(* ::Subsubsection:: *)
 (* transferToComputation *)
 
 transferToComputation[ form_, key_] :=

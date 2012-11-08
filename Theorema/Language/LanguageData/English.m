@@ -4,12 +4,14 @@ With[ {lang = "English"},
 	MessageName[META$, "usage", lang] = "";
 	MessageName[QU$, "usage", lang] = "QU$[ expr] temporarily marks quantified variables in expr.";
 	MessageName[VAR$, "usage", lang] = "";
+	MessageName[SEQ$, "usage", lang] = "";
 	MessageName[RNG$, "usage", lang] = "";
 	MessageName[SIMPRNG$, "usage", lang] = "SIMPRNG$[ x] usually denotes that the variable x ranges over the universe.";
 	MessageName[SETRNG$, "usage", lang] = "SETRNG$[ x, s] denotes that the variable x ranges over the set s.";
 	MessageName[PREDRNG$, "usage", lang] = "PREDRNG$[ x, p] denotes that the variable x satisfies the predicate p.";
 	MessageName[STEPRNG$, "usage", lang] = "STEPRNG$[ x, low, high, step] denotes that the variable x steps from low to high in steps of step.";
 	MessageName[DOMEXTRNG$, "usage", lang] = "DOMEXTRNG$[ x, dom] denotes that the variable x extends domain dom (in a domain extension definition).";
+	MessageName[ABBRVRNG$, "usage", lang] = "ABBRVRNG$[ a, e] denotes that the variable a abbreviates expression e (in a where-expression).";
 	MessageName[EqualDef$TM, "usage", lang] = "";
 	MessageName[IffDef$TM, "usage", lang] = "";
 	MessageName[Equal$TM, "usage", lang] = "";
@@ -20,6 +22,7 @@ With[ {lang = "English"},
 	MessageName[Or$TM, "usage", lang] = "";
 	MessageName[Forall$TM, "usage", lang] = "";
 	MessageName[Exists$TM, "usage", lang] = "";
+	MessageName[Abbrev$TM, "usage", lang] = "";
 	MessageName[Plus$TM, "usage", lang] = "";
 	MessageName[Times$TM, "usage", lang] = "";
 	MessageName[Less$TM, "usage", lang] = "";
@@ -30,6 +33,9 @@ With[ {lang = "English"},
 	MessageName[Union$TM, "usage", lang] = "";
 	MessageName[Tuple$TM, "usage", lang] = "";	
 	MessageName[TupleOf$TM, "usage", lang] = "";	
+	MessageName[BracketingBar$TM, "usage", lang] = "";	
+	MessageName[Subscript$TM, "usage", lang] = "";	
+	MessageName[LeftArrow$TM, "usage", lang] = "";	
 	MessageName[Set$TM, "usage", lang] = "";	
 	MessageName[SetOf$TM, "usage", lang] = "";	
 	MessageName[SequenceOf$TM, "usage", lang] = "";	
@@ -55,6 +61,8 @@ With[ {lang = "English"},
 	(* Global declarations *)	
 	MessageName[globalForall$TM, "usage", lang] = "globalForall$TM[ rng, cond, decl] is a datastructure representing a (nested) global universal variable, where 
 	decl contains further global declarations. globalForall$TM[ rng, cond] is a single global universal variable.";
+	MessageName[globalAbbrev$TM, "usage", lang] = "globalWhere$TM[ rng, cond, decl] is a datastructure representing a (nested) global abbreviation, where 
+	decl contains further global declarations. globalWhere$TM[ rng, cond] is a single global abbreviation.";
 	MessageName[globalImplies$TM, "usage", lang] = "globalImplies$TM[ cond, decl] is a datastructure representing a (nested) global condition, where
 	decl contains further global declarations. globalImplies$TM[ cond] is a single global condition.";
 	MessageName[domainConstruct$TM, "usage", lang] = "domainConstruct$TM[ dom, rng] is a datastructure representing a domain constructor for domain dom being 'the rng such that ...'.";

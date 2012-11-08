@@ -112,6 +112,15 @@ MakeExpression[ RowBox[{rng_, "|"|":", cond_}], fmt_] :=
         ]
     ] /; $parseTheoremaExpressions
 
+MakeExpression[ RowBox[{UnderscriptBox[ "where", rng_], form_}], fmt_] :=
+	(* We use the powerful toRangeBox in order to have the many variants, multiranges, etc. However, only ABBRVRNG$ makes sense in a "where",
+	   but we do not consider it a syntax error to use one of the other ranges *)
+     With[ {r = toRangeBox[ rng]},
+		MakeExpression[ RowBox[{"QU$", "[", 
+            RowBox[{ r, ",", RowBox[{ "Abbrev", "[", RowBox[{ r, ",", form}], "]"}]}],
+             "]"}], fmt]
+	]/; $parseTheoremaExpressions
+
 MakeExpression[ RowBox[{left_, RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], right_}], fmt_] :=
     MakeExpression[ RowBox[{"IffDef", "[", RowBox[{left, ",", right}], "]"}], fmt] /; $parseTheoremaExpressions
 
@@ -139,6 +148,7 @@ MakeExpression[ RowBox[ {cond_, "\[Implies]"|"\[DoubleLongRightArrow]"|"\[Double
 	MakeExpression[ RowBox[{ "globalImplies", "[", cond, "]"}], fmt] /; $parseTheoremaGlobals
 
 MakeExpression[ RowBox[{lhs_, ":=", UnderscriptBox[ "\[CapitalDelta]", rng_]}], fmt_] := 
+	(* We don't use the powerful toRangeBox because in this expression, the range does not have the many variants, multiranges, etc.*)
 	With[ {r = toDomSpecRangeBox[ rng]},
 		MakeExpression[ RowBox[{ "domainConstruct", "[", RowBox[{lhs, ",", RowBox[ {"QU$", "[", RowBox[{r, ",", r}], "]"}]}], "]"}], fmt]
 	] /; $parseTheoremaGlobals
@@ -146,6 +156,15 @@ MakeExpression[ RowBox[{lhs_, ":=", UnderscriptBox[ "\[CapitalDelta]", rng_]}], 
 toDomSpecRangeBox[ RowBox[{v_, "\[Superset]", d_}]] := RowBox[ {"RNG$", "[", RowBox[ {"DOMEXTRNG$", "[", RowBox[ {v, ",", d}], "]"}], "]"}]
 toDomSpecRangeBox[ v_String] := RowBox[ {"RNG$", "[", makeRangeSequence[ v], "]"}]
 toDomSpecRangeBox[args___] := unexpected[ toDomSpecRangeBox, {args}]
+
+MakeExpression[ UnderscriptBox[ "where", rng_], fmt_] := 
+	(* We the powerful toRangeBox in order to have the many variants, multiranges, etc. However, only ABBRVRNG$ makes sense in a "where",
+	   but we do not consider it a syntax error to use one of the other ranges *)
+	With[ {r = toRangeBox[ rng]},
+		MakeExpression[ RowBox[{"QU$", "[", 
+            RowBox[{ r, ",", RowBox[{ "globalAbbrev", "[", r, "]"}]}], "]"}], fmt]
+	] /; $parseTheoremaGlobals
+
 
 (* ::Subsection:: *)
 (* Auxiliary parsing functions *)
@@ -213,6 +232,9 @@ makeRangeSequence[ RowBox[{x___, y_, ",", RowBox[{v_, "=", lower_}], ",", Oversc
     Sequence[ makeRangeSequence[ RowBox[{x, RowBox[{y, "=", lower}], ",", OverscriptBox["\[Ellipsis]", step], ",", upper}]], ",",
     	makeSingleStepRange[ v, lower, upper, step]]
 
+makeRangeSequence[ RowBox[{a_, "=", e_}]] :=
+	makeSingleAbbrevRange[ a, e]
+
 makeRangeSequence[RowBox[{s_,",",r__}]] :=
     Sequence[ makeRangeSequence[s], ",", makeRangeSequence[RowBox[{r}]]]
 
@@ -236,6 +258,10 @@ makeSinglePredRange[args___] := unexpected[ makeSinglePredRange, {args}]
 makeSingleStepRange[ v_, lower_, upper_, step_] :=
 	RowBox[ {"STEPRNG$", "[", RowBox[ {v, ",", lower, ",", upper, ",", step}], "]"}]
 makeSingleStepRange[args___] := unexpected[ makeSingleStepRange, {args}]
+
+makeSingleAbbrevRange[ a_, e_] :=
+	RowBox[ {"ABBRVRNG$", "[", RowBox[ {a, ",", e}], "]"}]
+makeSingleAbbrevRange[ args___] := unexpected[ makeSingleAbbrevRange, {args}]
 
 getSingleRangeVar[ v_String] := v
 getSingleRangeVar[ RowBox[{v_, "\[Element]", _}]] := v

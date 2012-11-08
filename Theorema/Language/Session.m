@@ -97,7 +97,7 @@ markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
            lives in the context of the loading notebook/archive. With the substitution below, the private`sym becomes 
            a VAR$[loading`sym] *)
         s = Map[ sym_Symbol /; SymbolName[sym] === SymbolName[#] -> VAR$[#]&, specifiedVariables[r]];
-        replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {SEQ$, VAR$, NEW$, FIX$}]
+        replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {SEQ$, VAR$, FIX$}]
     ]
 
 markVariables[ Hold[ Theorema`Computation`Language`QU$[ r_Theorema`Computation`Language`RNG$, expr_]]] :=
@@ -450,6 +450,8 @@ applyGlobalDeclaration[ expr_, domainConstruct$TM[ lhs_, rng:RNG$[ SIMPRNG$[ v_]
 	substituteFree[ ReleaseHold[ markVariables[ Hold[ QU$[ rng, expr]]]], {v -> lhs}]
 applyGlobalDeclaration[ expr_, domainConstruct$TM[ lhs_, rng:RNG$[ DOMEXTRNG$[ v_, d_]]]] :=
 	substituteFree[ ReleaseHold[ markVariables[ Hold[ QU$[ rng, expr]]]], {v -> lhs}]
+applyGlobalDeclaration[ expr_, globalAbbrev$TM[ rng:RNG$[ a__ABBRVRNG$]]] := substituteFree[ ReleaseHold[ markVariables[ Hold[ QU$[ rng, expr]]]], 
+	Apply[ Rule, {a}, {1}]]
 applyGlobalDeclaration[ args___] := unexpected[ applyGlobalDeclaration, {args}]
 
 initSession[] :=
