@@ -48,9 +48,12 @@ initGUI[] :=
         		{"SetEqual", RowBox[{"A","=","B"}], False, False, False},
            		{"Union", RowBox[{"A","\[Union]","B"}], False, False, False},
         		{"Intersection", RowBox[{"A","\[Intersection]","B"}], False, False, False},
-        		{"SequenceOf", RowBox[{"{","\[Ellipsis]", "|", "\[Ellipsis]", "}"}], False, False, False}},
+        		{"SequenceOf", RowBox[{"{", "\[Ellipsis]", "|", "\[Ellipsis]", "}"}], False, False, False}},
         	{"Tuples",
-        		{"SequenceOf", RowBox[{"\[LeftAngleBracket]","\[Ellipsis]", "|", "\[Ellipsis]", "\[RightAngleBracket]"}], False, False, False}},
+        		{"Subscript", SubscriptBox[ "T", RowBox[{"i", ",", "\[Ellipsis]"}]], False, True, False},
+        		{"ReplacePart", SubscriptBox[ "T", RowBox[{RowBox[{"i", "\[LeftArrow]", "t"}], ",", "\[Ellipsis]"}]], False, True, False},
+        		{"Length", RowBox[{"\[LeftBracketingBar]", "T", "\[RightBracketingBar]"}], False, True, False},
+        		{"SequenceOf", RowBox[{"\[LeftAngleBracket]", "\[Ellipsis]", "|", "\[Ellipsis]", "\[RightAngleBracket]"}], False, True, False}},
         	{"Arithmetic", 
         		{"Plus", RowBox[{"A","+","B"}], False, True, False},
         		{"Times", RowBox[{"A","*","B"}], False, True, False},
@@ -76,8 +79,13 @@ initGUI[] :=
         		{"Which", RowBox[{"Which","[","\[Ellipsis]","]"}], False, True, False},
         		{"Switch", RowBox[{"Switch","[","\[Ellipsis]","]"}], False, True, False}}
         };
+        (* Init views in commander *)
         $tcActivitiesView = 1;
         $tcActionView = 1;
+        (* Init status of opener views *)
+        $tcSessArchCreate = True;
+        $tcSessArchLoad = True;
+        Scan[ ToExpression, Map[ "$builtinStructState$" <> # <> "=True"&, Map[ First, $tmaBuiltins]]];
 		$kbStruct = {};
 		$initLabel = "???";
 		$labelSeparator = ",";
@@ -90,6 +98,7 @@ initGUI[] :=
 		$maxSearchDepth = 200;
 		initBuiltins[ {"prove", "compute", "solve"}];
 		$selectedRuleSet = Hold[ basicTheoremaLanguageRules];
+		$selectedStrategy = applyOnce;
 		$CtrlActive = 0;
 		$ShiftActive = 0;
 		$TMAactDecl = translate[ "None"];
@@ -143,8 +152,8 @@ openTheoremaCommander[ ] /; $Notebooks :=
         			(* prove *)  {Dynamic[ Refresh[ displaySelectedGoal[], UpdateInterval -> 2]],
         				Dynamic[Refresh[displayKBBrowser["prove"], TrackedSymbols :> {$kbStruct}]],
         				displayBuiltinBrowser["prove"],
-        				Dynamic[ Refresh[ selectProver[], TrackedSymbols :> {$selectedRuleSet}]],
-        				Dynamic[ Refresh[ submitProveTask[ ], TrackedSymbols :> {$selectedProofGoal, $selectedProofKB, $selectedProver}]],
+        				Dynamic[ Refresh[ selectProver[], TrackedSymbols :> {$selectedRuleSet, $selectedStrategy}]],
+        				Dynamic[ Refresh[ submitProveTask[ ], TrackedSymbols :> {$selectedProofGoal, $selectedProofKB}]],
         				Dynamic[ Refresh[ proofNavigation[ $TMAproofTree], TrackedSymbols :> {$TMAproofTree, $TMAproofNotebook, ruleTextActive, $proofTreeScale, $selectedProofStep}]]},
         			(* compute *){Dynamic[Refresh[ compSetup[], TrackedSymbols :> {$buttonNat}]],
         				Dynamic[Refresh[displayKBBrowser["compute"], TrackedSymbols :> {$kbStruct}]],
@@ -1282,9 +1291,9 @@ archButtons[] :=
             makeArchCreateButton[],
             makeArchNewButton[],
             makeArchInfoButton[],
-            makeArchCloseButton[]}]}, True],
+            makeArchCloseButton[]}]}, Dynamic[$tcSessArchCreate]],
         OpenerView[{Style[translate["tcLangTabArchTabSectionLoad"],"Section"], Column[{
-            makeArchLoadButton[]}]}, True]}
+            makeArchLoadButton[]}]}, Dynamic[$tcSessArchLoad]]}
     ]
 archButtons[args___] := unexpected[archButtons, {args}]
 
@@ -1646,8 +1655,10 @@ allFormulae = {{"Sets", {}},
 
 makeButtonCategory[ {category_String, buttons_List}] :=
 	OpenerView[{
-			Style[ translate[ category], "Section"],
-			Grid[ Partition[ Map[ makeLangButton, buttons], 2], Alignment -> {Left, Top}]}]
+		Style[ translate[ category], "Section"],
+		Grid[ Partition[ Map[ makeLangButton, buttons], 2], Alignment -> {Left, Top}]},
+		ToExpression["Dynamic[$tcSessMathOpener$"<>category<>"]"]]
+
 makeButtonCategory[ args___] := unexpected[ makeButtonCategory, {args}]
 
 langButtons[] := 
