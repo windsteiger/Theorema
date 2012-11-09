@@ -409,7 +409,7 @@ displayGlobalDeclarations[ nb_NotebookObject] :=
 		pos = First[ Position[ raw, sel]];
 		availDecl = applicableGlobalDeclarations[ nb, raw, pos];
 		If[ availDecl =!= {},
-			globDecl = theoremaDisplay[ applyGlobalDeclaration[ "\[Ellipsis]", availDecl]],
+			globDecl = DisplayForm[ RowBox[ Map[ theoremaDisplay, availDecl]]],
 			globDecl = translate[ "None"]
 		];
 		globDecl

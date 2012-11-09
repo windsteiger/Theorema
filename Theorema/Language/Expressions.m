@@ -87,9 +87,30 @@ makeRangeBox[ PREDRNG$[ v_, p_], fmt_] := RowBox[ {MakeBoxes[ p, fmt], "[", Make
 makeRangeBox[ STEPRNG$[ v_, lower_, upper_, step_], fmt_] := 
 	RowBox[ {RowBox[ {MakeBoxes[v, fmt], "=", MakeBoxes[ lower, fmt]}], ",", makeEllipsisBox[ step, fmt], ",", MakeBoxes[ upper, fmt]}]
 makeRangeBox[ ABBRVRNG$[ a_, e_], fmt_] := RowBox[ {MakeBoxes[ a, fmt], "=", MakeBoxes[ e, fmt]}]
+makeRangeBox[ DOMEXTRNG$[ v_, d_], fmt_] := RowBox[ {MakeBoxes[ v, fmt], "\[Superset]", MakeBoxes[ d, fmt]}]
 makeRangeBox[ SIMPRNG$[ v_], fmt_] := MakeBoxes[ v, fmt]
 makeRangeBox[args___] := unexpected[ makeRangeBox, {args}]
 
 makeEllipsisBox[ 1, fmt_] := "\[Ellipsis]"
 makeEllipsisBox[ step_, fmt_] := OverscriptBox[ "\[Ellipsis]", MakeBoxes[ step, fmt]]
 makeEllipsisBox[ args___] := unexpected[ makeEllipsisBox, {args}]
+
+
+(* ::Section:: *)
+(* Global Declarations Display *)
+
+MakeBoxes[ globalForall$TM[ rng_RNG$, True], TheoremaForm] :=
+	UnderscriptBox[ "\[ForAll]", makeRangeBox[ rng, TheoremaForm]]
+	
+MakeBoxes[ globalForall$TM[ rng_RNG$, cond_], TheoremaForm] :=
+	UnderscriptBox[ UnderscriptBox[ "\[ForAll]", makeRangeBox[ rng, TheoremaForm]], MakeBoxes[ cond, TheoremaForm]]	
+
+MakeBoxes[ globalImplies$TM[ c_], TheoremaForm] :=
+	RowBox[ {MakeBoxes[ c, TheoremaForm], "\[Implies]"}]	
+
+MakeBoxes[ domainConstruct$TM[ _, rng_RNG$], TheoremaForm] :=
+	UnderscriptBox[ "domain", makeRangeBox[ rng, TheoremaForm]]	
+
+MakeBoxes[ globalAbbrev$TM[ rng_RNG$], TheoremaForm] :=
+	UnderscriptBox[ "where", makeRangeBox[ rng, TheoremaForm]]
+
