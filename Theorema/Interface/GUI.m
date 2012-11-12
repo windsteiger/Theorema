@@ -421,7 +421,7 @@ displayLabeledFormula[ FML$[ key_, form_, lab_]] :=
 		{ If[ nb =!= $Failed,
 			Hyperlink[ Style[ labDisp, "FormulaLabel"], {nb, key[[1]]}],
 			Tooltip[ Style[ labDisp, "FormulaLabel"], translate[ "noNB"] <> src]],
-		Style[ theoremaDisplay[ form], "DisplayFormula"]}
+		Style[ theoremaDisplay[ form], "DisplayFormula", LineBreakWithin -> False]}
 	]
 displayLabeledFormula[ args___] := unexpected[ displayLabeledFormula, {args}]
 
@@ -1207,7 +1207,7 @@ makeEnvButton[args___] := unexpected[makeEnvButton, {args}]
 makeFormButton[] := Button[ translate["tcSessTabEnvTabButtonFormLabel"], insertNewFormulaCell[ "Env"], Alignment -> {Left, Top}, ImageSize -> Automatic]
 makeFormButton[args___] := unexpected[makeFormButton, {args}]
 
-makeDeclButtons[] := Row[ Map[ makeDeclBut, {"VAR", "VARCOND", "COND"}], Spacer[5]]
+makeDeclButtons[] := Row[ Map[ makeDeclBut, {"VAR", "VARCOND", "COND", "ABBREV"}], Spacer[5]]
 makeDeclButtons[args___] := unexpected[ makeDeclButtons, {args}]
 
 showDecl[ ] := OpenerView[ {Style[ translate["tcSessTabEnvTabButtonAllDeclLabel"], "Section"], displayDecl[]}, Dynamic[$tcAllDeclOpener]]
@@ -1222,34 +1222,44 @@ displayDecl[ args___] := unexpected[ displayDecl, {args}]
 
 declButtonData["VAR"] := 
 	{
-		DisplayForm[ UnderscriptBox[ "\[ForAll]", Placeholder[ "rg"]]], 
-		UnderscriptBox[ "\[ForAll]", "\[Placeholder]"],
+		DisplayForm[ UnderscriptBox[ "\[ForAll]", SelectionPlaceholder[ "rg"]]], 
+		UnderscriptBox[ "\[ForAll]", "\[SelectionPlaceholder]"],
 		translate[ "GVARTooltip"]
 	}
 
 declButtonData["VARCOND"] := 
 	{
-		DisplayForm[ UnderscriptBox[ UnderscriptBox[ "\[ForAll]", Placeholder[ "rg"]], Placeholder[ "cond"]]],
-		UnderscriptBox[ UnderscriptBox[ "\[ForAll]", "\[Placeholder]"], "\[Placeholder]"],
+		DisplayForm[ UnderscriptBox[ UnderscriptBox[ "\[ForAll]", SelectionPlaceholder[ "rg"]], Placeholder[ "cond"]]],
+		UnderscriptBox[ UnderscriptBox[ "\[ForAll]", "\[SelectionPlaceholder]"], "\[Placeholder]"],
 		translate[ "GVARCONDTooltip"]
 	}
 
 declButtonData["COND"] := 
 	{
-		DisplayForm[ RowBox[ {Placeholder[ "cond"], "\[Implies]"}]],
-		RowBox[ {"\[Placeholder]", "\[Implies]"}],
+		DisplayForm[ RowBox[ {SelectionPlaceholder[ "cond"], "\[DoubleRightArrow]"}]],
+		RowBox[ {"\[SelectionPlaceholder]", "\[Implies]"}],
 		translate[ "GCONDTooltip"]
 	}
+
+declButtonData["ABBREV"] := 
+	{
+		DisplayForm[ UnderscriptBox[ "where", RowBox[ {SelectionPlaceholder[ "v"], "=", Placeholder[ "\[Ellipsis]"]}]]], 
+		UnderscriptBox[ "where", RowBox[ {"\[SelectionPlaceholder]", "=", "\[Placeholder]"}]],
+		translate[ "GABBREVTooltip"]
+	}
+
 makeDeclBut[ bname_String] := makeDeclBut[ bname, "GlobalDeclaration"]
 	
 makeDeclBut[ bname_String, style_String] :=
     With[ { bd = declButtonData[ bname]},
 			Tooltip[ Button[ bd[[1]], 
+				(* Should check CurrentValue["SelectionData"] to find out what is currently selected *)
 				FrontEndExecute[
-					NotebookWrite[ InputNotebook[], Cell[ BoxData[ bd[[2]]], style], All];
+					NotebookApply[ InputNotebook[], bd[[2]], Placeholder];
+					(*NotebookApply[ InputNotebook[], Cell[ BoxData[ bd[[2]]], style], Placeholder];
 					If[ MatchQ[ NotebookRead[ InputNotebook[]], _Cell],
 						SelectionMove[ InputNotebook[], All, CellContents]
-					]
+					]*)
 				],
 				Appearance -> "DialogBox", Alignment -> {Left, Top}, ImageSize -> All],
 				bd[[3]], TooltipDelay -> 0.5]
@@ -1272,7 +1282,7 @@ structButtons[] :=
     Column[{
     	Labeled[ Row[ {makeNbNewButton[], makeNbOpenButton[]}, Spacer[5]],
     		translate[ "Notebooks"], {{Top, Left}}],
-    	Labeled[ Grid[ Partition[ Map[ makeEnvButton, allEnvironments], 2]],
+    	Labeled[ Grid[ Partition[ Map[ makeEnvButton, allEnvironments], 4]],
     		translate[ "Environments"], {{Top, Left}}],
     	Labeled[ Column[ {makeFormButton[], Dynamic[ showEnv[]]}, Left, Spacer[2]],
     		translate[ "Formulae"], {{Top, Left}}],
@@ -1584,7 +1594,7 @@ langButtonData["EQUIVDEF"] :=
 			translate["EQUIVDEF"], 
 			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
 				RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}],
-				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
+				TagBox[ FrameBox["right"], "Placeholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]",
 			TagBox[ RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], Identity, SyntaxForm->"a\[Implies]b"], "\[Placeholder]"}],
 		translate["EQUIVDEFTooltip"]
