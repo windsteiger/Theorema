@@ -104,6 +104,9 @@ MakeBoxes[ globalForall$TM[ rng_RNG$, True], TheoremaForm] :=
 	
 MakeBoxes[ globalForall$TM[ rng_RNG$, cond_], TheoremaForm] :=
 	UnderscriptBox[ UnderscriptBox[ "\[ForAll]", makeRangeBox[ rng, TheoremaForm]], MakeBoxes[ cond, TheoremaForm]]	
+	
+MakeBoxes[ globalForall$TM[ rng_RNG$, cond_, form_], TheoremaForm] := 
+	MakeBoxes[ Forall$TM[ rng, cond, form], TheoremaForm]
 
 MakeBoxes[ globalImplies$TM[ c_], TheoremaForm] :=
 	RowBox[ {MakeBoxes[ c, TheoremaForm], "\[Implies]"}]	
