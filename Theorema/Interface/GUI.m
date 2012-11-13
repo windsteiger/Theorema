@@ -1012,7 +1012,10 @@ proofNavigation[ po_] :=
     	geom = Replace[ ImageSize, Options[ proofTree, ImageSize]];
     	(* Putting the frame around the inner Pane is a work-around, otherwise the pane is not positioned correctly when the proof tree is higher than 420 *)
         Column[{
-        	ButtonBar[ {"+" :> ($proofTreeScale *= 2), "\[FivePointedStar]" :> ($proofTreeScale = 1), "\[DottedSquare]" :> ($proofTreeScale = Fit), "-" :> ($proofTreeScale /= 2)},
+        	ButtonBar[ {Tooltip[ "+", translate[ "zoom in"]] :> ($proofTreeScale *= 2), 
+        		Tooltip[ "\[FivePointedStar]", translate[ "optimal size"]] :> ($proofTreeScale = 1), 
+        		Tooltip[ "\[DottedSquare]", translate[ "fit into window"]] :> ($proofTreeScale = Fit), 
+        		Tooltip[ "-", translate[ "zoom out"]] :> ($proofTreeScale /= 2)},
         		FrameMargins -> {{15, 15}, {2, 0}}],
         	Framed[ Pane[ proofTree,
         		{360, 510}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic, ScrollPosition -> {geom[[1]]/2-175, 0}], FrameStyle -> None],
