@@ -51,7 +51,7 @@ subProofHeader[ proofAlternatives, lang, ___, pVal_, {p_}] := {textCell[ ToStrin
 
 proofStepText[ searchDepthLimit, lang, {{goal_FML$, kb___FML$}}, {}, ___] :=
 	Join[{textCell[ "Search depth exceeded! The open proof situation is:"]}, 
-		proofStepText[ openProofSituation, lang, {goal, kb}, {}]
+		proofStepText[ openProofSituation, lang, {{goal, kb}}, {}]
 	];
 
 proofStepText[ invalidProofNode, lang, expr_, ___] := {textCell[ "The expression returned by the selected proof strategy is not a valid proof tree node."],
