@@ -102,6 +102,9 @@ inlineTheoremaExpression[ args___] := unexpected[ inlineTheoremaExpression, {arg
 inlineTheoremaExpressionSeq[ expr_List] := Sequence[ Riffle[ Map[ inlineTheoremaExpression, expr], ", "]]
 inlineTheoremaExpressionSeq[ args___] := unexpected[ inlineTheoremaExpressionSeq, {args}]
 
+formulaReferenceSequence[ refs_List] := Sequence[ Riffle[ Map[ formulaReference, refs], ", "]]
+formulaReferenceSequence[ args___] := unexpected[ formulaReferenceSequence, {args}]
+
 End[]
 
 Get[ "Theorema`Provers`Strategies`"]

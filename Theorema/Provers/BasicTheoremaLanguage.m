@@ -224,8 +224,8 @@ PRFSIT$[ g_, k:{pre___, e:FML$[ _, u:Exists$TM[ rng_, cond_, A_], _], post___}, 
 
 inferenceRule[ expandDef] = 
 ps:PRFSIT$[ g_, k_List, i_String, rest___?OptionQ] :> 
-	Module[ {locInfo = ps.local, def, rules, usedDefs, newForm, newG, newK = {}, defExpand = False, j, usedForms, genForms},
-		def = Cases[ k, FML$[ key_, d_?(!FreeQ[ #, _IffDef$TM|_EqualDef$TM]&), _] -> {d, key}];
+	Module[ {locInfo = ps.local, def, rules, usedDefs, newForm, newG, newK = {}, defExpand = False, j, usedForms, genForms, replBy = {}},
+		def = Cases[ k, FML$[ _, _?(!FreeQ[ #, _IffDef$TM|_EqualDef$TM]&), _]];
 		If[ def =!= {},
 			(* There are defs in the KB. This will apply only at the beginning, since these will be deleted from the KB *)
 			rules = defsToRules[ def],
@@ -248,8 +248,9 @@ ps:PRFSIT$[ g_, k_List, i_String, rest___?OptionQ] :>
 			(* The first used and generated are old/new goal. If they are identical, then the proof header won't print any text *)
 			usedForms = {{g}};
 			genForms = {{newG}};
+			AppendTo[ replBy, usedDefs];
 			Do[
-				If[ MemberQ[ def, k[[j]].key, {2}], Continue[]];
+				If[ MemberQ[ def, k[[j]]], Continue[]];
                 {newForm, usedDefs} = replaceAndTrack[ k[[j]].formula, rules];
                 If[ usedDefs =!= {},
                     (* rewrite applied *)
@@ -257,6 +258,7 @@ ps:PRFSIT$[ g_, k_List, i_String, rest___?OptionQ] :>
                     AppendTo[ newK, newForm];
                     AppendTo[ usedForms, {k[[j]]}];
                     AppendTo[ genForms, {newForm}];
+					AppendTo[ replBy, usedDefs];
                     defExpand = True,
                     (* else: no def expansion in goal *)
                     AppendTo[ newK, k[[j]]]
@@ -264,7 +266,7 @@ ps:PRFSIT$[ g_, k_List, i_String, rest___?OptionQ] :>
                 {j, Length[ k]}
             ];
             If[ defExpand,
-            	makeANDNODE[ makePRFINFO[ name -> expandDef, used -> usedForms, generated -> genForms, id -> i], 
+            	makeANDNODE[ makePRFINFO[ name -> expandDef, used -> usedForms, generated -> genForms, id -> i, "usedDefs" -> replBy], 
 					newSubgoal[ goal -> newG, kb -> newK, local -> locInfo, rest]],
 				$Failed
             ]

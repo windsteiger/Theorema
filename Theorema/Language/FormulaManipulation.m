@@ -165,6 +165,8 @@ executableForm[ {(Theorema`Language`Iff$TM|Theorema`Language`IffDef$TM|Theorema`
         With[ { left = execLeft[ Hold[l]], 
         	cond = makeConjunction[ Prepend[ c, "DUMMY$COND"], Theorema`Computation`Language`And$TM],
         	right = execRight[ Hold[r]]},
+        	(* The complicated DUMMY$COND... construction is necessary because the key itself contains strings,
+        	   and we need to get the escaped strings into the Hold *)
             StringReplace[ left <> "/;" <> execRight[ Hold[ cond]] <> ":=" <> right,
             	{ "DUMMY$COND" -> "Theorema`Computation`Language`Private`activeComputationKB[" <> ToString[ key, InputForm] <> "]",
             		"Theorema`Language`" -> "Theorema`Computation`Language`",
@@ -203,21 +205,23 @@ execRight[ args___] := unexpected[ execRight, {args}]
 defsToRules[ defList_List] := Map[ singleDefToRule, defList]
 defsToRules[ args___] := unexpected[ defsToRules, {args}]
 
-singleDefToRule[ {form_, key_}] :=
+singleDefToRule[ orig:FML$[ _, form_, _]] :=
 	Module[{stripUniv, r},
 		stripUniv = stripUniversalQuantifiers[ form];
-		r = ruleForm[ stripUniv, key];
+		r = ruleForm[ stripUniv, orig];
 		ToExpression[ r]
 	]
 singleDefToRule[ args___] := unexpected[ singleDefToRule, {args}]
 
-ruleForm[ {(Theorema`Language`Iff$TM|Theorema`Language`IffDef$TM|Theorema`Language`Equal$TM|Theorema`Language`EqualDef$TM)[ l_, r_], c_List, var_List}, key_] :=
+ruleForm[ {(Theorema`Language`Iff$TM|Theorema`Language`IffDef$TM|Theorema`Language`Equal$TM|Theorema`Language`EqualDef$TM)[ l_, r_], c_List, var_List}, ref_] :=
     Block[ {testMember},
         With[ {left = execLeft[ Hold[l]], 
                cond = makeConjunction[ Map[ testMember[ $TMAKBatomic, #]&, c], And],
-               right = "(" <> StringReplace[ execRight[ Hold[ AppendTo[ $usedDefinitionsInRewrite, "DUMMY$KEY"]; r]],
-            	"DUMMY$KEY" -> ToString[ key, InputForm]] <> ")"},
-            left <> "/;" <> execRight[ Hold[ cond] /. testMember -> MemberQ] <> ":> " <> right
+        		(* The complicated DUMMY$DEF... construction is necessary because ref itself contains strings (it's a whole formula incl key, label),
+        	   	and we need to get the escaped strings into the Hold *)
+               right = StringReplace[ execRight[ Hold[ AppendTo[ $usedDefinitionsInRewrite, "DUMMY$DEF"]; r]],
+               	"DUMMY$DEF" -> ToString[ ref, InputForm]]},
+            "RuleDelayed[" <> left <> "/;" <> execRight[ Hold[ cond] /. testMember -> MemberQ] <> "," <> right <> "]"
         ]
     ]
 ruleForm[ expr_, key_] := $Failed

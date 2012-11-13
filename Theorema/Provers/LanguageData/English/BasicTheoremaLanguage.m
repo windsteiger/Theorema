@@ -138,15 +138,21 @@ proofStepText[ existsKB, lang, {{g_}}, {{simpG_}}, ___] := {textCell[ "The unive
 	goalCell[ simpG, "."]
 	};
 
-proofStepText[ expandDef, lang, u_, g_, ___] := 
-	Module[ {stepText = {}, j},
+proofStepText[ expandDef, lang, u_, g_, ___, "usedDefs" -> defs_List, ___] := 
+	Module[ {stepText = {}, j, repl, suffix},
 		If[ u[[1]] =!= g[[1]],
-			stepText = { textCell[ "We now have to show"], goalCell[ g[[1, 1]], "."]}
+			repl = defs[[1]];
+			suffix = If[ Length[ repl] == 1, "", "s"];
+			stepText = { textCell[ "In order to prove ", formulaReference[ u[[1, 1]]], ", using definition" <> suffix <> " ", 
+				formulaReferenceSequence[ repl], ", we now have to show"],
+				goalCell[ g[[1, 1]], "."]}
 		];
 		PrependTo[ stepText, textCell[ "We expand definitions:"]];
 		Do[
+			repl = defs[[j]];
+			suffix = If[ Length[ repl] == 1, "", "s"];
 			stepText = Join[ stepText, 
-				{textCell[ "From ", formulaReference[ u[[j, 1]]], " we know, by definition,"], 
+				{textCell[ "From ", formulaReference[ u[[j, 1]]], " we know, by definition" <> suffix <> " ", formulaReferenceSequence[ repl], ","], 
 				assumptionCell[ g[[j, 1]]]}],
 			{j, 2, Length[g]}
 		];
