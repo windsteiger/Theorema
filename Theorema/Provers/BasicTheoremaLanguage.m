@@ -218,6 +218,59 @@ PRFSIT$[ g_, k:{pre___, e:FML$[ _, u:Exists$TM[ rng_, cond_, A_], _], post___}, 
 		]
 	]
 
+
+(* ::Section:: *)
+(* Expand Definitions *)
+
+inferenceRule[ expandDef] = 
+ps:PRFSIT$[ g_, k_List, i_String, rest___?OptionQ] :> 
+	Module[ {locInfo = ps.local, def, rules, usedDefs, newForm, newG, newK = {}, defExpand = False, j, usedForms, genForms},
+		def = Cases[ k, FML$[ key_, d_?(!FreeQ[ #, _IffDef$TM|_EqualDef$TM]&), _] -> {d, key}];
+		If[ def =!= {},
+			(* There are defs in the KB. This will apply only at the beginning, since these will be deleted from the KB *)
+			rules = defsToRules[ def],
+			(* else *)
+			rules = getLocalInfo[ locInfo, "defRules"]
+		];
+		If[ rules === $Failed,
+			(* There are no definitions available at all in this proof -> expanding defs does not apply *)
+			$Failed,
+			(* else: we have definition rewrite rules *)
+			locInfo = putLocalInfo[ locInfo, "defRules" -> rules];
+			{newForm, usedDefs} = replaceAndTrack[ g.formula, rules];
+			If[ usedDefs =!= {},
+				(* rewrite applied *)
+				newG = makeFML[ formula -> newForm];
+				defExpand = True,
+				(* else: no def expansion in goal *)
+				newG = g
+			];
+			(* The first used and generated are old/new goal. If they are identical, then the proof header won't print any text *)
+			usedForms = {{g}};
+			genForms = {{newG}};
+			Do[
+				If[ MemberQ[ def, k[[j]].key, {2}], Continue[]];
+                {newForm, usedDefs} = replaceAndTrack[ k[[j]].formula, rules];
+                If[ usedDefs =!= {},
+                    (* rewrite applied *)
+                    newForm = makeFML[ formula -> newForm];
+                    AppendTo[ newK, newForm];
+                    AppendTo[ usedForms, {k[[j]]}];
+                    AppendTo[ genForms, {newForm}];
+                    defExpand = True,
+                    (* else: no def expansion in goal *)
+                    AppendTo[ newK, k[[j]]]
+                ],
+                {j, Length[ k]}
+            ];
+            If[ defExpand,
+            	makeANDNODE[ makePRFINFO[ name -> expandDef, used -> usedForms, generated -> genForms, id -> i], 
+					newSubgoal[ goal -> newG, kb -> newK, local -> locInfo, rest]],
+				$Failed
+            ]
+		]
+	]
+
 (* ::Section:: *)
 (* Rule composition *)
 
@@ -256,7 +309,8 @@ registerRuleSet[ "Basic Theorema Language Rules", basicTheoremaLanguageRules, {
 	quantifierRules, 
 	connectiveRules, 
 	equalityRules,
-	{contradiction, True, True, 100}
+	{contradiction, True, True, 100},
+	{expandDef, True, True, 80}
 	}]
 
 End[]

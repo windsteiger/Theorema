@@ -320,8 +320,8 @@ PRFSIT$ /: Dot[ PRFSIT$[ _, _, _, _, rules -> Hold[r_], ruleActivity -> act_, ru
 PRFSIT$ /: Dot[ PRFSIT$[ _, _, _, _, rules -> Hold[r_], ___], rules] := r
 (* The following access should work for both standard (e.g. local, ruleActivity, rulePriority, strategy) and optional components, hence, key need not be a string *)
 PRFSIT$ /: Dot[ PRFSIT$[ _, _, _, ___, (Rule|RuleDelayed)[ key_, val_], ___], key_] := val
-(* Non-existing components should give {} *)
-PRFSIT$ /: Dot[ PRFSIT$[ _, _, _, ___], key_String] := {}
+(* Non-existing components should give $Failed *)
+PRFSIT$ /: Dot[ PRFSIT$[ _, _, _, ___], key_String] := $Failed
 PRFSIT$ /: Dot[ _PRFSIT$, proofValue] := pending
 PRFSIT$ /: Dot[ p_PRFSIT$, s___] := unexpected[ Dot, {p, s}]
 

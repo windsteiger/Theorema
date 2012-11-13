@@ -128,6 +128,12 @@ transferToComputation[ form_, key_] :=
 	]
 transferToComputation[ args___] := unexpected[ transferToComputation, {args}]
 
+(*
+	stripUniversalQuantifiers[ form] transforms form into a list {f, c, v}, where
+		f is the innermost formula being neither a universal quantified formula nor an implication
+		c is a list of conditions being applicable to f
+		v is a list of variables contained in f 
+*)
 stripUniversalQuantifiers[ Theorema`Language`Forall$TM[ r_, c_, f_]] :=
 	Module[ {rc, vars, cond, inner},
 		rc = rangeToCondition[ r];
@@ -190,6 +196,43 @@ execRight[ e_Hold] :=
 	]
 execRight[ args___] := unexpected[ execRight, {args}]
 
+
+(* ::Subsubsection:: *)
+(* defsToRules *)
+
+defsToRules[ defList_List] := Map[ singleDefToRule, defList]
+defsToRules[ args___] := unexpected[ defsToRules, {args}]
+
+singleDefToRule[ {form_, key_}] :=
+	Module[{stripUniv, r},
+		stripUniv = stripUniversalQuantifiers[ form];
+		r = ruleForm[ stripUniv, key];
+		ToExpression[ r]
+	]
+singleDefToRule[ args___] := unexpected[ singleDefToRule, {args}]
+
+ruleForm[ {(Theorema`Language`Iff$TM|Theorema`Language`IffDef$TM|Theorema`Language`Equal$TM|Theorema`Language`EqualDef$TM)[ l_, r_], c_List, var_List}, key_] :=
+    Block[ {testMember},
+        With[ {left = execLeft[ Hold[l]], 
+               cond = makeConjunction[ Map[ testMember[ $TMAKBatomic, #]&, c], And],
+               right = "(" <> StringReplace[ execRight[ Hold[ AppendTo[ $usedDefinitionsInRewrite, "DUMMY$KEY"]; r]],
+            	"DUMMY$KEY" -> ToString[ key, InputForm]] <> ")"},
+            left <> "/;" <> execRight[ Hold[ cond] /. testMember -> MemberQ] <> ":> " <> right
+        ]
+    ]
+ruleForm[ expr_, key_] := $Failed
+ruleForm[ args___] := unexpected[ ruleForm, {args}]
+
+(*
+	replaceAndTrack[ expr_, repl_List] results in {new, used} where
+		new = expr /. repl and
+		used is a list of formula keys corresponding to the formulae from which the applied replacements have been derived
+*)
+replaceAndTrack[ expr_, repl_List] :=
+	Block[{$usedDefinitionsInRewrite = {}},
+		{expr /. repl, $usedDefinitionsInRewrite}
+	]
+replaceAndTrack[ args___] := unexpected[ replaceAndTrack, {args}]
 
 (* ::Section:: *)
 (* FML$ datastructure *)

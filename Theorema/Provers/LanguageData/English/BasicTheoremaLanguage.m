@@ -24,6 +24,7 @@ MessageName[ forallGoal, "usage", lang] = "Prove universally quantified goal";
 MessageName[ forallKB, "usage", lang] = "Instantiate universally quantified formula";
 MessageName[ existsGoal, "usage", lang] = "Prove existentially quantified goal by introducing meta variables";
 MessageName[ existsKB, "usage", lang] = "Instantiate existentially quantified formula";
+MessageName[ expandDef, "usage", lang] = "Expand definitions";
 
 ] (* With *)
 
@@ -136,6 +137,21 @@ proofStepText[ existsKB, lang, {{e_}}, {new_List}, ___, "abf" -> v_List, ___] :=
 proofStepText[ existsKB, lang, {{g_}}, {{simpG_}}, ___] := {textCell[ "The universally quantified goal ", formulaReference[ g], " simplifies to"],
 	goalCell[ simpG, "."]
 	};
+
+proofStepText[ expandDef, lang, u_, g_, ___] := 
+	Module[ {stepText = {}, j},
+		If[ u[[1]] =!= g[[1]],
+			stepText = { textCell[ "We now have to show"], goalCell[ g[[1, 1]], "."]}
+		];
+		PrependTo[ stepText, textCell[ "We expand definitions:"]];
+		Do[
+			stepText = Join[ stepText, 
+				{textCell[ "From ", formulaReference[ u[[j, 1]]], " we know, by definition,"], 
+				assumptionCell[ g[[j, 1]]]}],
+			{j, 2, Length[g]}
+		];
+		stepText
+	];
 	
 ] (* With *)
 

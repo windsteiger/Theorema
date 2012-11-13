@@ -65,7 +65,7 @@ applyOnceAndLevelSaturation[ args___] := unexpected[ applyOnceAndLevelSaturation
 levelSaturation[ ps_PRFSIT$, sat1rules_List, sat2Rules_List] :=
 	Module[{locInfo = ps.local, satKB, psKB = ps.kb, l, posNew, posRearrKB, pairs = {}, i, j, newForms, newPairs},
 		l = Length[ psKB];
-		satKB = Replace[ "lastSat", locInfo];
+		satKB = getLocalInfo[ locInfo, "lastSat"];
 		(* flat list of positions of new forms in KB since last saturation run
 		   Since KB is a plain unstructured list all positions are specified by exactly 1 integer *)
 		posNew = Flatten[ Position[ psKB, _?(!MemberQ[ satKB, #.id]&), {1}, Heads -> False]];
