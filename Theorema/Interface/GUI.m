@@ -399,6 +399,7 @@ displaySelectedGoal[ ] :=
             translate["noGoal"],
             With[ {selGoal = goal[[1]]},
             	Column[ {
+            		Button[ translate[ "OKnext"], $selectedProofGoal = selGoal; $tcActionView++],
             		Row[ displayLabeledFormula[ selGoal], Spacer[5]],
             		Button[ translate[ "OKnext"], $selectedProofGoal = selGoal; $tcActionView++]}]
             ]
@@ -760,12 +761,15 @@ displayKBBrowser[ task_String] :=
             emptyPane[translate["noKnowl"]],
             (* generate tabs for each notebook,
                tab label contains a short form of the filename, tab contains a Pane containing the structured view *)
-            TabView[
-                  Map[Tooltip[Style[FileBaseName[#[[1]]], "NotebookName"], #[[1]]] -> 
-                     Pane[structView[#[[1]], #[[2]], {}, task][[1]],
-                      ImageSizeAction -> "Scrollable", Scrollbars -> Automatic] &, 
-                   $kbStruct], 
-                  Appearance -> {"Limited", 10}, FrameMargins->None]
+            Column[{
+            	Button[ translate[ "OKnext"], $tcActionView++],
+                TabView[
+                  		Map[Tooltip[Style[FileBaseName[#[[1]]], "NotebookName"], #[[1]]] -> 
+                     		Pane[structView[#[[1]], #[[2]], {}, task][[1]], ImageSizeAction -> "Scrollable", Scrollbars -> Automatic] &, 
+                   			$kbStruct], 
+                  		Appearance -> {"Limited", 10}, FrameMargins->None],
+                Button[ translate[ "OKnext"], $tcActionView++]
+            }]
         ]
     ]
 displayKBBrowser[args___] :=
@@ -924,13 +928,15 @@ setAll[l_, test_, val_] :=
 
 displayBuiltinBrowser[ task_String] :=
   Column[{
-  	Button[ translate[ "ResetBui"], initBuiltins[ {task}]],
-  	structViewBuiltin[ $tmaBuiltins, {}, task][[1]]
+	Row[ {Button[ translate[ "ResetBui"], initBuiltins[ {task}]], Button[ translate[ "OKnext"], $tcActionView++]}, Spacer[3]],
+  	structViewBuiltin[ $tmaBuiltins, {}, task][[1]],
+  	Button[ translate[ "OKnext"], $tcActionView++]
   }]
 displayBuiltinBrowser[args___] := unexcpected[ displayBuiltinBrowser, {args}]
 
 selectProver[ ] :=
     Column[{
+    	Button[ translate[ "OKnext"], $tcActionView++],
     	Labeled[ Tooltip[ PopupMenu[ Dynamic[ $selectedRuleSet], Map[ MapAt[ translate, #, {2}]&, $registeredRuleSets]],
     			Apply[ Function[ rs, MessageName[ rs, "usage"], {HoldFirst}], $selectedRuleSet]], 
     		translate[ "pRules"], {{ Top, Left}}],
@@ -954,17 +960,27 @@ selectProver[ ] :=
     		translate[ "pSimp"], {{ Top, Left}}],
     	Labeled[ RadioButtonBar[ 
     		Dynamic[Theorema`Provers`Common`Private`$proofCellStatus], {Open -> translate[ "open"], Closed -> translate[ "closed"]}], 
-    		translate[ "proofCellStatus"], {{ Top, Left}}]	
+    		translate[ "proofCellStatus"], {{ Top, Left}}],
+    	Button[ translate[ "OKnext"], $tcActionView++]	
     	}]
 selectProver[ args___] := unexpected[ selectRuleSet, {args}]
 
 submitProveTask[ ] := 
 	Module[ {},
 		Column[{
-			Labeled[ displaySelectedGoal[ $selectedProofGoal], translate["selGoal"], {{ Top, Left}}],
-			Labeled[ displaySelectedKB[], translate["selKB"], {{ Top, Left}}],
+			Button[ translate["prove"],
+				$tcActionView++;
+				execProveCall[ $selectedProofGoal, $selectedProofKB, 
+					{$selectedRuleSet, Map[ # -> ruleActive[#]&, $allRules], Map[ # -> rulePriority[#]&, $allRules]},
+					$selectedStrategy, $selectedSearchDepth,
+					{$eliminateBranches, $eliminateSteps, $eliminateFormulae}], 
+				Method -> "Queued", Active -> ($selectedProofGoal =!= {})],
+			Column[{
+				Labeled[ displaySelectedGoal[ $selectedProofGoal], translate["selGoal"], {{ Top, Left}}],
+				Labeled[ displaySelectedKB[], translate["selKB"], {{ Top, Left}}]}],
 			(* Method -> "Queued" so that no time limit is set for proof to complete *)
-			Button[ translate["prove"], 
+			Button[ translate["prove"],
+				$tcActionView++;
 				execProveCall[ $selectedProofGoal, $selectedProofKB, 
 					{$selectedRuleSet, Map[ # -> ruleActive[#]&, $allRules], Map[ # -> rulePriority[#]&, $allRules]},
 					$selectedStrategy, $selectedSearchDepth,
@@ -976,7 +992,6 @@ submitProveTask[ args___] := unexpected[ submitProveTask, {args}]
 
 execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, strategy_, searchDepth_, simplification_List] :=
 	Module[{nb = $proofInitNotebook, po, pv},
-		$tcActionView++;
 		If[ NotebookFind[ nb, makeProofIDTag[ goal], All, CellTags] === $Failed,
 			NotebookFind[ nb, goal[[1,1]], All, CellTags];
 			NotebookFind[ nb, "CloseEnvironment", Next, CellStyle];
