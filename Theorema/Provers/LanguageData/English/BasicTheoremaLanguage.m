@@ -18,6 +18,7 @@ MessageName[ orGoal, "usage", lang] = "Handle a disjunction in the goal";
 MessageName[ orKB, "usage", lang] = "Case distinction based on a disjunction in the knowledge base";
 MessageName[ implGoalDirect, "usage", lang] = "Prove implication directly";
 MessageName[ implGoalCP, "usage", lang] = "Prove implication using contraposition";
+MessageName[ modusPonens, "usage", lang] = "The Modus Ponens rule";
 MessageName[ equivGoal, "usage", lang] = "Prove equivalence by double implication";
 MessageName[ contradiction, "usage", lang] = "Prove by contradiction";
 MessageName[ forallGoal, "usage", lang] = "Prove universally quantified goal";
@@ -99,6 +100,10 @@ proofStepText[ implGoalCP, lang, {{g_}}, {{nr_, nl_}}, ___] := {textCell[ "We pr
 	goalCell[ nl, "."]
 	};
 
+proofStepText[ modusPonens, lang, {{impl_, lhs_}}, {{rhs_}}, ___] := {textCell[ "From ", formulaReference[ impl], " and ", formulaReference[ lhs], " we can infer"],
+	assumptionCell[ rhs, "."]
+	};
+
 proofStepText[ equivGoal, lang, {{g_}}, _, ___] := {textCell[ "We prove both directions of ", formulaReference[ g], "."]};
 
 subProofHeader[ equivGoal, lang, _, _, pVal_, {p_}] := {textCell[ Switch[ p, 1, "\[RightArrow]", 2, "\[LeftArrow]"], ":"]};
@@ -139,7 +144,12 @@ proofStepText[ existsKB, lang, {{g_}}, {{simpG_}}, ___] := {textCell[ "The unive
 	};
 
 proofStepText[ expandDef, lang, u_, g_, ___, "usedDefs" -> defs_List, ___] := 
+	(* u, g, and defs have same length.
+	   u is a list of singleton lists, u[[i,1]] are the formulae that are rewritten
+	   g is a list of singleton lists, g[[i,1]] are the new formulae
+	   defs is an auxliliary list containing lists of definition formulae, namely defs[[i]] are the definitions used when rewriting u[[i,1]] to g[[i,1]] *)
 	Module[ {stepText = {}, j, repl, suffix},
+		(* If the first in u and g are the same, then the goal has not been rewritten *)
 		If[ u[[1]] =!= g[[1]],
 			repl = defs[[1]];
 			suffix = If[ Length[ repl] == 1, "", "s"];
@@ -148,6 +158,7 @@ proofStepText[ expandDef, lang, u_, g_, ___, "usedDefs" -> defs_List, ___] :=
 				goalCell[ g[[1, 1]], "."]}
 		];
 		PrependTo[ stepText, textCell[ "We expand definitions:"]];
+		(* Each of the remaining is an expansion in the KB. Produce a line of text for each of them *)
 		Do[
 			repl = defs[[j]];
 			suffix = If[ Length[ repl] == 1, "", "s"];

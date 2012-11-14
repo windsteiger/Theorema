@@ -393,7 +393,8 @@ PRFINFO$ /: Dot[ p_PRFINFO$, s___] := unexpected[ Dot, {p, s}]
 getLocalInfo[ li_List, key_] :=
 	Module[{val = Replace[ key, li]},
 		If[ val === key,
-			$Failed,
+			(* a non-existing key yields a value {} *)
+			{},
 			val
 		]
 	]

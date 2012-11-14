@@ -133,6 +133,24 @@ PRFSIT$[ g:FML$[ _, Implies$TM[ P_, Q_], _], k_List, i_String, rest___?OptionQ] 
 			newSubgoal[ goal -> negLeft, kb -> Prepend[ k, negRight], rest]]
 	]
 
+inferenceRule[ modusPonens] = 
+ps:PRFSIT$[ g_, k:{___, impl:FML$[ _, Implies$TM[ P_, Q_], _], ___, lhs:FML$[ _, P_, _], ___}, i_String, rest___?OptionQ]|
+ps:PRFSIT$[ g_, k:{___, lhs:FML$[ _, P_, _], ___, impl:FML$[ _, Implies$TM[ P_, Q_], _], ___}, i_String, rest___?OptionQ] :> 
+	Catch[
+        Module[ {rhs, locInfo = ps.local, mp, implK = impl.key, lhsK = lhs.key},
+            mp = getLocalInfo[ locInfo, "modusPonens"];
+            If[ MemberQ[ mp, {lhsK, implK}],
+            	(* Modus Ponens has already been applied for those forms *)
+                Throw[ $Failed]
+            ];
+            rhs = makeFML[ formula -> Q];
+            locInfo = putLocalInfo[ locInfo, "modusPonens" -> Prepend[ mp, {lhsK, implK}]];
+            makeANDNODE[ makePRFINFO[ name -> modusPonens, used -> {impl, lhs}, generated -> rhs, id -> i], 
+                newSubgoal[ goal -> g, kb -> Prepend[ k, rhs], local -> locInfo, rest]]
+        ]
+    ]
+
+
 (* ::Subsection:: *)
 (* IFF *)
 
@@ -232,7 +250,7 @@ ps:PRFSIT$[ g_, k_List, i_String, rest___?OptionQ] :>
 			(* else *)
 			rules = getLocalInfo[ locInfo, "defRules"]
 		];
-		If[ rules === $Failed,
+		If[ rules === {},
 			(* There are no definitions available at all in this proof -> expanding defs does not apply *)
 			$Failed,
 			(* else: we have definition rewrite rules *)
@@ -291,8 +309,8 @@ connectiveRules = {"Connectives Rules",
 	{orKB, True, True, 19},
 	{implGoalDirect, True, True, 5},
 	{implGoalCP, False, False, 10},
-	{equivGoal, True, True, 10}
-	};
+	{modusPonens, True, True, 30, "levelSat2"},
+	{equivGoal, True, True, 10}};
 
 equalityRules = {"Equality Rules", 
 	{eqGoal, False, False, 20},
