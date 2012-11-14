@@ -329,9 +329,10 @@ singleRngToCondition[ Theorema`Language`STEPRNG$[ v_, l_Integer?NonNegative, h_I
 singleRngToCondition[ Theorema`Language`STEPRNG$[ v_, l_Integer, h_Integer, 1]] := 
 	{Theorema`Language`GreaterEqual$TM[ v, l], Theorema`Language`LessEqual$TM[ v, h], Theorema`Language`Element$TM[ v, Theorema`Language`\[DoubleStruckCapitalZ]$TM]}
 singleRngToCondition[ Theorema`Language`STEPRNG$[ v_, l_, h_, s_Integer]] := 
-	Module[ {new},
+	Module[ {new, step},
+		step = If[ s === 1, new, Theorema`Language`Times$TM[ new, s]];
 		{Theorema`Language`Exists$TM[ Theorema`Language`RNG$[ Theorema`Language`SETRNG$[ new, Theorema`Language`\[DoubleStruckCapitalN]0$TM]], True, 
-			Theorema`Language`And$TM[ Theorema`Language`Equal$TM[ v, Theorema`Language`Plus$TM[ l, Theorema`Language`Times$TM[ new, s]]],
+			Theorema`Language`And$TM[ Theorema`Language`Equal$TM[ v, Theorema`Language`Plus$TM[ l, step]],
 				If[ NonNegative[ s], Theorema`Language`LessEqual$TM, Theorema`Language`GreaterEqual$TM][ v, h]]]}
 	]
 singleRngToCondition[ Theorema`Language`PREDRNG$[ v_, P_]] := {P[ v]}
