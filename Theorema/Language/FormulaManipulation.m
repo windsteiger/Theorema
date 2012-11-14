@@ -8,8 +8,11 @@ Begin["`Private`"]
 
 
 (* ::Subsubsection:: *)
-(* splitForm *)
+(* splitAnd *)
 
+(*
+	splitAnd[ expr_, v_List] splits a conjunction expr into a conjunction containing exactly the free variables in v and a rest 
+*)
 splitAnd[ expr:(h:Theorema`Language`And$TM|Theorema`Computation`Language`And$TM|And)[ __], v_List] :=
 	Module[ {depSingle = {}, depMulti = {}, p, l = Length[ expr]},
 		Do[
