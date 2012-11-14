@@ -438,10 +438,11 @@ findSelectedFormula[args___] := unexpected[ findSelectedFormula, {args}]
 
 Clear[ applyGlobalDeclaration]
 applyGlobalDeclaration[ expr_, g_List] := Fold[ applyGlobalDeclaration, expr, Reverse[ g]]
-applyGlobalDeclaration[ expr_, globalForall$TM[ r_, c_]] := Forall$TM[ r, c, ReleaseHold[ markVariables[ Hold[ QU$[ r, expr]]]]]
+applyGlobalDeclaration[ expr_, globalForall$TM[ r_, c_]] := 
+	analyzeQuantifiedExpression[ Forall$TM[ r, c, ReleaseHold[ markVariables[ Hold[ QU$[ r, expr]]]]], {}]
 applyGlobalDeclaration[ expr_, globalForall$TM[ r_, c_, d_]] := 
-	With[ {new = applyGlobalDeclaration[ expr, d]}, 
-		Forall$TM[ r, c, ReleaseHold[ markVariables[ Hold[ QU$[ r, new]]]]]
+	With[ {new = applyGlobalDeclaration[ expr, d]},
+		applyGlobalDeclaration[ new, globalForall$TM[ r, c]]
 	]
 applyGlobalDeclaration[ expr_, globalImplies$TM[ c_]] := Implies$TM[ c, expr]
 applyGlobalDeclaration[ expr_, globalImplies$TM[ c_, d_]] := Implies$TM[ c, applyGlobalDeclaration[ expr, d]]
@@ -452,6 +453,25 @@ applyGlobalDeclaration[ expr_, domainConstruct$TM[ lhs_, rng:RNG$[ DOMEXTRNG$[ v
 applyGlobalDeclaration[ expr_, globalAbbrev$TM[ rng:RNG$[ a__ABBRVRNG$]]] := substituteFree[ ReleaseHold[ markVariables[ Hold[ QU$[ rng, expr]]]], 
 	Apply[ Rule, {a}, {1}]]
 applyGlobalDeclaration[ args___] := unexpected[ applyGlobalDeclaration, {args}]
+
+(*
+	analyze the ranges and drop all quantifiers that aren't needed
+*)
+analyzeQuantifiedExpression[ Forall$TM[ RNG$[ r_, s___], c_, e_], outerVar_List] :=
+	Module[ {rc, sc, sub, v, allV},
+		{v} = variables[ RNG$[ r]];
+		allV = Append[ outerVar, v];
+		{rc, sc} = splitAnd[ c, allV];
+		sub = analyzeQuantifiedExpression[ Forall$TM[ RNG$[s], sc, e], allV];
+		If[ MemberQ[ freeVariables[ sub], v],
+			(* the quantifier is relevant for the remaining expression, there is a variable to be bound *) 
+			Forall$TM[ RNG$[ r], rc, sub],
+			(* the quantifier can be dropped, there is no variable affected by it *)
+			sub 
+		]
+	]
+analyzeQuantifiedExpression[ Forall$TM[ RNG$[ ], c_, e_], _] := If[ TrueQ[ c], e, Implies$TM[ c, e]]
+analyzeQuantifiedExpression[ args___] := unexpected[ analyzeQuantifiedExpression, {args}]
 
 initSession[] :=
     Module[ {},

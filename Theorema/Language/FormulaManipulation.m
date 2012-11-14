@@ -11,13 +11,13 @@ Begin["`Private`"]
 (* splitAnd *)
 
 (*
-	splitAnd[ expr_, v_List] splits a conjunction expr into a conjunction containing exactly the free variables in v and a rest 
+	splitAnd[ expr_, v_List] splits a conjunction expr into 1. a conjunction containing the free variables in v and 2. the rest 
 *)
 splitAnd[ expr:(h:Theorema`Language`And$TM|Theorema`Computation`Language`And$TM|And)[ __], v_List] :=
 	Module[ {depSingle = {}, depMulti = {}, p, l = Length[ expr]},
 		Do[
 			p = expr[[i]];
-			If[ freeVariables[ p] === v, 
+			If[ Complement[ freeVariables[ p], v] === {}, 
 				AppendTo[ depSingle, p],
 				AppendTo[ depMulti, p]
 			],
@@ -26,7 +26,7 @@ splitAnd[ expr:(h:Theorema`Language`And$TM|Theorema`Computation`Language`And$TM|
 		{ makeConjunction[ depSingle, h], makeConjunction[ depMulti, h]}
 	]
 splitAnd[ expr_, v_List] :=
-    If[ freeVariables[ expr] === v,
+    If[ Complement[ freeVariables[ expr], v] === {},
         { expr, True},
         { True, expr}
     ]
