@@ -162,6 +162,7 @@ putGlobalDeclaration[ file_String, id_Integer, decl_] :=
 	]
 putGlobalDeclaration[ args___] := unexpected[ putGlobalDeclaration, {args}]
 
+SetAttributes[ processGlobalDeclaration, HoldAll];
 processGlobalDeclaration[ x_] := 
 	Module[ {},
 		putGlobalDeclaration[ CurrentValue["NotebookFullFileName"], CurrentValue["CellID"], ReleaseHold[ freshNames[ markVariables[ Hold[x]]]]];
@@ -170,8 +171,7 @@ processGlobalDeclaration[ x_] :=
 processGlobalDeclaration[ args___] := unexpected[ processGlobalDeclaration, {args}]
 
 
-SetAttributes[processEnvironment,HoldAll];
-
+SetAttributes[ processEnvironment, HoldAll];
 processEnvironment[ Theorema`Language`nE] := Null
 
 processEnvironment[x_] :=
