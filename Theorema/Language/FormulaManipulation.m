@@ -11,13 +11,16 @@ Begin["`Private`"]
 (* splitAnd *)
 
 (*
-	splitAnd[ expr_, v_List] splits a conjunction expr into 1. a conjunction containing the free variables in v and 2. the rest 
+	splitAnd[ expr_, v_List] splits a conjunction expr into 1. a conjunction of subexpr with free variables v and 2. the rest 
+	splitAnd[ expr_, v_List, False] splits a conjunction expr into 1. a conjunction of subexpr containing the free variables in v and 2. the rest 
 *)
-splitAnd[ expr:(h:Theorema`Language`And$TM|Theorema`Computation`Language`And$TM|And)[ __], v_List] :=
-	Module[ {depSingle = {}, depMulti = {}, p, l = Length[ expr]},
+splitAnd[ expr:(h:Theorema`Language`And$TM|Theorema`Computation`Language`And$TM|And)[ __], v_List, sub_:True] :=
+	Module[ {depSingle = {}, depMulti = {}, p, l, e = simplifiedAnd[ expr], fi, i},
+		l = Length[ e];
 		Do[
-			p = expr[[i]];
-			If[ Complement[ freeVariables[ p], v] === {}, 
+			p = e[[i]];
+			fi = freeVariables[ p];
+			If[ (sub && fi === v) || (!sub && Intersection[ v, fi] =!= {}), 
 				AppendTo[ depSingle, p],
 				AppendTo[ depMulti, p]
 			],
@@ -25,10 +28,12 @@ splitAnd[ expr:(h:Theorema`Language`And$TM|Theorema`Computation`Language`And$TM|
 		];
 		{ makeConjunction[ depSingle, h], makeConjunction[ depMulti, h]}
 	]
-splitAnd[ expr_, v_List] :=
-    If[ Complement[ freeVariables[ expr], v] === {},
-        { expr, True},
-        { True, expr}
+splitAnd[ expr_, v_List, sub_:True] :=
+    Module[ {fi = freeVariables[ expr]},
+        If[ (sub && fi === v) || (!sub && Intersection[ v, fi] =!= {}),
+            { expr, True},
+            { True, expr}
+        ]
     ]
 splitAnd[ args___] := unexpected[ splitAnd, {args}]
 
@@ -53,6 +58,29 @@ makeDisjunction[ l_List, a_] :=
         Apply[ a, l]
     ]
 makeDisjunction[ args___] := unexpected[ makeDisjunction, {args}]
+
+
+(* ::Subsubsection:: *)
+(* simplifiedAnd *)
+
+simplifiedAnd[ expr_] :=  
+	Module[ {simp = Flatten[ expr //. {True -> Sequence[], (Theorema`Language`And$TM|Theorema`Computation`Language`And$TM)[a_] -> a}]},
+		If[ Length[ simp] === 0,
+			True,
+			(* else *)
+			simp
+		]
+	]
+simplifiedAnd[ args___] := unexpected[ simplifiedAnd, {args}]
+
+
+(* ::Subsubsection:: *)
+(* thinnedExpression *)
+
+thinnedExpression[ e_, drop_List] :=
+	Fold[ thinnedExpression, e, drop]
+thinnedExpression[ e_, v_] := DeleteCases[ e, _?(!FreeQ[ #, v]&)]
+thinnedExpression[ args___] := unexpected[ thinnedExpression, {args}]
 
 
 (* ::Subsubsection:: *)

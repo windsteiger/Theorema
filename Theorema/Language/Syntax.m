@@ -45,7 +45,15 @@ $tmaQuantifiers =
     {{"\[ForAll]", "Forall"},
      {"\[Exists]", "Exists"},
      {"\[Intersection]", "IntersectionOf"},
-     {"\[Union]", "UnionOf"}
+     {"\[Union]", "UnionOf"},
+     {"\[Sum]", "SumOf"},
+     {"\[Product]", "ProductOf"},
+     {"\[Integral]", "IntegralOf"},
+     {"\[CurlyEpsilon]", "Such"},
+     {"such", "Such"},
+     {"the", "SuchUnique"},
+     {"max", "MaximumOf"},
+     {"min", "MinimumOf"}
     };
 
 $tmaQuantifierSymbols = Transpose[ $tmaQuantifiers][[1]];
