@@ -1261,8 +1261,8 @@ declButtonData["COND"] :=
 
 declButtonData["ABBREV"] := 
 	{
-		DisplayForm[ UnderscriptBox[ "where", RowBox[ {SelectionPlaceholder[ "v"], "=", Placeholder[ "\[Ellipsis]"]}]]], 
-		UnderscriptBox[ "where", RowBox[ {"\[SelectionPlaceholder]", "=", "\[Placeholder]"}]],
+		DisplayForm[ UnderscriptBox[ "let", RowBox[ {SelectionPlaceholder[ "v"], "=", Placeholder[ "\[Ellipsis]"]}]]], 
+		UnderscriptBox[ "let", RowBox[ {"\[SelectionPlaceholder]", "=", "\[Placeholder]"}]],
 		translate[ "GABBREVTooltip"]
 	}
 
