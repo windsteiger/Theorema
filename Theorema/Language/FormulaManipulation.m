@@ -132,7 +132,7 @@ substituteFree[ Hold[ f_[x___]], rules_List] :=
 	]
 substituteFree[ x:Hold[ (Theorema`Language`VAR$|Theorema`Computation`Language`VAR$)[_]], rules_List] := x /. rules
 substituteFree[ x:Hold[_], rules_List] := x
-substituteFree[ expr_, rule_Rule] := substituteFree[ expr, {rule}]
+substituteFree[ expr_, rule_?OptionQ] := substituteFree[ expr, {rule}]
 substituteFree[ expr_, rules_List] := ReleaseHold[ substituteFree[ Hold[ expr], rules]]
 substituteFree[ args___] := unexpected[ substituteFree, {args}]
 
@@ -163,7 +163,7 @@ transferToComputation[ args___] := unexpected[ transferToComputation, {args}]
 	stripUniversalQuantifiers[ form] transforms form into a list {f, c, v}, where
 		f is the innermost formula being neither a universal quantified formula nor an implication
 		c is a list of conditions being applicable to f
-		v is a list of variables contained in f 
+		v is a list of universally quantified variables contained in f 
 *)
 stripUniversalQuantifiers[ Theorema`Language`Forall$TM[ r_, c_, f_]] :=
 	Module[ {rc, vars, cond, inner},
@@ -193,12 +193,12 @@ singleRangeToCondition[ args___] := unexpected[ singleRangeToCondition, {args}]
 
 executableForm[ {(Theorema`Language`Iff$TM|Theorema`Language`IffDef$TM|Theorema`Language`Equal$TM|Theorema`Language`EqualDef$TM)[ l_, r_], c_List, var_List}, key_] :=
     Block[ { $ContextPath = {"System`"}, $Context = "Global`"},
-        With[ { left = execLeft[ Hold[l]], 
+        With[ { left = execLeft[ Hold[l], var], 
         	cond = makeConjunction[ Prepend[ c, "DUMMY$COND"], Theorema`Computation`Language`And$TM],
-        	right = execRight[ Hold[r]]},
+        	right = execRight[ Hold[r], var]},
         	(* The complicated DUMMY$COND... construction is necessary because the key itself contains strings,
         	   and we need to get the escaped strings into the Hold *)
-            StringReplace[ left <> "/;" <> execRight[ Hold[ cond]] <> ":=" <> right,
+            StringReplace[ left <> "/;" <> execRight[ Hold[ cond], var] <> ":=" <> right,
             	{ "DUMMY$COND" -> "Theorema`Computation`Language`Private`activeComputationKB[" <> ToString[ key, InputForm] <> "]",
             		"Theorema`Language`" -> "Theorema`Computation`Language`",
             		"Theorema`Knowledge`" -> "Theorema`Computation`Knowledge`"}
@@ -212,23 +212,27 @@ executableForm[ {(Theorema`Language`Iff$TM|Theorema`Language`IffDef$TM|Theorema`
 executableForm[ expr_, key_] := "$Failed"
 executableForm[ args___] := unexpected[ executableForm, {args}]
 
-execLeft[ e_Hold] := 
+execLeft[ e_Hold, var_List] := 
 	Module[ {s},
-		s = e /. Theorema`Language`VAR$[a_] :> Apply[ Pattern, {a, Blank[]}];
+		s = substituteFree[ e, Map[ varToPattern, var]];
 		ReleaseHold[ Map[ ToString[ Unevaluated[#]]&, s]]
 	]
 execLeft[ args___] := unexpected[ execLeft, {args}]
 
-execRight[ e_Hold] := 
+execRight[ e_Hold, var_List] := 
 	Module[ {s},
-		s = e /. {Theorema`Language`Assign$TM -> Set,
+		s = substituteFree[ e, Map[ stripVar, var]] /. {Theorema`Language`Assign$TM -> Set,
 			Theorema`Language`SetDelayed$TM -> SetDelayed, 
-			Theorema`Language`CompoundExpression$TM -> CompoundExpression,
-			Theorema`Language`VAR$[a_] -> a};
+			Theorema`Language`CompoundExpression$TM -> CompoundExpression};
 		ReleaseHold[ Map[ Function[ expr, ToString[ Unevaluated[ expr]], {HoldAll}], s]]
 	]
 execRight[ args___] := unexpected[ execRight, {args}]
 
+stripVar[ v:Theorema`Language`VAR$[a_]] := v -> a
+stripVar[ args___] := unexpected[ stripVar, {args}]
+
+varToPattern[ v:Theorema`Language`VAR$[a_]] := v :> Apply[ Pattern, {a, Blank[]}]
+varToPattern[ args___] := unexpected[ varToPattern, {args}]
 
 (* ::Subsubsection:: *)
 (* defsToRules *)
@@ -246,13 +250,12 @@ singleDefToRule[ args___] := unexpected[ singleDefToRule, {args}]
 
 ruleForm[ {(Theorema`Language`Iff$TM|Theorema`Language`IffDef$TM|Theorema`Language`Equal$TM|Theorema`Language`EqualDef$TM)[ l_, r_], c_List, var_List}, ref_] :=
     Block[ {testMember},
-        With[ {left = execLeft[ Hold[l]], 
+        With[ {left = execLeft[ Hold[l], var], 
                cond = makeConjunction[ Map[ testMember[ $TMAKBatomic, #]&, c], And],
         		(* The complicated DUMMY$DEF... construction is necessary because ref itself contains strings (it's a whole formula incl key, label),
         	   	and we need to get the escaped strings into the Hold *)
-               right = StringReplace[ execRight[ Hold[ AppendTo[ $usedDefinitionsInRewrite, "DUMMY$DEF"]; r]],
-               	"DUMMY$DEF" -> ToString[ ref, InputForm]]},
-            "RuleDelayed[" <> left <> "/;" <> execRight[ Hold[ cond] /. testMember -> MemberQ] <> "," <> right <> "]"
+               right = execRight[ Hold[r], var]},
+            "RuleDelayed[" <> left <> "/;" <> execRight[ Hold[ cond] /. testMember -> MemberQ, var] <> "," <> "Sow[" <> ToString[ ref, InputForm] <> "];" <> right <> "]"
         ]
     ]
 ruleForm[ expr_, key_] := $Failed
@@ -263,9 +266,14 @@ ruleForm[ args___] := unexpected[ ruleForm, {args}]
 		new = expr /. repl and
 		used is a list of formula keys corresponding to the formulae from which the applied replacements have been derived
 *)
-replaceAndTrack[ expr_, repl_List] :=
-	Block[{$usedDefinitionsInRewrite = {}},
-		{expr /. repl, $usedDefinitionsInRewrite}
+replaceAndTrack[ expr_, repl_List] := 
+	Module[ {e, used},
+		{e, used} = Reap[ expr /. repl];
+		If[ used === {},
+			{e, used},
+			(* else *)
+			{e, used[[1]]}
+		]
 	]
 replaceAndTrack[ args___] := unexpected[ replaceAndTrack, {args}]
 

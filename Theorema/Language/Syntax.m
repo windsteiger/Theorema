@@ -120,8 +120,8 @@ MakeExpression[ RowBox[{rng_, "|"|":", cond_}], fmt_] :=
         ]
     ] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{UnderscriptBox[ "where", rng_], form_}], fmt_] :=
-	(* We use the powerful toRangeBox in order to have the many variants, multiranges, etc. However, only ABBRVRNG$ makes sense in a "where",
+MakeExpression[ RowBox[{UnderscriptBox[ "let", rng_], form_}], fmt_] :=
+	(* We use the powerful toRangeBox in order to have the many variants, multiranges, etc. However, only ABBRVRNG$ makes sense in a "let",
 	   but we do not consider it a syntax error to use one of the other ranges *)
      With[ {r = toRangeBox[ rng]},
 		MakeExpression[ RowBox[{"QU$", "[", 
@@ -165,8 +165,8 @@ toDomSpecRangeBox[ RowBox[{v_, "\[Superset]", d_}]] := RowBox[ {"RNG$", "[", Row
 toDomSpecRangeBox[ v_String] := RowBox[ {"RNG$", "[", makeRangeSequence[ v], "]"}]
 toDomSpecRangeBox[args___] := unexpected[ toDomSpecRangeBox, {args}]
 
-MakeExpression[ UnderscriptBox[ "where", rng_], fmt_] := 
-	(* We the powerful toRangeBox in order to have the many variants, multiranges, etc. However, only ABBRVRNG$ makes sense in a "where",
+MakeExpression[ UnderscriptBox[ "let", rng_], fmt_] := 
+	(* We the powerful toRangeBox in order to have the many variants, multiranges, etc. However, only ABBRVRNG$ makes sense in a "let",
 	   but we do not consider it a syntax error to use one of the other ranges *)
 	With[ {r = toRangeBox[ rng]},
 		MakeExpression[ RowBox[{"QU$", "[", 

@@ -266,7 +266,7 @@ ps:PRFSIT$[ g_, k_List, i_String, rest___?OptionQ] :>
 			(* The first used and generated are old/new goal. If they are identical, then the proof header won't print any text *)
 			usedForms = {{g}};
 			genForms = {{newG}};
-			AppendTo[ replBy, usedDefs];
+			AppendTo[ replBy, Union[ usedDefs]];
 			Do[
 				If[ MemberQ[ def, k[[j]]], Continue[]];
                 {newForm, usedDefs} = replaceAndTrack[ k[[j]].formula, rules];
@@ -276,7 +276,7 @@ ps:PRFSIT$[ g_, k_List, i_String, rest___?OptionQ] :>
                     AppendTo[ newK, newForm];
                     AppendTo[ usedForms, {k[[j]]}];
                     AppendTo[ genForms, {newForm}];
-					AppendTo[ replBy, usedDefs];
+					AppendTo[ replBy, Union[ usedDefs]];
                     defExpand = True,
                     (* else: no def expansion in goal *)
                     AppendTo[ newK, k[[j]]]

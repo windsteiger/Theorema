@@ -55,7 +55,7 @@ MakeBoxes[ TupleOf$TM[ rng_, cond_, form_], TheoremaForm] :=
 	RowBox[ { "\[LeftAngleBracket]", MakeBoxes[ SequenceOf$TM[ rng, cond, form], TheoremaForm], "\[RightAngleBracket]"}]
 
 MakeBoxes[ Abbrev$TM[ rng_, form_], TheoremaForm] :=
-	RowBox[ {UnderscriptBox[ "where", makeRangeBox[ rng, TheoremaForm]], MakeBoxes[ form, TheoremaForm]}]
+	RowBox[ {UnderscriptBox[ "let", makeRangeBox[ rng, TheoremaForm]], MakeBoxes[ form, TheoremaForm]}]
 
 MakeBoxes[ IffDef$TM[ l_, r_], TheoremaForm] :=
     RowBox[ {MakeBoxes[ l, TheoremaForm],
@@ -114,5 +114,5 @@ MakeBoxes[ domainConstruct$TM[ _, rng_RNG$], TheoremaForm] :=
 	UnderscriptBox[ "domain", makeRangeBox[ rng, TheoremaForm]]	
 
 MakeBoxes[ globalAbbrev$TM[ rng_RNG$], TheoremaForm] :=
-	UnderscriptBox[ "where", makeRangeBox[ rng, TheoremaForm]]
+	UnderscriptBox[ "let", makeRangeBox[ rng, TheoremaForm]]
 
