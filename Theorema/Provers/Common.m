@@ -628,16 +628,22 @@ proofNodeIndicator[ args___] := unexpected[ proofNodeIndicator, {args}]
 	localInfo remains {} in the initial proof object
 *)
 makeInitialProofObject[ g_FML$, k_List, {r_Hold, act_List, prio_List}, s_] :=
-    Module[ {dummyPO},
+    Module[ {dummyPO, def, dRules},
         dummyPO = PRFOBJ$[
             makePRFINFO[ name -> initialProofSituation, generated -> Prepend[ k, g], id -> "OriginalPS"],
             PRFSIT$[ g, k, "InitialPS"],
             pending
         ];
         (* Use propagateProofValues and replaceProofSit in order to update the proof tree correspondingly *)
+        (* For the handling of definitions, we take defs in k, convert them into transformation rules,
+           and put the rules into the local proof info. We don't put the original defs into the KB then *)
+        def = Cases[ k, FML$[ _, _?(!FreeQ[ #, _IffDef$TM|_EqualDef$TM]&), _]];
+        dRules = defsToRules[ def]; 
         propagateProofValues[ 
             replaceProofSit[ dummyPO,
-            	{2} -> newSubgoal[ goal -> g, kb -> k, id -> "InitialPS",
+            	(* Complement is no problem because we do not rely on any ordering in the KB anyway *)
+            	{2} -> newSubgoal[ goal -> g, kb -> Complement[ k, def], id -> "InitialPS",
+            		local -> If[ dRules === {}, {}, {"defRules" -> dRules}],
                 	rules -> r, ruleActivity -> act, rulePriority -> prio, strategy -> s]]
         ]
     ]

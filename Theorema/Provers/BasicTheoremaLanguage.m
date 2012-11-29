@@ -242,19 +242,13 @@ PRFSIT$[ g_, k:{pre___, e:FML$[ _, u:Exists$TM[ rng_, cond_, A_], _], post___}, 
 
 inferenceRule[ expandDef] = 
 ps:PRFSIT$[ g_, k_List, i_String, rest___?OptionQ] :> 
-	Module[ {locInfo = ps.local, def, rules, usedDefs, newForm, newG, newK = {}, defExpand = False, j, usedForms, genForms, replBy = {}},
-		def = Cases[ k, FML$[ _, _?(!FreeQ[ #, _IffDef$TM|_EqualDef$TM]&), _]];
-		If[ def =!= {},
-			(* There are defs in the KB. This will apply only at the beginning, since these will be deleted from the KB *)
-			rules = defsToRules[ def],
-			(* else *)
-			rules = getLocalInfo[ locInfo, "defRules"]
-		];
+(* *)
+	Module[ {locInfo = ps.local, rules, usedDefs, newForm, newG, newK = {}, defExpand = False, j, usedForms, genForms, replBy = {}},
+		rules = getLocalInfo[ locInfo, "defRules"];
 		If[ rules === {},
 			(* There are no definitions available at all in this proof -> expanding defs does not apply *)
 			$Failed,
 			(* else: we have definition rewrite rules *)
-			locInfo = putLocalInfo[ locInfo, "defRules" -> rules];
 			{newForm, usedDefs} = replaceAndTrack[ g.formula, rules];
 			If[ usedDefs =!= {},
 				(* rewrite applied *)
@@ -268,7 +262,6 @@ ps:PRFSIT$[ g_, k_List, i_String, rest___?OptionQ] :>
 			genForms = {{newG}};
 			AppendTo[ replBy, Union[ usedDefs]];
 			Do[
-				If[ MemberQ[ def, k[[j]]], Continue[]];
                 {newForm, usedDefs} = replaceAndTrack[ k[[j]].formula, rules];
                 If[ usedDefs =!= {},
                     (* rewrite applied *)
