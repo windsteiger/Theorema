@@ -218,7 +218,7 @@ simpNodes[ ANDNODE$[ pi_, sub_, proved], simp:{sBranches_, sSteps_, sFormulae_}]
 			{sn, u},
 			sFormulae, (* eliminate unused formulae *)
 			thinnedGenerated = eliminateUnused[ pi, u];
-			{ANDNODE$[ thinnedGenerated, sn, proved], propUsed};
+			{ANDNODE$[ thinnedGenerated, sn, proved], propUsed},
 			True,
 			{ANDNODE$[ pi, sn, proved], propUsed}
 		]
