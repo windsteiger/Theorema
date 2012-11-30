@@ -708,7 +708,7 @@ proofObjectToCell[ args___] := unexpected[ proofObjectToCell, {args}]
 
 subProofToCell[ PRFINFO$[ name_, used_List, gen_List, ___], node_, pos_List] :=
 	Cell[ CellGroupData[ Join[ subProofHeaderId[ node.id, name, used, gen, node.proofValue, pos], {proofObjectToCell[ node]}], 
-		cellStatus[ $proofCellStatus, node.proofValue]]]
+		cellStatus[ $proofCellStatus, 1]]]
 subProofToCell[ args___] := unexpected[ subProofToCell, {args}]
 
 cellStatus[ Automatic, failed] := Closed
