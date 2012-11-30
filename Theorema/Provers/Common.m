@@ -37,7 +37,7 @@ initProver[] :=
 		$registeredStrategies = {};
 		Clear[ ruleTextActive];
 		ruleTextActive[_] := True;
-		$proofCellStatus = Open;
+		$proofCellStatus = Automatic;
 		$TMAcurrentDepth = 1;
 	]
 
@@ -686,7 +686,7 @@ proofObjectToCell[ PRFOBJ$[ pi_PRFINFO$, sub_, pVal_]] :=
 	]
 proofObjectToCell[ PRFINFO$[ name_?ruleTextActive, u_, g_, id_String, rest___?OptionQ], pVal_] := proofStepTextId[ id, name, u, g, rest, pVal]
 proofObjectToCell[ PRFINFO$[ _, _, _, _String, ___?OptionQ], _] := {}
-proofObjectToCell[ PRFSIT$[ g_FML$, kb_List, id_String, ___]] := Cell[ CellGroupData[ proofStepTextId[ id, openProofSituation, {Prepend[ kb, g]}, {}], $proofCellStatus]]
+proofObjectToCell[ PRFSIT$[ g_FML$, kb_List, id_String, ___]] := Cell[ CellGroupData[ proofStepTextId[ id, openProofSituation, {Prepend[ kb, g]}, {}], Open]]
 proofObjectToCell[ (ANDNODE$|ORNODE$)[ pi_PRFINFO$, subnodes__, pVal_]] := 
 	Module[{header, sub = {}},
 		header = proofObjectToCell[ pi, pVal];
@@ -698,17 +698,23 @@ proofObjectToCell[ (ANDNODE$|ORNODE$)[ pi_PRFINFO$, subnodes__, pVal_]] :=
 		If[ header === {},
 			Apply[ Sequence, sub],
 			(* else *)
-			Cell[ CellGroupData[ Join[ header, sub], $proofCellStatus]]
+			Cell[ CellGroupData[ Join[ header, sub], cellStatus[ $proofCellStatus, pVal]]]
 		]
 	]
 proofObjectToCell[ TERMINALNODE$[ pi_PRFINFO$, pVal_]] := 
-	Cell[ CellGroupData[ proofObjectToCell[ pi, pVal], $proofCellStatus]]
+	Cell[ CellGroupData[ proofObjectToCell[ pi, pVal], cellStatus[ $proofCellStatus, pVal]]]
 	
 proofObjectToCell[ args___] := unexpected[ proofObjectToCell, {args}]
 
 subProofToCell[ PRFINFO$[ name_, used_List, gen_List, ___], node_, pos_List] :=
-	Cell[ CellGroupData[ Join[ subProofHeaderId[ node.id, name, used, gen, node.proofValue, pos], {proofObjectToCell[ node]}], $proofCellStatus]]
+	Cell[ CellGroupData[ Join[ subProofHeaderId[ node.id, name, used, gen, node.proofValue, pos], {proofObjectToCell[ node]}], 
+		cellStatus[ $proofCellStatus, node.proofValue]]]
 subProofToCell[ args___] := unexpected[ subProofToCell, {args}]
+
+cellStatus[ Automatic, failed] := Closed
+cellStatus[ Automatic, _] := Open
+cellStatus[ _, v_] := v
+cellStatus[ args___] := unexpected[ cellStatus, {args}]
 
 
 (* ::Section:: *)

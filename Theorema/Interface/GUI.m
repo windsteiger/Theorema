@@ -959,7 +959,7 @@ selectProver[ ] :=
     		}, Alignment -> {Left}], 
     		translate[ "pSimp"], {{ Top, Left}}],
     	Labeled[ RadioButtonBar[ 
-    		Dynamic[Theorema`Provers`Common`Private`$proofCellStatus], {Open -> translate[ "open"], Closed -> translate[ "closed"]}], 
+    		Dynamic[Theorema`Provers`Common`Private`$proofCellStatus], {Automatic -> translate[ "auto"], Open -> translate[ "open"], Closed -> translate[ "closed"]}], 
     		translate[ "proofCellStatus"], {{ Top, Left}}],
     	Button[ translate[ "OKnext"], $tcActionView++]	
     	}]
