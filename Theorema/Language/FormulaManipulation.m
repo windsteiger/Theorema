@@ -199,7 +199,7 @@ executableForm[ {(Theorema`Language`Iff$TM|Theorema`Language`IffDef$TM|Theorema`
         	(* The complicated DUMMY$COND... construction is necessary because the key itself contains strings,
         	   and we need to get the escaped strings into the Hold *)
             StringReplace[ left <> "/;" <> execRight[ Hold[ cond], var] <> ":=" <> right,
-            	{ "DUMMY$COND" -> "Theorema`Computation`Language`Private`activeComputationKB[" <> ToString[ key, InputForm] <> "]",
+            	{ "DUMMY$COND" -> "kbSelectCompute[" <> ToString[ key, InputForm] <> "]",
             		"Theorema`Language`" -> "Theorema`Computation`Language`",
             		"Theorema`Knowledge`" -> "Theorema`Computation`Knowledge`"}
             ]

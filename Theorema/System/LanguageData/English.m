@@ -39,6 +39,9 @@ With[ {lang = "English"},
 	MessageName[processEnvironment, "usage", lang] = "processEnvironment[ expr] ...";
 	MessageName[processComputation, "usage", lang] = "processComputation[ expr] ...";
 	MessageName[findSelectedFormula, "usage", lang] = "findSelectedFormula[ sel] ...";
+	MessageName[kbSelectProve, "usage", lang] = "kbSelectProve[ f] indicates whether the formula labeled f should go into the KB for a proof.";
+	MessageName[kbSelectCompute, "usage", lang] = "kbSelectCompute[ f] indicates whether the formula labeled f should be used in a computation.";
+	MessageName[kbSelectSolve, "usage", lang] = "kbSelectCompute[ f] indicates whether the formula labeled f should go into the KB for solve.";
 
 (* Theorema`Language`FormulaManipulation` *)
 	MessageName[freeVariables, "usage", lang] = "";	
@@ -71,6 +74,9 @@ With[ {lang = "English"},
 (* Theorema`Computation`Language` *)
 	MessageName[setComputationContext, "usage", lang] = "setComputationContext[ c] sets the context for the next computation to c.";
 	MessageName[cleanupComputation, "usage", lang] = "cleanupComputation[ ] removes all user defined function from computation context.";
+	MessageName[buiActComputation, "usage", lang] = "buiActComputation[ f] indicates whether the builtin f is active during computation.";
+	MessageName[buiActProve, "usage", lang] = "buiActProve[ f] indicates whether the builtin f is active in a computation done during proving.";
+	MessageName[buiActSolve, "usage", lang] = "buiActSolve[ f] indicates whether the builtin f is active in a computation done during solving.";
 	
 (* Theorema`Interface`GUI` *)
 	MessageName[$kbStruct, "usage", lang] = "Structured knowledge base to be displayed in the KB browser";

@@ -175,10 +175,10 @@ inferenceRule[ forallGoal] =
 PRFSIT$[ g:FML$[ _, u:Forall$TM[ rng_, cond_, A_], _], k_List, i_String, rest___?OptionQ] :> 
 	Module[ {faBui, simp, rc, r, c, f, fix, newConds, newGoal},
 		(* we use computation regardless whether it is activated or not ... *)
-		faBui = Theorema`Computation`Language`Private`buiActComputation[ "Forall"];
-		Theorema`Computation`Language`Private`buiActProve[ "Forall"] = True;
+		faBui = buiActProve[ "Forall"];
+		buiActProve[ "Forall"] = True;
 		simp = computeInProof[ u];
-		Theorema`Computation`Language`Private`buiActProve[ "Forall"] = faBui;
+		buiActProve[ "Forall"] = faBui;
 		If[ MatchQ[ simp, _Forall$TM],
 			(* no simplification *)
 			rc = rngToCondition[ rng];

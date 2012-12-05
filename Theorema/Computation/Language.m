@@ -15,7 +15,7 @@ cleanupComputation[ ] :=
 	]
 cleanupComputation[ args___] := unexpected[ cleanupComputation, {args}]
 
-activeComputationKB[_] := False;
+kbSelectCompute[_] := False;
 
 buiActive[ f_String] :=
 	Switch[ $computationContext,

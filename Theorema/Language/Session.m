@@ -306,12 +306,12 @@ removeFormula[ args___] := unexpected[ removeFormula, {args}]
 removeFromEnv[ key_List] :=
 	Module[{p},
 		$tmaEnv = DeleteCases[ $tmaEnv, FML$[ key, ___]];
-		p = Position[ DownValues[ Theorema`Interface`GUI`Private`kbSelectProve], key];
+		p = Position[ DownValues[ kbSelectProve], key];
 		If[ p =!= {},
-			Unset[ Theorema`Interface`GUI`Private`kbSelectProve[ key]]];
-		p = Position[ DownValues[ Theorema`Computation`Language`Private`activeComputationKB], key];
+			Unset[ kbSelectProve[ key]]];
+		p = Position[ DownValues[ kbSelectCompute], key];
 		If[ p =!= {},
-			Unset[ Theorema`Computation`Language`Private`activeComputationKB[ key]]];			
+			Unset[ kbSelectCompute[ key]]];			
 	]
 removeFromEnv[ args___] := unexpected[ removeFromEnv, {args}]
 
@@ -365,8 +365,8 @@ updateKeys[args___] := unexpected[updateKeys, {args}]
 updateSingleKey[ new_String, old_String] :=
     Module[ {},
         $tmaEnv = Map[ Replace[ #, {id_,old}:>{id,new}]&, $tmaEnv, {2}];
-        DownValues[Theorema`Interface`GUI`Private`kbSelectProve] = DownValues[Theorema`Interface`GUI`Private`kbSelectProve] /. {id_,old} :> {id,new};
-        DownValues[Theorema`Computation`Language`Private`activeComputationKB] = DownValues[Theorema`Computation`Language`Private`activeComputationKB] /. {id_,old} :> {id,new};
+        DownValues[kbSelectProve] = DownValues[kbSelectProve] /. {id_,old} :> {id,new};
+        DownValues[kbSelectCompute] = DownValues[kbSelectCompute] /. {id_,old} :> {id,new};
         new
     ]
 updateSingleKey[args___] := unexpected[updateSingleKey, {args}]

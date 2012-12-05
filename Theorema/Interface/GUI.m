@@ -112,13 +112,13 @@ initBuiltins[ l_List] :=
     Module[ {bui},
         bui = Cases[ $tmaBuiltins, {_String, _, _Symbol, _Symbol, _Symbol}, Infinity];
         If[ MemberQ[ l, "prove"],
-            Scan[ (Theorema`Computation`Language`Private`buiActProve[#[[1]]] = #[[3]])&, bui]
+            Scan[ (buiActProve[#[[1]]] = #[[3]])&, bui]
         ];
         If[ MemberQ[ l, "compute"],
-            Scan[ (Theorema`Computation`Language`Private`buiActComputation[#[[1]]] = #[[4]])&, bui]
+            Scan[ (buiActComputation[#[[1]]] = #[[4]])&, bui]
         ];
         If[ MemberQ[ l, "solve"],
-            Scan[ (Theorema`Computation`Language`Private`buiActSolve[#[[1]]] = #[[5]])&, bui]
+            Scan[ (buiActSolve[#[[1]]] = #[[5]])&, bui]
         ];
     ]
 initBuiltins[ args___] := unexpected[ initBuiltins, {args}]
@@ -648,7 +648,7 @@ structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cel
         Instead of hyperlinking into the notebook, we then present a window showing the original cell content. *)
         nbAvail = FileExistsQ[file] && FileExtension[file]==="nb";
         (* generate a checkbox and display the label
-           checkbox sets the value of the global function kbSelectProve[labels] (activeComputationKB[labels] resp. for the compute tab),
+           checkbox sets the value of the global function kbSelectProve[labels] (kbSelectCompute[labels] resp. for the compute tab),
            enabled only if the formula has been evaluated 
            label is a hyperlink to the notebook or a button that opens a new window displaying the formula *)
         {Switch[ task,
@@ -664,7 +664,7 @@ structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cel
                     ]},
                 Spacer[10]],
             "compute",
-            Row[{Checkbox[Dynamic[Theorema`Computation`Language`Private`activeComputationKB["KEY"]], Enabled->isEval] /. "KEY" -> keyTags,
+            Row[{Checkbox[Dynamic[kbSelectCompute["KEY"]], Enabled->isEval] /. "KEY" -> keyTags,
                 Tooltip[ Hyperlink[ Style[formulaLabel, If[ isEval,
                                                        "FormalTextInputFormula",
                                                        "FormalTextInputFormulaUneval"
@@ -706,7 +706,7 @@ headerView[file_, Cell[ content_String, style_, ___], tags_, task_] :=
     	"prove",
         Row[{Checkbox[Dynamic[allTrue[tags, kbSelectProve], setAll[tags, kbSelectProve, #] &]], Style[ content, style]}, Spacer[10]],
         "compute",
-        Row[{Checkbox[Dynamic[allTrue[tags, Theorema`Computation`Language`Private`activeComputationKB], setAll[tags, Theorema`Computation`Language`Private`activeComputationKB, #] &]], Style[ content, style]}, Spacer[10]],
+        Row[{Checkbox[Dynamic[allTrue[tags, kbSelectCompute], setAll[tags, kbSelectCompute, #] &]], Style[ content, style]}, Spacer[10]],
         "solve",
         Row[{Checkbox[Dynamic[allTrue[tags, kbSelectSolve], setAll[tags, kbSelectSolve, #] &]], Style[ content, style]}, Spacer[10]]        
     ]
@@ -802,13 +802,13 @@ structViewBuiltin[ {op_String, display_, _, _, _}, tags_, task_String] :=
     Module[ { },
         {Switch[ task,
             "prove",
-            Row[{Checkbox[ Dynamic[ Theorema`Computation`Language`Private`buiActProve[op]]], Style[ DisplayForm[ display], "FormalTextInputFormula"]}, 
+            Row[{Checkbox[ Dynamic[ buiActProve[op]]], Style[ DisplayForm[ display], "FormalTextInputFormula"]}, 
                 Spacer[10]],
             "compute",
-          	Row[{Checkbox[ Dynamic[ Theorema`Computation`Language`Private`buiActComputation[op]]], Style[ DisplayForm[ display], "FormalTextInputFormula"]}, 
+          	Row[{Checkbox[ Dynamic[ buiActComputation[op]]], Style[ DisplayForm[ display], "FormalTextInputFormula"]}, 
           		Spacer[10]],
             "solve",
-          	Row[{Checkbox[ Dynamic[ Theorema`Computation`Language`Private`buiActSolve[op]]], Style[ DisplayForm[ display], "FormalTextInputFormula"]}, 
+          	Row[{Checkbox[ Dynamic[ buiActSolve[op]]], Style[ DisplayForm[ display], "FormalTextInputFormula"]}, 
           		Spacer[10]]
         ], {op}}
     ]
@@ -817,16 +817,16 @@ structViewBuiltin[ category_String, tags_, task_String] :=
     Module[ {},
     	Switch[ task,
     		"prove",
-    		Row[{Checkbox[ Dynamic[ allTrue[ tags, Theorema`Computation`Language`Private`buiActProve], 
-        		setAll[ tags, Theorema`Computation`Language`Private`buiActProve, #] &]], 
+    		Row[{Checkbox[ Dynamic[ allTrue[ tags, buiActProve], 
+        		setAll[ tags, buiActProve, #] &]], 
           		Style[ translate[category], "Section"]}, Spacer[10]],
     		"compute",
-        	Row[{Checkbox[ Dynamic[ allTrue[ tags, Theorema`Computation`Language`Private`buiActComputation], 
-        		setAll[ tags, Theorema`Computation`Language`Private`buiActComputation, #] &]], 
+        	Row[{Checkbox[ Dynamic[ allTrue[ tags, buiActComputation], 
+        		setAll[ tags, buiActComputation, #] &]], 
           		Style[ translate[category], "Section"]}, Spacer[10]],
           	"solve",
-          	Row[{Checkbox[ Dynamic[ allTrue[ tags, Theorema`Computation`Language`Private`buiActSolve], 
-        		setAll[ tags, Theorema`Computation`Language`Private`buiActSolve, #] &]], 
+          	Row[{Checkbox[ Dynamic[ allTrue[ tags, buiActSolve], 
+        		setAll[ tags, buiActSolve, #] &]], 
           		Style[ translate[category], "Section"]}, Spacer[10]]
     	]
     ]
@@ -1031,15 +1031,15 @@ proofNavigation[ args___] := unexpected[ proofNavigation, {args}]
    effect: print a cell containg information about the environment settings for that computation *)
 printComputationInfo[] :=
     Module[ {kbAct, bui, buiAct},
-        kbAct = Cases[ $tmaEnv, FML$[ k_, _, l_] /; Theorema`Computation`Language`Private`activeComputationKB[k] -> l];
-        bui = Cases[ DownValues[ Theorema`Computation`Language`Private`buiActComputation],
-        	HoldPattern[ Verbatim[HoldPattern][ Theorema`Computation`Language`Private`buiActComputation[ op_String]] :> v_] -> {op, v}];
+        kbAct = Cases[ $tmaEnv, FML$[ k_, _, l_] /; kbSelectCompute[k] -> l];
+        bui = Cases[ DownValues[ buiActComputation],
+        	HoldPattern[ Verbatim[HoldPattern][ buiActComputation[ op_String]] :> v_] -> {op, v}];
         buiAct = Cases[ bui, { op_, True} -> op];
         CellPrint[ Cell[ ToBoxes[ OpenerView[ {"", 
             Column[ {OpenerView[ {Style[ translate[ "KBcomp"], "CIContent"], Style[ kbAct, "CIContent"]}],
                 OpenerView[ {Style[ translate[ "BuiComp"], "CIContent"], Style[ buiAct, "CIContent"]}],
-                With[ {kb = Cases[ DownValues[ Theorema`Computation`Language`Private`activeComputationKB],
-                	HoldPattern[ Verbatim[HoldPattern][ Theorema`Computation`Language`Private`activeComputationKB[ k_List]] :> v_] -> {k, v}],
+                With[ {kb = Cases[ DownValues[ kbSelectCompute],
+                	HoldPattern[ Verbatim[HoldPattern][ kbSelectCompute[ k_List]] :> v_] -> {k, v}],
                     allBui = bui},
                     Button[ translate["SetEnv"], setCompEnv[ kb, allBui], ImageSize -> Automatic]
                 ]}
@@ -1049,10 +1049,10 @@ printComputationInfo[args___] := unexcpected[ printComputationInfo, {args}]
 
 setCompEnv[ kb_List, bui_List] :=
 	Module[{},
-		Clear[Theorema`Computation`Language`Private`activeComputationKB];
-		Theorema`Computation`Language`Private`activeComputationKB[_] := False;
-		Scan[(Theorema`Computation`Language`Private`activeComputationKB[#[[1]]] = #[[2]])&, kb];
-		Scan[(Theorema`Computation`Language`Private`buiActComputation[#[[1]]] = #[[2]])&, bui]
+		Clear[kbSelectCompute];
+		kbSelectCompute[_] := False;
+		Scan[(kbSelectCompute[#[[1]]] = #[[2]])&, kb];
+		Scan[(buiActComputation[#[[1]]] = #[[2]])&, bui]
 	]
 setCompEnv[ args___] := unexpected[ setCompEnv, {args}]
 
@@ -1063,8 +1063,8 @@ setCompEnv[ args___] := unexpected[ setCompEnv, {args}]
 printProveInfo[ goal_, kb_, rules_, strategy_, {pVal_, proofObj_}, searchDepth_] :=
     Module[ {kbAct, bui, buiAct},
         kbAct = Map[ makeLabel[ #.label]&, kb];
-        bui = Cases[ DownValues[ Theorema`Computation`Language`Private`buiActProve],
-        	HoldPattern[ Verbatim[HoldPattern][ Theorema`Computation`Language`Private`buiActProve[ op_String]] :> v_] -> {op, v}];
+        bui = Cases[ DownValues[ buiActProve],
+        	HoldPattern[ Verbatim[HoldPattern][ buiActProve[ op_String]] :> v_] -> {op, v}];
         buiAct = Cases[ bui, { op_, True} -> op];
         NotebookFind[ $proofInitNotebook, makeProofIDTag[ goal], All, CellTags];
         NotebookWrite[ $proofInitNotebook, Cell[ TextData[ {translate[ "Proof of"]<>" ", formulaReference[ goal], ": ", 
@@ -1100,7 +1100,7 @@ setProveEnv[ goal_, kb_List, bui_List, ruleSet_, strategy_, allRules_List, searc
 		Clear[ruleActive];
 		ruleActive[_] := True;
 		Scan[(ruleActive[#[[1]]] = #[[2]])&, allRules];
-		Scan[(Theorema`Computation`Language`Private`buiActProve[#[[1]]] = #[[2]])&, bui];
+		Scan[(buiActProve[#[[1]]] = #[[2]])&, bui];
 		$selectedRuleSet = ruleSet;
 		$selectedStrategy = strategy;
 		$selectedSearchDepth = searchDepth;
