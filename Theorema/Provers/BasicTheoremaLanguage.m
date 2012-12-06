@@ -242,13 +242,58 @@ PRFSIT$[ g_, k:{pre___, e:FML$[ _, u:Exists$TM[ rng_, cond_, A_], _], post___}, 
 
 
 (* ::Section:: *)
+(* substitution *)
+
+inferenceRule[ elementarySubstitution] = 
+ps:PRFSIT$[ g_, k_List, i_String, rest___?OptionQ] :> 
+	Module[ {locInfo = ps.local, rules, usedSubst, newForm, newG, newK = {}, substApplied = False, j, usedForms, genForms, replBy = {}},
+		rules = getLocalInfo[ locInfo, "elemSubstRules"];
+		If[ rules === {},
+			(* There are no substitutions available -> rule does not apply *)
+			$Failed,
+			(* else: we have substitutions *)
+			{newForm, usedSubst} = replaceRecursivelyAndTrack[ g.formula, rules];
+			If[ usedSubst =!= {},
+				(* rewrite applied *)
+				newG = makeFML[ formula -> newForm];
+				substApplied = True,
+				(* else: no subst in goal *)
+				newG = g
+			];
+			(* The first used and generated are old/new goal. If they are identical, then the proof header won't print any text for the goal part *)
+			usedForms = {{g}};
+			genForms = {{newG}};
+			AppendTo[ replBy, Union[ usedSubst]];
+			Do[
+                {newForm, usedSubst} = replaceRecursivelyAndTrack[ k[[j]].formula, rules];
+                If[ usedSubst =!= {},
+                    (* rewrite applied *)
+                    newForm = makeFML[ formula -> newForm];
+                    AppendTo[ newK, newForm];
+                    AppendTo[ usedForms, {k[[j]]}];
+                    AppendTo[ genForms, {newForm}];
+					AppendTo[ replBy, Union[ usedSubst]];
+                    substApplied = True,
+                    (* else: no subst in this formula *)
+                    AppendTo[ newK, k[[j]]]
+                ],
+                {j, Length[ k]}
+            ];
+            If[ substApplied,
+            	makeANDNODE[ makePRFINFO[ name -> elementarySubstitution, used -> usedForms, generated -> genForms, id -> i, "usedSubst" -> replBy], 
+					newSubgoal[ goal -> newG, kb -> newK, local -> locInfo, rest]],
+				$Failed
+            ]
+		]
+	]
+
+(* ::Section:: *)
 (* Expand Definitions *)
 
 inferenceRule[ expandDef] = 
 ps:PRFSIT$[ g_, k_List, i_String, rest___?OptionQ] :> 
-(* *)
 	Module[ {locInfo = ps.local, rules, usedDefs, newForm, newG, newK = {}, defExpand = False, j, usedForms, genForms, replBy = {}},
-		rules = getLocalInfo[ locInfo, "defRules"];
+		rules = getLocalInfo[ locInfo, "definitionRules"];
 		If[ rules === {},
 			(* There are no definitions available at all in this proof -> expanding defs does not apply *)
 			$Failed,
@@ -261,7 +306,7 @@ ps:PRFSIT$[ g_, k_List, i_String, rest___?OptionQ] :>
 				(* else: no def expansion in goal *)
 				newG = g
 			];
-			(* The first used and generated are old/new goal. If they are identical, then the proof header won't print any text *)
+			(* The first used and generated are old/new goal. If they are identical, then the proof header won't print any text for the goal part *)
 			usedForms = {{g}};
 			genForms = {{newG}};
 			AppendTo[ replBy, Union[ usedDefs]];
@@ -275,7 +320,7 @@ ps:PRFSIT$[ g_, k_List, i_String, rest___?OptionQ] :>
                     AppendTo[ genForms, {newForm}];
 					AppendTo[ replBy, Union[ usedDefs]];
                     defExpand = True,
-                    (* else: no def expansion in goal *)
+                    (* else: no def expansion in this formula *)
                     AppendTo[ newK, k[[j]]]
                 ],
                 {j, Length[ k]}
@@ -287,6 +332,31 @@ ps:PRFSIT$[ g_, k_List, i_String, rest___?OptionQ] :>
             ]
 		]
 	]
+
+
+(* ::Section:: *)
+(* Equalities in KB *)
+
+inferenceRule[ eqKB] = 
+ps:PRFSIT$[ g_, k:{___, FML$[ _, (Iff$TM|Equal$TM)[ _, _?isQuantifierFree], lab_], ___}, i_String, rest___?OptionQ] :> 
+	Module[ {locInfo = ps.local, rules, form, elemSubs = {}, nonSubs = {}, j},
+		rules = getLocalInfo[ locInfo, "elemSubstRules"];
+		Do[
+        	form = k[[j]];
+        	Switch[ form,
+        		FML$[ _, (Iff$TM|Equal$TM)[ lhs_, rhs_?isQuantifierFree], _],
+        		AppendTo[ elemSubs, form],
+        		_,
+        		AppendTo[ nonSubs, form]
+        	],
+        	{j, Length[k]}
+        ];
+        locInfo = putLocalInfo[ locInfo, "elemSubstRules" -> defsToRules[ elemSubs]];
+		makeANDNODE[ makePRFINFO[ name -> eqKB, used -> {elemSubs}, generated -> {}, id -> i], 
+			newSubgoal[ goal -> g, kb -> nonSubs, local -> locInfo, rest]
+		]
+	]
+
 
 (* ::Section:: *)
 (* Rule composition *)
@@ -311,7 +381,7 @@ connectiveRules = {"Connectives Rules",
 
 equalityRules = {"Equality Rules", 
 	{eqGoal, False, False, 20},
-	{eqKB, True, True, 15}
+	{eqKB, True, True, 3}
 	};
 
 registerRuleSet[ "Quantifier Rules", quantifierRules, {
@@ -326,8 +396,9 @@ registerRuleSet[ "Basic Theorema Language Rules", basicTheoremaLanguageRules, {
 	quantifierRules, 
 	connectiveRules, 
 	equalityRules,
-	{contradiction, True, True, 100},
-	{expandDef, True, True, 80}
+	{elementarySubstitution, True, True, 4},
+	{expandDef, True, True, 80},
+	{contradiction, True, True, 100}
 	}]
 
 End[]

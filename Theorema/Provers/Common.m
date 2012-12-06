@@ -624,26 +624,38 @@ proofNodeIndicator[ args___] := unexpected[ proofNodeIndicator, {args}]
 (* ::Subsubsection:: *)
 (* makeInitialProofObject *)
 
-(*
-	localInfo remains {} in the initial proof object
-*)
 makeInitialProofObject[ g_FML$, k_List, {r_Hold, act_List, prio_List}, s_] :=
-    Module[ {dummyPO, def, dRules},
+    Module[ {dummyPO, form, def = {}, elemSubs = {}, nonSubs = {}, dRules, sRules},
         dummyPO = PRFOBJ$[
             makePRFINFO[ name -> initialProofSituation, generated -> Prepend[ k, g], id -> "OriginalPS"],
             PRFSIT$[ g, k, "InitialPS"],
             pending
         ];
         (* Use propagateProofValues and replaceProofSit in order to update the proof tree correspondingly *)
-        (* For the handling of definitions, we take defs in k, convert them into transformation rules,
-           and put the rules into the local proof info. We don't put the original defs into the KB then *)
-        def = Cases[ k, FML$[ _, _?(!FreeQ[ #, _IffDef$TM|_EqualDef$TM]&), _]];
+        (* Handling of substitutions: we split k into
+        	"elementary substitutions", i.e. equalities or equivalences that do not introduce quantifiers on the rhs,
+        	"definitions", i.e. equalities or equivalences that normally do introduce quantifiers on the rhs, and
+        	the rest.
+           We convert "elementary substitutions" and "definitions" into transformation rules
+           and put them into the local proof info. We don't put the corresponding original formulae into the KB then *)
+        Do[
+        	form = k[[i]];
+        	Switch[ form,
+        		FML$[ _, (IffDef$TM|EqualDef$TM|Iff$TM|Equal$TM)[ lhs_, rhs_?isQuantifierFree], _],
+        		AppendTo[ elemSubs, form],
+        		FML$[ _, _?(!FreeQ[ #, _IffDef$TM|_EqualDef$TM]&), _],
+        		AppendTo[ def, form],
+        		_,
+        		AppendTo[ nonSubs, form]
+        	],
+        	{i, Length[k]}
+        ];
+        sRules = defsToRules[ elemSubs]; 
         dRules = defsToRules[ def]; 
         propagateProofValues[ 
             replaceProofSit[ dummyPO,
-            	(* Complement is no problem because we do not rely on any ordering in the KB anyway *)
-            	{2} -> newSubgoal[ goal -> g, kb -> Complement[ k, def], id -> "InitialPS",
-            		local -> If[ dRules === {}, {}, {"defRules" -> dRules}],
+            	{2} -> newSubgoal[ goal -> g, kb -> nonSubs, id -> "InitialPS",
+            		local -> {"elemSubstRules" -> sRules, "definitionRules" -> dRules},
                 	rules -> r, ruleActivity -> act, rulePriority -> prio, strategy -> s]]
         ]
     ]

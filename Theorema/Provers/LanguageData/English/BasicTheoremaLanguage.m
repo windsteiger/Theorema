@@ -25,7 +25,9 @@ MessageName[ forallGoal, "usage", lang] = "Prove universally quantified goal";
 MessageName[ forallKB, "usage", lang] = "Instantiate universally quantified formula";
 MessageName[ existsGoal, "usage", lang] = "Prove existentially quantified goal by introducing meta variables";
 MessageName[ existsKB, "usage", lang] = "Instantiate existentially quantified formula";
+MessageName[ elementarySubstitution, "usage", lang] = "Elementary substitution based on equalities and equivalences oin the knowledge base";
 MessageName[ expandDef, "usage", lang] = "Expand definitions";
+MessageName[ eqKB, "usage", lang] = "Equalities/equivalences in KB for rewriting";
 
 ] (* With *)
 
@@ -143,6 +145,32 @@ proofStepText[ existsKB, lang, {{g_}}, {{simpG_}}, ___] := {textCell[ "The unive
 	goalCell[ simpG, "."]
 	};
 
+proofStepText[ elementarySubstitution, lang, u_, g_, ___, "usedSubst" -> subs_List, ___] := 
+	(* u, g, and subs have same length.
+	   u is a list of singleton lists, u[[i,1]] are the formulae that are rewritten
+	   g is a list of singleton lists, g[[i,1]] are the new formulae
+	   subs is an auxliliary list containing lists of formulae, namely subs[[i]] are the formulae used when rewriting u[[i,1]] to g[[i,1]] *)
+	Module[ {stepText = {}, j, repl},
+		(* If the first in u and g are the same, then the goal has not been rewritten *)
+		If[ u[[1]] =!= g[[1]],
+			repl = subs[[1]];
+			stepText = { textCell[ "In order to prove ", formulaReference[ u[[1, 1]]], ", using ", 
+				formulaReferenceSequence[ repl], ", we now have to show"],
+				goalCell[ g[[1, 1]], "."]}
+		];
+		PrependTo[ stepText, textCell[ "We apply substitutions:"]];
+		(* Each of the remaining is an expansion in the KB. Produce a line of text for each of them *)
+		Do[
+			repl = subs[[j]];
+			suffix = If[ Length[ repl] == 1, "", "s"];
+			stepText = Join[ stepText, 
+				{textCell[ "From ", formulaReference[ u[[j, 1]]], " we know, by ", formulaReferenceSequence[ repl], ","], 
+				assumptionCell[ g[[j, 1]]]}],
+			{j, 2, Length[g]}
+		];
+		stepText
+	];
+	
 proofStepText[ expandDef, lang, u_, g_, ___, "usedDefs" -> defs_List, ___] := 
 	(* u, g, and defs have same length.
 	   u is a list of singleton lists, u[[i,1]] are the formulae that are rewritten
@@ -169,6 +197,10 @@ proofStepText[ expandDef, lang, u_, g_, ___, "usedDefs" -> defs_List, ___] :=
 		];
 		stepText
 	];
+	
+proofStepText[ eqKB, lang, {eqs__}, _, ___] := {textCell[ "We register ", formulaReferenceSequence[ eqs], " to be used for rewriting."]
+	};
+
 	
 ] (* With *)
 

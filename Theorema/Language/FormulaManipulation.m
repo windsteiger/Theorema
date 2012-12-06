@@ -138,6 +138,16 @@ substituteFree[ args___] := unexpected[ substituteFree, {args}]
 
 
 (* ::Subsubsection:: *)
+(* isQuantifierFree *)
+
+isQuantifierFree[ expr_] :=
+	FreeQ[ expr,
+		_Theorema`Language`RNG$|
+		_Theorema`Computation`Language`RNG$]
+isQuantifierFree[ args___] := unexpected[ isQuantifierFree, {args}]
+
+
+(* ::Subsubsection:: *)
 (* sequenceFree *)
 
 isSequenceFree[ expr_] := 
@@ -276,6 +286,17 @@ replaceAndTrack[ expr_, repl_List] :=
 		]
 	]
 replaceAndTrack[ args___] := unexpected[ replaceAndTrack, {args}]
+
+replaceRecursivelyAndTrack[ expr_, repl_List] := 
+	Module[ {e, used},
+		{e, used} = Reap[ expr //. repl];
+		If[ used === {},
+			{e, used},
+			(* else *)
+			{e, used[[1]]}
+		]
+	]
+replaceRecursivelyAndTrack[ args___] := unexpected[ replaceRecursivelyAndTrack, {args}]
 
 (* ::Section:: *)
 (* FML$ datastructure *)
