@@ -83,8 +83,6 @@ initGUI[] :=
         $tcActivitiesView = 1;
         $tcActionView = 1;
         (* Init status of opener views *)
-        $tcSessArchCreate = True;
-        $tcSessArchLoad = True;
         Scan[ ToExpression, Map[ "$builtinStructState$" <> # <> "=True"&, Map[ First, $tmaBuiltins]]];
 		$kbStruct = {};
 		$initLabel = "???";
@@ -415,7 +413,7 @@ displaySelectedGoal[ goal_] :=
 displaySelectedGoal[args___] :=
     unexpected[displaySelectedGoal, {args}]
 
-displayLabeledFormula[ FML$[ key_, form_, lab_]] := 
+displayLabeledFormula[ FML$[ key_, form_, lab_, ___]] := 
 	Module[ {src, nb, labDisp = makeLabel[ lab]},
 		src = StringReplace[ key[[2]], "Source"<>$cellTagKeySeparator -> "", 1];
 		nb = sourceToNotebookFile[ src];
@@ -633,7 +631,7 @@ structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cel
         (* keyTags are those cell tags that are used to uniquely identify the formula in the KB *)
         keyTags = getKeyTags[ cellTags];
         (* check whether cell has been evaluated -> formula is in KB? *)
-        formPos = Position[ $tmaEnv, FML$[ keyTags, _, _], 1, 1];
+        formPos = Position[ $tmaEnv, FML$[ keyTags, _, __], 1, 1];
         isEval = formPos =!= {};
         (* Join list of CellTags, use $labelSeparator. *)
         If[ cleanCellTags === {},
@@ -1031,7 +1029,7 @@ proofNavigation[ args___] := unexpected[ proofNavigation, {args}]
    effect: print a cell containg information about the environment settings for that computation *)
 printComputationInfo[] :=
     Module[ {kbAct, bui, buiAct},
-        kbAct = Cases[ $tmaEnv, FML$[ k_, _, l_] /; kbSelectCompute[k] -> l];
+        kbAct = Cases[ $tmaEnv, FML$[ k_, _, l_, ___] /; kbSelectCompute[k] -> l];
         bui = Cases[ DownValues[ buiActComputation],
         	HoldPattern[ Verbatim[HoldPattern][ buiActComputation[ op_String]] :> v_] -> {op, v}];
         buiAct = Cases[ bui, { op_, True} -> op];
@@ -1107,7 +1105,7 @@ setProveEnv[ goal_, kb_List, bui_List, ruleSet_, strategy_, allRules_List, searc
 	]
 setProveEnv[ args___] := unexpected[ setProveEnv, {args}]
 
-makeProofIDTag[ FML$[ id_, _,_]] := Apply[ StringJoin, Riffle[ Prepend[ id, "Proof"], "|"]]
+makeProofIDTag[ FML$[ id_, _, __]] := Apply[ StringJoin, Riffle[ Prepend[ id, "Proof"], "|"]]
 makeProofIDTag[ args___] := unexpected[ makeProofIDTag, {args}]
 
 
@@ -1228,7 +1226,7 @@ makeFormButton[args___] := unexpected[makeFormButton, {args}]
 makeDeclButtons[] := Row[ Map[ makeDeclBut, {"VAR", "VARCOND", "COND", "ABBREV"}], Spacer[5]]
 makeDeclButtons[args___] := unexpected[ makeDeclButtons, {args}]
 
-showDecl[ ] := OpenerView[ {Style[ translate["tcSessTabEnvTabButtonAllDeclLabel"], "Section"], displayDecl[]}, Dynamic[$tcAllDeclOpener]]
+showDecl[ ] := OpenerView[ {Style[ translate["tcSessTabEnvTabButtonAllDeclLabel"], "SmallHeader"], displayDecl[]}, Dynamic[$tcAllDeclOpener]]
 showDecl[ args___] := unexpected[ showDecl, {args}]
 
 displayDecl[ ] :=
@@ -1284,7 +1282,7 @@ makeDeclBut[ bname_String, style_String] :=
     ]
 makeDeclBut[args___] := unexpected[ makeDeclBut, {args}]
 
-showEnv[ ] := OpenerView[ {Style[ translate["tcSessTabEnvTabButtonAllFormLabel"], "Section"], displayEnv[]}, Dynamic[$tcAllFormulaeOpener]]
+showEnv[ ] := OpenerView[ {Style[ translate["tcSessTabEnvTabButtonAllFormLabel"], "SmallHeader"], displayEnv[]}, Dynamic[$tcAllFormulaeOpener]]
 showEnv[ args___] := unexpected[ showEnv, {args}]
 
 displayEnv[ ] :=
@@ -1315,30 +1313,32 @@ structButtons[args___] :=
 
 archButtons[] :=
     Column[{
-        OpenerView[{Style[translate["tcLangTabArchTabSectionCreate"],"Section"], Column[{
-            makeArchCreateButton[],
-            makeArchNewButton[],
-            makeArchInfoButton[],
-            makeArchCloseButton[]}]}, Dynamic[$tcSessArchCreate]],
-        OpenerView[{Style[translate["tcLangTabArchTabSectionLoad"],"Section"], Column[{
-            makeArchLoadButton[]}]}, Dynamic[$tcSessArchLoad]]}
-    ]
+        Labeled[ Column[{
+            Row[ {makeArchCreateButton[], makeArchNewButton[]}, Spacer[2]],
+            Row[ {makeArchInfoButton[], makeArchCloseButton[]}, Spacer[2]]}], translate[ "tcLangTabArchTabSectionCreate"], {{Top, Left}}],
+        Labeled[ Column[{
+            makeArchLoadButton[]}], translate[ "tcLangTabArchTabSectionLoad"], {{Top, Left}}]
+    }]
 archButtons[args___] := unexpected[archButtons, {args}]
 
 makeArchCreateButton[] :=
-	Button[ translate["tcLangTabArchTabButtonNewLabel"], insertNewArchive[ NotebookCreate[ StyleDefinitions -> makeColoredStylesheet[ "Notebook"]]], Alignment -> {Left, Top}, Method -> "Queued"]
+	Button[ translate["tcLangTabArchTabButtonNewLabel"], 
+		insertNewArchive[ NotebookCreate[ StyleDefinitions -> makeColoredStylesheet[ "Notebook"]]], Alignment -> {Left, Top}, Method -> "Queued"]
 makeArchNewButton[args___] := unexpected[makeArchNewButton, {args}]
 
 makeArchNewButton[] :=
-	Button[ translate["tcLangTabArchTabButtonMakeLabel"], insertNewArchive[ InputNotebook[]], Alignment -> {Left, Top}, Method -> "Queued"]
+	Button[ translate["tcLangTabArchTabButtonMakeLabel"], 
+		insertNewArchive[ InputNotebook[]], Alignment -> {Left, Top}, Method -> "Queued"]
 makeArchNewButton[args___] := unexpected[makeArchNewButton, {args}]
 
 makeArchInfoButton[] :=
-	Button[ translate["tcLangTabArchTabButtonInfoLabel"], insertArchiveInfo[], Alignment -> {Left, Top}]
+	Button[ translate["tcLangTabArchTabButtonInfoLabel"], 
+		insertArchiveInfo[], Alignment -> {Left, Top}]
 makeArchInfoButton[args___] := unexpected[makeArchInfoButton, {args}]
 
 makeArchCloseButton[] :=
-	Button[ translate["tcLangTabArchTabButtonCloseLabel"], insertCloseArchive[], Alignment -> {Left, Top}]
+	Button[ translate["tcLangTabArchTabButtonCloseLabel"], 
+		insertCloseArchive[], Alignment -> {Left, Top}]
 makeArchCloseButton[args___] := unexpected[makeArchCloseButton, {args}]
 
 insertNewArchive[ nb_NotebookObject] :=

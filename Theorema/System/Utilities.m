@@ -56,14 +56,6 @@ applyHold[Hold[a_], Hold[b___]] := Hold[a[b]];
 
 joinHold[Hold[a___], Hold[b___]] := Hold[a, b];
 
-
-(* ::Subsubsection:: *)
-(* joinKB *)
-
-joinKB[ kb1_List, kb2_List] := DeleteDuplicates[ Join[ kb1, kb2], #1[[1]] === #2[[1]]&]
-joinKB[ args___] := unexpected[ joinKB, {args}]
-
-
 (* ::Subsubsection:: *)
 (* notification *)
 

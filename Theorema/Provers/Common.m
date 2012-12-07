@@ -641,9 +641,9 @@ makeInitialProofObject[ g_FML$, k_List, {r_Hold, act_List, prio_List}, s_] :=
         Do[
         	form = k[[i]];
         	Switch[ form,
-        		FML$[ _, (IffDef$TM|EqualDef$TM|Iff$TM|Equal$TM)[ lhs_, rhs_?isQuantifierFree], _],
+        		FML$[ _, (IffDef$TM|EqualDef$TM|Iff$TM|Equal$TM)[ lhs_, rhs_?isQuantifierFree], __],
         		AppendTo[ elemSubs, form],
-        		FML$[ _, _?(!FreeQ[ #, _IffDef$TM|_EqualDef$TM]&), _],
+        		FML$[ _, _?(!FreeQ[ #, _IffDef$TM|_EqualDef$TM]&), __],
         		AppendTo[ def, form],
         		_,
         		AppendTo[ nonSubs, form]

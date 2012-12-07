@@ -250,7 +250,7 @@ varToPattern[ args___] := unexpected[ varToPattern, {args}]
 defsToRules[ defList_List] := Map[ singleDefToRule, defList]
 defsToRules[ args___] := unexpected[ defsToRules, {args}]
 
-singleDefToRule[ orig:FML$[ _, form_, _]] :=
+singleDefToRule[ orig:FML$[ _, form_, __]] :=
 	Module[{stripUniv, r},
 		stripUniv = stripUniversalQuantifiers[ form];
 		r = ruleForm[ stripUniv, orig];
@@ -301,16 +301,21 @@ replaceRecursivelyAndTrack[ args___] := unexpected[ replaceRecursivelyAndTrack, 
 (* ::Section:: *)
 (* FML$ datastructure *)
 
-Options[ makeFML] = {key :> defKey[], formula -> True, label :> defLabel[]};
+Options[ makeFML] = {key :> defKey[], formula -> True, label :> defLabel[], simplify -> True};
 
 makeFML[ data__?OptionQ] :=
-	Module[{k, f, l},
-		{k, f, l} = {key, formula, label} /. {data} /. Options[ makeFML];
-		makeTmaFml[ k, f, l]
+	Module[{k, f, l, s, fs},
+		{k, f, l, s} = {key, formula, label, simplify} /. {data} /. Options[ makeFML];
+		If[ TrueQ[ s],
+			fs = computeInProof[ f],
+			fs = f
+		];
+		makeTmaFml[ k, fs, l, f]
 	]
 makeFML[ args___] := unexpected[ makeFML, {args}]
 
-makeTmaFml[ key_List, fml_, label_String] := FML$[ key, fml, label]
+makeTmaFml[ key_List, fml_, label_String, fml_] := FML$[ key, fml, label]
+makeTmaFml[ key_List, fmlSimp_, label_String, fml_] := FML$[ key, fmlSimp, label, "origForm" -> fml]
 makeTmaFml[ args___] := unexpected[ makeTmaFml, {args}]
 
 defKey[ ] := {"ID" <> $cellTagKeySeparator <> ToString[ Unique[ "formula"]], "Source" <> $cellTagKeySeparator <> "none"}
@@ -322,11 +327,14 @@ defLabel[ args___] := unexpected[ defLabel, {args}]
 initFormulaLabel[ ] := $formulaLabel = 1;
 initFormulaLabel[ args___] := unexpected[ initFormulaLabel, {args}]
 
-FML$ /: Dot[ FML$[ k_, _, _], key] := k
-FML$ /: Dot[ FML$[ _, fml_, _], formula] := fml
-FML$ /: Dot[ FML$[ _, _, l_], label] := l
-FML$ /: Dot[ FML$[ k_, _, _], id] := k[[1]]
-FML$ /: Dot[ FML$[ k_, _, _], source] := k[[2]]
+FML$ /: Dot[ FML$[ k_, _, __], key] := k
+FML$ /: Dot[ FML$[ _, fml_, __], formula] := fml
+FML$ /: Dot[ FML$[ _, _, l_, ___], label] := l
+FML$ /: Dot[ FML$[ k_, _, __], id] := k[[1]]
+FML$ /: Dot[ FML$[ k_, _, __], source] := k[[2]]
+FML$ /: Dot[ FML$[ _, _, _, ___, (Rule|RuleDelayed)[ key_String, val_], ___], key_] := val
+FML$ /: Dot[ FML$[ _, _, _, ___], key_String] := {}
+FML$ /: Dot[ f_FML$, s___] := unexpected[ Dot, {f, s}]
 
 formulaReference[ fml_FML$] :=
     With[ { tag = fml.id, labelDisp = makeLabel[ fml.label], fmlDisp = theoremaDisplay[ fml.formula]},
@@ -408,6 +416,18 @@ computeInProof[ expr_] :=
 		ToExpression[ StringReplace[ ToString[ simp], "Theorema`Computation`" -> "Theorema`"]]
 	]
 computeInProof[ args___] := unexpected[ computeInProof, {args}]
+
+(* ::Subsubsection:: *)
+(* KB operations *)
+
+joinKB[ kb1:{___FML$}, kb2:{___FML$}] := DeleteDuplicates[ Join[ kb1, kb2], #1.formula === #2.formula&]
+joinKB[ args___] := unexpected[ joinKB, {args}]
+
+appendKB[ kb:{___FML$}, fml_FML$] := DeleteDuplicates[ Append[ kb, fml], #1.formula === #2.formula&]
+appendKB[ args___] := unexpected[ appendKB, {args}]
+
+prependKB[ kb:{___FML$}, fml_FML$] := DeleteDuplicates[ Prepend[ kb, fml], #1.formula === #2.formula&]
+prependKB[ args___] := unexpected[ prependKB, {args}]
 
 
 End[]

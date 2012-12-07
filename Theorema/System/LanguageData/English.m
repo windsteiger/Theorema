@@ -10,7 +10,6 @@ With[ {lang = "English"},
 	MessageName[replaceAllExcept, "usage", lang] = "replaceAllExcept[ expr, rules, expt] applies rule(s) to all subparts of 'expr' except those contained in the list 'expt'.";
 	MessageName[joinHold, "usage", lang] = "joinHold[Hold[a],Hold[b]] produces Hold[a,b].";
 	MessageName[applyHold, "usage", lang] = "applyHold[Hold[a],Hold[b]] produces Hold[a[b]].";
-	MessageName[joinKB, "usage", lang] = "joinKB[ kb1_List, kb2_List] joins the two knowledge bases and deletes duplicate entries.";
 	MessageName[notification, "usage", lang] = "notification[text] displays 'text' as a user notification.";
 
 (* Theorema`Language`Syntax` *)
@@ -59,11 +58,12 @@ With[ {lang = "English"},
 	MessageName[defsToRules, "usage", lang] = "";	
 	MessageName[replaceAndTrack, "usage", lang] = "";	
 	MessageName[replaceRecursivelyAndTrack, "usage", lang] = "";	
-	MessageName[FML$, "usage", lang] = "FML$[ key, form, lab] represents a Theorema formula including its key and label.";
+	MessageName[FML$, "usage", lang] = "FML$[ key, form, lab, opt] represents a Theorema formula including its key, label, and optional components.";
 	MessageName[makeFML, "usage", lang] = "makeFML[ fmldata] is the constructor for the FML$ datastructure.";
 	MessageName[key, "usage", lang] = "key is an option for the formula constructor makeFML and a selector for the FML$ datastructure.";
 	MessageName[formula, "usage", lang] = "formula is an option for the formula constructor makeFML and a selector for the FML$ datastructure.";
 	MessageName[label, "usage", lang] = "label is an option for the formula constructor makeFML and a selector for the FML$ datastructure.";
+	MessageName[simplify, "usage", lang] = "simplify is an option for the formula constructor makeFML deciding whether the constructed formula should be simplified by computation immediately.";
 	MessageName[id, "usage", lang] = "id is an option for the constructors makePRFINFO/makePRFSIT/newSubgoal and a selector for the FML$/PRFINFO$/PRFSIT$ datastructures.";
 	MessageName[source, "usage", lang] = "source is a selector for the FML$ datastructure.";
 	MessageName[initFormulaLabel, "usage", lang] = "initFormulaLabel[ ] initializes the formula labels used in a proof.";
@@ -72,7 +72,10 @@ With[ {lang = "English"},
 	MessageName[introduceMeta, "usage", lang] = "introduceMeta[ expr, rng] substitutes all free occurrences of variables specified by the range rng in expr by a fresh meta variable.";
 	MessageName[computeInProof, "usage", lang] = "computeInProof[expr] computes expr within a proof.";
 	MessageName[rngToCondition, "usage", lang] = "rngToCondition[rng] transforms the range specification rng into a list of conditions.";
-
+	MessageName[joinKB, "usage", lang] = "joinKB[ kb1_List, kb2_List] joins the two knowledge bases and deletes duplicate entries.";
+	MessageName[appendKB, "usage", lang] = "appendKB[ kb_List, fml] appends fml to the knowledge base kb and deletes duplicate entries.";
+	MessageName[prependKB, "usage", lang] = "prependKB[ kb_List, fml] prepends fml to the knowledge base kb and deletes duplicate entries.";
+	
 (* Theorema`Computation`Language` *)
 	MessageName[setComputationContext, "usage", lang] = "setComputationContext[ c] sets the context for the next computation to c.";
 	MessageName[cleanupComputation, "usage", lang] = "cleanupComputation[ ] removes all user defined function from computation context.";

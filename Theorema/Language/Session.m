@@ -422,16 +422,16 @@ occursBelow[args___] := unexpected[ occursBelow, {args}]
 updateKnowledgeBase[ form_, k_, glob_, tags_String] :=
     Module[ {newForm = applyGlobalDeclaration[ form, glob]},
     	transferToComputation[ newForm, k];
-        $tmaEnv = joinKB[ {makeFML[ key -> k, formula -> newForm, label -> tags]}, $tmaEnv];
+        $tmaEnv = DeleteDuplicates[ Prepend[ $tmaEnv, makeFML[ key -> k, formula -> newForm, label -> tags, simplify -> False]], #1[[1]] === #2[[1]]&];
         If[ inArchive[],
-            $tmaArch = joinKB[ {makeFML[ key -> k, formula -> newForm, label -> tags]}, $tmaArch];
+            $tmaArch = DeleteDuplicates[ Prepend[ $tmaArch, makeFML[ key -> k, formula -> newForm, label -> tags, simplify -> False]], #1[[1]] === #2[[1]]&];
         ]
     ]
 updateKnowledgeBase[args___] := unexpected[ updateKnowledgeBase, {args}]
 
 findSelectedFormula[ Cell[ _, ___, CellTags -> t_, ___]] :=
 	Module[ { key = getKeyTags[ t]},
-		Cases[ $tmaEnv, FML$[ key, form_, tag_String], {1}, 1]
+		Cases[ $tmaEnv, FML$[ key, _, __], {1}, 1]
 	]	
 findSelectedFormula[ sel_] := {}
 findSelectedFormula[args___] := unexpected[ findSelectedFormula, {args}]
@@ -663,9 +663,6 @@ loadArchive[ name_String, globalDecl_:{}] :=
             (* we use updateKnowledgeBase: this applies global declarations appropriately and 
                translates to computational form ... *)
             Scan[ updateKnowledgeBase[ #[[2]], #[[1]], globalDecl, #[[3]]]&, $tmaArch]
-            (* an alternative to updateKnowledgeBase would be:
-            $tmaArch = Map[ MapAt[ applyGlobalDeclaration[ #, globalDecl]&, #, 2]&, $tmaArch];
-            $tmaEnv = joinKB[ $tmaArch, $tmaEnv];*)
         ];
         $TheoremaArchives = DeleteDuplicates[ Prepend[ $TheoremaArchives, cxt]];
         If[ !FileExistsQ[archiveNotebookPath = getArchiveNotebookPath[ name]],
