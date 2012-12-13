@@ -736,8 +736,10 @@ textDataToString[ args___] := unexpected[ textDataToString, {args}]
 updateKBBrowser[] :=
     Module[ {file=CurrentValue["NotebookFullFileName"], pos, new},
         pos = Position[ $kbStruct, file -> _];
+        (* We don't extract the entire cells, we throw away all options except CellTags in order to not blow up $kbStruct too much *)
         new = file -> With[ {nb = NotebookGet[EvaluationNotebook[]]},
-                          extractKBStruct[nb] /. l_?VectorQ :> Extract[nb, l]
+                          extractKBStruct[nb] /. l_?VectorQ :> (Extract[nb, l] /. {Cell[ c_, s_, ___, ct:(CellTags->_), ___] -> Cell[ c, s, ct], 
+                          		Cell[ c_, s_, ___] -> Cell[ c, s]})
                       ];
         (* if there is already an entry for that notebook then replace the structure,
            otherwise add new entry *)
