@@ -595,9 +595,9 @@ structView[file_, {head:Cell[sec_, style:"Title"|"Section"|"Subsection"|"Subsubs
         compTags = Apply[Union, sub[[2]]];
         (* generate an opener view with the view of the header and the content as a column
            a global symbol with unique name is generated, whose value stores the state of the opener.
-           The default for Title/Section groups is "open", deeper levels are closed by default. *)
+           The default for Title/Section/Subsection groups is "open", deeper levels are closed by default. *)
         structControl = "Theorema`Interface`GUI`Private`$kbStructState$"<>ToString[Hash[FileBaseName[file]]]<>"$"<>ToString[CellID/.{opts}];
-        If[ MemberQ[ {"Title", "Section"}, style] && MatchQ[ ToExpression[ structControl], _Symbol],
+        If[ MemberQ[ {"Title", "Section", "Subsection"}, style] && MatchQ[ ToExpression[ structControl], _Symbol],
         	ToExpression[ structControl <> "=True"]
         ];
         {OpenerView[{headerView[file, head, compTags, task], Column[sub[[1]]]}, 
@@ -736,10 +736,9 @@ textDataToString[ args___] := unexpected[ textDataToString, {args}]
 updateKBBrowser[] :=
     Module[ {file=CurrentValue["NotebookFullFileName"], pos, new},
         pos = Position[ $kbStruct, file -> _];
-        (* We don't extract the entire cells, we throw away all options except CellTags in order to not blow up $kbStruct too much *)
+        (* We don't extract the entire cells, we throw away all options except CellTags and CellID in order to not blow up $kbStruct too much *)
         new = file -> With[ {nb = NotebookGet[EvaluationNotebook[]]},
-                          extractKBStruct[nb] /. l_?VectorQ :> (Extract[nb, l] /. {Cell[ c_, s_, ___, ct:(CellTags->_), ___] -> Cell[ c, s, ct], 
-                          		Cell[ c_, s_, ___] -> Cell[ c, s]})
+                          extractKBStruct[nb] /. l_?VectorQ :> (Extract[nb, l] /. {c:Cell[ _, _, ___] :> DeleteCases[ c, Except[ CellTags|CellID] -> _]})
                       ];
         (* if there is already an entry for that notebook then replace the structure,
            otherwise add new entry *)
