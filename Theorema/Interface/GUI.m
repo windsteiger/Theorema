@@ -1290,7 +1290,7 @@ showEnv[ args___] := unexpected[ showEnv, {args}]
 displayEnv[ ] :=
 	If[ $tmaEnv === {},
 		emptyPane[ "", {350, 30}],
-		Pane[ displayLabeledFormulaListGrid[ $tmaEnv], {300, 100}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
+		Pane[ displayLabeledFormulaListGrid[ $tmaEnv], {340, 250}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
 	]
 displayEnv[ args___] := unexpected[ displayEnv, {args}]
    
