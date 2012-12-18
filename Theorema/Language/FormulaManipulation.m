@@ -238,10 +238,10 @@ execRight[ e_Hold, var_List] :=
 	]
 execRight[ args___] := unexpected[ execRight, {args}]
 
-stripVar[ v:Theorema`Language`VAR$[a_]] := v -> a
+stripVar[ v:Theorema`Language`VAR$[a_]] := v -> ToExpression[ "VAR$" <> ToString[a]]
 stripVar[ args___] := unexpected[ stripVar, {args}]
 
-varToPattern[ v:Theorema`Language`VAR$[a_]] := v :> Apply[ Pattern, {a, Blank[]}]
+varToPattern[ v:Theorema`Language`VAR$[a_]] := With[ {new = ToExpression[ "VAR$" <> ToString[a]]}, v :> Apply[ Pattern, {new, Blank[]}]]
 varToPattern[ args___] := unexpected[ varToPattern, {args}]
 
 (* ::Subsubsection:: *)
