@@ -1,9 +1,11 @@
+(* ::Package:: *)
+
 (* Theorema 
     Copyright (C) 2010 The Theorema Group
 
-    This file is part of Theorema.2
+    This file is part of Theorema .2
     
-    Theorema.2 is free software: you can redistribute it and/or modify
+    Theorema .2 is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
@@ -34,6 +36,7 @@ If[ $Notebooks,
 
 (* ::Section:: *)
 (* initGUI *)
+
 
 initGUI[] := 
 	Module[{},
@@ -87,6 +90,7 @@ initGUI[] :=
         $tcSessArchLoad = True;
         Scan[ ToExpression, Map[ "$builtinStructState$" <> # <> "=True"&, Map[ First, $tmaBuiltins]]];
 		$kbStruct = {};
+		$keyWord = "";
 		$initLabel = "???";
 		$labelSeparator = ",";
 		$cellTagKeySeparator = ":";
@@ -97,6 +101,7 @@ initGUI[] :=
 		$selectedSearchDepth = 30;
 		$maxSearchDepth = 200;
 		initBuiltins[ {"prove", "compute", "solve"}];
+		resetDefaultRules[];
 		$selectedRuleSet = Hold[ basicTheoremaLanguageRules];
 		$selectedStrategy = applyOnce;
 		$CtrlActive = 0;
@@ -123,8 +128,11 @@ initBuiltins[ l_List] :=
     ]
 initBuiltins[ args___] := unexpected[ initBuiltins, {args}]
 
+
+
 (* ::Section:: *)
 (* theoremaCommander *)
+
 
 (*
 	The style sheet defines Deployed->False unlike in usual palettes. This is necessary in order make Button[ ..., Active->False] or
@@ -152,7 +160,7 @@ openTheoremaCommander[ ] /; $Notebooks :=
         			(* prove *)  {Dynamic[ Refresh[ displaySelectedGoal[], UpdateInterval -> 2]],
         				Dynamic[Refresh[displayKBBrowser["prove"], TrackedSymbols :> {$kbStruct}]],
         				displayBuiltinBrowser["prove"],
-        				Dynamic[ Refresh[ selectProver[], TrackedSymbols :> {$selectedRuleSet, $selectedStrategy}]],
+        				Dynamic[ Refresh[ selectProver[], TrackedSymbols :> {$selectedRuleSet, $selectedStrategy,$keyWord}]],
         				Dynamic[ Refresh[ submitProveTask[ ], TrackedSymbols :> {$selectedProofGoal, $selectedProofKB}]],
         				Dynamic[ Refresh[ proofNavigation[ $TMAproofTree], TrackedSymbols :> {$TMAproofTree, $TMAproofNotebook, ruleTextActive, $proofTreeScale, $selectedProofStep}]]},
         			(* compute *){Dynamic[Refresh[ compSetup[], TrackedSymbols :> {$buttonNat}]],
@@ -201,6 +209,7 @@ activitiesView[ args___] := unexpected[ activitiesView, {args}]
 
 (* ::Subsubsection:: *)
 (* virtualKeyboard *)
+
 
 virtualKeyboard[ ] /; $Notebooks :=
         CreatePalette[ Dynamic[ 
@@ -387,8 +396,12 @@ $symBlockMap = {
 	{i_, j_} -> Table[ {}, {4}]
 };
 
+
+
 (* ::Subsubsection:: *)
 (* displaySelectedGoal *)
+
+
    
 displaySelectedGoal[ ] :=
     Module[ { sel, goal},
@@ -456,8 +469,12 @@ sourceToNotebookFile[ s_String] :=
 sourceToNotebookFile[ args___] := unexpected[ sourceToNotebookFile, {args}]
 
  
+
+
 (* ::Subsubsection:: *)
 (* extractKBStruct *)
+
+
 (*
 extract hierarchically structured knowledge from a notebook
 *)
@@ -501,6 +518,7 @@ extractKBStruct[ args___] :=
 
 (* ::Subsubsection:: *)
 (* arrange items *)
+
 
 arrangeInput[{struct_, isolated_}, item_] :=
 (* given a structured list and a list of isolated items,
@@ -580,6 +598,8 @@ insertSorted[args___] := unexpected[insertSorted, {args}]
 
 (* ::Subsubsection:: *)
 (* structView *)
+
+
 Clear[structView];
 
 (* produce a list containing the structured view corresponding to notebook file and a list of all cell tags contained
@@ -727,8 +747,11 @@ textDataToString[ Cell[ BoxData[ b_], ___]] := "\!\(" <> ToString[ InputForm[ b]
 textDataToString[ _] := "\[DownQuestion]?"
 textDataToString[ args___] := unexpected[ textDataToString, {args}]
 
+
+
 (* ::Subsubsection:: *)
 (* updateKBBrowser *)
+
 
 (* global variable $kbStruct contains the knowledge structure
    for each notebook ever evaluated in the session it contains an entry
@@ -754,6 +777,8 @@ updateKBBrowser[args___] :=
 
 (* ::Subsubsection:: *)
 (* displayKBBrowser *)
+
+
    
 displayKBBrowser[ task_String] :=
     Module[ {},
@@ -775,8 +800,12 @@ displayKBBrowser[ task_String] :=
 displayKBBrowser[args___] :=
     unexpected[displayKBBrowser, {args}]
 
+
+
 (* ::Subsubsection:: *)
 (* structViewBuiltin *)
+
+
 Clear[structViewBuiltin];
 
 (* structured view for builtin operators
@@ -834,9 +863,15 @@ structViewBuiltin[ category_String, tags_, task_String] :=
 structViewBuiltin[args___] :=
     unexpected[structViewBuiltin, {args}]
 
+
+
 (* ::Subsubsection:: *)
 (* structViewRules *)
+
+
 Clear[structViewRules];
+Clear[makeRuleRow];
+Clear[displaySelectedRules];
 
 (*
 	Go through the nested rule list recursively and bulid up the nested opener view for rule selection.
@@ -849,11 +884,15 @@ Clear[structViewRules];
 	values and go into the initial proof object (settings can be changed during the proof).
 	ruleTextActive is a global symbol, it does not go into the proof object and can be modified globally.
 *)
-structViewRules[ Hold[ rs_]] := structViewRules[ rs, {}, True]
 
+structViewRules[ {category_String},___] := Sequence[];
+
+(*Responsible for groupe name of rules *)
 structViewRules[{category_String, r__}, tags_, open_:False] :=
     Module[ {sub, compTags, structControl},
-        sub = Transpose[Map[structViewRules[#, tags] &, {r}]];
+		sub = Map[structViewRules[#, tags] &, {r}];
+		If[ sub==={},Return[{{},{}}]];
+        sub = Transpose[sub];
         compTags = Apply[Union, sub[[2]]];
         structControl = "Theorema`Interface`GUI`Private`$ruleStructState$" <> ToString[ Hash[ category]];
         If[ open && MatchQ[ ToExpression[ structControl], _Symbol],
@@ -865,14 +904,66 @@ structViewRules[{category_String, r__}, tags_, open_:False] :=
          compTags}
     ]
 
+(*Responsible for groupe name of rules. 
+	If no rules in group, returns empty Sequense *)
+structViewRules[{category_String}, tags_, open_]:=Sequence[];
+
+structViewRules[ Hold[ rs_]] := 
+	Module[{list = {}},
+		If[StringLength[$keyWord]>2,		
+			list = DeleteCases[rs,{r_Symbol/;testNoMatch[MessageName[ r, "usage"],"*"<>$keyWord<>"*"],t_,text_,p_Integer ,___}, Infinity];
+			
+			structViewRules[ list, {}, True]
+			
+		,
+			structViewRules[ rs, {}, True]
+		]
+	]
+
+testNoMatch[s_String,p_String]:=Not[StringMatchQ[ s,p]]
+testNoMatch[s_,p_]:=True
+
+resetDefaultRules[] :=
+	Module[{rs, list},
+		rs = basicTheoremaLanguageRules;
+		list = Cases[rs,{r_Symbol,active_,text_,p_Integer,___},Infinity];
+		Map[
+			ruleActive[ #[[1]]] = #[[2]];
+    		ruleTextActive[ #[[1]]] = #[[3]];
+    		rulePriority[ #[[1]]] = #[[4]];
+		&,list];		
+	]
+
+displaySelectedRules[Hold[ rs_]] := 
+	Module[{list},
+		(*Select checked list_ from allRules_*)  
+		list = Cases[rs,{r_Symbol,True,text_,p_Integer,___}->{r,text,p},Infinity];
+		(*Sort list_ by priority_*)
+		list = Sort[list,#1[[3]]<#2[[3]]&];
+		Pane[		
+			Column[Map[makeRuleRow[#]&,list],Spacings->5],
+			ImageSize->{380,200},
+			Scrollbars->{False,True}
+		]	
+	]
+
+makeRuleRow[{r_Symbol, textActive:(True|False), p_Integer},___] := 
+	Module[{}, 
+		Style[
+		Row[{
+			Tooltip[If[textActive,"\[CheckmarkedBox]","\[EmptySquare]"], MessageName[ ruleTextActive, "usage"]],Spacer[5],
+			MessageName[ r, "usage"]
+		}]
+		,LineBreakWithin -> False]
+	]
+
+(*Draws toggler icon *) 
 showProofTextPic[ active_] = Graphics[ {If[ active, GrayLevel[0], GrayLevel[0.7]], 
 	{Thin, Line[{{0, 0}, {4, 0}, {4, 4}, {0, 4}, {0, 0}}], Table[ Line[{{1, i}, {3, i}}], {i, 1, 3}]}}, ImageSize -> {15, 15}, PlotRange -> {{-1, 5}, {-1, 5}}];
- 
+
+(*Responsible for rule *) 
 structViewRules[ {r_Symbol, active:(True|False), textActive:(True|False), p_Integer, ___}, tags_] :=
     Module[ {align = Baseline},
-    	ruleActive[ r] = active;
-    	ruleTextActive[ r] = textActive;
-    	rulePriority[ r] = p;
         {Style[ 
          Row[{
             Row[{Tooltip[ 
@@ -903,12 +994,14 @@ structViewRules[ category_String, tags_] :=
           	Style[ translate[ category], "Section"]}, Spacer[5]]
     ]
 
+
 structViewRules[args___] :=
-    unexpected[structViewRules, {args}]
+    unexpected[structViewRules, {args}];
 
 
 (* ::Subsubsection:: *)
 (* check/set values *)
+
 
 allTrue[ l_, test_] :=
     Catch[Module[ {},
@@ -921,8 +1014,11 @@ allTrue[ l_, test_] :=
 setAll[l_, test_, val_] :=
     Scan[(test[#] = val) &, l]
    
+
+
 (* ::Subsubsection:: *)
 (* displayBuiltinBrowser *)
+
 
 (* see displayKBBrowser *)
 
@@ -934,15 +1030,43 @@ displayBuiltinBrowser[ task_String] :=
   }]
 displayBuiltinBrowser[args___] := unexcpected[ displayBuiltinBrowser, {args}]
 
+makeSearchButton[]:= 
+	Module[{},		
+		Row[{
+		Button["Search",CreateDialog[{TextCell["Enter a name: "],
+			InputField[Dynamic[nm],String],DefaultButton[DialogReturn[$keyWord=nm]]}]],		
+		Button["Show all",$keyWord = ""]
+		}]
+	]	
+
 selectProver[ ] :=
     Column[{
     	Button[ translate[ "OKnext"], $tcActionView++],
+
     	Labeled[ Tooltip[ PopupMenu[ Dynamic[ $selectedRuleSet], Map[ MapAt[ translate, #, {2}]&, $registeredRuleSets]],
     			Apply[ Function[ rs, MessageName[ rs, "usage"], {HoldFirst}], $selectedRuleSet]], 
     		translate[ "pRules"], {{ Top, Left}}],
     	Module[ {view},
-    		{view, $allRules} = structViewRules[ $selectedRuleSet];
-    		Labeled[ view, translate[ "pRulesSetup"], {{ Top, Left}}]],
+			
+			{view, $allRules} = structViewRules[ $selectedRuleSet];								
+    		
+    		Labeled[ Column[{
+				Row[{
+				Button["Search",
+				CreateDialog[
+					{
+						TextCell["Enter a keyword: "],
+						InputField[Dynamic[$keyWord],String,ContinuousAction->True],
+						DefaultButton[DialogReturn[]]						
+					},
+					WindowTitle-> "Search rules by keyword"
+				]
+			],			
+			Button["Set rules to default",resetDefaultRules[]],
+			Button["Show all",$keyWord = ""]
+				}],
+			Row[ {"Filtered by: ", $keyWord}],
+				view}], translate[ "pRulesSetup"], {{ Top, Left}}]],
     	Labeled[ Tooltip[ PopupMenu[ Dynamic[ $selectedStrategy], Map[ MapAt[ translate, #, {2}]&, $registeredStrategies]],
     		With[ {ss = $selectedStrategy}, MessageName[ ss, "usage"]]], 
     		translate[ "pStrat"], {{ Top, Left}}],
@@ -977,7 +1101,14 @@ submitProveTask[ ] :=
 				Method -> "Queued", Active -> ($selectedProofGoal =!= {})],
 			Column[{
 				Labeled[ displaySelectedGoal[ $selectedProofGoal], translate["selGoal"], {{ Top, Left}}],
-				Labeled[ displaySelectedKB[], translate["selKB"], {{ Top, Left}}]}],
+				Labeled[ displaySelectedKB[], translate["selKB"], {{ Top, Left}}]
+						
+			}],
+			
+			Row[{
+				Module[ { },
+					Labeled[ displaySelectedRules[ $selectedRuleSet], "Your selected options are:",{{Top,Left}}]]    		
+			}],
 			(* Method -> "Queued" so that no time limit is set for proof to complete *)
 			Button[ translate["prove"],
 				$tcActionView++;
@@ -1024,8 +1155,11 @@ proofNavigation[ po_] :=
     ]
 proofNavigation[ args___] := unexpected[ proofNavigation, {args}]
 
+
+
 (* ::Subsubsection:: *)
 (* printComputationInfo *)
+
 
 (* this function is called during a computation (see processComputation[])
    effect: print a cell containg information about the environment settings for that computation *)
@@ -1059,6 +1193,7 @@ setCompEnv[ args___] := unexpected[ setCompEnv, {args}]
 
 (* ::Subsubsection:: *)
 (* printProofInfo *)
+
 
 printProveInfo[ goal_, kb_, rules_, strategy_, {pVal_, proofObj_}, searchDepth_] :=
     Module[ {kbAct, bui, buiAct},
@@ -1113,6 +1248,7 @@ makeProofIDTag[ args___] := unexpected[ makeProofIDTag, {args}]
 
 (* ::Section:: *)
 (* Palettes *)
+
 
 insertNewEnv[type_String] :=
     Module[ {nb = InputNotebook[]},
@@ -1177,6 +1313,7 @@ newCloseEnvCell[args___] :=
 
 (* ::Subsection:: *)
 (* Buttons *)
+
 
 makeNbNewButton[] :=
 	Button[ translate["tcSessTabNbTabButtonNewLabel"],
@@ -1310,8 +1447,11 @@ structButtons[] :=
 structButtons[args___] :=
     unexpected[envButtons, {args}]
 
+
+
 (* ::Section:: *)
 (* Archives Tab *)
+
 
 archButtons[] :=
     Column[{
@@ -1409,6 +1549,7 @@ loadArchiveInPlace[ args___] := unexpected[ loadArchiveInPlace, {args}]
 (* ::Section:: *)
 (* Preferences Tab *)
 
+
 setPreferences[ ] :=
 	Column[ {
 	Column[ {
@@ -1487,8 +1628,11 @@ savePreferences[ ] :=
 	]
 savePreferences[ args___] := unexpected[ savePreferences, {args}]
 
+
+
 (* ::Section:: *)
 (* Math Tab *)
+
 
 $buttonNat = False;
 
@@ -1642,15 +1786,7 @@ langButtonData["FORALL2"] :=
 	{
 		If[ $buttonNat, 
 			translate["FORALL2"], 
-			DisplayForm[RowBox[{UnderscriptBox[ UnderscriptBox[StyleBox["\[ForAll]", FontSize->14], Placeholder["rg"]], Placeholder["cond"]], TagBox[ FrameBox["expr"], "SelectionPlaceholder"]}]]],
-		RowBox[{UnderscriptBox[ UnderscriptBox["\[ForAll]", "\[Placeholder]"], "\[Placeholder]"], "\[SelectionPlaceholder]"}],
-		translate["QUANT2Tooltip"]
-	}
-
-langButtonData["EXISTS1"] := 
-	{
-		If[ $buttonNat, 
-			translate["EXISTS1"], 
+			DisplayForm[RowBox[{UnderscriptBox[ UnderscriptBox
 			DisplayForm[RowBox[{UnderscriptBox[StyleBox["\[Exists]", FontSize->14], Placeholder["rg"]], TagBox[ FrameBox["expr"], "SelectionPlaceholder"]}]]],
 		RowBox[{UnderscriptBox["\[Exists]", "\[Placeholder]"], "\[SelectionPlaceholder]"}],
 		translate["QUANT1Tooltip"]
@@ -1713,8 +1849,17 @@ makeCompButton[args___] :=
     unexpected[makeCompButton, {args}]
 
 
+
+
+
+
+
+
+
+
 (* ::Section:: *)
 (* end of package *)
+
 
 initGUI[];
 
