@@ -1,3 +1,5 @@
+(* ::Package:: *)
+
 (* Mathematica package *)
 
 With[ {lang = "English"},
@@ -54,6 +56,7 @@ With[ {lang = "English"},
 	MessageName[substituteFree, "usage", lang] = "";	
 	MessageName[isSequenceFree, "usage", lang] = "";	
 	MessageName[isQuantifierFree, "usage", lang] = "";	
+	MessageName[isVariableFree, "usage", lang] = "";	
 	MessageName[transferToComputation, "usage", lang] = "";	
 	MessageName[defsToRules, "usage", lang] = "";	
 	MessageName[replaceAndTrack, "usage", lang] = "";	
