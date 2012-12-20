@@ -1,5 +1,11 @@
+(* ::Package:: *)
 
 With[ {lang = "English"},
+    MessageName[RightArrowBar$TM, "usage", lang] = "";
+
+
+
+
 	MessageName[FIX$, "usage", lang] = "";
 	MessageName[META$, "usage", lang] = "";
 	MessageName[QU$, "usage", lang] = "QU$[ expr] temporarily marks quantified variables in expr.";
@@ -43,6 +49,13 @@ With[ {lang = "English"},
 	MessageName[BracketingBar$TM, "usage", lang] = "";	
 	MessageName[Subscript$TM, "usage", lang] = "";	
 	MessageName[LeftArrow$TM, "usage", lang] = "";	
+	MessageName[Cup$TM, "usage", lang] = "";	
+	MessageName[Cap$TM, "usage", lang] = "";	
+	MessageName[CupCap$TM, "usage", lang] = "";	
+	MessageName[MinimumOf$TM, "usage", lang] = "";	
+	MessageName[MaximumOf$TM, "usage", lang] = "";	
+	MessageName[min$TM, "usage", lang] = "";	
+	MessageName[max$TM, "usage", lang] = "";	
 	MessageName[Set$TM, "usage", lang] = "";	
 	MessageName[SetOf$TM, "usage", lang] = "";	
 	MessageName[SequenceOf$TM, "usage", lang] = "";	

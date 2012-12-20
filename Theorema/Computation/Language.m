@@ -1,3 +1,5 @@
+(* ::Package:: *)
+
 BeginPackage["Theorema`Computation`Language`"]
 
 Needs[ "Theorema`Common`"]
@@ -37,6 +39,8 @@ setComputationContext[ args___] := unexpected[ setComputationContext, {args}]
 
 (* ::Section:: *)
 (* Arithmetic *)
+
+
    
 Plus$TM[ a__] /; buiActive["Plus"] := Plus[ a]
 Times$TM[ a__] /; buiActive["Times"] := Times[ a]
@@ -46,8 +50,11 @@ LessEqual$TM[ a__] /; buiActive["LessEqual"] := LessEqual[ a]
 Greater$TM[ a__] /; buiActive["Greater"] := Greater[ a]
 GreaterEqual$TM[ a__] /; buiActive["GreaterEqual"] := GreaterEqual[ a]
 
+
+
 (* ::Section:: *)
 (* Logic *)
+
 
 Not$TM[ a_] /; buiActive["Not"] := Not[ a]
 And$TM[ a__] /; buiActive["And"] := And[ a]
@@ -115,7 +122,7 @@ Exists$TM[ RNG$[ r:_SETRNG$|_STEPRNG$], cond_, form_]/; buiActive["Exists"] :=
 	Module[ {iter},
    		existsIteration[ iter, cond, form] /; (iter = rangeToIterator[ r]) =!= $Failed
 	]
-
+Plus$TM[ a__] /; buiActive["Plus"] := Plus[ a]
 SetAttributes[ existsIteration, HoldRest]
 existsIteration[ {x_, iter__}, cond_, form_] :=
     Module[ {uneval = {}, ci, sub},
@@ -179,13 +186,27 @@ sequenceOfIteration[ args___] := unexpected[ sequenceOfIteration, {args}]
 (* ::Section:: *)
 (* Tuples *)
 
+
+Tuple$TM /: Subscript$TM[a_Tuple$TM,x___,RightArrowBar$TM[p_,b_Integer],y___] := Subscript$TM[a,x,RightArrowBar$TM[p,Set$TM[b]],y]
+Tuple$TM /: Subscript$TM[a_Tuple$TM,RightArrowBar$TM[p_,b_Set$TM]..] /; buiActive["Insert"] := Insert[ a,p,{b}]
+Tuple$TM /: Subscript$TM[a_Tuple$TM,LeftArrow$TM[b_]] /; buiActive["DeleteAt"] := Delete[ a,b]
+Tuple$TM /: Subscript$TM[a_Tuple$TM,LeftArrowBar$TM[b_Set$TM]] /; buiActive["Delete"] := DeleteCases[ a,b]
+Tuple$TM /: Cup$TM[a_Tuple$TM,p_] /; buiActive["Append"] := Append[ a,p]
+Tuple$TM /: Cap$TM[p_,a_Tuple$TM] /; buiActive["Prepend"] := Prepend[ a,p]
+Tuple$TM /: CupCap$TM[a__Tuple$TM] /; buiActive["Join"] := Join[ a]
+
+
+
 Tuple$TM /: BracketingBar$TM[ a_Tuple$TM] /; buiActive["Length"] && isSequenceFree[a] := Length[ a]
 Tuple$TM /: Subscript$TM[ a_Tuple$TM, p__Integer] /; buiActive["Subscript"] && isSequenceFree[a] := Part[ a, p]
-Tuple$TM /: Subscript$TM[ a_Tuple$TM, p__LeftArrow$TM] /; buiActive["ReplacePart"] && isSequenceFree[a] :=
+Tuple$TM /: Subscript$TM[ a_Tuple$TM, LeftArrow$TM[_,_]..] /; buiActive["ReplacePart"] && isSequenceFree[a] :=
 	ReplacePart[ a, {p /. {LeftArrow$TM -> Rule, Tuple$TM -> List}}]
+
+
 
 (* ::Section:: *)
 (* Mathematica programming constructs *)
+
 
 (* In a "Theorema program", sets and Mathematica lists (as in Module, Do, ...) may be mixed. Also, there is "=" assignment as opposed
    to "=" as equality in standard Theorema language.

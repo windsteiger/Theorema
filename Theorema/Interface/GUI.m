@@ -1,9 +1,11 @@
+(* ::Package:: *)
+
 (* Theorema 
     Copyright (C) 2010 The Theorema Group
 
-    This file is part of Theorema.2
+    This file is part of Theorema .2
     
-    Theorema.2 is free software: you can redistribute it and/or modify
+    Theorema .2 is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
@@ -35,6 +37,7 @@ If[ $Notebooks,
 (* ::Section:: *)
 (* initGUI *)
 
+
 initGUI[] := 
 	Module[{},
 		(*
@@ -53,6 +56,9 @@ initGUI[] :=
         		{"Subscript", SubscriptBox[ "T", RowBox[{"i", ",", "\[Ellipsis]"}]], False, True, False},
         		{"ReplacePart", SubscriptBox[ "T", RowBox[{RowBox[{"i", "\[LeftArrow]", "t"}], ",", "\[Ellipsis]"}]], False, True, False},
         		{"Length", RowBox[{"\[LeftBracketingBar]", "T", "\[RightBracketingBar]"}], False, True, False},
+        		{"Append", RowBox[{"T","\[Cup]","e"}], False, True, False},
+        		{"Prepend", RowBox[{"e","\[Cap]","T"}], False, True, False},
+        		{"Join", RowBox[{"T","\[CupCap]","S"}], False, True, False},
         		{"SequenceOf", RowBox[{"\[LeftAngleBracket]", "\[Ellipsis]", "|", "\[Ellipsis]", "\[RightAngleBracket]"}], False, True, False}},
         	{"Arithmetic", 
         		{"Plus", RowBox[{"A","+","B"}], False, True, False},
@@ -121,8 +127,11 @@ initBuiltins[ l_List] :=
     ]
 initBuiltins[ args___] := unexpected[ initBuiltins, {args}]
 
+
+
 (* ::Section:: *)
 (* theoremaCommander *)
+
 
 (*
 	The style sheet defines Deployed->False unlike in usual palettes. This is necessary in order make Button[ ..., Active->False] or
@@ -199,6 +208,7 @@ activitiesView[ args___] := unexpected[ activitiesView, {args}]
 
 (* ::Subsubsection:: *)
 (* virtualKeyboard *)
+
 
 virtualKeyboard[ ] /; $Notebooks :=
         CreatePalette[ Dynamic[ 
@@ -385,8 +395,12 @@ $symBlockMap = {
 	{i_, j_} -> Table[ {}, {4}]
 };
 
+
+
 (* ::Subsubsection:: *)
 (* displaySelectedGoal *)
+
+
    
 displaySelectedGoal[ ] :=
     Module[ { sel, goal},
@@ -454,8 +468,12 @@ sourceToNotebookFile[ s_String] :=
 sourceToNotebookFile[ args___] := unexpected[ sourceToNotebookFile, {args}]
 
  
+
+
 (* ::Subsubsection:: *)
 (* extractKBStruct *)
+
+
 (*
 extract hierarchically structured knowledge from a notebook
 *)
@@ -499,6 +517,7 @@ extractKBStruct[ args___] :=
 
 (* ::Subsubsection:: *)
 (* arrange items *)
+
 
 arrangeInput[{struct_, isolated_}, item_] :=
 (* given a structured list and a list of isolated items,
@@ -578,6 +597,8 @@ insertSorted[args___] := unexpected[insertSorted, {args}]
 
 (* ::Subsubsection:: *)
 (* structView *)
+
+
 Clear[structView];
 
 (* produce a list containing the structured view corresponding to notebook file and a list of all cell tags contained
@@ -725,8 +746,11 @@ textDataToString[ Cell[ BoxData[ b_], ___]] := "\!\(" <> ToString[ InputForm[ b]
 textDataToString[ _] := "\[DownQuestion]?"
 textDataToString[ args___] := unexpected[ textDataToString, {args}]
 
+
+
 (* ::Subsubsection:: *)
 (* updateKBBrowser *)
+
 
 (* global variable $kbStruct contains the knowledge structure
    for each notebook ever evaluated in the session it contains an entry
@@ -753,6 +777,8 @@ updateKBBrowser[args___] :=
 
 (* ::Subsubsection:: *)
 (* displayKBBrowser *)
+
+
    
 displayKBBrowser[ task_String] :=
     Module[ {},
@@ -774,8 +800,12 @@ displayKBBrowser[ task_String] :=
 displayKBBrowser[args___] :=
     unexpected[displayKBBrowser, {args}]
 
+
+
 (* ::Subsubsection:: *)
 (* structViewBuiltin *)
+
+
 Clear[structViewBuiltin];
 
 (* structured view for builtin operators
@@ -833,8 +863,12 @@ structViewBuiltin[ category_String, tags_, task_String] :=
 structViewBuiltin[args___] :=
     unexpected[structViewBuiltin, {args}]
 
+
+
 (* ::Subsubsection:: *)
 (* structViewRules *)
+
+
 Clear[structViewRules];
 
 (*
@@ -909,6 +943,7 @@ structViewRules[args___] :=
 (* ::Subsubsection:: *)
 (* check/set values *)
 
+
 allTrue[ l_, test_] :=
     Catch[Module[ {},
               Scan[If[ Not[TrueQ[test[#]]],
@@ -920,8 +955,11 @@ allTrue[ l_, test_] :=
 setAll[l_, test_, val_] :=
     Scan[(test[#] = val) &, l]
    
+
+
 (* ::Subsubsection:: *)
 (* displayBuiltinBrowser *)
+
 
 (* see displayKBBrowser *)
 
@@ -1023,8 +1061,11 @@ proofNavigation[ po_] :=
     ]
 proofNavigation[ args___] := unexpected[ proofNavigation, {args}]
 
+
+
 (* ::Subsubsection:: *)
 (* printComputationInfo *)
+
 
 (* this function is called during a computation (see processComputation[])
    effect: print a cell containg information about the environment settings for that computation *)
@@ -1058,6 +1099,7 @@ setCompEnv[ args___] := unexpected[ setCompEnv, {args}]
 
 (* ::Subsubsection:: *)
 (* printProofInfo *)
+
 
 printProveInfo[ goal_, kb_, rules_, strategy_, {pVal_, proofObj_}, searchDepth_] :=
     Module[ {kbAct, bui, buiAct},
@@ -1112,6 +1154,7 @@ makeProofIDTag[ args___] := unexpected[ makeProofIDTag, {args}]
 
 (* ::Section:: *)
 (* Palettes *)
+
 
 insertNewEnv[type_String] :=
     Module[ {nb = InputNotebook[]},
@@ -1176,6 +1219,7 @@ newCloseEnvCell[args___] :=
 
 (* ::Subsection:: *)
 (* Buttons *)
+
 
 makeNbNewButton[] :=
 	Button[ translate["tcSessTabNbTabButtonNewLabel"],
@@ -1309,8 +1353,11 @@ structButtons[] :=
 structButtons[args___] :=
     unexpected[envButtons, {args}]
 
+
+
 (* ::Section:: *)
 (* Archives Tab *)
+
 
 archButtons[] :=
     Column[{
@@ -1410,6 +1457,7 @@ loadArchiveInPlace[ args___] := unexpected[ loadArchiveInPlace, {args}]
 (* ::Section:: *)
 (* Preferences Tab *)
 
+
 setPreferences[ ] :=
 	Column[ {
 	Column[ {
@@ -1488,8 +1536,11 @@ savePreferences[ ] :=
 	]
 savePreferences[ args___] := unexpected[ savePreferences, {args}]
 
+
+
 (* ::Section:: *)
 (* Math Tab *)
+
 
 $buttonNat = False;
 
@@ -1716,6 +1767,7 @@ makeCompButton[args___] :=
 
 (* ::Section:: *)
 (* end of package *)
+
 
 initGUI[];
 
