@@ -1,3 +1,5 @@
+(* ::Package:: *)
+
 (* Mathematica Package *)
 
 BeginPackage["Theorema`Language`FormulaManipulation`"]
@@ -9,6 +11,7 @@ Begin["`Private`"]
 
 (* ::Subsubsection:: *)
 (* splitAnd *)
+
 
 (*
 	splitAnd[ expr_, v_List] splits a conjunction expr into 1. a conjunction containing the free variables in v and 2. the rest 
@@ -58,6 +61,7 @@ makeDisjunction[ args___] := unexpected[ makeDisjunction, {args}]
 (* ::Subsubsection:: *)
 (* freeVariables *)
 
+
 freeVariables[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[x__], cond_, expr_]] := 
 	Complement[ freeVariables[ {x, cond, expr}], variables[ r]]
 freeVariables[ Hold[ l___]] := freeVariables[ {l}]
@@ -71,12 +75,14 @@ freeVariables[ args___] := unexpected[ freeVariables, {args}]
 (* ::Subsubsection:: *)
 (* variables *)
 
+
 variables[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[r___]] := Map[ First, {r}]
 variables[ args___] := unexpected[ variables, {args}]
 
 
 (* ::Subsubsection:: *)
 (* specifiedVariables *)
+
 
 specifiedVariables[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[r___]] := Map[ extractVar, {r}]
 specifiedVariables[ args___] := unexpected[ specifiedVariables, {args}]
@@ -88,6 +94,7 @@ extractVar[ args___] := unexpected[ extractVar, {args}]
 
 (* ::Subsubsection:: *)
 (* substituteFree *)
+
 
 Clear[ substituteFree]
 substituteFree[ expr_Hold, {}] := expr
@@ -112,16 +119,31 @@ substituteFree[ args___] := unexpected[ substituteFree, {args}]
 (* ::Subsubsection:: *)
 (* sequenceFree *)
 
-isSequenceFree[ expr_] := 
+
+isSequenceFree[ expr_, level_:{1}] := 
 	FreeQ[ expr,
 		_Theorema`Language`SEQ$|
 		_Theorema`Computation`Language`SEQ$|
 		Theorema`Language`VAR$[_Theorema`Language`SEQ$]|
-		Theorema`Language`Computation`VAR$[_Theorema`Language`Computation`SEQ$], {1}]
+		Theorema`Language`Computation`VAR$[_Theorema`Language`Computation`SEQ$], level]
 isSequenceFree[ args___] := unexpected[ isSequenceFree, {args}]
+
+
+
+(* ::Subsubsection:: *)
+(* variableFree *)
+
+
+isVariableFree[ expr_, level_:{1}] := 
+	FreeQ[ expr,
+		_Theorema`Language`VAR$|_Theorema`Computation`Language`VAR$, level]
+isVariableFree[ args___] := unexpected[ isVariableFree, {args}]
+
+
 
 (* ::Subsubsection:: *)
 (* transferToComputation *)
+
 
 transferToComputation[ form_, key_] :=
 	Module[{stripUniv, exec},
@@ -179,7 +201,7 @@ executableForm[ {(Theorema`Language`Iff$TM|Theorema`Language`IffDef$TM|Theorema`
     ]
 (* We return a string "$Failed", because when returning the expression $Failed (or also Null) the 
    ToExpression[...] in the calling transferToComputation calls openEnvironment once more (which means that $PreRead
-   seems to be applied???), resulting in messing up the contexts. With the string "$Failed" this
+   seems to be applied ???), resulting in messing up the contexts. With the string "$Failed" this
    does not happen *)
 executableForm[ expr_, key_] := "$Failed"
 executableForm[ args___] := unexpected[ executableForm, {args}]
@@ -204,6 +226,7 @@ execRight[ args___] := unexpected[ execRight, {args}]
 
 (* ::Subsubsection:: *)
 (* defsToRules *)
+
 
 defsToRules[ defList_List] := Map[ singleDefToRule, defList]
 defsToRules[ args___] := unexpected[ defsToRules, {args}]
@@ -241,8 +264,11 @@ replaceAndTrack[ expr_, repl_List] :=
 	]
 replaceAndTrack[ args___] := unexpected[ replaceAndTrack, {args}]
 
+
+
 (* ::Section:: *)
 (* FML$ datastructure *)
+
 
 Options[ makeFML] = {key :> defKey[], formula -> True, label :> defLabel[]};
 
@@ -288,6 +314,7 @@ formulaReference[ args___] := unexpected[ formulaReference, {args}]
 (* ::Subsection:: *)
 (* arbitraryButFixed *)
 
+
 arbitraryButFixed[ expr_, rng_Theorema`Language`RNG$, kb_List:{}] :=
 	(*
 		Select all variable symbols from rng, then (for each v of them) find all FIX$[ v, n] constants in kb and take the maximal n, say n'.
@@ -299,8 +326,11 @@ arbitraryButFixed[ expr_, rng_Theorema`Language`RNG$, kb_List:{}] :=
 	]
 arbitraryButFixed[ args___] := unexpected[ arbitraryButFixed, {args}]
 
+
+
 (* ::Subsection:: *)
 (* introduceMeta *)
+
 
 introduceMeta[ expr_, rng_Theorema`Language`RNG$, kb_List:{}] :=
 	(*
@@ -318,6 +348,7 @@ introduceMeta[ args___] := unexpected[ introduceMeta, {args}]
 
 (* ::Subsection:: *)
 (* rngToCondition *)
+
 
 rngToCondition[ Theorema`Language`RNG$[ r__]] := Apply[ Join, Map[ singleRngToCondition, {r}]]
 rngToCondition[ args___] := unexpected[ rngToCondition, {args}]
@@ -341,6 +372,7 @@ singleRngToCondition[ args___] := unexpected[ singleRngToCondition, {args}]
 
 (* ::Section:: *)
 (* Computation within proving *)
+
 
 computeInProof[ expr_] :=
 	Module[{simp},
