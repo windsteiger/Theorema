@@ -187,7 +187,10 @@ transferToComputation[ form_, key_] :=
 	Module[{stripUniv, exec},
 		stripUniv = stripUniversalQuantifiers[ form];
 		exec = executableForm[ stripUniv, key];
-		ToExpression[ exec]
+		(* Certain equalities cannot be made executable and generate an error when translated to Mma. 
+		   Since this operation is part of the preprocesing, we catch the error,
+		   otherwise preprocessing would end in a premature state. *)
+		Quiet[ Check[ ToExpression[ exec], Null], {SetDelayed::nosym}]
 	]
 transferToComputation[ args___] := unexpected[ transferToComputation, {args}]
 
