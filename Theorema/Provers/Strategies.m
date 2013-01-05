@@ -62,26 +62,58 @@ applyOnceAndLevelSaturation[ ps_PRFSIT$] :=
 	]
 applyOnceAndLevelSaturation[ args___] := unexpected[ applyOnceAndLevelSaturation, {args}]
 
-levelSaturation[ ps_PRFSIT$, sat1rules_List, sat2Rules_List] :=
-	Module[{locInfo = ps.local, satKB, psKB = ps.kb, l, posNew, posRearrKB, pairs = {}, i, j, newForms, newPairs},
+levelSaturation[ ps:PRFSIT$[ _, _, _, _, rest___?OptionQ], sat1rules_List, sat2rules_List] :=
+	Module[{locInfo = ps.local, satKB, psKB = ps.kb, l, posNew, posRearrKB, pairs = {}, i, j,
+			newForms, newPairs, newFrom1, newFrom2, usd={}, gen={}, nextGen},
 		l = Length[ psKB];
 		satKB = getLocalInfo[ locInfo, "lastSat"];
-		(* flat list of positions of new forms in KB since last saturation run
+		(* list of positions of new forms in KB since last saturation run
 		   Since KB is a plain unstructured list all positions are specified by exactly 1 integer *)
-		posNew = Flatten[ Position[ psKB, _?(!MemberQ[ satKB, #.id]&), {1}, Heads -> False]];
+		posNew = Position[ psKB, _?(!MemberQ[ satKB, #.id]&), {1}, Heads -> False];
 		(* we build a list with pos of new forms followed by pos of the remaining (old) forms *)
-		posRearrKB = Join[ posNew, Complement[ Range[ l], posNew]];
+		posRearrKB = Join[ posNew, Complement[ Map[ List, Range[ l]], posNew]];
 		(* we form a list of new forms and a list of pairs involving the new forms just based on the positions *)
 		Do[
 			Do[ 
-				AppendTo[ pairs, {{posRearrKB[[j]]}, {posRearrKB[[i]]}}],
+				AppendTo[ pairs, {posRearrKB[[j]], posRearrKB[[i]]}],
 				{i, j+1, l}], 
 			{j, Length[ posNew]}];
 		newForms = Extract[ psKB, posNew];
+		newFrom1 = Map[ applyAllRules[ #, sat1rules]&, Map[ dummyGoalPS[ #, rest]&, newForms]];
+		newFrom1 = Map[ extractGenerated, newFrom1];
 		newPairs = Map[ Extract[ psKB, #]&, pairs];
-		ps
+		newFrom2 = Map[ applyAllRules[ #, sat2rules]&, Map[ dummyGoalPS[ #, rest]&, newPairs]];
+		newFrom2 = Map[ extractGenerated, newFrom2];
+		locInfo = putLocalInfo[ locInfo, "lastSat" -> Map[ #.key&, psKB]];
+		Do[
+			nextGen = newFrom1[[j]];
+			If[ nextGen =!= {},
+				AppendTo[ usd, {newForms[[j]]}];
+				AppendTo[ gen, nextGen];
+				psKB = joinKB[ psKB, nextGen]
+			],
+			{j, Length[ newFrom1]}
+		];
+		Do[
+			nextGen = newFrom2[[j]];
+			If[ nextGen =!= {},
+				AppendTo[ usd, newPairs[[j]]];
+				AppendTo[ gen, nextGen];
+				psKB = joinKB[ psKB, nextGen]
+			],
+			{j, Length[ newFrom2]}
+		];
+		makeANDNODE[ makePRFINFO[ name -> levelSat, used -> usd, generated -> gen, id -> ps.id], 
+                newSubgoal[ goal -> ps.goal, kb -> psKB, local -> locInfo, rest]]
 	]
 levelSaturation[ args___] := unexpected[ levelSaturation, {args}]
+
+dummyGoalPS[ f_FML$, rest___?OptionQ] := makePRFSIT[ goal -> f, kb -> {f}, id -> "dummy", rest]
+dummyGoalPS[ pair:{f_FML$, _FML$}, rest___?OptionQ] := makePRFSIT[ goal -> f, kb -> pair, id -> "dummy", rest]
+dummyGoalPS[ args___] := unexpected[ dummyGoalPS, {args}]
+
+extractGenerated[ nodes_List] := Union[ Flatten[ Map[ #.generated&, nodes]], SameTest -> (#1.formula === #2.formula&)]
+extractGenerated[ args___] := unexpected[ extractGenerated, {args}]
 
 (*
 	This is not serious, it just duplicates the proof situation into two children. Should be a test case for exhaustive search

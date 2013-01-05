@@ -9,6 +9,7 @@ MessageName[ proofAlternatives, "usage", lang] = "Alternatives to continue a pro
 MessageName[ searchDepthLimit, "usage", lang] = "Proof terminates due to search depth limitation";
 MessageName[ invalidProofNode, "usage", lang] = "A proof strategy returns an invalid proof node";
 MessageName[ noApplicableRule, "usage", lang] = "Proof fails since there is no applicable rule";
+MessageName[ levelSat, "usage", lang] = "Level saturation";
 
 ] (* With *)
 
@@ -18,6 +19,20 @@ MessageName[ noApplicableRule, "usage", lang] = "Proof fails since there is no a
 Begin["`Private`"]
 
 With[ {lang = "English"},
+
+inlineTheoremaExpressionSeq[ {f_}, lang] := inlineTheoremaExpression[f];
+inlineTheoremaExpressionSeq[ {f_, g_}, lang] := {inlineTheoremaExpression[f], " and ", inlineTheoremaExpression[g]};
+inlineTheoremaExpressionSeq[ {f_, m__, g_}, lang] := Join[ {inlineTheoremaExpression[f]}, 
+	Riffle[ Map[ inlineTheoremaExpression, {m}], ", ", {1, -1, 2}],
+	{"and ", inlineTheoremaExpression[g]}];
+inlineTheoremaExpressionSeq[ args___] := unexpected[ inlineTheoremaExpressionSeq, {args}];
+
+formulaReferenceSequence[ {f_}, lang] := formulaReference[f];
+formulaReferenceSequence[ {f_, g_}, lang] := {formulaReference[f], " and ", formulaReference[g]};
+formulaReferenceSequence[ {f_, m__, g_}, lang] := Join[ {formulaReference[f]}, 
+	Riffle[ Map[ formulaReference, {m}], ", ", {1, -1, 2}],
+	{"and ", formulaReference[g]}];
+formulaReferenceSequence[ args___] := unexpected[ formulaReferenceSequence, {args}];
 
 proofStepText[ initialProofSituation, lang, {}, {{goal_FML$}}, pVal_] := {If[ pVal === proved, textCell[ "We prove:"], textCell[ "We have to prove:"]], 
          goalCell[ goal],
@@ -47,7 +62,14 @@ proofStepText[ openProofSituation, lang, {{goal_FML$, kb__FML$}}, {}] := {textCe
 proofStepText[ proofAlternatives, lang, ___] := {textCell[ "We have several alternatives to continue the proof."]};
 
 subProofHeader[ proofAlternatives, lang, ___, pVal_, {p_}] := {textCell[ ToString[ StringForm[ "Alternative ``:", p]]]};
- 
+
+proofStepText[ levelSat, lang, u_List, g_List, pVal_] := Module[{i, cells = {textCell[ "From what we already know, we can derive new knowledge."]}},
+	Do[
+		cells = Join[ cells, {textCell[ "From ", formulaReferenceSequence[ u[[i]], lang], " we infer"], assumptionListCells[ g[[i]], ",", "."]}],
+		{i, Length[ u]}
+	];
+	cells
+];
 
 proofStepText[ searchDepthLimit, lang, {{goal_FML$, kb___FML$}}, {}, ___] :=
 	Join[{textCell[ "Search depth exceeded! The open proof situation is:"]}, 
