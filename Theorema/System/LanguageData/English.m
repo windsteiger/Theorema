@@ -118,6 +118,7 @@ With[ {lang = "English"},
 	MessageName[makeANDNODE, "usage", lang] = "makeANDNODE[ info_, {subgoals_}] constructs a node in the proof tree using proofinfo info to prove all the given subgoals.";
 	MessageName[makeORNODE, "usage", lang] = "makeORNODE[ info_, {subgoals_}] constructs a node in the proof tree using proofinfo info to prove at least one of the given subgoals.";
 	MessageName[makePRFINFO, "usage", lang] = "makePRFINFO[ ...] constructor for PRFINFO$ data staructure.";
+	MessageName[isProofNode, "usage", lang] = "isProofNode[ p] is True iff p is a valid node to be inserted into a proof tree.";
 	MessageName[name, "usage", lang] = "name is an option for the constructor makePRFINFO and a selector for the PRFINFO$ datastructure.";
 	MessageName[used, "usage", lang] = "used is an option for the constructor makePRFINFO and a selector for the PRFINFO$ datastructure.";
 	MessageName[generated, "usage", lang] = "generated is an option for the constructor makePRFINFO and a selector for the PRFINFO$ datastructure.";

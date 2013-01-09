@@ -43,10 +43,16 @@ applyOnce[ ps_PRFSIT$] :=
 applyOnce[ args___] := unexpected[ applyOnce, {args}]
 
 applyOnceAndLevelSaturation[ ps_PRFSIT$] :=
-	Module[ {i = ps.id, allRules = getActiveRulesFilter[ ps, "term"|"levelSat1"|"levelSat2", Flatten], 
+	Module[ {i = ps.id, satps = ps, allRules = getActiveRulesFilter[ ps, "term"|"levelSat1"|"levelSat2", Flatten], 
 		sat1 = getActiveRulesType[ ps, "levelSat1"], 
 		sat2 = getActiveRulesType[ ps, "levelSat2"], newNodes},
-		newNodes = applyAllRules[ ps, allRules];
+		If[ i === "InitialPS",
+			satps = levelSaturation[ ps, sat1, sat2];
+			If[ isProofNode[ satps],
+				Return[ satps]
+			]			
+		];
+		newNodes = applyAllRules[ satps, allRules];
 		newNodes = MapAt[ levelSaturation[ #, sat1, sat2]&, newNodes, Position[ newNodes, _PRFSIT$]];
 		Switch[ Length[ newNodes],
 			0,
@@ -62,6 +68,9 @@ applyOnceAndLevelSaturation[ ps_PRFSIT$] :=
 	]
 applyOnceAndLevelSaturation[ args___] := unexpected[ applyOnceAndLevelSaturation, {args}]
 
+(* ::Section:: *)
+(* Level saturation *)
+
 levelSaturation[ ps:PRFSIT$[ _, _, _, _, rest___?OptionQ], sat1rules_List, sat2rules_List] :=
 	Module[{locInfo = ps.local, satKB, psKB = ps.kb, l, posNew, posRearrKB, pairs = {}, i, j,
 			newForms, newPairs, newFrom1, newFrom2, usd={}, gen={}, nextGen},
@@ -69,7 +78,7 @@ levelSaturation[ ps:PRFSIT$[ _, _, _, _, rest___?OptionQ], sat1rules_List, sat2r
 		satKB = getLocalInfo[ locInfo, "lastSat"];
 		(* list of positions of new forms in KB since last saturation run
 		   Since KB is a plain unstructured list all positions are specified by exactly 1 integer *)
-		posNew = Position[ psKB, _?(!MemberQ[ satKB, #.id]&), {1}, Heads -> False];
+		posNew = Position[ psKB, _?(!MemberQ[ satKB, #.key]&), {1}, Heads -> False];
 		(* we build a list with pos of new forms followed by pos of the remaining (old) forms *)
 		posRearrKB = Join[ posNew, Complement[ Map[ List, Range[ l]], posNew]];
 		(* we form a list of new forms and a list of pairs involving the new forms just based on the positions *)
@@ -79,10 +88,14 @@ levelSaturation[ ps:PRFSIT$[ _, _, _, _, rest___?OptionQ], sat1rules_List, sat2r
 				{i, j+1, l}], 
 			{j, Length[ posNew]}];
 		newForms = Extract[ psKB, posNew];
-		newFrom1 = Map[ applyAllRules[ #, sat1rules]&, Map[ dummyGoalPS[ #, rest]&, newForms]];
+		Block[{$TMAcheckSuccess = False},
+			newFrom1 = Map[ applyAllRules[ #, sat1rules]&, Map[ dummyGoalPS, newForms]];
+		];
 		newFrom1 = Map[ extractGenerated, newFrom1];
 		newPairs = Map[ Extract[ psKB, #]&, pairs];
-		newFrom2 = Map[ applyAllRules[ #, sat2rules]&, Map[ dummyGoalPS[ #, rest]&, newPairs]];
+		Block[{$TMAcheckSuccess = False},
+			newFrom2 = Map[ applyAllRules[ #, sat2rules]&, Map[ dummyGoalPS, newPairs]];
+		];
 		newFrom2 = Map[ extractGenerated, newFrom2];
 		locInfo = putLocalInfo[ locInfo, "lastSat" -> Map[ #.key&, psKB]];
 		Do[
@@ -103,17 +116,22 @@ levelSaturation[ ps:PRFSIT$[ _, _, _, _, rest___?OptionQ], sat1rules_List, sat2r
 			],
 			{j, Length[ newFrom2]}
 		];
-		makeANDNODE[ makePRFINFO[ name -> levelSat, used -> usd, generated -> gen, id -> ps.id], 
+		If[ gen === {},
+			makePRFSIT[ goal -> ps.goal, kb -> psKB, id -> ps.id, local -> locInfo, rest],
+			(* else *)
+			makeANDNODE[ makePRFINFO[ name -> levelSat, used -> usd, generated -> gen, id -> ps.id], 
                 newSubgoal[ goal -> ps.goal, kb -> psKB, local -> locInfo, rest]]
+		]
 	]
 levelSaturation[ args___] := unexpected[ levelSaturation, {args}]
 
-dummyGoalPS[ f_FML$, rest___?OptionQ] := makePRFSIT[ goal -> f, kb -> {f}, id -> "dummy", rest]
-dummyGoalPS[ pair:{f_FML$, _FML$}, rest___?OptionQ] := makePRFSIT[ goal -> f, kb -> pair, id -> "dummy", rest]
+dummyGoalPS[ f_FML$] := makePRFSIT[ kb -> {f}, id -> "dummy"]
+dummyGoalPS[ pair:{_FML$, _FML$}] := makePRFSIT[ kb -> pair, id -> "dummy"]
 dummyGoalPS[ args___] := unexpected[ dummyGoalPS, {args}]
 
 extractGenerated[ nodes_List] := Union[ Flatten[ Map[ #.generated&, nodes]], SameTest -> (#1.formula === #2.formula&)]
 extractGenerated[ args___] := unexpected[ extractGenerated, {args}]
+
 
 (*
 	This is not serious, it just duplicates the proof situation into two children. Should be a test case for exhaustive search

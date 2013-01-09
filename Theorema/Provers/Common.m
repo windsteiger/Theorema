@@ -46,6 +46,7 @@ callProver[ ruleSetup:{_Hold, _List, _List}, strategy_, goal_FML$, kb_List, sear
 		$TMAcurrentDepth = 2;
 		$TMAproofTree = makeInitialProofTree[ ];
 		$TMAproofObject = makeInitialProofObject[ goal, kb, ruleSetup, strategy];
+		$TMAcheckSuccess = True;
 		Clear[ $TMAproofNotebook];
 		initFormulaLabel[];
 		proofSearch[ searchDepth];
@@ -335,10 +336,11 @@ Options[ newSubgoal] = Options[ makePRFSIT];
 newSubgoal[ data___?OptionQ] := checkProofSuccess[ makePRFSIT[ data]]
 newSubgoal[ args___] := unexpected[ newSubgoal, {args}]
 
-checkProofSuccess[ ps_PRFSIT$] := 
+checkProofSuccess[ ps_PRFSIT$] /; $TMAcheckSuccess := 
 	Module[{termRules = getActiveRulesType[ ps, "term"]}, 
 		Replace[ ps, termRules]
 	]
+checkProofSuccess[ ps_PRFSIT$] := ps
 checkProofSuccess[ args___] := unexpected[ checkProofSuccess, {args}]
 
 
