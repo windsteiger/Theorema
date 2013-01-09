@@ -696,38 +696,44 @@ displayProof[ args___] := unexpected[ displayProof, {args}]
 *)
 proofObjectToCell[ PRFOBJ$[ pi_PRFINFO$, sub_, pVal_]] := 
 	Module[{ cellList = proofObjectToCell[ pi, pVal]},
-		Join[ cellList, {proofObjectToCell[ sub]}]
+		Join[ cellList, {proofObjectToCell[ sub, pVal]}]
 	]
 proofObjectToCell[ PRFINFO$[ name_?ruleTextActive, u_, g_, id_String, rest___?OptionQ], pVal_] := proofStepTextId[ id, name, u, g, rest, pVal]
 proofObjectToCell[ PRFINFO$[ _, _, _, _String, ___?OptionQ], _] := {}
-proofObjectToCell[ PRFSIT$[ g_FML$, kb_List, id_String, ___]] := Cell[ CellGroupData[ proofStepTextId[ id, openProofSituation, {Prepend[ kb, g]}, {}], Open]]
-proofObjectToCell[ (ANDNODE$|ORNODE$)[ pi_PRFINFO$, subnodes__, pVal_]] := 
+proofObjectToCell[ PRFSIT$[ g_FML$, kb_List, id_String, ___], pVal_] := Cell[ CellGroupData[ proofStepTextId[ id, openProofSituation, {Prepend[ kb, g]}, {}],
+																			cellStatus[ $proofCellStatus, pending, pVal]]]
+proofObjectToCell[ (ANDNODE$|ORNODE$)[ pi_PRFINFO$, subnodes__, pVal_], overallVal_] := 
 	Module[{header, sub = {}},
 		header = proofObjectToCell[ pi, pVal];
 		If[ Length[ {subnodes}] == 1,
-			sub = {proofObjectToCell[ subnodes]},
+			sub = {proofObjectToCell[ subnodes, pVal]},
 			(* else *)
-			sub = MapIndexed[ subProofToCell[ pi, #1, #2]&, {subnodes}]
+			sub = MapIndexed[ subProofToCell[ pi, #1, #2, pVal]&, {subnodes}]
 		];
 		If[ header === {},
 			Apply[ Sequence, sub],
 			(* else *)
-			Cell[ CellGroupData[ Join[ header, sub], cellStatus[ $proofCellStatus, pVal]]]
+			Cell[ CellGroupData[ Join[ header, sub], cellStatus[ $proofCellStatus, pVal, overallVal]]]
 		]
 	]
-proofObjectToCell[ TERMINALNODE$[ pi_PRFINFO$, pVal_]] := 
-	Cell[ CellGroupData[ proofObjectToCell[ pi, pVal], cellStatus[ $proofCellStatus, pVal]]]
+proofObjectToCell[ TERMINALNODE$[ pi_PRFINFO$, pVal_], overallVal_] := 
+	Cell[ CellGroupData[ proofObjectToCell[ pi, pVal], cellStatus[ $proofCellStatus, pVal, overallVal]]]
 	
 proofObjectToCell[ args___] := unexpected[ proofObjectToCell, {args}]
 
-subProofToCell[ PRFINFO$[ name_, used_List, gen_List, ___], node_, pos_List] :=
-	Cell[ CellGroupData[ Join[ subProofHeaderId[ node.id, name, used, gen, node.proofValue, pos], {proofObjectToCell[ node]}], 
-		cellStatus[ $proofCellStatus, 1]]]
+subProofToCell[ PRFINFO$[ name_, used_List, gen_List, ___], node_, pos_List, pVal_] :=
+	Cell[ CellGroupData[ Join[ subProofHeaderId[ node.id, name, used, gen, node.proofValue, pos], {proofObjectToCell[ node, node.proofValue]}], 
+		cellStatus[ $proofCellStatus, node.proofValue, pVal]]]
 subProofToCell[ args___] := unexpected[ subProofToCell, {args}]
 
-cellStatus[ Automatic, failed] := Closed
+cellStatus[ Automatic, pending, pending] := Open
+cellStatus[ Automatic, _, pending] := Closed
+cellStatus[ Automatic, _, failed] := Open
+cellStatus[ Automatic, proved, proved] := Open
+cellStatus[ Automatic, _, proved] := Closed
+cellStatus[ Automatic, _, _] := Open
 cellStatus[ Automatic, _] := Open
-cellStatus[ _, v_] := v
+cellStatus[ v_, _, _] := v
 cellStatus[ args___] := unexpected[ cellStatus, {args}]
 
 
