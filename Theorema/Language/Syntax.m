@@ -142,6 +142,91 @@ MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalN]", "0"], fmt_] := MakeExpr
 
 MakeExpression[ RowBox[ {l_,"\[LeftArrow]"}], fmt_] := MakeExpression[ RowBox[{"LeftArrow", "[", l, "]"}], fmt] /; $parseTheoremaExpressions
 
+(* ::Subsection:: *)
+(* operator underscript -> domain *)
+
+(*
+	The assumption is that prefix/infix/postfix operators with underscript are used for operators, which 
+	translate correctly to some expression when used without the underscript.
+*)
+(* PREFIX *)
+MakeExpression[ RowBox[ {UnderscriptBox[ "-", dom_], r_}], fmt_] :=
+    Module[ {},
+    	(* Special case: unary minus *)
+    	(* We memorize for output, that dom has been introduced as a domain underscript *)
+    	registerDomainOperator[ "-", Minus, Prefix, dom];
+        MakeExpression[ RowBox[ {RowBox[ {dom, "[", "Minus", "]"}], "[", r, "]"}], fmt]
+    ] /; $parseTheoremaExpressions
+
+MakeExpression[ RowBox[ {UnderscriptBox[ op_, dom_], r_}], fmt_] :=
+    Module[ {expr = ToExpression[ RowBox[{op, r}], fmt]},
+    	(* expr is the form that would result without the underscript, say f[r] *)
+        With[ {aux = Head[ expr]},
+    		(* We memorize for output, that dom has been introduced as a domain underscript *)
+    		registerDomainOperator[ op, aux, Prefix, dom];
+        	(* From expr we now fetch the head, i.e. "f". We then generate dom[f][r] *)
+            MakeExpression[ RowBox[ {RowBox[ {dom, "[", aux, "]"}], "[", r, "]"}], fmt]
+        ]
+    ] /; $parseTheoremaExpressions
+
+(* INFIX *)
+MakeExpression[ RowBox[ {l_, UnderscriptBox[ "-", dom_], r_}], fmt_] :=
+    Module[ {},
+    	(* Special case: subtract *)
+    	(* We memorize for output, that dom has been introduced as a domain underscript *)
+    	registerDomainOperator[ "-", Subtract, Infix, dom];
+        MakeExpression[ RowBox[ {RowBox[ {dom, "[", "Subtract", "]"}], "[", RowBox[ {l, ",", r}], "]"}], fmt]
+    ] /; $parseTheoremaExpressions
+
+MakeExpression[ RowBox[ {l_, UnderscriptBox[ "/", dom_], r_}], fmt_] :=
+    Module[ {},
+    	(* Special case: divide *)
+    	(* We memorize for output, that dom has been introduced as a domain underscript *)
+    	registerDomainOperator[ "/", Divide, Infix, dom];
+        MakeExpression[ RowBox[ {RowBox[ {dom, "[", "Divide", "]"}], "[", RowBox[ {l, ",", r}], "]"}], fmt]
+    ] /; $parseTheoremaExpressions
+
+MakeExpression[ RowBox[ {l_, UnderscriptBox[ op_, dom_], r_}], fmt_] :=
+    Module[ {expr = ToExpression[ RowBox[{l, op, r}], fmt]},
+    	(* expr is the form that would result without the underscript, say f[x,y]. We do not even rely on that x MUST be l and y MUST be r *)
+        With[ {aux = Head[ expr], paramBox = ToBoxes[ Apply[ List, expr]][[1, 2]]},
+    		(* We memorize for output, that dom has been introduced as a domain underscript *)
+    		registerDomainOperator[ op, aux, Infix, dom];
+        	(* From expr we now fetch the head, i.e. "f", and the box form of the parameters, i.e. box form of "x,y".
+        	   We then generate dom[f][x,y] *)
+            MakeExpression[ RowBox[ {RowBox[ {dom, "[", aux, "]"}], "[", paramBox, "]"}], fmt]
+        ]
+    ] /; $parseTheoremaExpressions
+
+(* POSTFIX *)
+MakeExpression[ RowBox[ {l_, UnderscriptBox[ op_, dom_]}], fmt_] :=
+    Module[ {expr = ToExpression[ RowBox[{l, op}], fmt]},
+    	(* expr is the form that would result without the underscript, say f[l] *)
+        With[ {aux = Head[ expr]},
+    		(* We memorize for output, that dom has been introduced as a domain underscript *)
+    		registerDomainOperator[ op, aux, Postfix, dom];
+        	(* From expr we now fetch the head, i.e. "f". We then generate dom[f][r] *)
+            MakeExpression[ RowBox[ {RowBox[ {dom, "[", aux, "]"}], "[", l, "]"}], fmt]
+        ]
+    ] /; $parseTheoremaExpressions
+
+(* GENERAL *)
+MakeExpression[ RowBox[ {UnderscriptBox[ op_, dom_], "[", p___, "]"}], fmt_] :=
+	Module[ {},
+    	registerDomainOperator[ dom];
+        MakeExpression[ RowBox[ {RowBox[ {dom, "[", op, "]"}], "[", p, "]"}], fmt]
+    ] /; $parseTheoremaExpressions
+
+registerDomainOperator[ op_, f_, form_, dom_] :=
+	Module[{},
+		isUnderscriptDomain[ dom] = True;
+		operatorSymbol[ f, form] = op;
+	]
+registerDomainOperator[ dom_] :=
+	Module[{},
+		isUnderscriptDomain[ dom] = True;
+	]
+registerDomainOperator[ args___] := unexpected[ registerDomainOperator, {args}]
 
 
 (* ::Subsection:: *)
@@ -341,7 +426,37 @@ MakeBoxes[ s_Symbol, TheoremaForm] :=
 		]
 	]
 
-tmaInfixBox[ args_List, op_String] := RowBox[ Riffle[ Map[ MakeBoxes[ #, TheoremaForm]&, args], op]]
+
+(* ::Subsection:: *)
+(* Domain underscripts *)
+
+MakeBoxes[ (dom_?(isUnderscriptDomain[ MakeBoxes[ #, TheoremaForm]]&))[ op_][ a_], TheoremaForm] :=
+	Module[ {opSymPre = operatorSymbol[ ToExpression[ MakeBoxes[ op, TheoremaForm]], Prefix],
+		opSymPost = operatorSymbol[ ToExpression[ MakeBoxes[ op, TheoremaForm]], Postfix]},
+		Which[
+			StringQ[ opSymPre],
+			RowBox[ {UnderscriptBox[ opSymPre, MakeBoxes[ dom, TheoremaForm]], MakeBoxes[ a, TheoremaForm]}],
+			StringQ[ opSymPost],
+			RowBox[ {MakeBoxes[ a, TheoremaForm], UnderscriptBox[ opSymPost, MakeBoxes[ dom, TheoremaForm]]}],
+			True,
+			MakeBoxes[ Underscript[ op, dom][ a], TheoremaForm]
+		]
+	]
+	
+MakeBoxes[ (dom_?(isUnderscriptDomain[ MakeBoxes[ #, TheoremaForm]]&))[ op_][ a_, b_], TheoremaForm] :=
+	Module[ {opSym = operatorSymbol[ ToExpression[ MakeBoxes[ op, TheoremaForm]], Infix]},
+		Which[
+			StringQ[ opSym],
+			tmaInfixBox[ {a, b}, UnderscriptBox[ opSym, MakeBoxes[ dom, TheoremaForm]]],
+			True,
+			MakeBoxes[ Underscript[ op, dom][ a, b], TheoremaForm]
+		]
+	]
+	
+MakeBoxes[ (dom_?(isUnderscriptDomain[ MakeBoxes[ #, TheoremaForm]]&))[ op_][ a___], TheoremaForm] :=
+	MakeBoxes[ Underscript[ op, dom][ a], TheoremaForm]
+	
+tmaInfixBox[ args_List, op_] := RowBox[ Riffle[ Map[ MakeBoxes[ #, TheoremaForm]&, args], op]]
 tmaInfixBox[ args___] := unexpected[ tmaInfixBox, {args}]
 
 (*
