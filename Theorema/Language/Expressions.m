@@ -94,6 +94,11 @@ makeEllipsisBox[ 1, fmt_] := "\[Ellipsis]"
 makeEllipsisBox[ step_, fmt_] := OverscriptBox[ "\[Ellipsis]", MakeBoxes[ step, fmt]]
 makeEllipsisBox[ args___] := unexpected[ makeEllipsisBox, {args}]
 
+MakeBoxes[ CaseDistinction$TM[ c__], TheoremaForm] :=
+    RowBox[ {"\[Piecewise]",
+        GridBox[ Map[ formatClause, {c}]]}]
+
+formatClause[ Clause$TM[ c_, e_]] := {MakeBoxes[ e, TheoremaForm], "\[DoubleLeftArrow]", MakeBoxes[ c, TheoremaForm]}
 
 (* ::Section:: *)
 (* Global Declarations Display *)
