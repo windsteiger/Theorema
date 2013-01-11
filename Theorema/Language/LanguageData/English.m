@@ -65,6 +65,8 @@ With[ {lang = "English"},
 	MessageName[\[DoubleStruckCapitalQ]$TM, "usage", lang] = "";	
 	MessageName[\[DoubleStruckCapitalR]$TM, "usage", lang] = "";	
 	MessageName[\[DoubleStruckCapitalC]$TM, "usage", lang] = "";	
+	MessageName[CaseDistinction$TM, "usage", lang] = "";	
+	MessageName[Clause$TM, "usage", lang] = "";	
     (* Mathematica programming language *)
 	MessageName[Program, "usage", lang] = "";	
 	MessageName[Module$TM, "usage", lang] = "";	
