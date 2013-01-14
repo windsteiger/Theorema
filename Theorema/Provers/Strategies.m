@@ -26,27 +26,26 @@ Begin["`Private`"]
 (* Proof strategies *)
 
 applyOnce[ ps_PRFSIT$] := 
-	Module[ {i = ps.id, allRules = getActiveRulesFilter[ ps, "term", Flatten], newNodes},
+	Module[ {allRules = getActiveRulesFilter[ ps, "term", Flatten], newNodes},
 		newNodes = applyAllRules[ ps, allRules];
 		Switch[ Length[ newNodes],
 			0,
-			proofFails[ makePRFINFO[ name -> noApplicableRule, id -> i]],
+			proofFails[ makePRFINFO[ name -> noApplicableRule]],
 			1,
 			First[ newNodes],
 			_,
-			newNodes = Map[ renewID, newNodes];
 			makeORNODE[ 
-				makePRFINFO[ name -> proofAlternatives, used -> newNodes.used, generated -> newNodes.generated, id -> i],
+				makePRFINFO[ name -> proofAlternatives, used -> newNodes.used, generated -> newNodes.generated],
 				newNodes]
 		]
 	]
 applyOnce[ args___] := unexpected[ applyOnce, {args}]
 
 applyOnceAndLevelSaturation[ ps_PRFSIT$] :=
-	Module[ {i = ps.id, satps = ps, allRules = getActiveRulesFilter[ ps, "term"|"levelSat1"|"levelSat2", Flatten], 
+	Module[ {satps = ps, allRules = getActiveRulesFilter[ ps, "term"|"levelSat1"|"levelSat2", Flatten], 
 		sat1 = getActiveRulesType[ ps, "levelSat1"], 
 		sat2 = getActiveRulesType[ ps, "levelSat2"], newNodes},
-		If[ i === "InitialPS",
+		If[ ps.id === "InitialPS",
 			satps = levelSaturation[ ps, sat1, sat2];
 			If[ isProofNode[ satps],
 				Return[ satps]
@@ -56,13 +55,12 @@ applyOnceAndLevelSaturation[ ps_PRFSIT$] :=
 		newNodes = MapAt[ levelSaturation[ #, sat1, sat2]&, newNodes, Position[ newNodes, _PRFSIT$]];
 		Switch[ Length[ newNodes],
 			0,
-			proofFails[ makePRFINFO[ name -> noApplicableRule, id -> i]],
+			proofFails[ makePRFINFO[ name -> noApplicableRule]],
 			1,
 			First[ newNodes],
 			_,
-			newNodes = Map[ renewID, newNodes];
 			makeORNODE[ 
-				makePRFINFO[ name -> proofAlternatives, used -> newNodes.used, generated -> newNodes.generated, id -> i],
+				makePRFINFO[ name -> proofAlternatives, used -> newNodes.used, generated -> newNodes.generated],
 				newNodes]
 		]
 	]
@@ -119,7 +117,7 @@ levelSaturation[ ps:PRFSIT$[ _, _, _, _, rest___?OptionQ], sat1rules_List, sat2r
 		If[ gen === {},
 			makePRFSIT[ goal -> ps.goal, kb -> psKB, id -> ps.id, local -> locInfo, rest],
 			(* else *)
-			makeANDNODE[ makePRFINFO[ name -> levelSat, used -> usd, generated -> gen, id -> ps.id], 
+			makeANDNODE[ makePRFINFO[ name -> levelSat, used -> usd, generated -> gen], 
                 newSubgoal[ goal -> ps.goal, kb -> psKB, local -> locInfo, rest]]
 		]
 	]

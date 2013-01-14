@@ -156,9 +156,9 @@ replaceProofSit[ po_PRFOBJ$, pos_ -> p_PRFSIT$] :=
 	ReplacePart[ po, pos -> p]
 	
 replaceProofSit[ po_PRFOBJ$, pos_ -> new:node_[___]] :=
-	Module[{parentID = Extract[ po, pos].id, newVal = new.proofValue, sub},
+	Module[{parentID = Extract[ po, pos].id, sub},
 		sub = poToTree[ new];
-		$TMAproofTree = Join[ $TMAproofTree /. {parentID, pending, PRFSIT$, None} -> {parentID, newVal, node, new.name}, sub];
+		$TMAproofTree = Join[ $TMAproofTree /. {parentID, pending, PRFSIT$, None} -> {new.id, new.proofValue, node, new.name}, sub];
 		ReplacePart[ po, pos -> new]
 	]
 replaceProofSit[ args___] := unexpected[ replaceProofSit, {args}]
@@ -435,9 +435,6 @@ generated /: Dot[ node_, generated] := Apply[ Join, Map[ #.generated&, Cases[ no
 proofValue /: Dot[ node_?isProofNode, proofValue] := Last[ node]
 proofValue /: Dot[ po_PRFOBJ$, proofValue] := Last[ po]
 subgoals /: Dot[ _[ _PRFINFO$, subnodes___, _], subgoals] := {subnodes}
-
-renewID[ node_[ PRFINFO$[ n_, u_, g_, _, rest___?OptionQ], sub___, val_]] := node[ makeRealPRFINFO[ n, u, g, "", rest], sub, val]
-renewID[ args___] := unexpected[ renewID, {args}]
 
 makeANDNODE[ pi_PRFINFO$, subnode_] := ANDNODE$[ pi, subnode, pending]
 makeANDNODE[ pi_PRFINFO$, {subnodes__}] := ANDNODE$[ pi, subnodes, pending]
