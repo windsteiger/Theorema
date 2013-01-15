@@ -330,7 +330,7 @@ replaceRecursivelyAndTrack[ args___] := unexpected[ replaceRecursivelyAndTrack, 
 
 Options[ makeFML] = {key :> defKey[], formula -> True, label :> defLabel[], simplify -> True};
 
-makeFML[ data__?OptionQ] :=
+makeFML[ data___?OptionQ] :=
 	Module[{k, f, l, s, fs},
 		{k, f, l, s} = {key, formula, label, simplify} /. {data} /. Options[ makeFML];
 		If[ TrueQ[ s],
@@ -462,6 +462,13 @@ appendKB[ args___] := unexpected[ appendKB, {args}]
 prependKB[ kb:{___FML$}, fml_FML$] := DeleteDuplicates[ Prepend[ kb, fml], #1.formula === #2.formula&]
 prependKB[ args___] := unexpected[ prependKB, {args}]
 
+SetAttributes[ appendToKB, HoldFirst]
+appendToKB[ kb_, fml_FML$] := (kb = DeleteDuplicates[ Append[ kb, fml], #1.formula === #2.formula&])
+appendToKB[ args___] := unexpected[ appendToKB, {args}]
+
+SetAttributes[ prependToKB, HoldFirst]
+prependToKB[ kb_, fml_FML$] := (kb = DeleteDuplicates[ Prepend[ kb, fml], #1.formula === #2.formula&])
+prependToKB[ args___] := unexpected[ prependToKB, {args}]
 
 End[]
 

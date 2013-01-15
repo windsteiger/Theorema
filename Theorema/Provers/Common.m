@@ -303,7 +303,7 @@ eliminateUnusedInit[ args___] := unexpected[ eliminateUnusedInit, {args}]
   	arbitrary string "key"). The special selector p.ruleSetup is a combination of p.rules, p.ruleActivity, and p.rulePriority.
 *)
 
-Options[ makePRFSIT] = {goal -> {}, kb -> {}, id :> ToString[ Unique[ "PRFSIT$"]], local -> {}, rules -> Hold[], ruleActivity -> {}, rulePriority -> {}, strategy -> Identity};
+Options[ makePRFSIT] = {goal :> makeFML[], kb -> {}, id :> ToString[ Unique[ "PRFSIT$"]], local -> {}, rules -> Hold[], ruleActivity -> {}, rulePriority -> {}, strategy -> Identity};
 makePRFSIT[ data___?OptionQ] :=
 	Module[{g, k, i, l, r, a, p, s},
 		{g, k, i, l, r, a, p, s} = {goal, kb, id, local, rules, ruleActivity, rulePriority, strategy} /. {data} /. Options[ makePRFSIT];
@@ -641,11 +641,11 @@ makeInitialProofObject[ g_FML$, k_List, {r_Hold, act_List, prio_List}, s_] :=
         	form = k[[i]];
         	Switch[ form,
         		FML$[ _, (IffDef$TM|EqualDef$TM|Iff$TM|Equal$TM)[ lhs_, rhs_?isQuantifierFree], __],
-        		AppendTo[ elemSubs, form],
+        		appendToKB[ elemSubs, form],
         		FML$[ _, _?(!FreeQ[ #, _IffDef$TM|_EqualDef$TM]&), __],
-        		AppendTo[ def, form],
+        		appendToKB[ def, form],
         		_,
-        		AppendTo[ nonSubs, form]
+        		appendToKB[ nonSubs, form]
         	],
         	{i, Length[k]}
         ];

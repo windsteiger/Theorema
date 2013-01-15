@@ -78,6 +78,8 @@ With[ {lang = "English"},
 	MessageName[joinKB, "usage", lang] = "joinKB[ kb1_List, kb2_List] joins the two knowledge bases and deletes duplicate entries.";
 	MessageName[appendKB, "usage", lang] = "appendKB[ kb_List, fml] appends fml to the knowledge base kb and deletes duplicate entries.";
 	MessageName[prependKB, "usage", lang] = "prependKB[ kb_List, fml] prepends fml to the knowledge base kb and deletes duplicate entries.";
+	MessageName[appendToKB, "usage", lang] = "appendToKB[ sym, fml] sets sym to the result of appending fml to sym and deleting duplicate entries.";
+	MessageName[prependToKB, "usage", lang] = "prependToKB[ sym, fml] sets sym to the result of prepending fml to sym and deleting duplicate entries.";
 	
 (* Theorema`Computation`Language` *)
 	MessageName[setComputationContext, "usage", lang] = "setComputationContext[ c] sets the context for the next computation to c.";
