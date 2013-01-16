@@ -1,3 +1,5 @@
+(* ::Package:: *)
+
 BeginPackage["Theorema`Computation`Language`"]
 
 Needs[ "Theorema`Common`"]
@@ -37,6 +39,8 @@ setComputationContext[ args___] := unexpected[ setComputationContext, {args}]
 
 (* ::Section:: *)
 (* Arithmetic *)
+
+
    
 Plus$TM[ a__] /; buiActive["Plus"] := Plus[ a]
 Times$TM[ a__] /; buiActive["Times"] := Times[ a]
@@ -46,8 +50,11 @@ LessEqual$TM[ a__] /; buiActive["LessEqual"] := LessEqual[ a]
 Greater$TM[ a__] /; buiActive["Greater"] := Greater[ a]
 GreaterEqual$TM[ a__] /; buiActive["GreaterEqual"] := GreaterEqual[ a]
 
+
+
 (* ::Section:: *)
 (* Logic *)
+
 
 Not$TM[ a_] /; buiActive["Not"] := Not[ a]
 And$TM[ a__] /; buiActive["And"] := And[ a]
@@ -176,16 +183,27 @@ sequenceOfIteration[ args___] := unexpected[ sequenceOfIteration, {args}]
 (* Sets *)
 
 
+Set$TM /: Union$TM[ a__Set$TM] /; buiActive["Union"] := Union[ a]
+Set$TM /: Intersection$TM[ a__Set$TM] /; buiActive["Intersection"] &&  Intersection[ a] := True
+Set$TM /: Intersection$TM[ a__Set$TM] /; buiActive["Intersection"] && isVariableFree[a]:= Intersection[ a]
+Set$TM /: Element$TM[ p_,a_Set$TM] /; buiActive["IsElement"] && MemberQ[ a, p] := True
+Set$TM /: Element$TM[ p_,a_Set$TM] /; buiActive["IsElement"] && isVariableFree[a] := MemberQ[ a, p]
+
+
 (* ::Section:: *)
 (* Tuples *)
+
 
 Tuple$TM /: BracketingBar$TM[ a_Tuple$TM] /; buiActive["Length"] && isSequenceFree[a] := Length[ a]
 Tuple$TM /: Subscript$TM[ a_Tuple$TM, p__Integer] /; buiActive["Subscript"] && isSequenceFree[a] := Part[ a, p]
 Tuple$TM /: Subscript$TM[ a_Tuple$TM, p__LeftArrow$TM] /; buiActive["ReplacePart"] && isSequenceFree[a] :=
 	ReplacePart[ a, {p /. {LeftArrow$TM -> Rule, Tuple$TM -> List}}]
 
+
+
 (* ::Section:: *)
 (* Mathematica programming constructs *)
+
 
 (* In a "Theorema program", sets and Mathematica lists (as in Module, Do, ...) may be mixed. Also, there is "=" assignment as opposed
    to "=" as equality in standard Theorema language.

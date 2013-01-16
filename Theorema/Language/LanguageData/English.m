@@ -1,3 +1,4 @@
+(* ::Package:: *)
 
 With[ {lang = "English"},
 	MessageName[FIX$, "usage", lang] = "";
@@ -29,7 +30,9 @@ With[ {lang = "English"},
 	MessageName[LessEqual$TM, "usage", lang] = "";
 	MessageName[Greater$TM, "usage", lang] = "";
 	MessageName[GreaterEqual$TM, "usage", lang] = "";
+	MessageName[Element$TM, "usage", lang] = "";
 	MessageName[IntersectionOf$TM, "usage", lang] = "";
+    MessageName[Intersection$TM, "usage", lang] = "";
 	MessageName[Union$TM, "usage", lang] = "";
 	MessageName[Tuple$TM, "usage", lang] = "";	
 	MessageName[TupleOf$TM, "usage", lang] = "";	
