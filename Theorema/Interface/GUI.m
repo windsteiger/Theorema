@@ -1584,13 +1584,15 @@ applyColorScheme[ ] :=
 applyColorScheme[ args___] := unexpected[ applyColorScheme, {args}]
 
 makeColoredStylesheet[ type_String, color_:$TheoremaColorScheme] :=
-	Module[{tmp, styles},
+	Module[{tmp, styles, alias},
 		tmp = NotebookOpen[ 
 			FileNameJoin[ {$TheoremaDirectory, "Theorema", "Interface", "Templates", type <> "-Template.nb"}],
 			Visible -> False];
 		styles = NotebookGet[ tmp];
 		NotebookClose[ tmp];
-		styles /. Table[Apply[CMYKColor, IntegerDigits[i, 2, 4]] -> TMAcolor[i, color], {i, 0, 15}]
+		alias = Map[ langButtonData[ #][[4]] -> RowBox[ {autoParenthesis[ "("], langButtonData[ #][[2]], autoParenthesis[ ")"]}]&, Flatten[ Transpose[ allFormulae][[2]]]];
+		alias = Join[ alias, {"(" -> autoParenthesis[ "("], ")" -> autoParenthesis[ ")"]}];
+		styles /. Table[Apply[CMYKColor, IntegerDigits[i, 2, 4]] -> TMAcolor[i, color], {i, 0, 15}] /. (InputAliases -> {}) -> (InputAliases -> alias)
 	]
 makeColoredStylesheet[ args___] := unexpected[ makeColoredStylesheet, {args}]
 
@@ -1648,7 +1650,8 @@ langButtonData["AND1"] :=
 				"\[Wedge]",
 				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]", "\[Wedge]", "\[Placeholder]"}],
-		translate["CONN2STRONGTooltip"]
+		translate["CONN2STRONGTooltip"],
+		""
 	}
 
 langButtonData["AND2"] := 
@@ -1659,7 +1662,8 @@ langButtonData["AND2"] :=
 				"\[And]",
 				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]", "\[And]", "\[Placeholder]"}],
-		translate["CONN2WEAKTooltip"]
+		translate["CONN2WEAKTooltip"],
+		"and"
 	}
 
 langButtonData["OR1"] := 
@@ -1670,7 +1674,8 @@ langButtonData["OR1"] :=
 				"\[Vee]",
 				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]", "\[Vee]", "\[Placeholder]"}],
-		translate["CONN2STRONGTooltip"]
+		translate["CONN2STRONGTooltip"],
+		""
 	}
 
 langButtonData["OR2"] := 
@@ -1681,7 +1686,8 @@ langButtonData["OR2"] :=
 				"\[Or]",
 				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]", "\[Or]", "\[Placeholder]"}],
-		translate["CONN2WEAKTooltip"]
+		translate["CONN2WEAKTooltip"],
+		"or"
 	}
 
 langButtonData["IMPL1"] := 
@@ -1693,7 +1699,8 @@ langButtonData["IMPL1"] :=
 				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]",
 			TagBox[ "\[DoubleLongRightArrow]", Identity, SyntaxForm->"a\[DoubleRightArrow]b"], "\[Placeholder]"}],
-		translate["CONN2STRONGTooltip"]
+		translate["CONN2STRONGTooltip"],
+		""
 	}
 
 langButtonData["IMPL2"] := 
@@ -1704,7 +1711,8 @@ langButtonData["IMPL2"] :=
 				"\[Implies]",
 				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]", "\[Implies]", "\[Placeholder]"}],
-		translate["CONN2WEAKTooltip"]
+		translate["CONN2WEAKTooltip"],
+		"impl"
 	}
 
 langButtonData["EQUIV1"] := 
@@ -1716,7 +1724,8 @@ langButtonData["EQUIV1"] :=
 				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]",
 			TagBox[ "\[DoubleLongLeftRightArrow]", Identity, SyntaxForm->"a\[DoubleRightArrow]b"], "\[Placeholder]"}],
-		translate["CONN2STRONGTooltip"]
+		translate["CONN2STRONGTooltip"],
+		""
 	}
 
 langButtonData["EQUIV2"] := 
@@ -1728,10 +1737,11 @@ langButtonData["EQUIV2"] :=
 				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]",
 			TagBox[ "\[DoubleLeftRightArrow]", Identity, SyntaxForm->"a\[Implies]b"], "\[Placeholder]"}],
-		translate["CONN2WEAKTooltip"]
+		translate["CONN2WEAKTooltip"],
+		"equiv"
 	}
 
-langButtonData["EQ1"] := 
+langButtonData["EQ"] := 
 	{
 		If[ $buttonNat, 
 			translate["EQ1"], 
@@ -1739,7 +1749,8 @@ langButtonData["EQ1"] :=
 				"\[Equal]",
 				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]", "\[Equal]", "\[Placeholder]"}],
-		translate["CONN2Tooltip"]
+		translate["CONN2Tooltip"],
+		"eq"
 	}
 
 langButtonData["EQ2"] := 
@@ -1751,7 +1762,8 @@ langButtonData["EQ2"] :=
 				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]",
 			TagBox[ "=", Identity, SyntaxForm->"a\[Equal]b"], "\[Placeholder]"}],
-		translate["CONN2Tooltip"]
+		translate["CONN2Tooltip"],
+		""
 	}
 
 langButtonData["EQUIVDEF"] := 
@@ -1763,7 +1775,8 @@ langButtonData["EQUIVDEF"] :=
 				TagBox[ FrameBox["right"], "Placeholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]",
 			TagBox[ RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], Identity, SyntaxForm->"a\[Implies]b"], "\[Placeholder]"}],
-		translate["EQUIVDEFTooltip"]
+		translate["EQUIVDEFTooltip"],
+		":equiv"
 	}
 
 langButtonData["EQDEF"] := 
@@ -1774,57 +1787,79 @@ langButtonData["EQDEF"] :=
 				":=",
 				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]", ":=", "\[Placeholder]"}],
-		translate["EQDEFTooltip"]
+		translate["EQDEFTooltip"],
+		":eq"
 	}
 
 langButtonData["FORALL1"] := 
 	{
 		If[ $buttonNat, 
 			translate["FORALL1"], 
-			DisplayForm[RowBox[{UnderscriptBox[StyleBox["\[ForAll]", FontSize->14], Placeholder["rg"]], TagBox[ FrameBox["expr"], "SelectionPlaceholder"]}]]],
-		RowBox[{UnderscriptBox["\[ForAll]", "\[Placeholder]"], "\[SelectionPlaceholder]"}],
-		translate["QUANT1Tooltip"]
+			DisplayForm[RowBox[{UnderscriptBox[StyleBox["\[ForAll]", FontSize->14], SelectionPlaceholder["rg"]], Placeholder["expr"]}]]],
+		RowBox[{UnderscriptBox["\[ForAll]", "\[SelectionPlaceholder]"], "\[Placeholder]"}],
+		translate["QUANT1Tooltip"],
+		"far"
 	}
 
 langButtonData["FORALL2"] := 
 	{
 		If[ $buttonNat, 
 			translate["FORALL2"], 
-			DisplayForm[RowBox[{UnderscriptBox[ UnderscriptBox
-			DisplayForm[RowBox[{UnderscriptBox[StyleBox["\[Exists]", FontSize->14], Placeholder["rg"]], TagBox[ FrameBox["expr"], "SelectionPlaceholder"]}]]],
-		RowBox[{UnderscriptBox["\[Exists]", "\[Placeholder]"], "\[SelectionPlaceholder]"}],
-		translate["QUANT1Tooltip"]
+			DisplayForm[RowBox[{UnderscriptBox[ UnderscriptBox[StyleBox["\[ForAll]", FontSize->14], SelectionPlaceholder["rg"]], Placeholder["cond"]], Placeholder["expr"]}]]],
+		RowBox[{UnderscriptBox[ UnderscriptBox["\[ForAll]", "\[SelectionPlaceholder]"], "\[Placeholder]"], "\[Placeholder]"}],
+		translate["QUANT2Tooltip"],
+		"farc"
+	}
+	
+langButtonData["EXISTS1"] := 
+	{
+		If[ $buttonNat, 
+			translate["EXISTS1"], 
+			DisplayForm[RowBox[{UnderscriptBox[StyleBox["\[Exists]", FontSize->14], Placeholder["rg"]], SelectionPlaceholder["expr"]}]]],
+		RowBox[{UnderscriptBox["\[Exists]", "\[SelectionPlaceholder]"], "\[Placeholder]"}],
+		translate["QUANT1Tooltip"],
+		"exr"
 	}
 
 langButtonData["EXISTS2"] := 
 	{
 		If[ $buttonNat, 
 			translate["EXISTS2"], 
-			DisplayForm[RowBox[{UnderscriptBox[ UnderscriptBox[StyleBox["\[Exists]", FontSize->14], Placeholder["rg"]], Placeholder["cond"]], TagBox[ FrameBox["expr"], "SelectionPlaceholder"]}]]],
-		RowBox[{UnderscriptBox[ UnderscriptBox["\[Exists]", "\[Placeholder]"], "\[Placeholder]"], "\[SelectionPlaceholder]"}],
-		translate["QUANT2Tooltip"]
+			DisplayForm[RowBox[{UnderscriptBox[ UnderscriptBox[StyleBox["\[Exists]", FontSize->14], SelectionPlaceholder["rg"]], Placeholder["cond"]], Placeholder["expr"]}]]],
+		RowBox[{UnderscriptBox[ UnderscriptBox["\[Exists]", "\[SelectionPlaceholder]"], "\[Placeholder]"], "\[Placeholder]"}],
+		translate["QUANT2Tooltip"],
+		"exrc"
 	}
+	
 langButtonData[args___] :=
     unexpected[langButtonData, {args}]
 
+makeLangButton[ "DUMMY"] := ""
 makeLangButton[ bname_String] :=
     With[ { bd = langButtonData[bname]},
 			Tooltip[ Button[ bd[[1]], 
-				FrontEndExecute[{NotebookApply[ InputNotebook[], bd[[2]], Placeholder]}], Appearance -> "DialogBox", Alignment -> {Left, Top}, ImageSize -> All],
-				bd[[3]], TooltipDelay -> 0.5]
+				FrontEndExecute[{NotebookApply[ InputNotebook[], RowBox[ {autoParenthesis[ "("], bd[[2]], autoParenthesis[ ")"]}], Placeholder]}], Appearance -> "DialogBox", Alignment -> {Left, Top}, ImageSize -> All],
+				"\[EscapeKey]"<>bd[[4]]<>"\[EscapeKey]", TooltipDelay -> 0.5]
     ]
 makeLangButton[args___] :=
     unexpected[makeLangButton, {args}]
 
+(*
+	We use TagBox because StyleBox did not work together with InputAliases: when entering formulae with alias, some StyleBoxes vanished
+	for unknown reasons. With TagBox it works.
+*)
+autoParenthesis[ c_String] := TagBox[ c, "AutoParentheses"]
+autoParenthesis[ args___] := unexpected[ autoParenthesis, {args}]
+
 allFormulae = {{"Sets", {}},
 			   {"Arithmetic", {}},
-			   {"Logic", {"AND1", "AND2", "OR1", "OR2", "IMPL1", "IMPL2", "EQUIV1", "EQUIV2", "EQ1", "EQ2", "EQUIVDEF", "EQDEF", "FORALL1", "FORALL2", "EXISTS1", "EXISTS2"}}
+			   {"Logic", {"AND2", "OR2", "IMPL2", "EQUIV2", "EQ", "EQUIVDEF", "EQDEF", "FORALL1", "FORALL2", "EXISTS1", "EXISTS2"}}
 };
 
-makeButtonCategory[ {category_String, buttons_List}] :=
+makeButtonCategory[ {category_String, buttons_List}, cols_Integer:2] :=
 	OpenerView[{
 		Style[ translate[ category], "Section"],
-		Grid[ Partition[ Map[ makeLangButton, buttons], 2], Alignment -> {Left, Top}]},
+		Grid[ Partition[ Map[ makeLangButton, PadRight[ buttons, cols*(Quotient[ Length[ buttons]-1, cols]+1), "DUMMY"]], cols], Alignment -> {Left, Top}]},
 		ToExpression["Dynamic[$tcSessMathOpener$"<>category<>"]"]]
 
 makeButtonCategory[ args___] := unexpected[ makeButtonCategory, {args}]

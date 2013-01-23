@@ -103,6 +103,9 @@ tmaToInputOperator[ args___] := unexpected[ tmaToInputOperator, {args}]
 MakeExpression[RowBox[{a_, TagBox[op_, Identity, ___], b_}], fmt_] := 
 	MakeExpression[RowBox[{a, op, b}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 
+MakeExpression[RowBox[{ TagBox[ "(", "AutoParentheses"], expr_, TagBox[ ")", "AutoParentheses"]}], fmt_] := 
+	MakeExpression[ expr, fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+
 MakeExpression[ RowBox[{UnderscriptBox[ q_?isQuantifierSymbol, rng_], form_}], fmt_] :=
     standardQuantifier[ Replace[ q, $tmaQuantifierToName], rng, "True", form, fmt] /; $parseTheoremaExpressions
 
