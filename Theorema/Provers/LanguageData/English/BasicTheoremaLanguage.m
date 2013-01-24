@@ -27,7 +27,7 @@ MessageName[ existsGoal, "usage", lang] = "Prove existentially quantified goal b
 MessageName[ existsKB, "usage", lang] = "Instantiate existentially quantified formula";
 MessageName[ elementarySubstitution, "usage", lang] = "Elementary substitution based on equalities and equivalences oin the knowledge base";
 MessageName[ expandDef, "usage", lang] = "Expand definitions";
-MessageName[ eqKB, "usage", lang] = "Equalities/equivalences in KB for rewriting";
+MessageName[ eqIffKB, "usage", lang] = "Equalities/equivalences in KB for rewriting";
 
 ] (* With *)
 
@@ -198,7 +198,7 @@ proofStepText[ expandDef, lang, u_, g_, ___, "usedDefs" -> defs_List, ___] :=
 		stepText
 	];
 	
-proofStepText[ eqKB, lang, {eqs__}, _, ___] := {textCell[ "We register ", formulaReferenceSequence[ eqs, lang], " to be used for rewriting."]
+proofStepText[ eqIffKB, lang, {eqs__}, _, ___] := {textCell[ "We register ", formulaReferenceSequence[ eqs, lang], " to be used for rewriting."]
 	};
 
 	
