@@ -20,7 +20,7 @@ $tmaNonStandardOperators = Join[ $tmaNonStandardOperators,
 (* Auxiliary parsing functions *)
 
 makeSet[ SequenceOf$TM[ s__]] := ToExpression[ "SetOf$TM"][ s]
-makeSet[ x___] := Apply[ ToExpression[ "Set$TM"], Union[ {x}]]
+makeSet[ x___] /; isVariableFree[ {x}] := Apply[ ToExpression[ "Set$TM"], Union[ {x}]]
 
 makeTuple[ SequenceOf$TM[ r:RNG$[ __STEPRNG$], c_, e_]] := ToExpression[ "TupleOf$TM"][ r, c, e]
 
@@ -38,6 +38,8 @@ MakeBoxes[ \[DoubleStruckCapitalN]0$TM, TheoremaForm] := SubscriptBox[ "\[Double
 
 MakeBoxes[ Set$TM[ arg__], TheoremaForm] := MakeBoxes[ {arg}, TheoremaForm]
 MakeBoxes[ Set$TM[ ], TheoremaForm] := MakeBoxes[ "\[EmptySet]", TheoremaForm]
+(* An unevaluated 'makeSet' will turn into makeSet$TM when renaming back to standard context ... *)
+MakeBoxes[ Theorema`Common`makeSet$TM[ arg__], TheoremaForm] := StyleBox[ MakeBoxes[ {arg}, TheoremaForm], "ExpressionVariable"]
 
 MakeBoxes[ SequenceOf$TM[ rng:RNG$[ SETRNG$[ v_, _]], cond_, v_], TheoremaForm] :=
 	RowBox[ {makeRangeBox[ rng, TheoremaForm], "|", MakeBoxes[ cond, TheoremaForm]}]
