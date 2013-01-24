@@ -150,7 +150,7 @@ existsIteration[ {x_, iter__}, cond_, form_] :=
 (* Instead of nesting SequenceOf expressions and then concatenating the sequences, we construct a multi-iterator from the given ranges *)
 SequenceOf$TM[ RNG$[ r__], cond_, form_] :=
 	Module[ {s},
-		s /; buiActive["SequenceOf"] && (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
+		Apply[ Sequence, s] /; buiActive["SequenceOf"] && (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
 	]
 
 (* The multi-iterator is used in a Do-loop. Local variables have to be introduced to be substituted during the iteration *)   	
@@ -172,7 +172,7 @@ sequenceOfIteration[ iter:{__List}, cond_, form_] :=
                     locIter
                 ]
             ];
-            Apply[ Sequence, seq]
+            seq
         ]
     ]
 sequenceOfIteration[ iter_List, cond_, form_] := $Failed
