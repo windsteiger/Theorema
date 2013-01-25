@@ -197,8 +197,11 @@ MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalN]", "0"], fmt_] := MakeExpr
 (* Tuple notations *)
 
 MakeExpression[ RowBox[ {l_,"\[LeftArrow]"}], fmt_] := MakeExpression[ RowBox[{"LeftArrow", "[", l, "]"}], fmt] /; $parseTheoremaExpressions
-
 MakeExpression[ RowBox[ {l_,"\[LeftArrowBar]"}], fmt_] := MakeExpression[ RowBox[{"LeftArrowBar", "[", l, "]"}], fmt] /; $parseTheoremaExpressions
+
+MakeExpression[ RowBox[{left_,"\[EmptyUpTriangle]", right_}], fmt_] :=
+    MakeExpression[ RowBox[{"EmptyUpTriangle", "[", RowBox[{left, ",", right}], "]"}], fmt] /; $parseTheoremaExpressions
+
 
 (* ::Subsection:: *)
 (* operator underscript -> domain *)
