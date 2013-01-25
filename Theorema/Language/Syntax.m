@@ -95,6 +95,17 @@ tmaToInputOperator[ op_Symbol] :=
 tmaToInputOperator[ args___] := unexpected[ tmaToInputOperator, {args}]	
 
 
+(* ::Section:: *)
+(* Set and tuple constructor *)
+
+(*
+	Expression specific parts -> Expression.m
+	The default cases go here, otherwise it is not save that these are put at the end (if they have conditions,
+	they could stay in front of the rules loaded in "Computation`". Keep in mind that Expression.m is loaded twice!
+*)
+
+makeSet[ x___] /; isVariableFree[ {x}] := Apply[ ToExpression[ "Set$TM"], Union[ {x}]]
+makeTuple[ x___] := ToExpression[ "Tuple$TM"][x]
 
 (* ::Section:: *)
 (* MakeExpression *)

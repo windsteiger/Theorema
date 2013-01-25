@@ -148,9 +148,9 @@ existsIteration[ {x_, iter__}, cond_, form_] :=
     ]
 
 (* Instead of nesting SequenceOf expressions and then concatenating the sequences, we construct a multi-iterator from the given ranges *)
-SequenceOf$TM[ RNG$[ r__], cond_, form_] :=
+SequenceOf$TM[ RNG$[ r__STEPRNG$], cond_, form_] :=
 	Module[ {s},
-		Apply[ Sequence, s] /; buiActive["SequenceOf"] && (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
+		Apply[ Sequence, s] /; (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
 	]
 
 (* The multi-iterator is used in a Do-loop. Local variables have to be introduced to be substituted during the iteration *)   	
@@ -178,6 +178,15 @@ sequenceOfIteration[ iter:{__List}, cond_, form_] :=
 sequenceOfIteration[ iter_List, cond_, form_] := $Failed
 sequenceOfIteration[ args___] := unexpected[ sequenceOfIteration, {args}]
 
+SetOf$TM[ RNG$[ r__], cond_, form_] :=
+	Module[ {s},
+		Apply[ makeSet, s] /; (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
+	]
+
+TupleOf$TM[ RNG$[ r__], cond_, form_] :=
+	Module[ {s},
+		Apply[ makeTuple, s] /; (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
+	]
 
 (* ::Section:: *)
 (* Sets *)
