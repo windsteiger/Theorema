@@ -1,11 +1,6 @@
 (* ::Package:: *)
 
 With[ {lang = "English"},
-    MessageName[RightArrowBar$TM, "usage", lang] = "";
-
-
-
-
 	MessageName[FIX$, "usage", lang] = "";
 	MessageName[META$, "usage", lang] = "";
 	MessageName[QU$, "usage", lang] = "QU$[ expr] temporarily marks quantified variables in expr.";
@@ -21,6 +16,7 @@ With[ {lang = "English"},
 	MessageName[EqualDef$TM, "usage", lang] = "";
 	MessageName[IffDef$TM, "usage", lang] = "";
 	MessageName[Equal$TM, "usage", lang] = "";
+	MessageName[SetEqual$TM, "usage", lang] = "";
 	MessageName[Not$TM, "usage", lang] = "";
 	MessageName[Iff$TM, "usage", lang] = "";
 	MessageName[Implies$TM, "usage", lang] = "";
@@ -41,12 +37,15 @@ With[ {lang = "English"},
 	MessageName[TupleOf$TM, "usage", lang] = "";	
 	MessageName[BracketingBar$TM, "usage", lang] = "";	
 	MessageName[Subscript$TM, "usage", lang] = "";	
-	MessageName[LeftArrow$TM, "usage", lang] = "";	
+	MessageName[LeftArrow$TM, "usage", lang] = "";
+	MessageName[LeftArrowBar$TM, "usage", lang] = "";
+    MessageName[Rule$TM, "usage", lang] = "";	
 	MessageName[Cup$TM, "usage", lang] = "";	
-	MessageName[Cap$TM, "usage", lang] = "";	
-	MessageName[CupCap$TM, "usage", lang] = "";	
+    MessageName[Cap$TM, "usage", lang] = "";	
+    MessageName[CupCap$TM, "usage", lang] = "";	
 	MessageName[MinimumOf$TM, "usage", lang] = "";	
-	MessageName[MaximumOf$TM, "usage", lang] = "";	
+	MessageName[MaximumOf$TM, "usage", lang] = "";
+    MessageName[Element$TM, "usage", lang] = "";	
 	MessageName[min$TM, "usage", lang] = "";	
 	MessageName[max$TM, "usage", lang] = "";	
 	MessageName[Set$TM, "usage", lang] = "";	
