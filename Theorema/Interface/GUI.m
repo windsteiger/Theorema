@@ -54,7 +54,7 @@ initGUI[] :=
                 {"SupersetEqual", RowBox[{"A","\[SupersetEqual]","B"}], False, True, False},
                 {"Subset", RowBox[{"A","\[Subset]","B"}], False, True, False},
                 {"Superset", RowBox[{"A","\[Superset]","B"}], False, True, False},
-           	 {"Union", RowBox[{"A","\[Union]","B"}], False, True, False},
+				{"Union", RowBox[{"A","\[Union]","B"}], False, True, False},
         		{"Intersection", RowBox[{"A","\[Intersection]","B"}], False, True, False},
                 {"Difference", RowBox[{"A","\[Backslash]","B"}], False, True, False},
                 {"SymmetricDifference", RowBox[{"A","\[EmptyUpTriangle]","B"}], False, True, False},
@@ -62,7 +62,8 @@ initGUI[] :=
                 {"Cardinality", RowBox[{"\[LeftBracketingBar]", "A", "\[RightBracketingBar]"}], False, True, False},
                 {"PowerSet", RowBox[{"\[ScriptCapitalP]","[", "A", "]"}], False, True, False},
                 {"MaximumElementSet", RowBox[{"max","[", "A", "]"}], False, True, False},
-                {"MinimumElementSet", RowBox[{"min","[", "A", "]"}], False, True, False},
+                {"MinimumElementSet", RowBox[{"min","[", "A", "]"}], False, True, False}
+        	},
         	{"Tuples",
         		{"Subscript", SubscriptBox[ "T", "i"], False, True, False},
                 {"TupleEqual", RowBox[ {"T","\[Equal]","S"}], False, True, False},
@@ -75,17 +76,19 @@ initGUI[] :=
                 {"ReplacePart", SubscriptBox[ "T", RowBox[{RowBox[{"i", "\[LeftArrow]", "e"}], ",", "\[Ellipsis]"}] ], False, True, False},
 			    {"Append", RowBox[{"T","\[Cup]","e"}], False, True, False},
         		{"Prepend", RowBox[{"e","\[Cap]","T"}], False, True, False},
-        		{"Join", RowBox[{"T","\[CupCap]","S"}], False, True, False}},
+        		{"Join", RowBox[{"T","\[CupCap]","S"}], False, True, False},
         		{"Max", RowBox[{"max","[","T","]"}], False, True, False},
-        		{"Min", RowBox[{"min","[","T","]"}], False, True, False},
-        	{"Arithmetic", 
+        		{"Min", RowBox[{"min","[","T","]"}], False, True, False}
+        	},
+        	{"Arithmetic",
         		{"Plus", RowBox[{"A","+","B"}], False, True, False},
         		{"Times", RowBox[{"A","*","B"}], False, True, False},
         		{"Equal", RowBox[{"A","=","B"}], False, False, False},
         		{"Less", RowBox[{"A","<","B"}], False, True, False},
         		{"LessEqual", RowBox[{"A","\[LessEqual]","B"}], False, True, False},
         		{"Greater", RowBox[{"A",">","B"}], False, True, False},
-        		{"GreaterEqual", RowBox[{"A","\[GreaterEqual]","B"}], False, True, False}},
+        		{"GreaterEqual", RowBox[{"A","\[GreaterEqual]","B"}], False, True, False}
+        	},
         	{"Logic", 
         		{"Not", RowBox[{"\[Not]","P"}], False, True, False},
         		{"And", RowBox[{"P", "\[And]","Q"}], False, True, False},
@@ -94,14 +97,16 @@ initGUI[] :=
         		{"Iff", RowBox[{"P", "\[Equivalent]","Q"}], False, True, False},
         		{"Forall", RowBox[{"\[ForAll]","P"}], False, True, False},
         		{"Exists", RowBox[{"\[Exists]","P"}], False, True, False},
-        		{"Equal", RowBox[{"A","=","B"}], False, False, False}},
+        		{"Equal", RowBox[{"A","=","B"}], False, False, False}
+        	},
         	{"Programming",
         		{"Module", RowBox[{"Module","[","\[Ellipsis]","]"}], False, True, False},
         		{"Do", RowBox[{"Do","[","\[Ellipsis]","]"}], False, True, False},
         		{"While", RowBox[{"While","[","\[Ellipsis]","]"}], False, True, False},
         		{"For", RowBox[{"For","[","\[Ellipsis]","]"}], False, True, False},
         		{"Which", RowBox[{"Which","[","\[Ellipsis]","]"}], False, True, False},
-        		{"Switch", RowBox[{"Switch","[","\[Ellipsis]","]"}], False, True, False}}
+        		{"Switch", RowBox[{"Switch","[","\[Ellipsis]","]"}], False, True, False}
+        	}
         };
         (* Init views in commander *)
         $tcActivitiesView = 1;
@@ -830,10 +835,11 @@ Clear[structViewBuiltin];
    follows the ideas of the structured view of the KB *)
    
 structViewBuiltin[{category_String, rest__List}, tags_, task_String] :=
-    Module[ {sub, compTags},
+    Module[ {sub, compTags, opGroup},
         sub = Transpose[Map[structViewBuiltin[#, tags, task] &, {rest}]];
         compTags = Apply[Union, sub[[2]]];
-        {OpenerView[{structViewBuiltin[category, compTags, task], Column[sub[[1]]]}, 
+        opGroup = partitionFill[ sub[[1]], 4];
+        {OpenerView[{headerViewBuiltin[category, compTags, task], Grid[ opGroup, Alignment -> {Left, Baseline}]}, 
         	ToExpression["Dynamic[$builtinStructState$"<>category<>"]"]], 
          compTags}
     ]
@@ -860,7 +866,11 @@ structViewBuiltin[ {op_String, display_, _, _, _}, tags_, task_String] :=
         ], {op}}
     ]
 
-structViewBuiltin[ category_String, tags_, task_String] :=
+structViewBuiltin[args___] :=
+    unexpected[structViewBuiltin, {args}]
+
+
+headerViewBuiltin[ category_String, tags_, task_String] :=
     Module[ {},
     	Switch[ task,
     		"prove",
@@ -877,9 +887,6 @@ structViewBuiltin[ category_String, tags_, task_String] :=
           		Style[ translate[category], "Section"]}, Spacer[10]]
     	]
     ]
-
-structViewBuiltin[args___] :=
-    unexpected[structViewBuiltin, {args}]
 
 
 
@@ -1754,7 +1761,7 @@ allFormulae = {{"Sets", {}},
 makeButtonCategory[ {category_String, buttons_List}] :=
 	OpenerView[{
 		Style[ translate[ category], "Section"],
-		Grid[ Partition[ Map[ makeLangButton, buttons], 2], Alignment -> {Left, Top}]},
+		Grid[ partitionFill[ Map[ makeLangButton, buttons], 2], Alignment -> {Left, Top}]},
 		ToExpression["Dynamic[$tcSessMathOpener$"<>category<>"]"]]
 
 makeButtonCategory[ args___] := unexpected[ makeButtonCategory, {args}]
@@ -1782,6 +1789,9 @@ makeCompButton[] :=
 makeCompButton[args___] :=
     unexpected[makeCompButton, {args}]
 
+
+partitionFill[ l_List, n_Integer, default_:""] := Partition[ PadRight[ l, n*Ceiling[ Length[ l]/n], default], n]
+partitionFill[ args___] := unexpected[ partitionFill, {args}]
 
 (* ::Section:: *)
 (* end of package *)
