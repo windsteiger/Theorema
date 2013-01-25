@@ -183,11 +183,21 @@ sequenceOfIteration[ args___] := unexpected[ sequenceOfIteration, {args}]
 (* Sets *)
 
 
-Set$TM /: Union$TM[ a__Set$TM] /; buiActive["Union"] := Union[ a]
-Set$TM /: Intersection$TM[ a__Set$TM] /; buiActive["Intersection"] &&  Intersection[ a] := True
-Set$TM /: Intersection$TM[ a__Set$TM] /; buiActive["Intersection"] && isVariableFree[a]:= Intersection[ a]
-Set$TM /: Element$TM[ p_,a_Set$TM] /; buiActive["IsElement"] && MemberQ[ a, p] := True
-Set$TM /: Element$TM[ p_,a_Set$TM] /; buiActive["IsElement"] && isVariableFree[a] := MemberQ[ a, p]
+Set$TM /: Equal$TM[a__Set$TM] /; buiActive["SetEqual"] := SameQ[a]
+Set$TM /: SubsetEqual$TM[a_Set$TM, b_Set$TM] /; buiActive["SubsetEqual"] := Equal$TM[Intersection[a, b],a]
+Set$TM /: Subset$TM[a_Set$TM, b_Set$TM] /; buiActive["Subset"] := And[SubsetEqual$TM[a,b],Not[Equal$TM[a, b]]]
+Set$TM /: SupersetEqual$TM[a_Set$TM, b_Set$TM] /; buiActive["SupersetEqual"] := SubsetEqual$TM[b, a]
+Set$TM /: Superset$TM[a_Set$TM, b_Set$TM] /; buiActive["Superset"] := Subset$TM[b, a]
+Set$TM /: Union$TM[ a__Set$TM] /; buiActive["Union"] := Union[ a] /. List -> Set$TM
+Set$TM /: Intersection$TM[ a__Set$TM] /; buiActive["Intersection"] := Intersection[ a] /. List -> Set$TM
+Set$TM /: Backslash$TM[ a_Set$TM,b_Set$TM] /; buiActive["Difference"] := Complement[a, b] /. List -> Set$TM
+Set$TM /: EmptyUpTriangle$TM[ a_Set$TM,b_Set$TM] /; buiActive["SymmetricDifference"] := Union[Complement[a, b], Complement[b, a]] /. List -> Set$TM
+Set$TM /: Cross$TM[ a__Set$TM] /; buiActive["CartesianProduct"] := Flatten[List[Tuples[{a}//. Set$TM -> List]],1] /. List -> Set$TM
+Set$TM /: Element$TM[ p_,a_Set$TM] /; buiActive["IsElement"] := MemberQ[ a, p]
+Set$TM /: ScriptCapitalP$TM[ a_Set$TM] /; buiActive["PowerSet"] := Subsets[ a ] /. List -> Set$TM
+Set$TM /: BracketingBar$TM[ a_Set$TM] /; buiActive["Cardinality"] && isSequenceFree[a] := Length[ a]
+Set$TM /: max$TM[ a_Set$TM] /; buiActive["MaximumElementSet"] := Max[a /. Set$TM -> List]
+Set$TM /: min$TM[ a_Set$TM] /; buiActive["MinimumElementSet"] := Min[ a/. Set$TM -> List]
 
 
 (* ::Section:: *)
