@@ -453,7 +453,7 @@ computeInProof[ args___] := unexpected[ computeInProof, {args}]
 (* ::Subsubsection:: *)
 (* KB operations *)
 
-joinKB[ kb1:{___FML$}, kb2:{___FML$}] := DeleteDuplicates[ Join[ kb1, kb2], #1.formula === #2.formula&]
+joinKB[ kb:{___FML$}..] := DeleteDuplicates[ Join[ kb], #1.formula === #2.formula&]
 joinKB[ args___] := unexpected[ joinKB, {args}]
 
 appendKB[ kb:{___FML$}, fml_FML$] := DeleteDuplicates[ Append[ kb, fml], #1.formula === #2.formula&]
