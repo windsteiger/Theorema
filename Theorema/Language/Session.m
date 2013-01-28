@@ -36,7 +36,7 @@ freshNames[ Hold[ f_[ lhs_, Program[ rhs_]]]] :=
 freshNames[expr_Hold] :=
 	Module[ {symPos, repl},
 		symPos = DeleteCases[ Position[ expr, _Symbol], {0}, {1}, 1];
-		repl = Map[ # -> freshSymbol[ Extract[ expr, #]]&, symPos];
+		repl = Map[ # -> freshSymbol[ Extract[ expr, #, Hold]]&, symPos];
 		ReplacePart[ expr, repl]
 	]
 freshNames[args___] := unexpected[ freshNames, {args}]
@@ -44,14 +44,14 @@ freshNames[args___] := unexpected[ freshNames, {args}]
 freshNamesProg[ expr_Hold] :=
 	Module[ {symPos, repl},
 		symPos = DeleteCases[ Position[ expr, _Symbol], {0}, {1}, 1];
-		repl = Map[ # -> freshSymbolProg[ Extract[ expr, #]]&, symPos];
+		repl = Map[ # -> freshSymbolProg[ Extract[ expr, #, Hold]]&, symPos];
 		ReleaseHold[ ReplacePart[ expr, repl]]
 	]
 freshNamesProg[ args___] := unexpected[ freshNamesProg, {args}]
 
-freshSymbol[ s_Symbol] :=
+freshSymbol[ Hold[ s_Symbol]] :=
     Module[ {name},
-        Switch[ s,
+        Switch[ Unevaluated[ s],
             (* We use ToExpression in order to have the symbol generated in the right context
                depending on whether we are in a computation or not *)
             True|False, s,
@@ -63,7 +63,7 @@ freshSymbol[ s_Symbol] :=
         	List, makeSet,
         	AngleBracket, makeTuple,
         	_,
-        	name = ToString[s];
+        	name = ToString[ Unevaluated[s]];
         	If[ StringTake[ name, -1] === "$" || (StringLength[ name] >= 3 && StringTake[ name, -3] === "$TM"),
             	s,
             	ToExpression[ name <> "$TM"]
@@ -72,9 +72,9 @@ freshSymbol[ s_Symbol] :=
     ]
 freshSymbol[ args___] := unexpected[ freshSymbol, {args}]
 
-freshSymbolProg[ s_Symbol] :=
+freshSymbolProg[ Hold[ s_Symbol]] :=
     Module[ {name},
-        Switch[ s,
+        Switch[ Unevaluated[ s],
             True|False, s,
         	Set, ToExpression[ "Assign$TM"],
         	_,
@@ -95,13 +95,13 @@ markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
            global variables in an archive live in the archive's private context, whereas the global declaration
            lives in the context of the loading notebook/archive. With the substitution below, the private`sym becomes 
            a VAR$[loading`sym] *)
-        s = Map[ sym_Symbol /; SymbolName[sym] === SymbolName[#] -> VAR$[#]&, specifiedVariables[r]];
+        s = Map[ sym_Symbol /; SymbolName[ sym] === SymbolName[ #] -> VAR$[ #]&, specifiedVariables[ r]];
         replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {SEQ$, VAR$, FIX$}]
     ]
 
 markVariables[ Hold[ Theorema`Computation`Language`QU$[ r_Theorema`Computation`Language`RNG$, expr_]]] :=
     Module[ {s},
-        s = Map[ sym_Symbol /; SymbolName[sym] === SymbolName[#] -> Theorema`Computation`Language`VAR$[#]&, specifiedVariables[r]];
+        s = Map[ sym_Symbol /; SymbolName[ Unevaluated[ sym]] === SymbolName[ Unevaluated[ #]] -> Theorema`Computation`Language`VAR$[ #]&, specifiedVariables[r]];
         replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {Theorema`Computation`Language`SEQ$, Theorema`Computation`Language`VAR$}]
     ]
     
@@ -165,7 +165,7 @@ putGlobalDeclaration[ args___] := unexpected[ putGlobalDeclaration, {args}]
 SetAttributes[ processGlobalDeclaration, HoldAll];
 processGlobalDeclaration[ x_] := 
 	Module[ {},
-		putGlobalDeclaration[ CurrentValue["NotebookFullFileName"], CurrentValue["CellID"], ReleaseHold[ freshNames[ markVariables[ Hold[x]]]]];
+		putGlobalDeclaration[ CurrentValue["NotebookFullFileName"], CurrentValue["CellID"], ReleaseHold[ markVariables[ freshNames[ Hold[x]]]]];
 		closeGlobalDeclaration[];
 	]
 processGlobalDeclaration[ args___] := unexpected[ processGlobalDeclaration, {args}]
@@ -185,7 +185,7 @@ processEnvironment[x_] :=
 		(* extract the global declarations that are applicable in the current evaluation *)
 		globDec = applicableGlobalDeclarations[ nb, rawNotebook, evaluationPosition[ nb, rawNotebook]];
 		(* process the expression according the Theorema syntax rules and add it to the KB *)
-        Catch[ updateKnowledgeBase[ReleaseHold[ freshNames[ markVariables[ Hold[x]]]], key, globDec, cellTagsToString[ tags]]];
+        Catch[ updateKnowledgeBase[ReleaseHold[ markVariables[ freshNames[ Hold[x]]]], key, globDec, cellTagsToString[ tags]]];
         SelectionMove[ nb, After, Cell];
     ]
 processEnvironment[args___] := unexcpected[ processEnvironment, {args}]
@@ -716,7 +716,7 @@ processComputation[ x:Theorema`Computation`Language`nE] :=
 		$Failed
 	]
 processComputation[x_] := Module[ { procSynt, res},
-	procSynt = freshNames[ markVariables[ Hold[x]]];
+	procSynt = markVariables[ freshNames[ Hold[x]]];
 	printComputationInfo[];
 	setComputationContext[ "compute"];
 	res = Catch[ ReleaseHold[ procSynt]];
