@@ -57,19 +57,30 @@ subProofHeaderId[ args___] := unexpected[ subProofHeaderId, {args}]
 (* ::Section:: *)
 (* Proof Cells *)
 
-goalCell[ g_FML$, punct_String:""] := 
-	With[ {pid = $proofStepID}, 
-		Cell[ BoxData[ RowBox[ {ToBoxes[ g.formula, TheoremaForm], punct}]], "Goal", 
-			CellFrameLabels->{{None, Cell[ makeLabel[ g.label], "GoalLabel"]}, {None, None}}, 
-			CellTags -> {g.id, pid},
-			CellEventActions -> {"MouseClicked" :> ($selectedProofStep = pid), PassEventsDown -> True}
-		]
-	]
+formulaBox[ f_FML$] :=
+    Module[ {orig = f."origForm"},
+        If[ orig === {},
+            ToBoxes[ f.formula, TheoremaForm],
+            (* else *)
+            TooltipBox[ ToBoxes[ f.formula, TheoremaForm], ToBoxes[ orig, TheoremaForm]]
+    	]
+    ]
+formulaBox[ args___] := unexpected[ formulaBox, {args}]
+
+goalCell[ g_FML$, punct_String:""] :=
+    With[ {pid = $proofStepID, formBox = formulaBox[ g]},
+        Cell[ BoxData[ RowBox[ {formBox, punct}]], "Goal", 
+            CellFrameLabels->{{None, Cell[ makeLabel[ g.label], "GoalLabel"]}, {None, None}}, 
+            CellTags -> {g.id, pid},
+            CellEventActions -> {"MouseClicked" :> ($selectedProofStep = pid), PassEventsDown -> True}
+        ]
+    ]
+
 goalCell[ args___] := unexpected[ goalCell, {args}]
  
 assumptionCell[ a_FML$, punct_String:""] := 
-	With[ {pid = $proofStepID}, 
-		Cell[ BoxData[ RowBox[ {ToBoxes[ a.formula, TheoremaForm], punct}]], "Assumption", 
+	With[ {pid = $proofStepID, formBox = formulaBox[ a]}, 
+		Cell[ BoxData[ RowBox[ {formBox, punct}]], "Assumption", 
 			CellFrameLabels->{{None, Cell[ makeLabel[ a.label], "AssumptionLabel"]}, {None, None}}, 
 			CellTags -> {a.id, pid},
 			CellEventActions -> {"MouseClicked" :> ($selectedProofStep = pid), PassEventsDown -> True}
@@ -98,12 +109,6 @@ textCell[ args___] := unexpected[ textCell, {args}]
 *)
 inlineTheoremaExpression[ expr_] := Cell[ ToBoxes[ expr, TheoremaForm]]
 inlineTheoremaExpression[ args___] := unexpected[ inlineTheoremaExpression, {args}]
-
-inlineTheoremaExpressionSeq[ expr_List] := Sequence[ Riffle[ Map[ inlineTheoremaExpression, expr], ", "]]
-inlineTheoremaExpressionSeq[ args___] := unexpected[ inlineTheoremaExpressionSeq, {args}]
-
-formulaReferenceSequence[ refs_List] := Sequence[ Riffle[ Map[ formulaReference, refs], ", "]]
-formulaReferenceSequence[ args___] := unexpected[ formulaReferenceSequence, {args}]
 
 End[]
 

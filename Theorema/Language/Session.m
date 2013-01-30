@@ -162,6 +162,7 @@ putGlobalDeclaration[ file_String, id_Integer, decl_] :=
 	]
 putGlobalDeclaration[ args___] := unexpected[ putGlobalDeclaration, {args}]
 
+SetAttributes[ processGlobalDeclaration, HoldAll];
 processGlobalDeclaration[ x_] := 
 	Module[ {},
 		putGlobalDeclaration[ CurrentValue["NotebookFullFileName"], CurrentValue["CellID"], ReleaseHold[ freshNames[ markVariables[ Hold[x]]]]];
@@ -170,8 +171,7 @@ processGlobalDeclaration[ x_] :=
 processGlobalDeclaration[ args___] := unexpected[ processGlobalDeclaration, {args}]
 
 
-SetAttributes[processEnvironment,HoldAll];
-
+SetAttributes[ processEnvironment, HoldAll];
 processEnvironment[ Theorema`Language`nE] := Null
 
 processEnvironment[x_] :=
@@ -306,12 +306,12 @@ removeFormula[ args___] := unexpected[ removeFormula, {args}]
 removeFromEnv[ key_List] :=
 	Module[{p},
 		$tmaEnv = DeleteCases[ $tmaEnv, FML$[ key, ___]];
-		p = Position[ DownValues[ Theorema`Interface`GUI`Private`kbSelectProve], key];
+		p = Position[ DownValues[ kbSelectProve], key];
 		If[ p =!= {},
-			Unset[ Theorema`Interface`GUI`Private`kbSelectProve[ key]]];
-		p = Position[ DownValues[ Theorema`Computation`Language`Private`activeComputationKB], key];
+			Unset[ kbSelectProve[ key]]];
+		p = Position[ DownValues[ kbSelectCompute], key];
 		If[ p =!= {},
-			Unset[ Theorema`Computation`Language`Private`activeComputationKB[ key]]];			
+			Unset[ kbSelectCompute[ key]]];			
 	]
 removeFromEnv[ args___] := unexpected[ removeFromEnv, {args}]
 
@@ -365,8 +365,8 @@ updateKeys[args___] := unexpected[updateKeys, {args}]
 updateSingleKey[ new_String, old_String] :=
     Module[ {},
         $tmaEnv = Map[ Replace[ #, {id_,old}:>{id,new}]&, $tmaEnv, {2}];
-        DownValues[Theorema`Interface`GUI`Private`kbSelectProve] = DownValues[Theorema`Interface`GUI`Private`kbSelectProve] /. {id_,old} :> {id,new};
-        DownValues[Theorema`Computation`Language`Private`activeComputationKB] = DownValues[Theorema`Computation`Language`Private`activeComputationKB] /. {id_,old} :> {id,new};
+        DownValues[kbSelectProve] = DownValues[kbSelectProve] /. {id_,old} :> {id,new};
+        DownValues[kbSelectCompute] = DownValues[kbSelectCompute] /. {id_,old} :> {id,new};
         new
     ]
 updateSingleKey[args___] := unexpected[updateSingleKey, {args}]
@@ -422,24 +422,26 @@ occursBelow[args___] := unexpected[ occursBelow, {args}]
 updateKnowledgeBase[ form_, k_, glob_, tags_String] :=
     Module[ {newForm = applyGlobalDeclaration[ form, glob]},
     	transferToComputation[ newForm, k];
-        $tmaEnv = joinKB[ {makeFML[ key -> k, formula -> newForm, label -> tags]}, $tmaEnv];
+        $tmaEnv = DeleteDuplicates[ Prepend[ $tmaEnv, makeFML[ key -> k, formula -> newForm, label -> tags, simplify -> False]], #1[[1]] === #2[[1]]&];
         If[ inArchive[],
-            $tmaArch = joinKB[ {makeFML[ key -> k, formula -> newForm, label -> tags]}, $tmaArch];
+            $tmaArch = DeleteDuplicates[ Prepend[ $tmaArch, makeFML[ key -> k, formula -> newForm, label -> tags, simplify -> False]], #1[[1]] === #2[[1]]&];
         ]
     ]
 updateKnowledgeBase[args___] := unexpected[ updateKnowledgeBase, {args}]
 
 findSelectedFormula[ Cell[ _, ___, CellTags -> t_, ___]] :=
 	Module[ { key = getKeyTags[ t]},
-		Cases[ $tmaEnv, FML$[ key, form_, tag_String], {1}, 1]
+		Cases[ $tmaEnv, FML$[ key, _, __], {1}, 1]
 	]	
 findSelectedFormula[ sel_] := {}
 findSelectedFormula[args___] := unexpected[ findSelectedFormula, {args}]
 
 Clear[ applyGlobalDeclaration]
 applyGlobalDeclaration[ expr_, g_List] := Fold[ applyGlobalDeclaration, expr, Reverse[ g]]
+
 applyGlobalDeclaration[ expr_, globalForall$TM[ r_, c_]] := 
 	analyzeQuantifiedExpression[ Forall$TM[ r, c, ReleaseHold[ markVariables[ Hold[ QU$[ r, expr]]]]], {}]
+
 applyGlobalDeclaration[ expr_, globalForall$TM[ r_, c_, d_]] := 
 	With[ {new = applyGlobalDeclaration[ expr, d]},
 		applyGlobalDeclaration[ new, globalForall$TM[ r, c]]
@@ -457,20 +459,23 @@ applyGlobalDeclaration[ args___] := unexpected[ applyGlobalDeclaration, {args}]
 (*
 	analyze the ranges and drop all quantifiers that aren't needed
 *)
-analyzeQuantifiedExpression[ Forall$TM[ RNG$[ r_, s___], c_, e_], outerVar_List] :=
-	Module[ {rc, sc, sub, v, allV},
-		{v} = variables[ RNG$[ r]];
-		allV = Append[ outerVar, v];
-		{rc, sc} = splitAnd[ c, allV];
-		sub = analyzeQuantifiedExpression[ Forall$TM[ RNG$[s], sc, e], allV];
-		If[ MemberQ[ freeVariables[ sub], v],
-			(* the quantifier is relevant for the remaining expression, there is a variable to be bound *) 
-			Forall$TM[ RNG$[ r], rc, sub],
-			(* the quantifier can be dropped, there is no variable affected by it *)
-			sub 
+analyzeQuantifiedExpression[ Forall$TM[ r:RNG$[ __], c_, e_], outerVar_List] :=
+	Module[ {freeE, rc, sc, dropVar, thinnedRange, thinnedCond},
+		(* take the free vars in e *)
+		freeE = freeVariables[ e];
+		(* watch out for all conditions involving the free variables in e ... *)
+		{rc, sc} = splitAnd[ c, freeE, False];
+		(* ... and collect all free variables therein: these are the variables that require the quantifiers, the others can be dropped *)
+		dropVar = Complement[ variables[ r], freeVariables[ rc], freeE];
+		(* all others and conditions involving the others can be dropped *)
+		thinnedRange = thinnedExpression[ r, dropVar];
+		If[ Length[ thinnedRange] == 0,
+			e,
+			thinnedCond = simplifiedAnd[ And$TM[ thinnedExpression[ sc, dropVar], rc]];
+			Forall$TM[ thinnedRange, thinnedCond, e]
 		]
 	]
-analyzeQuantifiedExpression[ Forall$TM[ RNG$[ ], c_, e_], _] := If[ TrueQ[ c], e, Implies$TM[ c, e]]
+
 analyzeQuantifiedExpression[ args___] := unexpected[ analyzeQuantifiedExpression, {args}]
 
 initSession[] :=
@@ -658,9 +663,6 @@ loadArchive[ name_String, globalDecl_:{}] :=
             (* we use updateKnowledgeBase: this applies global declarations appropriately and 
                translates to computational form ... *)
             Scan[ updateKnowledgeBase[ #[[2]], #[[1]], globalDecl, #[[3]]]&, $tmaArch]
-            (* an alternative to updateKnowledgeBase would be:
-            $tmaArch = Map[ MapAt[ applyGlobalDeclaration[ #, globalDecl]&, #, 2]&, $tmaArch];
-            $tmaEnv = joinKB[ $tmaArch, $tmaEnv];*)
         ];
         $TheoremaArchives = DeleteDuplicates[ Prepend[ $TheoremaArchives, cxt]];
         If[ !FileExistsQ[archiveNotebookPath = getArchiveNotebookPath[ name]],

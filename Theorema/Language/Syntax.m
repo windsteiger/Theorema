@@ -1,3 +1,5 @@
+(* ::Package:: *)
+
 (* 
 Theorema editor: W. Windsteiger
 Author(s):       W. Windsteiger
@@ -40,12 +42,21 @@ initParser[args___] := unexpected[ initParser, {args}]
 (* ::Section:: *)
 (* Language classification *)
 
+
 (* To add a new quantifier, just add a pair to this list *)	
 $tmaQuantifiers =
     {{"\[ForAll]", "Forall"},
      {"\[Exists]", "Exists"},
      {"\[Intersection]", "IntersectionOf"},
-     {"\[Union]", "UnionOf"}
+     {"\[Union]", "UnionOf"},
+     {"\[Sum]", "SumOf"},
+     {"\[Product]", "ProductOf"},
+     {"\[Integral]", "IntegralOf"},
+     {"\[CurlyEpsilon]", "Such"},
+     {"such", "Such"},
+     {"the", "SuchUnique"},
+     {"max", "MaximumOf"},
+     {"min", "MinimumOf"}
     };
 
 $tmaQuantifierSymbols = Transpose[ $tmaQuantifiers][[1]];
@@ -83,11 +94,29 @@ tmaToInputOperator[ op_Symbol] :=
     ]
 tmaToInputOperator[ args___] := unexpected[ tmaToInputOperator, {args}]	
 
+
+(* ::Section:: *)
+(* Set and tuple constructor *)
+
+(*
+	Expression specific parts -> Expression.m
+	The default cases go here, otherwise it is not save that these are put at the end (if they have conditions,
+	they could stay in front of the rules loaded in "Computation`". Keep in mind that Expression.m is loaded twice!
+*)
+
+makeSet[ x___] /; isVariableFree[ {x}] := Apply[ ToExpression[ "Set$TM"], Union[ {x}]]
+makeTuple[ x___] := ToExpression[ "Tuple$TM"][x]
+
 (* ::Section:: *)
 (* MakeExpression *)
 
+
 MakeExpression[RowBox[{a_, TagBox[op_, Identity, ___], b_}], fmt_] := 
 	MakeExpression[RowBox[{a, op, b}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+
+
+(* ::Subsubsection:: *)
+(* Quantifiers *)
 
 MakeExpression[ RowBox[{UnderscriptBox[ q_?isQuantifierSymbol, rng_], form_}], fmt_] :=
     standardQuantifier[ Replace[ q, $tmaQuantifierToName], rng, "True", form, fmt] /; $parseTheoremaExpressions
@@ -112,8 +141,26 @@ MakeExpression[ RowBox[{rng_, "|"|":", cond_}], fmt_] :=
         ]
     ] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{UnderscriptBox[ "where", rng_], form_}], fmt_] :=
-	(* We use the powerful toRangeBox in order to have the many variants, multiranges, etc. However, only ABBRVRNG$ makes sense in a "where",
+MakeExpression[ RowBox[{UnderscriptBox[ SubscriptBox[ q_?isQuantifierSymbol, dom_], rng_], form_}], fmt_] :=
+    subscriptedQuantifier[ Replace[ q, $tmaQuantifierToName], rng, "True", dom, form, fmt]/; $parseTheoremaExpressions
+
+MakeExpression[ RowBox[{UnderscriptBox[ UnderscriptBox[ SubscriptBox[ q_?isQuantifierSymbol, dom_], rng_], cond_], form_}], fmt_] :=
+    subscriptedQuantifier[ Replace[ q, $tmaQuantifierToName], rng, cond, dom, form, fmt] /; $parseTheoremaExpressions
+
+MakeExpression[ RowBox[{UnderoverscriptBox[ q:"\[Sum]"|"\[Product]", low:RowBox[{_, "=", _}], high_], form_}], fmt_] :=
+    standardQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[{low, ",", "\[Ellipsis]", ",", high}], "True", form, fmt] /; $parseTheoremaExpressions
+
+MakeExpression[ RowBox[{UnderscriptBox[ UnderoverscriptBox[ q:"\[Sum]"|"\[Product]", low:RowBox[{_, "=", _}], high_], cond_], form_}], fmt_] :=
+    standardQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[{low, ",", "\[Ellipsis]", ",", high}], cond, form, fmt] /; $parseTheoremaExpressions
+
+MakeExpression[ RowBox[{UnderoverscriptBox[ SubscriptBox[ q:"\[Sum]"|"\[Product]", dom_], low:RowBox[{_, "=", _}], high_], form_}], fmt_] :=
+    subscriptedQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[{low, ",", "\[Ellipsis]", ",", high}], "True", dom, form, fmt] /; $parseTheoremaExpressions
+
+MakeExpression[ RowBox[{UnderscriptBox[ UnderoverscriptBox[ SubscriptBox[ q:"\[Sum]"|"\[Product]", dom_], low:RowBox[{_, "=", _}], high_], cond_], form_}], fmt_] :=
+    subscriptedQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[{low, ",", "\[Ellipsis]", ",", high}], cond, dom, form, fmt] /; $parseTheoremaExpressions
+   
+MakeExpression[ RowBox[{UnderscriptBox[ "let", rng_], form_}], fmt_] :=
+	(* We use the powerful toRangeBox in order to have the many variants, multiranges, etc. However, only ABBRVRNG$ makes sense in a "let",
 	   but we do not consider it a syntax error to use one of the other ranges *)
      With[ {r = toRangeBox[ rng]},
 		MakeExpression[ RowBox[{"QU$", "[", 
@@ -121,13 +168,131 @@ MakeExpression[ RowBox[{UnderscriptBox[ "where", rng_], form_}], fmt_] :=
              "]"}], fmt]
 	]/; $parseTheoremaExpressions
 
+
+(* ::Subsubsection:: *)
+(* Special connectives *)
+
 MakeExpression[ RowBox[{left_, RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], right_}], fmt_] :=
     MakeExpression[ RowBox[{"IffDef", "[", RowBox[{left, ",", right}], "]"}], fmt] /; $parseTheoremaExpressions
 
+MakeExpression[ RowBox[{"\[Piecewise]", GridBox[ c:{{_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", _}..}, ___]}], fmt_] :=
+	With[ {clauses = Riffle[ Map[ row2clause, c], ","]},
+    	MakeExpression[ RowBox[{"CaseDistinction", "[", RowBox[ clauses], "]"}], fmt]
+	] /; $parseTheoremaExpressions
+
+row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", c_}] := RowBox[ {"Clause", "[", RowBox[ {c, ",", e}], "]"}]
+
+MakeExpression[ RowBox[ {"\[And]", RowBox[{"\[Piecewise]", GridBox[ c:{{_}..}, ___]}]}], fmt_] :=
+	With[ {clauses = Riffle[ Map[ First, c], ","]},
+		MakeExpression[ RowBox[{"And", "[", RowBox[ clauses], "]"}], fmt]
+	] /; $parseTheoremaExpressions
+	
+(* ::Subsubsection:: *)
+(* Number domains *)
+
 MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalN]", "0"], fmt_] := MakeExpression[ "\[DoubleStruckCapitalN]0", fmt] /; $parseTheoremaExpressions
+
+
+(* ::Subsubsection:: *)
+(* Tuple notations *)
+
+MakeExpression[ RowBox[ {l_,"\[LeftArrow]"}], fmt_] := MakeExpression[ RowBox[{"LeftArrow", "[", l, "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {l_,"\[LeftArrowBar]"}], fmt_] := MakeExpression[ RowBox[{"LeftArrowBar", "[", l, "]"}], fmt] /; $parseTheoremaExpressions
+
+MakeExpression[ RowBox[{left_,"\[EmptyUpTriangle]", right_}], fmt_] :=
+    MakeExpression[ RowBox[{"EmptyUpTriangle", "[", RowBox[{left, ",", right}], "]"}], fmt] /; $parseTheoremaExpressions
+
+
+(* ::Subsection:: *)
+(* operator underscript -> domain *)
+
+(*
+	The assumption is that prefix/infix/postfix operators with underscript are used for operators, which 
+	translate correctly to some expression when used without the underscript.
+*)
+(* PREFIX *)
+MakeExpression[ RowBox[ {UnderscriptBox[ "-", dom_], r_}], fmt_] :=
+    Module[ {},
+    	(* Special case: unary minus *)
+    	(* We memorize for output, that dom has been introduced as a domain underscript *)
+    	registerDomainOperator[ "-", Minus, Prefix, dom];
+        MakeExpression[ RowBox[ {RowBox[ {dom, "[", "Minus", "]"}], "[", r, "]"}], fmt]
+    ] /; $parseTheoremaExpressions
+
+MakeExpression[ RowBox[ {UnderscriptBox[ op_, dom_], r_}], fmt_] :=
+    Module[ {expr = ToExpression[ RowBox[{op, r}], fmt]},
+    	(* expr is the form that would result without the underscript, say f[r] *)
+        With[ {aux = Head[ expr]},
+    		(* We memorize for output, that dom has been introduced as a domain underscript *)
+    		registerDomainOperator[ op, aux, Prefix, dom];
+        	(* From expr we now fetch the head, i.e. "f". We then generate dom[f][r] *)
+            MakeExpression[ RowBox[ {RowBox[ {dom, "[", aux, "]"}], "[", r, "]"}], fmt]
+        ]
+    ] /; $parseTheoremaExpressions
+
+(* INFIX *)
+MakeExpression[ RowBox[ {l_, UnderscriptBox[ "-", dom_], r_}], fmt_] :=
+    Module[ {},
+    	(* Special case: subtract *)
+    	(* We memorize for output, that dom has been introduced as a domain underscript *)
+    	registerDomainOperator[ "-", Subtract, Infix, dom];
+        MakeExpression[ RowBox[ {RowBox[ {dom, "[", "Subtract", "]"}], "[", RowBox[ {l, ",", r}], "]"}], fmt]
+    ] /; $parseTheoremaExpressions
+
+MakeExpression[ RowBox[ {l_, UnderscriptBox[ "/", dom_], r_}], fmt_] :=
+    Module[ {},
+    	(* Special case: divide *)
+    	(* We memorize for output, that dom has been introduced as a domain underscript *)
+    	registerDomainOperator[ "/", Divide, Infix, dom];
+        MakeExpression[ RowBox[ {RowBox[ {dom, "[", "Divide", "]"}], "[", RowBox[ {l, ",", r}], "]"}], fmt]
+    ] /; $parseTheoremaExpressions
+
+MakeExpression[ RowBox[ {l_, UnderscriptBox[ op_, dom_], r_}], fmt_] :=
+    Module[ {expr = ToExpression[ RowBox[{l, op, r}], fmt]},
+    	(* expr is the form that would result without the underscript, say f[x,y]. We do not even rely on that x MUST be l and y MUST be r *)
+        With[ {aux = Head[ expr], paramBox = ToBoxes[ Apply[ List, expr]][[1, 2]]},
+    		(* We memorize for output, that dom has been introduced as a domain underscript *)
+    		registerDomainOperator[ op, aux, Infix, dom];
+        	(* From expr we now fetch the head, i.e. "f", and the box form of the parameters, i.e. box form of "x,y".
+        	   We then generate dom[f][x,y] *)
+            MakeExpression[ RowBox[ {RowBox[ {dom, "[", aux, "]"}], "[", paramBox, "]"}], fmt]
+        ]
+    ] /; $parseTheoremaExpressions
+
+(* POSTFIX *)
+MakeExpression[ RowBox[ {l_, UnderscriptBox[ op_, dom_]}], fmt_] :=
+    Module[ {expr = ToExpression[ RowBox[{l, op}], fmt]},
+    	(* expr is the form that would result without the underscript, say f[l] *)
+        With[ {aux = Head[ expr]},
+    		(* We memorize for output, that dom has been introduced as a domain underscript *)
+    		registerDomainOperator[ op, aux, Postfix, dom];
+        	(* From expr we now fetch the head, i.e. "f". We then generate dom[f][r] *)
+            MakeExpression[ RowBox[ {RowBox[ {dom, "[", aux, "]"}], "[", l, "]"}], fmt]
+        ]
+    ] /; $parseTheoremaExpressions
+
+(* GENERAL *)
+MakeExpression[ RowBox[ {UnderscriptBox[ op_, dom_], "[", p___, "]"}], fmt_] :=
+	Module[ {},
+    	registerDomainOperator[ dom];
+        MakeExpression[ RowBox[ {RowBox[ {dom, "[", op, "]"}], "[", p, "]"}], fmt]
+    ] /; $parseTheoremaExpressions
+
+registerDomainOperator[ op_, f_, form_, dom_] :=
+	Module[{},
+		isUnderscriptDomain[ dom] = True;
+		operatorSymbol[ f, form] = op;
+	]
+registerDomainOperator[ dom_] :=
+	Module[{},
+		isUnderscriptDomain[ dom] = True;
+	]
+registerDomainOperator[ args___] := unexpected[ registerDomainOperator, {args}]
+
 
 (* ::Subsection:: *)
 (* Global Declarations *)
+
 
 MakeExpression[RowBox[{a_, TagBox[ "\[DoubleLongRightArrow]", Identity, ___]}], fmt_] := 
 	MakeExpression[RowBox[{a, "\[DoubleLongRightArrow]"}], fmt] /; $parseTheoremaGlobals
@@ -157,8 +322,8 @@ toDomSpecRangeBox[ RowBox[{v_, "\[Superset]", d_}]] := RowBox[ {"RNG$", "[", Row
 toDomSpecRangeBox[ v_String] := RowBox[ {"RNG$", "[", makeRangeSequence[ v], "]"}]
 toDomSpecRangeBox[args___] := unexpected[ toDomSpecRangeBox, {args}]
 
-MakeExpression[ UnderscriptBox[ "where", rng_], fmt_] := 
-	(* We the powerful toRangeBox in order to have the many variants, multiranges, etc. However, only ABBRVRNG$ makes sense in a "where",
+MakeExpression[ UnderscriptBox[ "let", rng_], fmt_] := 
+	(* We the powerful toRangeBox in order to have the many variants, multiranges, etc. However, only ABBRVRNG$ makes sense in a "let",
 	   but we do not consider it a syntax error to use one of the other ranges *)
 	With[ {r = toRangeBox[ rng]},
 		MakeExpression[ RowBox[{"QU$", "[", 
@@ -169,11 +334,11 @@ MakeExpression[ UnderscriptBox[ "where", rng_], fmt_] :=
 (* ::Subsection:: *)
 (* Auxiliary parsing functions *)
 
+
 (* QU$ is an auxiliary tag introduced in quantifier MakeExpressions, which should be eliminated during expression parsing
 	in markVariables. Any remaining QU$ actually indicates an error, and it will evaluate through this definition and
 	throw an exception. *)
 QU$[args___] := unexpected[ QU$, {args}]
-
 
 SetAttributes[ standardQuantifier, HoldRest]
 standardQuantifier[ name_, rng_, cond_, expr_, fmt_] :=
@@ -183,7 +348,17 @@ standardQuantifier[ name_, rng_, cond_, expr_, fmt_] :=
              "]"}], fmt]
     ]
 standardQuantifier[ args___] := unexpected[ standardQuantifier, {args}]
+
+SetAttributes[ subscriptedQuantifier, HoldRest]
+subscriptedQuantifier[ name_, rng_, cond_, sub_, expr_, fmt_] :=
+    With[ {r = toRangeBox[ rng]},
+        MakeExpression[ RowBox[{"QU$", "[", 
+            RowBox[{ r, ",", RowBox[{ name, "[", RowBox[{ r, ",", cond, ",", sub, ",", expr}], "]"}]}],
+             "]"}], fmt]
+    ]
+subscriptedQuantifier[ args___] := unexpected[ subscriptedQuantifier, {args}]
     
+SetAttributes[ standardGlobalQuantifier, HoldRest]
 standardGlobalQuantifier[ name_, rng_, cond_, fmt_] :=
     With[ {r = toRangeBox[ rng]},
         MakeExpression[ RowBox[{"QU$", "[", 
@@ -192,8 +367,11 @@ standardGlobalQuantifier[ name_, rng_, cond_, fmt_] :=
     ]
 standardGlobalQuantifier[ args___] := unexpected[ standardGlobalQuantifier, {args}]
 
+
+
 (* ::Subsubsection:: *)
 (* Ranges *)
+
 
 Clear[ toRangeBox, makeRangeSequence]
 
@@ -274,8 +452,11 @@ getSingleRangeVar[ r_] :=
 	]
 getSingleRangeVar[ args___] := unexpected[ getSingleRangeVar, {args}]
 
+
+
 (* ::Section:: *)
 (* MakeBoxes *)
+
 
 MakeBoxes[ (q_?isQuantifierName)[ rng_, True, form_], TheoremaForm] := 
 	RowBox[ {UnderscriptBox[ Replace[ q, $tmaNameToQuantifier], makeRangeBox[ rng, TheoremaForm]],
@@ -287,7 +468,17 @@ MakeBoxes[ (q_?isQuantifierName)[ rng_, cond_, form_], TheoremaForm] :=
 		MakeBoxes[ form, TheoremaForm]}
 	]
 
-MakeBoxes[ (op_?isNonStandardOperatorName)[ arg__], TheoremaForm] :=
+MakeBoxes[ (q_?isQuantifierName)[ rng_, True, sub_, form_], TheoremaForm] := 
+	RowBox[ {UnderscriptBox[ SubscriptBox[ Replace[ q, $tmaNameToQuantifier], MakeBoxes[ sub, TheoremaForm]], makeRangeBox[ rng, TheoremaForm]],
+		MakeBoxes[ form, TheoremaForm]}
+	]
+
+MakeBoxes[ (q_?isQuantifierName)[ rng_, cond_, sub_, form_], TheoremaForm] := 
+	RowBox[ {UnderscriptBox[ UnderscriptBox[ SubscriptBox[ Replace[ q, $tmaNameToQuantifier], MakeBoxes[ sub, TheoremaForm]], makeRangeBox[ rng, TheoremaForm]],
+		MakeBoxes[ cond, TheoremaForm]], MakeBoxes[ form, TheoremaForm]}
+	]
+
+MakeBoxes[ (op_?isNonStandardOperatorName)[ arg___], TheoremaForm] :=
     With[ {b = Replace[ op, $tmaNonStandardOperatorToBuiltin]},
         MakeBoxes[ b[ arg], TheoremaForm]
     ]
@@ -315,7 +506,37 @@ MakeBoxes[ s_Symbol, TheoremaForm] :=
 		]
 	]
 
-tmaInfixBox[ args_List, op_String] := RowBox[ Riffle[ Map[ MakeBoxes[ #, TheoremaForm]&, args], op]]
+
+(* ::Subsection:: *)
+(* Domain underscripts *)
+
+MakeBoxes[ (dom_?(isUnderscriptDomain[ MakeBoxes[ #, TheoremaForm]]&))[ op_][ a_], TheoremaForm] :=
+	Module[ {opSymPre = operatorSymbol[ ToExpression[ MakeBoxes[ op, TheoremaForm]], Prefix],
+		opSymPost = operatorSymbol[ ToExpression[ MakeBoxes[ op, TheoremaForm]], Postfix]},
+		Which[
+			StringQ[ opSymPre],
+			RowBox[ {UnderscriptBox[ opSymPre, MakeBoxes[ dom, TheoremaForm]], MakeBoxes[ a, TheoremaForm]}],
+			StringQ[ opSymPost],
+			RowBox[ {MakeBoxes[ a, TheoremaForm], UnderscriptBox[ opSymPost, MakeBoxes[ dom, TheoremaForm]]}],
+			True,
+			MakeBoxes[ Underscript[ op, dom][ a], TheoremaForm]
+		]
+	]
+	
+MakeBoxes[ (dom_?(isUnderscriptDomain[ MakeBoxes[ #, TheoremaForm]]&))[ op_][ a_, b_], TheoremaForm] :=
+	Module[ {opSym = operatorSymbol[ ToExpression[ MakeBoxes[ op, TheoremaForm]], Infix]},
+		Which[
+			StringQ[ opSym],
+			tmaInfixBox[ {a, b}, UnderscriptBox[ opSym, MakeBoxes[ dom, TheoremaForm]]],
+			True,
+			MakeBoxes[ Underscript[ op, dom][ a, b], TheoremaForm]
+		]
+	]
+	
+MakeBoxes[ (dom_?(isUnderscriptDomain[ MakeBoxes[ #, TheoremaForm]]&))[ op_][ a___], TheoremaForm] :=
+	MakeBoxes[ Underscript[ op, dom][ a], TheoremaForm]
+	
+tmaInfixBox[ args_List, op_] := RowBox[ Riffle[ Map[ MakeBoxes[ #, TheoremaForm]&, args], op]]
 tmaInfixBox[ args___] := unexpected[ tmaInfixBox, {args}]
 
 (*
@@ -378,29 +599,29 @@ SetAttributes[\[Bullet]\[Bullet]integerRange,HoldFirst];
 
 \[Bullet]\[Bullet]integerRange::usage="\[Bullet]\[Bullet]integerRange[i,lower,upper] denotes that the variable `i` ranges over all integers from `lower` to `upper`.";
 
-MakeRangeSequence[RowBox[{i_, ",", j__,",",n      RowBox[{k_, "=", lower_}], ",", "\[Ellipsis]", ",", upper_}]]:=Sequence[RowBox[{"\[Bullet]integerRange","[",i,",",lower,",",upper,"]"}],",",MakeRangeSequence[RowBox[{j,",",n      RowBox[{k, "=", lower}], ",", "\[Ellipsis]", ",", upper}]]]
+MakeRangeSequence[RowBox[{i_, ",", j__,",",n      RowBox[{k_, "=", lower_}], ",", "...", ",", upper_}]]:=Sequence[RowBox[{"\[Bullet]integerRange","[",i,",",lower,",",upper,"]"}],",",MakeRangeSequence[RowBox[{j,",",n      RowBox[{k, "=", lower}], ",", "...", ",", upper}]]]
 
-MakeRangeSequence[RowBox[{j_, ",", n      RowBox[{k_, "=", lower_}], ",", "\[Ellipsis]", ",", upper_}]]:=Sequence[RowBox[{"\[Bullet]integerRange","[",j,",",lower,",",upper,"]"}],",",RowBox[{"\[Bullet]integerRange","[",k,",",lower,",",upper,"]"}]]
+MakeRangeSequence[RowBox[{j_, ",", n      RowBox[{k_, "=", lower_}], ",", "...", ",", upper_}]]:=Sequence[RowBox[{"\[Bullet]integerRange","[",j,",",lower,",",upper,"]"}],",",RowBox[{"\[Bullet]integerRange","[",k,",",lower,",",upper,"]"}]]
 
-MakeRangeSequence[RowBox[{RowBox[{k_,"=",lower_}],",","\[Ellipsis]",",",upper_}]]:=n	RowBox[{"\[Bullet]integerRange","[",k,",",lower,",",upper,"]"}]
+MakeRangeSequence[RowBox[{RowBox[{k_,"=",lower_}],",","...",",",upper_}]]:=n	RowBox[{"\[Bullet]integerRange","[",k,",",lower,",",upper,"]"}]
 
-MakeRangeSequence[RowBox[{i_,",",j__,",",RowBox[{k_,"=",lower_}],",","\[Ellipsis]"}]]:=n	Sequence[RowBox[{"\[Bullet]integerRange","[",i,",",lower,",","\[Infinity]","]"}],",",MakeRangeSequence[RowBox[{j,",",RowBox[{k,"=",lower}],",","\[Ellipsis]"}]]]
+MakeRangeSequence[RowBox[{i_,",",j__,",",RowBox[{k_,"=",lower_}],",","..."}]]:=n	Sequence[RowBox[{"\[Bullet]integerRange","[",i,",",lower,",","\[Infinity]","]"}],",",MakeRangeSequence[RowBox[{j,",",RowBox[{k,"=",lower}],",","..."}]]]
 
-MakeRangeSequence[RowBox[{j_,",",RowBox[{k_,"=",lower_}],",","\[Ellipsis]"}]]:=n	Sequence[RowBox[{"\[Bullet]integerRange","[",j,",",lower,",","\[Infinity]","]"}],",",RowBox[{"\[Bullet]integerRange","[",k,",",lower,",","\[Infinity]","]"}]]
+MakeRangeSequence[RowBox[{j_,",",RowBox[{k_,"=",lower_}],",","..."}]]:=n	Sequence[RowBox[{"\[Bullet]integerRange","[",j,",",lower,",","\[Infinity]","]"}],",",RowBox[{"\[Bullet]integerRange","[",k,",",lower,",","\[Infinity]","]"}]]
 
-MakeRangeSequence[RowBox[{RowBox[{k_,"=",lower_}],",","\[Ellipsis]"}]]:=n	RowBox[{"\[Bullet]integerRange","[",k,",",lower,",","\[Infinity]","]"}]
+MakeRangeSequence[RowBox[{RowBox[{k_,"=",lower_}],",","..."}]]:=n	RowBox[{"\[Bullet]integerRange","[",k,",",lower,",","\[Infinity]","]"}]
 
-MakeRangeSequence[RowBox[{i_,",",j__,",",RowBox[{k_,"=","\[Ellipsis]"}],",",upper_}]]:=n	Sequence[RowBox[{"\[Bullet]integerRange","[",i,",",RowBox[{"-", "\[Infinity]"}],",",upper,"]"}],",",MakeRangeSequence[RowBox[{j,",",RowBox[{k,"=","\[Ellipsis]"}],",",upper}]]]
+MakeRangeSequence[RowBox[{i_,",",j__,",",RowBox[{k_,"=","..."}],",",upper_}]]:=n	Sequence[RowBox[{"\[Bullet]integerRange","[",i,",",RowBox[{"-", "\[Infinity]"}],",",upper,"]"}],",",MakeRangeSequence[RowBox[{j,",",RowBox[{k,"=","..."}],",",upper}]]]
 
-MakeRangeSequence[RowBox[{j_,",",RowBox[{k_,"=","\[Ellipsis]"}],",",upper_}]]:=n	Sequence[RowBox[{"\[Bullet]integerRange","[",j,",",RowBox[{"-", "\[Infinity]"}],",",upper,"]"}],",",RowBox[{"\[Bullet]integerRange","[",k,",",RowBox[{"-", "\[Infinity]"}],",",upper,"]"}]]
+MakeRangeSequence[RowBox[{j_,",",RowBox[{k_,"=","..."}],",",upper_}]]:=n	Sequence[RowBox[{"\[Bullet]integerRange","[",j,",",RowBox[{"-", "\[Infinity]"}],",",upper,"]"}],",",RowBox[{"\[Bullet]integerRange","[",k,",",RowBox[{"-", "\[Infinity]"}],",",upper,"]"}]]
 
-MakeRangeSequence[RowBox[{RowBox[{k_,"=","\[Ellipsis]"}],",",upper_}]]:=n	RowBox[{"\[Bullet]integerRange","[",k,",",RowBox[{"-", "\[Infinity]"}],",",upper,"]"}]
+MakeRangeSequence[RowBox[{RowBox[{k_,"=","..."}],",",upper_}]]:=n	RowBox[{"\[Bullet]integerRange","[",k,",",RowBox[{"-", "\[Infinity]"}],",",upper,"]"}]
 
-MakeRangeSequence[RowBox[{i_,",",j__,",",RowBox[{k_,"=","\[Ellipsis]"}]}]]:=n	Sequence[RowBox[{"\[Bullet]integerRange","[",i,",",RowBox[{"-", "\[Infinity]"}],",","\[Infinity]","]"}],",",nMakeRangeSequence[RowBox[{j,",",RowBox[{k,"=","\[Ellipsis]"}]}]]]
+MakeRangeSequence[RowBox[{i_,",",j__,",",RowBox[{k_,"=","..."}]}]]:=n	Sequence[RowBox[{"\[Bullet]integerRange","[",i,",",RowBox[{"-", "\[Infinity]"}],",","\[Infinity]","]"}],",",nMakeRangeSequence[RowBox[{j,",",RowBox[{k,"=","..."}]}]]]
 
-MakeRangeSequence[RowBox[{j_,",",RowBox[{k_,"=","\[Ellipsis]"}]}]]:=n	Sequence[RowBox[{"\[Bullet]integerRange","[",j,",",RowBox[{"-", "\[Infinity]"}],",","\[Infinity]","]"}],",",n	RowBox[{"\[Bullet]integerRange","[",k,",",RowBox[{"-", "\[Infinity]"}],",","\[Infinity]","]"}]]
+MakeRangeSequence[RowBox[{j_,",",RowBox[{k_,"=","..."}]}]]:=n	Sequence[RowBox[{"\[Bullet]integerRange","[",j,",",RowBox[{"-", "\[Infinity]"}],",","\[Infinity]","]"}],",",n	RowBox[{"\[Bullet]integerRange","[",k,",",RowBox[{"-", "\[Infinity]"}],",","\[Infinity]","]"}]]
 
-MakeRangeSequence[RowBox[{k_,"=","\[Ellipsis]"}]]:=n	RowBox[{"\[Bullet]integerRange","[",k,",",RowBox[{"-", "\[Infinity]"}],",","\[Infinity]","]"}]
+MakeRangeSequence[RowBox[{k_,"=","..."}]]:=n	RowBox[{"\[Bullet]integerRange","[",k,",",RowBox[{"-", "\[Infinity]"}],",","\[Infinity]","]"}]
 
 SetAttributes[\[Bullet]\[Bullet]domainRange,HoldFirst];
 
@@ -408,43 +629,43 @@ SetAttributes[\[Bullet]\[Bullet]domainRange,HoldFirst];
 
 \[Bullet]\[Bullet]domainRange::usage="\[Bullet]\[Bullet]domainRange[i,domain,lower,upper] denotes that the variable `i` ranges over all elements of the enumerable domain `domain` from `lower` to `upper`.";
 
-MakeRangeSequence[RowBox[{i_,",",j__,",",RowBox[{k_,UnderscriptBox["=",domain_],lower_}],",","\[Ellipsis]",",",upper_}]]:=Sequence[RowBox[{"\[Bullet]domainRange","[",i,",",domain,",",lower,",",upper,"]"}],",",MakeRangeSequence[RowBox[{j,",",RowBox[{k,UnderscriptBox["=",domain],lower}],",","\[Ellipsis]",",",upper}]]]
+MakeRangeSequence[RowBox[{i_,",",j__,",",RowBox[{k_,UnderscriptBox["=",domain_],lower_}],",","...",",",upper_}]]:=Sequence[RowBox[{"\[Bullet]domainRange","[",i,",",domain,",",lower,",",upper,"]"}],",",MakeRangeSequence[RowBox[{j,",",RowBox[{k,UnderscriptBox["=",domain],lower}],",","...",",",upper}]]]
 
-MakeRangeSequence[RowBox[{j_,",",RowBox[{k_,UnderscriptBox["=",domain_],lower_}],",","\[Ellipsis]",",",upper_}]]:=Sequence[RowBox[{"\[Bullet]domainRange","[",j,",",domain,",",lower,",",upper,"]"}],",",RowBox[{"\[Bullet]domainRange","[",k,",",domain,",",lower,",",upper,"]"}]]
+MakeRangeSequence[RowBox[{j_,",",RowBox[{k_,UnderscriptBox["=",domain_],lower_}],",","...",",",upper_}]]:=Sequence[RowBox[{"\[Bullet]domainRange","[",j,",",domain,",",lower,",",upper,"]"}],",",RowBox[{"\[Bullet]domainRange","[",k,",",domain,",",lower,",",upper,"]"}]]
 
-MakeRangeSequence[RowBox[{RowBox[{k_,UnderscriptBox["=",domain_],lower_}],",","\[Ellipsis]",",",upper_}]]:=(DeclareUnderscriptDomain[domain];RowBox[{"\[Bullet]domainRange","[",k,",",domain,",",lower,",",upper,"]"}])
+MakeRangeSequence[RowBox[{RowBox[{k_,UnderscriptBox["=",domain_],lower_}],",","...",",",upper_}]]:=(DeclareUnderscriptDomain[domain];RowBox[{"\[Bullet]domainRange","[",k,",",domain,",",lower,",",upper,"]"}])
 
-MakeRangeSequence[RowBox[{i_,",",j__,",",RowBox[{k_,UnderscriptBox["=",domain_],lower_}],",","\[Ellipsis]"}]]:=Sequence[n		RowBox[{"\[Bullet]domainRange","[",i,",",domain,",",lower,",",RowBox[{domain,"[","Last","]"}],"]"}],",",n		MakeRangeSequence[RowBox[{j,",",RowBox[{k,UnderscriptBox["=",domain],lower}],",","\[Ellipsis]"}]]]
+MakeRangeSequence[RowBox[{i_,",",j__,",",RowBox[{k_,UnderscriptBox["=",domain_],lower_}],",","..."}]]:=Sequence[n		RowBox[{"\[Bullet]domainRange","[",i,",",domain,",",lower,",",RowBox[{domain,"[","Last","]"}],"]"}],",",n		MakeRangeSequence[RowBox[{j,",",RowBox[{k,UnderscriptBox["=",domain],lower}],",","..."}]]]
 
-MakeRangeSequence[RowBox[{j_,",",RowBox[{k_,UnderscriptBox["=",domain_],lower_}],",","\[Ellipsis]"}]]:=Sequence[n		RowBox[{"\[Bullet]domainRange","[",j,",",domain,",",lower,",",RowBox[{domain,"[","Last","]"}],"]"}],",",n		RowBox[{"\[Bullet]domainRange","[",k,",",domain,",",lower,",",RowBox[{domain,"[","Last","]"}],"]"}]]
+MakeRangeSequence[RowBox[{j_,",",RowBox[{k_,UnderscriptBox["=",domain_],lower_}],",","..."}]]:=Sequence[n		RowBox[{"\[Bullet]domainRange","[",j,",",domain,",",lower,",",RowBox[{domain,"[","Last","]"}],"]"}],",",n		RowBox[{"\[Bullet]domainRange","[",k,",",domain,",",lower,",",RowBox[{domain,"[","Last","]"}],"]"}]]
 
-MakeRangeSequence[RowBox[{RowBox[{k_,UnderscriptBox["=",domain_],lower_}],",","\[Ellipsis]"}]]:=(DeclareUnderscriptDomain[domain];RowBox[{"\[Bullet]domainRange","[",k,",",domain,",",lower,",",RowBox[{domain,"[","Last","]"}],"]"}])
+MakeRangeSequence[RowBox[{RowBox[{k_,UnderscriptBox["=",domain_],lower_}],",","..."}]]:=(DeclareUnderscriptDomain[domain];RowBox[{"\[Bullet]domainRange","[",k,",",domain,",",lower,",",RowBox[{domain,"[","Last","]"}],"]"}])
 
-MakeRangeSequence[n		RowBox[{i_,",",j__,",",RowBox[{k_,UnderscriptBox["=",domain_],"\[Ellipsis]"}],",",upper_}]]:=Sequence[n		RowBox[{"\[Bullet]domainRange","[",i,",",domain,",",RowBox[{domain,"[","First","]"}],",",upper,"]"}],",",MakeRangeSequence[n		RowBox[{j,",",RowBox[{k,UnderscriptBox["=",domain],"\[Ellipsis]"}],",",upper}]]]
+MakeRangeSequence[n		RowBox[{i_,",",j__,",",RowBox[{k_,UnderscriptBox["=",domain_],"..."}],",",upper_}]]:=Sequence[n		RowBox[{"\[Bullet]domainRange","[",i,",",domain,",",RowBox[{domain,"[","First","]"}],",",upper,"]"}],",",MakeRangeSequence[n		RowBox[{j,",",RowBox[{k,UnderscriptBox["=",domain],"..."}],",",upper}]]]
 
-MakeRangeSequence[n		RowBox[{j_,",",RowBox[{k_,UnderscriptBox["=",domain_],"\[Ellipsis]"}],",",upper_}]]:=Sequence[n		RowBox[{"\[Bullet]domainRange","[",j,",",domain,",",RowBox[{domain,"[","First","]"}],",",upper,"]"}],",",n		RowBox[{"\[Bullet]domainRange","[",k,",",domain,",",RowBox[{domain,"[","First","]"}],",",upper,"]"}]]
+MakeRangeSequence[n		RowBox[{j_,",",RowBox[{k_,UnderscriptBox["=",domain_],"..."}],",",upper_}]]:=Sequence[n		RowBox[{"\[Bullet]domainRange","[",j,",",domain,",",RowBox[{domain,"[","First","]"}],",",upper,"]"}],",",n		RowBox[{"\[Bullet]domainRange","[",k,",",domain,",",RowBox[{domain,"[","First","]"}],",",upper,"]"}]]
 
-MakeRangeSequence[RowBox[{RowBox[{k_,UnderscriptBox["=",domain_],"\[Ellipsis]"}],",",upper_}]]:=(DeclareUnderscriptDomain[domain];RowBox[{"\[Bullet]domainRange","[",k,",",domain,",",RowBox[{domain,"[","First","]"}],",",upper,"]"}])
+MakeRangeSequence[RowBox[{RowBox[{k_,UnderscriptBox["=",domain_],"..."}],",",upper_}]]:=(DeclareUnderscriptDomain[domain];RowBox[{"\[Bullet]domainRange","[",k,",",domain,",",RowBox[{domain,"[","First","]"}],",",upper,"]"}])
 
-MakeRangeSequence[RowBox[{i_,",",j__,",",RowBox[{k_,UnderscriptBox["=",domain_],"\[Ellipsis]"}]}]]:=Sequence[RowBox[{"\[Bullet]domainRange","[",i,",",domain,",",RowBox[{domain,"[","First","]"}],",",RowBox[{domain,"[","Last","]"}],"]"}],",",MakeRangeSequence[RowBox[{j,",",RowBox[{k,UnderscriptBox["=",domain],"\[Ellipsis]"}]}]]]
+MakeRangeSequence[RowBox[{i_,",",j__,",",RowBox[{k_,UnderscriptBox["=",domain_],"..."}]}]]:=Sequence[RowBox[{"\[Bullet]domainRange","[",i,",",domain,",",RowBox[{domain,"[","First","]"}],",",RowBox[{domain,"[","Last","]"}],"]"}],",",MakeRangeSequence[RowBox[{j,",",RowBox[{k,UnderscriptBox["=",domain],"..."}]}]]]
 
-MakeRangeSequence[RowBox[{j_,",",RowBox[{k_,UnderscriptBox["=",domain_],"\[Ellipsis]"}]}]]:=Sequence[RowBox[{"\[Bullet]domainRange","[",j,",",domain,",",RowBox[{domain,"[","First","]"}],",",RowBox[{domain,"[","Last","]"}],"]"}],",",RowBox[{"\[Bullet]domainRange","[",k,",",domain,",",RowBox[{domain,"[","First","]"}],",",RowBox[{domain,"[","Last","]"}],"]"}]]
+MakeRangeSequence[RowBox[{j_,",",RowBox[{k_,UnderscriptBox["=",domain_],"..."}]}]]:=Sequence[RowBox[{"\[Bullet]domainRange","[",j,",",domain,",",RowBox[{domain,"[","First","]"}],",",RowBox[{domain,"[","Last","]"}],"]"}],",",RowBox[{"\[Bullet]domainRange","[",k,",",domain,",",RowBox[{domain,"[","First","]"}],",",RowBox[{domain,"[","Last","]"}],"]"}]]
 
-MakeRangeSequence[RowBox[{k_,UnderscriptBox["=",domain_],"\[Ellipsis]"}]]:=n	(DeclareUnderscriptDomain[domain];RowBox[{"\[Bullet]domainRange","[",k,",",domain,",",RowBox[{domain,"[","First","]"}],",",RowBox[{domain,"[","Last","]"}],"]"}])
+MakeRangeSequence[RowBox[{k_,UnderscriptBox["=",domain_],"..."}]]:=n	(DeclareUnderscriptDomain[domain];RowBox[{"\[Bullet]domainRange","[",k,",",domain,",",RowBox[{domain,"[","First","]"}],",",RowBox[{domain,"[","Last","]"}],"]"}])
 
 SetAttributes[\[Bullet]\[Bullet]limitRange,HoldFirst];
 
-MakeRangeSequence[RowBox[{i_, ",", j__, ",",RowBox[{k_,UnderscriptBox["\[LongRightArrow]"|"\[RightArrow]"|"\[Rule]",dom_], s_}]}]]:=n	Sequence[RowBox[{"\[Bullet]limitRange","[",i,",",s,",",dom,"]"}],",",n		MakeRangeSequence[RowBox[{j,",",RowBox[{k, "\[LongRightArrow]", s}]}]]]
+MakeRangeSequence[RowBox[{i_, ",", j__, ",",RowBox[{k_,UnderscriptBox["\[LongRightArrow]"|"\[RightArrow]"|"->",dom_], s_}]}]]:=n	Sequence[RowBox[{"\[Bullet]limitRange","[",i,",",s,",",dom,"]"}],",",n		MakeRangeSequence[RowBox[{j,",",RowBox[{k, "\[LongRightArrow]", s}]}]]]
 
-MakeRangeSequence[n    RowBox[{j_, ",", n      RowBox[{k_, UnderscriptBox["\[LongRightArrow]"|"\[RightArrow]"|"\[Rule]",dom_], s_}]}]]:=Sequence[RowBox[{"\[Bullet]limitRange","[",j,",",s,",",dom,"]"}],",",RowBox[{"\[Bullet]limitRange","[",k,",",s,",",dom,"]"}]]
+MakeRangeSequence[n    RowBox[{j_, ",", n      RowBox[{k_, UnderscriptBox["\[LongRightArrow]"|"\[RightArrow]"|"->",dom_], s_}]}]]:=Sequence[RowBox[{"\[Bullet]limitRange","[",j,",",s,",",dom,"]"}],",",RowBox[{"\[Bullet]limitRange","[",k,",",s,",",dom,"]"}]]
 
-MakeRangeSequence[RowBox[{k_,UnderscriptBox["\[LongRightArrow]"|"\[RightArrow]"|"\[Rule]",dom_],s_}]]:=RowBox[{"\[Bullet]limitRange","[",k,",",s,",",dom,"]"}]
+MakeRangeSequence[RowBox[{k_,UnderscriptBox["\[LongRightArrow]"|"\[RightArrow]"|"->",dom_],s_}]]:=RowBox[{"\[Bullet]limitRange","[",k,",",s,",",dom,"]"}]
 
-MakeRangeSequence[RowBox[{i_, ",", j__, ",",RowBox[{k_,"\[LongRightArrow]"|"\[RightArrow]"|"\[Rule]", s_}]}]]:=n	Sequence[RowBox[{"\[Bullet]limitRange","[",i,",",s,",","None","]"}],",",n		MakeRangeSequence[RowBox[{j,",",RowBox[{k, "\[LongRightArrow]", s}]}]]]
+MakeRangeSequence[RowBox[{i_, ",", j__, ",",RowBox[{k_,"\[LongRightArrow]"|"\[RightArrow]"|"->", s_}]}]]:=n	Sequence[RowBox[{"\[Bullet]limitRange","[",i,",",s,",","None","]"}],",",n		MakeRangeSequence[RowBox[{j,",",RowBox[{k, "\[LongRightArrow]", s}]}]]]
 
-MakeRangeSequence[n    RowBox[{j_, ",", n      RowBox[{k_, "\[LongRightArrow]"|"\[RightArrow]"|"\[Rule]", s_}]}]]:=Sequence[RowBox[{"\[Bullet]limitRange","[",j,",",s,",","None","]"}],",",RowBox[{"\[Bullet]limitRange","[",k,",",s,",","None","]"}]]
+MakeRangeSequence[n    RowBox[{j_, ",", n      RowBox[{k_, "\[LongRightArrow]"|"\[RightArrow]"|"->", s_}]}]]:=Sequence[RowBox[{"\[Bullet]limitRange","[",j,",",s,",","None","]"}],",",RowBox[{"\[Bullet]limitRange","[",k,",",s,",","None","]"}]]
 
-MakeRangeSequence[RowBox[{k_,"\[LongRightArrow]"|"\[RightArrow]"|"\[Rule]",s_}]]:=RowBox[{"\[Bullet]limitRange","[",k,",",s,",","None","]"}]
+MakeRangeSequence[RowBox[{k_,"\[LongRightArrow]"|"\[RightArrow]"|"->",s_}]]:=RowBox[{"\[Bullet]limitRange","[",k,",",s,",","None","]"}]
 
 SetAttributes[\[Bullet]\[Bullet]simpleRange,HoldFirst];
 
@@ -463,7 +684,7 @@ MakeRangeBoxes[(\[Bullet]range|\[Bullet]\[Bullet]range)[x:(_[_Pattern,___]),y___
 
 MakeRangeBoxes[(\[Bullet]range|\[Bullet]\[Bullet]range)[x_],f_]:=MakeSingleRangeBoxes[x,f]
 
-MakeRangeBoxes[(\[Bullet]range|\[Bullet]\[Bullet]range)[x:(__\[Bullet]simpleRange|__\[Bullet]\[Bullet]simpleRange)],f_]:=RowBox[MakeSimpleRangeBoxes[{x},f]]
+MakeRangeBoxes[(\[Bullet]range|\[Bullet]\[Bullet]range)[x:(__ \[Bullet]simpleRange|__ \[Bullet]\[Bullet]simpleRange)],f_]:=RowBox[MakeSimpleRangeBoxes[{x},f]]
 
 MakeRangeBoxes[(\[Bullet]range|\[Bullet]\[Bullet]range)[x__],f_]:=GridBox[MakeMultipleRangeBoxes[{x},f]]
 
@@ -485,15 +706,15 @@ MakeSingleRangeBoxes[(\[Bullet]setRange|\[Bullet]\[Bullet]setRange)[x_,s_],f_]:=
 
 MakeSingleRangeBoxes[(\[Bullet]integerRange|\[Bullet]\[Bullet]integerRange)[x_,lower_,upper_],f_]:=MakeSingleRangeBoxes[\[Bullet]simpleRange[x],f]/;(TypeVar/.SessionContext[x])===\[Bullet]\[Bullet]integerRange[x,lower,upper]
 
-MakeSingleRangeBoxes[(\[Bullet]integerRange|\[Bullet]\[Bullet]integerRange)[x_,lower_,upper_],f_]:=RowBox[{RowBox[{MakeBoxes[x,f],"=",MakeBoxes[lower,f]}],",","\[Ellipsis]",",",MakeBoxes[upper,f]}]
+MakeSingleRangeBoxes[(\[Bullet]integerRange|\[Bullet]\[Bullet]integerRange)[x_,lower_,upper_],f_]:=RowBox[{RowBox[{MakeBoxes[x,f],"=",MakeBoxes[lower,f]}],",","...",",",MakeBoxes[upper,f]}]
 
 MakeSingleRangeBoxes[(\[Bullet]domainRange|\[Bullet]\[Bullet]domainRange)[x_,domain_,lower_,upper_],f_]:=MakeSingleRangeBoxes[\[Bullet]simpleRange[x],f]/;(TypeVar/.SessionContext[x])===\[Bullet]\[Bullet]domainRange[x,domain,lower,upper]
 
-MakeSingleRangeBoxes[(\[Bullet]domainRange|\[Bullet]\[Bullet]domainRange)[x_,domain_,lower_,upper_],f_]:=RowBox[{RowBox[{MakeBoxes[x,f],UnderscriptBox["=",MakeBoxes[domain,f]],MakeBoxes[lower,f]}],",","\[Ellipsis]",",",MakeBoxes[upper,f]}]
+MakeSingleRangeBoxes[(\[Bullet]domainRange|\[Bullet]\[Bullet]domainRange)[x_,domain_,lower_,upper_],f_]:=RowBox[{RowBox[{MakeBoxes[x,f],UnderscriptBox["=",MakeBoxes[domain,f]],MakeBoxes[lower,f]}],",","...",",",MakeBoxes[upper,f]}]
 
 MakeSingleRangeBoxes[(\[Bullet]limitRange|\[Bullet]\[Bullet]limitRange)[x_,y_],f_]:=MakeSingleRangeBoxes[\[Bullet]simpleRange[x],f]/;(TypeVar/.SessionContext[x])===\[Bullet]\[Bullet]limitRange[x,y]
 
-MakeSingleRangeBoxes[(\[Bullet]limitRange|\[Bullet]\[Bullet]limitRange)[x_,y_],f_]:=RowBox[{MakeBoxes[x,f],"\[Rule]",MakeBoxes[y,f]}]
+MakeSingleRangeBoxes[(\[Bullet]limitRange|\[Bullet]\[Bullet]limitRange)[x_,y_],f_]:=RowBox[{MakeBoxes[x,f],"->",MakeBoxes[y,f]}]
 
 MakeSingleRangeBoxes[(\[Bullet]locval)[x_,y_],f_]:=RowBox[{MakeBoxes[x,f],"\[LeftArrow]",MakeBoxes[y,f]}]
 

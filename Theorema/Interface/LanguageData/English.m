@@ -115,6 +115,7 @@ With[ {lang = "English"},
 	translate["elimForm", lang] = "Eliminate unused formulae";
 	translate["noRoot", lang] = "Cannot identify root of proof tree";
 	translate["proofCellStatus", lang] = "Initial status of nested proof cells";
+	translate["auto", lang] = "automatic";
 	translate["open", lang] = "all open";
 	translate["closed", lang] = "all closed";
 	translate["abort", lang] = "Abort proof";

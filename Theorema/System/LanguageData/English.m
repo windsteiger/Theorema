@@ -1,3 +1,5 @@
+(* ::Package:: *)
+
 (* Mathematica package *)
 
 With[ {lang = "English"},
@@ -10,7 +12,6 @@ With[ {lang = "English"},
 	MessageName[replaceAllExcept, "usage", lang] = "replaceAllExcept[ expr, rules, expt] applies rule(s) to all subparts of 'expr' except those contained in the list 'expt'.";
 	MessageName[joinHold, "usage", lang] = "joinHold[Hold[a],Hold[b]] produces Hold[a,b].";
 	MessageName[applyHold, "usage", lang] = "applyHold[Hold[a],Hold[b]] produces Hold[a[b]].";
-	MessageName[joinKB, "usage", lang] = "joinKB[ kb1_List, kb2_List] joins the two knowledge bases and deletes duplicate entries.";
 	MessageName[notification, "usage", lang] = "notification[text] displays 'text' as a user notification.";
 
 (* Theorema`Language`Syntax` *)
@@ -39,6 +40,9 @@ With[ {lang = "English"},
 	MessageName[processEnvironment, "usage", lang] = "processEnvironment[ expr] ...";
 	MessageName[processComputation, "usage", lang] = "processComputation[ expr] ...";
 	MessageName[findSelectedFormula, "usage", lang] = "findSelectedFormula[ sel] ...";
+	MessageName[kbSelectProve, "usage", lang] = "kbSelectProve[ f] indicates whether the formula labeled f should go into the KB for a proof.";
+	MessageName[kbSelectCompute, "usage", lang] = "kbSelectCompute[ f] indicates whether the formula labeled f should be used in a computation.";
+	MessageName[kbSelectSolve, "usage", lang] = "kbSelectCompute[ f] indicates whether the formula labeled f should go into the KB for solve.";
 
 (* Theorema`Language`FormulaManipulation` *)
 	MessageName[freeVariables, "usage", lang] = "";	
@@ -47,16 +51,22 @@ With[ {lang = "English"},
 	MessageName[splitAnd, "usage", lang] = "";	
 	MessageName[makeConjunction, "usage", lang] = "";	
 	MessageName[makeDisjunction, "usage", lang] = "";	
+	MessageName[simplifiedAnd, "usage", lang] = "";	
+	MessageName[thinnedExpression, "usage", lang] = "";	
 	MessageName[substituteFree, "usage", lang] = "";	
-	MessageName[isSequenceFree, "usage", lang] = "";	
+	MessageName[isSequenceFree, "usage", lang] = "";
+	MessageName[isQuantifierFree, "usage", lang] = "";	
+	MessageName[isVariableFree, "usage", lang] = "";	
 	MessageName[transferToComputation, "usage", lang] = "";	
 	MessageName[defsToRules, "usage", lang] = "";	
 	MessageName[replaceAndTrack, "usage", lang] = "";	
-	MessageName[FML$, "usage", lang] = "FML$[ key, form, lab] represents a Theorema formula including its key and label.";
+	MessageName[replaceRecursivelyAndTrack, "usage", lang] = "";	
+	MessageName[FML$, "usage", lang] = "FML$[ key, form, lab, opt] represents a Theorema formula including its key, label, and optional components.";
 	MessageName[makeFML, "usage", lang] = "makeFML[ fmldata] is the constructor for the FML$ datastructure.";
 	MessageName[key, "usage", lang] = "key is an option for the formula constructor makeFML and a selector for the FML$ datastructure.";
 	MessageName[formula, "usage", lang] = "formula is an option for the formula constructor makeFML and a selector for the FML$ datastructure.";
 	MessageName[label, "usage", lang] = "label is an option for the formula constructor makeFML and a selector for the FML$ datastructure.";
+	MessageName[simplify, "usage", lang] = "simplify is an option for the formula constructor makeFML deciding whether the constructed formula should be simplified by computation immediately.";
 	MessageName[id, "usage", lang] = "id is an option for the constructors makePRFINFO/makePRFSIT/newSubgoal and a selector for the FML$/PRFINFO$/PRFSIT$ datastructures.";
 	MessageName[source, "usage", lang] = "source is a selector for the FML$ datastructure.";
 	MessageName[initFormulaLabel, "usage", lang] = "initFormulaLabel[ ] initializes the formula labels used in a proof.";
@@ -65,10 +75,18 @@ With[ {lang = "English"},
 	MessageName[introduceMeta, "usage", lang] = "introduceMeta[ expr, rng] substitutes all free occurrences of variables specified by the range rng in expr by a fresh meta variable.";
 	MessageName[computeInProof, "usage", lang] = "computeInProof[expr] computes expr within a proof.";
 	MessageName[rngToCondition, "usage", lang] = "rngToCondition[rng] transforms the range specification rng into a list of conditions.";
-
+	MessageName[joinKB, "usage", lang] = "joinKB[ kb1_List, kb2_List] joins the two knowledge bases and deletes duplicate entries.";
+	MessageName[appendKB, "usage", lang] = "appendKB[ kb_List, fml] appends fml to the knowledge base kb and deletes duplicate entries.";
+	MessageName[prependKB, "usage", lang] = "prependKB[ kb_List, fml] prepends fml to the knowledge base kb and deletes duplicate entries.";
+	MessageName[appendToKB, "usage", lang] = "appendToKB[ sym, fml] sets sym to the result of appending fml to sym and deleting duplicate entries.";
+	MessageName[prependToKB, "usage", lang] = "prependToKB[ sym, fml] sets sym to the result of prepending fml to sym and deleting duplicate entries.";
+	
 (* Theorema`Computation`Language` *)
 	MessageName[setComputationContext, "usage", lang] = "setComputationContext[ c] sets the context for the next computation to c.";
 	MessageName[cleanupComputation, "usage", lang] = "cleanupComputation[ ] removes all user defined function from computation context.";
+	MessageName[buiActComputation, "usage", lang] = "buiActComputation[ f] indicates whether the builtin f is active during computation.";
+	MessageName[buiActProve, "usage", lang] = "buiActProve[ f] indicates whether the builtin f is active in a computation done during proving.";
+	MessageName[buiActSolve, "usage", lang] = "buiActSolve[ f] indicates whether the builtin f is active in a computation done during solving.";
 	
 (* Theorema`Interface`GUI` *)
 	MessageName[$kbStruct, "usage", lang] = "Structured knowledge base to be displayed in the KB browser";
@@ -102,6 +120,7 @@ With[ {lang = "English"},
 	MessageName[makeANDNODE, "usage", lang] = "makeANDNODE[ info_, {subgoals_}] constructs a node in the proof tree using proofinfo info to prove all the given subgoals.";
 	MessageName[makeORNODE, "usage", lang] = "makeORNODE[ info_, {subgoals_}] constructs a node in the proof tree using proofinfo info to prove at least one of the given subgoals.";
 	MessageName[makePRFINFO, "usage", lang] = "makePRFINFO[ ...] constructor for PRFINFO$ data staructure.";
+	MessageName[isProofNode, "usage", lang] = "isProofNode[ p] is True iff p is a valid node to be inserted into a proof tree.";
 	MessageName[name, "usage", lang] = "name is an option for the constructor makePRFINFO and a selector for the PRFINFO$ datastructure.";
 	MessageName[used, "usage", lang] = "used is an option for the constructor makePRFINFO and a selector for the PRFINFO$ datastructure.";
 	MessageName[generated, "usage", lang] = "generated is an option for the constructor makePRFINFO and a selector for the PRFINFO$ datastructure.";
@@ -109,6 +128,7 @@ With[ {lang = "English"},
 	MessageName[putLocalInfo, "usage", lang] = "putLocalInfo[ li, type[key, val]] replaces the value of info 'key' in the local info datastructure 'li' with 'val'. If the value does not exist yet in 'li', it is added.";
 	MessageName[makePRFSIT, "usage", lang] = "makePRFSIT[ ...] constructor for PRFSIT$ data staructure.";
 	MessageName[newSubgoal, "usage", lang] = "newSubgoal[ ...] constructs a new proof situation and checks for proof success immediately.";
+	MessageName[$TMAcheckSuccess, "usage", lang] = "$TMAcheckSuccess decides whether proof success is automatically checked when a new subgoal is constructed.";
 	MessageName[type, "usage", lang] = "type is a selector for proof node datastructures.";
 	MessageName[goal, "usage", lang] = "goal is an option for the constructors makePRFSIT/newSubgoal and a selector for the PRFSIT$ datastructure.";
 	MessageName[kb, "usage", lang] = "kb is an option for the constructor makePRFSIT/newSubgoal and a selector for the PRFSIT$ datastructure.";
@@ -118,7 +138,6 @@ With[ {lang = "English"},
 	MessageName[ruleActivity, "usage", lang] = "ruleActivity is an option for the constructor makePRFSIT/newSubgoal and a selector for the PRFSIT$ datastructure.";
 	MessageName[rulePriority, "usage", lang] = "rulePriority is an option for the constructor makePRFSIT/newSubgoal and a selector for the PRFSIT$ datastructure.";
 	MessageName[strategy, "usage", lang] = "strategy is an option for the constructor makePRFSIT/newSubgoal and a selector for the PRFSIT$ datastructure.";
-	MessageName[renewID, "usage", lang] = "renewID[ node] assigns a new and unique ID to node.";
 	MessageName[proofFails, "usage", lang] = "proofFails[ ...] .";
 	MessageName[proofSucceeds, "usage", lang] = "proofSucceeds[ ...] .";
 	MessageName[proofDisproved, "usage", lang] = "proofDisproved[ ...] .";
