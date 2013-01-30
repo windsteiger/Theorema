@@ -103,6 +103,7 @@ With[ {lang = "English"},
 	translate["noGoal", lang] = "Select a whole cell (cell bracket) containing the proof goal";
 	translate["noKB", lang] = "No knowledge selected";
 	translate["selGoal", lang] = "Selected Proof Goal";
+	translate["selectedRules",lang] = "Selected Rules";
 	translate["selKB", lang] = "Selected Knowledge Base";
 	translate["selProver", lang] = "Selected Prover";
 	translate["prove", lang] = "Prove!";
