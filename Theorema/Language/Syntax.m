@@ -98,6 +98,7 @@ tmaToInputOperator[ args___] := unexpected[ tmaToInputOperator, {args}]
 (* ::Section:: *)
 (* Set and tuple constructor *)
 
+
 (*
 	Expression specific parts -> Expression.m
 	The default cases go here, otherwise it is not save that these are put at the end (if they have conditions,
@@ -106,6 +107,8 @@ tmaToInputOperator[ args___] := unexpected[ tmaToInputOperator, {args}]
 
 makeSet[ x___] /; isVariableFree[ {x}] := Apply[ ToExpression[ "Set$TM"], Union[ {x}]]
 makeTuple[ x___] := ToExpression[ "Tuple$TM"][x]
+
+
 
 (* ::Section:: *)
 (* MakeExpression *)
@@ -117,6 +120,7 @@ MakeExpression[RowBox[{a_, TagBox[op_, Identity, ___], b_}], fmt_] :=
 
 (* ::Subsubsection:: *)
 (* Quantifiers *)
+
 
 MakeExpression[ RowBox[{UnderscriptBox[ q_?isQuantifierSymbol, rng_], form_}], fmt_] :=
     standardQuantifier[ Replace[ q, $tmaQuantifierToName], rng, "True", form, fmt] /; $parseTheoremaExpressions
@@ -172,6 +176,7 @@ MakeExpression[ RowBox[{UnderscriptBox[ "let", rng_], form_}], fmt_] :=
 (* ::Subsubsection:: *)
 (* Special connectives *)
 
+
 MakeExpression[ RowBox[{left_, RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], right_}], fmt_] :=
     MakeExpression[ RowBox[{"IffDef", "[", RowBox[{left, ",", right}], "]"}], fmt] /; $parseTheoremaExpressions
 
@@ -187,14 +192,18 @@ MakeExpression[ RowBox[ {"\[And]", RowBox[{"\[Piecewise]", GridBox[ c:{{_}..}, _
 		MakeExpression[ RowBox[{"And", "[", RowBox[ clauses], "]"}], fmt]
 	] /; $parseTheoremaExpressions
 	
+
+
 (* ::Subsubsection:: *)
 (* Number domains *)
+
 
 MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalN]", "0"], fmt_] := MakeExpression[ "\[DoubleStruckCapitalN]0", fmt] /; $parseTheoremaExpressions
 
 
 (* ::Subsubsection:: *)
 (* Tuple notations *)
+
 
 MakeExpression[ RowBox[ {l_,"\[LeftArrow]"}], fmt_] := MakeExpression[ RowBox[{"LeftArrow", "[", l, "]"}], fmt] /; $parseTheoremaExpressions
 MakeExpression[ RowBox[ {l_,"\[LeftArrowBar]"}], fmt_] := MakeExpression[ RowBox[{"LeftArrowBar", "[", l, "]"}], fmt] /; $parseTheoremaExpressions
@@ -205,6 +214,7 @@ MakeExpression[ RowBox[{left_,"\[EmptyUpTriangle]", right_}], fmt_] :=
 
 (* ::Subsection:: *)
 (* operator underscript -> domain *)
+
 
 (*
 	The assumption is that prefix/infix/postfix operators with underscript are used for operators, which 
@@ -509,6 +519,7 @@ MakeBoxes[ s_Symbol, TheoremaForm] :=
 
 (* ::Subsection:: *)
 (* Domain underscripts *)
+
 
 MakeBoxes[ (dom_?(isUnderscriptDomain[ MakeBoxes[ #, TheoremaForm]]&))[ op_][ a_], TheoremaForm] :=
 	Module[ {opSymPre = operatorSymbol[ ToExpression[ MakeBoxes[ op, TheoremaForm]], Prefix],

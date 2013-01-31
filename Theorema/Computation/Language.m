@@ -220,6 +220,8 @@ TupleOf$TM[ RNG$[ r__], cond_, form_] :=
 		Apply[ makeTuple, s] /; (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
 	]
 
+
+
 (* ::Section:: *)
 (* Sets *)
 
@@ -233,12 +235,12 @@ Set$TM /: Union$TM[ a__Set$TM] /; buiActive["Union"] := Union[ a] /. List -> Set
 Set$TM /: Intersection$TM[ a__Set$TM] /; buiActive["Intersection"] := Intersection[ a] /. List -> Set$TM
 Set$TM /: Backslash$TM[ a_Set$TM,b_Set$TM] /; buiActive["Difference"] := Complement[a, b] /. List -> Set$TM
 Set$TM /: EmptyUpTriangle$TM[ a_Set$TM,b_Set$TM] /; buiActive["SymmetricDifference"] := Union[Complement[a, b], Complement[b, a]] /. List -> Set$TM
-Set$TM /: Cross$TM[ a__Set$TM] /; buiActive["CartesianProduct"] := Flatten[List[Tuples[{a}//. Set$TM -> List]],1] /. List -> Set$TM
+Set$TM /: Cross$TM[ a__Set$TM] /; buiActive["CartesianProduct"] := Apply[Set$TM, Replace[Tuples[{a}],List[x__]:> Tuple$TM[x] ,{1}]]
 Set$TM /: Element$TM[ p_,a_Set$TM] /; buiActive["IsElement"] := MemberQ[ a, p]
 Set$TM /: \[ScriptCapitalP]$TM[ a_Set$TM] /; buiActive["PowerSet"] := Subsets[ a] /. List -> Set$TM
 Set$TM /: BracketingBar$TM[ a_Set$TM] /; buiActive["Cardinality"] && isSequenceFree[a] := Length[ a]
-Set$TM /: max$TM[ a_Set$TM] /; buiActive["MaximumElementSet"] := Max[a /. Set$TM -> List]
-Set$TM /: min$TM[ a_Set$TM] /; buiActive["MinimumElementSet"] := Min[ a/. Set$TM -> List]
+Set$TM /: max$TM[ a_Set$TM] /; buiActive["MaximumElementSet"] := Max[a /. Set$TM -> List] /. Max -> max$TM
+Set$TM /: min$TM[ a_Set$TM] /; buiActive["MinimumElementSet"] := Min[ a/. Set$TM -> List] /. Min -> min$TM
 
 
 (* ::Section:: *)
@@ -249,7 +251,7 @@ Tuple$TM /: Subscript$TM[a_Tuple$TM,Rule$TM[p_,q_]] /; buiActive["Insert"] && is
 
 Tuple$TM /: Subscript$TM[a_Tuple$TM,LeftArrow$TM[b_]] /; buiActive["DeleteAt"] && isSequenceFree[a] := Delete[ a, b //. Tuple$TM -> List]
 forDelete[a_, p_] := 
-  Module[{anew := a, pnew}, 
+  Module[{anew = a, pnew,i}, 
    If[ Length[p] <= 0, pnew = {p}, pnew = p]; 
    For[i = 1, i <= Length[pnew], i++,  
      anew = DeleteCases[anew, pnew[[i]], Infinity]];
@@ -257,37 +259,33 @@ forDelete[a_, p_] :=
 Tuple$TM /: Subscript$TM[a_Tuple$TM, LeftArrowBar$TM[p_]] /; buiActive["Delete"] := forDelete[a, p] 
 
 Tuple$TM /: Equal$TM[a__Tuple$TM] /; buiActive["TupleEqual"] && SameQ[a ] := True
-Tuple$TM /: Equal$TM[a__Tuple$TM] /; buiActive["TupleEqual"] && isVariableFree[{a},{2}] := SameQ[a ]
+Tuple$TM /: Equal$TM[a__Tuple$TM] /; buiActive["TupleEqual"] && isVariableFree[{a},{2}] := False
 
 Tuple$TM /: Cup$TM[a_Tuple$TM,p_] /; buiActive["Append"] := Append[ a,p]
 Tuple$TM /: Cap$TM[p_,a_Tuple$TM] /; buiActive["Prepend"] := Prepend[ a,p]
 Tuple$TM /: CupCap$TM[a__Tuple$TM] /; buiActive["Join"] := Join[ a]
 
 Tuple$TM /: Element$TM[p_,a_Tuple$TM] /; buiActive["IsElement"] && MemberQ[a,p] := True
-Tuple$TM /: Element$TM[p_,a_Tuple$TM] /; buiActive["IsElement"] && isVariableFree[a] := MemberQ[a,p]
+Tuple$TM /: Element$TM[p_,a_Tuple$TM] /; buiActive["IsElement"] && isVariableFree[a] := False
 
-Tuple$TM /: max$TM[a_Tuple$TM] /; buiActive["Max"] && Max[a /. Tuple$TM -> List] := True
-Tuple$TM /: max$TM[a_Tuple$TM] /; buiActive["Max"] && isVariableFree[a,Infinity] := Max[a /. Tuple$TM -> List]
-Tuple$TM /: min$TM[a_Tuple$TM] /; buiActive["Min"] && Min[a /. Tuple$TM -> List] := True
-Tuple$TM /: min$TM[a_Tuple$TM] /; buiActive["Min"] && isVariableFree[a,Infinity] := Min[a /. Tuple$TM -> List]
+Tuple$TM /: max$TM[a_Tuple$TM] /; buiActive["Max"] && isVariableFree[a] := Max[a /. Tuple$TM -> List] /. Max -> max$TM
+Tuple$TM /: min$TM[a_Tuple$TM] /; buiActive["Min"] && isVariableFree[a] := Min[a /. Tuple$TM -> List] /. Min -> min$TM
 
 Tuple$TM /: BracketingBar$TM[ a_Tuple$TM] /; buiActive["Length"] && isSequenceFree[a] := Length[ a]
 
 Tuple$TM /: Subscript$TM[ a_Tuple$TM, p:LeftArrow$TM[_, _]..] /; buiActive["ReplacePart"] && isSequenceFree[a] :=
 	ReplacePart[ a, MapAt[# /. { Tuple$TM -> List}&, {p} /. LeftArrow$TM -> Rule, Table[{i,1},{i,Length[{p}]}]]]
-forReplace[a_, s_] := Module[{anew := a, pnew},
+forReplace[a_, s_] := Module[{anew = a, pnew,i,j},
   For[j = Length[s], j >= 1, j--,
-   If[Length[s[[j]][[1]]] <= 0, pnew = {s[[j]][[1]]}, 
-    pnew = s[[j]][[1]]];
+   If[Length[s[[j,1]]] <= 0, pnew = {s[[j,1]]}, 
+    pnew = s[[j,1]]];
    For[i = 1, i <= Length[pnew], i++, 
-    anew = Replace[anew, pnew[[i]] -> s[[j]][[2]], Infinity]]];
+    anew = Replace[anew, pnew[[i]] -> s[[j,2]], Infinity]]];
   anew]
 Tuple$TM /: Subscript$TM[ a_Tuple$TM, s:LeftArrowBar$TM[__,_]..] /; buiActive["Replace"] := forReplace[ a , {s}]
 
-Tuple$TM /: Subscript$TM[ a_Tuple$TM, p__] /; buiActive["Subscript"] && isSequenceFree[a] := Extract[ a, p /. Tuple$TM -> List] /. List -> Tuple$TM
-
-
-
+Tuple$TM /: Subscript$TM[ a_Tuple$TM, p__Integer] /; buiActive["Subscript"] && isSequenceFree[a] := Extract[ a, p ] 
+Tuple$TM /: Subscript$TM[ a_Tuple$TM, p_Tuple$TM] /; buiActive["Subscript"] && isSequenceFree[a] := Extract[ a, p /. Tuple$TM -> List] /. List -> Tuple$TM
 
 
 (* ::Section:: *)
