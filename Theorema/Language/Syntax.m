@@ -180,13 +180,23 @@ MakeExpression[ RowBox[{"\[Piecewise]", GridBox[ c:{{_, "\[DoubleLeftArrow]"|"\[
     	MakeExpression[ RowBox[{"CaseDistinction", "[", RowBox[ clauses], "]"}], fmt]
 	] /; $parseTheoremaExpressions
 
+row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", "otherwise"}] := RowBox[ {"Clause", "[", RowBox[ {"True", ",", e}], "]"}]
 row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", c_}] := RowBox[ {"Clause", "[", RowBox[ {c, ",", e}], "]"}]
 
 MakeExpression[ RowBox[ {"\[And]", RowBox[{"\[Piecewise]", GridBox[ c:{{_}..}, ___]}]}], fmt_] :=
 	With[ {clauses = Riffle[ Map[ First, c], ","]},
 		MakeExpression[ RowBox[{"And", "[", RowBox[ clauses], "]"}], fmt]
 	] /; $parseTheoremaExpressions
-	
+
+
+(* ::Subsubsection:: *)
+(* Indexed functions *)
+
+MakeExpression[ RowBox[ {SubscriptBox[ "max", ord_], "[", arg_, "]"}], fmt_] :=
+	With[ {g = RowBox[ {Unique["a"], ord, Unique["b"]}]},
+		MakeExpression[ RowBox[ {"max", "[", arg, ",", g, "]"}], fmt]
+	]/; $parseTheoremaExpressions
+
 (* ::Subsubsection:: *)
 (* Number domains *)
 

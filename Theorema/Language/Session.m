@@ -58,6 +58,8 @@ freshSymbol[ s_Symbol] :=
             DoubleLongRightArrow|DoubleRightArrow, ToExpression[ "Implies$TM"],
             DoubleLongLeftRightArrow|DoubleLeftRightArrow|Equivalent, ToExpression[ "Iff$TM"],
         	SetDelayed, ToExpression[ "EqualDef$TM"], 
+        	(* we don't encourage to use =, but in case it appears we interpret it as Equal *)
+        	Set, ToExpression[ "Equal$TM"],
         	Wedge, ToExpression[ "And$TM"],
         	Vee, ToExpression[ "Or$TM"],
         	List, makeSet,
