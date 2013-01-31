@@ -179,6 +179,7 @@ isVariableFree[ args___] := unexpected[ isVariableFree, {args}]
 
 
 
+
 (* ::Subsubsection:: *)
 (* transferToComputation *)
 
@@ -187,7 +188,10 @@ transferToComputation[ form_, key_] :=
 	Module[{stripUniv, exec},
 		stripUniv = stripUniversalQuantifiers[ form];
 		exec = executableForm[ stripUniv, key];
-		ToExpression[ exec]
+		(* Certain equalities cannot be made executable and generate an error when translated to Mma. 
+		   Since this operation is part of the preprocesing, we catch the error,
+		   otherwise preprocessing would end in a premature state. *)
+		Quiet[ Check[ ToExpression[ exec], Null], {SetDelayed::nosym}]
 	]
 transferToComputation[ args___] := unexpected[ transferToComputation, {args}]
 
@@ -327,7 +331,7 @@ replaceRecursivelyAndTrack[ args___] := unexpected[ replaceRecursivelyAndTrack, 
 
 Options[ makeFML] = {key :> defKey[], formula -> True, label :> defLabel[], simplify -> True};
 
-makeFML[ data__?OptionQ] :=
+makeFML[ data___?OptionQ] :=
 	Module[{k, f, l, s, fs},
 		{k, f, l, s} = {key, formula, label, simplify} /. {data} /. Options[ makeFML];
 		If[ TrueQ[ s],
@@ -450,7 +454,7 @@ computeInProof[ args___] := unexpected[ computeInProof, {args}]
 (* ::Subsubsection:: *)
 (* KB operations *)
 
-joinKB[ kb1:{___FML$}, kb2:{___FML$}] := DeleteDuplicates[ Join[ kb1, kb2], #1.formula === #2.formula&]
+joinKB[ kb:{___FML$}..] := DeleteDuplicates[ Join[ kb], #1.formula === #2.formula&]
 joinKB[ args___] := unexpected[ joinKB, {args}]
 
 appendKB[ kb:{___FML$}, fml_FML$] := DeleteDuplicates[ Append[ kb, fml], #1.formula === #2.formula&]
@@ -459,6 +463,13 @@ appendKB[ args___] := unexpected[ appendKB, {args}]
 prependKB[ kb:{___FML$}, fml_FML$] := DeleteDuplicates[ Prepend[ kb, fml], #1.formula === #2.formula&]
 prependKB[ args___] := unexpected[ prependKB, {args}]
 
+SetAttributes[ appendToKB, HoldFirst]
+appendToKB[ kb_, fml_FML$] := (kb = DeleteDuplicates[ Append[ kb, fml], #1.formula === #2.formula&])
+appendToKB[ args___] := unexpected[ appendToKB, {args}]
+
+SetAttributes[ prependToKB, HoldFirst]
+prependToKB[ kb_, fml_FML$] := (kb = DeleteDuplicates[ Prepend[ kb, fml], #1.formula === #2.formula&])
+prependToKB[ args___] := unexpected[ prependToKB, {args}]
 
 End[]
 

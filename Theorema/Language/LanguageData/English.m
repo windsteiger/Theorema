@@ -1,11 +1,6 @@
 (* ::Package:: *)
 
 With[ {lang = "English"},
-    MessageName[RightArrowBar$TM, "usage", lang] = "";
-
-
-
-
 	MessageName[FIX$, "usage", lang] = "";
 	MessageName[META$, "usage", lang] = "";
 	MessageName[QU$, "usage", lang] = "QU$[ expr] temporarily marks quantified variables in expr.";
@@ -21,6 +16,7 @@ With[ {lang = "English"},
 	MessageName[EqualDef$TM, "usage", lang] = "";
 	MessageName[IffDef$TM, "usage", lang] = "";
 	MessageName[Equal$TM, "usage", lang] = "";
+	MessageName[SetEqual$TM, "usage", lang] = "";
 	MessageName[Not$TM, "usage", lang] = "";
 	MessageName[Iff$TM, "usage", lang] = "";
 	MessageName[Implies$TM, "usage", lang] = "";
@@ -42,18 +38,33 @@ With[ {lang = "English"},
 	MessageName[LessEqual$TM, "usage", lang] = "";
 	MessageName[Greater$TM, "usage", lang] = "";
 	MessageName[GreaterEqual$TM, "usage", lang] = "";
+	MessageName[Element$TM, "usage", lang] = "";
 	MessageName[IntersectionOf$TM, "usage", lang] = "";
+    MessageName[Intersection$TM, "usage", lang] = "";
+    MessageName[Backslash$TM, "usage", lang] = "";
+    MessageName[EmptyUpTriangle$TM, "usage", lang] = "";
+    MessageName[\[ScriptCapitalP]$TM, "usage", lang] = "";
+    MessageName[SubsetEqual$TM, "usage", lang] = "";
+    MessageName[SupersetEqual$TM, "usage", lang] = "";
+    MessageName[Superset$TM, "usage", lang] = "";
+    MessageName[Subset$TM, "usage", lang] = "";
+    MessageName[Cross$TM, "usage", lang] = "";
+    MessageName[max$TM, "usage", lang] = "";
+    MessageName[min$TM, "usage", lang] = "";
 	MessageName[Union$TM, "usage", lang] = "";
 	MessageName[Tuple$TM, "usage", lang] = "";	
 	MessageName[TupleOf$TM, "usage", lang] = "";	
 	MessageName[BracketingBar$TM, "usage", lang] = "";	
 	MessageName[Subscript$TM, "usage", lang] = "";	
-	MessageName[LeftArrow$TM, "usage", lang] = "";	
+	MessageName[LeftArrow$TM, "usage", lang] = "";
+	MessageName[LeftArrowBar$TM, "usage", lang] = "";
+    MessageName[Rule$TM, "usage", lang] = "";	
 	MessageName[Cup$TM, "usage", lang] = "";	
-	MessageName[Cap$TM, "usage", lang] = "";	
-	MessageName[CupCap$TM, "usage", lang] = "";	
+    MessageName[Cap$TM, "usage", lang] = "";	
+    MessageName[CupCap$TM, "usage", lang] = "";	
 	MessageName[MinimumOf$TM, "usage", lang] = "";	
-	MessageName[MaximumOf$TM, "usage", lang] = "";	
+	MessageName[MaximumOf$TM, "usage", lang] = "";
+    MessageName[Element$TM, "usage", lang] = "";	
 	MessageName[min$TM, "usage", lang] = "";	
 	MessageName[max$TM, "usage", lang] = "";	
 	MessageName[Set$TM, "usage", lang] = "";	
@@ -65,6 +76,8 @@ With[ {lang = "English"},
 	MessageName[\[DoubleStruckCapitalQ]$TM, "usage", lang] = "";	
 	MessageName[\[DoubleStruckCapitalR]$TM, "usage", lang] = "";	
 	MessageName[\[DoubleStruckCapitalC]$TM, "usage", lang] = "";	
+	MessageName[CaseDistinction$TM, "usage", lang] = "";	
+	MessageName[Clause$TM, "usage", lang] = "";	
     (* Mathematica programming language *)
 	MessageName[Program, "usage", lang] = "";	
 	MessageName[Module$TM, "usage", lang] = "";	

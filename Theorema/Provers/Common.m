@@ -46,6 +46,7 @@ callProver[ ruleSetup:{_Hold, _List, _List}, strategy_, goal_FML$, kb_List, sear
 		$TMAcurrentDepth = 2;
 		$TMAproofTree = makeInitialProofTree[ ];
 		$TMAproofObject = makeInitialProofObject[ goal, kb, ruleSetup, strategy];
+		$TMAcheckSuccess = True;
 		Clear[ $TMAproofNotebook];
 		initFormulaLabel[];
 		proofSearch[ searchDepth];
@@ -155,9 +156,9 @@ replaceProofSit[ po_PRFOBJ$, pos_ -> p_PRFSIT$] :=
 	ReplacePart[ po, pos -> p]
 	
 replaceProofSit[ po_PRFOBJ$, pos_ -> new:node_[___]] :=
-	Module[{parentID = Extract[ po, pos].id, newVal = new.proofValue, sub},
+	Module[{parentID = Extract[ po, pos].id, sub},
 		sub = poToTree[ new];
-		$TMAproofTree = Join[ $TMAproofTree /. {parentID, pending, PRFSIT$, None} -> {parentID, newVal, node, new.name}, sub];
+		$TMAproofTree = Join[ $TMAproofTree /. {parentID, pending, PRFSIT$, None} -> {new.id, new.proofValue, node, new.name}, sub];
 		ReplacePart[ po, pos -> new]
 	]
 replaceProofSit[ args___] := unexpected[ replaceProofSit, {args}]
@@ -302,7 +303,7 @@ eliminateUnusedInit[ args___] := unexpected[ eliminateUnusedInit, {args}]
   	arbitrary string "key"). The special selector p.ruleSetup is a combination of p.rules, p.ruleActivity, and p.rulePriority.
 *)
 
-Options[ makePRFSIT] = {goal -> {}, kb -> {}, id :> ToString[ Unique[ "PRFSIT$"]], local -> {}, rules -> Hold[], ruleActivity -> {}, rulePriority -> {}, strategy -> Identity};
+Options[ makePRFSIT] = {goal :> makeFML[], kb -> {}, id :> ToString[ Unique[ "PRFSIT$"]], local -> {}, rules -> Hold[], ruleActivity -> {}, rulePriority -> {}, strategy -> Identity};
 makePRFSIT[ data___?OptionQ] :=
 	Module[{g, k, i, l, r, a, p, s},
 		{g, k, i, l, r, a, p, s} = {goal, kb, id, local, rules, ruleActivity, rulePriority, strategy} /. {data} /. Options[ makePRFSIT];
@@ -335,10 +336,11 @@ Options[ newSubgoal] = Options[ makePRFSIT];
 newSubgoal[ data___?OptionQ] := checkProofSuccess[ makePRFSIT[ data]]
 newSubgoal[ args___] := unexpected[ newSubgoal, {args}]
 
-checkProofSuccess[ ps_PRFSIT$] := 
+checkProofSuccess[ ps_PRFSIT$] /; $TMAcheckSuccess := 
 	Module[{termRules = getActiveRulesType[ ps, "term"]}, 
 		Replace[ ps, termRules]
 	]
+checkProofSuccess[ ps_PRFSIT$] := ps
 checkProofSuccess[ args___] := unexpected[ checkProofSuccess, {args}]
 
 
@@ -433,9 +435,6 @@ generated /: Dot[ node_, generated] := Apply[ Join, Map[ #.generated&, Cases[ no
 proofValue /: Dot[ node_?isProofNode, proofValue] := Last[ node]
 proofValue /: Dot[ po_PRFOBJ$, proofValue] := Last[ po]
 subgoals /: Dot[ _[ _PRFINFO$, subnodes___, _], subgoals] := {subnodes}
-
-renewID[ node_[ PRFINFO$[ n_, u_, g_, _, rest___?OptionQ], sub___, val_]] := node[ makeRealPRFINFO[ n, u, g, "", rest], sub, val]
-renewID[ args___] := unexpected[ renewID, {args}]
 
 makeANDNODE[ pi_PRFINFO$, subnode_] := ANDNODE$[ pi, subnode, pending]
 makeANDNODE[ pi_PRFINFO$, {subnodes__}] := ANDNODE$[ pi, subnodes, pending]
@@ -642,11 +641,11 @@ makeInitialProofObject[ g_FML$, k_List, {r_Hold, act_List, prio_List}, s_] :=
         	form = k[[i]];
         	Switch[ form,
         		FML$[ _, (IffDef$TM|EqualDef$TM|Iff$TM|Equal$TM)[ lhs_, rhs_?isQuantifierFree], __],
-        		AppendTo[ elemSubs, form],
+        		appendToKB[ elemSubs, form],
         		FML$[ _, _?(!FreeQ[ #, _IffDef$TM|_EqualDef$TM]&), __],
-        		AppendTo[ def, form],
+        		appendToKB[ def, form],
         		_,
-        		AppendTo[ nonSubs, form]
+        		appendToKB[ nonSubs, form]
         	],
         	{i, Length[k]}
         ];
@@ -694,38 +693,44 @@ displayProof[ args___] := unexpected[ displayProof, {args}]
 *)
 proofObjectToCell[ PRFOBJ$[ pi_PRFINFO$, sub_, pVal_]] := 
 	Module[{ cellList = proofObjectToCell[ pi, pVal]},
-		Join[ cellList, {proofObjectToCell[ sub]}]
+		Join[ cellList, {proofObjectToCell[ sub, pVal]}]
 	]
 proofObjectToCell[ PRFINFO$[ name_?ruleTextActive, u_, g_, id_String, rest___?OptionQ], pVal_] := proofStepTextId[ id, name, u, g, rest, pVal]
 proofObjectToCell[ PRFINFO$[ _, _, _, _String, ___?OptionQ], _] := {}
-proofObjectToCell[ PRFSIT$[ g_FML$, kb_List, id_String, ___]] := Cell[ CellGroupData[ proofStepTextId[ id, openProofSituation, {Prepend[ kb, g]}, {}], Open]]
-proofObjectToCell[ (ANDNODE$|ORNODE$)[ pi_PRFINFO$, subnodes__, pVal_]] := 
+proofObjectToCell[ PRFSIT$[ g_FML$, kb_List, id_String, ___], pVal_] := Cell[ CellGroupData[ proofStepTextId[ id, openProofSituation, {Prepend[ kb, g]}, {}],
+																			cellStatus[ $proofCellStatus, pending, pVal]]]
+proofObjectToCell[ (ANDNODE$|ORNODE$)[ pi_PRFINFO$, subnodes__, pVal_], overallVal_] := 
 	Module[{header, sub = {}},
 		header = proofObjectToCell[ pi, pVal];
 		If[ Length[ {subnodes}] == 1,
-			sub = {proofObjectToCell[ subnodes]},
+			sub = {proofObjectToCell[ subnodes, pVal]},
 			(* else *)
-			sub = MapIndexed[ subProofToCell[ pi, #1, #2]&, {subnodes}]
+			sub = MapIndexed[ subProofToCell[ pi, #1, #2, pVal]&, {subnodes}]
 		];
 		If[ header === {},
 			Apply[ Sequence, sub],
 			(* else *)
-			Cell[ CellGroupData[ Join[ header, sub], cellStatus[ $proofCellStatus, pVal]]]
+			Cell[ CellGroupData[ Join[ header, sub], cellStatus[ $proofCellStatus, pVal, overallVal]]]
 		]
 	]
-proofObjectToCell[ TERMINALNODE$[ pi_PRFINFO$, pVal_]] := 
-	Cell[ CellGroupData[ proofObjectToCell[ pi, pVal], cellStatus[ $proofCellStatus, pVal]]]
+proofObjectToCell[ TERMINALNODE$[ pi_PRFINFO$, pVal_], overallVal_] := 
+	Cell[ CellGroupData[ proofObjectToCell[ pi, pVal], cellStatus[ $proofCellStatus, pVal, overallVal]]]
 	
 proofObjectToCell[ args___] := unexpected[ proofObjectToCell, {args}]
 
-subProofToCell[ PRFINFO$[ name_, used_List, gen_List, ___], node_, pos_List] :=
-	Cell[ CellGroupData[ Join[ subProofHeaderId[ node.id, name, used, gen, node.proofValue, pos], {proofObjectToCell[ node]}], 
-		cellStatus[ $proofCellStatus, 1]]]
+subProofToCell[ PRFINFO$[ name_, used_List, gen_List, ___], node_, pos_List, pVal_] :=
+	Cell[ CellGroupData[ Join[ subProofHeaderId[ node.id, name, used, gen, node.proofValue, pos], {proofObjectToCell[ node, node.proofValue]}], 
+		cellStatus[ $proofCellStatus, node.proofValue, pVal]]]
 subProofToCell[ args___] := unexpected[ subProofToCell, {args}]
 
-cellStatus[ Automatic, failed] := Closed
+cellStatus[ Automatic, pending, pending] := Open
+cellStatus[ Automatic, _, pending] := Closed
+cellStatus[ Automatic, _, failed] := Open
+cellStatus[ Automatic, proved, proved] := Open
+cellStatus[ Automatic, _, proved] := Closed
+cellStatus[ Automatic, _, _] := Open
 cellStatus[ Automatic, _] := Open
-cellStatus[ _, v_] := v
+cellStatus[ v_, _, _] := v
 cellStatus[ args___] := unexpected[ cellStatus, {args}]
 
 

@@ -65,16 +65,22 @@ initGUI[] :=
                 {"MinimumElementSet", RowBox[{"min","[", "A", "]"}], False, True, False}
         	},
         	{"Tuples",
-        		{"Subscript", SubscriptBox[ "T", RowBox[{"i", ",", "\[Ellipsis]"}]], False, True, False},
-        		{"ReplacePart", SubscriptBox[ "T", RowBox[{RowBox[{"i", "\[LeftArrow]", "t"}], ",", "\[Ellipsis]"}]], False, True, False},
+        		{"Subscript", SubscriptBox[ "T", "i"], False, True, False},
+                {"TupleEqual", RowBox[ {"T","\[Equal]","S"}], False, True, False},
+                {"IsElement", RowBox[ {"e","\[Element]","T"}], False, True, False},
         		{"Length", RowBox[{"\[LeftBracketingBar]", "T", "\[RightBracketingBar]"}], False, True, False},
-        		{"Append", RowBox[{"T","\[Cup]","e"}], False, True, False},
+                {"Insert", SubscriptBox[ "T",RowBox[{"e","\[Rule]","i"}]], False, True, False},
+                {"Delete", SubscriptBox[ "T", RowBox[{RowBox[{"e", ",", "\[Ellipsis]"}], "\[LeftArrowBar]"}]], False, True, False},
+                {"DeleteAt", SubscriptBox[ "T", RowBox[{"i", "\[LeftArrow]"}]], False, True, False},
+        	    {"Replace", SubscriptBox[ "T", RowBox[{RowBox[{RowBox[{"e", ",", "\[Ellipsis]"}], "\[LeftArrowBar]", "newe"}], ",", "\[Ellipsis]"}]], False, True, False},
+                {"ReplacePart", SubscriptBox[ "T", RowBox[{RowBox[{"i", "\[LeftArrow]", "e"}], ",", "\[Ellipsis]"}] ], False, True, False},
+			    {"Append", RowBox[{"T","\[Cup]","e"}], False, True, False},
         		{"Prepend", RowBox[{"e","\[Cap]","T"}], False, True, False},
         		{"Join", RowBox[{"T","\[CupCap]","S"}], False, True, False},
         		{"Max", RowBox[{"max","[","T","]"}], False, True, False},
         		{"Min", RowBox[{"min","[","T","]"}], False, True, False}
         	},
-        	{"Arithmetic", 
+        	{"Arithmetic",
         		{"Plus", RowBox[{"A","+","B"}], False, True, False},
         		{"Times", RowBox[{"A","*","B"}], False, True, False},
         		{"Equal", RowBox[{"A","=","B"}], False, False, False},
@@ -662,6 +668,9 @@ structView[file_, item_List, tags_, task_] :=
         (* generate a column and return the collected tags also *)
         {Column[sub[[1]]], compTags}
     ]
+
+(*If item_List is empty*)
+structView[file_, {}, tags_, task_] := Sequence[];
   
 (* input cell with cell tags *)
 structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cellTags_, b___], 
@@ -826,6 +835,7 @@ displayKBBrowser[args___] :=
 
 
 Clear[structViewBuiltin];
+Clear[resultBuiltin];
 
 (* structured view for builtin operators
    follows the ideas of the structured view of the KB *)
@@ -838,8 +848,8 @@ structViewBuiltin[{category_String, rest__List}, tags_, task_String] :=
         {OpenerView[{headerViewBuiltin[category, compTags, task], Grid[ opGroup, Alignment -> {Left, Baseline}]}, 
         	ToExpression["Dynamic[$builtinStructState$"<>category<>"]"]], 
          compTags}
-    ]
-
+    ]     
+    
 structViewBuiltin[ item:List[__List], tags_, task_String] :=
     Module[ {sub, compTags},
         sub = Transpose[Map[structViewBuiltin[#, tags, task] &, item]];
@@ -885,6 +895,55 @@ headerViewBuiltin[ category_String, tags_, task_String] :=
     ]
 
 
+
+(*================================= ResultBuiltin START ==========================================*)
+
+(*
+Produces list of {catigory_String,children_List}.
+If all children are selected children_List contains only one "all" child.
+
+Example: resultBuiltin[$tmaBuiltins,{},"prove"]
+Returns: selected Builtins of task_String.
+*)    
+resultBuiltin[{category_String, rest__List}, tags_, task_String] :=
+    Module[ {sub, compTags, func},
+        sub = Transpose[Map[resultBuiltin[#, tags, task] &, {rest}]];
+        compTags = Apply[Union, sub[[2]]];
+        
+        Switch[ task,
+    		"prove",
+    		func = Theorema`Computation`Language`Private`buiActProve;,
+    		"compute",
+    		func = Theorema`Computation`Language`Private`buiActComputation;,        	
+          	"solve",
+          	func = Theorema`Computation`Language`Private`buiActSolve;
+    	];
+        
+        {{resultBuiltin[category, compTags, task], If[allTrue[ compTags, func]==True,{"all"},sub[[1]]]}, 
+        	ToExpression["Dynamic[$builtinStructState$"<>category<>"]"], 
+         compTags}
+    ]     
+    
+resultBuiltin[ item:List[__List], tags_, task_String] :=
+    Module[ {sub, compTags},
+        sub = Transpose[Map[resultBuiltin[#, tags, task] &, item]];
+        compTags = Apply[Union, sub[[2]]];
+        {Column[sub[[1]]], compTags}
+    ]
+    
+resultBuiltin[ {op_String, display_, _, _, _}, tags_, task_String] :=
+    Module[ { },
+        {op, {op}}
+    ]
+
+resultBuiltin[ category_String, tags_, task_String] :=
+    Module[ {},
+    	Row[{Style[ translate[category], "Section"]}, Spacer[10]]    	
+    ]
+
+resultBuiltin[args___] :=
+(*====================================== ResultBuiltin END ==========================================*)
+    
 
 (* ::Subsubsection:: *)
 (* structViewRules *)
@@ -962,8 +1021,8 @@ displaySelectedRules[Hold[ rs_]] :=
 		(*Sort list_ by priority_*)
 		list = Sort[list,#1[[3]]<#2[[3]]&];
 		Pane[		
-			Column[Map[makeRuleRow[#]&,list],Spacings->5],
-			ImageSize->{380,200},
+			Column[Map[makeRuleRow[#]&,list]],
+			ImageSize->{360,200},
 			Scrollbars->{False,True}
 		]	
 	]
@@ -1123,13 +1182,25 @@ submitProveTask[ ] :=
 			Column[{
 				Labeled[ displaySelectedGoal[ $selectedProofGoal], translate["selGoal"], {{ Top, Left}}],
 				Labeled[ displaySelectedKB[], translate["selKB"], {{ Top, Left}}]
-						
 			}],
 			
-			Row[{
-				Module[ { },
-					Labeled[ displaySelectedRules[ $selectedRuleSet], "Your selected options are:",{{Top,Left}}]]    		
-			}],
+			Column[{				
+				Labeled[ displaySelectedRules[ $selectedRuleSet], translate["selectedRules"]<>":",{{Top,Left}}],
+				Labeled[MessageName[Evaluate[$selectedStrategy],"usage"],translate[ "pStrat"]<>":", Left],
+				Labeled[$selectedSearchDepth,translate[ "sDepth"]<>":", Left],
+					Labeled[
+						Column[{
+    						If[ $eliminateBranches===True, translate[ "elimBranches"], Sequence[]],
+    						If[ $eliminateSteps===True, translate[ "elimSteps"], Sequence[]],
+    						If[ $eliminateFormulae===True, translate[ "elimForm"], Sequence[]]
+    					}]
+						, translate[ "pSimp"]<>":", Left
+					],
+				Labeled[ 
+					If[$proofCellStatus===Open, Row[{translate[ "open"]}], translate["closed"]], 
+    			translate[ "proofCellStatus"]<>":", Left]
+			}]			
+			,
 			(* Method -> "Queued" so that no time limit is set for proof to complete *)
 			Button[ translate["prove"],
 				$tcActionView++;
@@ -1908,8 +1979,6 @@ makeCompButton[args___] :=
 
 partitionFill[ l_List, n_Integer, default_:""] := Partition[ PadRight[ l, n*Ceiling[ Length[ l]/n], default], n]
 partitionFill[ args___] := unexpected[ partitionFill, {args}]
-
-
 
 (* ::Section:: *)
 (* end of package *)

@@ -27,7 +27,7 @@ MessageName[ existsGoal, "usage", lang] = "Prove existentially quantified goal b
 MessageName[ existsKB, "usage", lang] = "Instantiate existentially quantified formula";
 MessageName[ elementarySubstitution, "usage", lang] = "Elementary substitution based on equalities and equivalences oin the knowledge base";
 MessageName[ expandDef, "usage", lang] = "Expand definitions";
-MessageName[ eqKB, "usage", lang] = "Equalities/equivalences in KB for rewriting";
+MessageName[ eqIffKB, "usage", lang] = "Equalities/equivalences in KB for rewriting";
 
 ] (* With *)
 
@@ -111,12 +111,12 @@ proofStepText[ equivGoal, lang, {{g_}}, _, ___] := {textCell[ "We prove both dir
 subProofHeader[ equivGoal, lang, _, _, pVal_, {p_}] := {textCell[ Switch[ p, 1, "\[RightArrow]", 2, "\[LeftArrow]"], ":"]};
 
 proofStepText[ forallGoal, lang, {{g_}}, {{newG_}}, ___, "abf" -> v_List, ___] := {textCell[ "For proving ", formulaReference[ g], " we choose ", 
-	inlineTheoremaExpressionSeq[ v], " arbitrary but fixed and show"],
+	inlineTheoremaExpressionSeq[ v, lang], " arbitrary but fixed and show"],
 	goalCell[ newG, "."]
 	};
 
 proofStepText[ forallGoal, lang, {{g_}}, {{newG_, assum__}}, ___, "abf" -> v_List, ___] := {textCell[ "For proving ", formulaReference[ g], " we choose ", 
-	inlineTheoremaExpressionSeq[ v], " arbitrary but fixed and assume"],
+	inlineTheoremaExpressionSeq[ v, lang], " arbitrary but fixed and assume"],
 	assumptionListCells[ {assum}, ",", "."],
 	textCell[ "We have to show"],
 	goalCell[ newG, "."]
@@ -128,7 +128,7 @@ proofStepText[ forallGoal, lang, {{g_}}, {{simpG_}}, ___] := {textCell[ "The uni
 
 proofStepText[ existsGoal, lang, {{g_}}, {{newG_}}, ___, "meta" -> v_List, ___] := {textCell[ "For proving ", formulaReference[ g], " we have to find ",
 	If[ Length[v] == 1, "an appropriate value for ", "appropriate values for "],
-	inlineTheoremaExpressionSeq[ v], ", such that we can prove"],
+	inlineTheoremaExpressionSeq[ v, lang], ", such that we can prove"],
 	goalCell[ newG, "."]
 	};
 
@@ -138,7 +138,7 @@ proofStepText[ existsGoal, lang, {{g_}}, {{simpG_}}, ___] := {textCell[ "The exi
 	
 proofStepText[ existsKB, lang, {{e_}}, {new_List}, ___, "abf" -> v_List, ___] := {textCell[ "From ", formulaReference[ e], " we know "], 
 	assumptionListCells[ new, ",", ""],
-	textCell[ " for arbitrary but fixed ", inlineTheoremaExpressionSeq[ v], "."]
+	textCell[ " for arbitrary but fixed ", inlineTheoremaExpressionSeq[ v, lang], "."]
 	};
 
 proofStepText[ existsKB, lang, {{g_}}, {{simpG_}}, ___] := {textCell[ "The universally quantified goal ", formulaReference[ g], " simplifies to"],
@@ -155,7 +155,7 @@ proofStepText[ elementarySubstitution, lang, u_, g_, ___, "usedSubst" -> subs_Li
 		If[ u[[1]] =!= g[[1]],
 			repl = subs[[1]];
 			stepText = { textCell[ "In order to prove ", formulaReference[ u[[1, 1]]], ", using ", 
-				formulaReferenceSequence[ repl], ", we now have to show"],
+				formulaReferenceSequence[ repl, lang], ", we now have to show"],
 				goalCell[ g[[1, 1]], "."]}
 		];
 		PrependTo[ stepText, textCell[ "We apply substitutions:"]];
@@ -164,7 +164,7 @@ proofStepText[ elementarySubstitution, lang, u_, g_, ___, "usedSubst" -> subs_Li
 			repl = subs[[j]];
 			suffix = If[ Length[ repl] == 1, "", "s"];
 			stepText = Join[ stepText, 
-				{textCell[ "From ", formulaReference[ u[[j, 1]]], " we know, by ", formulaReferenceSequence[ repl], ","], 
+				{textCell[ "From ", formulaReference[ u[[j, 1]]], " we know, by ", formulaReferenceSequence[ repl, lang], ","], 
 				assumptionCell[ g[[j, 1]]]}],
 			{j, 2, Length[g]}
 		];
@@ -182,7 +182,7 @@ proofStepText[ expandDef, lang, u_, g_, ___, "usedDefs" -> defs_List, ___] :=
 			repl = defs[[1]];
 			suffix = If[ Length[ repl] == 1, "", "s"];
 			stepText = { textCell[ "In order to prove ", formulaReference[ u[[1, 1]]], ", using definition" <> suffix <> " ", 
-				formulaReferenceSequence[ repl], ", we now have to show"],
+				formulaReferenceSequence[ repl, lang], ", we now have to show"],
 				goalCell[ g[[1, 1]], "."]}
 		];
 		PrependTo[ stepText, textCell[ "We expand definitions:"]];
@@ -191,14 +191,14 @@ proofStepText[ expandDef, lang, u_, g_, ___, "usedDefs" -> defs_List, ___] :=
 			repl = defs[[j]];
 			suffix = If[ Length[ repl] == 1, "", "s"];
 			stepText = Join[ stepText, 
-				{textCell[ "From ", formulaReference[ u[[j, 1]]], " we know, by definition" <> suffix <> " ", formulaReferenceSequence[ repl], ","], 
+				{textCell[ "From ", formulaReference[ u[[j, 1]]], " we know, by definition" <> suffix <> " ", formulaReferenceSequence[ repl, lang], ","], 
 				assumptionCell[ g[[j, 1]]]}],
 			{j, 2, Length[g]}
 		];
 		stepText
 	];
 	
-proofStepText[ eqKB, lang, {eqs__}, _, ___] := {textCell[ "We register ", formulaReferenceSequence[ eqs], " to be used for rewriting."]
+proofStepText[ eqIffKB, lang, {eqs__}, _, ___] := {textCell[ "We register ", formulaReferenceSequence[ eqs, lang], " to be used for rewriting."]
 	};
 
 	

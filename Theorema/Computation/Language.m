@@ -63,144 +63,230 @@ Implies$TM[ a__] /; buiActive["Implies"] := Implies[ a]
 Iff$TM[ a__] /; buiActive["Iff"] := Equivalent[ a]
 
 rangeToIterator[ SETRNG$[ x_, A_Set$TM]] := { x, Apply[ List, A]}
-rangeToIterator[ STEPRNG$[ x_, l_Integer, h_Integer, s_Integer]] := {x, l, h, s}
+rangeToIterator[ 
+  STEPRNG$[ x_, l_Integer, h_Integer, s_Integer]] := {x, l, h, s}
 rangeToIterator[ _] := $Failed
 rangeToIterator[ args___] := unexpected[ rangeToIterator, {args}]
 
 ClearAll[ Forall$TM, Exists$TM, SequenceOf$TM]
-Scan[ SetAttributes[ #, HoldRest]&, {Forall$TM, Exists$TM, SequenceOf$TM}]
-Scan[ SetAttributes[ #, HoldFirst]&, {SETRNG$, STEPRNG$}]
+Scan[ SetAttributes[ #, HoldRest] &, {Forall$TM, Exists$TM, 
+  SequenceOf$TM}]
+Scan[ SetAttributes[ #, HoldFirst] &, {SETRNG$, STEPRNG$}]
 
-Forall$TM[ RNG$[ r_, s__], cond_, form_]/; buiActive["Forall"] := 
-	Module[ {splitC},
-		splitC = splitAnd[ cond, {r[[1]]}];
-		With[ {rc = splitC[[1]], sc = splitC[[2]]},
-			Forall$TM[ RNG$[r], rc, Forall$TM[ RNG$[s], sc, form]]
-		]
-	]
+Forall$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["Forall"] := 
+ 	Module[ {splitC},
+  		splitC = splitAnd[ cond, {r[[1]]}];
+  		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+   			Forall$TM[ RNG$[r], rc, Forall$TM[ RNG$[s], sc, form]]
+   		]
+  	]
 
-Forall$TM[ RNG$[ r:_SETRNG$|_STEPRNG$], cond_, form_]/; buiActive["Forall"] :=
-	Module[ {iter},
-   		forallIteration[ iter, cond, form] /; (iter = rangeToIterator[ r]) =!= $Failed
-	]
+Forall$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; 
+  buiActive["Forall"] :=
+ 	Module[ {iter},
+     		forallIteration[ iter, cond, 
+    form] /; (iter = rangeToIterator[ r]) =!= $Failed
+  	]
 
-(* We introduce local variables for the iteration so that we can substitute only for free occurrences.
-   Technically, Mathematica coulf iterate the VAR$[..] directly, but it would substitute ALL occurrences then *)
-SetAttributes[ forallIteration, HoldRest]
+(* We introduce local variables for the iteration so that we can \
+substitute only for free occurrences.
+   Technically, Mathematica coulf iterate the VAR$[..] directly, but \
+it would substitute ALL occurrences then *)
+SetAttributes[ \
+forallIteration, HoldRest]
 forallIteration[ {x_, iter__}, cond_, form_] :=
-    Module[ {uneval = {}, ci, sub},
-        Catch[
-            Do[ If[ TrueQ[ cond],
-                    ci = True,
-                    ci = ReleaseHold[ substituteFree[ Hold[ cond], {x -> i}]]
+     
+ Module[ {uneval = {}, ci, sub},
+          Catch[
+               Do[ If[ TrueQ[ cond],
+                         ci = True,
+                         
+     ci = ReleaseHold[ substituteFree[ Hold[ cond], {x -> i}]]
+                     ];
+                    If[ ci,
+                         
+     sub = ReleaseHold[ substituteFree[ Hold[ form], {x -> i}]];
+                         If[ sub,
+                              Continue[],
+                              Throw[ False],
+                              AppendTo[ uneval, sub]
+                          ],
+                         Continue[],
+                         
+     AppendTo[ uneval, 
+      Implies$TM[ ci, 
+       ReleaseHold[ substituteFree[ Hold[ form], {x -> i}]]]]
+                     ],
+                    { i, iter}
                 ];
-                If[ ci,
-                    sub = ReleaseHold[ substituteFree[ Hold[ form], {x -> i}]];
-                    If[ sub,
-                        Continue[],
-                        Throw[ False],
-                        AppendTo[ uneval, sub]
-                    ],
-                    Continue[],
-                    AppendTo[ uneval, Implies$TM[ ci, ReleaseHold[ substituteFree[ Hold[ form], {x -> i}]]]]
-                ],
-                { i, iter}
-            ];
-            makeConjunction[ uneval, And$TM]
-        ]
-    ]
+               makeConjunction[ uneval, And$TM]
+           ]
+      ]
     
-Exists$TM[ RNG$[ r_, s__], cond_, form_]/; buiActive["Exists"] := 
-	Module[ {splitC},
-		splitC = splitAnd[ cond, {r[[1]]}];
-		With[ {rc = splitC[[1]], sc = splitC[[2]]},
-			Exists$TM[ RNG$[r], rc, Exists$TM[ RNG$[s], sc, form]]
-		]
-	]
+Exists$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["Exists"] := 
+ 	Module[ {splitC},
+  		splitC = splitAnd[ cond, {r[[1]]}];
+  		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+   			Exists$TM[ RNG$[r], rc, Exists$TM[ RNG$[s], sc, form]]
+   		]
+  	]
 
-Exists$TM[ RNG$[ r:_SETRNG$|_STEPRNG$], cond_, form_]/; buiActive["Exists"] :=
-	Module[ {iter},
-   		existsIteration[ iter, cond, form] /; (iter = rangeToIterator[ r]) =!= $Failed
-	]
-Plus$TM[ a__] /; buiActive["Plus"] := Plus[ a]
+Exists$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; 
+  buiActive["Exists"] :=
+ 	Module[ {iter},
+     		existsIteration[ iter, cond, 
+    form] /; (iter = rangeToIterator[ r]) =!= $Failed
+  	]
+
 SetAttributes[ existsIteration, HoldRest]
 existsIteration[ {x_, iter__}, cond_, form_] :=
-    Module[ {uneval = {}, ci, sub},
-        Catch[
-            Do[ If[ TrueQ[ cond],
-                    ci = True,
-                    ci = ReleaseHold[ substituteFree[ Hold[ cond], {x -> i}]]
-                ];
-                If[ ci,
-                    sub = ReleaseHold[ substituteFree[ Hold[ form], {x -> i}]];
-                    If[ sub,
-                        Throw[ True],
-                        Continue[],
-                        AppendTo[ uneval, sub]
-                    ],
-                    Continue[],
-                    AppendTo[ uneval, And$TM[ ci, ReleaseHold[ substituteFree[ Hold[ form], {x -> i}]]]]
-                ],
-                 {i, iter}
-             ];
-            makeDisjunction[ uneval, Or$TM]
-        ]
-    ]
+     
+ Module[ {uneval = {}, ci, sub},
+          Catch[
+               Do[ If[ TrueQ[ cond],
+                         ci = True,
+                         
+     ci = ReleaseHold[ substituteFree[ Hold[ cond], {x -> i}]]
+                     ];
+                    If[ ci,
+                         
+     sub = ReleaseHold[ substituteFree[ Hold[ form], {x -> i}]];
+                         If[ sub,
+                              Throw[ True],
+                              Continue[],
+                              AppendTo[ uneval, sub]
+                          ],
+                         Continue[],
+                         
+     AppendTo[ uneval, 
+      And$TM[ ci, 
+       ReleaseHold[ substituteFree[ Hold[ form], {x -> i}]]]]
+                     ],
+                     {i, iter}
+                 ];
+               makeDisjunction[ uneval, Or$TM]
+           ]
+      ]
 
 (* Instead of nesting SequenceOf expressions and then concatenating the sequences, we construct a multi-iterator from the given ranges *)
-SequenceOf$TM[ RNG$[ r__], cond_, form_] :=
-	Module[ {s},
-		s /; buiActive["SequenceOf"] && (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
+SequenceOf$TM[ RNG$[ r__STEPRNG$], cond_, form_] :=
+ 	Module[ {s},
+		Apply[ Sequence, s] /; (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
 	]
 
-(* The multi-iterator is used in a Do-loop. Local variables have to be introduced to be substituted during the iteration *)   	
+(* The multi-iterator is used in a Do-loop. Local variables have to \
+be introduced to be substituted during the iteration *)   	
 SetAttributes[ sequenceOfIteration, HoldRest]
-sequenceOfIteration[ iter:{__List}, cond_, form_] :=
-    Module[ {seq = {}, ci, comp, tmpVar = Table[ Unique[], {Length[ iter]}], iVar = Map[ First, iter]},
-        Catch[
-            With[ {locIter = Apply[ Sequence, MapThread[ ReplacePart[ #1, 1 -> #2]&, {iter, tmpVar}]], locSubs = Thread[ Rule[ iVar, tmpVar]]},
-                Do[ If[ TrueQ[ cond],
-                        ci = True,
-                        ci = ReleaseHold[ substituteFree[ Hold[ cond], locSubs]]
-                    ];
-                    If[ ci,
-                        comp = ReleaseHold[ substituteFree[ Hold[ form], locSubs]];
-                        AppendTo[ seq, comp],
-                        Continue[],
-                        Throw[ $Failed]
-                    ],
-                    locIter
-                ]
-            ];
-            Apply[ Sequence, seq]
-        ]
-    ]
+sequenceOfIteration[ iter : {__List}, cond_, form_] :=
+     
+ Module[ {seq = {}, ci, comp, 
+   tmpVar = Table[ Unique[], {Length[ iter]}], 
+   iVar = Map[ First, iter]},
+          Catch[
+               
+   With[ {locIter = 
+      Apply[ Sequence, 
+       MapThread[ ReplacePart[ #1, 1 -> #2] &, {iter, tmpVar}]], 
+     locSubs = Thread[ Rule[ iVar, tmpVar]]},
+                    Do[ If[ TrueQ[ cond],
+                              ci = True,
+                              
+      ci = ReleaseHold[ substituteFree[ Hold[ cond], locSubs]]
+                          ];
+                         If[ ci,
+                              
+      comp = ReleaseHold[ substituteFree[ Hold[ form], locSubs]];
+                              AppendTo[ seq, comp],
+                              Continue[],
+                              Throw[ $Failed]
+                          ],
+                         locIter
+                     ]
+                ];
+            seq
+           ]
+      ]
 sequenceOfIteration[ iter_List, cond_, form_] := $Failed
-sequenceOfIteration[ args___] := unexpected[ sequenceOfIteration, {args}]
+sequenceOfIteration[ args___] := 
+ unexpected[ sequenceOfIteration, {args}]
 
+SetOf$TM[ RNG$[ r__], cond_, form_] :=
+	Module[ {s},
+		Apply[ makeSet, s] /; (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
+	]
+
+TupleOf$TM[ RNG$[ r__], cond_, form_] :=
+	Module[ {s},
+		Apply[ makeTuple, s] /; (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
+	]
 
 (* ::Section:: *)
 (* Sets *)
+
+
+Set$TM /: Equal$TM[a__Set$TM] /; buiActive["SetEqual"] := SameQ[a]
+Set$TM /: SubsetEqual$TM[a_Set$TM, b_Set$TM] /; buiActive["SubsetEqual"] := Equal$TM[Intersection[a, b],a]
+Set$TM /: Subset$TM[a_Set$TM, b_Set$TM] /; buiActive["Subset"] := And[SubsetEqual$TM[a,b],Not[Equal$TM[a, b]]]
+Set$TM /: SupersetEqual$TM[a_Set$TM, b_Set$TM] /; buiActive["SupersetEqual"] := SubsetEqual$TM[b, a]
+Set$TM /: Superset$TM[a_Set$TM, b_Set$TM] /; buiActive["Superset"] := Subset$TM[b, a]
+Set$TM /: Union$TM[ a__Set$TM] /; buiActive["Union"] := Union[ a] /. List -> Set$TM
+Set$TM /: Intersection$TM[ a__Set$TM] /; buiActive["Intersection"] := Intersection[ a] /. List -> Set$TM
+Set$TM /: Backslash$TM[ a_Set$TM,b_Set$TM] /; buiActive["Difference"] := Complement[a, b] /. List -> Set$TM
+Set$TM /: EmptyUpTriangle$TM[ a_Set$TM,b_Set$TM] /; buiActive["SymmetricDifference"] := Union[Complement[a, b], Complement[b, a]] /. List -> Set$TM
+Set$TM /: Cross$TM[ a__Set$TM] /; buiActive["CartesianProduct"] := Flatten[List[Tuples[{a}//. Set$TM -> List]],1] /. List -> Set$TM
+Set$TM /: Element$TM[ p_,a_Set$TM] /; buiActive["IsElement"] := MemberQ[ a, p]
+Set$TM /: \[ScriptCapitalP]$TM[ a_Set$TM] /; buiActive["PowerSet"] := Subsets[ a] /. List -> Set$TM
+Set$TM /: BracketingBar$TM[ a_Set$TM] /; buiActive["Cardinality"] && isSequenceFree[a] := Length[ a]
+Set$TM /: max$TM[ a_Set$TM] /; buiActive["MaximumElementSet"] := Max[a /. Set$TM -> List]
+Set$TM /: min$TM[ a_Set$TM] /; buiActive["MinimumElementSet"] := Min[ a/. Set$TM -> List]
 
 
 (* ::Section:: *)
 (* Tuples *)
 
 
-Tuple$TM /: Subscript$TM[a_Tuple$TM,x___,RightArrowBar$TM[p_,b_Integer],y___] := Subscript$TM[a,x,RightArrowBar$TM[p,Set$TM[b]],y]
-Tuple$TM /: Subscript$TM[a_Tuple$TM,RightArrowBar$TM[p_,b_Set$TM]..] /; buiActive["Insert"] := Insert[ a,p,{b}]
-Tuple$TM /: Subscript$TM[a_Tuple$TM,LeftArrow$TM[b_]] /; buiActive["DeleteAt"] := Delete[ a,b]
-Tuple$TM /: Subscript$TM[a_Tuple$TM,LeftArrowBar$TM[b_Set$TM]] /; buiActive["Delete"] := DeleteCases[ a,b]
+Tuple$TM /: Subscript$TM[a_Tuple$TM,Rule$TM[p_,q_]] /; buiActive["Insert"] && isSequenceFree[a] := Insert[ a,p,q /. Tuple$TM -> List]
+
+Tuple$TM /: Subscript$TM[a_Tuple$TM,LeftArrow$TM[b_]] /; buiActive["DeleteAt"] && isSequenceFree[a] := Delete[ a, b //. Tuple$TM -> List]
+forDelete[a_, p_] := 
+  Module[{anew := a, pnew}, 
+   If[ Length[p] <= 0, pnew = {p}, pnew = p]; 
+   For[i = 1, i <= Length[pnew], i++,  
+     anew = DeleteCases[anew, pnew[[i]], Infinity]];
+	anew]
+Tuple$TM /: Subscript$TM[a_Tuple$TM, LeftArrowBar$TM[p_]] /; buiActive["Delete"] := forDelete[a, p] 
+
+Tuple$TM /: Equal$TM[a__Tuple$TM] /; buiActive["TupleEqual"] && SameQ[a ] := True
+Tuple$TM /: Equal$TM[a__Tuple$TM] /; buiActive["TupleEqual"] && isVariableFree[{a},{2}] := SameQ[a ]
+
 Tuple$TM /: Cup$TM[a_Tuple$TM,p_] /; buiActive["Append"] := Append[ a,p]
 Tuple$TM /: Cap$TM[p_,a_Tuple$TM] /; buiActive["Prepend"] := Prepend[ a,p]
 Tuple$TM /: CupCap$TM[a__Tuple$TM] /; buiActive["Join"] := Join[ a]
 
+Tuple$TM /: Element$TM[p_,a_Tuple$TM] /; buiActive["IsElement"] && MemberQ[a,p] := True
+Tuple$TM /: Element$TM[p_,a_Tuple$TM] /; buiActive["IsElement"] && isVariableFree[a] := MemberQ[a,p]
 
+Tuple$TM /: max$TM[a_Tuple$TM] /; buiActive["Max"] && Max[a /. Tuple$TM -> List] := True
+Tuple$TM /: max$TM[a_Tuple$TM] /; buiActive["Max"] && isVariableFree[a,Infinity] := Max[a /. Tuple$TM -> List]
+Tuple$TM /: min$TM[a_Tuple$TM] /; buiActive["Min"] && Min[a /. Tuple$TM -> List] := True
+Tuple$TM /: min$TM[a_Tuple$TM] /; buiActive["Min"] && isVariableFree[a,Infinity] := Min[a /. Tuple$TM -> List]
 
 Tuple$TM /: BracketingBar$TM[ a_Tuple$TM] /; buiActive["Length"] && isSequenceFree[a] := Length[ a]
-Tuple$TM /: Subscript$TM[ a_Tuple$TM, p__Integer] /; buiActive["Subscript"] && isSequenceFree[a] := Part[ a, p]
-Tuple$TM /: Subscript$TM[ a_Tuple$TM, LeftArrow$TM[_,_]..] /; buiActive["ReplacePart"] && isSequenceFree[a] :=
-	ReplacePart[ a, {p /. {LeftArrow$TM -> Rule, Tuple$TM -> List}}]
+
+Tuple$TM /: Subscript$TM[ a_Tuple$TM, p:LeftArrow$TM[_, _]..] /; buiActive["ReplacePart"] && isSequenceFree[a] :=
+	ReplacePart[ a, MapAt[# /. { Tuple$TM -> List}&, {p} /. LeftArrow$TM -> Rule, Table[{i,1},{i,Length[{p}]}]]]
+forReplace[a_, s_] := Module[{anew := a, pnew},
+  For[j = Length[s], j >= 1, j--,
+   If[Length[s[[j]][[1]]] <= 0, pnew = {s[[j]][[1]]}, 
+    pnew = s[[j]][[1]]];
+   For[i = 1, i <= Length[pnew], i++, 
+    anew = Replace[anew, pnew[[i]] -> s[[j]][[2]], Infinity]]];
+  anew]
+Tuple$TM /: Subscript$TM[ a_Tuple$TM, s:LeftArrowBar$TM[__,_]..] /; buiActive["Replace"] := forReplace[ a , {s}]
+
+Tuple$TM /: Subscript$TM[ a_Tuple$TM, p__] /; buiActive["Subscript"] && isSequenceFree[a] := Extract[ a, p /. Tuple$TM -> List] /. List -> Tuple$TM
+
+
 
 
 

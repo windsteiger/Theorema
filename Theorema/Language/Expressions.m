@@ -19,17 +19,17 @@ $tmaNonStandardOperators = Join[ $tmaNonStandardOperators,
 (* ::Subsection:: *)
 (* Auxiliary parsing functions *)
 
+(* The default cases for non-SequenceOf are in Syntax.m, otherwise the defs are in wrong order when
+   this file is loaded twice
+*)
 makeSet[ SequenceOf$TM[ s__]] := ToExpression[ "SetOf$TM"][ s]
-makeSet[ x___] := Apply[ ToExpression[ "Set$TM"], Union[ {x}]]
 
 makeTuple[ SequenceOf$TM[ r:RNG$[ __STEPRNG$], c_, e_]] := ToExpression[ "TupleOf$TM"][ r, c, e]
-
 makeTuple[ SequenceOf$TM[ r_, __]] := 
 	Module[ {},
 		notification[ translate[ "tupleOfRange"], DisplayForm[ makeRangeBox[ r, TheoremaForm]]];
 		Throw[ $Failed]
 	]
-makeTuple[ x___] := ToExpression[ "Tuple$TM"][x]
 
 (* ::Section:: *)
 (* MakeBoxes *)
@@ -38,6 +38,8 @@ MakeBoxes[ \[DoubleStruckCapitalN]0$TM, TheoremaForm] := SubscriptBox[ "\[Double
 
 MakeBoxes[ Set$TM[ arg__], TheoremaForm] := MakeBoxes[ {arg}, TheoremaForm]
 MakeBoxes[ Set$TM[ ], TheoremaForm] := MakeBoxes[ "\[EmptySet]", TheoremaForm]
+(* An unevaluated 'makeSet' will turn into makeSet$TM when renaming back to standard context ... *)
+MakeBoxes[ Theorema`Common`makeSet$TM[ arg__], TheoremaForm] := StyleBox[ MakeBoxes[ {arg}, TheoremaForm], "ExpressionVariable"]
 
 MakeBoxes[ SequenceOf$TM[ rng:RNG$[ SETRNG$[ v_, _]], cond_, v_], TheoremaForm] :=
 	RowBox[ {makeRangeBox[ rng, TheoremaForm], "|", MakeBoxes[ cond, TheoremaForm]}]
@@ -94,6 +96,11 @@ makeEllipsisBox[ 1, fmt_] := "\[Ellipsis]"
 makeEllipsisBox[ step_, fmt_] := OverscriptBox[ "\[Ellipsis]", MakeBoxes[ step, fmt]]
 makeEllipsisBox[ args___] := unexpected[ makeEllipsisBox, {args}]
 
+MakeBoxes[ CaseDistinction$TM[ c__], TheoremaForm] :=
+    RowBox[ {"\[Piecewise]",
+        GridBox[ Map[ formatClause, {c}]]}]
+
+formatClause[ Clause$TM[ c_, e_]] := {MakeBoxes[ e, TheoremaForm], "\[DoubleLeftArrow]", MakeBoxes[ c, TheoremaForm]}
 
 (* ::Section:: *)
 (* Global Declarations Display *)
