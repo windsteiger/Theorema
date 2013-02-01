@@ -894,6 +894,8 @@ headerViewBuiltin[ category_String, tags_, task_String] :=
     	]
     ]
 
+headerViewBuiltin[args___] :=
+    unexpected[ headerViewBuiltin, {args}]
 
 
 (*================================= ResultBuiltin START ==========================================*)
@@ -904,44 +906,36 @@ If all children are selected children_List contains only one "all" child.
 
 Example: resultBuiltin[$tmaBuiltins,{},"prove"]
 Returns: selected Builtins of task_String.
-*)    
-resultBuiltin[{category_String, rest__List}, tags_, task_String] :=
-    Module[ {sub, compTags, func},
-        sub = Transpose[Map[resultBuiltin[#, tags, task] &, {rest}]];
-        compTags = Apply[Union, sub[[2]]];
-        
-        Switch[ task,
-    		"prove",
-    		func = Theorema`Computation`Language`Private`buiActProve;,
-    		"compute",
-    		func = Theorema`Computation`Language`Private`buiActComputation;,        	
-          	"solve",
-          	func = Theorema`Computation`Language`Private`buiActSolve;
-    	];
-        
-        {{resultBuiltin[category, compTags, task], If[allTrue[ compTags, func]==True,{"all"},sub[[1]]]}, 
-        	ToExpression["Dynamic[$builtinStructState$"<>category<>"]"], 
-         compTags}
-    ]     
-    
-resultBuiltin[ item:List[__List], tags_, task_String] :=
-    Module[ {sub, compTags},
-        sub = Transpose[Map[resultBuiltin[#, tags, task] &, item]];
-        compTags = Apply[Union, sub[[2]]];
-        {Column[sub[[1]]], compTags}
-    ]
-    
-resultBuiltin[ {op_String, display_, _, _, _}, tags_, task_String] :=
-    Module[ { },
-        {op, {op}}
-    ]
+*) 
 
-resultBuiltin[ category_String, tags_, task_String] :=
-    Module[ {},
-    	Row[{Style[ translate[category], "Section"]}, Spacer[10]]    	
-    ]
+summarizeBuiltins[ l_List, task_String] := Map[ resultBuiltin[ #, task]&, Cases[ l, {_String, {_, _, True|False, True|False, True|False}..}, Infinity]]
+summarizeBuiltins[args___] := unexpected[ summarizeBuiltins, {args}]
+   
+resultBuiltin[{category_String, rest__List}, task_String] :=
+    Module[ {sub, complete},
+        sub = Transpose[ Map[ resultBuiltin[ #, task] &, {rest}]];
+        complete = Apply[ And, sub[[2]]];
+        If[ complete,
+        	"[" <> category <> "]",
+        	{category, Apply[ Join, sub[[1]]]}
+        ]
+    ] 
+    
+resultBuiltin[ {op_String, display_, _, _, _}, task_String] :=
+		If[ Switch[ task,
+    		"prove",
+    		buiActProve[ op],
+    		"compute",
+    		buiActComputation[ op],        	
+          	"solve",
+          	buiActSolve[ op]],
+        {{op}, True},
+        {{}, False}
+		]
 
 resultBuiltin[args___] :=
+    unexpected[ resultBuiltin, {args}]
+
 (*====================================== ResultBuiltin END ==========================================*)
     
 
