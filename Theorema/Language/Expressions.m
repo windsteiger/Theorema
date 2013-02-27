@@ -8,7 +8,7 @@
 
 $tmaNonStandardOperators = Join[ $tmaNonStandardOperators,
     {
-     {Iff$TM, DoubleRightArrow},
+     {Iff$TM, DoubleLeftRightArrow},
      {EqualDef$TM, SetDelayed},
      {Tuple$TM, AngleBracket}
     }];
