@@ -718,8 +718,8 @@ proofObjectToCell[ TERMINALNODE$[ pi_PRFINFO$, pVal_], overallVal_] :=
 	
 proofObjectToCell[ args___] := unexpected[ proofObjectToCell, {args}]
 
-subProofToCell[ PRFINFO$[ name_, used_List, gen_List, ___], node_, pos_List, pVal_] :=
-	Cell[ CellGroupData[ Join[ subProofHeaderId[ node.id, name, used, gen, node.proofValue, pos], {proofObjectToCell[ node, node.proofValue]}], 
+subProofToCell[ PRFINFO$[ name_, used_List, gen_List, rest___], node_, pos_List, pVal_] :=
+	Cell[ CellGroupData[ Join[ subProofHeaderId[ node.id, name, used, gen, rest, node.proofValue, pos], {proofObjectToCell[ node, node.proofValue]}], 
 		cellStatus[ $proofCellStatus, node.proofValue, pVal]]]
 subProofToCell[ args___] := unexpected[ subProofToCell, {args}]
 

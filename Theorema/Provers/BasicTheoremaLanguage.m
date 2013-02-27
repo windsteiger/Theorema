@@ -246,16 +246,20 @@ PRFSIT$[ g_, k:{pre___, e:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], post___},
 
 inferenceRule[ elementarySubstitution] = 
 ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> 
-	Module[ {locInfo = ps.local, rules, usedSubst, newForm, newG, newK = {}, substApplied = False, j, usedForms, genForms, replBy = {}},
+	Module[ {locInfo = ps.local, rules, usedSubst, cond, newForm, newG, substCond = {}, usedInCond = {}, newK = {}, substApplied = False, j, usedForms, genForms, replBy = {}},
 		rules = getLocalInfo[ locInfo, "elemSubstRules"];
 		If[ rules === {},
 			(* There are no substitutions available -> rule does not apply *)
 			$Failed,
 			(* else: we have substitutions *)
-			{newForm, usedSubst} = replaceRecursivelyAndTrack[ g.formula, rules];
+			{newForm, usedSubst, cond} = replaceRecursivelyAndTrack[ g.formula, rules];
 			If[ usedSubst =!= {},
 				(* rewrite applied *)
 				newG = makeFML[ formula -> newForm];
+				If[ !TrueQ[ cond],
+					AppendTo[ substCond, cond];
+					AppendTo[ usedInCond, g]
+				];
 				substApplied = True,
 				(* else: no subst in goal *)
 				newG = g
@@ -265,10 +269,14 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :>
 			genForms = {{newG}};
 			AppendTo[ replBy, Union[ usedSubst]];
 			Do[
-                {newForm, usedSubst} = replaceRecursivelyAndTrack[ k[[j]].formula, rules];
+                {newForm, usedSubst, cond} = replaceRecursivelyAndTrack[ k[[j]].formula, rules];
                 If[ usedSubst =!= {},
                     (* rewrite applied *)
                     newForm = makeFML[ formula -> newForm];
+                    If[ !TrueQ[ cond],
+						AppendTo[ substCond, cond];
+						AppendTo[ usedInCond, k[[j]]]
+					];
                     appendToKB[ newK, newForm];
                     AppendTo[ usedForms, {k[[j]]}];
                     AppendTo[ genForms, {newForm}];
@@ -292,16 +300,21 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :>
 
 inferenceRule[ expandDef] = 
 ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> 
-	Module[ {locInfo = ps.local, rules, usedDefs, newForm, newG, newK = {}, defExpand = False, j, usedForms, genForms, replBy = {}},
+	Module[ {locInfo = ps.local, rules, usedDefs, cond, new, newG, newForm, newK = {}, defExpand = False, defCond = {}, usedInCond = {}, j, usedForms, genForms, replBy = {}, newGoals},
 		rules = getLocalInfo[ locInfo, "definitionRules"];
 		If[ rules === {},
 			(* There are no definitions available at all in this proof -> expanding defs does not apply *)
 			$Failed,
 			(* else: we have definition rewrite rules *)
-			{newForm, usedDefs} = replaceAndTrack[ g.formula, rules];
-			If[ usedDefs =!= {},
+			{new, usedDefs, cond} = replaceAndTrack[ g.formula, rules];
+			If[ usedDefs =!= {} && freeVariables[ cond] === {},
 				(* rewrite applied *)
-				newG = makeFML[ formula -> newForm];
+				(* in this case, the result is of the form {newForm, cond}, where cond are conditions to be fulfilled in order to allow the rewrite *)
+				newG = makeFML[ formula -> new];
+				If[ !TrueQ[ cond],
+					AppendTo[ defCond, cond];
+					AppendTo[ usedInCond, g]
+				];
 				defExpand = True,
 				(* else: no def expansion in goal *)
 				newG = g
@@ -311,10 +324,14 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :>
 			genForms = {{newG}};
 			AppendTo[ replBy, Union[ usedDefs]];
 			Do[
-                {newForm, usedDefs} = replaceAndTrack[ k[[j]].formula, rules];
-                If[ usedDefs =!= {},
+                {new, usedDefs, cond} = replaceAndTrack[ k[[j]].formula, rules];
+                If[ usedDefs =!= {} && freeVariables[ cond] === {},
                     (* rewrite applied *)
-                    newForm = makeFML[ formula -> newForm];
+                    newForm = makeFML[ formula -> new];
+					If[ !TrueQ[ cond],
+						AppendTo[ defCond, cond];
+						AppendTo[ usedInCond, k[[j]]]
+					];
                     appendToKB[ newK, newForm];
                     AppendTo[ usedForms, {k[[j]]}];
                     AppendTo[ genForms, {newForm}];
@@ -326,8 +343,21 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :>
                 {j, Length[ k]}
             ];
             If[ defExpand,
+            	newGoals = {newSubgoal[ goal -> newG, kb -> newK, local -> locInfo, rest]};
+            	If[ defCond =!= {},
+            		newForm = makeFML[ formula -> makeConjunction[ defCond, And$TM]];
+            		AppendTo[ newGoals, newSubgoal[ goal -> newForm, kb -> k, local -> locInfo, rest]],
+            		(* else *)
+            		newForm = True
+            	];
+            	(*
+            		If no conditions have been generated, then newGoals contains only ONE SUBGOAL and the last element of usedForms is {}.
+            		Otherwise, we have TWO SUBGOALS, and the last element of usedForms is non-empty. We can rely on this when generating the proof text.
+            	*)
+            	AppendTo[ usedForms, usedInCond];
+            	AppendTo[ genForms, {newForm}];
             	makeANDNODE[ makePRFINFO[ name -> expandDef, used -> usedForms, generated -> genForms, "usedDefs" -> replBy], 
-					newSubgoal[ goal -> newG, kb -> newK, local -> locInfo, rest]],
+					newGoals],
 				$Failed
             ]
 		]

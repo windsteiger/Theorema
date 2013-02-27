@@ -171,11 +171,13 @@ proofStepText[ elementarySubstitution, lang, u_, g_, ___, "usedSubst" -> subs_Li
 		stepText
 	];
 	
-proofStepText[ expandDef, lang, u_, g_, ___, "usedDefs" -> defs_List, ___] := 
+proofStepText[ expandDef, lang, u:{___, {}}, g:{___, {True}}, ___, "usedDefs" -> defs_List, ___] := 
 	(* u, g, and defs have same length.
-	   u is a list of singleton lists, u[[i,1]] are the formulae that are rewritten
-	   g is a list of singleton lists, g[[i,1]] are the new formulae
-	   defs is an auxliliary list containing lists of definition formulae, namely defs[[i]] are the definitions used when rewriting u[[i,1]] to g[[i,1]] *)
+	   Except for the last element, u is a list of singleton lists, u[[i,1]] are the formulae that are rewritten
+	   Except for the last element, g is a list of singleton lists, g[[i,1]] are the new formulae
+	   defs is an auxliliary list containing lists of definition formulae, namely defs[[i]] are the definitions used when rewriting u[[i,1]] to g[[i,1]].
+	   According to the input pattern, this is the case, where NO CONDITIONS need to be checked.
+	*)
 	Module[ {stepText = {}, j, repl, suffix},
 		(* If the first in u and g are the same, then the goal has not been rewritten *)
 		If[ u[[1]] =!= g[[1]],
@@ -193,10 +195,37 @@ proofStepText[ expandDef, lang, u_, g_, ___, "usedDefs" -> defs_List, ___] :=
 			stepText = Join[ stepText, 
 				{textCell[ "From ", formulaReference[ u[[j, 1]]], " we know, by definition" <> suffix <> " ", formulaReferenceSequence[ repl, lang], ","], 
 				assumptionCell[ g[[j, 1]]]}],
-			{j, 2, Length[g]}
+			{j, 2, Length[g]-1}
 		];
 		stepText
 	];
+
+proofStepText[ expandDef, lang, u_, g:_, ___, "usedDefs" -> defs_List, ___] := {textCell[ "We expand definitions:"]};
+
+subProofHeader[ expandDef, lang, u_, g_, ___, "usedDefs" -> defs_List, ___, {1}] := 
+	Module[ {stepText = {}, j, repl, suffix},
+		(* If the first in u and g are the same, then the goal has not been rewritten *)
+		If[ u[[1]] =!= g[[1]],
+			repl = defs[[1]];
+			suffix = If[ Length[ repl] == 1, "", "s"];
+			stepText = { textCell[ "In order to prove ", formulaReference[ u[[1, 1]]], ", using definition" <> suffix <> " ", 
+				formulaReferenceSequence[ repl, lang], ", we now have to show"],
+				goalCell[ g[[1, 1]], "."]}
+		];
+		(* Each of the remaining is an expansion in the KB. Produce a line of text for each of them *)
+		Do[
+			repl = defs[[j]];
+			suffix = If[ Length[ repl] == 1, "", "s"];
+			stepText = Join[ stepText, 
+				{textCell[ "From ", formulaReference[ u[[j, 1]]], " we know, by definition" <> suffix <> " ", formulaReferenceSequence[ repl, lang], ","], 
+				assumptionCell[ g[[j, 1]]]}],
+			{j, 2, Length[g]-1}
+		];
+		stepText
+	];
+subProofHeader[ expandDef, lang, u_, {___, {cond_}}, ___, "usedDefs" -> defs_List, ___, {2}] := {textCell[ "In order to validate the expansion of the definitions above, we have to check"],
+	goalCell[ cond, "."]
+	};	
 	
 proofStepText[ eqIffKB, lang, {eqs__}, _, ___] := {textCell[ "We register ", formulaReferenceSequence[ eqs, lang], " to be used for rewriting."]
 	};

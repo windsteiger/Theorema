@@ -42,29 +42,32 @@ splitAnd[ args___] := unexpected[ splitAnd, {args}]
 
 makeConjunction[ l_List, a_] :=
     Switch[ Length[ l],
-        0,
-        True,
-        1,
-        l[[1]],
-        _,
-        Apply[ a, l]
-    ]
+            0,
+            True,
+            1,
+            l[[1]],
+            _,
+            Apply[ a, l]
+        ]
 makeConjunction[ args___] := unexpected[ makeConjunction, {args}]
 
 makeDisjunction[ l_List, a_] :=
     Switch[ Length[ l],
-        0,
-        False,
-        1,
-        l[[1]],
-        _,
-        Apply[ a, l]
-    ]
+            0,
+            False,
+            1,
+            l[[1]],
+            _,
+            Apply[ a, l]
+        ]
 makeDisjunction[ args___] := unexpected[ makeDisjunction, {args}]
 
 
 (* ::Subsubsection:: *)
 (* simplifiedAnd *)
+
+simplifiedAnd[ True] := True
+simplifiedAnd[ h_[ True...]] := True
 
 simplifiedAnd[ expr_] :=  
 	Module[ {simp = Flatten[ expr //. {True -> Sequence[], (Theorema`Language`And$TM|Theorema`Computation`Language`And$TM)[a_] -> a}]},
@@ -286,41 +289,50 @@ singleDefToRule[ orig:FML$[ _, form_, __]] :=
 singleDefToRule[ args___] := unexpected[ singleDefToRule, {args}]
 
 ruleForm[ {(Theorema`Language`Iff$TM|Theorema`Language`IffDef$TM|Theorema`Language`Equal$TM|Theorema`Language`EqualDef$TM)[ l_, r_], c_List, var_List}, ref_] :=
+(*
+	ruleForm[ {eq, cond, var}, ref] translates an equality/equivalence into a rewrite rule.
+	{eq, cond, var} is assumed to be the result of 'stripUniversalQuantifiers' translating a universally quantified equality/equivalence into
+	eq ... the pure equality/equivalence,
+	cond ... the conditions on the variables contained in eq, and
+	var ... the variables contained in eq.
+	ref is the original universally quantified equality/equivalence formula. 
+	When the resulting rewrite rule is applied, it will Sow[ref, "ref"] and Sow[cond, "cond"], which must be caught by an appropriate Reap, 
+	see replaceAndTrack and replaceRecursivelyAndTrack.
+*)
     Block[ {testMember},
         With[ {left = execLeft[ Hold[l], var], 
-               cond = makeConjunction[ Map[ testMember[ $TMAKBatomic, #]&, c], And],
-        		(* The complicated DUMMY$DEF... construction is necessary because ref itself contains strings (it's a whole formula incl key, label),
-        	   	and we need to get the escaped strings into the Hold *)
+               cond = makeConjunction[ c, Theorema`Language`And$TM],
                right = execRight[ Hold[r], var]},
-            "RuleDelayed[" <> left <> "/;" <> execRight[ Hold[ cond] /. testMember -> MemberQ, var] <> "," <> "Sow[" <> ToString[ ref, InputForm] <> "];" <> right <> "]"
+            "RuleDelayed[" <> left <> "," <> "Sow[" <> ToString[ ref, InputForm] <> ",\"ref\"]; Sow[" <> execRight[ Hold[ cond], var] <> ",\"cond\"];" <> right <> "]"
         ]
     ]
 ruleForm[ expr_, key_] := $Failed
 ruleForm[ args___] := unexpected[ ruleForm, {args}]
 
 (*
-	replaceAndTrack[ expr_, repl_List] results in {new, used} where
-		new = expr /. repl and
-		used is a list of formula keys corresponding to the formulae from which the applied replacements have been derived
+	replaceAndTrack[ expr_, repl_List] results in {new, used, cond} where
+		new = expr /. repl,
+		used is a list of formula keys corresponding to the formulae from which the applied replacements have been derived, and
+		cond is a condition under which the rewrite is allowed.
 *)
 replaceAndTrack[ expr_, repl_List] := 
-	Module[ {e, used},
-		{e, used} = Reap[ expr /. repl];
-		If[ used === {},
-			{e, used},
+	Module[ {e, uc},
+		{e, uc} = Reap[ expr /. repl, {"ref", "cond"}];
+		If[ uc === {{}, {}},
+			{e, {}, {}},
 			(* else *)
-			{e, used[[1]]}
+			{e, uc[[1,1]], simplifiedAnd[ makeConjunction[ uc[[2,1]], Theorema`Language`And$TM]]}
 		]
 	]
 replaceAndTrack[ args___] := unexpected[ replaceAndTrack, {args}]
 
 replaceRecursivelyAndTrack[ expr_, repl_List] := 
-	Module[ {e, used},
-		{e, used} = Reap[ expr //. repl];
-		If[ used === {},
-			{e, used},
+	Module[ {e, uc},
+		{e, uc} = Reap[ expr //. repl, {"ref", "cond"}];
+		If[ uc === {{}, {}},
+			{e, {}, {}},
 			(* else *)
-			{e, used[[1]]}
+			{e, uc[[1,1]], simplifiedAnd[ makeConjunction[ uc[[2,1]], Theorema`Language`And$TM]]}
 		]
 	]
 replaceRecursivelyAndTrack[ args___] := unexpected[ replaceRecursivelyAndTrack, {args}]
