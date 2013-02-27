@@ -284,7 +284,13 @@ forReplace[a_, s_] := Module[{anew := a, pnew},
   anew]
 Tuple$TM /: Subscript$TM[ a_Tuple$TM, s:LeftArrowBar$TM[__,_]..] /; buiActive["Replace"] := forReplace[ a , {s}]
 
-Tuple$TM /: Subscript$TM[ a_Tuple$TM, p__] /; buiActive["Subscript"] && isSequenceFree[a] := Extract[ a, p /. Tuple$TM -> List] /. List -> Tuple$TM
+Tuple$TM /: Subscript$TM[ a_Tuple$TM, p__Integer] /; buiActive["Subscript"] := Subscript$TM[ a, Tuple$TM[ p]]
+Tuple$TM /: Subscript$TM[ a_Tuple$TM, p_?isPositionSpec] /; buiActive["Subscript"] && isSequenceFree[a] := Extract[ a, p /. Tuple$TM -> List] /. List -> Tuple$TM
+
+isPositionSpec[ _Integer] := True
+isPositionSpec[ Tuple$TM[ p__]] := Apply[ And, Map[ isPositionSpec, {p}]]
+isPositionSpec[ _] := False
+isPositionSpec[ args___] := unexpected[ isPositionSpec, {args}]
 
 
 
