@@ -30,7 +30,7 @@ applyOnce[ ps_PRFSIT$] :=
 		newNodes = applyAllRules[ ps, allRules];
 		Switch[ Length[ newNodes],
 			0,
-			proofFails[ makePRFINFO[ name -> noApplicableRule]],
+			proofFails[ makePRFINFO[ name -> noApplicableRule, used -> Prepend[ ps.kb, ps.goal]]],
 			1,
 			First[ newNodes],
 			_,
@@ -55,7 +55,7 @@ applyOnceAndLevelSaturation[ ps_PRFSIT$] :=
 		newNodes = MapAt[ levelSaturation[ #, sat1, sat2]&, newNodes, Position[ newNodes, _PRFSIT$]];
 		Switch[ Length[ newNodes],
 			0,
-			proofFails[ makePRFINFO[ name -> noApplicableRule]],
+			proofFails[ makePRFINFO[ name -> noApplicableRule, used -> Prepend[ ps.kb, ps.goal]]],
 			1,
 			First[ newNodes],
 			_,
