@@ -165,7 +165,12 @@ initBuiltins[ args___] := unexpected[ initBuiltins, {args}]
 *)
 openTheoremaCommander[ ] /; $Notebooks :=
     Module[ {},
-        CreatePalette[ Dynamic[Refresh[
+        CreatePalette[ Dynamic[
+        	With[ {progressPane = If[ $TMAproofSearchRunning,
+        		Dynamic[ Refresh[ proofNavigation[ $TMAproofTree], TrackedSymbols :> {}, UpdateInterval -> 5]],
+        		Dynamic[ Refresh[ proofNavigation[ $TMAproofTree], TrackedSymbols :> {$TMAproofTree, $TMAproofNotebook, ruleTextActive, $proofTreeScale, $selectedProofStep}]]
+        	]},
+        	Refresh[
         	activitiesView[
         		(* activities buttons *)
         		{translate["tcSessionTabLabel"], translate["tcProveTabLabel"], translate["tcComputeTabLabel"], translate["tcSolveTabLabel"], translate["tcPreferencesTabLabel"]},
@@ -186,7 +191,7 @@ openTheoremaCommander[ ] /; $Notebooks :=
         				displayBuiltinBrowser["prove"],
         				Dynamic[ Refresh[ selectProver[], TrackedSymbols :> {$selectedRuleSet, $selectedStrategy,$keyWord}]],
         				Dynamic[ Refresh[ submitProveTask[ ], TrackedSymbols :> {$selectedProofGoal, $selectedProofKB}]],
-        				Dynamic[ Refresh[ proofNavigation[ $TMAproofTree], TrackedSymbols :> {$TMAproofTree, $TMAproofNotebook, ruleTextActive, $proofTreeScale, $selectedProofStep}]]},
+        				progressPane},
         			(* compute *){Dynamic[Refresh[ compSetup[], TrackedSymbols :> {$buttonNat}]],
         				Dynamic[Refresh[displayKBBrowser["compute"], TrackedSymbols :> {$kbStruct}]],
         				displayBuiltinBrowser["compute"]},
@@ -194,7 +199,7 @@ openTheoremaCommander[ ] /; $Notebooks :=
         				displayBuiltinBrowser["solve"]},
         			(* prefs *)  {setPreferences[ ]}
         		}
-        	], TrackedSymbols :> {$Language}]],
+        	], TrackedSymbols :> {$Language, $TMAproofSearchRunning}]]],
         	StyleDefinitions -> makeColoredStylesheet[ "GUI"],
         	WindowTitle -> translate["Theorema Commander"],
         	WindowElements -> {"StatusArea"}]

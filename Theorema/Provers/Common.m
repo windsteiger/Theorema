@@ -39,10 +39,12 @@ initProver[] :=
 		ruleTextActive[_] := True;
 		$proofCellStatus = Automatic;
 		$TMAcurrentDepth = 1;
+		$TMAproofSearchRunning = False;
 	]
 
 callProver[ ruleSetup:{_Hold, _List, _List}, strategy_, goal_FML$, kb_List, searchDepth_Integer] :=
 	Module[{},
+		$TMAproofSearchRunning = True;
 		$TMAcurrentDepth = 2;
 		$TMAproofTree = makeInitialProofTree[ ];
 		$TMAproofObject = makeInitialProofObject[ goal, kb, ruleSetup, strategy];
@@ -50,6 +52,7 @@ callProver[ ruleSetup:{_Hold, _List, _List}, strategy_, goal_FML$, kb_List, sear
 		Clear[ $TMAproofNotebook];
 		initFormulaLabel[];
 		proofSearch[ searchDepth];
+		$TMAproofSearchRunning = False;
 		{$TMAproofObject.proofValue, $TMAproofObject}
 	]
 callProver[ args___] := unexpected[ callProver, {args}]
@@ -542,8 +545,20 @@ The initial proof tree already has an edge from original PS to initial PS, so th
 showProofNavigation[ {Depth -> _, node_List}, scale_] := Graphics[ proofStepNode[ {0, 0}, node, 18], ImageSize -> {350,420}, PlotRegion -> {{0.4, 0.6}, {0.6, 0.8}}]
 *)
 
+(*
+With[{a = Pi - Pi*depth/$SD}, 
+ Graphics[{Line[{{-1, 0}, {1, 0}}], 
+   Circle[{0, 0}, 1, {0, Pi}], {GrayLevel[0.4], 
+    Disk[{0, 0}, 1, {0, Pi}]},
+   {Thick, ColorData["TemperatureMap"][depth/$SD], 
+    Disk[{0, 0}, 1, {Max[a - 0.07, 0], Min[a + 0.07, Pi]}]}}, 
+  PlotRange -> {-0.2, 1}]]
+*)
 showProofNavigation[ {p__Rule}, scale_] :=
     Module[ {root = Cases[ {p}, {"OriginalPS", __}, {2}], geometry, font},
+    	If[ Length[ {p}] > 50 && $TMAproofSearchRunning,
+    		Return[ Graphics[ {Text[ "Proof in progress", {175, 250}]}, ImageSize -> {350, 500}]]
+    	];
     	If[ scale === Fit,
     		geometry = {350,500},
     		(* else *)

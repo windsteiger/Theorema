@@ -112,6 +112,7 @@ With[ {lang = "English"},
 	MessageName[displayProof, "usage", lang] = "displayProof[ proofObject_] displays proofObject.";
 	MessageName[$TMAproofObject, "usage", lang] = "$TMAproofObject is the global proof object.";
 	MessageName[$TMAproofTree, "usage", lang] = "$TMAproofTree is the global proof tree for visualization.";
+	MessageName[$TMAproofSearchRunning, "usage", lang] = "$TMAproofSearchRunning indicates (by True/False) whether a proof search is currently running.";
 	MessageName[showProofNavigation, "usage", lang] = "showProofNavigation[ proofObject_] shows a tree navigation through a proof.";
 	MessageName[$registeredRuleSets, "usage", lang] = "$registeredRuleSets is a list of available provers in the Theorema system.";
 	MessageName[$registeredStrategies, "usage", lang] = "$registeredStrategies is a list of available strategies in the Theorema system.";
