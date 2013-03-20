@@ -155,5 +155,8 @@ With[ {lang = "English"},
 	MessageName[failed, "usage", lang] = "failed is a possible proof value.";
 	MessageName[pending, "usage", lang] = "pending is a possible proof value.";
 	MessageName[$selectedProofStep, "usage", lang] = "$selectedProofStep refers to the id of the proof step that is selected in the current proof notebook.";
+	MessageName[$proofCellStatus, "usage", lang] = "$proofCellStatus determines the status (open/closed) of nested cells in the proof notebook.";
+	MessageName[$proofAborted, "usage", lang] = "$proofAborted is a flag that is checked whether the user tried to abort the running proof.";
+	MessageName[$currentSearchLevel, "usage", lang] = "$currentSearchLevel gives the search depth level of the last proof step performed.";
 
 ]

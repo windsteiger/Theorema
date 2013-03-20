@@ -124,6 +124,8 @@ initGUI[] :=
 		$selectedProofGoal = {};
 		$selectedSearchDepth = 30;
 		$maxSearchDepth = 200;
+		$selectedSearchTime = 360;
+		$maxSearchTime = 1000;
 		initBuiltins[ {"prove", "compute", "solve"}];
 		resetDefaultRules[];
 		$selectedRuleSet = Hold[ basicTheoremaLanguageRules];
@@ -166,10 +168,6 @@ initBuiltins[ args___] := unexpected[ initBuiltins, {args}]
 openTheoremaCommander[ ] /; $Notebooks :=
     Module[ {},
         CreatePalette[ Dynamic[
-        	With[ {progressPane = If[ $TMAproofSearchRunning,
-        		Dynamic[ Refresh[ proofNavigation[ $TMAproofTree], TrackedSymbols :> {}, UpdateInterval -> 5]],
-        		Dynamic[ Refresh[ proofNavigation[ $TMAproofTree], TrackedSymbols :> {$TMAproofTree, $TMAproofNotebook, ruleTextActive, $proofTreeScale, $selectedProofStep}]]
-        	]},
         	Refresh[
         	activitiesView[
         		(* activities buttons *)
@@ -190,8 +188,8 @@ openTheoremaCommander[ ] /; $Notebooks :=
         				Dynamic[Refresh[displayKBBrowser["prove"], TrackedSymbols :> {$kbStruct}]],
         				displayBuiltinBrowser["prove"],
         				Dynamic[ Refresh[ selectProver[], TrackedSymbols :> {$selectedRuleSet, $selectedStrategy,$keyWord}]],
-        				Dynamic[ Refresh[ submitProveTask[ ], TrackedSymbols :> {$selectedProofGoal, $selectedProofKB}]],
-        				progressPane},
+        				Dynamic[ Refresh[ submitProveTask[ ], TrackedSymbols :> {$selectedProofGoal, $selectedProofKB, $selectedSearchDepth, $selectedSearchTime}]],
+        				Dynamic[ Refresh[ proofNavigation[ $TMAproofTree], TrackedSymbols :> {$TMAproofTree, $TMAproofSearchRunning, $TMAproofNotebook, ruleTextActive, $proofTreeScale, $selectedProofStep}]]},
         			(* compute *){Dynamic[Refresh[ compSetup[], TrackedSymbols :> {$buttonNat}]],
         				Dynamic[Refresh[displayKBBrowser["compute"], TrackedSymbols :> {$kbStruct}]],
         				displayBuiltinBrowser["compute"]},
@@ -199,7 +197,7 @@ openTheoremaCommander[ ] /; $Notebooks :=
         				displayBuiltinBrowser["solve"]},
         			(* prefs *)  {setPreferences[ ]}
         		}
-        	], TrackedSymbols :> {$Language, $TMAproofSearchRunning}]]],
+        	], TrackedSymbols :> {$Language}]],
         	StyleDefinitions -> makeColoredStylesheet[ "GUI"],
         	WindowTitle -> translate["Theorema Commander"],
         	WindowElements -> {"StatusArea"}]
@@ -1149,12 +1147,26 @@ selectProver[ ] :=
     	Labeled[ Tooltip[ PopupMenu[ Dynamic[ $selectedStrategy], Map[ MapAt[ translate, #, {2}]&, $registeredStrategies]],
     		With[ {ss = $selectedStrategy}, MessageName[ ss, "usage"]]], 
     		translate[ "pStrat"], {{ Top, Left}}],
-    	Labeled[ Dynamic[ Row[ {Slider[ Dynamic[ $selectedSearchDepth], {2, $maxSearchDepth, 1}],
-    		InputField[ Dynamic[ $selectedSearchDepth], Number, FieldSize -> 3], 
-    		Button[ "-", $selectedSearchDepth--],
-    		Button[ "+", $selectedSearchDepth++],
-    		Button[ "\[LeftSkeleton]", $maxSearchDepth/=2],
-    		Button[ "\[RightSkeleton]", $maxSearchDepth*=2]}]], translate[ "sDepth"], {{ Top, Left}}],
+    	Labeled[ Grid[{
+    		{translate[ "sDepth"], Dynamic[ Row[ {Slider[ Dynamic[ $selectedSearchDepth], {2, $maxSearchDepth, 1}, ImageSize -> 150],
+    			InputField[ Dynamic[ $selectedSearchDepth], Number, FieldSize -> 3], 
+    			Button[ "-", $selectedSearchDepth--],
+    			Button[ "+", $selectedSearchDepth++],
+    			Button[ "\[LeftSkeleton]", $maxSearchDepth/=2],
+    			Button[ "\[RightSkeleton]", $maxSearchDepth*=2]}]]},
+    		{translate[ "sTime"], Dynamic[ Row[ {Slider[ Dynamic[ $selectedSearchTime], {2, $maxSearchTime, 1}, ImageSize -> 133],
+    			If[ $selectedSearchTime === Infinity,
+    				InputField[ "\[Infinity]", String, FieldSize -> 3], 
+    				InputField[ Dynamic[ $selectedSearchTime], Number, FieldSize -> 3]], 
+    			Button[ "-", $selectedSearchTime--],
+    			Button[ "+", $selectedSearchTime++],
+    			Button[ "\[LeftSkeleton]", $maxSearchTime/=2],
+    			Button[ "\[RightSkeleton]", $maxSearchTime*=2],
+    			If[ $selectedSearchTime === Infinity, 
+    				Button[ "\[Infinity]", $selectedSearchTime=360, Appearance :> "Pressed"],
+    				Button[ "\[Infinity]", $selectedSearchTime=Infinity]
+    			]}]]}
+    		}, Alignment -> Left], translate[ "sLimits"], {{ Top, Left}}],
     	Labeled[ Grid[{
     		{Checkbox[ Dynamic[ $eliminateBranches]], translate[ "elimBranches"]},
     		{Checkbox[ Dynamic[ $eliminateSteps]], translate[ "elimSteps"]},
@@ -1162,7 +1174,7 @@ selectProver[ ] :=
     		}, Alignment -> {Left}], 
     		translate[ "pSimp"], {{ Top, Left}}],
     	Labeled[ RadioButtonBar[ 
-    		Dynamic[Theorema`Provers`Common`Private`$proofCellStatus], {Automatic -> translate[ "auto"], Open -> translate[ "open"], Closed -> translate[ "closed"]}], 
+    		Dynamic[ $proofCellStatus], {Automatic -> translate[ "auto"], Open -> translate[ "open"], Closed -> translate[ "closed"]}], 
     		translate[ "proofCellStatus"], {{ Top, Left}}],
     	Button[ translate[ "OKnext"], $tcActionView++]	
     	}]
@@ -1175,7 +1187,7 @@ submitProveTask[ ] :=
 				$tcActionView++;
 				execProveCall[ $selectedProofGoal, $selectedProofKB, 
 					{$selectedRuleSet, Map[ # -> ruleActive[#]&, $allRules], Map[ # -> rulePriority[#]&, $allRules]},
-					$selectedStrategy, $selectedSearchDepth,
+					$selectedStrategy, $selectedSearchDepth, $selectedSearchTime,
 					{$eliminateBranches, $eliminateSteps, $eliminateFormulae}], 
 				Method -> "Queued", Active -> ($selectedProofGoal =!= {})],
 			Column[{
@@ -1184,9 +1196,10 @@ submitProveTask[ ] :=
 			}],
 			
 			Column[{				
-				Labeled[ displaySelectedRules[ $selectedRuleSet], translate["selectedRules"]<>":",{{Top,Left}}],
-				Labeled[MessageName[Evaluate[$selectedStrategy],"usage"],translate[ "pStrat"]<>":", Left],
-				Labeled[$selectedSearchDepth,translate[ "sDepth"]<>":", Left],
+				Labeled[ displaySelectedRules[ $selectedRuleSet], translate[ "selectedRules"]<>":",{{Top,Left}}],
+				Labeled[ MessageName[ Evaluate[ $selectedStrategy], "usage"], translate[ "pStrat"]<>":", Left],
+				Labeled[ $selectedSearchDepth, translate[ "sDepth"]<>":", Left],
+				Labeled[ $selectedSearchTime, translate[ "sTime"]<>":", Left],
 					Labeled[
 						Column[{
     						If[ $eliminateBranches===True, translate[ "elimBranches"], Sequence[]],
@@ -1196,7 +1209,11 @@ submitProveTask[ ] :=
 						, translate[ "pSimp"]<>":", Left
 					],
 				Labeled[ 
-					If[$proofCellStatus===Open, Row[{translate[ "open"]}], translate["closed"]], 
+					Switch[ $proofCellStatus,
+						Automatic, translate[ "auto"],
+						Open, translate[ "open"],
+						Closed, translate[ "closed"]
+					],
     			translate[ "proofCellStatus"]<>":", Left]
 			}]			
 			,
@@ -1205,14 +1222,14 @@ submitProveTask[ ] :=
 				$tcActionView++;
 				execProveCall[ $selectedProofGoal, $selectedProofKB, 
 					{$selectedRuleSet, Map[ # -> ruleActive[#]&, $allRules], Map[ # -> rulePriority[#]&, $allRules]},
-					$selectedStrategy, $selectedSearchDepth,
+					$selectedStrategy, $selectedSearchDepth, $selectedSearchTime,
 					{$eliminateBranches, $eliminateSteps, $eliminateFormulae}], 
 				Method -> "Queued", Active -> ($selectedProofGoal =!= {})]
 		}]
 	]
 submitProveTask[ args___] := unexpected[ submitProveTask, {args}]
 
-execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, strategy_, searchDepth_, simplification_List] :=
+execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, strategy_, searchDepth_, searchTime_, simplification_List] :=
 	Module[{nb = $proofInitNotebook, po, pv},
 		If[ NotebookFind[ nb, makeProofIDTag[ goal], All, CellTags] === $Failed,
 			NotebookFind[ nb, goal[[1,1]], All, CellTags];
@@ -1223,14 +1240,14 @@ execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, str
 		SetSelectedNotebook[ nb];
 		NotebookWrite[ nb, Cell[ translate[ "Proof of"]<>" "<>goal[[3]]<>": \[Ellipsis]", "OpenProof", CellTags -> makeProofIDTag[ goal]]];
 
-		{pv, po} = callProver[ rules, strategy, goal, kb, searchDepth];
+		{pv, po} = callProver[ rules, strategy, goal, kb, searchDepth, searchTime];
 		po = simplifyProof[ po, simplification];
 		printProveInfo[ goal, kb, ruleSet, strategy, {pv, po}, searchDepth];
 	]
 execProveCall[ args___] := unexpected[ execProveCall, {args}]
 
 proofNavigation[ po_] :=
-    Module[ {proofTree = showProofNavigation[ po, $proofTreeScale], geom},
+    Module[ {proofTree = showProofNavigation[ po, $proofTreeScale, $selectedSearchDepth], geom},
     	geom = Replace[ ImageSize, Options[ proofTree, ImageSize]];
     	(* Putting the frame around the inner Pane is a work-around, otherwise the pane is not positioned correctly when the proof tree is higher than 420 *)
         Column[{
@@ -1241,7 +1258,7 @@ proofNavigation[ po_] :=
         		FrameMargins -> {{15, 15}, {2, 0}}],
         	Framed[ Pane[ proofTree,
         		{360, 510}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic, ScrollPosition -> {geom[[1]]/2-175, 0}], FrameStyle -> None],
-        	Button[ translate["abort"], Theorema`Provers`Common`Private`$proofAborted = True]
+        	Button[ translate["abort"], $proofAborted = True]
         	}, Center]	
     ]
 proofNavigation[ args___] := unexpected[ proofNavigation, {args}]

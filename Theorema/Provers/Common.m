@@ -42,7 +42,7 @@ initProver[] :=
 		$TMAproofSearchRunning = False;
 	]
 
-callProver[ ruleSetup:{_Hold, _List, _List}, strategy_, goal_FML$, kb_List, searchDepth_Integer] :=
+callProver[ ruleSetup:{_Hold, _List, _List}, strategy_, goal_FML$, kb_List, searchDepth_Integer, searchTime_Integer] :=
 	Module[{},
 		$TMAproofSearchRunning = True;
 		$TMAcurrentDepth = 2;
@@ -51,7 +51,7 @@ callProver[ ruleSetup:{_Hold, _List, _List}, strategy_, goal_FML$, kb_List, sear
 		$TMAcheckSuccess = True;
 		Clear[ $TMAproofNotebook];
 		initFormulaLabel[];
-		proofSearch[ searchDepth];
+		TimeConstrained[ proofSearch[ searchDepth], searchTime];
 		$TMAproofSearchRunning = False;
 		{$TMAproofObject.proofValue, $TMAproofObject}
 	]
@@ -67,8 +67,9 @@ proofSearch[ searchDepth_Integer] :=
         While[ !$proofAborted && $TMAproofObject.proofValue === pending && (openPSpos = positionRelevantSits[ $TMAproofObject]) =!= {},
             openPS = Extract[ $TMAproofObject, openPSpos];
             {selPS, selPSpos} = chooseNextPS[ openPS, openPSpos];
-            $TMAcurrentDepth = Length[ selPSpos];
-            If[ $TMAcurrentDepth > searchDepth,
+            $currentSearchLevel = Length[ selPSpos];
+            $TMAcurrentDepth = Max[ $TMAcurrentDepth, $currentSearchLevel];
+            If[ $currentSearchLevel > searchDepth,
             	newSteps = searchDepthExceeded[ selPS],
             	(* else *)
             	pStrat = selPS.strategy;
@@ -537,7 +538,7 @@ applyAllRules[ args___] := unexpected[ applyAllRules, {args}]
 (* ::Subsubsection:: *)
 (* showProofNavigation *)
 
-showProofNavigation[ {}, scale_] := Graphics[ {}, ImageSize -> {350,420}]
+showProofNavigation[ {}, scale_, maxDepth_] := Graphics[ {}, ImageSize -> {350,420}]
 
 (*
 The initial proof tree already has an edge from original PS to initial PS, so this should not be called anymore
@@ -545,20 +546,14 @@ The initial proof tree already has an edge from original PS to initial PS, so th
 showProofNavigation[ {Depth -> _, node_List}, scale_] := Graphics[ proofStepNode[ {0, 0}, node, 18], ImageSize -> {350,420}, PlotRegion -> {{0.4, 0.6}, {0.6, 0.8}}]
 *)
 
-(*
-With[{a = Pi - Pi*depth/$SD}, 
- Graphics[{Line[{{-1, 0}, {1, 0}}], 
-   Circle[{0, 0}, 1, {0, Pi}], {GrayLevel[0.4], 
-    Disk[{0, 0}, 1, {0, Pi}]},
-   {Thick, ColorData["TemperatureMap"][depth/$SD], 
-    Disk[{0, 0}, 1, {Max[a - 0.07, 0], Min[a + 0.07, Pi]}]}}, 
-  PlotRange -> {-0.2, 1}]]
-*)
-showProofNavigation[ {p__Rule}, scale_] :=
+showProofNavigation[ {p__Rule}, scale_, maxDepth_] /; Length[ {p}] > 50 && $TMAproofSearchRunning :=
+    Module[ {i},
+    	Graphics[ Table[{EdgeForm[Thick], ColorData["TemperatureMap"][ i/maxDepth], 
+    		Rectangle[{0, i}, {5, i + 1}]}, {i, 1, $currentSearchLevel}], PlotRange -> {{-5, 10}, {0.9, maxDepth}}, ImageSize -> {350, 500}]
+    ]
+
+showProofNavigation[ {p__Rule}, scale_, maxDepth_] :=
     Module[ {root = Cases[ {p}, {"OriginalPS", __}, {2}], geometry, font},
-    	If[ Length[ {p}] > 50 && $TMAproofSearchRunning,
-    		Return[ Graphics[ {Text[ "Proof in progress", {175, 250}]}, ImageSize -> {350, 500}]]
-    	];
     	If[ scale === Fit,
     		geometry = {350,500},
     		(* else *)
@@ -617,8 +612,12 @@ proofStatusIndicator[ status_] :=
     	], ShowStringCharacters -> False
     ]
 	
-proofStatusIndicator[ status_, name_] := Tooltip[ 
-	proofStatusIndicator[ status],
+proofStatusIndicator[ status_, name_] := Tooltip[
+	Switch[ name,
+		searchDepthLimit, "\[Ellipsis]",
+		noApplicableRule, "\[Dagger]",
+		_, proofStatusIndicator[ status]
+	],
 	translate[ SymbolName[ status]] <> If[ status =!= pending, " (" <> MessageName[ name, "usage"] <> ")", ""]]
 	
 proofStatusIndicator[ args___] := unexpected[ proofStatusIndicator, {args}]
@@ -626,7 +625,7 @@ proofStatusIndicator[ args___] := unexpected[ proofStatusIndicator, {args}]
 proofNodeIndicator[ status_, type_, name_] :=
 	Module[ {label, description},
 		{label, description} = Switch[ type,
-			PRFSIT$, {"?", translate[ "open proof situation"]},
+			PRFSIT$, {"\[Paragraph]", translate[ "open proof situation"]},
         	ANDNODE$, {"\[Wedge]", MessageName[ name, "usage"]},
         	ORNODE$, {"\[Vee]", MessageName[ name, "usage"]},
         	_, {"\[DownQuestion]", translate[ "unknown proof node"]}
