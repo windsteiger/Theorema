@@ -129,7 +129,7 @@ initGUI[] :=
 		initBuiltins[ {"prove", "compute", "solve"}];
 		resetDefaultRules[];
 		$selectedRuleSet = Hold[ basicTheoremaLanguageRules];
-		$selectedStrategy = applyOnce;
+		$selectedStrategy = applyOnceAndLevelSaturation;
 		$CtrlActive = 0;
 		$ShiftActive = 0;
 		$TMAactDecl = translate[ "None"];
@@ -1247,22 +1247,30 @@ execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, str
 execProveCall[ args___] := unexpected[ execProveCall, {args}]
 
 proofNavigation[ po_] :=
-    Module[ {proofTree = showProofNavigation[ po, $proofTreeScale, $selectedSearchDepth], geom},
-    	geom = Replace[ ImageSize, Options[ proofTree, ImageSize]];
-    	(* Putting the frame around the inner Pane is a work-around, otherwise the pane is not positioned correctly when the proof tree is higher than 420 *)
-        Column[{
-        	ButtonBar[ {Tooltip[ "+", translate[ "zoom in"]] :> ($proofTreeScale *= 2), 
+    Module[ {proofTree, geom, addControl},
+    	If[ Length[ po] > 50 && $TMAproofSearchRunning,
+    		proofTree = showProofNavigation[ po, Fit, $selectedSearchDepth, Automatic];
+    		addControl = Graphics[ Table[{EdgeForm[Thick], ColorData["TemperatureMap"][ i/$selectedSearchDepth], 
+    			Rectangle[ {i*360/($selectedSearchDepth+1), 0}, {(i + 1)*360/($selectedSearchDepth+1), 20}]}, {i, 0, $currentSearchLevel}],
+    			PlotRange -> {{-0.1, 360}, {-0.1, 20.1}}, ImageSize -> {360, 20}],
+    	(* else *)
+    		proofTree = showProofNavigation[ po, $proofTreeScale, $selectedSearchDepth, All];
+    		addControl = ButtonBar[ {Tooltip[ "+", translate[ "zoom in"]] :> ($proofTreeScale *= 2), 
         		Tooltip[ "\[FivePointedStar]", translate[ "optimal size"]] :> ($proofTreeScale = 1), 
         		Tooltip[ "\[DottedSquare]", translate[ "fit into window"]] :> ($proofTreeScale = Fit), 
         		Tooltip[ "-", translate[ "zoom out"]] :> ($proofTreeScale /= 2)},
-        		FrameMargins -> {{15, 15}, {2, 0}}],
+        		FrameMargins -> {{15, 15}, {2, 0}}];
+    	];
+    	geom = Replace[ ImageSize, Options[ proofTree, ImageSize]];
+    	(* Putting the frame around the inner Pane is a work-around, otherwise the pane is not positioned correctly when the proof tree is higher than 420 *)
+        Column[{
+        	addControl,
         	Framed[ Pane[ proofTree,
         		{360, 510}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic, ScrollPosition -> {geom[[1]]/2-175, 0}], FrameStyle -> None],
         	Button[ translate["abort"], $proofAborted = True]
         	}, Center]	
     ]
 proofNavigation[ args___] := unexpected[ proofNavigation, {args}]
-
 
 
 (* ::Subsubsection:: *)

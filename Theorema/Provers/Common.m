@@ -42,7 +42,7 @@ initProver[] :=
 		$TMAproofSearchRunning = False;
 	]
 
-callProver[ ruleSetup:{_Hold, _List, _List}, strategy_, goal_FML$, kb_List, searchDepth_Integer, searchTime_Integer] :=
+callProver[ ruleSetup:{_Hold, _List, _List}, strategy_, goal_FML$, kb_List, searchDepth_Integer, searchTime:(_Integer|Infinity)] :=
 	Module[{},
 		$TMAproofSearchRunning = True;
 		$TMAcurrentDepth = 2;
@@ -157,12 +157,16 @@ replaceProofSit[ po_PRFOBJ$, pos_ -> p_PRFSIT$] :=
 	It can happen that the initial PS consists of a TERMINALNODE$ (namely, if the proof succeeds immediately).
 	Hence, we want to call replaceProofSit there in order to update the proof tree correspondingly.
 	*)
-	ReplacePart[ po, pos -> p]
+	Module[ {},
+		$lastVisitedNode = p.id;
+		ReplacePart[ po, pos -> p]
+	]
 	
 replaceProofSit[ po_PRFOBJ$, pos_ -> new:node_[___]] :=
 	Module[{parentID = Extract[ po, pos].id, sub},
 		sub = poToTree[ new];
 		$TMAproofTree = Join[ $TMAproofTree /. {parentID, pending, PRFSIT$, None} -> {new.id, new.proofValue, node, new.name}, sub];
+		$lastVisitedNode = new.id;
 		ReplacePart[ po, pos -> new]
 	]
 replaceProofSit[ args___] := unexpected[ replaceProofSit, {args}]
@@ -538,7 +542,7 @@ applyAllRules[ args___] := unexpected[ applyAllRules, {args}]
 (* ::Subsubsection:: *)
 (* showProofNavigation *)
 
-showProofNavigation[ {}, scale_, maxDepth_] := Graphics[ {}, ImageSize -> {350,420}]
+showProofNavigation[ {}, scale_, maxDepth_, mode_] := Graphics[ {}, ImageSize -> {350,420}]
 
 (*
 The initial proof tree already has an edge from original PS to initial PS, so this should not be called anymore
@@ -546,27 +550,44 @@ The initial proof tree already has an edge from original PS to initial PS, so th
 showProofNavigation[ {Depth -> _, node_List}, scale_] := Graphics[ proofStepNode[ {0, 0}, node, 18], ImageSize -> {350,420}, PlotRegion -> {{0.4, 0.6}, {0.6, 0.8}}]
 *)
 
-showProofNavigation[ {p__Rule}, scale_, maxDepth_] /; Length[ {p}] > 50 && $TMAproofSearchRunning :=
-    Module[ {i},
-    	Graphics[ Table[{EdgeForm[Thick], ColorData["TemperatureMap"][ i/maxDepth], 
-    		Rectangle[{0, i}, {5, i + 1}]}, {i, 1, $currentSearchLevel}], PlotRange -> {{-5, 10}, {0.9, maxDepth}}, ImageSize -> {350, 500}]
-    ]
-
-showProofNavigation[ {p__Rule}, scale_, maxDepth_] :=
-    Module[ {root = Cases[ {p}, {"OriginalPS", __}, {2}], geometry, font},
+showProofNavigation[ p:{__Rule}, scale_, maxDepth_, mode_] :=
+    Module[ {edges, root, geometry, font, framed},
+    	Switch[ mode,
+    		All,
+    		edges = p;
+    		root = Cases[ p, {"OriginalPS", __}, {2}];
+    		framed = False,
+    		Automatic,
+    		{edges, root} = zoomedTree[ p];
+    		framed = True;
+    	];
     	If[ scale === Fit,
     		geometry = {350,500},
     		(* else *)
-    		geometry = {Max[ Count[ {p}, _ -> {__, TERMINALNODE$|PRFSIT$, _}]*20, 350], Max[ $TMAcurrentDepth*15, 500]}*scale
+    		geometry = {Max[ Count[ p, _ -> {__, TERMINALNODE$|PRFSIT$, _}]*20, 350], Max[ $TMAcurrentDepth*15, 500]}*scale
     	];
     	font = 18-Ceiling[ Apply[ Times, geometry]/(350*500)];
         If[ root === {},
             translate[ "noRoot"],
-            TreePlot[ {p}, Automatic, First[ root], VertexRenderingFunction -> (proofStepNode[ #1, #2, font]&),
-            EdgeRenderingFunction -> ({Dashed, GrayLevel[0.5], Line[#1]}&), ImageSize -> geometry, AspectRatio -> 1/Apply[ Divide, geometry]]
+            TreePlot[ edges, Automatic, First[ root], VertexRenderingFunction -> (proofStepNode[ #1, #2, font]&),
+            EdgeRenderingFunction -> ({Dashed, GrayLevel[0.5], Line[#1]}&), ImageSize -> geometry, AspectRatio -> 1/Apply[ Divide, geometry],
+            Frame -> framed, FrameStyle -> Dotted]
         ]
     ]
 showProofNavigation[ args___] := unexpected[ showProofNavigation, {args}]
+
+zoomedTree[ p_List] :=
+	Module[{edges, nodes, root},
+		nodes = NestList[ parentNode[#, p] &, $lastVisitedNode, 5];
+		edges = Cases[ p, HoldPattern[{id_, __} /; MemberQ[ nodes, id] -> _]];
+		root = Cases[ p, HoldPattern[n:{id_, __} /; id === Last[ nodes] -> _] -> n, {1}, 1];
+		{edges, root}
+	]
+zoomedTree[ args___] := unexpected[ zoomedTree, {args}]
+
+parentNode[ id_, {___, {p_, __} -> {id_, __}, ___}] := p
+parentNode[ id_, T_] := id
+parentNode[ args___] := unexpected[ parentNode, {args}]
 
 proofStepNode[ pos_List, node:{ id_String, status_, type_, name_}, font_] := 
 	Module[{opacity = If[ TrueQ[ ruleTextActive[ name]], 1, 0.3], selectionMarker},
@@ -576,11 +597,15 @@ proofStepNode[ pos_List, node:{ id_String, status_, type_, name_}, font_] :=
 		];
 		Join[ selectionMarker,
 			{
-			Switch[ status,
-				pending, RGBColor[0.360784, 0.67451, 0.933333, opacity] (* steelblue *),
-				failed, RGBColor[1, 0.270588, 0, opacity] (* orangered *),
-				proved, RGBColor[0, 0.780392, 0.54902, opacity] (* turquoiseblue *),
-				_, Black],
+			If[ id === $lastVisitedNode,
+				Yellow,
+				(* else *)
+				Switch[ status,
+					pending, RGBColor[0.360784, 0.67451, 0.933333, opacity] (* steelblue *),
+					failed, RGBColor[1, 0.270588, 0, opacity] (* orangered *),
+					proved, RGBColor[0, 0.780392, 0.54902, opacity] (* turquoiseblue *),
+					_, Black]
+			],
 			Switch[ type,
 				PRFSIT$|PRFOBJ$, Disk[ pos, 0.1],
 				TERMINALNODE$, Map[ (pos + 0.1*#)&, Rectangle[ {-Sqrt[Pi]/2, -Sqrt[Pi]/2}, {Sqrt[Pi]/2, Sqrt[Pi]/2}]],
