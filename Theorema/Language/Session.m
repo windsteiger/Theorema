@@ -466,7 +466,7 @@ analyzeQuantifiedExpression[ Forall$TM[ r:RNG$[ __], c_, e_], outerVar_List] :=
 		(* watch out for all conditions involving the free variables in e ... *)
 		{rc, sc} = splitAnd[ c, freeE, False];
 		(* ... and collect all free variables therein: these are the variables that require the quantifiers, the others can be dropped *)
-		dropVar = Complement[ variables[ r], freeVariables[ rc], freeE];
+		dropVar = Complement[ rngVariables[ r], freeVariables[ rc], freeE];
 		(* all others and conditions involving the others can be dropped *)
 		thinnedRange = thinnedExpression[ r, dropVar];
 		If[ Length[ thinnedRange] == 0,

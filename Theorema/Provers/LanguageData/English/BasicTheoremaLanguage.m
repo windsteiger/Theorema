@@ -68,7 +68,7 @@ proofStepText[ notGoal|contradiction, lang, {{g_}}, {{opp_}}, ___] := {textCell[
 
 proofStepText[ andGoal, lang, {{g_}}, _, ___] := {textCell[ "For proving ", formulaReference[ g], " we prove the individual conjuncts."]};
 
-subProofHeader[ andGoal, lang, _, {generated_List}, pVal_, {p_}] := {textCell[ "Proof of ", formulaReference[ Part[ generated, p]], ":"],
+subProofHeader[ andGoal, lang, _, {generated_List}, ___, pVal_, {p_}] := {textCell[ "Proof of ", formulaReference[ Part[ generated, p]], ":"],
 	textCell[ "We need to prove"],
 	goalCell[ Part[ generated, p], "."]
 	};
@@ -86,7 +86,7 @@ proofStepText[ orGoal, lang, {{g_}}, {{negAssum__, newG_}}, ___] := {textCell[ "
 
 proofStepText[ orKB, lang, {{g_}}, {generated_List}, ___] := {textCell[ "Based on the assumption ", formulaReference[ g], " we distinguish several cases:"]};
 
-subProofHeader[ orKB, lang, _, {generated_List}, pVal_, {p_}] := {textCell[ "Case ", ToString[p], ": we assume"],
+subProofHeader[ orKB, lang, _, {generated_List}, ___, pVal_, {p_}] := {textCell[ "Case ", ToString[p], ": we assume"],
 	assumptionCell[ Part[ generated, p], "."]
 	};
 
@@ -108,7 +108,7 @@ proofStepText[ modusPonens, lang, {{impl_, lhs_}}, {{rhs_}}, ___] := {textCell[ 
 
 proofStepText[ equivGoal, lang, {{g_}}, _, ___] := {textCell[ "We prove both directions of ", formulaReference[ g], "."]};
 
-subProofHeader[ equivGoal, lang, _, _, pVal_, {p_}] := {textCell[ Switch[ p, 1, "\[RightArrow]", 2, "\[LeftArrow]"], ":"]};
+subProofHeader[ equivGoal, lang, _, _, ___, pVal_, {p_}] := {textCell[ Switch[ p, 1, "\[RightArrow]", 2, "\[LeftArrow]"], ":"]};
 
 proofStepText[ forallGoal, lang, {{g_}}, {{newG_}}, ___, "abf" -> v_List, ___] := {textCell[ "For proving ", formulaReference[ g], " we choose ", 
 	inlineTheoremaExpressionSeq[ v, lang], " arbitrary but fixed and show"],

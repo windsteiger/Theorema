@@ -46,7 +46,8 @@ With[ {lang = "English"},
 
 (* Theorema`Language`FormulaManipulation` *)
 	MessageName[freeVariables, "usage", lang] = "";	
-	MessageName[variables, "usage", lang] = "";	
+	MessageName[rngVariables, "usage", lang] = "";	
+	MessageName[rngConstants, "usage", lang] = "";	
 	MessageName[specifiedVariables, "usage", lang] = "";
 	MessageName[splitAnd, "usage", lang] = "";	
 	MessageName[makeConjunction, "usage", lang] = "";	

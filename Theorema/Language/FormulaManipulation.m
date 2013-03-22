@@ -94,7 +94,7 @@ thinnedExpression[ args___] := unexpected[ thinnedExpression, {args}]
 
 
 freeVariables[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[x__], cond_, expr_]] := 
-	Complement[ freeVariables[ {x, cond, expr}], variables[ r]]
+	Complement[ freeVariables[ {x, cond, expr}], rngVariables[ r]]
 freeVariables[ Hold[ l___]] := freeVariables[ {l}]
 freeVariables[ l_List] := Apply[ Union, Map[ freeVariables, l]]
 freeVariables[ f_[x___]] := freeVariables[ {f, x}]
@@ -104,11 +104,18 @@ freeVariables[ args___] := unexpected[ freeVariables, {args}]
 
 
 (* ::Subsubsection:: *)
-(* variables *)
+(* rngVariables *)
 
 
-variables[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[r___]] := Map[ First, {r}]
-variables[ args___] := unexpected[ variables, {args}]
+rngVariables[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[r___]] := Map[ First, {r}]
+rngVariables[ args___] := unexpected[ rngVariables, {args}]
+
+(* ::Subsubsection:: *)
+(* rngConstants *)
+
+
+rngConstants[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[r___]] := Map[ First, {r}]
+rngConstants[ args___] := unexpected[ rngConstants, {args}]
 
 
 (* ::Subsubsection:: *)
@@ -131,7 +138,7 @@ Clear[ substituteFree]
 substituteFree[ expr_Hold, {}] := expr
 substituteFree[ Hold[], _] := Hold[]
 substituteFree[ Hold[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[ rng__], cond_, form_]], rules_List] :=
-	Module[ {qvars = variables[ r], vars},
+	Module[ {qvars = rngVariables[ r], vars},
 		vars = Select[ rules, !MemberQ[ qvars, #[[1]]]&];
 		applyHold[ Hold[q], joinHold[ substituteFree[ Hold[r], vars], joinHold[ substituteFree[ Hold[cond], vars], substituteFree[ Hold[form], vars]]]]
 	]
@@ -209,7 +216,7 @@ stripUniversalQuantifiers[ Theorema`Language`Forall$TM[ r_, c_, f_]] :=
 		rc = rangeToCondition[ r];
 		{inner, cond, vars} = stripUniversalQuantifiers[ f];
 		cond = Join[ rc, cond];
-		{inner, If[ !TrueQ[ c], Prepend[ cond, c], cond], Join[ variables[ r], vars]}
+		{inner, If[ !TrueQ[ c], Prepend[ cond, c], cond], Join[ rngVariables[ r], vars]}
 	]
 stripUniversalQuantifiers[ Theorema`Language`Implies$TM[ l_, r_]] :=
 	Module[ {vars, cond, inner},
@@ -398,10 +405,13 @@ arbitraryButFixed[ expr_, rng_Theorema`Language`RNG$, kb_List:{}] :=
 	(*
 		Select all variable symbols from rng, then (for each v of them) find all FIX$[ v, n] constants in kb and take the maximal n, say n'.
 		A new constant then has the form FIX$[ v, n'+1], hence, we substitute all free VAR$[v] by FIX$[ v, n'+1].
-		If no FIX$[ v, n] occurs in kb, then n'+1 is -Infinity, we take 0 instead to create the first new constant FIX$[ v, 0]. *)
+		If no FIX$[ v, n] occurs in kb, then n'+1 is -Infinity, we take 0 instead to create the first new constant FIX$[ v, 0]. 
+		We return the expression with variables substituted by abf constants and a range expression expressing the ranges,
+		from which the constants have been derived. 
+	*)
 	Module[{vars = specifiedVariables[ rng], subs},
 		subs = Map[ Theorema`Language`VAR$[ #] -> Theorema`Language`FIX$[ #, Max[ Cases[ kb, Theorema`Language`FIX$[ #, n_] -> n, Infinity]] + 1]&, vars] /. -Infinity -> 0;
-		{substituteFree[ expr, subs], Map[ Part[ #, 2]&, subs]} 
+		{substituteFree[ expr, subs], rng /. subs} 
 	]
 arbitraryButFixed[ args___] := unexpected[ arbitraryButFixed, {args}]
 

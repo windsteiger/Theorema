@@ -172,8 +172,8 @@ PRFSIT$[ g:FML$[ _, Iff$TM[ P_, Q_], __], k_List, id_, rest___?OptionQ] :>
 (* FORALL *)
 
 inferenceRule[ forallGoal] = 
-PRFSIT$[ g:FML$[ _, u:Forall$TM[ rng_, cond_, A_], __], k_List, id_, rest___?OptionQ] :> 
-	Module[ {faBui, simp, rc, r, c, f, fix, newConds, newGoal},
+ps:PRFSIT$[ g:FML$[ _, u:Forall$TM[ rng_, cond_, A_], __], k_List, id_, rest___?OptionQ] :> 
+	Module[ {faBui, simp, rc, r, c, f, fix, newConds, newGoal, locInfo, locC},
 		(* we use computation regardless whether it is activated or not ... *)
 		faBui = buiActProve[ "Forall"];
 		buiActProve[ "Forall"] = True;
@@ -186,10 +186,13 @@ PRFSIT$[ g:FML$[ _, u:Forall$TM[ rng_, cond_, A_], __], k_List, id_, rest___?Opt
 				$Failed,
 				(* else *)
 				{{r, c, f}, fix} = arbitraryButFixed[ {rc, cond, A}, rng, {g, k}];
+				locInfo = ps.local;
+				locC = getLocalInfo[ locInfo, "constants"];
+				locInfo = putLocalInfo[ locInfo, "constants" -> Prepend[ locC, fix]];
 				newConds = Map[ makeFML[ formula -> #]&, DeleteCases[ Append[ r, c], True]];
 				newGoal = makeFML[ formula -> f];
-				makeANDNODE[ makePRFINFO[ name -> forallGoal, used -> g, generated -> Prepend[ newConds, newGoal], "abf" -> fix], 
-					newSubgoal[ goal -> newGoal, kb -> joinKB[ newConds, k], rest]]
+				makeANDNODE[ makePRFINFO[ name -> forallGoal, used -> g, generated -> Prepend[ newConds, newGoal], "abf" -> rngConstants[ fix]], 
+					newSubgoal[ goal -> newGoal, kb -> joinKB[ newConds, k], local -> locInfo, rest]]
 			],
 			(* else *)
 			simp = makeFML[ formula -> simp];
@@ -224,15 +227,18 @@ PRFSIT$[ g:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], k_List, id_, rest___?Opt
 	]
 
 inferenceRule[ existsKB] = 
-PRFSIT$[ g_, k:{pre___, e:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], post___}, id_, rest___?OptionQ] :> 
-	Module[ {simp, r, c, f, fix, newConds},
+ps:PRFSIT$[ g_, k:{pre___, e:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], post___}, id_, rest___?OptionQ] :> 
+	Module[ {simp, r, c, f, fix, newConds, locInfo, locC},
 		simp = computeInProof[ u];
 		If[ MatchQ[ simp, _Exists$TM],
 			(* no simplification *)
 			{{r, c, f}, fix} = arbitraryButFixed[ {rngToCondition[ rng], cond, A}, rng, {g, k}];
+			locInfo = ps.local;
+			locC = getLocalInfo[ locInfo, "constants"];
+			locInfo = putLocalInfo[ locInfo, "constants" -> Prepend[ locC, fix]];
 			newConds = Map[ makeFML[ formula -> #]&, DeleteCases[ Join[ r, {c, f}], True]];
-			makeANDNODE[ makePRFINFO[ name -> existsKB, used -> e, generated -> newConds, "abf" -> fix], 
-				newSubgoal[ goal -> g, kb -> joinKB[ newConds, {pre, post}], rest]],
+			makeANDNODE[ makePRFINFO[ name -> existsKB, used -> e, generated -> newConds, "abf" -> rngConstants[ fix]], 
+				newSubgoal[ goal -> g, kb -> joinKB[ newConds, {pre, post}], local -> locInfo, rest]],
 			(* else *)
 			simp = makeFML[ formula -> simp];
 			makeANDNODE[ makePRFINFO[ name -> existsKB, used -> e, generated -> simp], 
