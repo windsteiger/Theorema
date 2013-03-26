@@ -92,7 +92,7 @@ assumptionListCells[ {f___, l_}, sep_String, punct_String] :=
 	Module[{initial, term},
 		initial = Map[ assumptionCell[ #, sep]&, {f}];
 		term = assumptionCell[ l, punct];
-		Cell[ CellGroupData[ Append[ initial, term]]]
+		cellGroup[ Append[ initial, term]]
 	]
 assumptionListCells[ args___] := unexpected[ assumptionListCells, {args}]
 
@@ -109,6 +109,10 @@ textCell[ args___] := unexpected[ textCell, {args}]
 *)
 inlineTheoremaExpression[ expr_] := Cell[ ToBoxes[ expr, TheoremaForm]]
 inlineTheoremaExpression[ args___] := unexpected[ inlineTheoremaExpression, {args}]
+
+(* When grouping cells, note that the first element in the group must not be a group itself *)
+cellGroup[ l_List, status_:Open] := Cell[ CellGroupData[ l, status]]
+cellGroup[ args___] := unexpected[ cellGroup, {args}]
 
 End[]
 

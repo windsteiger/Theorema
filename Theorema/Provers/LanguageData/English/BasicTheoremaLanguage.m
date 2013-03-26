@@ -23,11 +23,13 @@ MessageName[ equivGoal, "usage", lang] = "Prove equivalence by double implicatio
 MessageName[ contradiction, "usage", lang] = "Prove by contradiction";
 MessageName[ forallGoal, "usage", lang] = "Prove universally quantified goal";
 MessageName[ forallKB, "usage", lang] = "Instantiate universally quantified formula";
+MessageName[ instantiate, "usage", lang] = "Instantiate universally quantified formula";
 MessageName[ existsGoal, "usage", lang] = "Prove existentially quantified goal by introducing meta variables";
 MessageName[ existsKB, "usage", lang] = "Instantiate existentially quantified formula";
 MessageName[ elementarySubstitution, "usage", lang] = "Elementary substitution based on equalities and equivalences oin the knowledge base";
 MessageName[ expandDef, "usage", lang] = "Expand definitions";
 MessageName[ eqIffKB, "usage", lang] = "Equalities/equivalences in KB for rewriting";
+MessageName[ instantiate, "usage", lang] = "Instantiate using constants available in the proof";
 
 ] (* With *)
 
@@ -230,6 +232,26 @@ subProofHeader[ expandDef, lang, u_, {___, {cond_}}, ___, "usedDefs" -> defs_Lis
 proofStepText[ eqIffKB, lang, {eqs__}, _, ___] := {textCell[ "We register ", formulaReferenceSequence[ eqs, lang], " to be used for rewriting."]
 	};
 
+proofStepText[ instantiate, lang, u_, {}, ___] := 
+	(* Instantiation has been tried, but none of them could be successfully applied *)
+	{textCell[ "New constants have been generated, but no instantiations could be carried out."]};
+	
+proofStepText[ instantiate, lang, u_, g_, ___, "instantiation" -> inst_List, ___] := 
+	Module[ {stepText = {textCell[ "There are new constants to be used for instantiation."]}, instText = {}, j, i},
+		(* Each of the g_i is a list of instances of u_i *)
+		Do[
+			instText = {textCell[ "We can instantiate ", formulaReference[ u[[j, 1]]], ":"]};
+			Do[
+				instText = Join[ instText,
+					{textCell[ "With ", inlineTheoremaExpression[ inst[[j, i]]], " we get"],
+					assumptionCell[ g[[j, i]], "."]}],
+				{i, Length[ g[[j]]]}
+			];
+			stepText = Append[ stepText, cellGroup[ instText]],
+			{j, Length[u]}
+		];
+		stepText
+	]
 	
 ] (* With *)
 

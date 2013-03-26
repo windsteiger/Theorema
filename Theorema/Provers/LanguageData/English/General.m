@@ -80,11 +80,13 @@ proofStepText[ invalidProofNode, lang, expr_, ___] := {textCell[ "The expression
 	Cell[ BoxData[ ToBoxes[ expr]], "Print"]};
 
 proofStepText[ noApplicableRule, lang, {{goal_FML$, kb___FML$}}, {}, ___, "openPS" -> ps_, ___] := 
-	Join[{textCell[ "There is no proof rule to apply. The open proof situation is:"]},
-		proofStepText[ openProofSituation, lang, {{goal, kb}}, {}],
-		{Cell[ CellGroupData[ {Cell[ "The proof situation data (for debugging)", "Text"],
-			Cell[ BoxData[ ToBoxes[ ps]], "Input"]}, Closed]]}
-	];
+	{Cell[ CellGroupData[
+		Join[{textCell[ "There is no proof rule to apply. The open proof situation is:"]},
+			proofStepText[ openProofSituation, lang, {{goal, kb}}, {}],
+			{Cell[ CellGroupData[ {Cell[ "The proof situation data (for debugging)", "Text"],
+			 Cell[ BoxData[ ToBoxes[ ps]], "Input"]}, Closed]]}
+		]
+	]]};
 
 proofStepText[ step_Symbol, lang, ___] := {
 	textCell[ ToString[ StringForm[ "We have no explanatory text for step '``'. Please implement the respective case for the function 'proofStepText'.", step]]]

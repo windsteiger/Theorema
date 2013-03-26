@@ -71,7 +71,7 @@ PRFSIT$[ g:FML$[ _, a_, __] /; !TrueQ[ !a] && FreeQ[ g, _META$], k_List, id_, re
 (* AND *)
 
 inferenceRule[ andGoal] = 
-PRFSIT$[ g:FML$[ _, And$TM[ c__], lab_, ___] /; FreeQ[ g, _META$], k_List, id_, rest___?OptionQ] :> 
+PRFSIT$[ g:FML$[ _, And$TM[ c__], lab_, ___] /; FreeQ[ {c}, _META$], k_List, id_, rest___?OptionQ] :> 
 	Module[ {conj},
 		conj = MapIndexed[ makeFML[ formula -> #1, label -> lab <> "." <> ToString[ #2[[1]]]]&, {c}];
 		makeANDNODE[ makePRFINFO[ name -> andGoal, used -> g, generated -> conj], 
@@ -93,7 +93,7 @@ PRFSIT$[ g_, {pre___, k:FML$[ _, And$TM[ c__], lab_, ___], post___}, id_, rest__
 (* OR *)
 
 inferenceRule[ orGoal] = 
-PRFSIT$[ g:FML$[ _, Or$TM[ a__, b_], lab_, ___], k_List, id_, rest___?OptionQ] :> 
+PRFSIT$[ g:FML$[ _, Or$TM[ a__, b_], lab_, ___] /; FreeQ[ {a, b}, _META$], k_List, id_, rest___?OptionQ] :> 
 	Module[ {negAssum, newG},
 		negAssum = MapIndexed[ makeFML[ formula -> Not$TM[#1], label -> lab <> "." <> ToString[ #2[[1]]]]&, {a}];
 		newG = makeFML[ formula -> b];
@@ -395,6 +395,68 @@ ps:PRFSIT$[ g_, k:{___, FML$[ _, (Iff$TM|Equal$TM)[ _, _?isQuantifierFree], __],
 
 
 (* ::Section:: *)
+(* Instantiation *)
+
+(*
+  We assume the local info of the PRFSIT has an entry "constants" -> L. The list L is a list of elementary ranges, e.g. SIMPRNG$, SETRNG$, etc.
+  Elements of the form RNG$[...] in L are ranges that have not yet been processed for instantiation, i.e. if L is free of RNG$_ then there
+  are no new contants for instantiation, otherwise we need to instantiate using RNG$ and then add the ranges (without the RNG$ wrapper) to L.
+*)
+
+inferenceRule[ instantiate] = 
+ps:PRFSIT$[ g_, K_List, id_, rest___?OptionQ] :> 
+	Module[ {locInfo = ps.local, oldConst, newConst, univKB = Cases[ K, FML$[ _, _Forall$TM, _]], instForm, orig = {}, new = {}, inst = {}, i},
+        (
+        instForm = Map[ instantiateForall[ #, newConst]&, univKB];
+        (* for each form in univKB we get a list {forms, inst}, where
+        	forms is a list of instantiations of form and
+        	inst is a list of substitutions, such that inst_i applied to form gives forms_i.
+        *)
+        Do[
+        	If[ instForm[[ i, 1]] === {},
+        		Continue[],
+        		(* else *)
+        		AppendTo[ orig, {univKB[[i]]}];
+        		AppendTo[ new, instForm[[ i, 1]]];
+        		AppendTo[ inst, instForm[[ i, 2]]]
+        	],
+        	{i, Length[ instForm]}
+        ];
+        locInfo = putLocalInfo[ locInfo, "constants" -> Join[ Apply[ List, newConst], oldConst]];
+		makeANDNODE[ makePRFINFO[ name -> instantiate, used -> orig, generated -> new, "instantiation" -> inst], 
+			newSubgoal[ goal -> g, kb -> Fold[ joinKB[ #2, #1]&, K, new], local -> locInfo, rest]
+		]
+		) /; ({newConst, oldConst} = constants[ locInfo]; newConst =!= {})
+	]
+
+constants[ loc_List] :=
+	Module[{L = getLocalInfo[ loc, "constants"], new, old},
+		new = Cases[ L, _RNG$];
+		old = Complement[ L, new];
+		{Apply[ Join, new], old}
+	]
+newConstants[ args___] := unexpected[ newConstants, {args}]
+
+instantiateForall[ f:FML$[ _, Forall$TM[ R1_RNG$, C_, A_], __], R2_RNG$] :=
+    Module[ {possibleInst = Select[ Tuples[ {R1, R2}], compatibleRange], inst = {}, subst = {}, S, i},
+        Do[
+        	S = MapThread[ Rule, {rngVariables[ RNG$[ possibleInst[[i, 1]]]], rngConstants[ RNG$[ possibleInst[[i, 2]]]]}];
+            AppendTo[ inst, makeFML[ formula -> substituteFree[ simplifiedForall[ Forall$TM[ DeleteCases[ R1, possibleInst[[i, 1]]], C, A]], S]]];
+            subst = Join[ subst, S],
+        	{i, Length[ possibleInst]}
+        ];
+        {inst, subst}
+    ]
+instantiateForall[ args___] := unexpected[ instantiateForall, {args}]
+
+compatibleRange[ {SIMPRNG$[ _], _}] := True
+compatibleRange[ {STEPRNG$[ _, l1_Integer, u1_Integer, s_], STEPRNG$[ _, l2_Integer, u2_Integer, s_]}] /; l1 <= l2 && u1 >= u2 := True
+compatibleRange[ {SETRNG$[ _, s_Set$TM], SETRNG$[ _, s_Set$TM]}] := True
+compatibleRange[ {_, _}] := False
+compatibleRange[ args___] := unexpected[ compatibleRange, {args}]
+
+
+(* ::Section:: *)
 (* Rule composition *)
 
 terminationRules = {"Termination Rules",
@@ -423,6 +485,7 @@ equalityRules = {"Equality Rules",
 registerRuleSet[ "Quantifier Rules", quantifierRules, {
 	{forallGoal, True, True, 10},
 	{forallKB, True, True, 70},
+	{instantiate, True, True, 35},
 	{existsGoal, True, True, 10},
 	{existsKB, True, True, 11}
 	}]

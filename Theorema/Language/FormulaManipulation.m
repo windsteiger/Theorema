@@ -68,6 +68,7 @@ makeDisjunction[ args___] := unexpected[ makeDisjunction, {args}]
 
 simplifiedAnd[ True] := True
 simplifiedAnd[ h_[ True...]] := True
+simplifiedAnd[ h_[ ___, False, ___]] := False
 
 simplifiedAnd[ expr_] :=  
 	Module[ {simp = Flatten[ expr //. {True -> Sequence[], (Theorema`Language`And$TM|Theorema`Computation`Language`And$TM)[a_] -> a}]},
@@ -78,6 +79,40 @@ simplifiedAnd[ expr_] :=
 		]
 	]
 simplifiedAnd[ args___] := unexpected[ simplifiedAnd, {args}]
+
+(* ::Subsubsection:: *)
+(* simplifiedOr *)
+
+simplifiedOr[ h_[ False...]] := False
+simplifiedOr[ h_[ ___, True, ___]] := True
+
+simplifiedOr[ expr_] :=  
+	Module[ {simp = Flatten[ expr //. {False -> Sequence[], (Theorema`Language`Or$TM|Theorema`Computation`Language`Or$TM)[a_] -> a}]},
+		If[ Length[ simp] === 0,
+			False,
+			(* else *)
+			simp
+		]
+	]
+simplifiedOr[ args___] := unexpected[ simplifiedOr, {args}]
+
+
+(* ::Subsubsection:: *)
+(* simplifiedImplies *)
+
+simplifiedImplies[ Theorema`Language`Implies$TM[ True, A_]] := A
+simplifiedImplies[ Theorema`Language`Implies$TM[ False, _]] := True
+simplifiedImplies[ Theorema`Language`Implies$TM[ _, True]] := True
+simplifiedImplies[ i_Theorema`Language`Implies$TM] := i
+simplifiedImplies[ args___] := unexpected[ simplifiedImplies, {args}]
+
+
+(* ::Subsubsection:: *)
+(* simplifiedForall *)
+
+simplifiedForall[ Theorema`Language`Forall$TM[ Theorema`Language`RNG$[], C_, A_]] := simplifiedImplies[ Theorema`Language`Implies$TM[ C, A]]
+simplifiedForall[ f_Theorema`Language`Forall$TM] := f
+simplifiedForall[ args___] := unexpected[ simplifiedForall, {args}]
 
 
 (* ::Subsubsection:: *)
@@ -106,13 +141,11 @@ freeVariables[ args___] := unexpected[ freeVariables, {args}]
 (* ::Subsubsection:: *)
 (* rngVariables *)
 
-
 rngVariables[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[r___]] := Map[ First, {r}]
 rngVariables[ args___] := unexpected[ rngVariables, {args}]
 
 (* ::Subsubsection:: *)
 (* rngConstants *)
-
 
 rngConstants[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[r___]] := Map[ First, {r}]
 rngConstants[ args___] := unexpected[ rngConstants, {args}]
@@ -120,7 +153,6 @@ rngConstants[ args___] := unexpected[ rngConstants, {args}]
 
 (* ::Subsubsection:: *)
 (* specifiedVariables *)
-
 
 specifiedVariables[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[r___]] := Map[ extractVar, {r}]
 specifiedVariables[ args___] := unexpected[ specifiedVariables, {args}]
