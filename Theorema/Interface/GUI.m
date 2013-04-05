@@ -113,6 +113,8 @@ initGUI[] :=
         $tcActionView = 1;
         (* Init status of opener views *)
         Scan[ ToExpression, Map[ "$builtinStructState$" <> # <> "=True"&, Map[ First, $tmaBuiltins]]];
+        $tcAllFormulaeOpener = True;
+        $tcAllDeclOpener = True;
 		$kbStruct = {};
 		$keyWord = "";
 		$initLabel = "???";
@@ -174,7 +176,7 @@ openTheoremaCommander[ ] /; $Notebooks :=
         		{translate["tcSessionTabLabel"], translate["tcProveTabLabel"], translate["tcComputeTabLabel"], translate["tcSolveTabLabel"], translate["tcPreferencesTabLabel"]},
         		(* for each activity the respective action buttons *)
         		{
-        			(* session *){translate["tcSessTabStructTabLabel"], translate["tcSessTabMathTabLabel"], translate["tcSessTabArchTabLabel"]},
+        			(* session *){translate["tcSessTabComposeTabLabel"], translate["tcSessTabInspectTabLabel"], translate["tcSessTabArchTabLabel"]},
         			(* prove *)  {translate["tcProveTabGoalTabLabel"], translate["tcProveTabKBTabLabel"], translate["tcProveTabBuiltinTabLabel"],
         				translate["tcProveTabProverTabLabel"], translate["tcProveTabSubmitTabLabel"], translate["tcProveTabInspectTabLabel"]},
         			(* compute *){translate["tcComputeTabSetupTabLabel"], translate["tcComputeTabKBTabLabel"], translate["tcComputeTabBuiltinTabLabel"]},
@@ -183,14 +185,14 @@ openTheoremaCommander[ ] /; $Notebooks :=
         		},
         		(* for each activity and each action the respective content *)
         		{
-        			(* session *){structButtons[], Dynamic[ Refresh[ langButtons[], TrackedSymbols :> {$buttonNat}]], archButtons[]},
+        			(* session *){sessionCompose[], sessionInspect[], sessionArchive[]},
         			(* prove *)  {Dynamic[ Refresh[ displaySelectedGoal[], UpdateInterval -> 2]],
         				Dynamic[Refresh[displayKBBrowser["prove"], TrackedSymbols :> {$kbStruct}]],
         				displayBuiltinBrowser["prove"],
         				Dynamic[ Refresh[ selectProver[], TrackedSymbols :> {$selectedRuleSet, $selectedStrategy,$keyWord}]],
         				Dynamic[ Refresh[ submitProveTask[ ], TrackedSymbols :> {$selectedProofGoal, $selectedProofKB, $selectedSearchDepth, $selectedSearchTime}]],
         				Dynamic[ Refresh[ proofNavigation[ $TMAproofTree], TrackedSymbols :> {$TMAproofTree, $TMAproofSearchRunning, $TMAproofNotebook, ruleTextActive, $proofTreeScale, $selectedProofStep}]]},
-        			(* compute *){Dynamic[Refresh[ compSetup[], TrackedSymbols :> {$buttonNat}]],
+        			(* compute *){compSetup[],
         				Dynamic[Refresh[displayKBBrowser["compute"], TrackedSymbols :> {$kbStruct}]],
         				displayBuiltinBrowser["compute"]},
         			(* solve *)  {Dynamic[Refresh[displayKBBrowser["solve"], TrackedSymbols :> {$kbStruct}]],
@@ -1549,27 +1551,36 @@ displayEnv[ args___] := unexpected[ displayEnv, {args}]
    
 allEnvironments = {"DEF", "THM", "LMA", "PRP", "COR", "CNJ", "ALG", "EXM"};
 
-structButtons[] :=
+sessionCompose[] :=
     Column[{
+    	Button[ translate[ "Virtual Keyboard"], virtualKeyboard[]],
     	Labeled[ Row[ {makeNbNewButton[], makeNbOpenButton[]}, Spacer[5]],
     		translate[ "Notebooks"], {{Top, Left}}],
     	Labeled[ Grid[ Partition[ Map[ makeEnvButton, allEnvironments], 4]],
     		translate[ "Environments"], {{Top, Left}}],
-    	Labeled[ Column[ {makeFormButton[], Dynamic[ showEnv[]]}, Left, Spacer[2]],
+    	Labeled[ Column[ {makeFormButton[], Dynamic[ Refresh[ langButtons[], TrackedSymbols :> {$buttonNat}]]}, Left, Spacer[2]],
     		translate[ "Formulae"], {{Top, Left}}],
-    	Labeled[ Column[ {makeDeclButtons[], Dynamic[ showDecl[]]}, Left, Spacer[2]],
+    	Labeled[ Column[ {makeDeclButtons[]}, Left, Spacer[2]],
     		translate[ "Declarations"], {{Top, Left}}]
     }]
-structButtons[args___] :=
-    unexpected[envButtons, {args}]
+sessionCompose[args___] :=
+    unexpected[sessionCompose, {args}]
 
+sessionInspect[ ] :=
+	Column[{
+    	Labeled[ Column[ {Dynamic[ showEnv[]]}, Left, Spacer[2]],
+    		translate[ "Formulae"], {{Top, Left}}],
+    	Labeled[ Column[ {showDecl[]}, Left, Spacer[2]],
+    		translate[ "Declarations"], {{Top, Left}}]
+    }]
+sessionInspect[ args___] := unexpected[ sessionInspect, {args}]
 
 
 (* ::Section:: *)
 (* Archives Tab *)
 
 
-archButtons[] :=
+sessionArchive[] :=
     Column[{
         Labeled[ Column[{
             Row[ {makeArchCreateButton[], makeArchNewButton[]}, Spacer[2]],
@@ -1577,7 +1588,7 @@ archButtons[] :=
         Labeled[ Column[{
             makeArchLoadButton[]}], translate[ "tcLangTabArchTabSectionLoad"], {{Top, Left}}]
     }]
-archButtons[args___] := unexpected[archButtons, {args}]
+sessionArchive[args___] := unexpected[sessionArchive, {args}]
 
 makeArchCreateButton[] :=
 	Button[ translate["tcLangTabArchTabButtonNewLabel"], 
@@ -1679,9 +1690,12 @@ setPreferences[ ] :=
     				  Button[ translate[ "apply color scheme"], applyColorScheme[ ], BaselinePosition -> Center]}, Spacer[2]], 
     		translate[ "tcPrefAppearColorSchemes"], {{Top, Left}}],
 		Labeled[ Row[{Checkbox[ Dynamic[ $suppressWelcomeScreen]], translate["tcPrefAppearSuppressWelcome"]}, Spacer[2]], 
-    		translate[ "tcPrefAppearWelcome"], {{Top, Left}}]
+    		translate[ "tcPrefAppearWelcome"], {{Top, Left}}],
+		Labeled[ Grid[{{RadioButton[Dynamic[$buttonNat], False], translate["tcSessTabMathTabBSform"], 
+			RadioButton[Dynamic[$buttonNat], True], translate["tcSessTabMathTabBSnat"]}}, Spacings -> {{{4, 0.5}}, Automatic}], 
+    		translate["tcSessTabMathTabBS"], {{Top, Left}}]
     	}],
-    	Spacer[{1,300}],
+    	Spacer[{1,260}],
 		savePreferencesButton[]
 	}
 	]
@@ -1722,10 +1736,10 @@ savePreferencesButton[ ] :=
         Column[{
         	Dynamic[ Refresh[ Row[{
         	translate["preferences last saved: "],
-            $prefsSaveStatus <> If[ {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen} === $savedValues,
+            $prefsSaveStatus <> If[ {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen, $buttonNat} === $savedValues,
                                         " \[Checkmark]",
                                         ""
-                                    ]}], TrackedSymbols :> {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen, $prefsSaveStatus}]],
+                                    ]}], TrackedSymbols :> {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen, $buttonNat, $prefsSaveStatus}]],
          Button[ translate["save current settings"], savePreferences[]]
         }, Center, ItemSize -> {28.2,1}, Dividers -> {{False}, 1 -> True}
         ]
@@ -1742,8 +1756,8 @@ savePreferences[ ] :=
 				DeleteFile[ prefsFile]
 			]
 		];
-		$savedValues = {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen};
-		Save[ prefsFile, {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen, $savedValues}];
+		$savedValues = {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen, $buttonNat};
+		Save[ prefsFile, {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen, $buttonNat, $savedValues}];
 		$prefsSaveStatus = DateString[ FileDate[ FileNameJoin[{$UserBaseDirectory, "Applications", "Theorema", "Kernel", "TheoremaPreferences.m"}]]];
 	]
 savePreferences[ args___] := unexpected[ savePreferences, {args}]
@@ -1753,8 +1767,6 @@ savePreferences[ args___] := unexpected[ savePreferences, {args}]
 (* ::Section:: *)
 (* Math Tab *)
 
-
-$buttonNat = False;
 
 langButtonData["AND1"] := 
 	{
@@ -1950,8 +1962,11 @@ langButtonData[args___] :=
 
 makeLangButton[ bname_String] :=
     With[ { bd = langButtonData[bname]},
-			Tooltip[ Button[ bd[[1]], 
-				FrontEndExecute[{NotebookApply[ InputNotebook[], RowBox[ {autoParenthesis[ "("], bd[[2]], autoParenthesis[ ")"]}], Placeholder]}], Appearance -> "DialogBox", Alignment -> {Left, Top}, ImageSize -> All],
+			Tooltip[ Button[ bd[[1]],
+				If[ CurrentValue[ "ShiftKey"],
+					FrontEndExecute[{NotebookApply[ InputNotebook[], bd[[2]], Placeholder]}],
+					FrontEndExecute[{NotebookApply[ InputNotebook[], RowBox[ {autoParenthesis[ "("], bd[[2]], autoParenthesis[ ")"]}], Placeholder]}]
+				], Appearance -> "DialogBox", Alignment -> {Left, Top}, ImageSize -> All],
 				"\[EscapeKey]"<>bd[[4]]<>"\[EscapeKey]", TooltipDelay -> 0.5]
     ]
 makeLangButton[args___] :=
@@ -1977,14 +1992,11 @@ makeButtonCategory[ {category_String, buttons_List}, cols_Integer:2] :=
 
 makeButtonCategory[ args___] := unexpected[ makeButtonCategory, {args}]
 
-langButtons[] := 
-	Column[{
-		Button[ translate[ "Virtual Keyboard"], virtualKeyboard[]],
-		Column[ Map[ makeButtonCategory, allFormulae]],
-		Row[{translate["tcSessTabMathTabBS"], 
-			Row[{RadioButton[Dynamic[$buttonNat], False], translate["tcSessTabMathTabBSform"]}, Spacer[2]], 
-			Row[{RadioButton[Dynamic[$buttonNat], True], translate["tcSessTabMathTabBSnat"]}, Spacer[2]]}, Spacer[10]]
-	}, Dividers -> Center, Spacings -> 2]
+langButtons[] :=
+    Pane[
+    	Column[ Map[ makeButtonCategory, allFormulae]],
+    	{350, 275}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
+
 langButtons[args___] :=
     unexpected[langButtons, {args}]
     
