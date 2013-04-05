@@ -28,6 +28,7 @@ MessageName[ existsGoal, "usage", lang] = "Prove existentially quantified goal b
 MessageName[ existsKB, "usage", lang] = "Instantiate existentially quantified formula";
 MessageName[ elementarySubstitution, "usage", lang] = "Elementary substitution based on equalities and equivalences oin the knowledge base";
 MessageName[ expandDef, "usage", lang] = "Expand definitions";
+MessageName[ eqGoal, "usage", lang] = "Prove equalities";
 MessageName[ eqIffKB, "usage", lang] = "Equalities/equivalences in KB for rewriting";
 MessageName[ instantiate, "usage", lang] = "Instantiate using constants available in the proof";
 
@@ -127,6 +128,21 @@ proofStepText[ forallGoal, lang, {{g_}}, {{newG_, assum__}}, ___, "abf" -> v_Lis
 proofStepText[ forallGoal, lang, {{g_}}, {{simpG_}}, ___] := {textCell[ "The universally quantified goal ", formulaReference[ g], " simplifies to"],
 	goalCell[ simpG, "."]
 	};
+
+proofStepText[ forallKB, lang, {{u_}}, {}, ___] := 
+	(* Instantiation has been tried, but was not successful *)
+	{textCell[ "No instantiation of ", formulaReference[ u], " possible."]};
+	
+proofStepText[ forallKB, lang, {{u_}}, {g_}, ___, "instantiation" -> inst_List, ___] :=
+    Module[ {instText = {textCell[ "We instantiate ", formulaReference[ u], ":"]}, i},
+        Do[
+            instText = Join[ instText,
+                {textCell[ "Using ", inlineTheoremaExpression[ inst[[ i]]], " we obtain"],
+                assumptionCell[ g[[ i]], "."]}],
+            {i, Length[ g]}
+        ];
+        instText
+    ];
 
 proofStepText[ existsGoal, lang, {{g_}}, {{newG_}}, ___, "meta" -> v_List, ___] := {textCell[ "For proving ", formulaReference[ g], " we have to find ",
 	If[ Length[v] == 1, "an appropriate value for ", "appropriate values for "],

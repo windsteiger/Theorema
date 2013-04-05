@@ -201,6 +201,26 @@ ps:PRFSIT$[ g:FML$[ _, u:Forall$TM[ rng_, cond_, A_], __], k_List, id_, rest___?
 		]
 	]
 
+inferenceRule[ forallKB] = 
+ps:PRFSIT$[ g_, K:{___, f:FML$[ _, _Forall$TM, __], ___}, id_, rest___?OptionQ] :> 
+	Catch[
+        Module[ {locInfo = ps.local, faInst, fk = f.key, newConst, oldConst, inst},
+            faInst = getLocalInfo[ locInfo, "forallKB"];
+            If[ MemberQ[ faInst, fk],
+            	(* Rule forallKB has already been applied for those forms *)
+                Throw[ $Failed]
+            ];
+            {newConst, oldConst} = constants[ locInfo];
+            (* we instantiate with the "old" constants only, because the new ones will be treated by the 'instantiate'-rule separately *)
+            inst = instantiateForall[ f, Apply[ RNG$, oldConst]];
+            
+            locInfo = putLocalInfo[ locInfo, "forallKB" -> Prepend[ faInst, fk]];
+            makeANDNODE[ makePRFINFO[ name -> forallKB, used -> f, generated -> inst[[1]], "instantiation" -> inst[[2]]], 
+                newSubgoal[ goal -> g, kb -> joinKB[ inst[[1]], K], local -> locInfo, rest]]
+        ]
+    ]
+
+
 (* ::Subsection:: *)
 (* EXITSTS *)
 
@@ -484,7 +504,7 @@ equalityRules = {"Equality Rules",
 
 registerRuleSet[ "Quantifier Rules", quantifierRules, {
 	{forallGoal, True, True, 10},
-	{forallKB, True, True, 70},
+	{forallKB, True, True, 40},
 	{instantiate, True, True, 35},
 	{existsGoal, True, True, 10},
 	{existsKB, True, True, 11}

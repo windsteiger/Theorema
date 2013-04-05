@@ -410,6 +410,7 @@ getLocalInfo[ li_List, key_] :=
 	]
 getLocalInfo[ args___] := unexpected[ getLocalInfo, {args}]
 
+putLocalInfo[ li_List, o1_, or__] := Fold[ putLocalInfo, li, {o1, or}]
 putLocalInfo[ li_List, type_[key_, val_]] :=
 	Module[{p = Position[ li, (Rule|RuleDelayed)[ key, _]]},
 		If[ p === {},
