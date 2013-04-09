@@ -111,7 +111,7 @@ proofStepText[ modusPonens, lang, {{impl_, lhs_}}, {{rhs_}}, ___] := {textCell[ 
 
 proofStepText[ equivGoal, lang, {{g_}}, _, ___] := {textCell[ "We prove both directions of ", formulaReference[ g], "."]};
 
-subProofHeader[ equivGoal, lang, _, _, ___, pVal_, {p_}] := {textCell[ Switch[ p, 1, "\[RightArrow]", 2, "\[LeftArrow]"], ":"]};
+subProofHeader[ equivGoal, lang, _, _, ___, pVal_, {p_}] := {textCell[ Switch[ p, 1, "\[DoubleRightArrow]", 2, "\[DoubleLeftArrow]"], ":"]};
 
 proofStepText[ forallGoal, lang, {{g_}}, {{newG_}}, ___, "abf" -> v_List, ___] := {textCell[ "For proving ", formulaReference[ g], " we choose ", 
 	inlineTheoremaExpressionSeq[ v, lang], " arbitrary but fixed and show"],
