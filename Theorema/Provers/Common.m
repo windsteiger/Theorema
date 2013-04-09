@@ -51,7 +51,7 @@ callProver[ ruleSetup:{_Hold, _List, _List}, strategy_, goal_FML$, kb_List, sear
 		$TMAcheckSuccess = True;
 		Clear[ $TMAproofNotebook];
 		initFormulaLabel[];
-		TimeConstrained[ proofSearch[ searchDepth], searchTime];
+		proofSearch[ searchDepth, searchTime];
 		$TMAproofSearchRunning = False;
 		{$TMAproofObject.proofValue, $TMAproofObject}
 	]
@@ -61,10 +61,11 @@ callProver[ args___] := unexpected[ callProver, {args}]
 (* ::Subsubsection:: *)
 (* proofSearch *)
 
-proofSearch[ searchDepth_Integer] :=
-    Module[ {openPSpos, openPS, selPSpos, selPS, pStrat, newSteps},
+proofSearch[ searchDepth_Integer, searchTime:(_Integer|Infinity)] :=
+    Module[ {startTime = SessionTime[], openPSpos, openPS, selPSpos, selPS, pStrat, newSteps},
     	$proofAborted = False;
-        While[ !$proofAborted && $TMAproofObject.proofValue === pending && (openPSpos = positionRelevantSits[ $TMAproofObject]) =!= {},
+        While[ SessionTime[] - startTime <= searchTime && !$proofAborted && $TMAproofObject.proofValue === pending && 
+        	(openPSpos = positionRelevantSits[ $TMAproofObject]) =!= {},
             openPS = Extract[ $TMAproofObject, openPSpos];
             {selPS, selPSpos} = chooseNextPS[ openPS, openPSpos];
             $currentSearchLevel = Length[ selPSpos];
