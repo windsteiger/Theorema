@@ -442,8 +442,8 @@ displaySelectedGoal[ ] :=
             With[ {selGoal = goal[[1]]},
             	Column[ {
             		Button[ translate[ "OKnext"], $selectedProofGoal = selGoal; $tcActionView++],
-            		Row[ displayLabeledFormula[ selGoal], Spacer[5]],
-            		Button[ translate[ "OKnext"], $selectedProofGoal = selGoal; $tcActionView++]}]
+            		Grid[ {displayLabeledFormula[ selGoal]}]
+            		}]
             ]
         ]
     ]
@@ -451,7 +451,7 @@ displaySelectedGoal[ goal_] :=
     Module[ { },
         If[ goal === {},
             translate["noGoal"],
-            Row[ displayLabeledFormula[ goal], Spacer[5]]
+            Grid[ {displayLabeledFormula[ goal]}]
         ]
     ]
 displaySelectedGoal[args___] :=
@@ -1232,19 +1232,10 @@ submitProveTask[ ] :=
 submitProveTask[ args___] := unexpected[ submitProveTask, {args}]
 
 execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, strategy_, searchDepth_, searchTime_, simplification_List] :=
-	Module[{nb = $proofInitNotebook, po, pv},
-		If[ NotebookFind[ nb, makeProofIDTag[ goal], All, CellTags] === $Failed,
-			NotebookFind[ nb, goal[[1,1]], All, CellTags];
-			NotebookFind[ nb, "CloseEnvironment", Next, CellStyle];
-			SelectionMove[ nb, After, CellGroup],
-			SelectionMove[ nb, All, CellGroup]
-		];
-		SetSelectedNotebook[ nb];
-		NotebookWrite[ nb, Cell[ translate[ "Proof of"]<>" "<>goal[[3]]<>": \[Ellipsis]", "OpenProof", CellTags -> makeProofIDTag[ goal]]];
-
-		{pv, po} = callProver[ rules, strategy, goal, kb, searchDepth, searchTime];
-		po = simplifyProof[ po, simplification];
-		printProveInfo[ goal, kb, ruleSet, strategy, {pv, po}, searchDepth];
+	Module[{po, pv, pt, st},
+		{pv, po, pt} = callProver[ rules, strategy, goal, kb, searchDepth, searchTime];
+		{po, st} = simplifyProof[ po, simplification];
+		printProveInfo[ goal, kb, ruleSet, strategy, {pv, po}, {pt, st}, searchDepth];
 	]
 execProveCall[ args___] := unexpected[ execProveCall, {args}]
 
@@ -1293,7 +1284,7 @@ printComputationInfo[] :=
                 With[ {kb = Cases[ DownValues[ kbSelectCompute],
                 	HoldPattern[ Verbatim[HoldPattern][ kbSelectCompute[ k_List]] :> v_] -> {k, v}],
                     allBui = bui},
-                    Button[ translate["SetEnv"], setCompEnv[ kb, allBui], ImageSize -> Automatic]
+                    Button[ translate["RestoreEnv"], setCompEnv[ kb, allBui], ImageSize -> Automatic]
                 ]}
             ]}, False]], "ComputationInfo"]];
     ]
@@ -1313,13 +1304,19 @@ setCompEnv[ args___] := unexpected[ setCompEnv, {args}]
 (* printProofInfo *)
 
 
-printProveInfo[ goal_, kb_, rules_, strategy_, {pVal_, proofObj_}, searchDepth_] :=
+printProveInfo[ goal_, kb_, rules_, strategy_, {pVal_, proofObj_}, {pTime_, sTime_}, searchDepth_] :=
     Module[ {kbAct, bui, buiAct},
         kbAct = Map[ makeLabel[ #.label]&, kb];
         bui = Cases[ DownValues[ buiActProve],
         	HoldPattern[ Verbatim[HoldPattern][ buiActProve[ op_String]] :> v_] -> {op, v}];
         buiAct = Cases[ bui, { op_, True} -> op];
-        NotebookFind[ $proofInitNotebook, makeProofIDTag[ goal], All, CellTags];
+        If[ NotebookFind[ $proofInitNotebook, makeProofIDTag[ goal], All, CellTags] === $Failed,
+			NotebookFind[ $proofInitNotebook, goal[[1,1]], All, CellTags];
+			NotebookFind[ $proofInitNotebook, "CloseEnvironment", Next, CellStyle];
+			SelectionMove[ $proofInitNotebook, After, CellGroup],
+			SelectionMove[ $proofInitNotebook, All, CellGroup]
+		];
+		SetSelectedNotebook[ $proofInitNotebook];
         NotebookWrite[ $proofInitNotebook, Cell[ TextData[ {translate[ "Proof of"]<>" ", formulaReference[ goal], ": ", 
         	Cell[ BoxData[ ToBoxes[ proofStatusIndicator[ pVal]]]]}],
         	"OpenProof", CellTags -> makeProofIDTag[ goal]]];
@@ -1336,7 +1333,7 @@ printProveInfo[ goal_, kb_, rules_, strategy_, {pVal_, proofObj_}, searchDepth_]
                 	HoldPattern[ Verbatim[HoldPattern][ kbSelectProve[ k_List]] :> v_] -> {k, v}],
                     allBui = bui, allRules = Cases[ DownValues[ ruleActive],
                 	HoldPattern[ Verbatim[HoldPattern][ ruleActive[ r_Symbol]] :> v_] -> {r, v}]},
-                    Button[ translate["SetEnv"], setProveEnv[ goal, allKB, allBui, rules, strategy, allRules, searchDepth], ImageSize -> Automatic]
+                    Button[ translate["RestoreEnv"], setProveEnv[ goal, allKB, allBui, rules, strategy, allRules, searchDepth], ImageSize -> Automatic]
                 ]}
             ]}, False]], "ProofInfo"]];
         NotebookWrite[ $proofInitNotebook, Cell[ "\[EmptySquare]", "CloseProof"]];

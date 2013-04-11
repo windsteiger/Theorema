@@ -111,7 +111,7 @@ With[ {lang = "English"},
 	MessageName[subProofHeaderId, "usage", lang] = "subProofHeaderId[ name_, lang_, pos_] generates the cell expression used as header for the subproof at position pos.";
 
 (* Theorema`Provers`Common` *)
-	MessageName[callProver, "usage", lang] = "callProver[ prover_, goal_, kb_] calls prover with goal and kb, returns a proof value and proof object.";
+	MessageName[callProver, "usage", lang] = "callProver[ prover_, goal_, kb_] calls prover with goal and kb, returns a proof value, a proof object, and the time elapsed.";
 	MessageName[simplifyProof, "usage", lang] = "simplifyProof[ proof_, {branches_, steps_, formulae_}] simplifies 'proof' according to the specified settings.";
 	MessageName[displayProof, "usage", lang] = "displayProof[ proofObject_] displays proofObject.";
 	MessageName[$TMAproofObject, "usage", lang] = "$TMAproofObject is the global proof object.";

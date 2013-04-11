@@ -43,7 +43,7 @@ initProver[] :=
 	]
 
 callProver[ ruleSetup:{_Hold, _List, _List}, strategy_, goal_FML$, kb_List, searchDepth_Integer, searchTime:(_Integer|Infinity)] :=
-	Module[{},
+	Module[ {timeElapsed},
 		$TMAproofSearchRunning = True;
 		$TMAcurrentDepth = 2;
 		$TMAproofTree = makeInitialProofTree[ ];
@@ -51,9 +51,9 @@ callProver[ ruleSetup:{_Hold, _List, _List}, strategy_, goal_FML$, kb_List, sear
 		$TMAcheckSuccess = True;
 		Clear[ $TMAproofNotebook];
 		initFormulaLabel[];
-		proofSearch[ searchDepth, searchTime];
+		timeElapsed = proofSearch[ searchDepth, searchTime];
 		$TMAproofSearchRunning = False;
-		{$TMAproofObject.proofValue, $TMAproofObject}
+		{$TMAproofObject.proofValue, $TMAproofObject, timeElapsed}
 	]
 callProver[ args___] := unexpected[ callProver, {args}]
 
@@ -81,6 +81,7 @@ proofSearch[ searchDepth_Integer, searchTime:(_Integer|Infinity)] :=
 			];
             $TMAproofObject = replaceProofSit[ $TMAproofObject, selPSpos -> newSteps];
             $TMAproofObject = propagateProofValues[ $TMAproofObject];
+            SessionTime[] - startTime
         ]
     ]
 proofSearch[ args___] := unexpected[ proofSearch, {args}]
@@ -190,7 +191,7 @@ isOptComponent[ args___] := unexpected[ isOptComponent, {args}]
 simplifyProof[ PRFOBJ$[ pi_, sub_, proved], simp_List /; Apply[ Or, simp]] := 
 (*	We call the function only if at least one of the simplification settings is True
 	*)
-	Module[{simpPo, sn, used, spi},
+	Module[{simpPo, sn, used, spi, startTime = SessionTime[]},
 		{sn, used} = simpNodes[ sub, simp];
 		If[ simp[[3]],
 			(* simplify formulae *)
@@ -200,9 +201,9 @@ simplifyProof[ PRFOBJ$[ pi_, sub_, proved], simp_List /; Apply[ Or, simp]] :=
 			simpPo = PRFOBJ$[ pi, sn, proved]
 		];		
 		$TMAproofTree = poToTree[ simpPo];
-		simpPo
+		{simpPo, SessionTime[] - startTime}
 	]
-simplifyProof[ po_PRFOBJ$, simp_List] := po
+simplifyProof[ po_PRFOBJ$, simp_List] := {po, 0.}
 simplifyProof[ args___] := unexpected[ simplifyProof, {args}]
 
 (*
