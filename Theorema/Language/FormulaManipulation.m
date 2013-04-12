@@ -103,6 +103,8 @@ simplifiedOr[ args___] := unexpected[ simplifiedOr, {args}]
 simplifiedImplies[ Theorema`Language`Implies$TM[ True, A_]] := A
 simplifiedImplies[ Theorema`Language`Implies$TM[ False, _]] := True
 simplifiedImplies[ Theorema`Language`Implies$TM[ _, True]] := True
+simplifiedImplies[ Theorema`Language`Implies$TM[ A_, Theorema`Language`Implies$TM[ B_, C_]]] := 
+	simplifiedImplies[ Theorema`Language`Implies$TM[ simplifiedAnd[ Theorema`Language`And$TM[ A, B]], C]]
 simplifiedImplies[ i_Theorema`Language`Implies$TM] := i
 simplifiedImplies[ args___] := unexpected[ simplifiedImplies, {args}]
 
@@ -114,6 +116,16 @@ simplifiedForall[ Theorema`Language`Forall$TM[ Theorema`Language`RNG$[], C_, A_]
 simplifiedForall[ f_Theorema`Language`Forall$TM] := f
 simplifiedForall[ args___] := unexpected[ simplifiedForall, {args}]
 
+
+(* ::Subsubsection:: *)
+(* standardForm *)
+
+standardFormQuantifier[ Theorema`Language`Forall$TM[ r1_Theorema`Language`RNG$, C1_, Theorema`Language`Forall$TM[ r2_Theorema`Language`RNG$, C2_, body_]]] :=
+	standardFormQuantifier[ Theorema`Language`Forall$TM[ Join[ r1, r2], simplifiedAnd[ Theorema`Language`And$TM[ C1, C2]], body]]
+standardFormQuantifier[ Theorema`Language`Forall$TM[ r_Theorema`Language`RNG$, C_, body_]] :=
+	Theorema`Language`Forall$TM[ r, True, simplifiedImplies[ Theorema`Language`Implies$TM[ C, body]]]
+standardFormQuantifier[ f_] := f
+standardFormQuantifier[ args___] := unexpected[ standardFormQuantifier, {args}]
 
 (* ::Subsubsection:: *)
 (* thinnedExpression *)
@@ -389,7 +401,7 @@ makeFML[ data___?OptionQ] :=
 			fs = computeInProof[ f],
 			fs = f
 		];
-		makeTmaFml[ k, fs, l, f]
+		makeTmaFml[ k, standardFormQuantifier[ fs], l, f]
 	]
 makeFML[ args___] := unexpected[ makeFML, {args}]
 
