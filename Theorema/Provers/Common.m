@@ -319,7 +319,7 @@ makePRFSIT[ data___?OptionQ] :=
 		{g, k, i, l, r, a, p, s} = {goal, kb, id, local, rules, ruleActivity, rulePriority, strategy} /. {data} /. Options[ makePRFSIT];
 		PRFSIT$[ g, k, i, local -> l, rules -> r, ruleActivity -> a, rulePriority -> p, strategy -> s, Apply[ Sequence, Select[ {data}, isOptComponent]]]
 	]
-makePRFSIT[ args___] := unexpected[ makePRFINFO, {args}]
+makePRFSIT[ args___] := unexpected[ makePRFSIT, {args}]
 
 (*
 	The selector p.rules immediately strips the Hold
