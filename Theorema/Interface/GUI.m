@@ -1168,16 +1168,21 @@ selectProver[ ] :=
     				Button[ "\[Infinity]", $selectedSearchTime=360, Appearance :> "Pressed"],
     				Button[ "\[Infinity]", $selectedSearchTime=Infinity]
     			]}]]}
-    		}, Alignment -> Left], translate[ "sLimits"], {{ Top, Left}}],
+    		}, Alignment -> Left], translate[ "sLimits"], {{Top, Left}}],
     	Labeled[ Grid[{
     		{Checkbox[ Dynamic[ $eliminateBranches]], translate[ "elimBranches"]},
     		{Checkbox[ Dynamic[ $eliminateSteps]], translate[ "elimSteps"]},
     		{Checkbox[ Dynamic[ $eliminateFormulae]], translate[ "elimForm"]}
     		}, Alignment -> {Left}], 
-    		translate[ "pSimp"], {{ Top, Left}}],
+    		translate[ "pSimp"], {{Top, Left}}],
+    	Labeled[ Grid[{
+    		{Checkbox[ Dynamic[ $interactiveProofSitSel]], translate[ "interactiveProofSitSel"]},
+    		{Checkbox[ Dynamic[ $interactiveNewProofSitFilter]], translate[ "interactiveNewProofSitFilter"]}
+    		}, Alignment -> {Left}], 
+    		translate[ "pInteractive"], {{Top, Left}}],
     	Labeled[ RadioButtonBar[ 
     		Dynamic[ $proofCellStatus], {Automatic -> translate[ "auto"], Open -> translate[ "open"], Closed -> translate[ "closed"]}], 
-    		translate[ "proofCellStatus"], {{ Top, Left}}],
+    		translate[ "proofCellStatus"], {{Top, Left}}],
     	Button[ translate[ "OKnext"], $tcActionView++]	
     	}]
 selectProver[ args___] := unexpected[ selectRuleSet, {args}]
@@ -1193,23 +1198,28 @@ submitProveTask[ ] :=
 					{$eliminateBranches, $eliminateSteps, $eliminateFormulae}], 
 				Method -> "Queued", Active -> ($selectedProofGoal =!= {})],
 			Column[{
-				Labeled[ displaySelectedGoal[ $selectedProofGoal], translate["selGoal"], {{ Top, Left}}],
-				Labeled[ displaySelectedKB[], translate["selKB"], {{ Top, Left}}]
+				Labeled[ displaySelectedGoal[ $selectedProofGoal], translate["selGoal"], {{Top, Left}}],
+				Labeled[ displaySelectedKB[], translate["selKB"], {{Top, Left}}]
 			}],
 			
 			Column[{				
-				Labeled[ displaySelectedRules[ $selectedRuleSet], translate[ "selectedRules"]<>":",{{Top,Left}}],
+				Labeled[ displaySelectedRules[ $selectedRuleSet], translate[ "selectedRules"]<>":", {{Top,Left}}],
 				Labeled[ MessageName[ Evaluate[ $selectedStrategy], "usage"], translate[ "pStrat"]<>":", Left],
 				Labeled[ $selectedSearchDepth, translate[ "sDepth"]<>":", Left],
 				Labeled[ $selectedSearchTime, translate[ "sTime"]<>":", Left],
-					Labeled[
-						Column[{
-    						If[ $eliminateBranches===True, translate[ "elimBranches"], Sequence[]],
-    						If[ $eliminateSteps===True, translate[ "elimSteps"], Sequence[]],
-    						If[ $eliminateFormulae===True, translate[ "elimForm"], Sequence[]]
-    					}]
-						, translate[ "pSimp"]<>":", Left
-					],
+				Labeled[
+					Column[{
+    					If[ TrueQ[ $eliminateBranches], translate[ "elimBranches"], Sequence[]],
+    					If[ TrueQ[ $eliminateSteps], translate[ "elimSteps"], Sequence[]],
+    					If[ TrueQ[ $eliminateFormulae], translate[ "elimForm"], Sequence[]]
+    				}],
+    				translate[ "pSimp"]<>":", Left],
+				Labeled[
+					Column[{
+    					If[ TrueQ[ $interactiveProofSitSel], translate[ "interactiveProofSitSel"], Sequence[]],
+    					If[ TrueQ[ $interactiveNewProofSitFilter], translate[ "interactiveNewProofSitFilter"], Sequence[]]
+    				}],
+    				translate[ "pInteractive"]<>":", Left],
 				Labeled[ 
 					Switch[ $proofCellStatus,
 						Automatic, translate[ "auto"],

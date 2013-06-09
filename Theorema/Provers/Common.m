@@ -151,7 +151,26 @@ chooseNextPS[ ps_List, psPos_List] :=
 	Module[{},
 		{First[ ps], First[ psPos]}
 	]
+chooseNextPS[ ps_List, psPos_List] /; $interactiveProofSitSel :=
+	Module[{ cells, psSel},
+		psChoice = ps[[1]].id;
+		cells = Append[ MapIndexed[ proofSitDisplay, ps], 
+			Cell[ BoxData[ ToBoxes[ DefaultButton[ DialogReturn[]]]]]];
+		DialogInput[ Notebook[ cells, StyleDefinitions -> makeColoredStylesheet[ "Proof"]]];
+		{psSel} = Position[ ps, _?(#.id === psChoice&), {1}];
+		{Extract[ ps, psSel], Extract[ psPos, psSel]}
+	]
 chooseNextPS[ args___] := unexpected[ chooseNextPS, {args}]
+
+proofSitDisplay[ ps_PRFSIT$, {num_Integer}] :=
+	Module[ {},
+		Cell[ CellGroupData[ 
+			{Cell[ TextData[{ Cell[ BoxData[ ToBoxes[ RadioButton[ Dynamic[ psChoice], ps.id]]]], 
+   			"  ", "Open proof situation #" <> ToString[ num]}], "Subsubsection", ShowGroupOpener -> False],
+			proofObjectToCell[ ps, pending]}, Dynamic[ If[ psChoice === ps.id, Open, Closed]]]]
+	]
+proofSitDisplay[ args___] := unexpected[ proofSitDisplay, {args}]
+
 
 replaceProofSit[ po_PRFOBJ$, pos_ -> p_PRFSIT$] :=
 	(* 

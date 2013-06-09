@@ -162,5 +162,7 @@ With[ {lang = "English"},
 	MessageName[$proofCellStatus, "usage", lang] = "$proofCellStatus determines the status (open/closed) of nested cells in the proof notebook.";
 	MessageName[$proofAborted, "usage", lang] = "$proofAborted is a flag that is checked whether the user tried to abort the running proof.";
 	MessageName[$currentSearchLevel, "usage", lang] = "$currentSearchLevel gives the search depth level of the last proof step performed.";
+	MessageName[$interactiveProofSitSel, "usage", lang] = "$interactiveProofSitSel indicates whether interactive selection of proof situations is activated.";
+	MessageName[$interactiveNewProofSitFilter, "usage", lang] = "$interactiveNewProofSitFilter indicates whether interactive filtering of proof situations is activated.";
 
 ]
