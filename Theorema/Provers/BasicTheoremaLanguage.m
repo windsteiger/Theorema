@@ -504,7 +504,7 @@ equalityRules = {"Equality Rules",
 
 registerRuleSet[ "Quantifier Rules", quantifierRules, {
 	{forallGoal, True, True, 10},
-	{forallKB, True, True, 40},
+	{forallKB, True, True, 40, "levelSat1"},
 	{instantiate, True, True, 35},
 	{existsGoal, True, True, 10},
 	{existsKB, True, True, 11}
