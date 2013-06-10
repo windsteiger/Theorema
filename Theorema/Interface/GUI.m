@@ -83,6 +83,7 @@ initGUI[] :=
         	{"Arithmetic",
         		{"Plus", RowBox[{"A","+","B"}], False, True, False},
         		{"Times", RowBox[{"A","*","B"}], False, True, False},
+        		{"Power", SuperscriptBox[ "A", "B"], False, True, False},
         		{"Equal", RowBox[{"A","=","B"}], False, False, False},
         		{"Less", RowBox[{"A","<","B"}], False, True, False},
         		{"LessEqual", RowBox[{"A","\[LessEqual]","B"}], False, True, False},

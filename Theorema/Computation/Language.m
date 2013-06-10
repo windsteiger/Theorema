@@ -44,6 +44,7 @@ setComputationContext[ args___] := unexpected[ setComputationContext, {args}]
    
 Plus$TM[ a__] /; buiActive["Plus"] := Plus[ a]
 Times$TM[ a__] /; buiActive["Times"] := Times[ a]
+Power$TM[ a_, b_] /; buiActive["Power"] := Power[ a, b]
 Equal$TM[ a_, b_] /; buiActive["Equal"] := a == b
 Less$TM[ a__] /; buiActive["Less"] := Less[ a]
 LessEqual$TM[ a__] /; buiActive["LessEqual"] := LessEqual[ a]
