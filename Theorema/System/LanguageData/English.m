@@ -43,6 +43,7 @@ With[ {lang = "English"},
 	MessageName[kbSelectProve, "usage", lang] = "kbSelectProve[ f] indicates whether the formula labeled f should go into the KB for a proof.";
 	MessageName[kbSelectCompute, "usage", lang] = "kbSelectCompute[ f] indicates whether the formula labeled f should be used in a computation.";
 	MessageName[kbSelectSolve, "usage", lang] = "kbSelectCompute[ f] indicates whether the formula labeled f should go into the KB for solve.";
+	MessageName[makeTmaExpression, "usage", lang] = "makeTmaExpression[ e] turns e into an expression in Theorema language.";
 
 (* Theorema`Language`FormulaManipulation` *)
 	MessageName[freeVariables, "usage", lang] = "";	
@@ -164,5 +165,7 @@ With[ {lang = "English"},
 	MessageName[$currentSearchLevel, "usage", lang] = "$currentSearchLevel gives the search depth level of the last proof step performed.";
 	MessageName[$interactiveProofSitSel, "usage", lang] = "$interactiveProofSitSel indicates whether interactive selection of proof situations is activated.";
 	MessageName[$interactiveNewProofSitFilter, "usage", lang] = "$interactiveNewProofSitFilter indicates whether interactive filtering of proof situations is activated.";
+	MessageName[$interactiveInstantiate, "usage", lang] = "$interactiveInstantiate indicates whether interactive instantiation is activated.";
+	MessageName[displayPrfsit, "usage", lang] = "displayPrfsit[ ps] generates a cell representation of the proof situation ps to be rendered in a notebook.";
 
 ]

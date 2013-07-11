@@ -465,17 +465,47 @@ arbitraryButFixed[ args___] := unexpected[ arbitraryButFixed, {args}]
 (* introduceMeta *)
 
 
-introduceMeta[ expr_, rng_Theorema`Language`RNG$, kb_List:{}] :=
+introduceMeta[ expr_, rng_Theorema`Language`RNG$, forms_List:{}] :=
 	(*
 		Select all variable symbols from rng, then (for each v of them) find all META$[ v, n, ...] in kb and take the maximal n, say n'.
 		A new meta variable then has the form META$[ v, n'+1, c], hence, we substitute all free VAR$[v] by META$[ v, n'+1, c].
 		If no META$[ v, n, ...] occurs in kb, then n'+1 is -Infinity, we take 0 instead to create the first new meta variable META$[ v, 0, c]. *)
 	Module[{vars = specifiedVariables[ rng], const, subs},
-		const = Union[ Cases[ kb, Theorema`Language`FIX$[ #, n_], Infinity]];
-		subs = Map[ Theorema`Language`VAR$[ #] -> Theorema`Language`META$[ #, Max[ Cases[ kb, Theorema`Language`META$[ #, n_] -> n, Infinity]] + 1, const]&, vars] /. -Infinity -> 0;
+		const = Union[ Cases[ forms, _Theorema`Language`FIX$, Infinity]];
+		subs = Map[ Theorema`Language`VAR$[ #] -> Theorema`Language`META$[ #, Max[ Cases[ forms, Theorema`Language`META$[ #, n_] -> n, Infinity]] + 1, const]&, vars] /. -Infinity -> 0;
 		{substituteFree[ expr, subs], Map[ Part[ #, 2]&, subs]} 
 	]
+introduceMeta[ expr_, rng_Theorema`Language`RNG$, forms_List] /; $interactiveInstantiate :=
+	Module[{vars = rngVariables[ rng], const, inst, subs},
+		const = Union[ Cases[ forms, _Theorema`Language`FIX$, Infinity]];
+		inst = getInstance[ vars, const, forms];
+		If[ inst === $Canceled,
+			Return[ { {Null, Null, Null}, $Canceled}],
+			inst = Map[ makeTmaExpression, inst];
+			subs = Thread[ vars -> inst];
+			{substituteFree[ expr, subs], subs}
+		]
+	]
 introduceMeta[ args___] := unexpected[ introduceMeta, {args}]
+
+getInstance[ v_, fix_, {g_, kb_}] :=
+    Module[ {expr, 
+    		fixBut = Map[ PasteButton[ theoremaDisplay[ #], With[ {fbox = ToBoxes[#, TheoremaForm]}, DisplayForm[ InterpretationBox[ fbox, #]]]]&, fix],
+    		buttonRow},
+        expr[_] = Null;
+        buttonRow = {CancelButton[], DefaultButton[ DialogReturn[ Array[ expr, Length[v]]]]};
+        DialogInput[ Notebook[ 
+        	Join[
+        		{displayPrfsit[ PRFSIT$[ g, kb, ""]]},
+        		MapIndexed[ Cell[ BoxData[ RowBox[ {ToBoxes[ #1, TheoremaForm], ":=", 
+        			ToBoxes[ InputField[ Dynamic[ expr[#2[[1]]]], Hold[ Expression], FieldSize -> 10]]}]], "Text"]&, v], 
+        		{Cell[ BoxData[ RowBox[ Map[ ToBoxes, fixBut]]], "Text"],
+        		Cell[ BoxData[ RowBox[ Map[ ToBoxes, buttonRow]]], "Text"]}
+        	],
+        	StyleDefinitions -> makeColoredStylesheet[ "Proof"], Deployed -> True]
+        ]
+    ]
+getInstance[ args___] := unexpected[ getInstance, {args}]
 
 
 

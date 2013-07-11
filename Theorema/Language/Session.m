@@ -119,6 +119,20 @@ markVariables[Hold[e_]] := Hold[e]
 
 markVariables[args___] := unexpected[ markVariables, {args}]
 
+(*
+	makeTmaExpression[ e] is the combination of functions that we export to be used in other places if needed.
+*)
+SetAttributes[ makeTmaExpression, HoldAll]
+makeTmaExpression[ e_Hold] := Block[ {$ContextPath},
+	$ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
+	ReleaseHold[ markVariables[ freshNames[ e]]]
+]
+makeTmaExpression[ e_] := Block[ {$ContextPath},
+	$ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
+	ReleaseHold[ markVariables[ freshNames[ Hold[ e]]]]
+]
+makeTmaExpression[ args___] := unexpected[ makeTmaExpression, {args}]
+
 openGlobalDeclaration[ expr_] :=
     Module[ {},
         $parseTheoremaGlobals = True;

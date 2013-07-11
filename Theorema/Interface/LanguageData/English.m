@@ -118,6 +118,7 @@ With[ {lang = "English"},
 	translate["pInteractive", lang] = "Interactive Proving";
 	translate["interactiveProofSitSel", lang] = "Select next proof situation interactively";
 	translate["interactiveNewProofSitFilter", lang] = "Filter new proof situations interactively";
+	translate["interactiveInstantiate", lang] = "Instantiate quantified formulae interactively";
 	translate["noRoot", lang] = "Cannot identify root of proof tree";
 	translate["proofCellStatus", lang] = "Initial status of nested proof cells";
 	translate["auto", lang] = "automatic";

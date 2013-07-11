@@ -235,9 +235,13 @@ PRFSIT$[ g:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], k_List, id_, rest___?Opt
 				$Failed,
 				(* else *)
 				{{r, c, f}, meta} = introduceMeta[ {rc, cond, A}, rng, {g, k}];
-				newGoal = makeFML[ formula -> Apply[ And$TM, DeleteCases[ Join[ r, {c, f}], True]]];
-				makeANDNODE[ makePRFINFO[ name -> existsGoal, used -> g, generated -> newGoal, "meta" -> meta], 
-					newSubgoal[ goal -> newGoal, kb -> k, rest]]
+				If[ meta === $Canceled, (* can happen in interactive proving *)
+					$Failed,
+					(* else *)
+					newGoal = makeFML[ formula -> Apply[ And$TM, DeleteCases[ Join[ r, {c, f}], True]]];
+					makeANDNODE[ makePRFINFO[ name -> existsGoal, used -> g, generated -> newGoal, "meta" -> meta], 
+						newSubgoal[ goal -> newGoal, kb -> k, rest]]
+				]
 			],
 			(* else *)
 			simp = makeFML[ formula -> simp];
@@ -246,6 +250,7 @@ PRFSIT$[ g:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], k_List, id_, rest___?Opt
 		]
 	]
 
+  
 inferenceRule[ existsKB] = 
 ps:PRFSIT$[ g_, k:{pre___, e:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], post___}, id_, rest___?OptionQ] :> 
 	Module[ {simp, r, c, f, fix, newConds, locInfo, locC},

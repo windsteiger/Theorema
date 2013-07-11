@@ -1178,7 +1178,8 @@ selectProver[ ] :=
     		translate[ "pSimp"], {{Top, Left}}],
     	Labeled[ Grid[{
     		{Checkbox[ Dynamic[ $interactiveProofSitSel]], translate[ "interactiveProofSitSel"]},
-    		{Checkbox[ Dynamic[ $interactiveNewProofSitFilter]], translate[ "interactiveNewProofSitFilter"]}
+    		{Checkbox[ Dynamic[ $interactiveNewProofSitFilter]], translate[ "interactiveNewProofSitFilter"]},
+    		{Checkbox[ Dynamic[ $interactiveInstantiate]], translate[ "interactiveInstantiate"]}
     		}, Alignment -> {Left}], 
     		translate[ "pInteractive"], {{Top, Left}}],
     	Labeled[ RadioButtonBar[ 
@@ -1218,7 +1219,8 @@ submitProveTask[ ] :=
 				Labeled[
 					Column[{
     					If[ TrueQ[ $interactiveProofSitSel], translate[ "interactiveProofSitSel"], Sequence[]],
-    					If[ TrueQ[ $interactiveNewProofSitFilter], translate[ "interactiveNewProofSitFilter"], Sequence[]]
+    					If[ TrueQ[ $interactiveNewProofSitFilter], translate[ "interactiveNewProofSitFilter"], Sequence[]],
+    					If[ TrueQ[ $interactiveInstantiate], translate[ "interactiveInstantiate"], Sequence[]]
     				}],
     				translate[ "pInteractive"]<>":", Left],
 				Labeled[ 

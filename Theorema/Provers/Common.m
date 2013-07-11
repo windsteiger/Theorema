@@ -151,13 +151,13 @@ chooseNextPS[ ps_List, psPos_List] :=
 	Module[{},
 		{First[ ps], First[ psPos]}
 	]
-chooseNextPS[ ps_List, psPos_List] /; $interactiveProofSitSel :=
+chooseNextPS[ ps_List, psPos_List] /; $interactiveProofSitSel && Length[ ps] > 1 :=
 	Module[{ cells, psSel},
-		psChoice = ps[[1]].id;
+		$selectedProofStep = ps[[1]].id;
 		cells = Append[ MapIndexed[ proofSitDisplay, ps], 
 			Cell[ BoxData[ ToBoxes[ DefaultButton[ DialogReturn[]]]]]];
-		DialogInput[ Notebook[ cells, StyleDefinitions -> makeColoredStylesheet[ "Proof"]]];
-		{psSel} = Position[ ps, _?(#.id === psChoice&), {1}];
+		DialogInput[ Notebook[ cells, ShowCellBracket -> False, StyleDefinitions -> makeColoredStylesheet[ "Proof"]]];
+		{psSel} = Position[ ps, _?(#.id === $selectedProofStep&), {1}];
 		{Extract[ ps, psSel], Extract[ psPos, psSel]}
 	]
 chooseNextPS[ args___] := unexpected[ chooseNextPS, {args}]
@@ -165,9 +165,9 @@ chooseNextPS[ args___] := unexpected[ chooseNextPS, {args}]
 proofSitDisplay[ ps_PRFSIT$, {num_Integer}] :=
 	Module[ {},
 		Cell[ CellGroupData[ 
-			{Cell[ TextData[{ Cell[ BoxData[ ToBoxes[ RadioButton[ Dynamic[ psChoice], ps.id]]]], 
-   			"  ", "Open proof situation #" <> ToString[ num]}], "Subsubsection", ShowGroupOpener -> False],
-			proofObjectToCell[ ps, pending]}, Dynamic[ If[ psChoice === ps.id, Open, Closed]]]]
+			{Cell[ TextData[{ Cell[ BoxData[ ToBoxes[ RadioButton[ Dynamic[ $selectedProofStep], ps.id]]]], 
+   			"  ", translate[ "open proof situation"], " #" <> ToString[ num]}], "Subsubsection", ShowGroupOpener -> False],
+			displayPrfsit[ ps]}, Dynamic[ If[ $selectedProofStep === ps.id, Open, Closed]]]]
 	]
 proofSitDisplay[ args___] := unexpected[ proofSitDisplay, {args}]
 
@@ -642,7 +642,7 @@ proofStepNode[ pos_List, node:{ id_String, status_, type_, name_}, font_] :=
        					_, proofNodeIndicator[ status, type, name]], 
 					{CurrentValue[ $TMAproofNotebook, "NotebookFileName"], id},
 					BaseStyle -> {FontSize -> font}, Active -> ValueQ[ $TMAproofNotebook] && ruleTextActive[ name]],
-					{"MouseClicked" :> ($selectedProofStep = id)}, PassEventsDown -> True], pos]]}
+					{"MouseClicked" :> If[ !$interactiveProofSitSel || type === PRFSIT$, $selectedProofStep = id]}, PassEventsDown -> True], pos]]}
 			}
 		]
 	]
@@ -793,6 +793,11 @@ cellStatus[ Automatic, _, _] := Open
 cellStatus[ Automatic, _] := Open
 cellStatus[ v_, _, _] := v
 cellStatus[ args___] := unexpected[ cellStatus, {args}]
+
+(* displayPrfsit exported to be used in other places *)
+displayPrfsit[ ps_PRFSIT$] := proofObjectToCell[ ps, pending]
+displayPrfsit[ args___] := unexpected[ displayPrfsit, {args}]
+
 
 
 (* ::Section:: *)

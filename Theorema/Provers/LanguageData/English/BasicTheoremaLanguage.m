@@ -144,6 +144,11 @@ proofStepText[ forallKB, lang, {{u_}}, {g_}, ___, "instantiation" -> inst_List, 
         instText
     ];
 
+proofStepText[ existsGoal, lang, {{g_}}, {{newG_}}, ___, "meta" -> v:{___Rule}, ___] := {textCell[ "For proving ", formulaReference[ g], 
+	", let ", inlineTheoremaExpressionSeq[ v, lang]," and then prove "],
+	goalCell[ newG, "."]
+	};
+
 proofStepText[ existsGoal, lang, {{g_}}, {{newG_}}, ___, "meta" -> v_List, ___] := {textCell[ "For proving ", formulaReference[ g], " we have to find ",
 	If[ Length[v] == 1, "an appropriate value for ", "appropriate values for "],
 	inlineTheoremaExpressionSeq[ v, lang], ", such that we can prove"],
