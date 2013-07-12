@@ -102,6 +102,8 @@ With[ {lang = "English"},
 	MessageName[$cellTagKeySeparator, "usage", lang] = "Separator between key and value in a cellTag.";
 	MessageName[printComputationInfo, "usage", lang] = "Print info about global knowledge used inside a computation";
 	MessageName[makeColoredStylesheet, "usage", lang] = "Generate a colored stylesheet from a template using the color scheme chosen in the preferences.";
+	MessageName[tmaDialogInput, "usage", lang] = "Theorema extension of Mathematica's DialogInput.";
+	MessageName[tmaNotebookPut, "usage", lang] = "Theorema extension of Mathematica's NotebookPut.";
 	
 (* Theorema`Interface`Language` *)
 	MessageName[translate, "usage", lang] = "translate[s_String,lang_String] gives string s in language lang.";

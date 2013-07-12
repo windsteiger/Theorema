@@ -2026,6 +2026,31 @@ makeCompButton[args___] :=
 partitionFill[ l_List, n_Integer, default_:""] := Partition[ PadRight[ l, n*Ceiling[ Length[ l]/n], default], n]
 partitionFill[ args___] := unexpected[ partitionFill, {args}]
 
+
+(* ::Section:: *)
+(* Windowing functions *)
+
+tmaNotebookPut[ nb_Notebook, style_String, opts___?OptionQ] :=
+	NotebookPut[ nb, 
+		StyleDefinitions -> makeColoredStylesheet[ style],
+		Magnification -> CurrentValue[ First[ getTheoremaCommander[]], Magnification],
+		opts
+	]
+tmaNotebookPut[ args___] := unexpected[ tmaNotebookPut, {args}]
+
+tmaDialogInput[ Notebook[ expr_, nbOpts___?OptionQ], style_String, opts___?OptionQ] :=
+	DialogInput[ 
+		Notebook[ expr, 
+			StyleDefinitions -> makeColoredStylesheet[ style],
+			Magnification -> CurrentValue[ First[ getTheoremaCommander[]], Magnification],
+			ShowCellBracket -> False, Deployed -> True,
+			WindowSize -> All,
+			WindowElements -> {"VerticalScrollBar", "HorizontalScrollBar", "StatusArea"},
+			opts
+		]
+	]
+tmaDialogInput[ args___] := unexpected[ tmaDialogInput, {args}]
+
 (* ::Section:: *)
 (* end of package *)
 

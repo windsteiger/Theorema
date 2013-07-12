@@ -177,4 +177,10 @@ With[ {lang = "English"},
     translate["tupleOfRange", lang] = "The tuple quantifier can only be used with step-ranges, not with ``.";
     translate["ambiguousRange", lang] = "The range `` does not unambiguously mark one variable.";
 
+(* Theorema`Provers`Common` *)
+    translate["more...", lang] = "more\[Ellipsis]";
+    translate["less...", lang] = "less\[Ellipsis]";
+    translate["showProofProgress", lang] = "Show the proof progress so far";
+    translate["hideProofProgress", lang] = "Hide proof progress";
+
 ]

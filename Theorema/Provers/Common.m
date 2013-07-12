@@ -152,21 +152,31 @@ chooseNextPS[ ps_List, psPos_List] :=
 		{First[ ps], First[ psPos]}
 	]
 chooseNextPS[ ps_List, psPos_List] /; $interactiveProofSitSel && Length[ ps] > 1 :=
-	Module[{ cells, psSel},
+	Module[{ proofCells, cells, psSel, showProof = False},
+		proofCells = proofObjectToCell[ $TMAproofObject];
+		$TMAproofNotebook = tmaNotebookPut[ Notebook[ proofCells], "Proof", Visible -> Dynamic[ showProof]];
 		$selectedProofStep = ps[[1]].id;
-		cells = Append[ MapIndexed[ proofSitDisplay, ps], 
-			Cell[ BoxData[ ToBoxes[ DefaultButton[ DialogReturn[]]]]]];
-		DialogInput[ Notebook[ cells, ShowCellBracket -> False, StyleDefinitions -> makeColoredStylesheet[ "Proof"]]];
+		cells = Join[ 
+			{Cell[ BoxData[ ToBoxes[ 
+				Toggler[ Dynamic[ showProof], 
+					{False -> Tooltip[ translate[ "more..."], translate[ "showProofProgress"]], 
+					 True -> Tooltip[ translate[ "less..."], translate[ "hideProofProgress"]]}]]], 
+				"Hint"
+				]},
+			MapIndexed[ proofSitDisplay, ps], 
+			{Cell[ BoxData[ ToBoxes[ DefaultButton[ DialogReturn[]]]]]}];
+		tmaDialogInput[ Notebook[ cells], "Dialog"];
+		NotebookClose[ $TMAproofNotebook];
 		{psSel} = Position[ ps, _?(#.id === $selectedProofStep&), {1}];
 		{Extract[ ps, psSel], Extract[ psPos, psSel]}
 	]
 chooseNextPS[ args___] := unexpected[ chooseNextPS, {args}]
-
+       	
 proofSitDisplay[ ps_PRFSIT$, {num_Integer}] :=
 	Module[ {},
 		Cell[ CellGroupData[ 
 			{Cell[ TextData[{ Cell[ BoxData[ ToBoxes[ RadioButton[ Dynamic[ $selectedProofStep], ps.id]]]], 
-   			"  ", translate[ "open proof situation"], " #" <> ToString[ num]}], "Subsubsection", ShowGroupOpener -> False],
+   			"  ", translate[ "open proof situation"], " #" <> ToString[ num]}], "Section", ShowGroupOpener -> False],
 			displayPrfsit[ ps]}, Dynamic[ If[ $selectedProofStep === ps.id, Open, Closed]]]]
 	]
 proofSitDisplay[ args___] := unexpected[ proofSitDisplay, {args}]

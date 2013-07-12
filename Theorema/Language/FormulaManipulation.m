@@ -479,7 +479,7 @@ introduceMeta[ expr_, rng_Theorema`Language`RNG$, forms_List] /; $interactiveIns
 	Module[{vars = rngVariables[ rng], const, inst, subs},
 		const = Union[ Cases[ forms, _Theorema`Language`FIX$, Infinity]];
 		inst = getInstance[ vars, const, forms];
-		If[ inst === $Canceled,
+		If[ MemberQ[ {$Canceled, $Failed}, inst],
 			Return[ { {Null, Null, Null}, $Canceled}],
 			inst = Map[ makeTmaExpression, inst];
 			subs = Thread[ vars -> inst];
@@ -494,15 +494,16 @@ getInstance[ v_, fix_, {g_, kb_}] :=
     		buttonRow},
         expr[_] = Null;
         buttonRow = {CancelButton[], DefaultButton[ DialogReturn[ Array[ expr, Length[v]]]]};
-        DialogInput[ Notebook[ 
+        tmaDialogInput[ Notebook[ 
         	Join[
         		{displayPrfsit[ PRFSIT$[ g, kb, ""]]},
         		MapIndexed[ Cell[ BoxData[ RowBox[ {ToBoxes[ #1, TheoremaForm], ":=", 
         			ToBoxes[ InputField[ Dynamic[ expr[#2[[1]]]], Hold[ Expression], FieldSize -> 10]]}]], "Text"]&, v], 
         		{Cell[ BoxData[ RowBox[ Map[ ToBoxes, fixBut]]], "Text"],
         		Cell[ BoxData[ RowBox[ Map[ ToBoxes, buttonRow]]], "Text"]}
+        		]
         	],
-        	StyleDefinitions -> makeColoredStylesheet[ "Proof"], Deployed -> True]
+        	"Dialog"
         ]
     ]
 getInstance[ args___] := unexpected[ getInstance, {args}]
