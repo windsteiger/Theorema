@@ -58,7 +58,9 @@ GreaterEqual$TM[ a__] /; buiActive["GreaterEqual"] := GreaterEqual[ a]
 
 
 Not$TM[ a_] /; buiActive["Not"] := Not[ a]
+And$TM[ pre___, a_, mid___, a_, post___] /; buiActive["And"] := And$TM[ pre, a, mid, post]
 And$TM[ a__] /; buiActive["And"] := And[ a]
+Or$TM[ pre___, a_, mid___, a_, post___] /; buiActive["Or"] := Or$TM[ pre, a, mid, post]
 Or$TM[ a__] /; buiActive["Or"] := Or[ a]
 Implies$TM[ a__] /; buiActive["Implies"] := Implies[ a]
 Iff$TM[ a__] /; buiActive["Iff"] := Equivalent[ a]
