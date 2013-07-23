@@ -44,6 +44,7 @@ With[ {lang = "English"},
 	MessageName[kbSelectCompute, "usage", lang] = "kbSelectCompute[ f] indicates whether the formula labeled f should be used in a computation.";
 	MessageName[kbSelectSolve, "usage", lang] = "kbSelectCompute[ f] indicates whether the formula labeled f should go into the KB for solve.";
 	MessageName[makeTmaExpression, "usage", lang] = "makeTmaExpression[ e] turns e into an expression in Theorema language.";
+	MessageName[computeInProof, "usage", lang] = "computeInProof[expr] computes expr within a proof.";
 
 (* Theorema`Language`FormulaManipulation` *)
 	MessageName[freeVariables, "usage", lang] = "";	
@@ -78,7 +79,7 @@ With[ {lang = "English"},
 	MessageName[formulaReference, "usage", lang] = "formulaReference[ fml] gives a hyperlink to the formula.";
 	MessageName[arbitraryButFixed, "usage", lang] = "arbitraryButFixed[ expr, rng] substitutes all free occurrences of variables specified by the range rng in expr by a new constant.";
 	MessageName[introduceMeta, "usage", lang] = "introduceMeta[ expr, rng] substitutes all free occurrences of variables specified by the range rng in expr by a fresh meta variable.";
-	MessageName[computeInProof, "usage", lang] = "computeInProof[expr] computes expr within a proof.";
+	MessageName[instantiateInteractive, "usage", lang] = "instantiateInteractive[ expr, rng] substitutes all free occurrences of variables specified by the range rng in expr by a term obtained from a user dialog.";
 	MessageName[rngToCondition, "usage", lang] = "rngToCondition[rng] transforms the range specification rng into a list of conditions.";
 	MessageName[joinKB, "usage", lang] = "joinKB[ kb1_List, kb2_List] joins the two knowledge bases and deletes duplicate entries.";
 	MessageName[appendKB, "usage", lang] = "appendKB[ kb_List, fml] appends fml to the knowledge base kb and deletes duplicate entries.";
@@ -102,8 +103,10 @@ With[ {lang = "English"},
 	MessageName[$cellTagKeySeparator, "usage", lang] = "Separator between key and value in a cellTag.";
 	MessageName[printComputationInfo, "usage", lang] = "Print info about global knowledge used inside a computation";
 	MessageName[makeColoredStylesheet, "usage", lang] = "Generate a colored stylesheet from a template using the color scheme chosen in the preferences.";
-	MessageName[tmaDialogInput, "usage", lang] = "Theorema extension of Mathematica's DialogInput.";
-	MessageName[tmaNotebookPut, "usage", lang] = "Theorema extension of Mathematica's NotebookPut.";
+	MessageName[tmaNotebookPut, "usage", lang] = "Theorema version of Mathematica's NotebookPut.";
+	MessageName[tmaDialogInput, "usage", lang] = "Theorema version of Mathematica's DialogInput.";
+	MessageName[getInstanceDialog, "usage", lang] = "The dialog window asking for an instantiation.";
+	MessageName[nextProofSitDialog, "usage", lang] = "The dialog window for choosing the next proof situation.";
 	
 (* Theorema`Interface`Language` *)
 	MessageName[translate, "usage", lang] = "translate[s_String,lang_String] gives string s in language lang.";
@@ -167,7 +170,7 @@ With[ {lang = "English"},
 	MessageName[$currentSearchLevel, "usage", lang] = "$currentSearchLevel gives the search depth level of the last proof step performed.";
 	MessageName[$interactiveProofSitSel, "usage", lang] = "$interactiveProofSitSel indicates whether interactive selection of proof situations is activated.";
 	MessageName[$interactiveNewProofSitFilter, "usage", lang] = "$interactiveNewProofSitFilter indicates whether interactive filtering of proof situations is activated.";
-	MessageName[$interactiveInstantiate, "usage", lang] = "$interactiveInstantiate indicates whether interactive instantiation is activated.";
-	MessageName[displayPrfsit, "usage", lang] = "displayPrfsit[ ps] generates a cell representation of the proof situation ps to be rendered in a notebook.";
+	MessageName[pSitCells, "usage", lang] = "pSitCells[ ps] generates a cell representation of the proof situation ps to be rendered in a notebook.";
+	MessageName[pObjCells, "usage", lang] = "pObjCells[ po] generates a cell representation of the proof object po (default: $TMAproofObject) to be rendered in a notebook.";
 
 ]

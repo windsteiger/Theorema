@@ -475,38 +475,21 @@ introduceMeta[ expr_, rng_Theorema`Language`RNG$, forms_List:{}] :=
 		subs = Map[ Theorema`Language`VAR$[ #] -> Theorema`Language`META$[ #, Max[ Cases[ forms, Theorema`Language`META$[ #, n_] -> n, Infinity]] + 1, const]&, vars] /. -Infinity -> 0;
 		{substituteFree[ expr, subs], Map[ Part[ #, 2]&, subs]} 
 	]
-introduceMeta[ expr_, rng_Theorema`Language`RNG$, forms_List] /; $interactiveInstantiate :=
+introduceMeta[ args___] := unexpected[ introduceMeta, {args}]
+
+instantiateInteractive[ expr_, rng_Theorema`Language`RNG$, forms_List] :=
 	Module[{vars = rngVariables[ rng], const, inst, subs},
 		const = Union[ Cases[ forms, _Theorema`Language`FIX$, Infinity]];
-		inst = getInstance[ vars, const, forms];
-		If[ MemberQ[ {$Canceled, $Failed}, inst],
-			Return[ { {Null, Null, Null}, $Canceled}],
+		inst = getInstanceDialog[ vars, const, forms];
+		If[ inst === $Failed,
+			Return[ { {Null, Null, Null}, $Failed}],
+			(* else *)
 			inst = Map[ makeTmaExpression, inst];
 			subs = Thread[ vars -> inst];
 			{substituteFree[ expr, subs], subs}
 		]
 	]
-introduceMeta[ args___] := unexpected[ introduceMeta, {args}]
-
-getInstance[ v_, fix_, {g_, kb_}] :=
-    Module[ {expr, 
-    		fixBut = Map[ PasteButton[ theoremaDisplay[ #], With[ {fbox = ToBoxes[#, TheoremaForm]}, DisplayForm[ InterpretationBox[ fbox, #]]]]&, fix],
-    		buttonRow},
-        expr[_] = Null;
-        buttonRow = {CancelButton[], DefaultButton[ DialogReturn[ Array[ expr, Length[v]]]]};
-        tmaDialogInput[ Notebook[ 
-        	Join[
-        		{displayPrfsit[ PRFSIT$[ g, kb, ""]]},
-        		MapIndexed[ Cell[ BoxData[ RowBox[ {ToBoxes[ #1, TheoremaForm], ":=", 
-        			ToBoxes[ InputField[ Dynamic[ expr[#2[[1]]]], Hold[ Expression], FieldSize -> 10]]}]], "Text"]&, v], 
-        		{Cell[ BoxData[ RowBox[ Map[ ToBoxes, fixBut]]], "Text"],
-        		Cell[ BoxData[ RowBox[ Map[ ToBoxes, buttonRow]]], "Text"]}
-        		]
-        	],
-        	"Dialog"
-        ]
-    ]
-getInstance[ args___] := unexpected[ getInstance, {args}]
+instantiateInteractive[ args___] := unexpected[ instantiateInteractive, {args}]
 
 
 
@@ -534,19 +517,6 @@ singleRngToCondition[ Theorema`Language`PREDRNG$[ v_, P_]] := {P[ v]}
 singleRngToCondition[ u_] := {$Failed}
 singleRngToCondition[ args___] := unexpected[ singleRngToCondition, {args}]
 
-
-(* ::Section:: *)
-(* Computation within proving *)
-
-
-computeInProof[ expr_] :=
-	Module[{simp},
-		setComputationContext[ "prove"];
-		simp = ToExpression[ StringReplace[ ToString[ expr], "Theorema`Language`" -> "Theorema`Computation`Language`"]];
-		setComputationContext[ "none"];
-		ToExpression[ StringReplace[ ToString[ simp], "Theorema`Computation`" -> "Theorema`"]]
-	]
-computeInProof[ args___] := unexpected[ computeInProof, {args}]
 
 (* ::Subsubsection:: *)
 (* KB operations *)

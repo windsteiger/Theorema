@@ -152,36 +152,15 @@ chooseNextPS[ ps_List, psPos_List] :=
 		{First[ ps], First[ psPos]}
 	]
 chooseNextPS[ ps_List, psPos_List] /; $interactiveProofSitSel && Length[ ps] > 1 :=
-	Module[{ proofCells, cells, psSel, showProof = False},
-		proofCells = proofObjectToCell[ $TMAproofObject];
-		$TMAproofNotebook = tmaNotebookPut[ Notebook[ proofCells], "Proof", Visible -> Dynamic[ showProof]];
+	Module[{ psSel},
 		$selectedProofStep = ps[[1]].id;
-		cells = Join[ 
-			{Cell[ BoxData[ ToBoxes[ 
-				Toggler[ Dynamic[ showProof], 
-					{False -> Tooltip[ translate[ "more..."], translate[ "showProofProgress"]], 
-					 True -> Tooltip[ translate[ "less..."], translate[ "hideProofProgress"]]}]]], 
-				"Hint"
-				]},
-			MapIndexed[ proofSitDisplay, ps], 
-			{Cell[ BoxData[ ToBoxes[ DefaultButton[ DialogReturn[]]]]]}];
-		tmaDialogInput[ Notebook[ cells], "Dialog"];
+		nextProofSitDialog[ ps];
 		NotebookClose[ $TMAproofNotebook];
 		{psSel} = Position[ ps, _?(#.id === $selectedProofStep&), {1}];
 		{Extract[ ps, psSel], Extract[ psPos, psSel]}
 	]
 chooseNextPS[ args___] := unexpected[ chooseNextPS, {args}]
        	
-proofSitDisplay[ ps_PRFSIT$, {num_Integer}] :=
-	Module[ {},
-		Cell[ CellGroupData[ 
-			{Cell[ TextData[{ Cell[ BoxData[ ToBoxes[ RadioButton[ Dynamic[ $selectedProofStep], ps.id]]]], 
-   			"  ", translate[ "open proof situation"], " #" <> ToString[ num]}], "Section", ShowGroupOpener -> False],
-			displayPrfsit[ ps]}, Dynamic[ If[ $selectedProofStep === ps.id, Open, Closed]]]]
-	]
-proofSitDisplay[ args___] := unexpected[ proofSitDisplay, {args}]
-
-
 replaceProofSit[ po_PRFOBJ$, pos_ -> p_PRFSIT$] :=
 	(* 
 	This is a special case needed when building up the initial proof object.
@@ -745,7 +724,7 @@ displayProof[ p_PRFOBJ$] :=
 	Module[{ cells, tree = poToTree[ p]},
 		cells = proofObjectToCell[ p];
 		$TMAproofObject = p;
-		$TMAproofNotebook = NotebookPut[ Notebook[ cells, StyleDefinitions -> makeColoredStylesheet[ "Proof"]]];
+		$TMAproofNotebook = tmaNotebookPut[ Notebook[ cells], "Proof"];
 		$TMAproofTree = tree; 
 		$selectedProofStep = "OriginalPS";
 		With[ {nb = $TMAproofNotebook, tr = tree},
@@ -804,10 +783,14 @@ cellStatus[ Automatic, _] := Open
 cellStatus[ v_, _, _] := v
 cellStatus[ args___] := unexpected[ cellStatus, {args}]
 
-(* displayPrfsit exported to be used in other places *)
-displayPrfsit[ ps_PRFSIT$] := proofObjectToCell[ ps, pending]
-displayPrfsit[ args___] := unexpected[ displayPrfsit, {args}]
+(* pSitCells exported to be used in other places *)
+pSitCells[ ps_PRFSIT$] := proofObjectToCell[ ps, pending]
+pSitCells[ args___] := unexpected[ pSitCells, {args}]
 
+(* pObjCells exported to be used in other places *)
+pObjCells[ ] := pObjCells[ $TMAproofObject]
+pObjCells[ po_PRFOBJ$] := proofObjectToCell[ po]
+pObjCells[ args___] := unexpected[ pObjCells, {args}]
 
 
 (* ::Section:: *)

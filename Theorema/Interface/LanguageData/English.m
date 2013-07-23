@@ -118,7 +118,7 @@ With[ {lang = "English"},
 	translate["pInteractive", lang] = "Interactive Proving";
 	translate["interactiveProofSitSel", lang] = "Select next proof situation interactively";
 	translate["interactiveNewProofSitFilter", lang] = "Filter new proof situations interactively";
-	translate["interactiveInstantiate", lang] = "Instantiate quantified formulae interactively";
+	translate["interactiveInstantiate", lang] = "Instantiate quantifiers interactively";
 	translate["noRoot", lang] = "Cannot identify root of proof tree";
 	translate["proofCellStatus", lang] = "Initial status of nested proof cells";
 	translate["auto", lang] = "automatic";
@@ -134,6 +134,7 @@ With[ {lang = "English"},
 	translate["apply color scheme", lang] = "Apply color scheme";
 	translate["save current settings", lang] = "Save current settings";
 	translate["preferences last saved: ", lang] = "Preferences last saved: ";
+	translate["instantiate later", lang] = "Instantiate later";
 
 	translate["Virtual Keyboard", lang] = "Virtual Keyboard";
 	    
@@ -178,9 +179,9 @@ With[ {lang = "English"},
     translate["ambiguousRange", lang] = "The range `` does not unambiguously mark one variable.";
 
 (* Theorema`Provers`Common` *)
-    translate["more...", lang] = "more\[Ellipsis]";
-    translate["less...", lang] = "less\[Ellipsis]";
+    translate["more", lang] = "more \[Ellipsis]";
+    translate["hide proof", lang] = "hide proof";
     translate["showProofProgress", lang] = "Show the proof progress so far";
-    translate["hideProofProgress", lang] = "Hide proof progress";
+    translate["hideProofProgress", lang] = "Hide the proof by clicking here. Do not close the proof window, since it cannot be re-opened then.";
 
 ]

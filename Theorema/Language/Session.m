@@ -774,6 +774,21 @@ renameToStandardContext[ expr_] :=
 	]
 renameToStandardContext[ args___] := unexpected[ renameToStandardContext, {args}]
 
+(* ::Section:: *)
+(* Computation within proving *)
+
+computeInProof[ expr_] :=
+	Module[{simp},
+		setComputationContext[ "prove"];
+		simp = ToExpression[ StringReplace[ ToString[ expr], "Theorema`Language`" -> "Theorema`Computation`Language`"]];
+		setComputationContext[ "none"];
+		(* simp does not evaluate further *)
+		With[ {res = simp},
+			ToExpression[ StringReplace[ ToString[ renameToStandardContext[ res]], "Theorema`Computation`" -> "Theorema`"]]
+		]
+	]
+computeInProof[ args___] := unexpected[ computeInProof, {args}]
+
 
 (* ::Section:: *)
 (* end of package *)

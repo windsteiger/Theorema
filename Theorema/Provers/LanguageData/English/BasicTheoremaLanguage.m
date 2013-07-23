@@ -23,8 +23,10 @@ MessageName[ equivGoal, "usage", lang] = "Prove equivalence by double implicatio
 MessageName[ contradiction, "usage", lang] = "Prove by contradiction";
 MessageName[ forallGoal, "usage", lang] = "Prove universally quantified goal";
 MessageName[ forallKB, "usage", lang] = "Instantiate universally quantified formula";
+MessageName[ forallKBInteractive, "usage", lang] = "Interactively instantiate universally quantified formula";
 MessageName[ instantiate, "usage", lang] = "Instantiate universally quantified formula";
 MessageName[ existsGoal, "usage", lang] = "Prove existentially quantified goal by introducing meta variables";
+MessageName[ existsGoalInteractive, "usage", lang] = "Prove existentially quantified goal by interactive instantiation";
 MessageName[ existsKB, "usage", lang] = "Instantiate existentially quantified formula";
 MessageName[ elementarySubstitution, "usage", lang] = "Elementary substitution based on equalities and equivalences oin the knowledge base";
 MessageName[ expandDef, "usage", lang] = "Expand definitions";
@@ -144,11 +146,6 @@ proofStepText[ forallKB, lang, {{u_}}, {g_}, ___, "instantiation" -> inst_List, 
         instText
     ];
 
-proofStepText[ existsGoal, lang, {{g_}}, {{newG_}}, ___, "meta" -> v:{___Rule}, ___] := {textCell[ "For proving ", formulaReference[ g], 
-	", let ", inlineTheoremaExpressionSeq[ v, lang]," and then prove "],
-	goalCell[ newG, "."]
-	};
-
 proofStepText[ existsGoal, lang, {{g_}}, {{newG_}}, ___, "meta" -> v_List, ___] := {textCell[ "For proving ", formulaReference[ g], " we have to find ",
 	If[ Length[v] == 1, "an appropriate value for ", "appropriate values for "],
 	inlineTheoremaExpressionSeq[ v, lang], ", such that we can prove"],
@@ -159,6 +156,11 @@ proofStepText[ existsGoal, lang, {{g_}}, {{simpG_}}, ___] := {textCell[ "The exi
 	goalCell[ simpG, "."]
 	};
 	
+proofStepText[ existsGoalInteractive, lang, {{g_}}, {{newG_}}, ___, "instantiation" -> v:{___Rule}, ___] := {textCell[ "For proving ", formulaReference[ g], 
+	", let ", inlineTheoremaExpressionSeq[ Apply[ EqualDef$TM, v, {1}], lang]," and then prove "],
+	goalCell[ newG, "."]
+	};
+
 proofStepText[ existsKB, lang, {{e_}}, {new_List}, ___, "abf" -> v_List, ___] := {textCell[ "From ", formulaReference[ e], " we know "], 
 	assumptionListCells[ new, ",", ""],
 	textCell[ " for arbitrary but fixed ", inlineTheoremaExpressionSeq[ v, lang], "."]

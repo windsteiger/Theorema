@@ -92,13 +92,13 @@ initGUI[] :=
         	},
         	{"Logic", 
         		{"Not", RowBox[{"\[Not]","P"}], False, True, False},
-        		{"And", RowBox[{"P", "\[And]","Q"}], False, True, False},
-        		{"Or", RowBox[{"P", "\[Or]","Q"}], False, True, False},
-        		{"Implies", RowBox[{"P", "\[Implies]","Q"}], False, True, False},
-        		{"Iff", RowBox[{"P", "\[Equivalent]","Q"}], False, True, False},
+        		{"And", RowBox[{"P", "\[And]","Q"}], True, True, False},
+        		{"Or", RowBox[{"P", "\[Or]","Q"}], True, True, False},
+        		{"Implies", RowBox[{"P", "\[Implies]","Q"}], True, True, False},
+        		{"Iff", RowBox[{"P", "\[Equivalent]","Q"}], True, True, False},
         		{"Forall", RowBox[{"\[ForAll]","P"}], False, True, False},
         		{"Exists", RowBox[{"\[Exists]","P"}], False, True, False},
-        		{"Equal", RowBox[{"A","=","B"}], False, False, False}
+        		{"Equal", RowBox[{"A","=","B"}], True, False, False}
         	},
         	{"Programming",
         		{"Module", RowBox[{"Module","[","\[Ellipsis]","]"}], False, True, False},
@@ -1179,7 +1179,7 @@ selectProver[ ] :=
     	Labeled[ Grid[{
     		{Checkbox[ Dynamic[ $interactiveProofSitSel]], translate[ "interactiveProofSitSel"]},
     		{Checkbox[ Dynamic[ $interactiveNewProofSitFilter]], translate[ "interactiveNewProofSitFilter"]},
-    		{Checkbox[ Dynamic[ $interactiveInstantiate]], translate[ "interactiveInstantiate"]}
+    		{Checkbox[ Dynamic[ allTrue[ {existsGoalInteractive, forallKBInteractive}, ruleActive], setAll[ {existsGoalInteractive, forallKBInteractive}, ruleActive, #] &]], translate[ "interactiveInstantiate"]}
     		}, Alignment -> {Left}], 
     		translate[ "pInteractive"], {{Top, Left}}],
     	Labeled[ RadioButtonBar[ 
@@ -1220,7 +1220,7 @@ submitProveTask[ ] :=
 					Column[{
     					If[ TrueQ[ $interactiveProofSitSel], translate[ "interactiveProofSitSel"], Sequence[]],
     					If[ TrueQ[ $interactiveNewProofSitFilter], translate[ "interactiveNewProofSitFilter"], Sequence[]],
-    					If[ TrueQ[ $interactiveInstantiate], translate[ "interactiveInstantiate"], Sequence[]]
+    					If[ TrueQ[ Map[ ruleActive, And[ existsGoalInteractive, forallKBInteractive]]], translate[ "interactiveInstantiate"], Sequence[]]
     				}],
     				translate[ "pInteractive"]<>":", Left],
 				Labeled[ 
@@ -2050,6 +2050,54 @@ tmaDialogInput[ Notebook[ expr_, nbOpts___?OptionQ], style_String, opts___?Optio
 		]
 	]
 tmaDialogInput[ args___] := unexpected[ tmaDialogInput, {args}]
+
+getInstanceDialog[ v_, fix_, {g_, kb_}] :=
+    Module[ {expr, 
+    		fixBut = Map[ PasteButton[ theoremaDisplay[ #], With[ {fbox = ToBoxes[#, TheoremaForm]}, DisplayForm[ InterpretationBox[ fbox, #]]]]&, fix],
+    		buttonRow},
+        expr[_] = Null;
+        buttonRow = {CancelButton[ translate[ "instantiate later"], DialogReturn[ $Failed]], DefaultButton[ translate[ "OK"], DialogReturn[ Array[ expr, Length[v]]]]};
+        tmaDialogInput[ Notebook[ 
+        	Join[
+        		{pSitCells[ PRFSIT$[ g, kb, ""]]},
+        		MapIndexed[ Cell[ BoxData[ RowBox[ {ToBoxes[ #1, TheoremaForm], ":=", 
+        			ToBoxes[ InputField[ Dynamic[ expr[#2[[1]]]], Hold[ Expression], FieldSize -> 10]]}]], "Text"]&, v], 
+        		{Cell[ BoxData[ RowBox[ Map[ ToBoxes, fixBut]]], "Text"],
+        		Cell[ BoxData[ RowBox[ Map[ ToBoxes, buttonRow]]], "Text"]}
+        		]
+        	],
+        	"Dialog"
+        ]
+    ]
+getInstanceDialog[ args___] := unexpected[ getInstanceDialog, {args}]
+
+SetAttributes[ nextProofSitDialog, HoldFirst]
+nextProofSitDialog[ ps_List] :=
+    Module[ {proofCells, showProof = False},
+        proofCells = pObjCells[];
+        $TMAproofNotebook = tmaNotebookPut[ Notebook[ proofCells], "Proof", Visible -> Dynamic[ showProof]];
+        tmaDialogInput[ Notebook[
+            Join[ 
+                {Cell[ BoxData[ ToBoxes[ 
+                    Toggler[ Dynamic[ showProof], 
+                        {False -> Tooltip[ translate[ "more"], translate[ "showProofProgress"]], 
+                         True -> Tooltip[ translate[ "hide proof"], translate[ "hideProofProgress"]]}]]], 
+                    "Hint"]},
+                MapIndexed[ proofSitChoiceButtons, ps], 
+                {Cell[ BoxData[ ToBoxes[ DefaultButton[]]]]}]
+            ], "Dialog"]
+    ]
+nextProofSitDialog[ args___] := unexpected[ nextProofSitDialog, {args}]
+
+proofSitChoiceButtons[ ps_PRFSIT$, {num_Integer}] :=
+	Module[ {},
+		Cell[ CellGroupData[ 
+			{Cell[ TextData[{ Cell[ BoxData[ ToBoxes[ RadioButton[ Dynamic[ $selectedProofStep], ps.id]]]], 
+   			"  ", translate[ "open proof situation"], " #" <> ToString[ num]}], "Section", ShowGroupOpener -> False],
+			pSitCells[ ps]}, Dynamic[ If[ $selectedProofStep === ps.id, Open, Closed]]]]
+	]
+proofSitChoiceButtons[ args___] := unexpected[ proofSitChoiceButtons, {args}]
+
 
 (* ::Section:: *)
 (* end of package *)

@@ -235,20 +235,35 @@ PRFSIT$[ g:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], k_List, id_, rest___?Opt
 				$Failed,
 				(* else *)
 				{{r, c, f}, meta} = introduceMeta[ {rc, cond, A}, rng, {g, k}];
-				If[ meta === $Canceled, (* can happen in interactive proving *)
-					$Failed,
-					(* else *)
-					newGoal = makeFML[ formula -> Apply[ And$TM, DeleteCases[ Join[ r, {c, f}], True]]];
-					makeANDNODE[ makePRFINFO[ name -> existsGoal, used -> g, generated -> newGoal, "meta" -> meta], 
-						newSubgoal[ goal -> newGoal, kb -> k, rest]]
-				]
+				newGoal = makeFML[ formula -> Apply[ And$TM, DeleteCases[ Join[ r, {c, f}], True]]];
+				makeANDNODE[ makePRFINFO[ name -> existsGoal, used -> g, generated -> newGoal, "meta" -> meta], 
+					newSubgoal[ goal -> newGoal, kb -> k, rest]]
+
 			],
-			(* else *)
+			(* else: quantifier simplified *)
 			simp = makeFML[ formula -> simp];
 			makeANDNODE[ makePRFINFO[ name -> existsGoal, used -> g, generated -> simp], 
 				newSubgoal[ goal -> simp, kb -> k, rest]]
 		]
 	]
+
+inferenceRule[ existsGoalInteractive] = 
+PRFSIT$[ g:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], k_List, id_, rest___?OptionQ] :> 
+    Module[ {rc, r, c, f, inst, newGoal},
+        rc = rngToCondition[ rng];
+        If[ !FreeQ[ rc, $Failed],
+            $Failed,
+            (* else *)
+            {{r, c, f}, inst} = instantiateInteractive[ {rc, cond, A}, rng, {g, k}];
+            If[ inst === $Failed, (* the interactive dialog has been canceled or closed *)
+                $Failed,
+                (* else *)
+                newGoal = makeFML[ formula -> Apply[ And$TM, DeleteCases[ Join[ r, {c, f}], True]]];
+                makeANDNODE[ makePRFINFO[ name -> existsGoalInteractive, used -> g, generated -> newGoal, "instantiation" -> inst], 
+                    newSubgoal[ goal -> newGoal, kb -> k, rest]]
+            ]
+        ]
+    ]
 
   
 inferenceRule[ existsKB] = 
@@ -510,8 +525,10 @@ equalityRules = {"Equality Rules",
 registerRuleSet[ "Quantifier Rules", quantifierRules, {
 	{forallGoal, True, True, 10},
 	{forallKB, True, True, 40, "levelSat1"},
+	{forallKBInteractive, False, True, 42, "levelSat1"},
 	{instantiate, True, True, 35},
 	{existsGoal, True, True, 10},
+	{existsGoalInteractive, False, True, 12},
 	{existsKB, True, True, 11}
 	}]
 
