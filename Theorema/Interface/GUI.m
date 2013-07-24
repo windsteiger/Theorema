@@ -1196,7 +1196,12 @@ submitProveTask[ ] :=
 				$tcActionView++;
 				execProveCall[ $selectedProofGoal, $selectedProofKB, 
 					{$selectedRuleSet, Map[ # -> ruleActive[#]&, $allRules], Map[ # -> rulePriority[#]&, $allRules]},
-					$selectedStrategy, $selectedSearchDepth, $selectedSearchTime,
+					$selectedStrategy, $selectedSearchDepth,
+					(* If interactive proving is active in one way, then do not apply time limit *)
+					If[ TrueQ[ ruleActive[ forallKBInteractive] || ruleActive[ existsGoalInteractive] || $interactiveProofSitSel || $interactiveNewProofSitFilter],
+						Infinity,
+						$selectedSearchTime
+					],
 					{$eliminateBranches, $eliminateSteps, $eliminateFormulae}], 
 				Method -> "Queued", Active -> ($selectedProofGoal =!= {})],
 			Column[{
@@ -1237,7 +1242,12 @@ submitProveTask[ ] :=
 				$tcActionView++;
 				execProveCall[ $selectedProofGoal, $selectedProofKB, 
 					{$selectedRuleSet, Map[ # -> ruleActive[#]&, $allRules], Map[ # -> rulePriority[#]&, $allRules]},
-					$selectedStrategy, $selectedSearchDepth, $selectedSearchTime,
+					$selectedStrategy, $selectedSearchDepth,
+					(* If interactive proving is active in one way, then do not apply time limit *)
+					If[ TrueQ[ ruleActive[ forallKBInteractive] || ruleActive[ existsGoalInteractive] || $interactiveProofSitSel || $interactiveNewProofSitFilter],
+						Infinity,
+						$selectedSearchTime
+					],
 					{$eliminateBranches, $eliminateSteps, $eliminateFormulae}], 
 				Method -> "Queued", Active -> ($selectedProofGoal =!= {})]
 		}]
