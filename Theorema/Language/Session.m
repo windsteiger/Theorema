@@ -35,7 +35,12 @@ freshNames[ Hold[ f_[ lhs_, Program[ rhs_]]]] :=
 	]
 freshNames[expr_Hold] :=
 	Module[ {symPos, repl},
-		symPos = DeleteCases[ Position[ expr, _Symbol], {0}, {1}, 1];
+		(* There are certain expressions, into which we do not want to go deeper for substituting fresh names. 
+		   An example is a META$[__] expression representing a meta-variable in a proof, which has a list as
+		   its 3rd parameter. Going into it would turn the list into a Set$TM ... 
+		   If other cases occur in the future, just add a suitable transformation here BEFORE the replaceable
+		   positions are computed. *)
+		symPos = DeleteCases[ Position[ expr /. {META$[__] -> META$[]}, _Symbol], {0}, {1}, 1];
 		repl = Map[ # -> freshSymbol[ Extract[ expr, #, Hold]]&, symPos];
 		ReplacePart[ expr, repl]
 	]
