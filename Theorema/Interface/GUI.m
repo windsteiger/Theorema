@@ -2061,25 +2061,30 @@ tmaDialogInput[ Notebook[ expr_, nbOpts___?OptionQ], style_String, opts___?Optio
 	]
 tmaDialogInput[ args___] := unexpected[ tmaDialogInput, {args}]
 
-getInstanceDialog[ v_, fix_, {g_, kb_}] :=
+getExistGoalInstanceDialog[ v_, fix_, {g_, kb_}] :=
     Module[ {expr, 
-    		fixBut = Map[ PasteButton[ theoremaDisplay[ #], With[ {fbox = ToBoxes[#, TheoremaForm]}, DisplayForm[ InterpretationBox[ fbox, #]]]]&, fix],
+    		fixBut = Map[ 
+    			PasteButton[
+    				theoremaDisplay[ RNG$[ #]], 
+    				With[ {fbox = ToBoxes[ First[ #], TheoremaForm], fc = First[ #]}, DisplayForm[ InterpretationBox[ fbox, fc]]]]&, fix],
     		buttonRow},
         expr[_] = Null;
         buttonRow = {CancelButton[ translate[ "instantiate later"], DialogReturn[ $Failed]], DefaultButton[ translate[ "OK"], DialogReturn[ Array[ expr, Length[v]]]]};
         tmaDialogInput[ Notebook[ 
         	Join[
-        		{pSitCells[ PRFSIT$[ g, kb, ""]]},
+        		{pSitCells[ PRFSIT$[ g, kb, ""]],
+        		Cell[ translate[ "instVar"], "Subsubsection"]},
         		MapIndexed[ Cell[ BoxData[ RowBox[ {ToBoxes[ #1, TheoremaForm], ":=", 
         			ToBoxes[ InputField[ Dynamic[ expr[#2[[1]]]], Hold[ Expression], FieldSize -> 10]]}]], "Text"]&, v], 
-        		{Cell[ BoxData[ RowBox[ Map[ ToBoxes, fixBut]]], "Text"],
+        		{Cell[ translate[ "availConst"], "Subsubsection"],
+        		Cell[ BoxData[ RowBox[ Map[ ToBoxes, fixBut]]], "Text"],
         		Cell[ BoxData[ RowBox[ Map[ ToBoxes, buttonRow]]], "Text"]}
         		]
         	],
         	"Dialog"
         ]
     ]
-getInstanceDialog[ args___] := unexpected[ getInstanceDialog, {args}]
+getExistGoalInstanceDialog[ args___] := unexpected[ getExistGoalInstanceDialog, {args}]
 
 SetAttributes[ nextProofSitDialog, HoldFirst]
 nextProofSitDialog[ ps_List] :=

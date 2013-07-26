@@ -257,7 +257,7 @@ transferToComputation[ args___] := unexpected[ transferToComputation, {args}]
 *)
 stripUniversalQuantifiers[ Theorema`Language`Forall$TM[ r_, c_, f_]] :=
 	Module[ {rc, vars, cond, inner},
-		rc = rangeToCondition[ r];
+		rc = rngToCondition[ r];
 		{inner, cond, vars} = stripUniversalQuantifiers[ f];
 		cond = Join[ rc, cond];
 		{inner, If[ !TrueQ[ c], Prepend[ cond, c], cond], Join[ rngVariables[ r], vars]}
@@ -270,6 +270,10 @@ stripUniversalQuantifiers[ Theorema`Language`Implies$TM[ l_, r_]] :=
 stripUniversalQuantifiers[ expr_] := {expr, {}, {}}
 stripUniversalQuantifiers[ args___] := unexpected[ stripUniversalQuantifiers, {args}]
 
+(*
+was used in stripUniversalQuantifiers: turned out that rngToCondition does the same.
+
+
 rangeToCondition[ Theorema`Language`RNG$[ rng__]] := Map[ singleRangeToCondition, {rng}]
 rangeToCondition[ args___] := unexpected[ rangeToCondition, {args}]
 
@@ -279,7 +283,7 @@ singleRangeToCondition[ Theorema`Language`STEPRNG$[ x_, l_, h_, 1]] :=
 	Theorema`Language`And$TM[ Theorema`Language`isInteger$TM[x], Theorema`Language`LessEqual$TM[ l, x], Theorema`Language`LessEqual$TM[ x, h]]
 singleRangeToCondition[ _] := Sequence[]
 singleRangeToCondition[ args___] := unexpected[ singleRangeToCondition, {args}]
-
+*)
 
 executableForm[ {(Theorema`Language`Iff$TM|Theorema`Language`IffDef$TM|Theorema`Language`Equal$TM|Theorema`Language`EqualDef$TM)[ l_, r_], c_List, var_List}, key_] :=
     Block[ { $ContextPath = {"System`"}, $Context = "Global`"},
@@ -477,19 +481,33 @@ introduceMeta[ expr_, rng_Theorema`Language`RNG$, forms_List:{}] :=
 	]
 introduceMeta[ args___] := unexpected[ introduceMeta, {args}]
 
-instantiateInteractive[ expr_, rng_Theorema`Language`RNG$, forms_List] :=
-	Module[{vars = rngVariables[ rng], const, inst, subs},
-		const = Union[ Cases[ forms, _Theorema`Language`FIX$, Infinity]];
-		inst = getInstanceDialog[ vars, const, forms];
+
+(* ::Subsection:: *)
+(* instantiateExistGoalInteractive *)
+
+instantiateExistGoalInteractive[ g:FML$[ _, Theorema`Language`Exists$TM[ rng_, __], ___], const_List, K_List] :=
+	Module[{vars = rngVariables[ rng], inst, nn},
+		inst = getExistGoalInstanceDialog[ vars, const, {g, K}];
 		If[ inst === $Failed,
-			Return[ { {Null, Null, Null}, $Failed}],
+			Return[ $Failed],
 			(* else *)
-			inst = Map[ makeTmaExpression, inst];
-			subs = Thread[ vars -> inst];
-			{substituteFree[ expr, subs], subs}
+			nn = Position[ inst, Except[ Null], {1}, Heads -> False];
+			(* Ignore Null in inst, these come from empty input fields -> these vars should not be instantiated *)
+			inst = Map[ makeTmaExpression, Extract[ inst, nn]];
+			Thread[ Extract[ vars, nn] -> inst]
 		]
 	]
-instantiateInteractive[ args___] := unexpected[ instantiateInteractive, {args}]
+instantiateExistGoalInteractive[ args___] := unexpected[ instantiateExistGoalInteractive, {args}]
+
+
+(* ::Subsection:: *)
+(* instantiateUnivKnowInteractive *)
+
+instantiateUnivKnowInteractive[ K_List] :=
+	Module[{local},
+		K
+	]
+instantiateUnivKnowInteractive[ args___] := unexpected[ instantiateUnivKnowInteractive, {args}]
 
 
 

@@ -220,6 +220,24 @@ ps:PRFSIT$[ g_, K:{___, f:FML$[ _, _Forall$TM, __], ___}, id_, rest___?OptionQ] 
         ]
     ]
 
+inferenceRule[ forallKBInteractive] = 
+ps:PRFSIT$[ g_, K:{___, f:FML$[ _, Forall$TM[ rng_, cond_, A_], __], ___}, id_, rest___?OptionQ] :> 
+    Module[ {rc, r, c, Ainst, fInst, inst},
+        rc = rngToCondition[ rng];
+        If[ !FreeQ[ rc, $Failed],
+            $Failed,
+            (* else *)
+            {{r, c, Ainst}, inst} = instantiateUnivKnowInteractive[ {rc, cond, A}, rng, {g, K}];
+            If[ inst === $Failed,
+            	(* interactive dialog has been canceled *)
+                $Failed,
+                (* else *)
+                fInst = makeFML[ formula -> Implies$TM[ And$TM[ r, c], Ainst]];
+                makeANDNODE[ makePRFINFO[ name -> forallKBInteractive, used -> f, generated -> fInst, "instantiation" -> inst], 
+                    newSubgoal[ goal -> g, kb -> prependKB[ K, fInst], rest]]
+            ]
+        ]
+    ]
 
 (* ::Subsection:: *)
 (* EXITSTS *)
@@ -248,22 +266,31 @@ PRFSIT$[ g:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], k_List, id_, rest___?Opt
 	]
 
 inferenceRule[ existsGoalInteractive] = 
-PRFSIT$[ g:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], k_List, id_, rest___?OptionQ] :> 
-    Module[ {rc, r, c, f, inst, newGoal},
-        rc = rngToCondition[ rng];
-        If[ !FreeQ[ rc, $Failed],
+ps:PRFSIT$[ g:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], k_List, id_, rest___?OptionQ] :> 
+    Module[ {const, subst, rc, instRng, thinnedRng, newGoal},
+    	const = getAllConstants[ ps.local];
+        subst = instantiateExistGoalInteractive[ g, const, k];
+        If[ subst === $Failed,
+        	(* the interactive dialog has been canceled or closed *)
             $Failed,
             (* else *)
-            {{r, c, f}, inst} = instantiateInteractive[ {rc, cond, A}, rng, {g, k}];
-            If[ inst === $Failed, (* the interactive dialog has been canceled or closed *)
-                $Failed,
-                (* else *)
-                newGoal = makeFML[ formula -> Apply[ And$TM, DeleteCases[ Join[ r, {c, f}], True]]];
-                makeANDNODE[ makePRFINFO[ name -> existsGoalInteractive, used -> g, generated -> newGoal, "instantiation" -> inst], 
-                    newSubgoal[ goal -> newGoal, kb -> k, rest]]
+            instRng = Select[ rng, MemberQ[ Map[ First, subst], First[#]]&];
+			thinnedRng = Complement[ rng, instRng];
+            rc = rngToCondition[ instRng];
+            If[ !FreeQ[ rc, $Failed], 
+				$Failed,
+				(* else *)				
+            	newGoal = makeFML[ formula -> makeExist[ thinnedRng, rc, cond, A, subst]];
+            	makeANDNODE[ makePRFINFO[ name -> existsGoalInteractive, used -> g, generated -> newGoal, "instantiation" -> subst], 
+                	newSubgoal[ goal -> newGoal, kb -> k, rest]]
             ]
         ]
     ]
+
+makeExist[ RNG$[], cond1_List, cond2_, A_, subst_] := Apply[ And$TM, substituteFree[ DeleteCases[ Join[ cond1, {cond2, A}], True], subst]]
+makeExist[ r:RNG$[__], cond1_List, cond2_, A_, subst_] := 
+	Exists$TM[ r, True, Apply[ And$TM, substituteFree[ DeleteCases[ Join[ cond1, {cond2, A}], True], subst]]]
+makeExist[ args___] := unexpected[ makeExist, {args}]
 
   
 inferenceRule[ existsKB] = 
@@ -475,7 +502,15 @@ constants[ loc_List] :=
 		old = Complement[ L, new];
 		{Apply[ Join, new], old}
 	]
-newConstants[ args___] := unexpected[ newConstants, {args}]
+constants[ args___] := unexpected[ constants, {args}]
+
+getAllConstants[ loc_List] :=
+   (* constants in local info can be a mixture of elementary ranges (e.g. SETRNG$) and
+	ranges wrapped in RNG$ (constants that have not yet been used for instantiation).
+	We just eliminate the RNG$'es to get a flat list of elementary ranges *)
+    getLocalInfo[ loc, "constants"] /. RNG$ -> Sequence;
+getAllConstants[ args___] := unexpected[ getAllConstants, {args}]
+
 
 instantiateForall[ f:FML$[ _, Forall$TM[ R1_RNG$, C_, A_], __], R2_RNG$] :=
     Module[ {possibleInst = Select[ Tuples[ {R1, R2}], compatibleRange], inst = {}, subst = {}, S, i},
@@ -525,7 +560,7 @@ equalityRules = {"Equality Rules",
 registerRuleSet[ "Quantifier Rules", quantifierRules, {
 	{forallGoal, True, True, 10},
 	{forallKB, True, True, 40, "levelSat1"},
-	{forallKBInteractive, False, True, 42, "levelSat1"},
+	{forallKBInteractive, False, True, 42},
 	{instantiate, True, True, 35},
 	{existsGoal, True, True, 10},
 	{existsGoalInteractive, False, True, 12},

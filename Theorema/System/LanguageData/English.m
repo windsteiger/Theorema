@@ -79,7 +79,7 @@ With[ {lang = "English"},
 	MessageName[formulaReference, "usage", lang] = "formulaReference[ fml] gives a hyperlink to the formula.";
 	MessageName[arbitraryButFixed, "usage", lang] = "arbitraryButFixed[ expr, rng] substitutes all free occurrences of variables specified by the range rng in expr by a new constant.";
 	MessageName[introduceMeta, "usage", lang] = "introduceMeta[ expr, rng] substitutes all free occurrences of variables specified by the range rng in expr by a fresh meta variable.";
-	MessageName[instantiateInteractive, "usage", lang] = "instantiateInteractive[ expr, rng] substitutes all free occurrences of variables specified by the range rng in expr by a term obtained from a user dialog.";
+	MessageName[instantiateExistGoalInteractive, "usage", lang] = "instantiateExistGoalInteractive[ expr, rng] substitutes all free occurrences of variables specified by the range rng in expr by a term obtained from a user dialog.";
 	MessageName[rngToCondition, "usage", lang] = "rngToCondition[rng] transforms the range specification rng into a list of conditions.";
 	MessageName[joinKB, "usage", lang] = "joinKB[ kb1_List, kb2_List] joins the two knowledge bases and deletes duplicate entries.";
 	MessageName[appendKB, "usage", lang] = "appendKB[ kb_List, fml] appends fml to the knowledge base kb and deletes duplicate entries.";
@@ -105,7 +105,7 @@ With[ {lang = "English"},
 	MessageName[makeColoredStylesheet, "usage", lang] = "Generate a colored stylesheet from a template using the color scheme chosen in the preferences.";
 	MessageName[tmaNotebookPut, "usage", lang] = "Theorema version of Mathematica's NotebookPut.";
 	MessageName[tmaDialogInput, "usage", lang] = "Theorema version of Mathematica's DialogInput.";
-	MessageName[getInstanceDialog, "usage", lang] = "The dialog window asking for an instantiation.";
+	MessageName[getExistGoalInstanceDialog, "usage", lang] = "The dialog window asking for an instantiation.";
 	MessageName[nextProofSitDialog, "usage", lang] = "The dialog window for choosing the next proof situation.";
 	
 (* Theorema`Interface`Language` *)

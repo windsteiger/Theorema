@@ -135,6 +135,8 @@ With[ {lang = "English"},
 	translate["save current settings", lang] = "Save current settings";
 	translate["preferences last saved: ", lang] = "Preferences last saved: ";
 	translate["instantiate later", lang] = "Instantiate later";
+	translate["instVar", lang] = "Variables to be instantiated";
+	translate["availConst", lang] = "Available constants";
 
 	translate["Virtual Keyboard", lang] = "Virtual Keyboard";
 	    

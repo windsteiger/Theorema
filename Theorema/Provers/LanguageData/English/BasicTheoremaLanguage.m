@@ -146,6 +146,11 @@ proofStepText[ forallKB, lang, {{u_}}, {g_}, ___, "instantiation" -> inst_List, 
         instText
     ];
 
+proofStepText[ forallKBInteractive, lang, {{u_}}, {{g_}}, ___, "instantiation" -> inst_List, ___] :=
+	{textCell[ "Formula ", formulaReference[ u], " holds in particular for ", inlineTheoremaExpressionSeq[ inst, lang], ", i.e."],
+	assumptionCell[ g, "."]
+    };
+
 proofStepText[ existsGoal, lang, {{g_}}, {{newG_}}, ___, "meta" -> v_List, ___] := {textCell[ "For proving ", formulaReference[ g], " we have to find ",
 	If[ Length[v] == 1, "an appropriate value for ", "appropriate values for "],
 	inlineTheoremaExpressionSeq[ v, lang], ", such that we can prove"],
