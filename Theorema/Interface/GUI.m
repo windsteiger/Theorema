@@ -1790,11 +1790,11 @@ savePreferences[ args___] := unexpected[ savePreferences, {args}]
 
 langButtonData["AND1"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["AND1"], 
 			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
 				"\[Wedge]",
-				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
+				TagBox[ FrameBox["right"], "Placeholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]", "\[Wedge]", "\[Placeholder]"}],
 		translate["CONN2STRONGTooltip"],
 		""
@@ -1802,11 +1802,11 @@ langButtonData["AND1"] :=
 
 langButtonData["AND2"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["AND2"], 
 			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
 				"\[And]",
-				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
+				TagBox[ FrameBox["right"], "Placeholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]", "\[And]", "\[Placeholder]"}],
 		translate["CONN2WEAKTooltip"],
 		"and"
@@ -1814,11 +1814,11 @@ langButtonData["AND2"] :=
 
 langButtonData["OR1"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["OR1"], 
 			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
 				"\[Vee]",
-				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
+				TagBox[ FrameBox["right"], "Placeholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]", "\[Vee]", "\[Placeholder]"}],
 		translate["CONN2STRONGTooltip"],
 		""
@@ -1826,11 +1826,11 @@ langButtonData["OR1"] :=
 
 langButtonData["OR2"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["OR2"], 
 			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
 				"\[Or]",
-				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
+				TagBox[ FrameBox["right"], "Placeholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]", "\[Or]", "\[Placeholder]"}],
 		translate["CONN2WEAKTooltip"],
 		"or"
@@ -1838,11 +1838,11 @@ langButtonData["OR2"] :=
 
 langButtonData["IMPL1"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["IMPL1"], 
 			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
 				"\[DoubleLongRightArrow]",
-				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
+				TagBox[ FrameBox["right"], "Placeholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]",
 			TagBox[ "\[DoubleLongRightArrow]", Identity, SyntaxForm->"a\[DoubleRightArrow]b"], "\[Placeholder]"}],
 		translate["CONN2STRONGTooltip"],
@@ -1851,11 +1851,11 @@ langButtonData["IMPL1"] :=
 
 langButtonData["IMPL2"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["IMPL2"], 
 			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
 				"\[Implies]",
-				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
+				TagBox[ FrameBox["right"], "Placeholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]", "\[Implies]", "\[Placeholder]"}],
 		translate["CONN2WEAKTooltip"],
 		"impl"
@@ -1863,11 +1863,11 @@ langButtonData["IMPL2"] :=
 
 langButtonData["EQUIV1"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["EQUIV1"], 
 			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
 				"\[DoubleLongLeftRightArrow]",
-				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
+				TagBox[ FrameBox["right"], "Placeholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]",
 			TagBox[ "\[DoubleLongLeftRightArrow]", Identity, SyntaxForm->"a\[DoubleRightArrow]b"], "\[Placeholder]"}],
 		translate["CONN2STRONGTooltip"],
@@ -1876,11 +1876,11 @@ langButtonData["EQUIV1"] :=
 
 langButtonData["EQUIV2"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["EQUIV2"], 
 			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
 				"\[DoubleLeftRightArrow]",
-				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
+				TagBox[ FrameBox["right"], "Placeholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]",
 			TagBox[ "\[DoubleLeftRightArrow]", Identity, SyntaxForm->"a\[Implies]b"], "\[Placeholder]"}],
 		translate["CONN2WEAKTooltip"],
@@ -1889,11 +1889,11 @@ langButtonData["EQUIV2"] :=
 
 langButtonData["EQ"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["EQ1"], 
 			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
 				"\[Equal]",
-				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
+				TagBox[ FrameBox["right"], "Placeholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]", "\[Equal]", "\[Placeholder]"}],
 		translate["CONN2Tooltip"],
 		"eq"
@@ -1901,11 +1901,11 @@ langButtonData["EQ"] :=
 
 langButtonData["EQ2"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["EQ2"], 
 			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
 				"=",
-				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
+				TagBox[ FrameBox["right"], "Placeholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]",
 			TagBox[ "=", Identity, SyntaxForm->"a\[Equal]b"], "\[Placeholder]"}],
 		translate["CONN2Tooltip"],
@@ -1914,7 +1914,7 @@ langButtonData["EQ2"] :=
 
 langButtonData["EQUIVDEF"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["EQUIVDEF"], 
 			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
 				RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}],
@@ -1927,11 +1927,11 @@ langButtonData["EQUIVDEF"] :=
 
 langButtonData["EQDEF"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["EQDEF"], 
 			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
 				":=",
-				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
+				TagBox[ FrameBox["right"], "Placeholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]", ":=", "\[Placeholder]"}],
 		translate["EQDEFTooltip"],
 		":eq"
@@ -1939,40 +1939,40 @@ langButtonData["EQDEF"] :=
 
 langButtonData["FORALL1"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["FORALL1"], 
-			DisplayForm[RowBox[{UnderscriptBox[StyleBox["\[ForAll]", FontSize->14], SelectionPlaceholder["rg"]], Placeholder["expr"]}]]],
-		RowBox[{UnderscriptBox["\[ForAll]", "\[SelectionPlaceholder]"], "\[Placeholder]"}],
+			DisplayForm[RowBox[{UnderscriptBox[StyleBox["\[ForAll]", FontSize->14], Placeholder["rg"]], SelectionPlaceholder["expr"]}]]],
+		RowBox[{UnderscriptBox["\[ForAll]", "\[Placeholder]"], "\[SelectionPlaceholder]"}],
 		translate["QUANT1Tooltip"],
 		"far"
 	}
 
 langButtonData["FORALL2"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["FORALL2"], 
-			DisplayForm[RowBox[{UnderscriptBox[ UnderscriptBox[StyleBox["\[ForAll]", FontSize->14], SelectionPlaceholder["rg"]], Placeholder["cond"]], Placeholder["expr"]}]]],
-		RowBox[{UnderscriptBox[ UnderscriptBox["\[ForAll]", "\[SelectionPlaceholder]"], "\[Placeholder]"], "\[Placeholder]"}],
+			DisplayForm[RowBox[{UnderscriptBox[ UnderscriptBox[StyleBox["\[ForAll]", FontSize->14], Placeholder["rg"]], Placeholder["cond"]], SelectionPlaceholder["expr"]}]]],
+		RowBox[{UnderscriptBox[ UnderscriptBox["\[ForAll]", "\[Placeholder]"], "\[Placeholder]"], "\[SelectionPlaceholder]"}],
 		translate["QUANT2Tooltip"],
 		"farc"
 	}
 	
 langButtonData["EXISTS1"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["EXISTS1"], 
 			DisplayForm[RowBox[{UnderscriptBox[StyleBox["\[Exists]", FontSize->14], Placeholder["rg"]], SelectionPlaceholder["expr"]}]]],
-		RowBox[{UnderscriptBox["\[Exists]", "\[SelectionPlaceholder]"], "\[Placeholder]"}],
+		RowBox[{UnderscriptBox["\[Exists]", "\[Placeholder]"], "\[SelectionPlaceholder]"}],
 		translate["QUANT1Tooltip"],
 		"exr"
 	}
 
 langButtonData["EXISTS2"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["EXISTS2"], 
-			DisplayForm[RowBox[{UnderscriptBox[ UnderscriptBox[StyleBox["\[Exists]", FontSize->14], SelectionPlaceholder["rg"]], Placeholder["cond"]], Placeholder["expr"]}]]],
-		RowBox[{UnderscriptBox[ UnderscriptBox["\[Exists]", "\[SelectionPlaceholder]"], "\[Placeholder]"], "\[Placeholder]"}],
+			DisplayForm[RowBox[{UnderscriptBox[ UnderscriptBox[StyleBox["\[Exists]", FontSize->14], Placeholder["rg"]], Placeholder["cond"]], SelectionPlaceholder["expr"]}]]],
+		RowBox[{UnderscriptBox[ UnderscriptBox["\[Exists]", "\[Placeholder]"], "\[Placeholder]"], "\[SelectionPlaceholder]"}],
 		translate["QUANT2Tooltip"],
 		"exrc"
 	}
