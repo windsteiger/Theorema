@@ -441,20 +441,20 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :>
 (* Equalities in KB *)
 
 inferenceRule[ eqIffKB] = 
-ps:PRFSIT$[ g_, k:{___, FML$[ _, (Iff$TM|Equal$TM)[ _, _?isQuantifierFree], __], ___}, id_, rest___?OptionQ] :> 
+ps:PRFSIT$[ g_, k:{___, FML$[ _, (Iff$TM|Equal$TM)[ _, _], __], ___}, id_, rest___?OptionQ] :> 
 	Module[ {locInfo = ps.local, rules, form, elemSubs = {}, nonSubs = {}, j},
 		rules = getLocalInfo[ locInfo, "elemSubstRules"];
 		Do[
         	form = k[[j]];
         	Switch[ form,
-        		FML$[ _, (Iff$TM|Equal$TM)[ lhs_, rhs_?isQuantifierFree], __],
+        		FML$[ _, (Iff$TM|Equal$TM)[ _, rhs_], __],
         		appendToKB[ elemSubs, form],
         		_,
         		appendToKB[ nonSubs, form]
         	],
         	{j, Length[k]}
         ];
-        locInfo = putLocalInfo[ locInfo, "elemSubstRules" -> Join[ rules, defsToRules[ elemSubs]]];
+        locInfo = putLocalInfo[ locInfo, "elemSubstRules" -> Join[ rules, formulaListToRules[ elemSubs]]];
 		makeANDNODE[ makePRFINFO[ name -> eqIffKB, used -> {elemSubs}, generated -> {}], 
 			newSubgoal[ goal -> g, kb -> nonSubs, local -> locInfo, rest]
 		]

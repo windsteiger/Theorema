@@ -699,8 +699,8 @@ makeInitialProofObject[ g_FML$, k_List, {r_Hold, act_List, prio_List}, s_] :=
         	],
         	{i, Length[k]}
         ];
-        sRules = defsToRules[ elemSubs]; 
-        dRules = defsToRules[ def]; 
+        sRules = formulaListToRules[ elemSubs]; 
+        dRules = formulaListToRules[ def]; 
         propagateProofValues[ 
             replaceProofSit[ dummyPO,
             	{2} -> newSubgoal[ goal -> g, kb -> nonSubs, id -> "InitialPS",
