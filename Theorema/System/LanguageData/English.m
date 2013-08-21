@@ -62,9 +62,11 @@ With[ {lang = "English"},
 	MessageName[substituteFree, "usage", lang] = "";	
 	MessageName[isSequenceFree, "usage", lang] = "";
 	MessageName[isQuantifierFree, "usage", lang] = "";	
+	MessageName[isLogQuantifierFree, "usage", lang] = "";	
 	MessageName[isVariableFree, "usage", lang] = "";	
 	MessageName[transferToComputation, "usage", lang] = "";	
 	MessageName[formulaListToRules, "usage", lang] = "";	
+	MessageName[formulaToRules, "usage", lang] = "";	
 	MessageName[replaceAndTrack, "usage", lang] = "";	
 	MessageName[replaceRecursivelyAndTrack, "usage", lang] = "";	
 	MessageName[FML$, "usage", lang] = "FML$[ key, form, lab, opt] represents a Theorema formula including its key, label, and optional components.";
@@ -86,6 +88,7 @@ With[ {lang = "English"},
 	MessageName[prependKB, "usage", lang] = "prependKB[ kb_List, fml] prepends fml to the knowledge base kb and deletes duplicate entries.";
 	MessageName[appendToKB, "usage", lang] = "appendToKB[ sym, fml] sets sym to the result of appending fml to sym and deleting duplicate entries.";
 	MessageName[prependToKB, "usage", lang] = "prependToKB[ sym, fml] sets sym to the result of prepending fml to sym and deleting duplicate entries.";
+	MessageName[trimKBforRewriting, "usage", lang] = "trimKBforRewriting[ k] processes the formulas in k and generates rewrite rules from appropriate candidates.";
 	
 (* Theorema`Computation`Language` *)
 	MessageName[setComputationContext, "usage", lang] = "setComputationContext[ c] sets the context for the next computation to c.";

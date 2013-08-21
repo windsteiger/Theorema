@@ -674,7 +674,7 @@ proofNodeIndicator[ args___] := unexpected[ proofNodeIndicator, {args}]
 (* makeInitialProofObject *)
 
 makeInitialProofObject[ g_FML$, k_List, {r_Hold, act_List, prio_List}, s_] :=
-    Module[ {dummyPO, form, def = {}, elemSubs = {}, nonSubs = {}, dRules, sRules},
+    Module[ {dummyPO, thinnedKB, dRules, sRules, goalRules, kbRules},
         dummyPO = PRFOBJ$[
             makePRFINFO[ name -> initialProofSituation, generated -> Prepend[ k, g], id -> "OriginalPS"],
             PRFSIT$[ g, k, "InitialPS"],
@@ -682,29 +682,16 @@ makeInitialProofObject[ g_FML$, k_List, {r_Hold, act_List, prio_List}, s_] :=
         ];
         (* Use propagateProofValues and replaceProofSit in order to update the proof tree correspondingly *)
         (* Handling of substitutions: we split k into
-        	"elementary substitutions", i.e. equalities or equivalences that do not introduce quantifiers on the rhs,
+        	"elementary substitutions", i.e. equalities or equivalences that do not introduce (logical) quantifiers,
         	"definitions", i.e. equalities or equivalences that normally do introduce quantifiers on the rhs, and
         	the rest.
            We convert "elementary substitutions" and "definitions" into transformation rules
            and put them into the local proof info. We don't put the corresponding original formulae into the KB then *)
-        Do[
-        	form = k[[i]];
-        	Switch[ form,
-        		FML$[ _, (IffDef$TM|EqualDef$TM|Iff$TM|Equal$TM)[ lhs_, rhs_?isQuantifierFree], __],
-        		appendToKB[ elemSubs, form],
-        		FML$[ _, _?(!FreeQ[ #, _IffDef$TM|_EqualDef$TM]&), __],
-        		appendToKB[ def, form],
-        		_,
-        		appendToKB[ nonSubs, form]
-        	],
-        	{i, Length[k]}
-        ];
-        sRules = formulaListToRules[ elemSubs]; 
-        dRules = formulaListToRules[ def]; 
+        {thinnedKB, kbRules, goalRules, sRules, dRules} = trimKBforRewriting[ k];
         propagateProofValues[ 
             replaceProofSit[ dummyPO,
-            	{2} -> newSubgoal[ goal -> g, kb -> nonSubs, id -> "InitialPS",
-            		local -> {"elemSubstRules" -> sRules, "definitionRules" -> dRules},
+            	{2} -> newSubgoal[ goal -> g, kb -> thinnedKB, id -> "InitialPS",
+            		local -> {"elemSubstRules" -> sRules, "definitionRules" -> dRules, "kbRules" -> kbRules, "goalRules" -> goalRules},
                 	rules -> r, ruleActivity -> act, rulePriority -> prio, strategy -> s]]
         ]
     ]

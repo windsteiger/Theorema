@@ -454,12 +454,12 @@ ps:PRFSIT$[ g_, k:{___, FML$[ _, (Iff$TM|Equal$TM)[ _, _], __], ___}, id_, rest_
         	],
         	{j, Length[k]}
         ];
-        locInfo = putLocalInfo[ locInfo, "elemSubstRules" -> Join[ rules, formulaListToRules[ elemSubs]]];
+        (* Again, we only put the forward rules, the backward rules would be the same *)
+        locInfo = putLocalInfo[ locInfo, "elemSubstRules" -> Join[ rules, First[ formulaListToRules[ elemSubs]]]];
 		makeANDNODE[ makePRFINFO[ name -> eqIffKB, used -> {elemSubs}, generated -> {}], 
 			newSubgoal[ goal -> g, kb -> nonSubs, local -> locInfo, rest]
 		]
 	]
-
 
 (* ::Section:: *)
 (* Instantiation *)

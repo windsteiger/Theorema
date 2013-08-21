@@ -197,7 +197,6 @@ substituteFree[ expr_, rule_?OptionQ] := substituteFree[ expr, {rule}]
 substituteFree[ expr_, rules_List] := ReleaseHold[ substituteFree[ Hold[ expr], rules]]
 substituteFree[ args___] := unexpected[ substituteFree, {args}]
 
-
 (* ::Subsubsection:: *)
 (* isQuantifierFree *)
 
@@ -207,10 +206,14 @@ isQuantifierFree[ expr_] :=
 		_Theorema`Computation`Language`RNG$]
 isQuantifierFree[ args___] := unexpected[ isQuantifierFree, {args}]
 
+(* ::Subsubsection:: *)
+(* isLogQuantifierFree *)
+
+isLogQuantifierFree[ expr_] := FreeQ[ expr, _Theorema`Language`Forall$TM|_Theorema`Language`Exists$TM]
+isLogQuantifierFree[ args___] := unexpected[ isLogQuantifierFree, {args}]
 
 (* ::Subsubsection:: *)
 (* sequenceFree *)
-
 
 isSequenceFree[ expr_, level_:{1}] := 
 	FreeQ[ expr,
@@ -220,23 +223,16 @@ isSequenceFree[ expr_, level_:{1}] :=
 		Theorema`Language`Computation`VAR$[_Theorema`Language`Computation`SEQ$], level]
 isSequenceFree[ args___] := unexpected[ isSequenceFree, {args}]
 
-
-
 (* ::Subsubsection:: *)
 (* variableFree *)
-
 
 isVariableFree[ expr_, level_:{1}] := 
 	FreeQ[ expr,
 		_Theorema`Language`VAR$|_Theorema`Computation`Language`VAR$, level]
 isVariableFree[ args___] := unexpected[ isVariableFree, {args}]
 
-
-
-
 (* ::Subsubsection:: *)
 (* transferToComputation *)
-
 
 transferToComputation[ form_, key_] :=
 	Module[{stripUniv, exec},
@@ -260,15 +256,19 @@ stripUniversalQuantifiers[ Theorema`Language`Forall$TM[ r_, c_, f_]] :=
 		rc = rngToCondition[ r];
 		{inner, cond, vars} = stripUniversalQuantifiers[ f];
 		cond = Join[ rc, cond];
-		{inner, If[ !TrueQ[ c], Prepend[ cond, c], cond], Join[ rngVariables[ r], vars]}
+		{inner, If[ !TrueQ[ c], joinConditions[ cond, c], cond], Join[ rngVariables[ r], vars]}
 	]
 stripUniversalQuantifiers[ Theorema`Language`Implies$TM[ l_, r_]] :=
 	Module[ {vars, cond, inner},
 		{inner, cond, vars} = stripUniversalQuantifiers[ r];
-		{inner, Prepend[ cond, l], vars}
+		{inner, joinConditions[ cond, l], vars}
 	]
 stripUniversalQuantifiers[ expr_] := {expr, {}, {}}
 stripUniversalQuantifiers[ args___] := unexpected[ stripUniversalQuantifiers, {args}]
+
+joinConditions[ c_List, newCond_Theorema`Language`And$TM] := Join[ Apply[ List, simplifiedAnd[ newCond]], c]
+joinConditions[ c_List, newCond_] := Prepend[ c, newCond]
+joinConditions[ args___] := unexpected[ joinConditions, {args}]
 
 (*
 was used in stripUniversalQuantifiers: turned out that rngToCondition does the same.
@@ -339,6 +339,50 @@ varToPattern[ args___] := unexpected[ varToPattern, {args}]
 formulaListToRules[ l_List] := MapThread[ Join, Map[ formulaToRules, l]]
 formulaListToRules[ args___] := unexpected[ formulaListToRules, {args}]
 
+
+(* ::Subsubsection:: *)
+(* formulaToRules *)
+
+(*
+	Convert a formula to a list of reasonable rewrite rules.
+*)
+formulaToRules[ orig:FML$[ _, form_, __]] :=
+	Module[{stripUniv, ruleList},
+		stripUniv = stripUniversalQuantifiers[ form];
+		ruleList = makeRules[ stripUniv, orig];
+		Map[ ToExpression, ruleList, {2}]
+	]
+formulaToRules[ args___] := unexpected[ formulaToRules, {args}]
+
+(*
+	We expect the list at pos. 1 to be the result of stripUniversalQuantifiers, i.e. all universal quantifiers are stripped, implications are processed.
+	It is of the form {form, c, var}, where form is neither forall nor implies, c is a list of conditions, and var is a list of (universally quantified) variables.
+	Result is a list of forward rules, a list of backward rules, and a list of elementary substitutions and/or definition rules.
+*)
+makeRules[ {(Theorema`Language`IffDef$TM|Theorema`Language`EqualDef$TM)[ l_, r_], c_List, var_List}, ref_] := {{}, {}, {makeSingleRule[ {l, r, c, var}, ref]}}
+makeRules[ {Theorema`Language`Iff$TM[ l_, r_], c_List, var_List}, ref_] :=
+	Append[ MapThread[ Join, {makeRules[ {r, Append[ c, l], var}, ref], makeRules[ {l, Append[ c, r], var}, ref]}], {}]
+(* Special case equality: we can rewrite left to right and right to left, but we can also rewrite the equality as a whole. *)
+makeRules[ {form:Theorema`Language`Equal$TM[ l_, r_], c_List, var_List}, ref_] :=
+    Module[ {forward = MapIndexed[ makeSingleRule[ {#1, form, Drop[ c, #2], var}, ref]&, c], backward = {}},
+        If[ c =!= {},
+        	(* in this case, forward is also empty, we need not do anything *)
+            backward = {makeSingleRule[ {form, makeConjunction[ c, Theorema`Language`And$TM], {}, var}, ref, "backward"]}
+        ];
+        {forward, backward, {makeSingleRule[ {l, r, c, var}, ref], makeSingleRule[ {r, l, c, var}, ref]}}
+    ]
+makeRules[ {form:Theorema`Language`And$TM[ f__], c:{__}, var_List}, ref_]	:= 
+	{MapIndexed[ makeSingleRule[ {#1, form, Drop[ c, #2], var}, ref]&, c], 
+	Map[ makeSingleRule[ {#, makeConjunction[ c, Theorema`Language`And$TM], {}, var}, ref, "backward"]&, {f}],
+	{}}
+makeRules[ {form_, c:{__}, var_List}, ref_]	:= 
+	{MapIndexed[ makeSingleRule[ {#1, form, Drop[ c, #2], var}, ref]&, c], 
+	{makeSingleRule[ {form, makeConjunction[ c, Theorema`Language`And$TM], {}, var}, ref, "backward"]},
+	{}}
+makeRules[ {form_, c_List, var_List}, ref_] := {{}, {}, {}}
+makeRules[ args___] := unexpected[ makeRules, {args}]
+
+
 (* 
 	If the free variables left/right do not coincide, then do not generate a rewrite rule
 *)
@@ -378,40 +422,6 @@ makeSingleRule[ { l_, r_, {}, var_List}, ref_, "backward"] :=
 makeSingleRule[ { l_, r_, c_List, var_List}, ref_, "backward"] := 
 	makeSingleRule[ { l, makeConjunction[ Append[ c, r], Theorema`Language`And$TM], {}, var}, ref, "backward"]
 makeSingleRule[ args___] := unexpected[ makeSingleRule, {args}]
-
-
-(* ::Subsubsection:: *)
-(* formulaToRules *)
-
-(*
-	Convert a formula to a list of reasonable rewrite rules.
-*)
-formulaToRules[ orig:FML$[ _, form_, __]] :=
-	Module[{stripUniv, ruleList},
-		stripUniv = stripUniversalQuantifiers[ form];
-		ruleList = makeRules[ stripUniv, orig];
-		Map[ ToExpression, ruleList, {2}]
-	]
-formulaToRules[ args___] := unexpected[ formulaToRules, {args}]
-
-(*
-	We expect the list at pos. 1 to be the result of stripUniversalQuantifiers, i.e. all universal quantifiers are stripped, implications are processed.
-	It is of the form {form, c, var}, where form is neither forall nor implies, c is a list of conditions, and var is a list of (universally quantified) variables.
-	Result is a list of forward rules and a list of backward rules.
-*)
-makeRules[ {(Theorema`Language`IffDef$TM|Theorema`Language`EqualDef$TM)[ l_, r_], c_List, var_List}, ref_] := With[ {rule = makeSingleRule[ {l, r, c, var}, ref]}, {{rule}, {rule}}]
-makeRules[ {Theorema`Language`Iff$TM[ l_, r_], c_List, var_List}, ref_] :=
-	MapThread[ Join, {makeRules[ {r, Append[ c, l], var}, ref], makeRules[ {l, Append[ c, r], var}, ref]}]
-makeRules[ {Theorema`Language`Equal$TM[ l_, r_], c_List, var_List}, ref_] :=
-	With[ {rule1 = makeSingleRule[ {l, r, c, var}, ref], rule2 = makeSingleRule[ {r, l, c, var}, ref]}, {{rule1, rule2}, {rule1, rule2}}]
-makeRules[ {form:Theorema`Language`And$TM[ f__], c:{__}, var_List}, ref_]	:= 
-	{MapIndexed[ makeSingleRule[ {#1, form, Drop[ c, #2], var}, ref]&, c], 
-	Map[ makeSingleRule[ {#, makeConjunction[ c, Theorema`Language`And$TM], {}, var}, ref, "backward"]&, {f}]}
-makeRules[ {form_, c:{__}, var_List}, ref_]	:= 
-	{MapIndexed[ makeSingleRule[ {#1, form, Drop[ c, #2], var}, ref]&, c], 
-	{makeSingleRule[ {form, makeConjunction[ c, Theorema`Language`And$TM], {}, var}, ref, "backward"]}}
-makeRules[ {form_, c_List, var_List}, ref_] := {{}, {}}
-makeRules[ args___] := unexpected[ makeRules, {args}]
 
 
 (* ::Subsubsection:: *)
@@ -570,7 +580,9 @@ instantiateUnivKnowInteractive[ args___] := unexpected[ instantiateUnivKnowInter
 (* ::Subsection:: *)
 (* rngToCondition *)
 
-
+(*
+	rngToCondition[ r] converts the range r into a LIST of conditions.
+*)
 rngToCondition[ Theorema`Language`RNG$[ r__]] := Apply[ Join, Map[ singleRngToCondition, {r}]]
 rngToCondition[ args___] := unexpected[ rngToCondition, {args}]
 
@@ -611,6 +623,39 @@ appendToKB[ args___] := unexpected[ appendToKB, {args}]
 SetAttributes[ prependToKB, HoldFirst]
 prependToKB[ kb_, fml_FML$] := (kb = DeleteDuplicates[ Prepend[ kb, fml], #1.formula === #2.formula&])
 prependToKB[ args___] := unexpected[ prependToKB, {args}]
+
+trimKBforRewriting[ k_List] :=
+	Module[{sRules = {}, dRules = {}, kbRules = {}, goalRules = {}, thinnedKB = {}},
+		Do[
+        	{thinnedKB, kbRules, goalRules, sRules, dRules} = 
+        		MapThread[ Join, {{thinnedKB, kbRules, goalRules, sRules, dRules}, trimFormulaForRewriting[ k[[i]]]}];
+        	,
+        	{i, Length[k]}
+        ];
+        {thinnedKB, kbRules, goalRules, sRules, dRules}
+	]
+trimKBforRewriting[ args___] := unexpected[ trimKBforRewriting, {args}]
+
+
+trimFormulaForRewriting[ form_FML$] :=
+    Module[ {sRules = {}, dRules = {}, kbRules = {}, goalRules = {}, kbForm = {}},
+        Switch[ form,
+            FML$[ _, (Theorema`Language`EqualDef$TM|Theorema`Language`Equal$TM)[ lhs_, rhs_], __]|FML$[ _, (Theorema`Language`IffDef$TM|Theorema`Language`Iff$TM)[ lhs_?isLogQuantifierFree, rhs_?isLogQuantifierFree], __],
+            (* these are substitutions that we want to perform immediately -> elemSubstRules 
+               subst coming from equalities are in pos 3, equivalences produce identical forward and backward rules, hence we take only the forward in pos 1
+               and join them *)
+            sRules = Apply[ Join, Delete[ formulaToRules[ form], 2]],
+            FML$[ _, _?(!FreeQ[ #, _Theorema`Language`IffDef$TM|_Theorema`Language`EqualDef$TM]&), __],
+            (* definition rules come in pos 3 *)
+            dRules = formulaToRules[ form][[3]],
+            _,
+            {kbRules, goalRules, sRules} = formulaToRules[ form];
+            AppendTo[ kbForm, form]
+            ];
+        {kbForm, kbRules, goalRules, sRules, dRules}
+    ]
+trimFormulaForRewriting[ args___] := unexpected[ trimFormulaForRewriting, {args}]
+
 
 End[]
 
