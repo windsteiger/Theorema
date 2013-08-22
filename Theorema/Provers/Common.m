@@ -40,6 +40,7 @@ initProver[] :=
 		$proofCellStatus = Automatic;
 		$TMAcurrentDepth = 1;
 		$TMAproofSearchRunning = False;
+		$rewriteRules = {};
 	]
 
 callProver[ ruleSetup:{_Hold, _List, _List}, strategy_, goal_FML$, kb_List, searchDepth_Integer, searchTime:(_Integer|Infinity)] :=
@@ -321,11 +322,16 @@ eliminateUnusedInit[ args___] := unexpected[ eliminateUnusedInit, {args}]
   	arbitrary string "key"). The special selector p.ruleSetup is a combination of p.rules, p.ruleActivity, and p.rulePriority.
 *)
 
-Options[ makePRFSIT] = {goal :> makeFML[], kb -> {}, id :> ToString[ Unique[ "PRFSIT$"]], local -> {}, rules -> Hold[], ruleActivity -> {}, rulePriority -> {}, strategy -> Identity};
+Options[ makePRFSIT] = {goal :> makeFML[], kb -> {}, id :> ToString[ Unique[ "PRFSIT$"]], local -> {}, rules -> Hold[], ruleActivity -> {}, rulePriority -> {}, strategy -> Identity,
+	kbRules -> {}, goalRules -> {}, substRules -> {}, defRules -> {}};
 makePRFSIT[ data___?OptionQ] :=
-	Module[{g, k, i, l, r, a, p, s},
-		{g, k, i, l, r, a, p, s} = {goal, kb, id, local, rules, ruleActivity, rulePriority, strategy} /. {data} /. Options[ makePRFSIT];
-		PRFSIT$[ g, k, i, local -> l, rules -> r, ruleActivity -> a, rulePriority -> p, strategy -> s, Apply[ Sequence, Select[ {data}, isOptComponent]]]
+	Module[{g, k, i, l, r, a, p, s, kr, gr, sr, dr},
+		{g, k, i, l, r, a, p, s, kr, gr, sr, dr} = 
+			{goal, kb, id, local, rules, ruleActivity, rulePriority, strategy, kbRules, goalRules, substRules, defRules} /. {data} /. Options[ makePRFSIT];
+		{kr, gr, sr, dr} = MapThread[ Join, Append[ $rewriteRules, {kr, gr, sr, dr}]];
+		PRFSIT$[ g, k, i, local -> l, rules -> r, ruleActivity -> a, rulePriority -> p, strategy -> s,
+			kbRules -> kr, goalRules -> gr, substRules -> sr, defRules -> dr,
+			Apply[ Sequence, Select[ {data}, isOptComponent]]]
 	]
 makePRFSIT[ args___] := unexpected[ makePRFSIT, {args}]
 
@@ -674,7 +680,7 @@ proofNodeIndicator[ args___] := unexpected[ proofNodeIndicator, {args}]
 (* makeInitialProofObject *)
 
 makeInitialProofObject[ g_FML$, k_List, {r_Hold, act_List, prio_List}, s_] :=
-    Module[ {dummyPO, thinnedKB, dRules, sRules, goalRules, kbRules},
+    Module[ {dummyPO, thinnedKB, dr, sr, gr, kr},
         dummyPO = PRFOBJ$[
             makePRFINFO[ name -> initialProofSituation, generated -> Prepend[ k, g], id -> "OriginalPS"],
             PRFSIT$[ g, k, "InitialPS"],
@@ -687,12 +693,13 @@ makeInitialProofObject[ g_FML$, k_List, {r_Hold, act_List, prio_List}, s_] :=
         	the rest.
            We convert "elementary substitutions" and "definitions" into transformation rules
            and put them into the local proof info. We don't put the corresponding original formulae into the KB then *)
-        {thinnedKB, kbRules, goalRules, sRules, dRules} = trimKBforRewriting[ k];
+        {thinnedKB, kr, gr, sr, dr} = trimKBforRewriting[ k];
         propagateProofValues[ 
             replaceProofSit[ dummyPO,
             	{2} -> newSubgoal[ goal -> g, kb -> thinnedKB, id -> "InitialPS",
-            		local -> {"elemSubstRules" -> sRules, "definitionRules" -> dRules, "kbRules" -> kbRules, "goalRules" -> goalRules},
-                	rules -> r, ruleActivity -> act, rulePriority -> prio, strategy -> s]]
+            		local -> {"elemSubstRules" -> sr, "definitionRules" -> dr, "kbRules" -> kr, "goalRules" -> gr},
+                	rules -> r, ruleActivity -> act, rulePriority -> prio, strategy -> s,
+                	substRules -> sr, defRules -> dr, kbRules -> kr, goalRules -> gr]]
         ]
     ]
 makeInitialProofObject[ args___] := unexpected[ makeInitialProofObject, {args}]

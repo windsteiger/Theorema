@@ -111,7 +111,7 @@ levelSaturation[ ps:PRFSIT$[ _, _, _, _, rest___?OptionQ], sat1rules_List, sat2r
 			If[ nextGen =!= {},
 				AppendTo[ usd, {newForms[[j]]}];
 				AppendTo[ gen, nextGen];
-				psKB = joinKB[ psKB, nextGen]
+				psKB = joinKB[ nextGen, psKB]
 			],
 			{j, Length[ newFrom1]}
 		];
@@ -120,7 +120,7 @@ levelSaturation[ ps:PRFSIT$[ _, _, _, _, rest___?OptionQ], sat1rules_List, sat2r
 			If[ nextGen =!= {},
 				AppendTo[ usd, newPairs[[j]]];
 				AppendTo[ gen, nextGen];
-				psKB = joinKB[ psKB, nextGen]
+				psKB = joinKB[ nextGen, psKB]
 			],
 			{j, Length[ newFrom2]}
 		];

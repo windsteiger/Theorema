@@ -84,7 +84,7 @@ PRFSIT$[ g_, {pre___, k:FML$[ _, And$TM[ c__], lab_, ___], post___}, id_, rest__
 	Module[ {conj},
 		conj = MapIndexed[ makeFML[ formula -> #1, label -> lab <> "." <> ToString[ #2[[1]]]]&, {c}];
 		makeANDNODE[ makePRFINFO[ name -> andKB, used -> k, generated -> conj], 
-			newSubgoal[ goal -> g, kb -> joinKB[ {pre}, conj, {post}], rest]
+			newSubgoal[ goal -> g, kb -> joinKB[ conj, {pre, post}], rest]
 		]
 	]
 
@@ -107,7 +107,7 @@ PRFSIT$[ g_, {pre___, k:FML$[ _, Or$TM[ c__], lab_, ___], post___}, id_, rest___
 	Module[ {caseAssum},
 		caseAssum = MapIndexed[ makeFML[ formula -> #1, label -> lab <> "." <> ToString[ #2[[1]]]]&, {c}];
 		makeANDNODE[ makePRFINFO[ name -> orKB, used -> k, generated -> caseAssum], 
-			Map[ newSubgoal[ goal -> g, kb -> prependKB[{pre, post}, #], rest]&, caseAssum]
+			Map[ Block[ {$rewriteRules = {}}, newSubgoal[ goal -> g, kb -> prependKB[{pre, post}, #], rest]]&, caseAssum]
 		]
 	]
 
