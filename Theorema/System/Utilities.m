@@ -42,8 +42,38 @@ replaceAllExcept[expr_, rules_List, expt_List, opts___?OptionQ] :=
    		exptRules = Join[ Map[(# -> #) &, expt], rules, Map[(HoldPattern[#[x___]] :> #[x]) &, heads]];
    		expr /. exptRules];
 
-replaceAllExcept[expr_, r_?(MemberQ[{Rule, RuleDelayed}, Head[#]]&), expt_List, opts___?OptionQ] := replaceAllExcept[expr, {r}, expt, opts];
+replaceAllExcept[expr_, r_Rule|r_RuleDelayed, expt_List, opts___?OptionQ] := replaceAllExcept[expr, {r}, expt, opts];
 replaceAllExcept[args___] := unexpected[ replaceAllExcept, {args}]
+
+(* ::Subsubsection:: *)
+(* replaceRepeatedExcept *)
+
+Options[replaceRepeatedExcept] = {Heads -> {}, MaxIterations -> 20};
+
+(*
+	For ReplaceRepeated the trick with adding a rule A->A to prevent substitution of A or proceeding deeper into A does not work -> infinite loop.
+	Idea: we replace expressions that should not be substituted by a string "EXCPT~h", where h is a hash code of the expression.
+	When the replacement rule is actually applied, it sows a rule that establishes the backsubstitution from "EXCPT~h" to the original expression.
+	Using Reap, we collect the backsubstitutions and apply them at the end.
+*)
+replaceRepeatedExcept[expr_, rules_List, expt_List, opts___?OptionQ] :=
+  	Module[{exptRules, heads, maxIt, new, backsubs},
+  		{heads, maxIt} = {Heads, MaxIterations} /. {opts} /. Options[replaceRepeatedExcept];
+   		exptRules = Join[ 
+   			Map[(# :> With[ {s = "EXCPT~"~~ToString[ Hash[#]]}, Sow[ s -> #]; s])&, expt], 
+   			rules, 
+   			Map[(HoldPattern[#[x___]] :> With[ {s = "EXCPT~"~~ToString[ Hash[#[x]]]}, Sow[ s -> #[x]]; s])&, heads]
+   			];
+   		{new, backsubs} = Reap[ ReplaceRepeated[ expr, exptRules, MaxIterations -> maxIt]];
+   		If[ backsubs === {},
+   			new,
+   			(* else *)
+   			new /. backsubs[[1]]
+   		]
+  	]
+
+replaceRepeatedExcept[expr_, r_Rule|r_RuleDelayed, expt_List, opts___?OptionQ] := replaceRepeatedExcept[expr, {r}, expt, opts];
+replaceRepeatedExcept[args___] := unexpected[ replaceRepeatedExcept, {args}]
 
 
 (* ::Subsubsection:: *)

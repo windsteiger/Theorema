@@ -10,6 +10,7 @@ With[ {lang = "English"},
 (* Theorema`System`Utilities` *)
 	MessageName[unexpected, "usage", lang] = "unexpected[ f, {args}] terminates the evaluation of f[args] due to unexpected/invalid arguments.";
 	MessageName[replaceAllExcept, "usage", lang] = "replaceAllExcept[ expr, rules, expt] applies rule(s) to all subparts of 'expr' except those contained in the list 'expt'.";
+	MessageName[replaceRepeatedExcept, "usage", lang] = "replaceRepeatedExcept[ expr, rules, expt] applies rule(s) repeatedly to all subparts of 'expr' except those contained in the list 'expt'.";
 	MessageName[joinHold, "usage", lang] = "joinHold[Hold[a],Hold[b]] produces Hold[a,b].";
 	MessageName[applyHold, "usage", lang] = "applyHold[Hold[a],Hold[b]] produces Hold[a[b]].";
 	MessageName[notification, "usage", lang] = "notification[text] displays 'text' as a user notification.";
@@ -83,7 +84,7 @@ With[ {lang = "English"},
 	MessageName[introduceMeta, "usage", lang] = "introduceMeta[ expr, rng] substitutes all free occurrences of variables specified by the range rng in expr by a fresh meta variable.";
 	MessageName[instantiateExistGoalInteractive, "usage", lang] = "instantiateExistGoalInteractive[ expr, rng] substitutes all free occurrences of variables specified by the range rng in expr by a term obtained from a user dialog.";
 	MessageName[rngToCondition, "usage", lang] = "rngToCondition[rng] transforms the range specification rng into a list of conditions.";
-	MessageName[joinKB, "usage", lang] = "joinKB[ kb1_List, kb2_List] joins the two knowledge bases and deletes duplicate entries.";
+	MessageName[joinKB, "usage", lang] = "joinKB[ kb1_List, kb2_List] joins the two knowledge bases and deletes duplicate entries. kb1 should be new formulas, kb2 is assumed to be an existing kb without duplicates.";
 	MessageName[appendKB, "usage", lang] = "appendKB[ kb_List, fml] appends fml to the knowledge base kb and deletes duplicate entries.";
 	MessageName[prependKB, "usage", lang] = "prependKB[ kb_List, fml] prepends fml to the knowledge base kb and deletes duplicate entries.";
 	MessageName[appendToKB, "usage", lang] = "appendToKB[ sym, fml] sets sym to the result of appending fml to sym and deleting duplicate entries.";
@@ -152,6 +153,10 @@ With[ {lang = "English"},
 	MessageName[ruleActivity, "usage", lang] = "ruleActivity is an option for the constructor makePRFSIT/newSubgoal and a selector for the PRFSIT$ datastructure.";
 	MessageName[rulePriority, "usage", lang] = "rulePriority is an option for the constructor makePRFSIT/newSubgoal and a selector for the PRFSIT$ datastructure.";
 	MessageName[strategy, "usage", lang] = "strategy is an option for the constructor makePRFSIT/newSubgoal and a selector for the PRFSIT$ datastructure.";
+	MessageName[kbRules, "usage", lang] = "kbRules is an option for the constructor makePRFSIT/newSubgoal and a selector for the PRFSIT$ datastructure.";
+	MessageName[goalRules, "usage", lang] = "goalRules is an option for the constructor makePRFSIT/newSubgoal and a selector for the PRFSIT$ datastructure.";
+	MessageName[substRules, "usage", lang] = "substRules is an option for the constructor makePRFSIT/newSubgoal and a selector for the PRFSIT$ datastructure.";
+	MessageName[defRules, "usage", lang] = "defRules is an option for the constructor makePRFSIT/newSubgoal and a selector for the PRFSIT$ datastructure.";
 	MessageName[proofFails, "usage", lang] = "proofFails[ ...] .";
 	MessageName[proofSucceeds, "usage", lang] = "proofSucceeds[ ...] .";
 	MessageName[proofDisproved, "usage", lang] = "proofDisproved[ ...] .";
@@ -175,5 +180,6 @@ With[ {lang = "English"},
 	MessageName[$interactiveNewProofSitFilter, "usage", lang] = "$interactiveNewProofSitFilter indicates whether interactive filtering of proof situations is activated.";
 	MessageName[pSitCells, "usage", lang] = "pSitCells[ ps] generates a cell representation of the proof situation ps to be rendered in a notebook.";
 	MessageName[pObjCells, "usage", lang] = "pObjCells[ po] generates a cell representation of the proof object po (default: $TMAproofObject) to be rendered in a notebook.";
+	MessageName[$rewriteRules, "usage", lang] = "is a global variable used to accumulate newly generated rewrite rules corresponding to formulas in the KB.";
 
 ]
