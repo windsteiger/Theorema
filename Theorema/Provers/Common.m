@@ -278,9 +278,12 @@ propagateUsed[ args___] := unexpected[ propagateUsed, {args}]
 (* 
 	Eliminate unused formulae from generated formulae
 *)
-eliminateUnused[ pi_PRFINFO$, used_List] :=
+(* amaletzk: BUGFIX
+	Replaced formal argument "used" by "u", because otherwise "pi.used" causes an error
+*)
+eliminateUnused[ pi_PRFINFO$, u_List] :=
 	Module[{gen = pi.generated, thinned, p},
-		thinned = DeleteCases[ gen, _?(!MemberQ[ used, #.key]&), {2}];
+		thinned = DeleteCases[ gen, _?(!MemberQ[ u, #.key]&), {2}];
 		p = Position[ thinned, {}];
 		ReplacePart[ pi, {2 -> Delete[ pi.used, p], 3 -> Delete[ thinned, p]}]
 	]
