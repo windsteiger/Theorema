@@ -162,6 +162,9 @@ initBuiltins[ args___] := unexpected[ initBuiltins, {args}]
 (* ::Section:: *)
 (* theoremaCommander *)
 
+openTheoremaGUI[ ] := openTheoremaCommander[]
+openTheoremaGUI[ args___] := unexpected[ openTheoremaGUI, {args}]
+
 
 (*
 	The style sheet defines Deployed->False unlike in usual palettes. This is necessary in order make Button[ ..., Active->False] or
