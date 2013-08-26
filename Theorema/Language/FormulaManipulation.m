@@ -288,7 +288,7 @@ singleRangeToCondition[ args___] := unexpected[ singleRangeToCondition, {args}]
 executableForm[ {(Theorema`Language`Iff$TM|Theorema`Language`IffDef$TM|Theorema`Language`Equal$TM|Theorema`Language`EqualDef$TM)[ l_, r_], c_List, var_List}, key_] :=
     Block[ { $ContextPath = {"System`"}, $Context = "Global`"},
         With[ { left = execLeft[ Hold[l], var], 
-        	cond = makeConjunction[ Prepend[ c, "DUMMY$COND"], Theorema`Computation`Language`And$TM],
+        	cond = makeConjunction[ Prepend[ c, "DUMMY$COND"], And],
         	right = execRight[ Hold[r], var]},
         	(* The complicated DUMMY$COND... construction is necessary because the key itself contains strings,
         	   and we need to get the escaped strings into the Hold *)
