@@ -223,9 +223,9 @@ MakeExpression[ RowBox[ {UnderscriptBox[ "-", dom_], r_}], fmt_] :=
     ] /; $parseTheoremaExpressions
 
 MakeExpression[ RowBox[ {UnderscriptBox[ op_, dom_], r_}], fmt_] :=
-    Module[ {expr = ToExpression[ RowBox[{op, r}], fmt]},
+    Module[ {expr = MakeExpression[ RowBox[{op, r}], fmt]},
     	(* expr is the form that would result without the underscript, say f[r] *)
-        With[ {aux = Head[ expr]},
+        With[ {aux = expr[[1, 0]]},
     		(* We memorize for output, that dom has been introduced as a domain underscript *)
     		registerDomainOperator[ op, aux, Prefix, dom];
         	(* From expr we now fetch the head, i.e. "f". We then generate dom[f][r] *)
@@ -251,22 +251,22 @@ MakeExpression[ RowBox[ {l_, UnderscriptBox[ "/", dom_], r_}], fmt_] :=
     ] /; $parseTheoremaExpressions
 
 MakeExpression[ RowBox[ {l_, UnderscriptBox[ op_, dom_], r_}], fmt_] :=
-    Module[ {expr = ToExpression[ RowBox[{l, op, r}], fmt]},
-    	(* expr is the form that would result without the underscript, say f[x,y]. We do not even rely on that x MUST be l and y MUST be r *)
-        With[ {aux = Head[ expr], paramBox = ToBoxes[ Apply[ List, expr]][[1, 2]]},
+    Module[ {expr = MakeExpression[ RowBox[{l, op, r}], fmt]},
+    	(* expr is the form that would result without the underscript, say f[l,r] with HoldComplete wrapped around, so expr[[1,0]] gives the desired Head, say "f".  *)
+        With[ {aux = expr[[1, 0]]},
     		(* We memorize for output, that dom has been introduced as a domain underscript *)
     		registerDomainOperator[ op, aux, Infix, dom];
         	(* From expr we now fetch the head, i.e. "f", and the box form of the parameters, i.e. box form of "x,y".
         	   We then generate dom[f][x,y] *)
-            MakeExpression[ RowBox[ {RowBox[ {dom, "[", aux, "]"}], "[", paramBox, "]"}], fmt]
+            MakeExpression[ RowBox[ {RowBox[ {dom, "[", aux, "]"}], "[", RowBox[ {l, ",", r}], "]"}], fmt]
         ]
     ] /; $parseTheoremaExpressions
 
 (* POSTFIX *)
 MakeExpression[ RowBox[ {l_, UnderscriptBox[ op_, dom_]}], fmt_] :=
-    Module[ {expr = ToExpression[ RowBox[{l, op}], fmt]},
+    Module[ {expr = MakeExpression[ RowBox[{l, op}], fmt]},
     	(* expr is the form that would result without the underscript, say f[l] *)
-        With[ {aux = Head[ expr]},
+        With[ {aux = expr[[1, 0]]},
     		(* We memorize for output, that dom has been introduced as a domain underscript *)
     		registerDomainOperator[ op, aux, Postfix, dom];
         	(* From expr we now fetch the head, i.e. "f". We then generate dom[f][r] *)
