@@ -108,6 +108,16 @@ simplifiedImplies[ Theorema`Language`Implies$TM[ A_, Theorema`Language`Implies$T
 simplifiedImplies[ i_Theorema`Language`Implies$TM] := i
 simplifiedImplies[ args___] := unexpected[ simplifiedImplies, {args}]
 
+(* ::Subsubsection:: *)
+(* simplifiedNot *)
+
+simplifiedNot[ Theorema`Language`Not$TM[ Theorema`Language`Not$TM[ A_]]] := A
+simplifiedNot[ Theorema`Language`Not$TM[ Theorema`Language`And$TM[ A__]]] := Apply[ Theorema`Language`Or$TM, Map[ Theorema`Language`Not$TM, {A}]]
+simplifiedNot[ Theorema`Language`Not$TM[ Theorema`Language`Or$TM[ A__]]] := Apply[ Theorema`Language`And$TM, Map[ Theorema`Language`Not$TM, {A}]]
+simplifiedNot[ Theorema`Language`Not$TM[ Theorema`Language`Implies$TM[ A_, B_]]] := Theorema`Language`And$TM[ A, Theorema`Language`Not$TM[ B]]
+simplifiedNot[ Theorema`Language`Not$TM[ Theorema`Language`Iff$TM[ A_, B_]]] := 
+	Theorema`Language`Or$TM[ Theorema`Language`And$TM[ A, Theorema`Language`Not$TM[ B]], Theorema`Language`And$TM[ B, Theorema`Language`Not$TM[ A]]]
+simplifiedNot[ n_Theorema`Language`Not$TM] := n
 
 (* ::Subsubsection:: *)
 (* simplifiedForall *)
@@ -373,11 +383,11 @@ makeRules[ {form:Theorema`Language`Equal$TM[ l_, r_], c_List, var_List}, ref_, i
         	{forward, backward, {makeSingleRule[ {l, r, c, var}, ref, rwid, 1], makeSingleRule[ {r, l, c, var}, ref, rwid, -1]}}
         ]
     ]
-makeRules[ {form:Theorema`Language`And$TM[ f__], c:{__}, var_List}, ref_, id_String:"", dir_Integer:0]	:= 
+makeRules[ {form:Theorema`Language`And$TM[ f__], c:{__}, var_List}, ref_, id_String:"", dir_Integer:0] := 
 	{MapIndexed[ makeSingleRule[ {#1, form, Drop[ c, #2], var}, ref, id, dir]&, c], 
 	Map[ makeSingleRule[ {#, makeConjunction[ c, Theorema`Language`And$TM], {}, var}, ref, id, dir, "backward"]&, {f}],
 	{}}
-makeRules[ {form_, c:{__}, var_List}, ref_, id_String:"", dir_Integer:0]	:= 
+makeRules[ {form_, c:{__}, var_List}, ref_, id_String:"", dir_Integer:0] := 
 	{MapIndexed[ makeSingleRule[ {#1, form, Drop[ c, #2], var}, ref, id, dir]&, c], 
 	{makeSingleRule[ {form, makeConjunction[ c, Theorema`Language`And$TM], {}, var}, ref, id, dir, "backward"]},
 	{}}
@@ -395,12 +405,11 @@ makeRules[ args___] := unexpected[ makeRules, {args}]
 	If conjunctions or multiple conditions are involved, there can be more than one rule with id=i and dir=d. In this case, if a rule with id=i and dir=-d
 	has been applied to a formula, then remove all rules with id=i and dir=d in order to prevent cyclic rewriting.
 *)
-(* Do not rewrite numbers and logical quantifiers *)
+(* Do not rewrite numbers and logical combinations *)
 makeSingleRule[ {l_?NumberQ, r_, c_List, var_List}, ref_, id_, dir_] := Sequence[]
+makeSingleRule[ {_Theorema`Language`And$TM|_Theorema`Language`Or$TM|_Theorema`Language`Implies$TM|_Theorema`Language`Iff$TM, r_, c_List, var_List}, ref_, id_, dir_] := Sequence[]
 makeSingleRule[ {_Theorema`Language`Forall$TM|_Theorema`Language`Exists$TM, r_, c_List, var_List}, ref_, id_, dir_] := Sequence[]
-(* 
-	If the free variables left/right do not coincide, then do not generate a rewrite rule
-*)
+(* If the free variables left/right do not coincide, then do not generate a rewrite rule *)
 makeSingleRule[ {l_, r_, c_List, var_List}, ref_, id_, dir_] /; With[ {fr = freeVariables[ Append[ c, r]], fl = freeVariables[ l]}, Complement[ fr, fl] =!= {} || Complement[ fl, var] =!= {}] := 
 	Sequence[]
 	
