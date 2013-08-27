@@ -167,9 +167,9 @@ MakeExpression[ RowBox[{UnderscriptBox[ "let", rng_], form_}], fmt_] :=
 	   but we do not consider it a syntax error to use one of the other ranges *)
      With[ {r = toRangeBox[ rng]},
 		MakeExpression[ RowBox[{"QU$", "[", 
-            RowBox[{ r, ",", RowBox[{ "Abbrev", "[", RowBox[{ r, ",", form}], "]"}]}],
-             "]"}], fmt]
-	]/; $parseTheoremaExpressions
+            RowBox[{ r, ",", RowBox[{ "Abbrev", "[", RowBox[{ r, ",", form}], "]"}]}], "]"}], 
+        fmt]
+     ] /; $parseTheoremaExpressions
 
 
 (* ::Subsubsection:: *)
@@ -188,6 +188,11 @@ row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", c_}] := RowBox[ 
 MakeExpression[ RowBox[ {"\[And]", RowBox[{"\[Piecewise]", GridBox[ c:{{_}..}, ___]}]}], fmt_] :=
 	With[ {clauses = Riffle[ Map[ First, c], ","]},
 		MakeExpression[ RowBox[{"And", "[", RowBox[ clauses], "]"}], fmt]
+	] /; $parseTheoremaExpressions
+	
+MakeExpression[ RowBox[ {"\[Or]", RowBox[{"\[Piecewise]", GridBox[ c:{{_}..}, ___]}]}], fmt_] :=
+	With[ {clauses = Riffle[ Map[ First, c], ","]},
+		MakeExpression[ RowBox[{"Or", "[", RowBox[ clauses], "]"}], fmt]
 	] /; $parseTheoremaExpressions
 	
 (* ::Subsubsection:: *)
@@ -302,7 +307,7 @@ MakeExpression[RowBox[{a_, TagBox[ "\[DoubleLongRightArrow]", Identity, ___]}], 
 
 MakeExpression[ UnderscriptBox[ "\[ForAll]", rng_], fmt_] :=
     standardGlobalQuantifier[ "globalForall", rng, "True", fmt] /; $parseTheoremaGlobals
-
+    
 MakeExpression[ UnderscriptBox[ UnderscriptBox[ "\[ForAll]", rng_], cond_], fmt_] :=
     standardGlobalQuantifier[ "globalForall", rng, cond, fmt] /; $parseTheoremaGlobals
 
