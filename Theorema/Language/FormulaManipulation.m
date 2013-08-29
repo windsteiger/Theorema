@@ -118,6 +118,7 @@ simplifiedNot[ Theorema`Language`Not$TM[ Theorema`Language`Implies$TM[ A_, B_]]]
 simplifiedNot[ Theorema`Language`Not$TM[ Theorema`Language`Iff$TM[ A_, B_]]] := 
 	Theorema`Language`Or$TM[ Theorema`Language`And$TM[ A, Theorema`Language`Not$TM[ B]], Theorema`Language`And$TM[ B, Theorema`Language`Not$TM[ A]]]
 simplifiedNot[ n_Theorema`Language`Not$TM] := n
+simplifiedNot[ args___] := unexpected[ simplifiedNot, {args}]
 
 (* ::Subsubsection:: *)
 (* simplifiedForall *)
@@ -342,9 +343,10 @@ varToPattern[ args___] := unexpected[ varToPattern, {args}]
 (* formulaListToRules *)
 
 (*
-	formulaListToRules[ l_List] converts l into a list {f, b}, where 
+	formulaListToRules[ l_List] converts l into a list {f, b, e}, where 
 	f is a list of forward rewrite rules (for rewriting the kb) and
 	b is a list of backward rewrite rules (for rewriting the goal).
+	e is a list of elementary substitution.
 *)
 formulaListToRules[ l_List] := MapThread[ Join, Map[ formulaToRules, l]]
 formulaListToRules[ args___] := unexpected[ formulaListToRules, {args}]
@@ -368,127 +370,168 @@ formulaToRules[ args___] := unexpected[ formulaToRules, {args}]
 	It is of the form {form, c, var}, where form is neither forall nor implies, c is a list of conditions, and var is a list of (universally quantified) variables.
 	Result is a list of forward rules, a list of backward rules, and a list of elementary substitutions and/or definition rules.
 *)
-makeRules[ {(Theorema`Language`IffDef$TM|Theorema`Language`EqualDef$TM)[ l_, r_], c_List, var_List}, ref_, id_String:"", dir_Integer:0] := 
-	{{}, {}, {makeSingleRule[ {l, r, c, var}, ref, id, dir]}}
-makeRules[ {Theorema`Language`Iff$TM[ l_, r_], c_List, var_List}, ref_, id_String:"", dir_Integer:0] := With[ {rwid = ToString[ Unique[ "RWID$"]]},
-	Append[ MapThread[ Join, {makeRules[ {r, Append[ c, l], var}, ref, rwid, 1], makeRules[ {l, Append[ c, r], var}, ref, rwid, -1]}], {}]]
+makeRules[ {(Theorema`Language`IffDef$TM|Theorema`Language`EqualDef$TM)[ l_, r_], c_List, var_List}, ref_] := 
+	{{}, {}, {makeSingleRule[ {l, r, c, var}, ref]}}
+makeRules[ {Theorema`Language`Iff$TM[ l_, r_], c_List, var_List}, ref_] := 
+	MapThread[ Join, {makeRules[ {r, joinConditions[ c, l], var}, ref], makeRules[ {l, joinConditions[ c, r], var}, ref]}]
 (* Special case equality: we can rewrite left to right and right to left, but we can also rewrite the equality as a whole. *)
-makeRules[ {form:Theorema`Language`Equal$TM[ l_, r_], c_List, var_List}, ref_, id_String:"", dir_Integer:0] :=
-    Module[ {forward = MapIndexed[ makeSingleRule[ {#1, form, Drop[ c, #2], var}, ref, id, dir]&, c], backward = {}},
+makeRules[ {form:Theorema`Language`Equal$TM[ l_, r_], c_List, var_List}, ref_] :=
+    Module[ {forward = MapIndexed[ makeSingleRule[ {#1, form, Drop[ c, #2], var}, ref]&, c], backward = {}},
         If[ c =!= {},
         	(* in this case, forward is also empty, we need not do anything *)
-            backward = {makeSingleRule[ {form, makeConjunction[ c, Theorema`Language`And$TM], {}, var}, ref, id, dir, "backward"]}
+            backward = {makeSingleRule[ {form, makeConjunction[ c, Theorema`Language`And$TM], {}, var}, ref, "backward"]}
         ];
-        With[ {rwid = ToString[ Unique[ "RWID$"]]},
-        	{forward, backward, {makeSingleRule[ {l, r, c, var}, ref, rwid, 1], makeSingleRule[ {r, l, c, var}, ref, rwid, -1]}}
-        ]
+        {forward, backward, {makeSingleRule[ {l, r, c, var}, ref], makeSingleRule[ {r, l, c, var}, ref]}}
     ]
-makeRules[ {form:Theorema`Language`And$TM[ f__], c:{__}, var_List}, ref_, id_String:"", dir_Integer:0] := 
-	{MapIndexed[ makeSingleRule[ {#1, form, Drop[ c, #2], var}, ref, id, dir]&, c], 
-	Map[ makeSingleRule[ {#, makeConjunction[ c, Theorema`Language`And$TM], {}, var}, ref, id, dir, "backward"]&, {f}],
+(* We do not introduce backward rules for the negated implications *)
+makeRules[ {form:Theorema`Language`And$TM[ f__], c:{__}, var_List}, ref_] := 
+	{Join[ 
+		MapIndexed[ makeSingleRule[ {#1, form, Drop[ c, #2], var}, ref]&, c],
+		Map[ makeSingleRule[ 
+				{simplifiedNot[ Theorema`Language`Not$TM[ #]], makeDisjunction[ Map[ simplifiedNot[ Theorema`Language`Not$TM[ #]]&, c], Theorema`Language`Or$TM], {}, var}, 
+				ref]&, {f}]
+	], 
+	Map[ makeSingleRule[ {#, makeConjunction[ c, Theorema`Language`And$TM], {}, var}, ref, "backward"]&, {f}],
 	{}}
-makeRules[ {form_, c:{__}, var_List}, ref_, id_String:"", dir_Integer:0] := 
-	{MapIndexed[ makeSingleRule[ {#1, form, Drop[ c, #2], var}, ref, id, dir]&, c], 
-	{makeSingleRule[ {form, makeConjunction[ c, Theorema`Language`And$TM], {}, var}, ref, id, dir, "backward"]},
+makeRules[ {form_, c:{__}, var_List}, ref_] := 
+	{Append[
+		MapIndexed[ makeSingleRule[ {#1, form, Drop[ c, #2], var}, ref]&, c],
+		makeSingleRule[ {simplifiedNot[ Theorema`Language`Not$TM[ form]], makeDisjunction[ Map[ simplifiedNot[ Theorema`Language`Not$TM[ #]]&, c], Theorema`Language`Or$TM], {}, var}, ref]
+	], 
+	{makeSingleRule[ {form, makeConjunction[ c, Theorema`Language`And$TM], {}, var}, ref, "backward"]},
 	{}}
-makeRules[ {form_, c_List, var_List}, ref_, id_String:"", dir_Integer:0] := {{}, {}, {}}
+makeRules[ {form_, c_List, var_List}, ref_] := {{}, {}, {}}
 makeRules[ args___] := unexpected[ makeRules, {args}]
 
 (*
-	A "rewrite rule" is stored as {key, id, dir, r}, where
+	A "rewrite rule" is stored as {key, r}, where
 	key ... is the key of the formula from which the rule has been derived,
-	id  ... is an identifier for the rule,
-	dir ... in {1,-1} is used to identify rules coming from symmetrical formulas (equalities/equivalences), and
-	r   ... is the actual rule lhs->rhs.
-
-	E.g. a formula A=B generates {key, i, 1, A->B} and {key, i, -1, B->A}. When we use B->A then remove {..., A->B} from the list of available rules.
-	If conjunctions or multiple conditions are involved, there can be more than one rule with id=i and dir=d. In this case, if a rule with id=i and dir=-d
-	has been applied to a formula, then remove all rules with id=i and dir=d in order to prevent cyclic rewriting.
+	r   ... is the actual rule lhs:>rhs.
+	
+	We can use the key to filter rules before applying them to a formula with that key.
 *)
 (* Do not rewrite numbers and logical combinations *)
-makeSingleRule[ {l_?NumberQ, r_, c_List, var_List}, ref_, id_, dir_] := Sequence[]
-makeSingleRule[ {_Theorema`Language`And$TM|_Theorema`Language`Or$TM|_Theorema`Language`Implies$TM|_Theorema`Language`Iff$TM, r_, c_List, var_List}, ref_, id_, dir_] := Sequence[]
-makeSingleRule[ {_Theorema`Language`Forall$TM|_Theorema`Language`Exists$TM, r_, c_List, var_List}, ref_, id_, dir_] := Sequence[]
+makeSingleRule[ {l_?NumberQ, r_, c_List, var_List}, ref_] := Sequence[]
+makeSingleRule[ {_Theorema`Language`And$TM|_Theorema`Language`Or$TM|_Theorema`Language`Implies$TM|_Theorema`Language`Iff$TM, r_, c_List, var_List}, ref_] := Sequence[]
+makeSingleRule[ {_Theorema`Language`Forall$TM|_Theorema`Language`Exists$TM, r_, c_List, var_List}, ref_] := Sequence[]
 (* If the free variables left/right do not coincide, then do not generate a rewrite rule *)
-makeSingleRule[ {l_, r_, c_List, var_List}, ref_, id_, dir_] /; With[ {fr = freeVariables[ Append[ c, r]], fl = freeVariables[ l]}, Complement[ fr, fl] =!= {} || Complement[ fl, var] =!= {}] := 
+makeSingleRule[ {l_, r_, c_List, var_List}, ref_] /; With[ {fr = freeVariables[ Append[ c, r]], fl = freeVariables[ l]}, Complement[ fr, fl] =!= {} || Complement[ fl, var] =!= {}] := 
 	Sequence[]
 	
-makeSingleRule[ all:{l_, r_, c_List, var_List}, ref_, id_, dir_] := {ref.key, id, dir, makeSingleRule[ all, ref]}
+makeSingleRule[ all:{l_, r_, c_List, var_List}, ref_] := {ref.key, mmaTransRule[ all, ref]}
 
 (*
 	For backward rules we allow to introduce an existential quantifier if additional free variables occur.
 	The corresponding thing for forward rules is not done by rewriting, it should be achieved by instantiation.
 *)
-makeSingleRule[ {l_, r_, {}, var_List}, ref_, id_, dir_, "backward"] := 
+makeSingleRule[ {l_, r_, {}, var_List}, ref_, "backward"] := 
 	Module[ {addVars = Complement[ freeVariables[ r], freeVariables[ l]], newF},
 		If[ addVars === {},
 			newF = r,
 			(* else *)
 			newF = Theorema`Language`Exists$TM[ Apply[ Theorema`Language`RNG$, Map[ Theorema`Language`SIMPRNG$, addVars]], True, r]
 		];
-		makeSingleRule[ {l, newF, {}, var}, ref, id, dir]
+		makeSingleRule[ {l, newF, {}, var}, ref]
 	]
-makeSingleRule[ {l_, r_, c_List, var_List}, ref_, id_, dir_, "backward"] := 
-	makeSingleRule[ { l, makeConjunction[ Append[ c, r], Theorema`Language`And$TM], {}, var}, ref, id, dir, "backward"]
+makeSingleRule[ {l_, r_, c_List, var_List}, ref_, "backward"] := 
+	makeSingleRule[ { l, makeConjunction[ Append[ c, r], Theorema`Language`And$TM], {}, var}, ref, "backward"]
 
-makeSingleRule[ {l_, r_, c_List, var_List}, ref_] :=
+makeSingleRule[ args___] := unexpected[ makeSingleRule, {args}]
+
+mmaTransRule[ {l_, r_, c_List, var_List}, ref_] :=
 (*
-	makeSingleRule[ {left, right, cond, var}, ref] translates left/right into a rewrite rule.
+	mmaTransRule[ {left, right, cond, var}, ref] translates left/right into a rewrite rule.
 	cond, var are assumed to be come from 'stripUniversalQuantifiers' translating a universally quantified equality/equivalence into
 	eq ... the pure equality/equivalence,
 	cond ... the conditions on the variables contained in eq, and
 	var ... the variables contained in eq.
-	ref is the original universally quantified equality/equivalence formula. 
+	ref is the original (universally quantified) equality/equivalence formula. 
 	When the resulting rewrite rule is applied, it will Sow[ref, "ref"] and Sow[cond, "cond"], which must be caught by an appropriate Reap, 
-	see replaceAndTrack and replaceRecursivelyAndTrack.
+	see replace...AndTrack.
 *)
     With[ {left = execLeft[ Hold[l], var], 
                cond = makeConjunction[ c, Theorema`Language`And$TM],
                right = execRight[ Hold[r], var]},
             ToExpression[ 
-            	"RuleDelayed[" <> left <> "," <> "Sow[" <> ToString[ ref, InputForm] <> ",\"ref\"]; Sow[" <> execRight[ Hold[ cond], var] <> ",\"cond\"];" <> right <> "]"
+            	"RuleDelayed[" <> left <> "," <> 
+            	"Sow[" <> ToString[ ref, InputForm] <> ",\"ref\"]; Sow[" <> execRight[ Hold[ cond], var] <> ",\"cond\"];" <> right <> "]"
             ]
         ]
         
-makeSingleRule[ args___] := unexpected[ makeSingleRule, {args}]
+mmaTransRule[ args___] := unexpected[ mmaTransRule, {args}]
 
 
 (* ::Subsubsection:: *)
-(* replaceAndTrack *)
+(* replace...AndTrack *)
 
 (*
-	replaceAndTrack[ expr_, repl_List] results in {new, used, cond} where
-		new = expr /. repl,
-		used is a list of formula keys corresponding to the formulae from which the applied replacements have been derived, and
-		cond is a condition under which the rewrite is allowed.
+	All these functions return a list {e, form, cond}, where
+	e is the resulting expression after replacement,
+	form is a list of formulas used for replacement, i.e. the formulas from which the rewrite rules have been derived,
+	cond is a condition, under which the replacement is allowed.
 *)
-replaceAndTrack[ expr_, repl_List] := 
+replaceAndTrack[ expr:_Theorema`Language`VAR$|_Theorema`Language`SEQ$|_Theorema`Language`FIX$, _List] := {expr, {}, True}
+
+replaceAndTrack[ expr_, repl_List] :=
 	Module[ {e, uc},
-		{e, uc} = Reap[ replaceAllExcept[ expr, repl, {}, Heads -> {Theorema`Language`VAR$, Theorema`Language`SEQ$, Theorema`Language`FIX$}], {"ref", "cond"}];
+		{e, uc} = Reap[ Replace[ expr, repl], {"ref", "cond"}];
 		If[ uc === {{}, {}},
-			{e, {}, {}},
+			{e, {}, True},
 			(* else *)
 			{e, uc[[1,1]], simplifiedAnd[ makeConjunction[ uc[[2,1]], Theorema`Language`And$TM]]}
 		]
 	]
 replaceAndTrack[ args___] := unexpected[ replaceAndTrack, {args}]
 
-replaceRecursivelyAndTrack[ expr_, repl_List] := 
-(*
-	We take care that no infinite rewritings occur using "MaxIterations".
-*)
+replaceListAndTrack[ expr_, repl_List] := 
+	Module[ {all},
+		all = DeleteCases[ Map[ replaceAndTrack[ expr, {#}]&, repl], {expr, _, _}];
+		If[ all === {},
+			{{}, {}, {}},
+			Transpose[ all]
+		]
+	]
+replaceListAndTrack[ args___] := unexpected[ replaceListAndTrack, {args}]
+
+replaceAllAndTrack[ expr_, repl_List] := 
+	Module[ {e, uc},
+		{e, uc} = Reap[ replaceAllExcept[ expr, repl, {}, Heads -> {Theorema`Language`VAR$, Theorema`Language`SEQ$, Theorema`Language`FIX$}], {"ref", "cond"}];
+		If[ uc === {{}, {}},
+			{e, {}, True},
+			(* else *)
+			{e, uc[[1,1]], simplifiedAnd[ makeConjunction[ uc[[2,1]], Theorema`Language`And$TM]]}
+		]
+	]
+replaceAllAndTrack[ args___] := unexpected[ replaceAllAndTrack, {args}]
+
+replaceRepeatedAndTrack[ expr_, repl_List] := 
+(* We take care that no infinite rewritings occur using "MaxIterations" *)
 	Module[ {e, uc},
 		{e, uc} = Reap[ 
 			Quiet[ replaceRepeatedExcept[expr, repl, {}, Heads -> {Theorema`Language`VAR$, Theorema`Language`SEQ$, Theorema`Language`FIX$}, MaxIterations -> 5], 
 					ReplaceRepeated::rrlim],
 				{"ref", "cond"}];
 		If[ uc === {{}, {}},
-			{e, {}, {}},
+			{e, {}, True},
 			(* else *)
 			{e, uc[[1,1]], simplifiedAnd[ makeConjunction[ uc[[2,1]], Theorema`Language`And$TM]]}
 		]
 	]
-replaceRecursivelyAndTrack[ args___] := unexpected[ replaceRecursivelyAndTrack, {args}]
+replaceRepeatedAndTrack[ args___] := unexpected[ replaceRepeatedAndTrack, {args}]
+
+(* ::Subsubsection:: *)
+(* filterRules *)
+
+(*
+	rules is a list of rewrite rules of the form {k, l:>r} as generated by makeSingleRule above.
+	key is the key of the formula, to which the rules are intended to be applied.
+	filterRules[ rules_List, key_] filters rules and returns the plain Mathematica rewrite rules that are applicable to the formula with key 'key'.
+		It deletes rules where k=key because they are derived from the formula to which they should now be applied.
+	filterRules[ rules_List, keyList_] deletes rules with k in the keyList. It returns a list of rules of the form {k, l:>r}, not the plain Mma rules.
+*)
+filterRules[ rules_List, key:{_, _}] := Cases[ rules, {Except[ key], r_} -> r]
+filterRules[ rules_List, {keys:{_, _}..}] := DeleteCases[ rules, Alternatives[ keys]]
+filterRules[ args___] := unexpected[ filterRules, {args}]
 
 
 (* ::Section:: *)

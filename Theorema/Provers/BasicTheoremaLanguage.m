@@ -315,6 +315,59 @@ ps:PRFSIT$[ g_, k:{pre___, e:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], post__
 
 
 (* ::Section:: *)
+(* goal rewriting *)
+
+(*
+	In the proof situations "goalRewriting"-> we store {g, {key1, ..., keyn}}, where
+	g is the key of the goal and
+	keyi are the keys of the rewrite rules
+	that were available when the rule was applied the last time.
+*)
+inferenceRule[ goalRewriting] = 
+this:PRFSIT$[ g:FML$[ _, Except[_Forall$TM|_Exists$TM], __], k_List, id_, rest___?OptionQ] :> 
+	Module[ {lastGoalRewriting, rules, rewKeys, usedSubsts, conds, newForms, newG, j, newNodes = {}},
+		lastGoalRewriting = this."goalRewriting";
+		Which[
+			lastGoalRewriting === $Failed || g.key =!= lastGoalRewriting[[1]],
+			(* first application of this rule or applied to new goal *)
+			rules = this.goalRules,
+			True,
+			(* applied to this goal aleady before *)
+			rules = DeleteCases[ this.goalRules, {Apply[ Alternatives, lastGoalRewriting[[2]]], _}]
+			(* if there are no new rules, then rules={} *)
+		];
+			
+		If[ rules === {},
+			(* There are no (new) substitutions available -> stop *)
+			$Failed,
+			(* else: we have substitutions *)
+			rewKeys = g."rewrittenBy";
+			{newForms, usedSubsts, conds} = replaceListAndTrack[ g.formula, filterRules[ rules, g.key]];
+			Do[
+				newG = makeFML[ formula -> newForms[[j]]];
+				(* Goal rewriting should actually generate NO conditions. If a condition still appears, there must have gone something wrong *)
+				Assert[ conds[[j]]];
+				(* The second param to "goalRewriting" -> is unimportant, because there is a new goal, so we will not access it when the rule is applied next time.*)
+				AppendTo[ newNodes, 
+					makeANDNODE[ makePRFINFO[ name -> goalRewriting, used -> Prepend[ usedSubsts[[j]], g], generated -> newG], 
+						newSubgoal[ goal -> newG, kb -> k, goalRules -> filterRules[ this.goalRules, Map[ #.key&, usedSubsts]], "goalRewriting" -> {g.key, {}}, rest]]],
+				{j, Length[ newForms]}
+			];
+			Switch[ Length[ newNodes],
+				0,
+				makeANDNODE[ makePRFINFO[ name -> goalRewriting, used -> {}, generated -> {}], 
+						newSubgoal[ goal -> g, kb -> k, "goalRewriting" -> {g.key, Map[ First, this.goalRules]}, rest]],
+				1,
+				First[ newNodes],
+				_,
+				makeORNODE[ 
+					makePRFINFO[ name -> multipleGoalRewriting, used -> newNodes.used, generated -> newNodes.generated],
+					newNodes]
+			]            	
+		]
+	]
+
+(* ::Section:: *)
 (* substitution *)
 
 inferenceRule[ elementarySubstitution] = 
@@ -325,7 +378,7 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :>
 			(* There are no substitutions available -> rule does not apply *)
 			$Failed,
 			(* else: we have substitutions *)
-			{newForm, usedSubst, cond} = replaceRecursivelyAndTrack[ g.formula, rules];
+			{newForm, usedSubst, cond} = replaceRepeatedAndTrack[ g.formula, rules];
 			If[ usedSubst =!= {},
 				(* rewrite applied *)
 				newG = makeFML[ formula -> newForm];
@@ -342,7 +395,7 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :>
 			genForms = {{newG}};
 			AppendTo[ replBy, Union[ usedSubst]];
 			Do[
-                {newForm, usedSubst, cond} = replaceRecursivelyAndTrack[ k[[j]].formula, rules];
+                {newForm, usedSubst, cond} = replaceRepeatedAndTrack[ k[[j]].formula, rules];
                 If[ usedSubst =!= {},
                     (* rewrite applied *)
                     newForm = makeFML[ formula -> newForm];
@@ -360,6 +413,7 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :>
                 ],
                 {j, Length[ k]}
             ];
+            (* Proof goals for checking the conditions are still missing *)
             If[ substApplied,
             	makeANDNODE[ makePRFINFO[ name -> elementarySubstitution, used -> usedForms, generated -> genForms, "usedSubst" -> replBy], 
 					newSubgoal[ goal -> newG, kb -> newK, local -> locInfo, rest]],
@@ -379,7 +433,7 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :>
 			(* There are no definitions available at all in this proof -> expanding defs does not apply *)
 			$Failed,
 			(* else: we have definition rewrite rules *)
-			{new, usedDefs, cond} = replaceAndTrack[ g.formula, rules];
+			{new, usedDefs, cond} = replaceAllAndTrack[ g.formula, rules];
 			If[ usedDefs =!= {} && freeVariables[ cond] === {},
 				(* rewrite applied *)
 				(* in this case, the result is of the form {newForm, cond}, where cond are conditions to be fulfilled in order to allow the rewrite *)
@@ -397,7 +451,7 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :>
 			genForms = {{newG}};
 			AppendTo[ replBy, Union[ usedDefs]];
 			Do[
-                {new, usedDefs, cond} = replaceAndTrack[ k[[j]].formula, rules];
+                {new, usedDefs, cond} = replaceAllAndTrack[ k[[j]].formula, rules];
                 If[ usedDefs =!= {} && freeVariables[ cond] === {},
                     (* rewrite applied *)
                     newForm = makeFML[ formula -> new];
@@ -572,6 +626,8 @@ registerRuleSet[ "Basic Theorema Language Rules", basicTheoremaLanguageRules, {
 	quantifierRules, 
 	connectiveRules, 
 	equalityRules,
+	{goalRewriting, True, True, 15},
+	{knowledgeRewriting, True, True, 25},
 	{elementarySubstitution, True, True, 4},
 	{expandDef, True, True, 80},
 	{contradiction, True, True, 100}

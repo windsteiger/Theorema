@@ -28,7 +28,10 @@ MessageName[ instantiate, "usage", lang] = "Instantiate universally quantified f
 MessageName[ existsGoal, "usage", lang] = "Prove existentially quantified goal by introducing meta variables";
 MessageName[ existsGoalInteractive, "usage", lang] = "Prove existentially quantified goal by interactive instantiation";
 MessageName[ existsKB, "usage", lang] = "Instantiate existentially quantified formula";
-MessageName[ elementarySubstitution, "usage", lang] = "Elementary substitution based on equalities and equivalences oin the knowledge base";
+MessageName[ multipleGoalRewriting, "usage", lang] = "Goal can be rewritten in several ways";
+MessageName[ goalRewriting, "usage", lang] = "Goal rewriting based on (quantified) implications and equivalences in the knowledge base";
+MessageName[ knowledgeRewriting, "usage", lang] = "Knowledge rewriting based on (quantified) implications and equivalences in the knowledge base";
+MessageName[ elementarySubstitution, "usage", lang] = "Elementary substitution based on equalities and equivalences in the knowledge base";
 MessageName[ expandDef, "usage", lang] = "Expand definitions";
 MessageName[ eqGoal, "usage", lang] = "Prove equalities";
 MessageName[ eqIffKB, "usage", lang] = "Equalities/equivalences in KB for rewriting";
@@ -175,6 +178,18 @@ proofStepText[ existsKB, lang, {{g_}}, {{simpG_}}, ___] := {textCell[ "The unive
 	goalCell[ simpG, "."]
 	};
 
+proofStepText[ multipleGoalRewriting, lang, ___] := {textCell[ "We have several possibilities to rewrite the goal."]};
+
+subProofHeader[ multipleGoalRewriting, lang, u_, g_, ___, pVal_, {p_}] := {};
+
+proofStepText[ goalRewriting, lang, {}, {}, ___] := {};
+(* Case: goal rewriting applicable, but no rewrite possible *)	
+
+proofStepText[ goalRewriting, lang, {{origGoal_, rewrittenBy_}}, {{g_}}, ___] := 
+(* Case: no condition generated *)
+	{textCell[ "By ", formulaReference[ rewrittenBy], " the goal ", formulaReference[ origGoal], " can be reduced to"],
+	goalCell[ g, "."]};
+	
 proofStepText[ elementarySubstitution, lang, u_, g_, ___, "usedSubst" -> subs_List, ___] := 
 	(* u, g, and subs have same length.
 	   u is a list of singleton lists, u[[i,1]] are the formulae that are rewritten
