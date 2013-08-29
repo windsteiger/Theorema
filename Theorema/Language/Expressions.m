@@ -64,6 +64,7 @@ MakeBoxes[ IffDef$TM[ l_, r_], TheoremaForm] :=
         TagBox[ RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], Identity, SyntaxForm->"a\[Implies]b"], 
         MakeBoxes[ r, TheoremaForm]}]
 
+MakeBoxes[ VAR$[ SEQ$[ v_]], TheoremaForm] := StyleBox[ MakeBoxes[ RepeatedNull[v], TheoremaForm], "ExpressionVariable"]
 MakeBoxes[ VAR$[ v_], TheoremaForm] := StyleBox[ MakeBoxes[ v, TheoremaForm], "ExpressionVariable"]
 abfAnnotations = {
 	{OverscriptBox, {"_", "^", "~"}}, 

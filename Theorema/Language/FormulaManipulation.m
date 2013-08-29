@@ -318,9 +318,11 @@ execRight[ e_Hold, var_List] :=
 	]
 execRight[ args___] := unexpected[ execRight, {args}]
 
+stripVar[ v:Theorema`Language`VAR$[Theorema`Language`SEQ$[a_]]] := v -> ToExpression[ "SEQ$" <> ToString[a]]
 stripVar[ v:Theorema`Language`VAR$[a_]] := v -> ToExpression[ "VAR$" <> ToString[a]]
 stripVar[ args___] := unexpected[ stripVar, {args}]
 
+varToPattern[ v:Theorema`Language`VAR$[Theorema`Language`SEQ$[a_]]] := With[ {new = ToExpression[ "SEQ$" <> ToString[a]]}, v :> Apply[ Pattern, {new, BlankNullSequence[]}]]
 varToPattern[ v:Theorema`Language`VAR$[a_]] := With[ {new = ToExpression[ "VAR$" <> ToString[a]]}, v :> Apply[ Pattern, {new, Blank[]}]]
 varToPattern[ args___] := unexpected[ varToPattern, {args}]
 
