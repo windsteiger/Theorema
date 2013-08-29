@@ -62,9 +62,9 @@ replaceRepeatedExcept[expr_, rules_List, expt_List, opts___?OptionQ] :=
    		exptRules = Join[ 
    			Map[(# :> With[ {s = "EXCPT~"~~ToString[ Hash[#]]}, Sow[ s -> #]; s])&, expt], 
    			rules, 
-   			Map[(HoldPattern[#[x___]] :> With[ {s = "EXCPT~"~~ToString[ Hash[#[x]]]}, Sow[ s -> #[x]]; s])&, heads]
+   			Map[(HoldPattern[#[x___]] :> With[ {s = "EXCPT~"~~ToString[ Hash[#[x]]]}, Sow[ s -> #[x], "backsubs"]; s])&, heads]
    			];
-   		{new, backsubs} = Reap[ ReplaceRepeated[ expr, exptRules, MaxIterations -> maxIt]];
+   		{new, backsubs} = Reap[ ReplaceRepeated[ expr, exptRules, MaxIterations -> maxIt], "backsubs"];
    		If[ backsubs === {},
    			new,
    			(* else *)
