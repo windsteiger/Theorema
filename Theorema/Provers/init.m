@@ -47,9 +47,12 @@ proofStepTextId[ id_, step_, rest___] :=
 proofStepTextId[ args___] := unexpected[ proofStepTextId, {args}]
 
 subProofHeaderId[ id_, step_, rest___, pVal_, pos_List] :=
-	Block[ {$proofStepID = id},
-		MapAt[ Append[ #, CellDingbat -> ToBoxes[ proofStatusIndicator[ pVal]]]&, 
-			subProofHeader[ step, $Language, rest, pVal, pos], 1]
+	Block[ {$proofStepID = id, sp = subProofHeader[ step, $Language, rest, pVal, pos]},
+		If[ sp === {},
+			{},
+			(* else *)
+			MapAt[ Append[ #, CellDingbat -> ToBoxes[ proofStatusIndicator[ pVal]]]&, sp, 1]
+		]
 	]
 subProofHeaderId[ args___] := unexpected[ subProofHeaderId, {args}]
 
