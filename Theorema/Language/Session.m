@@ -774,7 +774,9 @@ displayBoxes[ args___] := unexpected[ displayBoxes, {args}]
 
 renameToStandardContext[ expr_] :=
 	Block[{$ContextPath = {"System`"}, $Context = "System`", stringExpr},
-		stringExpr = ToString[ expr];
+		(* BUGFIX amaletzk: added FullForm[], otherwise doesn't work if outermost symbol is built-in Power *)
+		stringExpr = ToString[ FullForm[ expr]];
+		
 		stringExpr = StringReplace[ stringExpr, "Theorema`Computation`" -> "Theorema`"];
 		$ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
         (* Set default context when not in an archive *)
