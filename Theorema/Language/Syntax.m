@@ -183,6 +183,9 @@ MakeExpression[ RowBox[{"\[Piecewise]", GridBox[ c:{{_, "\[DoubleLeftArrow]"|"\[
     	MakeExpression[ RowBox[{"CaseDistinction", "[", RowBox[ clauses], "]"}], fmt]
 	] /; $parseTheoremaExpressions
 
+row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", "otherwise"}] := RowBox[ {"Clause", "[", RowBox[ {True, ",", e}], "]"}]
+row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", "o", ".", "w", "."}] := RowBox[ {"Clause", "[", RowBox[ {True, ",", e}], "]"}]
+row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", "o", ".", " ", "w", "."}] := RowBox[ {"Clause", "[", RowBox[ {True, ",", e}], "]"}]
 row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", c_}] := RowBox[ {"Clause", "[", RowBox[ {c, ",", e}], "]"}]
 
 MakeExpression[ RowBox[ {"\[And]", RowBox[{"\[Piecewise]", GridBox[ c:{{_}..}, ___]}]}], fmt_] :=
@@ -193,6 +196,11 @@ MakeExpression[ RowBox[ {"\[And]", RowBox[{"\[Piecewise]", GridBox[ c:{{_}..}, _
 MakeExpression[ RowBox[ {"\[Or]", RowBox[{"\[Piecewise]", GridBox[ c:{{_}..}, ___]}]}], fmt_] :=
 	With[ {clauses = Riffle[ Map[ First, c], ","]},
 		MakeExpression[ RowBox[{"Or", "[", RowBox[ clauses], "]"}], fmt]
+	] /; $parseTheoremaExpressions
+	
+MakeExpression[ RowBox[ {"\[DoubleLongLeftRightArrow]", RowBox[{"\[Piecewise]", GridBox[ c:{{_}..}, ___]}]}], fmt_] :=
+	With[ {clauses = Riffle[ Map[ First, c], ","]},
+		MakeExpression[ RowBox[{"Iff", "[", RowBox[ clauses], "]"}], fmt]
 	] /; $parseTheoremaExpressions
 	
 (* ::Subsubsection:: *)

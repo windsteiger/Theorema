@@ -34,7 +34,11 @@ With[ {lang = "German"},
     translate["noKnowl", lang] = "Kein Wissen verf\[UDoubleDot]gbar";
    
     translate["Sets", lang] = "Mengen";
+    translate["Tuples", lang] = "Tupel";
     translate["Arithmetic", lang] = "Arithmetik";
+    translate["Logic", lang] = "Logik";
+    translate["Domains", lang] = "Bereiche und Datentypen";
+    translate["Programming", lang] = "Mathematica Programmierung";
     translate["notUniqueLabel", lang] = "This label is not unique in the notebook: ";
     
     translate["archLabelNeeds", lang] = "verwendet:";

@@ -141,6 +141,7 @@ With[ {lang = "English"},
     translate["Tuples", lang] = "Tuples";
     translate["Arithmetic", lang] = "Arithmetic";
     translate["Logic", lang] = "Logic";
+    translate["Domains", lang] = "Domains and Data Types";
     translate["Programming", lang] = "Mathematica Programming";
     translate["BuiComp", lang] = "Builtins used in computation";
     translate["KBcomp", lang] = "Knowledge used in computation";

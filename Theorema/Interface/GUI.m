@@ -88,7 +88,9 @@ initGUI[] :=
         		{"Less", RowBox[{"A","<","B"}], False, True, False},
         		{"LessEqual", RowBox[{"A","\[LessEqual]","B"}], False, True, False},
         		{"Greater", RowBox[{"A",">","B"}], False, True, False},
-        		{"GreaterEqual", RowBox[{"A","\[GreaterEqual]","B"}], False, True, False}
+        		{"GreaterEqual", RowBox[{"A","\[GreaterEqual]","B"}], False, True, False},
+        		{"SumOf", RowBox[{"\[Sum]",SubscriptBox["A","i"]}], False, True, False},
+        		{"ProductOf", RowBox[{"\[Product]",SubscriptBox["A","i"]}], False, True, False}
         	},
         	{"Logic", 
         		{"Not", RowBox[{"\[Not]","P"}], False, True, False},
@@ -100,7 +102,14 @@ initGUI[] :=
         		{"Exists", RowBox[{"\[Exists]","P"}], False, True, False},
         		{"Equal", RowBox[{"A","=","B"}], False, False, False}
         	},
+        	{"Domains",
+        		{"isInteger", RowBox[{"A","\[Element]","\[DoubleStruckCapitalZ]"}], False, True, True},
+        		{"isRational", RowBox[{"A","\[Element]","\[DoubleStruckCapitalQ]"}], False, True, True},
+        		{"isSet", RowBox[{"A","=",RowBox[{"{","\[Ellipsis]","}"}]}], False, True, True},
+        		{"isSet", RowBox[{"A","=",RowBox[{"\[LeftAngleBracket]","\[Ellipsis]","\[RightAngleBracket]"}]}], False, True, True}
+        	},
         	{"Programming",
+        		{"CaseDistinction", RowBox[{"\[Piecewise]",GridBox[{{"A"},{"B"}}]}], False, True, False},
         		{"Module", RowBox[{"Module","[","\[Ellipsis]","]"}], False, True, False},
         		{"Do", RowBox[{"Do","[","\[Ellipsis]","]"}], False, True, False},
         		{"While", RowBox[{"While","[","\[Ellipsis]","]"}], False, True, False},
@@ -1776,7 +1785,6 @@ savePreferences[ args___] := unexpected[ savePreferences, {args}]
 
 (* ::Section:: *)
 (* Math Tab *)
-
 
 langButtonData["AND1"] := 
 	{
