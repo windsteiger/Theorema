@@ -83,6 +83,7 @@ initGUI[] :=
         	{"Arithmetic",
         		{"Plus", RowBox[{"A","+","B"}], False, True, False},
         		{"Times", RowBox[{"A","*","B"}], False, True, False},
+        		{"Power", SuperscriptBox[ "A", "B"], False, True, False},
         		{"Equal", RowBox[{"A","=","B"}], False, False, False},
         		{"Less", RowBox[{"A","<","B"}], False, True, False},
         		{"LessEqual", RowBox[{"A","\[LessEqual]","B"}], False, True, False},
@@ -91,13 +92,13 @@ initGUI[] :=
         	},
         	{"Logic", 
         		{"Not", RowBox[{"\[Not]","P"}], False, True, False},
-        		{"And", RowBox[{"P", "\[And]","Q"}], False, True, False},
-        		{"Or", RowBox[{"P", "\[Or]","Q"}], False, True, False},
-        		{"Implies", RowBox[{"P", "\[Implies]","Q"}], False, True, False},
-        		{"Iff", RowBox[{"P", "\[Equivalent]","Q"}], False, True, False},
+        		{"And", RowBox[{"P", "\[And]","Q"}], True, True, False},
+        		{"Or", RowBox[{"P", "\[Or]","Q"}], True, True, False},
+        		{"Implies", RowBox[{"P", "\[Implies]","Q"}], True, True, False},
+        		{"Iff", RowBox[{"P", "\[Equivalent]","Q"}], True, True, False},
         		{"Forall", RowBox[{"\[ForAll]","P"}], False, True, False},
         		{"Exists", RowBox[{"\[Exists]","P"}], False, True, False},
-        		{"Equal", RowBox[{"A","=","B"}], False, False, False}
+        		{"Equal", RowBox[{"A","=","B"}], True, False, False}
         	},
         	{"Programming",
         		{"Module", RowBox[{"Module","[","\[Ellipsis]","]"}], False, True, False},
@@ -113,7 +114,10 @@ initGUI[] :=
         $tcActionView = 1;
         (* Init status of opener views *)
         Scan[ ToExpression, Map[ "$builtinStructState$" <> # <> "=True"&, Map[ First, $tmaBuiltins]]];
+        $tcAllFormulaeOpener = True;
+        $tcAllDeclOpener = True;
 		$kbStruct = {};
+		$keyWord = "";
 		$initLabel = "???";
 		$labelSeparator = ",";
 		$cellTagKeySeparator = ":";
@@ -123,9 +127,12 @@ initGUI[] :=
 		$selectedProofGoal = {};
 		$selectedSearchDepth = 30;
 		$maxSearchDepth = 200;
+		$selectedSearchTime = 360;
+		$maxSearchTime = 1000;
 		initBuiltins[ {"prove", "compute", "solve"}];
+		resetDefaultRules[];
 		$selectedRuleSet = Hold[ basicTheoremaLanguageRules];
-		$selectedStrategy = applyOnce;
+		$selectedStrategy = applyOnceAndLevelSaturation;
 		$CtrlActive = 0;
 		$ShiftActive = 0;
 		$TMAactDecl = translate[ "None"];
@@ -155,6 +162,9 @@ initBuiltins[ args___] := unexpected[ initBuiltins, {args}]
 (* ::Section:: *)
 (* theoremaCommander *)
 
+openTheoremaGUI[ ] := openTheoremaCommander[]
+openTheoremaGUI[ args___] := unexpected[ openTheoremaGUI, {args}]
+
 
 (*
 	The style sheet defines Deployed->False unlike in usual palettes. This is necessary in order make Button[ ..., Active->False] or
@@ -163,13 +173,14 @@ initBuiltins[ args___] := unexpected[ initBuiltins, {args}]
 *)
 openTheoremaCommander[ ] /; $Notebooks :=
     Module[ {},
-        CreatePalette[ Dynamic[Refresh[
+        CreatePalette[ Dynamic[
+        	Refresh[
         	activitiesView[
         		(* activities buttons *)
         		{translate["tcSessionTabLabel"], translate["tcProveTabLabel"], translate["tcComputeTabLabel"], translate["tcSolveTabLabel"], translate["tcPreferencesTabLabel"]},
         		(* for each activity the respective action buttons *)
         		{
-        			(* session *){translate["tcSessTabStructTabLabel"], translate["tcSessTabMathTabLabel"], translate["tcSessTabArchTabLabel"]},
+        			(* session *){translate["tcSessTabComposeTabLabel"], translate["tcSessTabInspectTabLabel"], translate["tcSessTabArchTabLabel"]},
         			(* prove *)  {translate["tcProveTabGoalTabLabel"], translate["tcProveTabKBTabLabel"], translate["tcProveTabBuiltinTabLabel"],
         				translate["tcProveTabProverTabLabel"], translate["tcProveTabSubmitTabLabel"], translate["tcProveTabInspectTabLabel"]},
         			(* compute *){translate["tcComputeTabSetupTabLabel"], translate["tcComputeTabKBTabLabel"], translate["tcComputeTabBuiltinTabLabel"]},
@@ -178,14 +189,14 @@ openTheoremaCommander[ ] /; $Notebooks :=
         		},
         		(* for each activity and each action the respective content *)
         		{
-        			(* session *){structButtons[], Dynamic[ Refresh[ langButtons[], TrackedSymbols :> {$buttonNat}]], archButtons[]},
+        			(* session *){sessionCompose[], sessionInspect[], sessionArchive[]},
         			(* prove *)  {Dynamic[ Refresh[ displaySelectedGoal[], UpdateInterval -> 2]],
         				Dynamic[Refresh[displayKBBrowser["prove"], TrackedSymbols :> {$kbStruct}]],
         				displayBuiltinBrowser["prove"],
-        				Dynamic[ Refresh[ selectProver[], TrackedSymbols :> {$selectedRuleSet, $selectedStrategy}]],
-        				Dynamic[ Refresh[ submitProveTask[ ], TrackedSymbols :> {$selectedProofGoal, $selectedProofKB}]],
-        				Dynamic[ Refresh[ proofNavigation[ $TMAproofTree], TrackedSymbols :> {$TMAproofTree, $TMAproofNotebook, ruleTextActive, $proofTreeScale, $selectedProofStep}]]},
-        			(* compute *){Dynamic[Refresh[ compSetup[], TrackedSymbols :> {$buttonNat}]],
+        				Dynamic[ Refresh[ selectProver[], TrackedSymbols :> {$selectedRuleSet, $selectedStrategy,$keyWord}]],
+        				Dynamic[ Refresh[ submitProveTask[ ], TrackedSymbols :> {$selectedProofGoal, $selectedProofKB, $selectedSearchDepth, $selectedSearchTime}]],
+        				Dynamic[ Refresh[ proofNavigation[ $TMAproofTree], TrackedSymbols :> {$TMAproofTree, $TMAproofSearchRunning, $TMAproofNotebook, ruleTextActive, $proofTreeScale, $selectedProofStep}]]},
+        			(* compute *){compSetup[],
         				Dynamic[Refresh[displayKBBrowser["compute"], TrackedSymbols :> {$kbStruct}]],
         				displayBuiltinBrowser["compute"]},
         			(* solve *)  {Dynamic[Refresh[displayKBBrowser["solve"], TrackedSymbols :> {$kbStruct}]],
@@ -435,8 +446,8 @@ displaySelectedGoal[ ] :=
             With[ {selGoal = goal[[1]]},
             	Column[ {
             		Button[ translate[ "OKnext"], $selectedProofGoal = selGoal; $tcActionView++],
-            		Row[ displayLabeledFormula[ selGoal], Spacer[5]],
-            		Button[ translate[ "OKnext"], $selectedProofGoal = selGoal; $tcActionView++]}]
+            		Grid[ {displayLabeledFormula[ selGoal]}]
+            		}]
             ]
         ]
     ]
@@ -444,7 +455,7 @@ displaySelectedGoal[ goal_] :=
     Module[ { },
         If[ goal === {},
             translate["noGoal"],
-            Row[ displayLabeledFormula[ goal], Spacer[5]]
+            Grid[ {displayLabeledFormula[ goal]}]
         ]
     ]
 displaySelectedGoal[args___] :=
@@ -666,6 +677,9 @@ structView[file_, item_List, tags_, task_] :=
         (* generate a column and return the collected tags also *)
         {Column[sub[[1]]], compTags}
     ]
+
+(*If item_List is empty*)
+structView[file_, {}, tags_, task_] := Sequence[];
   
 (* input cell with cell tags *)
 structView[file_, Cell[content_, "FormalTextInputFormula", a___, CellTags -> cellTags_, b___], 
@@ -830,6 +844,7 @@ displayKBBrowser[args___] :=
 
 
 Clear[structViewBuiltin];
+Clear[resultBuiltin];
 
 (* structured view for builtin operators
    follows the ideas of the structured view of the KB *)
@@ -842,8 +857,8 @@ structViewBuiltin[{category_String, rest__List}, tags_, task_String] :=
         {OpenerView[{headerViewBuiltin[category, compTags, task], Grid[ opGroup, Alignment -> {Left, Baseline}]}, 
         	ToExpression["Dynamic[$builtinStructState$"<>category<>"]"]], 
          compTags}
-    ]
-
+    ]     
+    
 structViewBuiltin[ item:List[__List], tags_, task_String] :=
     Module[ {sub, compTags},
         sub = Transpose[Map[structViewBuiltin[#, tags, task] &, item]];
@@ -888,13 +903,58 @@ headerViewBuiltin[ category_String, tags_, task_String] :=
     	]
     ]
 
+headerViewBuiltin[args___] :=
+    unexpected[ headerViewBuiltin, {args}]
 
+
+(*================================= ResultBuiltin START ==========================================*)
+
+(*
+Produces list of {catigory_String,children_List}.
+If all children are selected children_List contains only one "all" child.
+
+Example: resultBuiltin[$tmaBuiltins,{},"prove"]
+Returns: selected Builtins of task_String.
+*) 
+
+summarizeBuiltins[ l_List, task_String] := Map[ resultBuiltin[ #, task]&, Cases[ l, {_String, {_, _, True|False, True|False, True|False}..}, Infinity]]
+summarizeBuiltins[args___] := unexpected[ summarizeBuiltins, {args}]
+   
+resultBuiltin[{category_String, rest__List}, task_String] :=
+    Module[ {sub, complete},
+        sub = Transpose[ Map[ resultBuiltin[ #, task] &, {rest}]];
+        complete = Apply[ And, sub[[2]]];
+        If[ complete,
+        	"[" <> category <> "]",
+        	{category, Apply[ Join, sub[[1]]]}
+        ]
+    ] 
+    
+resultBuiltin[ {op_String, display_, _, _, _}, task_String] :=
+		If[ Switch[ task,
+    		"prove",
+    		buiActProve[ op],
+    		"compute",
+    		buiActComputation[ op],        	
+          	"solve",
+          	buiActSolve[ op]],
+        {{op}, True},
+        {{}, False}
+		]
+
+resultBuiltin[args___] :=
+    unexpected[ resultBuiltin, {args}]
+
+(*====================================== ResultBuiltin END ==========================================*)
+    
 
 (* ::Subsubsection:: *)
 (* structViewRules *)
 
 
 Clear[structViewRules];
+Clear[makeRuleRow];
+Clear[displaySelectedRules];
 
 (*
 	Go through the nested rule list recursively and bulid up the nested opener view for rule selection.
@@ -907,11 +967,15 @@ Clear[structViewRules];
 	values and go into the initial proof object (settings can be changed during the proof).
 	ruleTextActive is a global symbol, it does not go into the proof object and can be modified globally.
 *)
-structViewRules[ Hold[ rs_]] := structViewRules[ rs, {}, True]
 
+structViewRules[ {category_String},___] := Sequence[];
+
+(*Responsible for groupe name of rules *)
 structViewRules[{category_String, r__}, tags_, open_:False] :=
     Module[ {sub, compTags, structControl},
-        sub = Transpose[Map[structViewRules[#, tags] &, {r}]];
+		sub = Map[structViewRules[#, tags] &, {r}];
+		If[ sub==={},Return[{{},{}}]];
+        sub = Transpose[sub];
         compTags = Apply[Union, sub[[2]]];
         structControl = "Theorema`Interface`GUI`Private`$ruleStructState$" <> ToString[ Hash[ category]];
         If[ open && MatchQ[ ToExpression[ structControl], _Symbol],
@@ -923,14 +987,66 @@ structViewRules[{category_String, r__}, tags_, open_:False] :=
          compTags}
     ]
 
+(*Responsible for groupe name of rules. 
+	If no rules in group, returns empty Sequense *)
+structViewRules[{category_String}, tags_, open_]:=Sequence[];
+
+structViewRules[ Hold[ rs_]] := 
+	Module[{list = {}},
+		If[StringLength[$keyWord]>2,		
+			list = DeleteCases[rs,{r_Symbol/;testNoMatch[MessageName[ r, "usage"],"*"<>$keyWord<>"*"],t_,text_,p_Integer ,___}, Infinity];
+			
+			structViewRules[ list, {}, True]
+			
+		,
+			structViewRules[ rs, {}, True]
+		]
+	]
+
+testNoMatch[s_String,p_String]:=Not[StringMatchQ[ s,p]]
+testNoMatch[s_,p_]:=True
+
+resetDefaultRules[] :=
+	Module[{rs, list},
+		rs = basicTheoremaLanguageRules;
+		list = Cases[rs,{r_Symbol,active_,text_,p_Integer,___},Infinity];
+		Map[
+			ruleActive[ #[[1]]] = #[[2]];
+    		ruleTextActive[ #[[1]]] = #[[3]];
+    		rulePriority[ #[[1]]] = #[[4]];
+		&,list];		
+	]
+
+displaySelectedRules[Hold[ rs_]] := 
+	Module[{list},
+		(*Select checked list_ from allRules_*)  
+		list = Cases[rs,{r_Symbol,True,text_,p_Integer,___}->{r,text,p},Infinity];
+		(*Sort list_ by priority_*)
+		list = Sort[list,#1[[3]]<#2[[3]]&];
+		Pane[		
+			Column[Map[makeRuleRow[#]&,list]],
+			ImageSize->{360,200},
+			Scrollbars->{False,True}
+		]	
+	]
+
+makeRuleRow[{r_Symbol, textActive:(True|False), p_Integer},___] := 
+	Module[{}, 
+		Style[
+		Row[{
+			Tooltip[If[textActive,"\[CheckmarkedBox]","\[EmptySquare]"], MessageName[ ruleTextActive, "usage"]],Spacer[5],
+			MessageName[ r, "usage"]
+		}]
+		,LineBreakWithin -> False]
+	]
+
+(*Draws toggler icon *) 
 showProofTextPic[ active_] = Graphics[ {If[ active, GrayLevel[0], GrayLevel[0.7]], 
 	{Thin, Line[{{0, 0}, {4, 0}, {4, 4}, {0, 4}, {0, 0}}], Table[ Line[{{1, i}, {3, i}}], {i, 1, 3}]}}, ImageSize -> {15, 15}, PlotRange -> {{-1, 5}, {-1, 5}}];
- 
+
+(*Responsible for rule *) 
 structViewRules[ {r_Symbol, active:(True|False), textActive:(True|False), p_Integer, ___}, tags_] :=
     Module[ {align = Baseline},
-    	ruleActive[ r] = active;
-    	ruleTextActive[ r] = textActive;
-    	rulePriority[ r] = p;
         {Style[ 
          Row[{
             Row[{Tooltip[ 
@@ -961,8 +1077,9 @@ structViewRules[ category_String, tags_] :=
           	Style[ translate[ category], "Section"]}, Spacer[5]]
     ]
 
+
 structViewRules[args___] :=
-    unexpected[structViewRules, {args}]
+    unexpected[structViewRules, {args}];
 
 
 (* ::Subsubsection:: *)
@@ -996,33 +1113,81 @@ displayBuiltinBrowser[ task_String] :=
   }]
 displayBuiltinBrowser[args___] := unexcpected[ displayBuiltinBrowser, {args}]
 
+makeSearchButton[]:= 
+	Module[{},		
+		Row[{
+		Button["Search",CreateDialog[{TextCell["Enter a name: "],
+			InputField[Dynamic[nm],String],DefaultButton[DialogReturn[$keyWord=nm]]}]],		
+		Button["Show all",$keyWord = ""]
+		}]
+	]	
+
 selectProver[ ] :=
     Column[{
     	Button[ translate[ "OKnext"], $tcActionView++],
+
     	Labeled[ Tooltip[ PopupMenu[ Dynamic[ $selectedRuleSet], Map[ MapAt[ translate, #, {2}]&, $registeredRuleSets]],
     			Apply[ Function[ rs, MessageName[ rs, "usage"], {HoldFirst}], $selectedRuleSet]], 
     		translate[ "pRules"], {{ Top, Left}}],
     	Module[ {view},
-    		{view, $allRules} = structViewRules[ $selectedRuleSet];
-    		Labeled[ view, translate[ "pRulesSetup"], {{ Top, Left}}]],
+			
+			{view, $allRules} = structViewRules[ $selectedRuleSet];								
+    		
+    		Labeled[ Column[{
+				Row[{
+				Button["Search",
+				CreateDialog[
+					{
+						TextCell["Enter a keyword: "],
+						InputField[Dynamic[$keyWord],String,ContinuousAction->True],
+						DefaultButton[DialogReturn[]]						
+					},
+					WindowTitle-> "Search rules by keyword"
+				]
+			],			
+			Button["Set rules to default",resetDefaultRules[]],
+			Button["Show all",$keyWord = ""]
+				}],
+			Row[ {"Filtered by: ", $keyWord}],
+				view}], translate[ "pRulesSetup"], {{ Top, Left}}]],
     	Labeled[ Tooltip[ PopupMenu[ Dynamic[ $selectedStrategy], Map[ MapAt[ translate, #, {2}]&, $registeredStrategies]],
     		With[ {ss = $selectedStrategy}, MessageName[ ss, "usage"]]], 
     		translate[ "pStrat"], {{ Top, Left}}],
-    	Labeled[ Dynamic[ Row[ {Slider[ Dynamic[ $selectedSearchDepth], {2, $maxSearchDepth, 1}],
-    		InputField[ Dynamic[ $selectedSearchDepth], Number, FieldSize -> 3], 
-    		Button[ "-", $selectedSearchDepth--],
-    		Button[ "+", $selectedSearchDepth++],
-    		Button[ "\[LeftSkeleton]", $maxSearchDepth/=2],
-    		Button[ "\[RightSkeleton]", $maxSearchDepth*=2]}]], translate[ "sDepth"], {{ Top, Left}}],
+    	Labeled[ Grid[{
+    		{translate[ "sDepth"], Dynamic[ Row[ {Slider[ Dynamic[ $selectedSearchDepth], {2, $maxSearchDepth, 1}, ImageSize -> 150],
+    			InputField[ Dynamic[ $selectedSearchDepth], Number, FieldSize -> 3], 
+    			Button[ "-", $selectedSearchDepth--],
+    			Button[ "+", $selectedSearchDepth++],
+    			Button[ "\[LeftSkeleton]", $maxSearchDepth/=2],
+    			Button[ "\[RightSkeleton]", $maxSearchDepth*=2]}]]},
+    		{translate[ "sTime"], Dynamic[ Row[ {Slider[ Dynamic[ $selectedSearchTime], {2, $maxSearchTime, 1}, ImageSize -> 133],
+    			If[ $selectedSearchTime === Infinity,
+    				InputField[ "\[Infinity]", String, FieldSize -> 3], 
+    				InputField[ Dynamic[ $selectedSearchTime], Number, FieldSize -> 3]], 
+    			Button[ "-", $selectedSearchTime--],
+    			Button[ "+", $selectedSearchTime++],
+    			Button[ "\[LeftSkeleton]", $maxSearchTime/=2],
+    			Button[ "\[RightSkeleton]", $maxSearchTime*=2],
+    			If[ $selectedSearchTime === Infinity, 
+    				Button[ "\[Infinity]", $selectedSearchTime=360, Appearance :> "Pressed"],
+    				Button[ "\[Infinity]", $selectedSearchTime=Infinity]
+    			]}]]}
+    		}, Alignment -> Left], translate[ "sLimits"], {{Top, Left}}],
     	Labeled[ Grid[{
     		{Checkbox[ Dynamic[ $eliminateBranches]], translate[ "elimBranches"]},
     		{Checkbox[ Dynamic[ $eliminateSteps]], translate[ "elimSteps"]},
     		{Checkbox[ Dynamic[ $eliminateFormulae]], translate[ "elimForm"]}
     		}, Alignment -> {Left}], 
-    		translate[ "pSimp"], {{ Top, Left}}],
+    		translate[ "pSimp"], {{Top, Left}}],
+    	Labeled[ Grid[{
+    		{Checkbox[ Dynamic[ $interactiveProofSitSel]], translate[ "interactiveProofSitSel"]},
+    		{Checkbox[ Dynamic[ $interactiveNewProofSitFilter]], translate[ "interactiveNewProofSitFilter"]},
+    		{Checkbox[ Dynamic[ allTrue[ {existsGoalInteractive, forallKBInteractive}, ruleActive], setAll[ {existsGoalInteractive, forallKBInteractive}, ruleActive, #] &]], translate[ "interactiveInstantiate"]}
+    		}, Alignment -> {Left}], 
+    		translate[ "pInteractive"], {{Top, Left}}],
     	Labeled[ RadioButtonBar[ 
-    		Dynamic[Theorema`Provers`Common`Private`$proofCellStatus], {Automatic -> translate[ "auto"], Open -> translate[ "open"], Closed -> translate[ "closed"]}], 
-    		translate[ "proofCellStatus"], {{ Top, Left}}],
+    		Dynamic[ $proofCellStatus], {Automatic -> translate[ "auto"], Open -> translate[ "open"], Closed -> translate[ "closed"]}], 
+    		translate[ "proofCellStatus"], {{Top, Left}}],
     	Button[ translate[ "OKnext"], $tcActionView++]	
     	}]
 selectProver[ args___] := unexpected[ selectRuleSet, {args}]
@@ -1035,57 +1200,96 @@ submitProveTask[ ] :=
 				execProveCall[ $selectedProofGoal, $selectedProofKB, 
 					{$selectedRuleSet, Map[ # -> ruleActive[#]&, $allRules], Map[ # -> rulePriority[#]&, $allRules]},
 					$selectedStrategy, $selectedSearchDepth,
+					(* If interactive proving is active in one way, then do not apply time limit *)
+					If[ TrueQ[ ruleActive[ forallKBInteractive] || ruleActive[ existsGoalInteractive] || $interactiveProofSitSel || $interactiveNewProofSitFilter],
+						Infinity,
+						$selectedSearchTime
+					],
 					{$eliminateBranches, $eliminateSteps, $eliminateFormulae}], 
 				Method -> "Queued", Active -> ($selectedProofGoal =!= {})],
 			Column[{
-				Labeled[ displaySelectedGoal[ $selectedProofGoal], translate["selGoal"], {{ Top, Left}}],
-				Labeled[ displaySelectedKB[], translate["selKB"], {{ Top, Left}}]}],
+				Labeled[ displaySelectedGoal[ $selectedProofGoal], translate["selGoal"], {{Top, Left}}],
+				Labeled[ displaySelectedKB[], translate["selKB"], {{Top, Left}}]
+			}],
+			
+			Column[{				
+				Labeled[ displaySelectedRules[ $selectedRuleSet], translate[ "selectedRules"]<>":", {{Top,Left}}],
+				Labeled[ MessageName[ Evaluate[ $selectedStrategy], "usage"], translate[ "pStrat"]<>":", Left],
+				Labeled[ $selectedSearchDepth, translate[ "sDepth"]<>":", Left],
+				Labeled[ $selectedSearchTime, translate[ "sTime"]<>":", Left],
+				Labeled[
+					Column[{
+    					If[ TrueQ[ $eliminateBranches], translate[ "elimBranches"], Sequence[]],
+    					If[ TrueQ[ $eliminateSteps], translate[ "elimSteps"], Sequence[]],
+    					If[ TrueQ[ $eliminateFormulae], translate[ "elimForm"], Sequence[]]
+    				}],
+    				translate[ "pSimp"]<>":", Left],
+				Labeled[
+					Column[{
+    					If[ TrueQ[ $interactiveProofSitSel], translate[ "interactiveProofSitSel"], Sequence[]],
+    					If[ TrueQ[ $interactiveNewProofSitFilter], translate[ "interactiveNewProofSitFilter"], Sequence[]],
+    					If[ TrueQ[ Map[ ruleActive, And[ existsGoalInteractive, forallKBInteractive]]], translate[ "interactiveInstantiate"], Sequence[]]
+    				}],
+    				translate[ "pInteractive"]<>":", Left],
+				Labeled[ 
+					Switch[ $proofCellStatus,
+						Automatic, translate[ "auto"],
+						Open, translate[ "open"],
+						Closed, translate[ "closed"]
+					],
+    			translate[ "proofCellStatus"]<>":", Left]
+			}]			
+			,
 			(* Method -> "Queued" so that no time limit is set for proof to complete *)
 			Button[ translate["prove"],
 				$tcActionView++;
 				execProveCall[ $selectedProofGoal, $selectedProofKB, 
 					{$selectedRuleSet, Map[ # -> ruleActive[#]&, $allRules], Map[ # -> rulePriority[#]&, $allRules]},
 					$selectedStrategy, $selectedSearchDepth,
+					(* If interactive proving is active in one way, then do not apply time limit *)
+					If[ TrueQ[ ruleActive[ forallKBInteractive] || ruleActive[ existsGoalInteractive] || $interactiveProofSitSel || $interactiveNewProofSitFilter],
+						Infinity,
+						$selectedSearchTime
+					],
 					{$eliminateBranches, $eliminateSteps, $eliminateFormulae}], 
 				Method -> "Queued", Active -> ($selectedProofGoal =!= {})]
 		}]
 	]
 submitProveTask[ args___] := unexpected[ submitProveTask, {args}]
 
-execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, strategy_, searchDepth_, simplification_List] :=
-	Module[{nb = $proofInitNotebook, po, pv},
-		If[ NotebookFind[ nb, makeProofIDTag[ goal], All, CellTags] === $Failed,
-			NotebookFind[ nb, goal[[1,1]], All, CellTags];
-			NotebookFind[ nb, "CloseEnvironment", Next, CellStyle];
-			SelectionMove[ nb, After, CellGroup],
-			SelectionMove[ nb, All, CellGroup]
-		];
-		SetSelectedNotebook[ nb];
-		NotebookWrite[ nb, Cell[ translate[ "Proof of"]<>" "<>goal[[3]]<>": \[Ellipsis]", "OpenProof", CellTags -> makeProofIDTag[ goal]]];
-
-		{pv, po} = callProver[ rules, strategy, goal, kb, searchDepth];
-		po = simplifyProof[ po, simplification];
-		printProveInfo[ goal, kb, ruleSet, strategy, {pv, po}, searchDepth];
+execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, strategy_, searchDepth_, searchTime_, simplification_List] :=
+	Module[{po, pv, pt, st},
+		{pv, po, pt} = callProver[ rules, strategy, goal, kb, searchDepth, searchTime];
+		{po, st} = simplifyProof[ po, simplification];
+		printProveInfo[ goal, kb, ruleSet, strategy, {pv, po}, {pt, st}, searchDepth];
 	]
 execProveCall[ args___] := unexpected[ execProveCall, {args}]
 
 proofNavigation[ po_] :=
-    Module[ {proofTree = showProofNavigation[ po, $proofTreeScale], geom},
-    	geom = Replace[ ImageSize, Options[ proofTree, ImageSize]];
-    	(* Putting the frame around the inner Pane is a work-around, otherwise the pane is not positioned correctly when the proof tree is higher than 420 *)
-        Column[{
-        	ButtonBar[ {Tooltip[ "+", translate[ "zoom in"]] :> ($proofTreeScale *= 2), 
+    Module[ {proofTree, geom, addControl},
+    	If[ Length[ po] > 50 && $TMAproofSearchRunning,
+    		proofTree = showProofNavigation[ po, Fit, $selectedSearchDepth, Automatic];
+    		addControl = Graphics[ Table[{EdgeForm[Thick], ColorData["TemperatureMap"][ i/$selectedSearchDepth], 
+    			Rectangle[ {i*360/($selectedSearchDepth+1), 0}, {(i + 1)*360/($selectedSearchDepth+1), 20}]}, {i, 0, $currentSearchLevel}],
+    			PlotRange -> {{-0.1, 360}, {-0.1, 20.1}}, ImageSize -> {360, 20}],
+    	(* else *)
+    		proofTree = showProofNavigation[ po, $proofTreeScale, $selectedSearchDepth, All];
+    		addControl = ButtonBar[ {Tooltip[ "+", translate[ "zoom in"]] :> ($proofTreeScale *= 2), 
         		Tooltip[ "\[FivePointedStar]", translate[ "optimal size"]] :> ($proofTreeScale = 1), 
         		Tooltip[ "\[DottedSquare]", translate[ "fit into window"]] :> ($proofTreeScale = Fit), 
         		Tooltip[ "-", translate[ "zoom out"]] :> ($proofTreeScale /= 2)},
-        		FrameMargins -> {{15, 15}, {2, 0}}],
+        		FrameMargins -> {{15, 15}, {2, 0}}];
+    	];
+    	geom = Replace[ ImageSize, Options[ proofTree, ImageSize]];
+    	(* Putting the frame around the inner Pane is a work-around, otherwise the pane is not positioned correctly when the proof tree is higher than 420 *)
+        Column[{
+        	addControl,
         	Framed[ Pane[ proofTree,
         		{360, 510}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic, ScrollPosition -> {geom[[1]]/2-175, 0}], FrameStyle -> None],
-        	Button[ translate["abort"], Theorema`Provers`Common`Private`$proofAborted = True]
+        	Button[ translate["abort"], $proofAborted = True]
         	}, Center]	
     ]
 proofNavigation[ args___] := unexpected[ proofNavigation, {args}]
-
 
 
 (* ::Subsubsection:: *)
@@ -1106,7 +1310,7 @@ printComputationInfo[] :=
                 With[ {kb = Cases[ DownValues[ kbSelectCompute],
                 	HoldPattern[ Verbatim[HoldPattern][ kbSelectCompute[ k_List]] :> v_] -> {k, v}],
                     allBui = bui},
-                    Button[ translate["SetEnv"], setCompEnv[ kb, allBui], ImageSize -> Automatic]
+                    Button[ translate["RestoreEnv"], setCompEnv[ kb, allBui], ImageSize -> Automatic]
                 ]}
             ]}, False]], "ComputationInfo"]];
     ]
@@ -1126,13 +1330,19 @@ setCompEnv[ args___] := unexpected[ setCompEnv, {args}]
 (* printProofInfo *)
 
 
-printProveInfo[ goal_, kb_, rules_, strategy_, {pVal_, proofObj_}, searchDepth_] :=
+printProveInfo[ goal_, kb_, rules_, strategy_, {pVal_, proofObj_}, {pTime_, sTime_}, searchDepth_] :=
     Module[ {kbAct, bui, buiAct},
         kbAct = Map[ makeLabel[ #.label]&, kb];
         bui = Cases[ DownValues[ buiActProve],
         	HoldPattern[ Verbatim[HoldPattern][ buiActProve[ op_String]] :> v_] -> {op, v}];
         buiAct = Cases[ bui, { op_, True} -> op];
-        NotebookFind[ $proofInitNotebook, makeProofIDTag[ goal], All, CellTags];
+        If[ NotebookFind[ $proofInitNotebook, makeProofIDTag[ goal], All, CellTags] === $Failed,
+			NotebookFind[ $proofInitNotebook, goal[[1,1]], All, CellTags];
+			NotebookFind[ $proofInitNotebook, "CloseEnvironment", Next, CellStyle];
+			SelectionMove[ $proofInitNotebook, After, CellGroup],
+			SelectionMove[ $proofInitNotebook, All, CellGroup]
+		];
+		SetSelectedNotebook[ $proofInitNotebook];
         NotebookWrite[ $proofInitNotebook, Cell[ TextData[ {translate[ "Proof of"]<>" ", formulaReference[ goal], ": ", 
         	Cell[ BoxData[ ToBoxes[ proofStatusIndicator[ pVal]]]]}],
         	"OpenProof", CellTags -> makeProofIDTag[ goal]]];
@@ -1149,7 +1359,7 @@ printProveInfo[ goal_, kb_, rules_, strategy_, {pVal_, proofObj_}, searchDepth_]
                 	HoldPattern[ Verbatim[HoldPattern][ kbSelectProve[ k_List]] :> v_] -> {k, v}],
                     allBui = bui, allRules = Cases[ DownValues[ ruleActive],
                 	HoldPattern[ Verbatim[HoldPattern][ ruleActive[ r_Symbol]] :> v_] -> {r, v}]},
-                    Button[ translate["SetEnv"], setProveEnv[ goal, allKB, allBui, rules, strategy, allRules, searchDepth], ImageSize -> Automatic]
+                    Button[ translate["RestoreEnv"], setProveEnv[ goal, allKB, allBui, rules, strategy, allRules, searchDepth], ImageSize -> Automatic]
                 ]}
             ]}, False]], "ProofInfo"]];
         NotebookWrite[ $proofInitNotebook, Cell[ "\[EmptySquare]", "CloseProof"]];
@@ -1364,27 +1574,36 @@ displayEnv[ args___] := unexpected[ displayEnv, {args}]
    
 allEnvironments = {"DEF", "THM", "LMA", "PRP", "COR", "CNJ", "ALG", "EXM"};
 
-structButtons[] :=
+sessionCompose[] :=
     Column[{
+    	Button[ translate[ "Virtual Keyboard"], virtualKeyboard[]],
     	Labeled[ Row[ {makeNbNewButton[], makeNbOpenButton[]}, Spacer[5]],
     		translate[ "Notebooks"], {{Top, Left}}],
     	Labeled[ Grid[ Partition[ Map[ makeEnvButton, allEnvironments], 4]],
     		translate[ "Environments"], {{Top, Left}}],
-    	Labeled[ Column[ {makeFormButton[], Dynamic[ showEnv[]]}, Left, Spacer[2]],
+    	Labeled[ Column[ {makeFormButton[], Dynamic[ Refresh[ langButtons[], TrackedSymbols :> {$buttonNat}]]}, Left, Spacer[2]],
     		translate[ "Formulae"], {{Top, Left}}],
-    	Labeled[ Column[ {makeDeclButtons[], Dynamic[ showDecl[]]}, Left, Spacer[2]],
+    	Labeled[ Column[ {makeDeclButtons[]}, Left, Spacer[2]],
     		translate[ "Declarations"], {{Top, Left}}]
     }]
-structButtons[args___] :=
-    unexpected[envButtons, {args}]
+sessionCompose[args___] :=
+    unexpected[sessionCompose, {args}]
 
+sessionInspect[ ] :=
+	Column[{
+    	Labeled[ Column[ {Dynamic[ showEnv[]]}, Left, Spacer[2]],
+    		translate[ "Formulae"], {{Top, Left}}],
+    	Labeled[ Column[ {showDecl[]}, Left, Spacer[2]],
+    		translate[ "Declarations"], {{Top, Left}}]
+    }]
+sessionInspect[ args___] := unexpected[ sessionInspect, {args}]
 
 
 (* ::Section:: *)
 (* Archives Tab *)
 
 
-archButtons[] :=
+sessionArchive[] :=
     Column[{
         Labeled[ Column[{
             Row[ {makeArchCreateButton[], makeArchNewButton[]}, Spacer[2]],
@@ -1392,7 +1611,7 @@ archButtons[] :=
         Labeled[ Column[{
             makeArchLoadButton[]}], translate[ "tcLangTabArchTabSectionLoad"], {{Top, Left}}]
     }]
-archButtons[args___] := unexpected[archButtons, {args}]
+sessionArchive[args___] := unexpected[sessionArchive, {args}]
 
 makeArchCreateButton[] :=
 	Button[ translate["tcLangTabArchTabButtonNewLabel"], 
@@ -1494,9 +1713,12 @@ setPreferences[ ] :=
     				  Button[ translate[ "apply color scheme"], applyColorScheme[ ], BaselinePosition -> Center]}, Spacer[2]], 
     		translate[ "tcPrefAppearColorSchemes"], {{Top, Left}}],
 		Labeled[ Row[{Checkbox[ Dynamic[ $suppressWelcomeScreen]], translate["tcPrefAppearSuppressWelcome"]}, Spacer[2]], 
-    		translate[ "tcPrefAppearWelcome"], {{Top, Left}}]
+    		translate[ "tcPrefAppearWelcome"], {{Top, Left}}],
+		Labeled[ Grid[{{RadioButton[Dynamic[$buttonNat], False], translate["tcSessTabMathTabBSform"], 
+			RadioButton[Dynamic[$buttonNat], True], translate["tcSessTabMathTabBSnat"]}}, Spacings -> {{{4, 0.5}}, Automatic}], 
+    		translate["tcSessTabMathTabBS"], {{Top, Left}}]
     	}],
-    	Spacer[{1,300}],
+    	Spacer[{1,260}],
 		savePreferencesButton[]
 	}
 	]
@@ -1513,13 +1735,15 @@ applyColorScheme[ ] :=
 applyColorScheme[ args___] := unexpected[ applyColorScheme, {args}]
 
 makeColoredStylesheet[ type_String, color_:$TheoremaColorScheme] :=
-	Module[{tmp, styles},
+	Module[{tmp, styles, alias},
 		tmp = NotebookOpen[ 
 			FileNameJoin[ {$TheoremaDirectory, "Theorema", "Interface", "Templates", type <> "-Template.nb"}],
 			Visible -> False];
 		styles = NotebookGet[ tmp];
 		NotebookClose[ tmp];
-		styles /. Table[Apply[CMYKColor, IntegerDigits[i, 2, 4]] -> TMAcolor[i, color], {i, 0, 15}]
+		alias = Map[ langButtonData[ #][[4]] -> RowBox[ {autoParenthesis[ "("], langButtonData[ #][[2]], autoParenthesis[ ")"]}]&, Flatten[ Transpose[ allFormulae][[2]]]];
+		alias = Join[ alias, {"(" -> autoParenthesis[ "("], ")" -> autoParenthesis[ ")"]}];
+		styles /. Table[Apply[CMYKColor, IntegerDigits[i, 2, 4]] -> TMAcolor[i, color], {i, 0, 15}] /. (InputAliases -> {}) -> (InputAliases -> alias)
 	]
 makeColoredStylesheet[ args___] := unexpected[ makeColoredStylesheet, {args}]
 
@@ -1535,10 +1759,10 @@ savePreferencesButton[ ] :=
         Column[{
         	Dynamic[ Refresh[ Row[{
         	translate["preferences last saved: "],
-            $prefsSaveStatus <> If[ {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen} === $savedValues,
+            $prefsSaveStatus <> If[ {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen, $buttonNat} === $savedValues,
                                         " \[Checkmark]",
                                         ""
-                                    ]}], TrackedSymbols :> {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen, $prefsSaveStatus}]],
+                                    ]}], TrackedSymbols :> {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen, $buttonNat, $prefsSaveStatus}]],
          Button[ translate["save current settings"], savePreferences[]]
         }, Center, ItemSize -> {28.2,1}, Dividers -> {{False}, 1 -> True}
         ]
@@ -1555,8 +1779,8 @@ savePreferences[ ] :=
 				DeleteFile[ prefsFile]
 			]
 		];
-		$savedValues = {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen};
-		Save[ prefsFile, {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen, $savedValues}];
+		$savedValues = {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen, $buttonNat};
+		Save[ prefsFile, {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen, $buttonNat, $savedValues}];
 		$prefsSaveStatus = DateString[ FileDate[ FileNameJoin[{$UserBaseDirectory, "Applications", "Theorema", "Kernel", "TheoremaPreferences.m"}]]];
 	]
 savePreferences[ args___] := unexpected[ savePreferences, {args}]
@@ -1567,213 +1791,235 @@ savePreferences[ args___] := unexpected[ savePreferences, {args}]
 (* Math Tab *)
 
 
-$buttonNat = False;
-
 langButtonData["AND1"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["AND1"], 
 			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
 				"\[Wedge]",
-				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
+				TagBox[ FrameBox["right"], "Placeholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]", "\[Wedge]", "\[Placeholder]"}],
-		translate["CONN2STRONGTooltip"]
+		translate["CONN2STRONGTooltip"],
+		""
 	}
 
 langButtonData["AND2"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["AND2"], 
 			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
 				"\[And]",
-				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
+				TagBox[ FrameBox["right"], "Placeholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]", "\[And]", "\[Placeholder]"}],
-		translate["CONN2WEAKTooltip"]
+		translate["CONN2WEAKTooltip"],
+		"and"
 	}
 
 langButtonData["OR1"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["OR1"], 
 			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
 				"\[Vee]",
-				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
+				TagBox[ FrameBox["right"], "Placeholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]", "\[Vee]", "\[Placeholder]"}],
-		translate["CONN2STRONGTooltip"]
+		translate["CONN2STRONGTooltip"],
+		""
 	}
 
 langButtonData["OR2"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["OR2"], 
 			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
 				"\[Or]",
-				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
+				TagBox[ FrameBox["right"], "Placeholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]", "\[Or]", "\[Placeholder]"}],
-		translate["CONN2WEAKTooltip"]
+		translate["CONN2WEAKTooltip"],
+		"or"
 	}
 
 langButtonData["IMPL1"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["IMPL1"], 
 			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
 				"\[DoubleLongRightArrow]",
-				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
+				TagBox[ FrameBox["right"], "Placeholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]",
 			TagBox[ "\[DoubleLongRightArrow]", Identity, SyntaxForm->"a\[DoubleRightArrow]b"], "\[Placeholder]"}],
-		translate["CONN2STRONGTooltip"]
+		translate["CONN2STRONGTooltip"],
+		""
 	}
 
 langButtonData["IMPL2"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["IMPL2"], 
 			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
 				"\[Implies]",
-				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
+				TagBox[ FrameBox["right"], "Placeholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]", "\[Implies]", "\[Placeholder]"}],
-		translate["CONN2WEAKTooltip"]
+		translate["CONN2WEAKTooltip"],
+		"impl"
 	}
 
 langButtonData["EQUIV1"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["EQUIV1"], 
 			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
 				"\[DoubleLongLeftRightArrow]",
-				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
+				TagBox[ FrameBox["right"], "Placeholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]",
 			TagBox[ "\[DoubleLongLeftRightArrow]", Identity, SyntaxForm->"a\[DoubleRightArrow]b"], "\[Placeholder]"}],
-		translate["CONN2STRONGTooltip"]
+		translate["CONN2STRONGTooltip"],
+		""
 	}
 
 langButtonData["EQUIV2"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["EQUIV2"], 
 			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
 				"\[DoubleLeftRightArrow]",
-				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
+				TagBox[ FrameBox["right"], "Placeholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]",
 			TagBox[ "\[DoubleLeftRightArrow]", Identity, SyntaxForm->"a\[Implies]b"], "\[Placeholder]"}],
-		translate["CONN2WEAKTooltip"]
+		translate["CONN2WEAKTooltip"],
+		"equiv"
 	}
 
-langButtonData["EQ1"] := 
+langButtonData["EQ"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["EQ1"], 
 			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
 				"\[Equal]",
-				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
+				TagBox[ FrameBox["right"], "Placeholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]", "\[Equal]", "\[Placeholder]"}],
-		translate["CONN2Tooltip"]
+		translate["CONN2Tooltip"],
+		"eq"
 	}
 
 langButtonData["EQ2"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["EQ2"], 
 			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
 				"=",
-				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
+				TagBox[ FrameBox["right"], "Placeholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]",
 			TagBox[ "=", Identity, SyntaxForm->"a\[Equal]b"], "\[Placeholder]"}],
-		translate["CONN2Tooltip"]
+		translate["CONN2Tooltip"],
+		""
 	}
 
 langButtonData["EQUIVDEF"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["EQUIVDEF"], 
 			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
 				RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}],
 				TagBox[ FrameBox["right"], "Placeholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]",
 			TagBox[ RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], Identity, SyntaxForm->"a\[Implies]b"], "\[Placeholder]"}],
-		translate["EQUIVDEFTooltip"]
+		translate["EQUIVDEFTooltip"],
+		":equiv"
 	}
 
 langButtonData["EQDEF"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["EQDEF"], 
 			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
 				":=",
-				TagBox[ FrameBox["right"], "SelectionPlaceholder"]}]]],
+				TagBox[ FrameBox["right"], "Placeholder"]}]]],
 		RowBox[{"\[SelectionPlaceholder]", ":=", "\[Placeholder]"}],
-		translate["EQDEFTooltip"]
+		translate["EQDEFTooltip"],
+		":eq"
 	}
 
 langButtonData["FORALL1"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["FORALL1"], 
-			DisplayForm[RowBox[{UnderscriptBox[StyleBox["\[ForAll]", FontSize->14], Placeholder["rg"]], TagBox[ FrameBox["expr"], "SelectionPlaceholder"]}]]],
+			DisplayForm[RowBox[{UnderscriptBox[StyleBox["\[ForAll]", FontSize->14], Placeholder["rg"]], SelectionPlaceholder["expr"]}]]],
 		RowBox[{UnderscriptBox["\[ForAll]", "\[Placeholder]"], "\[SelectionPlaceholder]"}],
-		translate["QUANT1Tooltip"]
+		translate["QUANT1Tooltip"],
+		"far"
 	}
 
 langButtonData["FORALL2"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["FORALL2"], 
-			DisplayForm[RowBox[{UnderscriptBox[ UnderscriptBox[StyleBox["\[ForAll]", FontSize->14], Placeholder["rg"]], Placeholder["cond"]], TagBox[ FrameBox["expr"], "SelectionPlaceholder"]}]]],
+			DisplayForm[RowBox[{UnderscriptBox[ UnderscriptBox[StyleBox["\[ForAll]", FontSize->14], Placeholder["rg"]], Placeholder["cond"]], SelectionPlaceholder["expr"]}]]],
 		RowBox[{UnderscriptBox[ UnderscriptBox["\[ForAll]", "\[Placeholder]"], "\[Placeholder]"], "\[SelectionPlaceholder]"}],
-		translate["QUANT2Tooltip"]
+		translate["QUANT2Tooltip"],
+		"farc"
 	}
-
+	
 langButtonData["EXISTS1"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["EXISTS1"], 
-			DisplayForm[RowBox[{UnderscriptBox[StyleBox["\[Exists]", FontSize->14], Placeholder["rg"]], TagBox[ FrameBox["expr"], "SelectionPlaceholder"]}]]],
+			DisplayForm[RowBox[{UnderscriptBox[StyleBox["\[Exists]", FontSize->14], Placeholder["rg"]], SelectionPlaceholder["expr"]}]]],
 		RowBox[{UnderscriptBox["\[Exists]", "\[Placeholder]"], "\[SelectionPlaceholder]"}],
-		translate["QUANT1Tooltip"]
+		translate["QUANT1Tooltip"],
+		"exr"
 	}
 
 langButtonData["EXISTS2"] := 
 	{
-		If[ $buttonNat, 
+		If[ TrueQ[ $buttonNat], 
 			translate["EXISTS2"], 
-			DisplayForm[RowBox[{UnderscriptBox[ UnderscriptBox[StyleBox["\[Exists]", FontSize->14], Placeholder["rg"]], Placeholder["cond"]], TagBox[ FrameBox["expr"], "SelectionPlaceholder"]}]]],
+			DisplayForm[RowBox[{UnderscriptBox[ UnderscriptBox[StyleBox["\[Exists]", FontSize->14], Placeholder["rg"]], Placeholder["cond"]], SelectionPlaceholder["expr"]}]]],
 		RowBox[{UnderscriptBox[ UnderscriptBox["\[Exists]", "\[Placeholder]"], "\[Placeholder]"], "\[SelectionPlaceholder]"}],
-		translate["QUANT2Tooltip"]
+		translate["QUANT2Tooltip"],
+		"exrc"
 	}
+	
 langButtonData[args___] :=
     unexpected[langButtonData, {args}]
 
 makeLangButton[ bname_String] :=
     With[ { bd = langButtonData[bname]},
-			Tooltip[ Button[ bd[[1]], 
-				FrontEndExecute[{NotebookApply[ InputNotebook[], bd[[2]], Placeholder]}], Appearance -> "DialogBox", Alignment -> {Left, Top}, ImageSize -> All],
-				bd[[3]], TooltipDelay -> 0.5]
+			Tooltip[ Button[ bd[[1]],
+				If[ CurrentValue[ "ShiftKey"],
+					FrontEndExecute[{NotebookApply[ InputNotebook[], bd[[2]], Placeholder]}],
+					FrontEndExecute[{NotebookApply[ InputNotebook[], RowBox[ {autoParenthesis[ "("], bd[[2]], autoParenthesis[ ")"]}], Placeholder]}]
+				], Appearance -> "DialogBox", Alignment -> {Left, Top}, ImageSize -> All],
+				"\[EscapeKey]"<>bd[[4]]<>"\[EscapeKey]", TooltipDelay -> 0.5]
     ]
 makeLangButton[args___] :=
     unexpected[makeLangButton, {args}]
 
+(*
+	We use TagBox because StyleBox did not work together with InputAliases: when entering formulae with alias, some StyleBoxes vanished
+	for unknown reasons. With TagBox it works.
+*)
+autoParenthesis[ c_String] := TagBox[ c, "AutoParentheses"]
+autoParenthesis[ args___] := unexpected[ autoParenthesis, {args}]
+
 allFormulae = {{"Sets", {}},
 			   {"Arithmetic", {}},
-			   {"Logic", {"AND1", "AND2", "OR1", "OR2", "IMPL1", "IMPL2", "EQUIV1", "EQUIV2", "EQ1", "EQ2", "EQUIVDEF", "EQDEF", "FORALL1", "FORALL2", "EXISTS1", "EXISTS2"}}
+			   {"Logic", {"AND2", "OR2", "IMPL2", "EQUIV2", "EQ", "EQUIVDEF", "EQDEF", "FORALL1", "FORALL2", "EXISTS1", "EXISTS2"}}
 };
 
-makeButtonCategory[ {category_String, buttons_List}] :=
+makeButtonCategory[ {category_String, buttons_List}, cols_Integer:2] :=
 	OpenerView[{
 		Style[ translate[ category], "Section"],
-		Grid[ partitionFill[ Map[ makeLangButton, buttons], 2], Alignment -> {Left, Top}]},
+		Grid[ partitionFill[ Map[ makeLangButton, buttons], cols], Alignment -> {Left, Top}]},
 		ToExpression["Dynamic[$tcSessMathOpener$"<>category<>"]"]]
 
 makeButtonCategory[ args___] := unexpected[ makeButtonCategory, {args}]
 
-langButtons[] := 
-	Column[{
-		Button[ translate[ "Virtual Keyboard"], virtualKeyboard[]],
-		Column[ Map[ makeButtonCategory, allFormulae]],
-		Row[{translate["tcSessTabMathTabBS"], 
-			Row[{RadioButton[Dynamic[$buttonNat], False], translate["tcSessTabMathTabBSform"]}, Spacer[2]], 
-			Row[{RadioButton[Dynamic[$buttonNat], True], translate["tcSessTabMathTabBSnat"]}, Spacer[2]]}, Spacer[10]]
-	}, Dividers -> Center, Spacings -> 2]
+langButtons[] :=
+    Pane[
+    	Column[ Map[ makeButtonCategory, allFormulae]],
+    	{350, 275}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
+
 langButtons[args___] :=
     unexpected[langButtons, {args}]
     
@@ -1793,6 +2039,81 @@ makeCompButton[args___] :=
 partitionFill[ l_List, n_Integer, default_:""] := Partition[ PadRight[ l, n*Ceiling[ Length[ l]/n], default], n]
 partitionFill[ args___] := unexpected[ partitionFill, {args}]
 
+(* ::Section:: *)
+(* Windowing functions *)
+
+tmaNotebookPut[ nb_Notebook, style_String, opts___?OptionQ] :=
+	NotebookPut[ nb, 
+		StyleDefinitions -> makeColoredStylesheet[ style],
+		Magnification -> CurrentValue[ First[ getTheoremaCommander[]], Magnification],
+		opts
+	]
+tmaNotebookPut[ args___] := unexpected[ tmaNotebookPut, {args}]
+
+tmaDialogInput[ Notebook[ expr_, nbOpts___?OptionQ], style_String, opts___?OptionQ] :=
+	DialogInput[ 
+		Notebook[ expr, 
+			StyleDefinitions -> makeColoredStylesheet[ style],
+			Magnification -> CurrentValue[ First[ getTheoremaCommander[]], Magnification],
+			ShowCellBracket -> False, Deployed -> True,
+			WindowSize -> All,
+			WindowElements -> {"VerticalScrollBar", "HorizontalScrollBar", "StatusArea"},
+			opts
+		]
+	]
+tmaDialogInput[ args___] := unexpected[ tmaDialogInput, {args}]
+
+getExistGoalInstanceDialog[ v_, fix_, {g_, kb_}] :=
+    Module[ {expr, 
+    		fixBut = Map[ 
+    			PasteButton[
+    				theoremaDisplay[ RNG$[ #]], 
+    				With[ {fbox = ToBoxes[ First[ #], TheoremaForm], fc = First[ #]}, DisplayForm[ InterpretationBox[ fbox, fc]]]]&, fix],
+    		buttonRow},
+        expr[_] = Null;
+        buttonRow = {CancelButton[ translate[ "instantiate later"], DialogReturn[ $Failed]], DefaultButton[ translate[ "OK"], DialogReturn[ Array[ expr, Length[v]]]]};
+        tmaDialogInput[ Notebook[ 
+        	Join[
+        		{pSitCells[ PRFSIT$[ g, kb, ""]],
+        		Cell[ translate[ "instVar"], "Subsubsection"]},
+        		MapIndexed[ Cell[ BoxData[ RowBox[ {ToBoxes[ #1, TheoremaForm], ":=", 
+        			ToBoxes[ InputField[ Dynamic[ expr[#2[[1]]]], Hold[ Expression], FieldSize -> 10]]}]], "Text"]&, v], 
+        		{Cell[ translate[ "availConst"], "Subsubsection"],
+        		Cell[ BoxData[ RowBox[ Map[ ToBoxes, fixBut]]], "Text"],
+        		Cell[ BoxData[ RowBox[ Map[ ToBoxes, buttonRow]]], "Text"]}
+        		]
+        	],
+        	"Dialog"
+        ]
+    ]
+getExistGoalInstanceDialog[ args___] := unexpected[ getExistGoalInstanceDialog, {args}]
+
+SetAttributes[ nextProofSitDialog, HoldFirst]
+nextProofSitDialog[ ps_List] :=
+    Module[ {proofCells, showProof = False},
+        proofCells = pObjCells[];
+        $TMAproofNotebook = tmaNotebookPut[ Notebook[ proofCells], "Proof", Visible -> Dynamic[ showProof]];
+        tmaDialogInput[ Notebook[
+            Join[ 
+                {Cell[ BoxData[ ToBoxes[ 
+                    Toggler[ Dynamic[ showProof], 
+                        {False -> Tooltip[ translate[ "more"], translate[ "showProofProgress"]], 
+                         True -> Tooltip[ translate[ "hide proof"], translate[ "hideProofProgress"]]}]]], 
+                    "Hint"]},
+                MapIndexed[ proofSitChoiceButtons, ps], 
+                {Cell[ BoxData[ ToBoxes[ DefaultButton[]]]]}]
+            ], "Dialog"]
+    ]
+nextProofSitDialog[ args___] := unexpected[ nextProofSitDialog, {args}]
+
+proofSitChoiceButtons[ ps_PRFSIT$, {num_Integer}] :=
+	Module[ {},
+		Cell[ CellGroupData[ 
+			{Cell[ TextData[{ Cell[ BoxData[ ToBoxes[ RadioButton[ Dynamic[ $selectedProofStep], ps.id]]]], 
+   			"  ", translate[ "open proof situation"], " #" <> ToString[ num]}], "Section", ShowGroupOpener -> False],
+			pSitCells[ ps]}, Dynamic[ If[ $selectedProofStep === ps.id, Open, Closed]]]]
+	]
+proofSitChoiceButtons[ args___] := unexpected[ proofSitChoiceButtons, {args}]
 
 
 (* ::Section:: *)

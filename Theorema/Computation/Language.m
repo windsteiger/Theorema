@@ -44,6 +44,7 @@ setComputationContext[ args___] := unexpected[ setComputationContext, {args}]
    
 Plus$TM[ a__] /; buiActive["Plus"] := Plus[ a]
 Times$TM[ a__] /; buiActive["Times"] := Times[ a]
+Power$TM[ a_, b_] /; buiActive["Power"] := Power[ a, b]
 Equal$TM[ a_, b_] /; buiActive["Equal"] := a == b
 Less$TM[ a__] /; buiActive["Less"] := Less[ a]
 LessEqual$TM[ a__] /; buiActive["LessEqual"] := LessEqual[ a]
@@ -57,7 +58,9 @@ GreaterEqual$TM[ a__] /; buiActive["GreaterEqual"] := GreaterEqual[ a]
 
 
 Not$TM[ a_] /; buiActive["Not"] := Not[ a]
+And$TM[ pre___, a_, mid___, a_, post___] /; buiActive["And"] := And$TM[ pre, a, mid, post]
 And$TM[ a__] /; buiActive["And"] := And[ a]
+Or$TM[ pre___, a_, mid___, a_, post___] /; buiActive["Or"] := Or$TM[ pre, a, mid, post]
 Or$TM[ a__] /; buiActive["Or"] := Or[ a]
 Implies$TM[ a__] /; buiActive["Implies"] := Implies[ a]
 Iff$TM[ a__] /; buiActive["Iff"] := Equivalent[ a]
@@ -276,8 +279,13 @@ Tuple$TM /: Subscript$TM[ a_Tuple$TM, p:LeftArrow$TM[_, _]..] /; buiActive["Repl
 
 Tuple$TM /: Subscript$TM[ a_Tuple$TM, s:LeftArrowBar$TM[_, _]..] /; buiActive["Replace"] := Fold[ ReplaceAll, a, {s} /. LeftArrowBar$TM -> Rule]
 
-Tuple$TM /: Subscript$TM[ a_Tuple$TM, p__Integer] /; buiActive["Subscript"] && isSequenceFree[a] := Extract[ a, p ] 
-Tuple$TM /: Subscript$TM[ a_Tuple$TM, p_Tuple$TM] /; buiActive["Subscript"] && isSequenceFree[a] := Extract[ a, p /. Tuple$TM -> List] /. List -> Tuple$TM
+Tuple$TM /: Subscript$TM[ a_Tuple$TM, p__Integer] /; buiActive["Subscript"] := Subscript$TM[ a, Tuple$TM[ p]]
+Tuple$TM /: Subscript$TM[ a_Tuple$TM, p_?isPositionSpec] /; buiActive["Subscript"] && isSequenceFree[a] := Extract[ a, p /. Tuple$TM -> List] /. List -> Tuple$TM
+
+isPositionSpec[ _Integer] := True
+isPositionSpec[ Tuple$TM[ p__]] := Apply[ And, Map[ isPositionSpec, {p}]]
+isPositionSpec[ _] := False
+isPositionSpec[ args___] := unexpected[ isPositionSpec, {args}]
 
 
 (* ::Section:: *)

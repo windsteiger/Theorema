@@ -23,11 +23,19 @@ MessageName[ equivGoal, "usage", lang] = "Prove equivalence by double implicatio
 MessageName[ contradiction, "usage", lang] = "Prove by contradiction";
 MessageName[ forallGoal, "usage", lang] = "Prove universally quantified goal";
 MessageName[ forallKB, "usage", lang] = "Instantiate universally quantified formula";
+MessageName[ forallKBInteractive, "usage", lang] = "Interactively instantiate universally quantified formula";
+MessageName[ instantiate, "usage", lang] = "Instantiate universally quantified formula";
 MessageName[ existsGoal, "usage", lang] = "Prove existentially quantified goal by introducing meta variables";
+MessageName[ existsGoalInteractive, "usage", lang] = "Prove existentially quantified goal by interactive instantiation";
 MessageName[ existsKB, "usage", lang] = "Instantiate existentially quantified formula";
-MessageName[ elementarySubstitution, "usage", lang] = "Elementary substitution based on equalities and equivalences oin the knowledge base";
+MessageName[ multipleGoalRewriting, "usage", lang] = "Goal can be rewritten in several ways";
+MessageName[ goalRewriting, "usage", lang] = "Goal rewriting based on (quantified) implications and equivalences in the knowledge base";
+MessageName[ knowledgeRewriting, "usage", lang] = "Knowledge rewriting based on (quantified) implications and equivalences in the knowledge base";
+MessageName[ elementarySubstitution, "usage", lang] = "Elementary substitution based on equalities and equivalences in the knowledge base";
 MessageName[ expandDef, "usage", lang] = "Expand definitions";
+MessageName[ eqGoal, "usage", lang] = "Prove equalities";
 MessageName[ eqIffKB, "usage", lang] = "Equalities/equivalences in KB for rewriting";
+MessageName[ instantiate, "usage", lang] = "Instantiate using constants available in the proof";
 
 ] (* With *)
 
@@ -68,7 +76,7 @@ proofStepText[ notGoal|contradiction, lang, {{g_}}, {{opp_}}, ___] := {textCell[
 
 proofStepText[ andGoal, lang, {{g_}}, _, ___] := {textCell[ "For proving ", formulaReference[ g], " we prove the individual conjuncts."]};
 
-subProofHeader[ andGoal, lang, _, {generated_List}, pVal_, {p_}] := {textCell[ "Proof of ", formulaReference[ Part[ generated, p]], ":"],
+subProofHeader[ andGoal, lang, _, {generated_List}, ___, pVal_, {p_}] := {textCell[ "Proof of ", formulaReference[ Part[ generated, p]], ":"],
 	textCell[ "We need to prove"],
 	goalCell[ Part[ generated, p], "."]
 	};
@@ -86,7 +94,7 @@ proofStepText[ orGoal, lang, {{g_}}, {{negAssum__, newG_}}, ___] := {textCell[ "
 
 proofStepText[ orKB, lang, {{g_}}, {generated_List}, ___] := {textCell[ "Based on the assumption ", formulaReference[ g], " we distinguish several cases:"]};
 
-subProofHeader[ orKB, lang, _, {generated_List}, pVal_, {p_}] := {textCell[ "Case ", ToString[p], ": we assume"],
+subProofHeader[ orKB, lang, _, {generated_List}, ___, pVal_, {p_}] := {textCell[ "Case ", ToString[p], ": we assume"],
 	assumptionCell[ Part[ generated, p], "."]
 	};
 
@@ -108,7 +116,7 @@ proofStepText[ modusPonens, lang, {{impl_, lhs_}}, {{rhs_}}, ___] := {textCell[ 
 
 proofStepText[ equivGoal, lang, {{g_}}, _, ___] := {textCell[ "We prove both directions of ", formulaReference[ g], "."]};
 
-subProofHeader[ equivGoal, lang, _, _, pVal_, {p_}] := {textCell[ Switch[ p, 1, "\[RightArrow]", 2, "\[LeftArrow]"], ":"]};
+subProofHeader[ equivGoal, lang, _, _, ___, pVal_, {p_}] := {textCell[ Switch[ p, 1, "\[DoubleRightArrow]", 2, "\[DoubleLeftArrow]"], ":"]};
 
 proofStepText[ forallGoal, lang, {{g_}}, {{newG_}}, ___, "abf" -> v_List, ___] := {textCell[ "For proving ", formulaReference[ g], " we choose ", 
 	inlineTheoremaExpressionSeq[ v, lang], " arbitrary but fixed and show"],
@@ -126,6 +134,26 @@ proofStepText[ forallGoal, lang, {{g_}}, {{simpG_}}, ___] := {textCell[ "The uni
 	goalCell[ simpG, "."]
 	};
 
+proofStepText[ forallKB, lang, {{u_}}, {}, ___] := 
+	(* Instantiation has been tried, but was not successful *)
+	{textCell[ "No instantiation of ", formulaReference[ u], " possible."]};
+	
+proofStepText[ forallKB, lang, {{u_}}, {g_}, ___, "instantiation" -> inst_List, ___] :=
+    Module[ {instText = {textCell[ "We instantiate ", formulaReference[ u], ":"]}, i},
+        Do[
+            instText = Join[ instText,
+                {textCell[ "Using ", inlineTheoremaExpression[ inst[[ i]]], " we obtain"],
+                assumptionCell[ g[[ i]], "."]}],
+            {i, Length[ g]}
+        ];
+        instText
+    ];
+
+proofStepText[ forallKBInteractive, lang, {{u_}}, {{g_}}, ___, "instantiation" -> inst_List, ___] :=
+	{textCell[ "Formula ", formulaReference[ u], " holds in particular for ", inlineTheoremaExpressionSeq[ inst, lang], ", i.e."],
+	assumptionCell[ g, "."]
+    };
+
 proofStepText[ existsGoal, lang, {{g_}}, {{newG_}}, ___, "meta" -> v_List, ___] := {textCell[ "For proving ", formulaReference[ g], " we have to find ",
 	If[ Length[v] == 1, "an appropriate value for ", "appropriate values for "],
 	inlineTheoremaExpressionSeq[ v, lang], ", such that we can prove"],
@@ -136,6 +164,11 @@ proofStepText[ existsGoal, lang, {{g_}}, {{simpG_}}, ___] := {textCell[ "The exi
 	goalCell[ simpG, "."]
 	};
 	
+proofStepText[ existsGoalInteractive, lang, {{g_}}, {{newG_}}, ___, "instantiation" -> v:{___Rule}, ___] := {textCell[ "For proving ", formulaReference[ g], 
+	", let ", inlineTheoremaExpressionSeq[ Apply[ EqualDef$TM, v, {1}], lang]," and then prove "],
+	goalCell[ newG, "."]
+	};
+
 proofStepText[ existsKB, lang, {{e_}}, {new_List}, ___, "abf" -> v_List, ___] := {textCell[ "From ", formulaReference[ e], " we know "], 
 	assumptionListCells[ new, ",", ""],
 	textCell[ " for arbitrary but fixed ", inlineTheoremaExpressionSeq[ v, lang], "."]
@@ -145,6 +178,18 @@ proofStepText[ existsKB, lang, {{g_}}, {{simpG_}}, ___] := {textCell[ "The unive
 	goalCell[ simpG, "."]
 	};
 
+proofStepText[ multipleGoalRewriting, lang, ___] := {textCell[ "We have several possibilities to rewrite the goal."]};
+
+subProofHeader[ multipleGoalRewriting, lang, u_, g_, ___, pVal_, {p_}] := {};
+
+proofStepText[ goalRewriting, lang, {}, {}, ___] := {};
+(* Case: goal rewriting applicable, but no rewrite possible *)	
+
+proofStepText[ goalRewriting, lang, {{origGoal_, rewrittenBy_}}, {{g_}}, ___] := 
+(* Case: no condition generated *)
+	{textCell[ "By ", formulaReference[ rewrittenBy], " the goal ", formulaReference[ origGoal], " can be reduced to"],
+	goalCell[ g, "."]};
+	
 proofStepText[ elementarySubstitution, lang, u_, g_, ___, "usedSubst" -> subs_List, ___] := 
 	(* u, g, and subs have same length.
 	   u is a list of singleton lists, u[[i,1]] are the formulae that are rewritten
@@ -171,11 +216,13 @@ proofStepText[ elementarySubstitution, lang, u_, g_, ___, "usedSubst" -> subs_Li
 		stepText
 	];
 	
-proofStepText[ expandDef, lang, u_, g_, ___, "usedDefs" -> defs_List, ___] := 
+proofStepText[ expandDef, lang, u:{___, {}}, g:{___, {True}}, ___, "usedDefs" -> defs_List, ___] := 
 	(* u, g, and defs have same length.
-	   u is a list of singleton lists, u[[i,1]] are the formulae that are rewritten
-	   g is a list of singleton lists, g[[i,1]] are the new formulae
-	   defs is an auxliliary list containing lists of definition formulae, namely defs[[i]] are the definitions used when rewriting u[[i,1]] to g[[i,1]] *)
+	   Except for the last element, u is a list of singleton lists, u[[i,1]] are the formulae that are rewritten
+	   Except for the last element, g is a list of singleton lists, g[[i,1]] are the new formulae
+	   defs is an auxliliary list containing lists of definition formulae, namely defs[[i]] are the definitions used when rewriting u[[i,1]] to g[[i,1]].
+	   According to the input pattern, this is the case, where NO CONDITIONS need to be checked.
+	*)
 	Module[ {stepText = {}, j, repl, suffix},
 		(* If the first in u and g are the same, then the goal has not been rewritten *)
 		If[ u[[1]] =!= g[[1]],
@@ -193,14 +240,61 @@ proofStepText[ expandDef, lang, u_, g_, ___, "usedDefs" -> defs_List, ___] :=
 			stepText = Join[ stepText, 
 				{textCell[ "From ", formulaReference[ u[[j, 1]]], " we know, by definition" <> suffix <> " ", formulaReferenceSequence[ repl, lang], ","], 
 				assumptionCell[ g[[j, 1]]]}],
-			{j, 2, Length[g]}
+			{j, 2, Length[g]-1}
 		];
 		stepText
 	];
+
+proofStepText[ expandDef, lang, u_, g:_, ___, "usedDefs" -> defs_List, ___] := {textCell[ "We expand definitions:"]};
+
+subProofHeader[ expandDef, lang, u_, g_, ___, "usedDefs" -> defs_List, ___, {1}] := 
+	Module[ {stepText = {}, j, repl, suffix},
+		(* If the first in u and g are the same, then the goal has not been rewritten *)
+		If[ u[[1]] =!= g[[1]],
+			repl = defs[[1]];
+			suffix = If[ Length[ repl] == 1, "", "s"];
+			stepText = { textCell[ "In order to prove ", formulaReference[ u[[1, 1]]], ", using definition" <> suffix <> " ", 
+				formulaReferenceSequence[ repl, lang], ", we now have to show"],
+				goalCell[ g[[1, 1]], "."]}
+		];
+		(* Each of the remaining is an expansion in the KB. Produce a line of text for each of them *)
+		Do[
+			repl = defs[[j]];
+			suffix = If[ Length[ repl] == 1, "", "s"];
+			stepText = Join[ stepText, 
+				{textCell[ "From ", formulaReference[ u[[j, 1]]], " we know, by definition" <> suffix <> " ", formulaReferenceSequence[ repl, lang], ","], 
+				assumptionCell[ g[[j, 1]]]}],
+			{j, 2, Length[g]-1}
+		];
+		stepText
+	];
+subProofHeader[ expandDef, lang, u_, {___, {cond_}}, ___, "usedDefs" -> defs_List, ___, {2}] := {textCell[ "In order to validate the expansion of the definitions above, we have to check"],
+	goalCell[ cond, "."]
+	};	
 	
 proofStepText[ eqIffKB, lang, {eqs__}, _, ___] := {textCell[ "We register ", formulaReferenceSequence[ eqs, lang], " to be used for rewriting."]
 	};
 
+proofStepText[ instantiate, lang, u_, {}, ___] := 
+	(* Instantiation has been tried, but none of them could be successfully applied *)
+	{textCell[ "New constants have been generated, but no instantiations could be carried out."]};
+	
+proofStepText[ instantiate, lang, u_, g_, ___, "instantiation" -> inst_List, ___] := 
+	Module[ {stepText = {textCell[ "There are new constants to be used for instantiation."]}, instText = {}, j, i},
+		(* Each of the g_i is a list of instances of u_i *)
+		Do[
+			instText = {textCell[ "We can instantiate ", formulaReference[ u[[j, 1]]], ":"]};
+			Do[
+				instText = Join[ instText,
+					{textCell[ "With ", inlineTheoremaExpression[ inst[[j, i]]], " we get"],
+					assumptionCell[ g[[j, i]], "."]}],
+				{i, Length[ g[[j]]]}
+			];
+			stepText = Append[ stepText, cellGroup[ instText]],
+			{j, Length[u]}
+		];
+		stepText
+	]
 	
 ] (* With *)
 

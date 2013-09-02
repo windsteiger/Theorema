@@ -35,8 +35,13 @@ freshNames[ Hold[ f_[ lhs_, Program[ rhs_]]]] :=
 	]
 freshNames[expr_Hold] :=
 	Module[ {symPos, repl},
-		symPos = DeleteCases[ Position[ expr, _Symbol], {0}, {1}, 1];
-		repl = Map[ # -> freshSymbol[ Extract[ expr, #]]&, symPos];
+		(* There are certain expressions, into which we do not want to go deeper for substituting fresh names. 
+		   An example is a META$[__] expression representing a meta-variable in a proof, which has a list as
+		   its 3rd parameter. Going into it would turn the list into a Set$TM ... 
+		   If other cases occur in the future, just add a suitable transformation here BEFORE the replaceable
+		   positions are computed. *)
+		symPos = DeleteCases[ Position[ expr /. {META$[__] -> META$[]}, _Symbol], {0}, {1}, 1];
+		repl = Map[ # -> freshSymbol[ Extract[ expr, #, Hold]]&, symPos];
 		ReplacePart[ expr, repl]
 	]
 freshNames[args___] := unexpected[ freshNames, {args}]
@@ -44,14 +49,14 @@ freshNames[args___] := unexpected[ freshNames, {args}]
 freshNamesProg[ expr_Hold] :=
 	Module[ {symPos, repl},
 		symPos = DeleteCases[ Position[ expr, _Symbol], {0}, {1}, 1];
-		repl = Map[ # -> freshSymbolProg[ Extract[ expr, #]]&, symPos];
+		repl = Map[ # -> freshSymbolProg[ Extract[ expr, #, Hold]]&, symPos];
 		ReleaseHold[ ReplacePart[ expr, repl]]
 	]
 freshNamesProg[ args___] := unexpected[ freshNamesProg, {args}]
 
-freshSymbol[ s_Symbol] :=
+freshSymbol[ Hold[ s_Symbol]] :=
     Module[ {name},
-        Switch[ s,
+        Switch[ Unevaluated[ s],
             (* We use ToExpression in order to have the symbol generated in the right context
                depending on whether we are in a computation or not *)
             True|False, s,
@@ -65,7 +70,7 @@ freshSymbol[ s_Symbol] :=
         	List, makeSet,
         	AngleBracket, makeTuple,
         	_,
-        	name = ToString[s];
+        	name = ToString[ Unevaluated[s]];
         	If[ StringTake[ name, -1] === "$" || (StringLength[ name] >= 3 && StringTake[ name, -3] === "$TM"),
             	s,
             	ToExpression[ name <> "$TM"]
@@ -74,9 +79,9 @@ freshSymbol[ s_Symbol] :=
     ]
 freshSymbol[ args___] := unexpected[ freshSymbol, {args}]
 
-freshSymbolProg[ s_Symbol] :=
+freshSymbolProg[ Hold[ s_Symbol]] :=
     Module[ {name},
-        Switch[ s,
+        Switch[ Unevaluated[ s],
             True|False, s,
         	Set, ToExpression[ "Assign$TM"],
         	_,
@@ -97,13 +102,13 @@ markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
            global variables in an archive live in the archive's private context, whereas the global declaration
            lives in the context of the loading notebook/archive. With the substitution below, the private`sym becomes 
            a VAR$[loading`sym] *)
-        s = Map[ sym_Symbol /; SymbolName[sym] === SymbolName[#] -> VAR$[#]&, specifiedVariables[r]];
+        s = Map[ sym_Symbol /; SymbolName[ sym] === SymbolName[ #] -> VAR$[ #]&, specifiedVariables[ r]];
         replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {SEQ$, VAR$, FIX$}]
     ]
 
 markVariables[ Hold[ Theorema`Computation`Language`QU$[ r_Theorema`Computation`Language`RNG$, expr_]]] :=
     Module[ {s},
-        s = Map[ sym_Symbol /; SymbolName[sym] === SymbolName[#] -> Theorema`Computation`Language`VAR$[#]&, specifiedVariables[r]];
+        s = Map[ sym_Symbol /; SymbolName[ Unevaluated[ sym]] === SymbolName[ Unevaluated[ #]] -> Theorema`Computation`Language`VAR$[ #]&, specifiedVariables[r]];
         replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {Theorema`Computation`Language`SEQ$, Theorema`Computation`Language`VAR$}]
     ]
     
@@ -120,6 +125,20 @@ markVariables[Hold[]] := Hold[]
 markVariables[Hold[e_]] := Hold[e]
 
 markVariables[args___] := unexpected[ markVariables, {args}]
+
+(*
+	makeTmaExpression[ e] is the combination of functions that we export to be used in other places if needed.
+*)
+SetAttributes[ makeTmaExpression, HoldAll]
+makeTmaExpression[ e_Hold] := Block[ {$ContextPath},
+	$ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
+	ReleaseHold[ markVariables[ freshNames[ e]]]
+]
+makeTmaExpression[ e_] := Block[ {$ContextPath},
+	$ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
+	ReleaseHold[ markVariables[ freshNames[ Hold[ e]]]]
+]
+makeTmaExpression[ args___] := unexpected[ makeTmaExpression, {args}]
 
 openGlobalDeclaration[ expr_] :=
     Module[ {},
@@ -167,7 +186,7 @@ putGlobalDeclaration[ args___] := unexpected[ putGlobalDeclaration, {args}]
 SetAttributes[ processGlobalDeclaration, HoldAll];
 processGlobalDeclaration[ x_] := 
 	Module[ {},
-		putGlobalDeclaration[ CurrentValue["NotebookFullFileName"], CurrentValue["CellID"], ReleaseHold[ freshNames[ markVariables[ Hold[x]]]]];
+		putGlobalDeclaration[ CurrentValue["NotebookFullFileName"], CurrentValue["CellID"], ReleaseHold[ markVariables[ freshNames[ Hold[x]]]]];
 		closeGlobalDeclaration[];
 	]
 processGlobalDeclaration[ args___] := unexpected[ processGlobalDeclaration, {args}]
@@ -187,7 +206,7 @@ processEnvironment[x_] :=
 		(* extract the global declarations that are applicable in the current evaluation *)
 		globDec = applicableGlobalDeclarations[ nb, rawNotebook, evaluationPosition[ nb, rawNotebook]];
 		(* process the expression according the Theorema syntax rules and add it to the KB *)
-        Catch[ updateKnowledgeBase[ReleaseHold[ freshNames[ markVariables[ Hold[x]]]], key, globDec, cellTagsToString[ tags]]];
+        Catch[ updateKnowledgeBase[ReleaseHold[ markVariables[ freshNames[ Hold[x]]]], key, globDec, cellTagsToString[ tags]]];
         SelectionMove[ nb, After, Cell];
     ]
 processEnvironment[args___] := unexcpected[ processEnvironment, {args}]
@@ -468,7 +487,7 @@ analyzeQuantifiedExpression[ Forall$TM[ r:RNG$[ __], c_, e_], outerVar_List] :=
 		(* watch out for all conditions involving the free variables in e ... *)
 		{rc, sc} = splitAnd[ c, freeE, False];
 		(* ... and collect all free variables therein: these are the variables that require the quantifiers, the others can be dropped *)
-		dropVar = Complement[ variables[ r], freeVariables[ rc], freeE];
+		dropVar = Complement[ rngVariables[ r], freeVariables[ rc], freeE];
 		(* all others and conditions involving the others can be dropped *)
 		thinnedRange = thinnedExpression[ r, dropVar];
 		If[ Length[ thinnedRange] == 0,
@@ -718,7 +737,7 @@ processComputation[ x:Theorema`Computation`Language`nE] :=
 		$Failed
 	]
 processComputation[x_] := Module[ { procSynt, res},
-	procSynt = freshNames[ markVariables[ Hold[x]]];
+	procSynt = markVariables[ freshNames[ Hold[x]]];
 	printComputationInfo[];
 	setComputationContext[ "compute"];
 	res = Catch[ ReleaseHold[ procSynt]];
@@ -761,6 +780,21 @@ renameToStandardContext[ expr_] :=
         ReleaseHold[ freshNames[ Hold["EXPR"] /. "EXPR" -> ToExpression[ stringExpr]]]
 	]
 renameToStandardContext[ args___] := unexpected[ renameToStandardContext, {args}]
+
+(* ::Section:: *)
+(* Computation within proving *)
+
+computeInProof[ expr_] :=
+	Module[{simp},
+		setComputationContext[ "prove"];
+		simp = ToExpression[ StringReplace[ ToString[ expr], "Theorema`Language`" -> "Theorema`Computation`Language`"]];
+		setComputationContext[ "none"];
+		(* simp does not evaluate further *)
+		With[ {res = simp},
+			ToExpression[ StringReplace[ ToString[ renameToStandardContext[ res]], "Theorema`Computation`" -> "Theorema`"]]
+		]
+	]
+computeInProof[ args___] := unexpected[ computeInProof, {args}]
 
 
 (* ::Section:: *)

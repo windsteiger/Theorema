@@ -8,7 +8,7 @@
 
 $tmaNonStandardOperators = Join[ $tmaNonStandardOperators,
     {
-     {Iff$TM, DoubleRightArrow},
+     {Iff$TM, DoubleLeftRightArrow},
      {EqualDef$TM, SetDelayed},
      {Tuple$TM, AngleBracket}
     }];
@@ -81,6 +81,7 @@ metaAnnotations = {"*", "**", "***", "\[Dagger]", "\[DoubleDagger]"};
 MakeBoxes[ META$[ c_, n_Integer, dep_List] /; n<5, TheoremaForm] := StyleBox[ SuperscriptBox[ MakeBoxes[ c, TheoremaForm], metaAnnotations[[n+1]]], "ExpressionMeta"]
 MakeBoxes[ META$[ c_, n_Integer, dep_List], TheoremaForm] := StyleBox[ SuperscriptBox[ MakeBoxes[ c, TheoremaForm], RowBox[{"(", MakeBoxes[ n, StandardForm], ")"}]], "ExpressionMeta"]
 
+MakeBoxes[ r_RNG$, fmt_] := makeRangeBox[ r, fmt]
 makeRangeBox[ RNG$[ s__SIMPRNG$], fmt_] := RowBox[ Riffle[ Map[ makeRangeBox[ #, fmt]&, {s}], ","]]
 makeRangeBox[ RNG$[ s__], fmt_] := GridBox[ Map[ {makeRangeBox[ #, fmt]}&, {s}]]
 makeRangeBox[ SETRNG$[ v_, s_], fmt_] := RowBox[ {MakeBoxes[v, fmt], "\[Element]", MakeBoxes[ s, fmt]}]

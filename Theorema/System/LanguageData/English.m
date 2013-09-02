@@ -10,6 +10,7 @@ With[ {lang = "English"},
 (* Theorema`System`Utilities` *)
 	MessageName[unexpected, "usage", lang] = "unexpected[ f, {args}] terminates the evaluation of f[args] due to unexpected/invalid arguments.";
 	MessageName[replaceAllExcept, "usage", lang] = "replaceAllExcept[ expr, rules, expt] applies rule(s) to all subparts of 'expr' except those contained in the list 'expt'.";
+	MessageName[replaceRepeatedExcept, "usage", lang] = "replaceRepeatedExcept[ expr, rules, expt] applies rule(s) repeatedly to all subparts of 'expr' except those contained in the list 'expt'.";
 	MessageName[joinHold, "usage", lang] = "joinHold[Hold[a],Hold[b]] produces Hold[a,b].";
 	MessageName[applyHold, "usage", lang] = "applyHold[Hold[a],Hold[b]] produces Hold[a[b]].";
 	MessageName[notification, "usage", lang] = "notification[text] displays 'text' as a user notification.";
@@ -43,24 +44,35 @@ With[ {lang = "English"},
 	MessageName[kbSelectProve, "usage", lang] = "kbSelectProve[ f] indicates whether the formula labeled f should go into the KB for a proof.";
 	MessageName[kbSelectCompute, "usage", lang] = "kbSelectCompute[ f] indicates whether the formula labeled f should be used in a computation.";
 	MessageName[kbSelectSolve, "usage", lang] = "kbSelectCompute[ f] indicates whether the formula labeled f should go into the KB for solve.";
+	MessageName[makeTmaExpression, "usage", lang] = "makeTmaExpression[ e] turns e into an expression in Theorema language.";
+	MessageName[computeInProof, "usage", lang] = "computeInProof[expr] computes expr within a proof.";
 
 (* Theorema`Language`FormulaManipulation` *)
 	MessageName[freeVariables, "usage", lang] = "";	
-	MessageName[variables, "usage", lang] = "";	
+	MessageName[rngVariables, "usage", lang] = "";	
+	MessageName[rngConstants, "usage", lang] = "";	
 	MessageName[specifiedVariables, "usage", lang] = "";
 	MessageName[splitAnd, "usage", lang] = "";	
 	MessageName[makeConjunction, "usage", lang] = "";	
 	MessageName[makeDisjunction, "usage", lang] = "";	
 	MessageName[simplifiedAnd, "usage", lang] = "";	
+	MessageName[simplifiedOr, "usage", lang] = "";	
+	MessageName[simplifiedImplies, "usage", lang] = "";	
+	MessageName[simplifiedForall, "usage", lang] = "";	
 	MessageName[thinnedExpression, "usage", lang] = "";	
 	MessageName[substituteFree, "usage", lang] = "";	
 	MessageName[isSequenceFree, "usage", lang] = "";
 	MessageName[isQuantifierFree, "usage", lang] = "";	
+	MessageName[isLogQuantifierFree, "usage", lang] = "";	
 	MessageName[isVariableFree, "usage", lang] = "";	
 	MessageName[transferToComputation, "usage", lang] = "";	
-	MessageName[defsToRules, "usage", lang] = "";	
+	MessageName[formulaListToRules, "usage", lang] = "";	
+	MessageName[formulaToRules, "usage", lang] = "";	
 	MessageName[replaceAndTrack, "usage", lang] = "";	
-	MessageName[replaceRecursivelyAndTrack, "usage", lang] = "";	
+	MessageName[replaceListAndTrack, "usage", lang] = "";	
+	MessageName[replaceAllAndTrack, "usage", lang] = "";	
+	MessageName[replaceRepeatedAndTrack, "usage", lang] = "";	
+	MessageName[filterRules, "usage", lang] = "";	
 	MessageName[FML$, "usage", lang] = "FML$[ key, form, lab, opt] represents a Theorema formula including its key, label, and optional components.";
 	MessageName[makeFML, "usage", lang] = "makeFML[ fmldata] is the constructor for the FML$ datastructure.";
 	MessageName[key, "usage", lang] = "key is an option for the formula constructor makeFML and a selector for the FML$ datastructure.";
@@ -73,13 +85,14 @@ With[ {lang = "English"},
 	MessageName[formulaReference, "usage", lang] = "formulaReference[ fml] gives a hyperlink to the formula.";
 	MessageName[arbitraryButFixed, "usage", lang] = "arbitraryButFixed[ expr, rng] substitutes all free occurrences of variables specified by the range rng in expr by a new constant.";
 	MessageName[introduceMeta, "usage", lang] = "introduceMeta[ expr, rng] substitutes all free occurrences of variables specified by the range rng in expr by a fresh meta variable.";
-	MessageName[computeInProof, "usage", lang] = "computeInProof[expr] computes expr within a proof.";
+	MessageName[instantiateExistGoalInteractive, "usage", lang] = "instantiateExistGoalInteractive[ expr, rng] substitutes all free occurrences of variables specified by the range rng in expr by a term obtained from a user dialog.";
 	MessageName[rngToCondition, "usage", lang] = "rngToCondition[rng] transforms the range specification rng into a list of conditions.";
-	MessageName[joinKB, "usage", lang] = "joinKB[ kb1_List, kb2_List] joins the two knowledge bases and deletes duplicate entries.";
+	MessageName[joinKB, "usage", lang] = "joinKB[ kb1_List, kb2_List] joins the two knowledge bases and deletes duplicate entries. kb1 should be new formulas, kb2 is assumed to be an existing kb without duplicates.";
 	MessageName[appendKB, "usage", lang] = "appendKB[ kb_List, fml] appends fml to the knowledge base kb and deletes duplicate entries.";
 	MessageName[prependKB, "usage", lang] = "prependKB[ kb_List, fml] prepends fml to the knowledge base kb and deletes duplicate entries.";
 	MessageName[appendToKB, "usage", lang] = "appendToKB[ sym, fml] sets sym to the result of appending fml to sym and deleting duplicate entries.";
 	MessageName[prependToKB, "usage", lang] = "prependToKB[ sym, fml] sets sym to the result of prepending fml to sym and deleting duplicate entries.";
+	MessageName[trimKBforRewriting, "usage", lang] = "trimKBforRewriting[ k] processes the formulas in k and generates rewrite rules from appropriate candidates.";
 	
 (* Theorema`Computation`Language` *)
 	MessageName[setComputationContext, "usage", lang] = "setComputationContext[ c] sets the context for the next computation to c.";
@@ -97,6 +110,10 @@ With[ {lang = "English"},
 	MessageName[$cellTagKeySeparator, "usage", lang] = "Separator between key and value in a cellTag.";
 	MessageName[printComputationInfo, "usage", lang] = "Print info about global knowledge used inside a computation";
 	MessageName[makeColoredStylesheet, "usage", lang] = "Generate a colored stylesheet from a template using the color scheme chosen in the preferences.";
+	MessageName[tmaNotebookPut, "usage", lang] = "Theorema version of Mathematica's NotebookPut.";
+	MessageName[tmaDialogInput, "usage", lang] = "Theorema version of Mathematica's DialogInput.";
+	MessageName[getExistGoalInstanceDialog, "usage", lang] = "The dialog window asking for an instantiation.";
+	MessageName[nextProofSitDialog, "usage", lang] = "The dialog window for choosing the next proof situation.";
 	
 (* Theorema`Interface`Language` *)
 	MessageName[translate, "usage", lang] = "translate[s_String,lang_String] gives string s in language lang.";
@@ -107,11 +124,12 @@ With[ {lang = "English"},
 	MessageName[subProofHeaderId, "usage", lang] = "subProofHeaderId[ name_, lang_, pos_] generates the cell expression used as header for the subproof at position pos.";
 
 (* Theorema`Provers`Common` *)
-	MessageName[callProver, "usage", lang] = "callProver[ prover_, goal_, kb_] calls prover with goal and kb, returns a proof value and proof object.";
+	MessageName[callProver, "usage", lang] = "callProver[ prover_, goal_, kb_] calls prover with goal and kb, returns a proof value, a proof object, and the time elapsed.";
 	MessageName[simplifyProof, "usage", lang] = "simplifyProof[ proof_, {branches_, steps_, formulae_}] simplifies 'proof' according to the specified settings.";
 	MessageName[displayProof, "usage", lang] = "displayProof[ proofObject_] displays proofObject.";
 	MessageName[$TMAproofObject, "usage", lang] = "$TMAproofObject is the global proof object.";
 	MessageName[$TMAproofTree, "usage", lang] = "$TMAproofTree is the global proof tree for visualization.";
+	MessageName[$TMAproofSearchRunning, "usage", lang] = "$TMAproofSearchRunning indicates (by True/False) whether a proof search is currently running.";
 	MessageName[showProofNavigation, "usage", lang] = "showProofNavigation[ proofObject_] shows a tree navigation through a proof.";
 	MessageName[$registeredRuleSets, "usage", lang] = "$registeredRuleSets is a list of available provers in the Theorema system.";
 	MessageName[$registeredStrategies, "usage", lang] = "$registeredStrategies is a list of available strategies in the Theorema system.";
@@ -138,6 +156,10 @@ With[ {lang = "English"},
 	MessageName[ruleActivity, "usage", lang] = "ruleActivity is an option for the constructor makePRFSIT/newSubgoal and a selector for the PRFSIT$ datastructure.";
 	MessageName[rulePriority, "usage", lang] = "rulePriority is an option for the constructor makePRFSIT/newSubgoal and a selector for the PRFSIT$ datastructure.";
 	MessageName[strategy, "usage", lang] = "strategy is an option for the constructor makePRFSIT/newSubgoal and a selector for the PRFSIT$ datastructure.";
+	MessageName[kbRules, "usage", lang] = "kbRules is an option for the constructor makePRFSIT/newSubgoal and a selector for the PRFSIT$ datastructure.";
+	MessageName[goalRules, "usage", lang] = "goalRules is an option for the constructor makePRFSIT/newSubgoal and a selector for the PRFSIT$ datastructure.";
+	MessageName[substRules, "usage", lang] = "substRules is an option for the constructor makePRFSIT/newSubgoal and a selector for the PRFSIT$ datastructure.";
+	MessageName[defRules, "usage", lang] = "defRules is an option for the constructor makePRFSIT/newSubgoal and a selector for the PRFSIT$ datastructure.";
 	MessageName[proofFails, "usage", lang] = "proofFails[ ...] .";
 	MessageName[proofSucceeds, "usage", lang] = "proofSucceeds[ ...] .";
 	MessageName[proofDisproved, "usage", lang] = "proofDisproved[ ...] .";
@@ -154,5 +176,13 @@ With[ {lang = "English"},
 	MessageName[failed, "usage", lang] = "failed is a possible proof value.";
 	MessageName[pending, "usage", lang] = "pending is a possible proof value.";
 	MessageName[$selectedProofStep, "usage", lang] = "$selectedProofStep refers to the id of the proof step that is selected in the current proof notebook.";
+	MessageName[$proofCellStatus, "usage", lang] = "$proofCellStatus determines the status (open/closed) of nested cells in the proof notebook.";
+	MessageName[$proofAborted, "usage", lang] = "$proofAborted is a flag that is checked whether the user tried to abort the running proof.";
+	MessageName[$currentSearchLevel, "usage", lang] = "$currentSearchLevel gives the search depth level of the last proof step performed.";
+	MessageName[$interactiveProofSitSel, "usage", lang] = "$interactiveProofSitSel indicates whether interactive selection of proof situations is activated.";
+	MessageName[$interactiveNewProofSitFilter, "usage", lang] = "$interactiveNewProofSitFilter indicates whether interactive filtering of proof situations is activated.";
+	MessageName[pSitCells, "usage", lang] = "pSitCells[ ps] generates a cell representation of the proof situation ps to be rendered in a notebook.";
+	MessageName[pObjCells, "usage", lang] = "pObjCells[ po] generates a cell representation of the proof object po (default: $TMAproofObject) to be rendered in a notebook.";
+	MessageName[$rewriteRules, "usage", lang] = "is a global variable used to accumulate newly generated rewrite rules corresponding to formulas in the KB.";
 
 ]

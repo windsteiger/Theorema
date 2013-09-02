@@ -52,15 +52,14 @@ Map[ Get, FileNames[ "*.m", FileNameJoin[{$TheoremaDirectory, "Theorema", "Kerne
 
 Protect[$TheoremaDirectory]; 
 
-$TheoremaArchiveDirectory = FileNameJoin[{$TheoremaDirectory,"Theorema","Knowledge"}];
-$TheoremaArchivePath = {$TheoremaArchiveDirectory, $HomeDirectory};
-
 Get[ "Theorema`Interface`ColorSchemes`"];
 
 Map[ Get, FileNames["TheoremaPreferences.m", {
   FileNameJoin[{$TheoremaDirectory, "Theorema", "Kernel"}],
   FileNameJoin[{$UserBaseDirectory, "Applications", "Theorema", "Kernel"}]}]];   
     
+$TheoremaArchivePath = {$TheoremaArchiveDirectory, $HomeDirectory};
+
 `priv`arrowShape = {{0, 0}, {94, 0}, {107, 40}, {70, 40}, {156, 126}, {126, 156}, {40, 70}, {40, 107}, {0, 94}, {0, 0}};
 
 `priv`RISCLogo[`priv`a_] := {TMAcolor[1], 

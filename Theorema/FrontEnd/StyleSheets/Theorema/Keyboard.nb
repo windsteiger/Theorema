@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       145,          7]
-NotebookDataLength[      4404,        152]
-NotebookOptionsPosition[      3094,        113]
-NotebookOutlinePosition[      3586,        134]
-CellTagsIndexPosition[      3543,        131]
+NotebookDataLength[      4426,        153]
+NotebookOptionsPosition[      3116,        114]
+NotebookOutlinePosition[      3608,        135]
+CellTagsIndexPosition[      3565,        132]
 MenuPosition->0
 WindowFrame->Normal*)
 
@@ -28,7 +28,8 @@ Make modifications to any definition using commands in the Format menu.\
 \>", "Text"],
 
 Cell[StyleData["Notebook"],
- Editable->True],
+ Editable->True,
+ WindowOpacity->0.95],
 
 Cell[CellGroupData[{
 
@@ -135,23 +136,23 @@ CellTagsIndex->{}
 Notebook[{
 Cell[561, 21, 49, 0, 40, 49, 0, "StyleData", "StyleDefinitions", ""],
 Cell[613, 23, 191, 4, 65, "Text"],
-Cell[807, 29, 44, 1, 32, 27, 0, "StyleData", "Notebook", "All"],
+Cell[807, 29, 66, 2, 32, 27, 0, "StyleData", "Notebook", "All"],
 Cell[CellGroupData[{
-Cell[876, 34, 42, 0, 54, "Section"],
-Cell[921, 36, 31, 0, 40, 31, 0, "StyleData", "All", "Working"],
-Cell[955, 38, 36, 0, 40, 36, 0, "StyleData", "All", "Presentation"]
+Cell[898, 35, 42, 0, 54, "Section"],
+Cell[943, 37, 31, 0, 40, 31, 0, "StyleData", "All", "Working"],
+Cell[977, 39, 36, 0, 40, 36, 0, "StyleData", "All", "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[1028, 43, 41, 0, 54, "Section"],
-Cell[1072, 45, 227, 8, 40, 27, 0, "StyleData", "KBButton", "All",
+Cell[1050, 44, 41, 0, 54, "Section"],
+Cell[1094, 46, 227, 8, 40, 27, 0, "StyleData", "KBButton", "All",
  MenuSortingValue->10000],
-Cell[1302, 55, 189, 2, 40, 74, 0, "StyleData", "KBButtonOver", "All"],
-Cell[1494, 59, 211, 3, 40, 75, 0, "StyleData", "KBButtonPress", "All"],
-Cell[1708, 64, 117, 3, 56, 23, 0, "StyleData", "Pane", "All"],
-Cell[1828, 69, 631, 20, 50, 79, 0, "StyleData", "SelectionPlaceholder", "All",
+Cell[1324, 56, 189, 2, 40, 74, 0, "StyleData", "KBButtonOver", "All"],
+Cell[1516, 60, 211, 3, 40, 75, 0, "StyleData", "KBButtonPress", "All"],
+Cell[1730, 65, 117, 3, 56, 23, 0, "StyleData", "Pane", "All"],
+Cell[1850, 70, 631, 20, 50, 79, 0, "StyleData", "SelectionPlaceholder", "All",
  
  StyleMenuListing->None],
-Cell[2462, 91, 616, 19, 50, 70, 0, "StyleData", "Placeholder", "All",
+Cell[2484, 92, 616, 19, 50, 70, 0, "StyleData", "Placeholder", "All",
  StyleMenuListing->None]
 }, Open  ]]
 }

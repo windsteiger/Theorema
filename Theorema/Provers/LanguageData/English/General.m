@@ -79,7 +79,14 @@ proofStepText[ searchDepthLimit, lang, {{goal_FML$, kb___FML$}}, {}, ___] :=
 proofStepText[ invalidProofNode, lang, expr_, ___] := {textCell[ "The expression returned by the selected proof strategy is not a valid proof tree node."],
 	Cell[ BoxData[ ToBoxes[ expr]], "Print"]};
 
-proofStepText[ noApplicableRule, lang, ___] := {textCell[ "There is no proof rule to apply."]};
+proofStepText[ noApplicableRule, lang, {{goal_FML$, kb___FML$}}, {}, ___, "openPS" -> ps_, ___] := 
+	{Cell[ CellGroupData[
+		Join[{textCell[ "There is no proof rule to apply. The open proof situation is:"]},
+			proofStepText[ openProofSituation, lang, {{goal, kb}}, {}],
+			{Cell[ CellGroupData[ {Cell[ "The proof situation data (for debugging)", "Text"],
+			 Cell[ BoxData[ ToBoxes[ ps]], "Input"]}, Closed]]}
+		]
+	]]};
 
 proofStepText[ step_Symbol, lang, ___] := {
 	textCell[ ToString[ StringForm[ "We have no explanatory text for step '``'. Please implement the respective case for the function 'proofStepText'.", step]]]

@@ -30,7 +30,7 @@ applyOnce[ ps_PRFSIT$] :=
 		newNodes = applyAllRules[ ps, allRules];
 		Switch[ Length[ newNodes],
 			0,
-			proofFails[ makePRFINFO[ name -> noApplicableRule]],
+			proofFails[ makePRFINFO[ name -> noApplicableRule, used -> Prepend[ ps.kb, ps.goal], "openPS" -> Drop[ Apply[ List, ps], 2]]],
 			1,
 			First[ newNodes],
 			_,
@@ -44,7 +44,7 @@ applyOnce[ args___] := unexpected[ applyOnce, {args}]
 applyOnceAndLevelSaturation[ ps_PRFSIT$] :=
 	Module[ {satps = ps, allRules = getActiveRulesFilter[ ps, "term"|"levelSat1"|"levelSat2", Flatten], 
 		sat1 = getActiveRulesType[ ps, "levelSat1"], 
-		sat2 = getActiveRulesType[ ps, "levelSat2"], newNodes},
+		sat2 = getActiveRulesType[ ps, "levelSat2"], newNodes, reSat},
 		If[ ps.id === "InitialPS",
 			satps = levelSaturation[ ps, sat1, sat2];
 			If[ isProofNode[ satps],
@@ -52,10 +52,20 @@ applyOnceAndLevelSaturation[ ps_PRFSIT$] :=
 			]			
 		];
 		newNodes = applyAllRules[ satps, allRules];
-		newNodes = MapAt[ levelSaturation[ #, sat1, sat2]&, newNodes, Position[ newNodes, _PRFSIT$]];
+		If[ newNodes === {},
+			(* no rule applied *)
+			reSat = levelSaturation[ satps, sat1, sat2];
+			If[ !MatchQ[ reSat, _PRFSIT$],
+				(* levelSaturation generated new formulae and returned an ANDNODE *)
+				newNodes = {reSat}
+				(* otherwise, levelSaturation returned a PRFSIT and we do nothing, i.e. newNodes stays {} *)
+			],
+			(* at least one proof rule applied, and we saturate all pending PRFSITs *)
+			newNodes = MapAt[ levelSaturation[ #, sat1, sat2]&, newNodes, Position[ newNodes, _PRFSIT$]]
+		];
 		Switch[ Length[ newNodes],
 			0,
-			proofFails[ makePRFINFO[ name -> noApplicableRule]],
+			proofFails[ makePRFINFO[ name -> noApplicableRule, used -> Prepend[ ps.kb, ps.goal], "openPS" -> Drop[ Apply[ List, ps], 2]]],
 			1,
 			First[ newNodes],
 			_,
@@ -87,12 +97,12 @@ levelSaturation[ ps:PRFSIT$[ _, _, _, _, rest___?OptionQ], sat1rules_List, sat2r
 			{j, Length[ posNew]}];
 		newForms = Extract[ psKB, posNew];
 		Block[{$TMAcheckSuccess = False},
-			newFrom1 = Map[ applyAllRules[ #, sat1rules]&, Map[ dummyGoalPS, newForms]];
+			newFrom1 = Map[ applyAllRules[ #, sat1rules]&, Map[ dummyGoalPS[ #, locInfo]&, newForms]];
 		];
 		newFrom1 = Map[ extractGenerated, newFrom1];
 		newPairs = Map[ Extract[ psKB, #]&, pairs];
 		Block[{$TMAcheckSuccess = False},
-			newFrom2 = Map[ applyAllRules[ #, sat2rules]&, Map[ dummyGoalPS, newPairs]];
+			newFrom2 = Map[ applyAllRules[ #, sat2rules]&, Map[ dummyGoalPS[ #, locInfo]&, newPairs]];
 		];
 		newFrom2 = Map[ extractGenerated, newFrom2];
 		locInfo = putLocalInfo[ locInfo, "lastSat" -> Map[ #.key&, psKB]];
@@ -101,7 +111,7 @@ levelSaturation[ ps:PRFSIT$[ _, _, _, _, rest___?OptionQ], sat1rules_List, sat2r
 			If[ nextGen =!= {},
 				AppendTo[ usd, {newForms[[j]]}];
 				AppendTo[ gen, nextGen];
-				psKB = joinKB[ psKB, nextGen]
+				psKB = joinKB[ nextGen, psKB]
 			],
 			{j, Length[ newFrom1]}
 		];
@@ -110,7 +120,7 @@ levelSaturation[ ps:PRFSIT$[ _, _, _, _, rest___?OptionQ], sat1rules_List, sat2r
 			If[ nextGen =!= {},
 				AppendTo[ usd, newPairs[[j]]];
 				AppendTo[ gen, nextGen];
-				psKB = joinKB[ psKB, nextGen]
+				psKB = joinKB[ nextGen, psKB]
 			],
 			{j, Length[ newFrom2]}
 		];
@@ -123,8 +133,8 @@ levelSaturation[ ps:PRFSIT$[ _, _, _, _, rest___?OptionQ], sat1rules_List, sat2r
 	]
 levelSaturation[ args___] := unexpected[ levelSaturation, {args}]
 
-dummyGoalPS[ f_FML$] := makePRFSIT[ kb -> {f}, id -> "dummy"]
-dummyGoalPS[ pair:{_FML$, _FML$}] := makePRFSIT[ kb -> pair, id -> "dummy"]
+dummyGoalPS[ f_FML$, loc_] := makePRFSIT[ kb -> {f}, id -> "dummy", local -> loc]
+dummyGoalPS[ pair:{_FML$, _FML$}, loc_] := makePRFSIT[ kb -> pair, id -> "dummy", local -> loc]
 dummyGoalPS[ args___] := unexpected[ dummyGoalPS, {args}]
 
 extractGenerated[ nodes_List] := Union[ Flatten[ Map[ #.generated&, nodes]], SameTest -> (#1.formula === #2.formula&)]
