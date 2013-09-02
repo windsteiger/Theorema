@@ -247,16 +247,14 @@ Set$TM /: min$TM[ a_Set$TM] /; buiActive["MinimumElementSet"] := Min[ a/. Set$TM
 (* Tuples *)
 
 
-Tuple$TM /: Subscript$TM[a_Tuple$TM,Rule$TM[p_,q_]] /; buiActive["Insert"] && isSequenceFree[a] := Insert[ a,p,q /. Tuple$TM -> List]
+Tuple$TM /: Subscript$TM[ a_Tuple$TM, Rule$TM[ p_, q_]] /; buiActive["Insert"] && isSequenceFree[a] := Insert[ a, p, q /. Tuple$TM -> List]
 
-Tuple$TM /: Subscript$TM[a_Tuple$TM,LeftArrow$TM[b_]] /; buiActive["DeleteAt"] && isSequenceFree[a] := Delete[ a, b //. Tuple$TM -> List]
-forDelete[a_, p_] := 
-  Module[{anew = a, pnew,i}, 
-   If[ Length[p] <= 0, pnew = {p}, pnew = p]; 
-   For[i = 1, i <= Length[pnew], i++,  
-     anew = DeleteCases[anew, pnew[[i]], Infinity]];
-	anew]
-Tuple$TM /: Subscript$TM[a_Tuple$TM, LeftArrowBar$TM[p_]] /; buiActive["Delete"] := forDelete[a, p] 
+(* Delete elements at one or more positions *)
+Tuple$TM /: Subscript$TM[ a_Tuple$TM, LeftArrow$TM[ b_]] /; buiActive["DeleteAt"] && isSequenceFree[a] := Delete[ a, b //. Tuple$TM -> List]
+
+(* Delete elements of a certain shape. Multiple deletions are not possible, because it would need
+	special syntax how to specify multiple shapes. Tuples cannot be used because for this *)
+Tuple$TM /: Subscript$TM[a_Tuple$TM, d:(LeftArrowBar$TM[_]..)] /; buiActive["Delete"] := Fold[ DeleteCases[ #1, #2[[1]]]&, a, {d}] 
 
 Tuple$TM /: Equal$TM[a__Tuple$TM] /; buiActive["TupleEqual"] && SameQ[a ] := True
 Tuple$TM /: Equal$TM[a__Tuple$TM] /; buiActive["TupleEqual"] && isVariableFree[{a},{2}] := False
@@ -274,15 +272,9 @@ Tuple$TM /: min$TM[a_Tuple$TM] /; buiActive["Min"] && isVariableFree[a] := Min[a
 Tuple$TM /: BracketingBar$TM[ a_Tuple$TM] /; buiActive["Length"] && isSequenceFree[a] := Length[ a]
 
 Tuple$TM /: Subscript$TM[ a_Tuple$TM, p:LeftArrow$TM[_, _]..] /; buiActive["ReplacePart"] && isSequenceFree[a] :=
-	ReplacePart[ a, MapAt[# /. { Tuple$TM -> List}&, {p} /. LeftArrow$TM -> Rule, Table[{i,1},{i,Length[{p}]}]]]
-forReplace[a_, s_] := Module[{anew = a, pnew,i,j},
-  For[j = Length[s], j >= 1, j--,
-   If[Length[s[[j,1]]] <= 0, pnew = {s[[j,1]]}, 
-    pnew = s[[j,1]]];
-   For[i = 1, i <= Length[pnew], i++, 
-    anew = Replace[anew, pnew[[i]] -> s[[j,2]], Infinity]]];
-  anew]
-Tuple$TM /: Subscript$TM[ a_Tuple$TM, s:LeftArrowBar$TM[__,_]..] /; buiActive["Replace"] := forReplace[ a , {s}]
+	ReplacePart[ a, MapAt[# /. {Tuple$TM -> List}&, {p} /. LeftArrow$TM -> Rule, Table[ {i, 1}, {i, Length[{p}]}]]]
+
+Tuple$TM /: Subscript$TM[ a_Tuple$TM, s:LeftArrowBar$TM[_, _]..] /; buiActive["Replace"] := Fold[ ReplaceAll, a, {s} /. LeftArrowBar$TM -> Rule]
 
 Tuple$TM /: Subscript$TM[ a_Tuple$TM, p__Integer] /; buiActive["Subscript"] && isSequenceFree[a] := Extract[ a, p ] 
 Tuple$TM /: Subscript$TM[ a_Tuple$TM, p_Tuple$TM] /; buiActive["Subscript"] && isSequenceFree[a] := Extract[ a, p /. Tuple$TM -> List] /. List -> Tuple$TM
