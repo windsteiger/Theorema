@@ -116,6 +116,16 @@ MakeExpression[RowBox[{a_, TagBox[op_, Identity, ___], b_}], fmt_] :=
 
 MakeExpression[RowBox[{ TagBox[ "(", "AutoParentheses"], expr_, TagBox[ ")", "AutoParentheses"]}], fmt_] := 
 	MakeExpression[ expr, fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+	
+	
+(* ::Subsubsection:: *)
+(* Sequence Variables *)
+
+MakeExpression[ RowBox[{a_, "..."}], fmt_] :=
+	MakeExpression[ RowBox[{"SEQ0$", "[", a, "]"}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+	
+MakeExpression[ RowBox[{a_, ".."}], fmt_] :=
+	MakeExpression[ RowBox[{"SEQ1$", "[", a, "]"}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 
 
 (* ::Subsubsection:: *)

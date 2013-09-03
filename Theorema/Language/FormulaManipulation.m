@@ -318,11 +318,13 @@ execRight[ e_Hold, var_List] :=
 	]
 execRight[ args___] := unexpected[ execRight, {args}]
 
-stripVar[ v:Theorema`Language`VAR$[Theorema`Language`SEQ$[a_]]] := v -> ToExpression[ "SEQ$" <> ToString[a]]
+stripVar[ v:Theorema`Language`VAR$[Theorema`Language`SEQ0$[a_]]] := v -> ToExpression[ "SEQ0$" <> ToString[a]]
+stripVar[ v:Theorema`Language`VAR$[Theorema`Language`SEQ1$[a_]]] := v -> ToExpression[ "SEQ1$" <> ToString[a]]
 stripVar[ v:Theorema`Language`VAR$[a_]] := v -> ToExpression[ "VAR$" <> ToString[a]]
 stripVar[ args___] := unexpected[ stripVar, {args}]
 
-varToPattern[ v:Theorema`Language`VAR$[Theorema`Language`SEQ$[a_]]] := With[ {new = ToExpression[ "SEQ$" <> ToString[a]]}, v :> Apply[ Pattern, {new, BlankNullSequence[]}]]
+varToPattern[ v:Theorema`Language`VAR$[Theorema`Language`SEQ0$[a_]]] := With[ {new = ToExpression[ "SEQ0$" <> ToString[a]]}, v :> Apply[ Pattern, {new, BlankNullSequence[]}]]
+varToPattern[ v:Theorema`Language`VAR$[Theorema`Language`SEQ1$[a_]]] := With[ {new = ToExpression[ "SEQ1$" <> ToString[a]]}, v :> Apply[ Pattern, {new, BlankSequence[]}]]
 varToPattern[ v:Theorema`Language`VAR$[a_]] := With[ {new = ToExpression[ "VAR$" <> ToString[a]]}, v :> Apply[ Pattern, {new, Blank[]}]]
 varToPattern[ args___] := unexpected[ varToPattern, {args}]
 

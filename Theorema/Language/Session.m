@@ -95,22 +95,26 @@ markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
            global variables in an archive live in the archive's private context, whereas the global declaration
            lives in the context of the loading notebook/archive. With the substitution below, the private`sym becomes 
            a VAR$[loading`sym] *)
+           
+        (* amaletz: We have to keep the distinction between sequence variables and individual variables,
+        			because "SymbolName[]" would give an error if applied to compound expressions.
+        *)
         vars = specifiedVariables[ r];
-        seq = Cases[vars, Theorema`Knowledge`RepeatedNull$TM[ _]];
+        seq = Cases[vars, (SEQ0$|SEQ1$)[ _]];
         vars = Complement[ vars, seq];
-        s = Join[Map[ Theorema`Knowledge`RepeatedNull$TM[sym_Symbol] /; SymbolName[ sym] === SymbolName[ #] -> VAR$[SEQ$[ #]]&, seq[[All, 1]]],
+        s = Join[Map[ (h:(SEQ0$|SEQ1$))[sym_Symbol] /; SymbolName[ sym] === SymbolName[ #] -> VAR$[h[ #]]&, seq[[All, 1]]],
         		 Map[ sym_Symbol /; SymbolName[ sym] === SymbolName[ #] -> VAR$[ #]&, vars]];
-        replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {SEQ$, VAR$, FIX$}]
+        replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {SEQ0$, SEQ1$, VAR$, FIX$}]
     ]
 
 markVariables[ Hold[ Theorema`Computation`Language`QU$[ r_Theorema`Computation`Language`RNG$, expr_]]] :=
     Module[ {s, seq, vars},
     	vars = specifiedVariables[ r];
-        seq = Cases[vars, Theorema`Computation`Knowledge`RepeatedNull$TM[ _]];
+        seq = Cases[vars, (Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$)[ _]];
         vars = Complement[ vars, seq];
-        s = Join[Map[ Theorema`Computation`Knowledge`RepeatedNull$TM[sym_Symbol] /; SymbolName[ sym] === SymbolName[ #] -> Theorema`Computation`Language`VAR$[Theorema`Computation`Language`SEQ$[ #]]&, seq[[All, 1]]],
+        s = Join[Map[ (h:(Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$))[sym_Symbol] /; SymbolName[ sym] === SymbolName[ #] -> Theorema`Computation`Language`VAR$[h[ #]]&, seq[[All, 1]]],
         		 Map[ sym_Symbol /; SymbolName[ sym] === SymbolName[ #] -> Theorema`Computation`Language`VAR$[ #]&, vars]];
-        replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {Theorema`Computation`Language`SEQ$, Theorema`Computation`Language`VAR$}]
+        replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {Theorema`Computation`Language`SEQ0$, Theorema`Computation`Language`SEQ1$, Theorema`Computation`Language`VAR$, Theorema`Computation`Language`FIX$}]
     ]
     
 markVariables[Hold[h_[e___]]] := applyHold[
