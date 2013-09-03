@@ -350,7 +350,7 @@ this:PRFSIT$[ g:FML$[ _, Except[_Forall$TM|_Exists$TM], __], k_List, id_, rest__
 				(* The second param to "goalRewriting" -> is unimportant, because there is a new goal, so we will not access it when the rule is applied next time.*)
 				AppendTo[ newNodes, 
 					makeANDNODE[ makePRFINFO[ name -> goalRewriting, used -> Prepend[ usedSubsts[[j]], g], generated -> newG], 
-						newSubgoal[ goal -> newG, kb -> k, goalRules -> filterRules[ this.goalRules, Map[ #.key&, usedSubsts]], "goalRewriting" -> {g.key, {}}, rest]]],
+						newSubgoal[ goal -> newG, kb -> k, goalRules -> filterRules[ this.goalRules, Map[ #.key&, usedSubsts[[j]]]], "goalRewriting" -> {g.key, {}}, rest]]],
 				{j, Length[ newForms]}
 			];
 			Switch[ Length[ newNodes],

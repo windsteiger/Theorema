@@ -530,7 +530,7 @@ replaceRepeatedAndTrack[ args___] := unexpected[ replaceRepeatedAndTrack, {args}
 	filterRules[ rules_List, keyList_] deletes rules with k in the keyList. It returns a list of rules of the form {k, l:>r}, not the plain Mma rules.
 *)
 filterRules[ rules_List, key:{_, _}] := Cases[ rules, {Except[ key], r_} -> r]
-filterRules[ rules_List, {keys:{_, _}..}] := DeleteCases[ rules, Alternatives[ keys]]
+filterRules[ rules_List, {keys:{_, _}..}] := DeleteCases[ rules, {Alternatives[ keys], _}]
 filterRules[ args___] := unexpected[ filterRules, {args}]
 
 
@@ -684,7 +684,9 @@ singleRngToCondition[ args___] := unexpected[ singleRngToCondition, {args}]
 
 (*
 	The kb operations put the rewrite rules for appropriate formulas into a global variable. When we
-	create a new proof sit (makePRFSIT) we put what has accumulated into the approriate places.
+	create a new proof sit (makePRFSIT) we put what has accumulated into the approriate places. This means
+	that an inference rule MUST use the kb operations provided here to modify the kb and that a rule
+	will typically run inside a Block[ {$rewriteRules = {}}, ...], when it enriches the kb.
 *)
 
 (*
