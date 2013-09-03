@@ -17,6 +17,9 @@ With[ {lang = "English"},
 
 (* Theorema`Language`Syntax` *)
 	MessageName[theoremaDisplay, "usage", lang] = "theoremaDisplay[expr] displays expr in Theorema syntax using the definitions for MakeBoxes[ expr, TheoremaForm].";	
+	MessageName[isQuantifierFormula, "usage", lang] = "isQuantifierFormula[ e] is true iff e is built up by a logical quantifier.";	
+	MessageName[isConnectiveFormula, "usage", lang] = "isConnectiveFormula[ e] is true iff e is built up by a logical connective.";	
+	MessageName[isAtomicExpression, "usage", lang] = "isAtomicExpression[ e] is true iff e is neither a quantifier nor a connective formula.";	
 	MessageName[makeSet, "usage", lang] = "makeSet[s] constructs a set from s during the phase of parsing an expression.";	
 	MessageName[makeTuple, "usage", lang] = "makeTuple[t] constructs a tuple from t during the phase of parsing an expression.";	
 	MessageName[$parseTheoremaExpressions, "usage", lang] = "whether to parse expressions with their Theorema meaning ...";
@@ -184,5 +187,7 @@ With[ {lang = "English"},
 	MessageName[pSitCells, "usage", lang] = "pSitCells[ ps] generates a cell representation of the proof situation ps to be rendered in a notebook.";
 	MessageName[pObjCells, "usage", lang] = "pObjCells[ po] generates a cell representation of the proof object po (default: $TMAproofObject) to be rendered in a notebook.";
 	MessageName[$rewriteRules, "usage", lang] = "is a global variable used to accumulate newly generated rewrite rules corresponding to formulas in the KB.";
+	MessageName[makeInferenceRule, "usage", lang] = "";
+	MessageName[ruleAppliedBefore, "usage", lang] = "";
 
 ]

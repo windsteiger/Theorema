@@ -264,7 +264,7 @@ PRFSIT$[ g:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], k_List, id_, rest___?Opt
 				newSubgoal[ goal -> simp, kb -> k, rest]]
 		]
 	]
-
+	
 inferenceRule[ existsGoalInteractive] = 
 ps:PRFSIT$[ g:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], k_List, id_, rest___?OptionQ] :> 
     Module[ {const, subst, rc, instRng, thinnedRng, newGoal},
@@ -321,10 +321,15 @@ ps:PRFSIT$[ g_, k:{pre___, e:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], post__
 	In the proof situations "goalRewriting"-> we store {g, {key1, ..., keyn}}, where
 	g is the key of the goal and
 	keyi are the keys of the rewrite rules
-	that were available when the rule was applied the last time.
+	that were available when the rule was applied to g.
+	
+	The idea is that if we try to rewrite a goal G, then we look what happened at the last rewrite: say {g, {key1, ..., keyn}}.
+	If G != g then use all rules available in goalRules, otherwise use just "new" goalRules. If there are no new rules then stop,
+	otherwise rewrite. If none of the new rules apply, then do a proof step that documents which rules have already been tried.
+	Otherwise generate one new goal or an alternative of several new goals.
 *)
 inferenceRule[ goalRewriting] = 
-this:PRFSIT$[ g:FML$[ _, Except[_Forall$TM|_Exists$TM], __], k_List, id_, rest___?OptionQ] :> 
+this:PRFSIT$[ g:FML$[ _, _?isAtomicExpression, __], k_List, id_, rest___?OptionQ] :> 
 	Module[ {lastGoalRewriting, rules, rewKeys, usedSubsts, conds, newForms, newG, j, newNodes = {}},
 		lastGoalRewriting = this."goalRewriting";
 		Which[

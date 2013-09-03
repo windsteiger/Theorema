@@ -817,6 +817,23 @@ Module[ {},
 	]
 registerStrategy[ args___] := unexpected[ registerStrategy, {args}]
 
+
+(* ::Section:: *)
+(* Prover programming *)
+
+SetAttributes[ makeInferenceRule, HoldAll]
+
+makeInferenceRule[ name_, ps_PRFSIT$, rhs_, usedForms_List] :=
+    inferenceRule[ name] =
+        this:ps :> 
+            Block[ {$rewriteRules = {}, $history = {name, usedForms}},
+                rhs /; !ruleAppliedBefore[ this.history, $history]
+            ]
+makeInferenceRule[ args___] := unexpected[ makeInferenceRule, {args}]
+
+ruleAppliedBefore[ history_List, step:{_, _}] := MemberQ[ history, step]
+ruleAppliedBefore[ args___] := unexpected[ ruleAppliedBefore, {args}]
+
 (* ::Section:: *)
 (* Package Initialization *)
 
