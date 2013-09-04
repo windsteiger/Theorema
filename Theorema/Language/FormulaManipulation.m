@@ -418,7 +418,7 @@ makeSingleRule[ {_Theorema`Language`Forall$TM|_Theorema`Language`Exists$TM, r_, 
 makeSingleRule[ {l_, r_, c_List, var_List}, ref_] /; With[ {fr = freeVariables[ Append[ c, r]], fl = freeVariables[ l]}, Complement[ fr, fl] =!= {} || Complement[ fl, var] =!= {}] := 
 	Sequence[]
 	
-makeSingleRule[ all:{l_, r_, c_List, var_List}, ref_] := {ref.key, mmaTransRule[ all, ref]}
+makeSingleRule[ all:{l_, r_, c_List, var_List}, ref_] := {key@ref, mmaTransRule[ all, ref]}
 
 (*
 	For backward rules we allow to introduce an existential quantifier if additional free variables occur.
@@ -563,17 +563,23 @@ defLabel[ args___] := unexpected[ defLabel, {args}]
 initFormulaLabel[ ] := $formulaLabel = 1;
 initFormulaLabel[ args___] := unexpected[ initFormulaLabel, {args}]
 
-FML$ /: Dot[ FML$[ k_, _, __], key] := k
-FML$ /: Dot[ FML$[ _, fml_, __], formula] := fml
-FML$ /: Dot[ FML$[ _, _, l_, ___], label] := l
-FML$ /: Dot[ FML$[ k_, _, __], id] := k[[1]]
-FML$ /: Dot[ FML$[ k_, _, __], source] := k[[2]]
-FML$ /: Dot[ FML$[ _, _, _, ___, (Rule|RuleDelayed)[ key_String, val_], ___], key_] := val
-FML$ /: Dot[ FML$[ _, _, _, ___], key_String] := {}
-FML$ /: Dot[ f_FML$, s___] := unexpected[ Dot, {f, s}]
+key[ FML$[ k_, _, __]] := k
+key[ args___] := unexpected[ key, {args}]
+
+formula[ FML$[ _, fml_, __]] := fml
+formula[ args___] := unexpected[ formula, {args}]
+
+label[ FML$[ _, _, l_, ___]] := l
+label[ args___] := unexpected[ label, {args}]
+
+id[ FML$[ k_, _, __]] := k[[1]]
+(* default case implemented elsewhere *)
+
+source[ FML$[ k_, _, __]] := k[[2]]
+source[ args___] := unexpected[ source, {args}]
 
 formulaReference[ fml_FML$] :=
-    With[ { tag = fml.id, labelDisp = makeLabel[ fml.label], fmlDisp = theoremaDisplay[ fml.formula]},
+    With[ { tag = id@fml, labelDisp = makeLabel[ label@fml], fmlDisp = theoremaDisplay[ formula@fml]},
         Cell[ BoxData[ ToBoxes[
             Button[ Tooltip[ Mouseover[ Style[ labelDisp, "FormReference"], Style[ labelDisp, "FormReferenceHover"]], fmlDisp],
                NotebookLocate[ tag], Appearance->None]
@@ -699,7 +705,7 @@ joinKB[ args___] := unexpected[ joinKB, {args}]
 
 appendKB[ kb:{___FML$}, fml_FML$] := 
 	Module[ {member, trimmed},
-		member = Catch[ Scan[ If[fml.formula === #.formula, Throw[ True]]&, kb]; False];
+		member = Catch[ Scan[ If[ formula@fml === formula@#, Throw[ True]]&, kb]; False];
 		If[ member,
 			(* fml is already in kb, we leave kb unchanged *)
 			kb,
@@ -715,7 +721,7 @@ appendKB[ args___] := unexpected[ appendKB, {args}]
 
 prependKB[ kb:{___FML$}, fml_FML$] := 
 	Module[ {member, trimmed},
-		member = Catch[ Scan[ If[fml.formula === #.formula, Throw[ True]]&, kb]; False];
+		member = Catch[ Scan[ If[ formula@fml === formula@#, Throw[ True]]&, kb]; False];
 		If[ member,
 			(* fml is already in kb, we leave kb unchanged *)
 			kb,

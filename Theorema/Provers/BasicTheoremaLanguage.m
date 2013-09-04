@@ -137,16 +137,15 @@ inferenceRule[ modusPonens] =
 ps:PRFSIT$[ g_, k:{___, impl:FML$[ _, Implies$TM[ P_, Q_], __], ___, lhs:FML$[ _, P_, __], ___}, id_, rest___?OptionQ]|
 PRFSIT$[ g_, k:{___, lhs:FML$[ _, P_, __], ___, impl:FML$[ _, Implies$TM[ P_, Q_], __], ___}, id_, rest___?OptionQ] :> 
 	Catch[
-        Module[ {rhs, locInfo = ps.local, mp, implK = impl.key, lhsK = lhs.key},
-            mp = getLocalInfo[ locInfo, "modusPonens"];
+        Module[ {rhs, mp, implK = key@impl, lhsK = key@lhs},
+            mp = getOptionalComponent[ ps, "modusPonens"];
             If[ MemberQ[ mp, {lhsK, implK}],
             	(* Modus Ponens has already been applied for those forms *)
                 Throw[ $Failed]
             ];
             rhs = makeFML[ formula -> Q];
-            locInfo = putLocalInfo[ locInfo, "modusPonens" -> Prepend[ mp, {lhsK, implK}]];
             makeANDNODE[ makePRFINFO[ name -> modusPonens, used -> {impl, lhs}, generated -> rhs], 
-                newSubgoal[ goal -> g, kb -> prependKB[ k, rhs], local -> locInfo, rest]]
+                newSubgoal[ goal -> g, kb -> prependKB[ k, rhs], "modusPonens" -> Prepend[ mp, {lhsK, implK}], rest]]
         ]
     ]
 
@@ -173,7 +172,7 @@ PRFSIT$[ g:FML$[ _, Iff$TM[ P_, Q_], __], k_List, id_, rest___?OptionQ] :>
 
 inferenceRule[ forallGoal] = 
 ps:PRFSIT$[ g:FML$[ _, u:Forall$TM[ rng_, cond_, A_], __], k_List, id_, rest___?OptionQ] :> 
-	Module[ {faBui, simp, rc, r, c, f, fix, newConds, newGoal, locInfo, locC},
+	Module[ {faBui, simp, rc, r, c, f, fix, newConds, newGoal, locC},
 		(* we use computation regardless whether it is activated or not ... *)
 		faBui = buiActProve[ "Forall"];
 		buiActProve[ "Forall"] = True;
@@ -186,13 +185,11 @@ ps:PRFSIT$[ g:FML$[ _, u:Forall$TM[ rng_, cond_, A_], __], k_List, id_, rest___?
 				$Failed,
 				(* else *)
 				{{r, c, f}, fix} = arbitraryButFixed[ {rc, cond, A}, rng, {g, k}];
-				locInfo = ps.local;
-				locC = getLocalInfo[ locInfo, "constants"];
-				locInfo = putLocalInfo[ locInfo, "constants" -> Prepend[ locC, fix]];
+				locC = getOptionalComponent[ ps, "constants"];
 				newConds = Map[ makeFML[ formula -> #]&, DeleteCases[ Append[ r, c], True]];
 				newGoal = makeFML[ formula -> f];
 				makeANDNODE[ makePRFINFO[ name -> forallGoal, used -> g, generated -> Prepend[ newConds, newGoal], "abf" -> rngConstants[ fix]], 
-					newSubgoal[ goal -> newGoal, kb -> joinKB[ newConds, k], local -> locInfo, rest]]
+					newSubgoal[ goal -> newGoal, kb -> joinKB[ newConds, k], "constants" -> Prepend[ locC, fix], rest]]
 			],
 			(* else *)
 			simp = makeFML[ formula -> simp];
@@ -204,19 +201,17 @@ ps:PRFSIT$[ g:FML$[ _, u:Forall$TM[ rng_, cond_, A_], __], k_List, id_, rest___?
 inferenceRule[ forallKB] = 
 ps:PRFSIT$[ g_, K:{___, f:FML$[ _, _Forall$TM, __], ___}, id_, rest___?OptionQ] :> 
 	Catch[
-        Module[ {locInfo = ps.local, faInst, fk = f.key, newConst, oldConst, inst},
-            faInst = getLocalInfo[ locInfo, "forallKB"];
+        Module[ {faInst, fk = key@f, newConst, oldConst, inst},
+            faInst = getOptionalComponent[ ps, "forallKB"];
             If[ MemberQ[ faInst, fk],
             	(* Rule forallKB has already been applied for those forms *)
                 Throw[ $Failed]
             ];
-            {newConst, oldConst} = constants[ locInfo];
+            {newConst, oldConst} = constants[ ps];
             (* we instantiate with the "old" constants only, because the new ones will be treated by the 'instantiate'-rule separately *)
-            inst = instantiateForall[ f, Apply[ RNG$, oldConst]];
-            
-            locInfo = putLocalInfo[ locInfo, "forallKB" -> Prepend[ faInst, fk]];
+            inst = instantiateForall[ f, Apply[ RNG$, oldConst]];            
             makeANDNODE[ makePRFINFO[ name -> forallKB, used -> f, generated -> inst[[1]], "instantiation" -> inst[[2]]], 
-                newSubgoal[ goal -> g, kb -> joinKB[ inst[[1]], K], local -> locInfo, rest]]
+                newSubgoal[ goal -> g, kb -> joinKB[ inst[[1]], K], "forallKB" -> Prepend[ faInst, fk], rest]]
         ]
     ]
 
@@ -268,7 +263,7 @@ PRFSIT$[ g:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], k_List, id_, rest___?Opt
 inferenceRule[ existsGoalInteractive] = 
 ps:PRFSIT$[ g:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], k_List, id_, rest___?OptionQ] :> 
     Module[ {const, subst, rc, instRng, thinnedRng, newGoal},
-    	const = getAllConstants[ ps.local];
+    	const = getAllConstants[ ps];
         subst = instantiateExistGoalInteractive[ g, const, k];
         If[ subst === $Failed,
         	(* the interactive dialog has been canceled or closed *)
@@ -295,17 +290,15 @@ makeExist[ args___] := unexpected[ makeExist, {args}]
   
 inferenceRule[ existsKB] = 
 ps:PRFSIT$[ g_, k:{pre___, e:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], post___}, id_, rest___?OptionQ] :> 
-	Module[ {simp, r, c, f, fix, newConds, locInfo, locC},
+	Module[ {simp, r, c, f, fix, newConds, locC},
 		simp = computeInProof[ u];
 		If[ MatchQ[ simp, _Exists$TM],
 			(* no simplification *)
 			{{r, c, f}, fix} = arbitraryButFixed[ {rngToCondition[ rng], cond, A}, rng, {g, k}];
-			locInfo = ps.local;
-			locC = getLocalInfo[ locInfo, "constants"];
-			locInfo = putLocalInfo[ locInfo, "constants" -> Prepend[ locC, fix]];
+			locC = Prepend[ getOptionalComponent[ ps, "constants"], fix];
 			newConds = Map[ makeFML[ formula -> #]&, DeleteCases[ Join[ r, {c, f}], True]];
 			makeANDNODE[ makePRFINFO[ name -> existsKB, used -> e, generated -> newConds, "abf" -> rngConstants[ fix]], 
-				newSubgoal[ goal -> g, kb -> joinKB[ newConds, {pre, post}], local -> locInfo, rest]],
+				newSubgoal[ goal -> g, kb -> joinKB[ newConds, {pre, post}], "constants" -> locC, rest]],
 			(* else *)
 			simp = makeFML[ formula -> simp];
 			makeANDNODE[ makePRFINFO[ name -> existsKB, used -> e, generated -> simp], 
@@ -330,24 +323,22 @@ ps:PRFSIT$[ g_, k:{pre___, e:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], post__
 *)
 inferenceRule[ goalRewriting] = 
 this:PRFSIT$[ g:FML$[ _, _?isAtomicExpression, __], k_List, id_, rest___?OptionQ] :> 
-	Module[ {lastGoalRewriting, rules, rewKeys, usedSubsts, conds, newForms, newG, j, newNodes = {}},
-		lastGoalRewriting = this."goalRewriting";
-		Which[
-			lastGoalRewriting === $Failed || g.key =!= lastGoalRewriting[[1]],
+	Module[ {lastGoalRewriting, rules, usedSubsts, conds, newForms, newG, j, newNodes = {}},
+		lastGoalRewriting = getOptionalComponent[ this, "goalRewriting"];
+		If[
 			(* first application of this rule or applied to new goal *)
-			rules = this.goalRules,
-			True,
-			(* applied to this goal aleady before *)
-			rules = DeleteCases[ this.goalRules, {Apply[ Alternatives, lastGoalRewriting[[2]]], _}]
+			lastGoalRewriting === {} || key@g =!= lastGoalRewriting[[1]],
+			rules = goalRules@this,
+			(* else: applied to this goal aleady before, we only consider the new rules *)
+			rules = DeleteCases[ goalRules@this, {Apply[ Alternatives, lastGoalRewriting[[2]]], _}]
 			(* if there are no new rules, then rules={} *)
 		];
 			
 		If[ rules === {},
-			(* There are no (new) substitutions available -> stop *)
+			(* There are no (new) rules available -> stop *)
 			$Failed,
-			(* else: we have substitutions *)
-			rewKeys = g."rewrittenBy";
-			{newForms, usedSubsts, conds} = replaceListAndTrack[ g.formula, filterRules[ rules, g.key]];
+			(* else: we have new rules *)
+			{newForms, usedSubsts, conds} = replaceListAndTrack[ formula@g, filterRules[ rules, key@g]];
 			Do[
 				newG = makeFML[ formula -> newForms[[j]]];
 				(* Goal rewriting should actually generate NO conditions. If a condition still appears, there must have gone something wrong *)
@@ -355,18 +346,18 @@ this:PRFSIT$[ g:FML$[ _, _?isAtomicExpression, __], k_List, id_, rest___?OptionQ
 				(* The second param to "goalRewriting" -> is unimportant, because there is a new goal, so we will not access it when the rule is applied next time.*)
 				AppendTo[ newNodes, 
 					makeANDNODE[ makePRFINFO[ name -> goalRewriting, used -> Prepend[ usedSubsts[[j]], g], generated -> newG], 
-						newSubgoal[ goal -> newG, kb -> k, goalRules -> filterRules[ this.goalRules, Map[ #.key&, usedSubsts[[j]]]], "goalRewriting" -> {g.key, {}}, rest]]],
+						newSubgoal[ goal -> newG, kb -> k, goalRules -> filterRules[ goalRules@this, Map[ key, usedSubsts[[j]]]], "goalRewriting" -> {key@g, {}}, rest]]],
 				{j, Length[ newForms]}
 			];
 			Switch[ Length[ newNodes],
 				0,
 				makeANDNODE[ makePRFINFO[ name -> goalRewriting, used -> {}, generated -> {}], 
-						newSubgoal[ goal -> g, kb -> k, "goalRewriting" -> {g.key, Map[ First, this.goalRules]}, rest]],
+						newSubgoal[ goal -> g, kb -> k, "goalRewriting" -> {key@g, Map[ First, goalRules@this]}, rest]],
 				1,
 				First[ newNodes],
 				_,
 				makeORNODE[ 
-					makePRFINFO[ name -> multipleGoalRewriting, used -> newNodes.used, generated -> newNodes.generated],
+					makePRFINFO[ name -> multipleGoalRewriting, used -> used@newNodes, generated -> generated@newNodes],
 					newNodes]
 			]            	
 		]
@@ -377,13 +368,13 @@ this:PRFSIT$[ g:FML$[ _, _?isAtomicExpression, __], k_List, id_, rest___?OptionQ
 
 inferenceRule[ elementarySubstitution] = 
 ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> 
-	Module[ {locInfo = ps.local, rules, usedSubst, cond, newForm, newG, substCond = {}, usedInCond = {}, newK = {}, substApplied = False, j, usedForms, genForms, replBy = {}},
-		rules = getLocalInfo[ locInfo, "elemSubstRules"];
+	Module[ {rules, usedSubst, cond, newForm, newG, substCond = {}, usedInCond = {}, newK = {}, substApplied = False, j, usedForms, genForms, replBy = {}},
+		rules = substRules@ps;
 		If[ rules === {},
 			(* There are no substitutions available -> rule does not apply *)
 			$Failed,
 			(* else: we have substitutions *)
-			{newForm, usedSubst, cond} = replaceRepeatedAndTrack[ g.formula, rules];
+			{newForm, usedSubst, cond} = replaceRepeatedAndTrack[ formula@g, rules];
 			If[ usedSubst =!= {},
 				(* rewrite applied *)
 				newG = makeFML[ formula -> newForm];
@@ -400,7 +391,7 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :>
 			genForms = {{newG}};
 			AppendTo[ replBy, Union[ usedSubst]];
 			Do[
-                {newForm, usedSubst, cond} = replaceRepeatedAndTrack[ k[[j]].formula, rules];
+                {newForm, usedSubst, cond} = replaceRepeatedAndTrack[ formula@k[[j]], rules];
                 If[ usedSubst =!= {},
                     (* rewrite applied *)
                     newForm = makeFML[ formula -> newForm];
@@ -421,7 +412,7 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :>
             (* Proof goals for checking the conditions are still missing *)
             If[ substApplied,
             	makeANDNODE[ makePRFINFO[ name -> elementarySubstitution, used -> usedForms, generated -> genForms, "usedSubst" -> replBy], 
-					newSubgoal[ goal -> newG, kb -> newK, local -> locInfo, rest]],
+					newSubgoal[ goal -> newG, kb -> newK, rest]],
 				$Failed
             ]
 		]
@@ -432,13 +423,13 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :>
 
 inferenceRule[ expandDef] = 
 ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> 
-	Module[ {locInfo = ps.local, rules, usedDefs, cond, new, newG, newForm, newK = {}, defExpand = False, defCond = {}, usedInCond = {}, j, usedForms, genForms, replBy = {}, newGoals},
-		rules = getLocalInfo[ locInfo, "definitionRules"];
+	Module[ {rules, usedDefs, cond, new, newG, newForm, newK = {}, defExpand = False, defCond = {}, usedInCond = {}, j, usedForms, genForms, replBy = {}, newGoals},
+		rules = defRules@ps;
 		If[ rules === {},
 			(* There are no definitions available at all in this proof -> expanding defs does not apply *)
 			$Failed,
 			(* else: we have definition rewrite rules *)
-			{new, usedDefs, cond} = replaceAllAndTrack[ g.formula, rules];
+			{new, usedDefs, cond} = replaceAllAndTrack[ formula@g, rules];
 			If[ usedDefs =!= {} && freeVariables[ cond] === {},
 				(* rewrite applied *)
 				(* in this case, the result is of the form {newForm, cond}, where cond are conditions to be fulfilled in order to allow the rewrite *)
@@ -456,7 +447,7 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :>
 			genForms = {{newG}};
 			AppendTo[ replBy, Union[ usedDefs]];
 			Do[
-                {new, usedDefs, cond} = replaceAllAndTrack[ k[[j]].formula, rules];
+                {new, usedDefs, cond} = replaceAllAndTrack[ formula@k[[j]], rules];
                 If[ usedDefs =!= {} && freeVariables[ cond] === {},
                     (* rewrite applied *)
                     newForm = makeFML[ formula -> new];
@@ -475,10 +466,10 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :>
                 {j, Length[ k]}
             ];
             If[ defExpand,
-            	newGoals = {newSubgoal[ goal -> newG, kb -> newK, local -> locInfo, rest]};
+            	newGoals = {newSubgoal[ goal -> newG, kb -> newK, rest]};
             	If[ defCond =!= {},
             		newForm = makeFML[ formula -> makeConjunction[ defCond, And$TM]];
-            		AppendTo[ newGoals, newSubgoal[ goal -> newForm, kb -> k, local -> locInfo, rest]],
+            		AppendTo[ newGoals, newSubgoal[ goal -> newForm, kb -> k, rest]],
             		(* else *)
             		newForm = True
             	];
@@ -495,31 +486,6 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :>
 		]
 	]
 
-
-(* ::Section:: *)
-(* Equalities in KB *)
-
-inferenceRule[ eqIffKB] = 
-ps:PRFSIT$[ g_, k:{___, FML$[ _, (Iff$TM|Equal$TM)[ _, _], __], ___}, id_, rest___?OptionQ] :> 
-	Module[ {locInfo = ps.local, rules, form, elemSubs = {}, nonSubs = {}, j},
-		rules = getLocalInfo[ locInfo, "elemSubstRules"];
-		Do[
-        	form = k[[j]];
-        	Switch[ form,
-        		FML$[ _, (Iff$TM|Equal$TM)[ _, rhs_], __],
-        		appendToKB[ elemSubs, form],
-        		_,
-        		appendToKB[ nonSubs, form]
-        	],
-        	{j, Length[k]}
-        ];
-        (* Again, we only put the forward rules, the backward rules would be the same *)
-        locInfo = putLocalInfo[ locInfo, "elemSubstRules" -> Join[ rules, First[ formulaListToRules[ elemSubs]]]];
-		makeANDNODE[ makePRFINFO[ name -> eqIffKB, used -> {elemSubs}, generated -> {}], 
-			newSubgoal[ goal -> g, kb -> nonSubs, local -> locInfo, rest]
-		]
-	]
-
 (* ::Section:: *)
 (* Instantiation *)
 
@@ -531,7 +497,7 @@ ps:PRFSIT$[ g_, k:{___, FML$[ _, (Iff$TM|Equal$TM)[ _, _], __], ___}, id_, rest_
 
 inferenceRule[ instantiate] = 
 ps:PRFSIT$[ g_, K_List, id_, rest___?OptionQ] :> 
-	Module[ {locInfo = ps.local, oldConst, newConst, univKB = Cases[ K, FML$[ _, _Forall$TM, _]], instForm, orig = {}, new = {}, inst = {}, i},
+	Module[ {oldConst, newConst, univKB = Cases[ K, FML$[ _, _Forall$TM, _]], instForm, orig = {}, new = {}, inst = {}, i},
         (
         instForm = Map[ instantiateForall[ #, newConst]&, univKB];
         (* for each form in univKB we get a list {forms, inst}, where
@@ -548,26 +514,25 @@ ps:PRFSIT$[ g_, K_List, id_, rest___?OptionQ] :>
         	],
         	{i, Length[ instForm]}
         ];
-        locInfo = putLocalInfo[ locInfo, "constants" -> Join[ Apply[ List, newConst], oldConst]];
 		makeANDNODE[ makePRFINFO[ name -> instantiate, used -> orig, generated -> new, "instantiation" -> inst], 
-			newSubgoal[ goal -> g, kb -> Fold[ joinKB[ #2, #1]&, K, new], local -> locInfo, rest]
+			newSubgoal[ goal -> g, kb -> Fold[ joinKB[ #2, #1]&, K, new], "constants" -> Join[ Apply[ List, newConst], oldConst], rest]
 		]
-		) /; ({newConst, oldConst} = constants[ locInfo]; newConst =!= {})
+		) /; ({newConst, oldConst} = constants[ ps]; newConst =!= {})
 	]
 
-constants[ loc_List] :=
-	Module[{L = getLocalInfo[ loc, "constants"], new, old},
+constants[ ps_PRFSIT$] :=
+	Module[{L = getOptionalComponent[ ps, "constants"], new, old},
 		new = Cases[ L, _RNG$];
 		old = Complement[ L, new];
 		{Apply[ Join, new], old}
 	]
 constants[ args___] := unexpected[ constants, {args}]
 
-getAllConstants[ loc_List] :=
+getAllConstants[ ps_PRFSIT$] :=
    (* constants in local info can be a mixture of elementary ranges (e.g. SETRNG$) and
 	ranges wrapped in RNG$ (constants that have not yet been used for instantiation).
 	We just eliminate the RNG$'es to get a flat list of elementary ranges *)
-    getLocalInfo[ loc, "constants"] /. RNG$ -> Sequence;
+    getOptionalComponent[ ps, "constants"] /. RNG$ -> Sequence;
 getAllConstants[ args___] := unexpected[ getAllConstants, {args}]
 
 
@@ -612,8 +577,7 @@ connectiveRules = {"Connectives Rules",
 	{equivGoal, True, True, 10}};
 
 equalityRules = {"Equality Rules", 
-	{eqGoal, False, False, 20},
-	{eqIffKB, True, True, 3}
+	{eqGoal, False, False, 20}
 	};
 
 registerRuleSet[ "Quantifier Rules", quantifierRules, {

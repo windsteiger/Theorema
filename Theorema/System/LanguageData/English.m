@@ -14,6 +14,7 @@ With[ {lang = "English"},
 	MessageName[joinHold, "usage", lang] = "joinHold[Hold[a],Hold[b]] produces Hold[a,b].";
 	MessageName[applyHold, "usage", lang] = "applyHold[Hold[a],Hold[b]] produces Hold[a[b]].";
 	MessageName[notification, "usage", lang] = "notification[text] displays 'text' as a user notification.";
+	MessageName[getOptionalComponent, "usage", lang] = "getOptionalComponent[ ds, key] is a generic accessor function for optional components in a datastructure.";
 
 (* Theorema`Language`Syntax` *)
 	MessageName[theoremaDisplay, "usage", lang] = "theoremaDisplay[expr] displays expr in Theorema syntax using the definitions for MakeBoxes[ expr, TheoremaForm].";	
@@ -145,15 +146,13 @@ With[ {lang = "English"},
 	MessageName[name, "usage", lang] = "name is an option for the constructor makePRFINFO and a selector for the PRFINFO$ datastructure.";
 	MessageName[used, "usage", lang] = "used is an option for the constructor makePRFINFO and a selector for the PRFINFO$ datastructure.";
 	MessageName[generated, "usage", lang] = "generated is an option for the constructor makePRFINFO and a selector for the PRFINFO$ datastructure.";
-	MessageName[getLocalInfo, "usage", lang] = "getLocalInfo[ li, key] reads the value of info 'key' from the local info datastructure 'li'.";
-	MessageName[putLocalInfo, "usage", lang] = "putLocalInfo[ li, type[key, val]] replaces the value of info 'key' in the local info datastructure 'li' with 'val'. If the value does not exist yet in 'li', it is added.";
 	MessageName[makePRFSIT, "usage", lang] = "makePRFSIT[ ...] constructor for PRFSIT$ data staructure.";
 	MessageName[newSubgoal, "usage", lang] = "newSubgoal[ ...] constructs a new proof situation and checks for proof success immediately.";
 	MessageName[$TMAcheckSuccess, "usage", lang] = "$TMAcheckSuccess decides whether proof success is automatically checked when a new subgoal is constructed.";
 	MessageName[type, "usage", lang] = "type is a selector for proof node datastructures.";
 	MessageName[goal, "usage", lang] = "goal is an option for the constructors makePRFSIT/newSubgoal and a selector for the PRFSIT$ datastructure.";
 	MessageName[kb, "usage", lang] = "kb is an option for the constructor makePRFSIT/newSubgoal and a selector for the PRFSIT$ datastructure.";
-	MessageName[local, "usage", lang] = "local is an option for the constructor makePRFSIT/newSubgoal and a selector for the PRFSIT$ datastructure.";
+	MessageName[history, "usage", lang] = "history is an option for the constructor makePRFSIT/newSubgoal and a selector for the PRFSIT$ datastructure.";
 	MessageName[ruleSetup, "usage", lang] = "ruleSetup is an option for the constructor makePRFSIT/newSubgoal and a selector for the PRFSIT$ datastructure.";
 	MessageName[rules, "usage", lang] = "rules is an option for the constructor makePRFSIT/newSubgoal and a selector for the PRFSIT$ datastructure.";
 	MessageName[ruleActivity, "usage", lang] = "ruleActivity is an option for the constructor makePRFSIT/newSubgoal and a selector for the PRFSIT$ datastructure.";

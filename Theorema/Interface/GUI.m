@@ -1332,7 +1332,7 @@ setCompEnv[ args___] := unexpected[ setCompEnv, {args}]
 
 printProveInfo[ goal_, kb_, rules_, strategy_, {pVal_, proofObj_}, {pTime_, sTime_}, searchDepth_] :=
     Module[ {kbAct, bui, buiAct},
-        kbAct = Map[ makeLabel[ #.label]&, kb];
+        kbAct = Map[ makeLabel[ label[#]]&, kb];
         bui = Cases[ DownValues[ buiActProve],
         	HoldPattern[ Verbatim[HoldPattern][ buiActProve[ op_String]] :> v_] -> {op, v}];
         buiAct = Cases[ bui, { op_, True} -> op];
@@ -1351,7 +1351,7 @@ printProveInfo[ goal_, kb_, rules_, strategy_, {pVal_, proofObj_}, {pTime_, sTim
         	Button[ translate["ShowProof"], displayProof[ proofObj], ImageSize -> Automatic, Method -> "Queued"]]], "ProofDisplay"]];
         NotebookWrite[ $proofInitNotebook, Cell[ ToBoxes[
         	OpenerView[ {Spacer[10], 
-            Column[ {OpenerView[ {Style[ translate[ "GoalProve"], "PIContent"], Style[ makeLabel[ goal.label], "PIContent"]}],
+            Column[ {OpenerView[ {Style[ translate[ "GoalProve"], "PIContent"], Style[ makeLabel[ label@goal], "PIContent"]}],
             	OpenerView[ {Style[ translate[ "KBprove"], "PIContent"], Style[ kbAct, "PIContent"]}],
                 OpenerView[ {Style[ translate[ "BuiProve"], "PIContent"], Style[ buiAct, "PIContent"]}],
                 OpenerView[ {Style[ translate[ "selProver"], "PIContent"], Style[ {rules, strategy}, "PIContent"]}],
@@ -2109,9 +2109,9 @@ nextProofSitDialog[ args___] := unexpected[ nextProofSitDialog, {args}]
 proofSitChoiceButtons[ ps_PRFSIT$, {num_Integer}] :=
 	Module[ {},
 		Cell[ CellGroupData[ 
-			{Cell[ TextData[{ Cell[ BoxData[ ToBoxes[ RadioButton[ Dynamic[ $selectedProofStep], ps.id]]]], 
+			{Cell[ TextData[{ Cell[ BoxData[ ToBoxes[ RadioButton[ Dynamic[ $selectedProofStep], id@ps]]]], 
    			"  ", translate[ "open proof situation"], " #" <> ToString[ num]}], "Section", ShowGroupOpener -> False],
-			pSitCells[ ps]}, Dynamic[ If[ $selectedProofStep === ps.id, Open, Closed]]]]
+			pSitCells[ ps]}, Dynamic[ If[ $selectedProofStep === id@ps, Open, Closed]]]]
 	]
 proofSitChoiceButtons[ args___] := unexpected[ proofSitChoiceButtons, {args}]
 

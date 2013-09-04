@@ -56,9 +56,9 @@ Options[replaceRepeatedExcept] = {Heads -> {}, MaxIterations -> 20};
 	When the replacement rule is actually applied, it sows a rule that establishes the backsubstitution from "EXCPT~h" to the original expression.
 	Using Reap, we collect the backsubstitutions and apply them at the end.
 *)
-replaceRepeatedExcept[expr_, rules_List, expt_List, opts___?OptionQ] :=
+replaceRepeatedExcept[ expr_, rules_List, expt_List, opts___?OptionQ] :=
   	Module[{exptRules, heads, maxIt, new, backsubs},
-  		{heads, maxIt} = {Heads, MaxIterations} /. {opts} /. Options[replaceRepeatedExcept];
+  		{heads, maxIt} = {Heads, MaxIterations} /. {opts} /. Options[ replaceRepeatedExcept];
    		exptRules = Join[ 
    			Map[(# :> With[ {s = "EXCPT~"~~ToString[ Hash[#]]}, Sow[ s -> #]; s])&, expt], 
    			rules, 
@@ -72,26 +72,34 @@ replaceRepeatedExcept[expr_, rules_List, expt_List, opts___?OptionQ] :=
    		]
   	]
 
-replaceRepeatedExcept[expr_, r_Rule|r_RuleDelayed, expt_List, opts___?OptionQ] := replaceRepeatedExcept[expr, {r}, expt, opts];
-replaceRepeatedExcept[args___] := unexpected[ replaceRepeatedExcept, {args}]
+replaceRepeatedExcept[ expr_, r_Rule|r_RuleDelayed, expt_List, opts___?OptionQ] := replaceRepeatedExcept[ expr, {r}, expt, opts];
+replaceRepeatedExcept[ args___] := unexpected[ replaceRepeatedExcept, {args}]
 
 
 (* ::Subsubsection:: *)
 (* applyHold *)
 
-applyHold[Hold[a_], Hold[b___]] := Hold[a[b]];
+applyHold[ Hold[a_], Hold[b___]] := Hold[ a[ b]];
 
 (* ::Subsubsection:: *)
 (* joinHold *)
 
-joinHold[Hold[a___], Hold[b___]] := Hold[a, b];
+joinHold[ Hold[a___], Hold[b___]] := Hold[ a, b];
 
 (* ::Subsubsection:: *)
 (* notification *)
 
 notification[msg__] /; $Notebooks := MessageDialog[ StringForm[msg]]
 notification[msg__] := Message[ StringForm[msg]]
-notification[args___] := unexpected[notification, {args}]
+notification[args___] := unexpected[ notification, {args}]
+
+
+(* ::Subsubsection:: *)
+(* Generic accessor for optional components in a datastructure *)
+
+getOptionalComponent[ ds_[ ___, (Rule|RuleDelayed)[ key_String, val_], ___], key_] := val
+getOptionalComponent[ ds_, key_String] := {}
+getOptionalComponent[args___] := unexpected[ getOptionalComponent, {args}]
 
 End[]
 

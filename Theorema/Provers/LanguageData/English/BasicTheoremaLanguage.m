@@ -34,7 +34,6 @@ MessageName[ knowledgeRewriting, "usage", lang] = "Knowledge rewriting based on 
 MessageName[ elementarySubstitution, "usage", lang] = "Elementary substitution based on equalities and equivalences in the knowledge base";
 MessageName[ expandDef, "usage", lang] = "Expand definitions";
 MessageName[ eqGoal, "usage", lang] = "Prove equalities";
-MessageName[ eqIffKB, "usage", lang] = "Equalities/equivalences in KB for rewriting";
 MessageName[ instantiate, "usage", lang] = "Instantiate using constants available in the proof";
 
 ] (* With *)
@@ -272,9 +271,6 @@ subProofHeader[ expandDef, lang, u_, {___, {cond_}}, ___, "usedDefs" -> defs_Lis
 	goalCell[ cond, "."]
 	};	
 	
-proofStepText[ eqIffKB, lang, {eqs__}, _, ___] := {textCell[ "We register ", formulaReferenceSequence[ eqs, lang], " to be used for rewriting."]
-	};
-
 proofStepText[ instantiate, lang, u_, {}, ___] := 
 	(* Instantiation has been tried, but none of them could be successfully applied *)
 	{textCell[ "New constants have been generated, but no instantiations could be carried out."]};
