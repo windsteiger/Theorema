@@ -226,6 +226,29 @@ SumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["SumOf"] :
 	Module[ {v},
 		(Apply[ Plus$TM, v]) /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
+SumOf$TM[ RNG$[ r_, s__], cond_, dom_, form_] /; buiActive["SumOf"] :=
+ 	Module[ {splitC},
+ 		splitC = splitAnd[ cond, {r[[1]]}];
+ 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 			SumOf$TM[ RNG$[r], rc, dom, SumOf$TM[ RNG$[s], sc, dom, form]]
+ 		]
+	]
+SumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, dom_, form_] /; buiActive["SumOf"] :=
+	Module[ {v},
+		(* amaletz: The reason why it's done in that 'complicated' way is the following:
+		   The 0-element might not be defined in "dom", which is no problem, but if it's not
+		   defined and one just folds the function using it as the initial element, it will
+		   always appear as a symbolic expression in the final result. However, if there is at
+		   least 1 value in "v", then the 0-element is not needed at all.
+		   Also, "Apply" cannot be used, because the domain functions can only deal with EXACTLY
+		   2 arguments (in addition to that, we cannot even rely on associativity).
+		*)
+		Switch[ Length[ v],
+			0, Theorema`Computation`Knowledge`Underscript$TM[0, dom],
+			1, First[ v],
+			_, Fold[ dom[Plus$TM], dom[Plus$TM][First[v], v[[2]]], Drop[v, 2]]
+		] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+	]
 	
 ProductOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["ProductOf"] :=
  	Module[ {splitC},
@@ -237,6 +260,22 @@ ProductOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["ProductOf"] :=
 ProductOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["ProductOf"] :=
 	Module[ {v},
 		(Apply[ Times$TM, v]) /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+	]
+ProductOf$TM[ RNG$[ r_, s__], cond_, dom_, form_] /; buiActive["ProductOf"] :=
+ 	Module[ {splitC},
+ 		splitC = splitAnd[ cond, {r[[1]]}];
+ 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 			ProductOf$TM[ RNG$[r], rc, dom, ProductOf$TM[ RNG$[s], sc, dom, form]]
+ 		]
+	]
+ProductOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, dom_, form_] /; buiActive["ProductOf"] :=
+	Module[ {v},
+		(* See comment in function "SumOf$TM" *)
+		Switch[ Length[ v],
+			0, Theorema`Computation`Knowledge`Underscript$TM[1, dom],
+			1, First[ v],
+			_, Fold[ dom[Times$TM], dom[Times$TM][First[v], v[[2]]], Drop[v, 2]]
+		] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
 	
 SetAttributes[ valueIteration, HoldRest]
