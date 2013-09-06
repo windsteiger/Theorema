@@ -28,20 +28,24 @@ Begin["`Private`"]
 (* Termination rules *)
 
 inferenceRule[ goalInKB] = 
-PRFSIT$[ goal:FML$[ _, g_, __], {___, k:FML$[ _, g_, __], ___}, ___] :> 
-	proofSucceeds[ makePRFINFO[ name -> goalInKB, used -> {goal, k}]]
+PRFSIT$[ goal:FML$[ _, g_, __], {___, k:FML$[ _, g_, __], ___}, ___] :> performProofStep[
+	makeTERMINALNODE[ makePRFINFO[ name -> goalInKB, used -> {goal, k}], proved]
+]
 
 inferenceRule[ contradictionKB] = 
-PRFSIT$[ goal_FML$, {___, k:FML$[ _, phi_, __], ___, c:FML$[ _, Not$TM[ phi_], __], ___} | {___, k:FML$[ _, Not$TM[ phi_], __], ___, c:FML$[ _, phi_, __], ___}, ___] :> 
-	proofSucceeds[ makePRFINFO[ name -> contradictionKB, used -> {k, c}]]
+PRFSIT$[ goal_FML$, {___, k:FML$[ _, phi_, __], ___, c:FML$[ _, Not$TM[ phi_], __], ___} | {___, k:FML$[ _, Not$TM[ phi_], __], ___, c:FML$[ _, phi_, __], ___}, ___] :> performProofStep[
+	makeTERMINALNODE[ makePRFINFO[ name -> contradictionKB, used -> {k, c}], proved]
+]
 
 inferenceRule[ falseInKB] =
-PRFSIT$[ goal_FML$, {___, k:FML$[ _, False | Not$TM[ True], __], ___}, ___] :> 
-	proofSucceeds[ makePRFINFO[ name -> falseInKB, used -> k]]
+PRFSIT$[ goal_FML$, {___, k:FML$[ _, False | Not$TM[ True], __], ___}, ___] :> performProofStep[
+	makeTERMINALNODE[ makePRFINFO[ name -> falseInKB, used -> k], proved]
+]
 
 inferenceRule[ trueGoal] =
-PRFSIT$[ goal:FML$[ _, True | Not$TM[ False], __], _List, ___] :> 
-	proofSucceeds[ makePRFINFO[ name -> trueGoal, used -> goal]]
+PRFSIT$[ goal:FML$[ _, True | Not$TM[ False], __], _List, ___] :> performProofStep[
+	makeTERMINALNODE[ makePRFINFO[ name -> trueGoal, used -> goal], proved]
+]
 	
 (* ::Section:: *)
 (* Connectives *)
@@ -50,119 +54,115 @@ PRFSIT$[ goal:FML$[ _, True | Not$TM[ False], __], _List, ___] :>
 (* NOT *)
 
 inferenceRule[ notGoal] = 
-PRFSIT$[ g:FML$[ _, Not$TM[ a_], __], k_List, id_, rest___?OptionQ] :> 
+PRFSIT$[ g:FML$[ _, Not$TM[ a_], __], k_List, id_, rest___?OptionQ] :> performProofStep[
 	Module[ {opp},
-		opp = makeFML[ formula -> a];
-		makeANDNODE[ makePRFINFO[ name -> notGoal, used -> g, generated -> opp], 
-			newSubgoal[ goal -> makeFML[ formula -> False, label -> "F"], kb -> prependKB[ k, opp], rest]
+		opp = makeAssumptionFML[ formula -> a];
+		makeANDNODE[ makePRFINFO[ name -> notGoal, used -> g], 
+			toBeProved[ goal -> makeFML[ formula -> False, label -> "\[UpTee]"], kb -> prependKB[ k, opp], rest]
 		]
 	]
+]
 
 inferenceRule[ contradiction] = 
-PRFSIT$[ g:FML$[ _, a_, __] /; !TrueQ[ !a] && FreeQ[ g, _META$], k_List, id_, rest___?OptionQ] :> 
+PRFSIT$[ g:FML$[ _, a_, __] /; !TrueQ[ !a] && FreeQ[ g, _META$], k_List, id_, rest___?OptionQ] :> performProofStep[
 	Module[ {opp},
-		opp = makeFML[ formula -> Not$TM[ a]];
-		makeANDNODE[ makePRFINFO[ name -> contradiction, used -> g, generated -> opp], 
-			newSubgoal[ goal -> makeFML[ formula -> False, label -> "F"], kb -> prependKB[ k, opp], rest]
+		opp = makeAssumptionFML[ formula -> Not$TM[ a]];
+		makeANDNODE[ makePRFINFO[ name -> contradiction, used -> g], 
+			toBeProved[ goal -> makeFML[ formula -> False, label -> "\[UpTee]"], kb -> prependKB[ k, opp], rest]
 		]
 	]
+]
 	
 (* ::Subsection:: *)
 (* AND *)
 
 inferenceRule[ andGoal] = 
-PRFSIT$[ g:FML$[ _, And$TM[ c__], lab_, ___] /; FreeQ[ {c}, _META$], k_List, id_, rest___?OptionQ] :> 
+PRFSIT$[ g:FML$[ _, And$TM[ c__], lab_, ___] /; FreeQ[ {c}, _META$], k_List, id_, rest___?OptionQ] :> performProofStep[
 	Module[ {conj},
-		conj = MapIndexed[ makeFML[ formula -> #1, label -> lab <> "." <> ToString[ #2[[1]]]]&, {c}];
-		makeANDNODE[ makePRFINFO[ name -> andGoal, used -> g, generated -> conj], 
-			Map[ newSubgoal[ goal -> #, kb -> k, rest]&, conj]
+		conj = MapIndexed[ makeGoalFML[ formula -> #1, label -> lab <> "." <> ToString[ #2[[1]]]]&, {c}];
+		makeANDNODE[ makePRFINFO[ name -> andGoal, used -> g], 
+			Map[ toBeProved[ goal -> #, kb -> k, rest]&, conj]
 		]
 	]
+]
 
 inferenceRule[ andKB] = 
-PRFSIT$[ g_, {pre___, k:FML$[ _, And$TM[ c__], lab_, ___], post___}, id_, rest___?OptionQ] :> 
+PRFSIT$[ g_, {pre___, k:FML$[ _, And$TM[ c__], lab_, ___], post___}, id_, rest___?OptionQ] :> performProofStep[
 	Module[ {conj},
-		conj = MapIndexed[ makeFML[ formula -> #1, label -> lab <> "." <> ToString[ #2[[1]]]]&, {c}];
-		makeANDNODE[ makePRFINFO[ name -> andKB, used -> k, generated -> conj], 
-			newSubgoal[ goal -> g, kb -> joinKB[ conj, {pre, post}], rest]
+		conj = MapIndexed[ makeAssumptionFML[ formula -> #1, label -> lab <> "." <> ToString[ #2[[1]]]]&, {c}];
+		makeANDNODE[ makePRFINFO[ name -> andKB, used -> k], 
+			toBeProved[ goal -> g, kb -> joinKB[ conj, {pre, post}], rest]
 		]
 	]
+]
 
 
 (* ::Subsection:: *)
 (* OR *)
 
 inferenceRule[ orGoal] = 
-PRFSIT$[ g:FML$[ _, Or$TM[ a__, b_], lab_, ___] /; FreeQ[ {a, b}, _META$], k_List, id_, rest___?OptionQ] :> 
+PRFSIT$[ g:FML$[ _, Or$TM[ a__, b_], lab_, ___] /; FreeQ[ {a, b}, _META$], k_List, id_, rest___?OptionQ] :> performProofStep[
 	Module[ {negAssum, newG},
-		negAssum = MapIndexed[ makeFML[ formula -> Not$TM[#1], label -> lab <> "." <> ToString[ #2[[1]]]]&, {a}];
-		newG = makeFML[ formula -> b];
-		makeANDNODE[ makePRFINFO[ name -> orGoal, used -> g, generated -> Append[ negAssum, newG]], 
-			newSubgoal[ goal -> newG, kb -> joinKB[ negAssum, k], rest]
+		negAssum = MapIndexed[ makeAssumptionFML[ formula -> Not$TM[#1], label -> lab <> "." <> ToString[ #2[[1]]]]&, {a}];
+		newG = makeGoalFML[ formula -> b];
+		makeANDNODE[ makePRFINFO[ name -> orGoal, used -> g], 
+			toBeProved[ goal -> newG, kb -> joinKB[ negAssum, k], rest]
 		]
 	]
+]
 
 inferenceRule[ orKB] = 
-PRFSIT$[ g_, {pre___, k:FML$[ _, Or$TM[ c__], lab_, ___], post___}, id_, rest___?OptionQ] :> 
+PRFSIT$[ g_, {pre___, k:FML$[ _, Or$TM[ c__], lab_, ___], post___}, id_, rest___?OptionQ] :> performProofStep[
 	Module[ {caseAssum},
-		caseAssum = MapIndexed[ makeFML[ formula -> #1, label -> lab <> "." <> ToString[ #2[[1]]]]&, {c}];
-		makeANDNODE[ makePRFINFO[ name -> orKB, used -> k, generated -> caseAssum], 
-			Map[ Block[ {$rewriteRules = {}}, newSubgoal[ goal -> g, kb -> prependKB[{pre, post}, #], rest]]&, caseAssum]
+		caseAssum = MapIndexed[ makeAssumptionFML[ formula -> #1, label -> lab <> "." <> ToString[ #2[[1]]]]&, {c}];
+		makeANDNODE[ makePRFINFO[ name -> orKB, used -> k], 
+			Map[ Block[ {$rewriteRules = {}}, toBeProved[ goal -> g, kb -> prependKB[{pre, post}, #], rest]]&, caseAssum]
 		]
 	]
+]
 
 
 (* ::Subsection:: *)
 (* IMPLIES *)
 
 inferenceRule[ implGoalDirect] = 
-PRFSIT$[ g:FML$[ _, Implies$TM[ P_, Q_], __], k_List, id_, rest___?OptionQ] :> 
+PRFSIT$[ g:FML$[ _, Implies$TM[ P_, Q_], __], k_List, id_, rest___?OptionQ] :> performProofStep[
 	Module[ {left, right},
-		left = makeFML[ formula -> P];
-		right = makeFML[ formula -> Q];
-		makeANDNODE[ makePRFINFO[ name -> implGoalDirect, used -> g, generated -> {left, right}], 
-			newSubgoal[ goal -> right, kb -> prependKB[ k, left], rest]]
+		left = makeAssumptionFML[ formula -> P];
+		right = makeGoalFML[ formula -> Q];
+		makeANDNODE[ makePRFINFO[ name -> implGoalDirect, used -> g], 
+			toBeProved[ goal -> right, kb -> prependKB[ k, left], rest]]
 	]
+]
 
 inferenceRule[ implGoalCP] = 
-PRFSIT$[ g:FML$[ _, Implies$TM[ P_, Q_], __], k_List, id_, rest___?OptionQ] :> 
+PRFSIT$[ g:FML$[ _, Implies$TM[ P_, Q_], __], k_List, id_, rest___?OptionQ] :> performProofStep[
 	Module[ {negLeft, negRight},
-		negLeft = makeFML[ formula -> Not$TM[ P]];
-		negRight = makeFML[ formula -> Not$TM[ Q]];
-		makeANDNODE[ makePRFINFO[ name -> implGoalCP, used -> g, generated -> {negRight, negLeft}], 
-			newSubgoal[ goal -> negLeft, kb -> prependKB[ k, negRight], rest]]
+		negRight = makeAssumptionFML[ formula -> Not$TM[ Q]];
+		negLeft = makeGoalFML[ formula -> Not$TM[ P]];
+		makeANDNODE[ makePRFINFO[ name -> implGoalCP, used -> g], 
+			toBeProved[ goal -> negLeft, kb -> prependKB[ k, negRight], rest]]
 	]
+]
 
-inferenceRule[ modusPonens] = 
-ps:PRFSIT$[ g_, k:{___, impl:FML$[ _, Implies$TM[ P_, Q_], __], ___, lhs:FML$[ _, P_, __], ___}, id_, rest___?OptionQ]|
-PRFSIT$[ g_, k:{___, lhs:FML$[ _, P_, __], ___, impl:FML$[ _, Implies$TM[ P_, Q_], __], ___}, id_, rest___?OptionQ] :> 
-	Catch[
-        Module[ {rhs, mp, implK = key@impl, lhsK = key@lhs},
-            mp = getOptionalComponent[ ps, "modusPonens"];
-            If[ MemberQ[ mp, {lhsK, implK}],
-            	(* Modus Ponens has already been applied for those forms *)
-                Throw[ $Failed]
-            ];
-            rhs = makeFML[ formula -> Q];
-            makeANDNODE[ makePRFINFO[ name -> modusPonens, used -> {impl, lhs}, generated -> rhs], 
-                newSubgoal[ goal -> g, kb -> prependKB[ k, rhs], "modusPonens" -> Prepend[ mp, {lhsK, implK}], rest]]
-        ]
-    ]
-
+(*
+Modus Ponens is superseded by the much more general rewriting technique
+*)
 
 (* ::Subsection:: *)
 (* IFF *)
 
 inferenceRule[ equivGoal] = 
-PRFSIT$[ g:FML$[ _, Iff$TM[ P_, Q_], __], k_List, id_, rest___?OptionQ] :> 
+PRFSIT$[ g:FML$[ _, Iff$TM[ P_, Q_], __], k_List, id_, rest___?OptionQ] :> performProofStep[
 	Module[ {left2right, right2left},
-		left2right = makeFML[ formula -> Implies$TM[ P, Q]];
-		right2left = makeFML[ formula -> Implies$TM[ Q, P]];
-		makeANDNODE[ makePRFINFO[ name -> equivGoal, used -> g, generated -> {left2right, right2left}], 
-			{newSubgoal[ goal -> left2right, kb -> k, rest],
-			newSubgoal[ goal -> right2left, kb -> k, rest]}
+		left2right = makeGoalFML[ formula -> Implies$TM[ P, Q]];
+		right2left = makeGoalFML[ formula -> Implies$TM[ Q, P]];
+		makeANDNODE[ makePRFINFO[ name -> equivGoal, used -> g], 
+			{toBeProved[ goal -> left2right, kb -> k, rest],
+			toBeProved[ goal -> right2left, kb -> k, rest]}
 		]
 	]
+]
 
 (* ::Section:: *)
 (* Quantifiers *)
@@ -171,7 +171,7 @@ PRFSIT$[ g:FML$[ _, Iff$TM[ P_, Q_], __], k_List, id_, rest___?OptionQ] :>
 (* FORALL *)
 
 inferenceRule[ forallGoal] = 
-ps:PRFSIT$[ g:FML$[ _, u:Forall$TM[ rng_, cond_, A_], __], k_List, id_, rest___?OptionQ] :> 
+ps:PRFSIT$[ g:FML$[ _, u:Forall$TM[ rng_, cond_, A_], __], k_List, id_, rest___?OptionQ] :> performProofStep[
 	Module[ {faBui, simp, rc, r, c, f, fix, newConds, newGoal, locC},
 		(* we use computation regardless whether it is activated or not ... *)
 		faBui = buiActProve[ "Forall"];
@@ -186,20 +186,21 @@ ps:PRFSIT$[ g:FML$[ _, u:Forall$TM[ rng_, cond_, A_], __], k_List, id_, rest___?
 				(* else *)
 				{{r, c, f}, fix} = arbitraryButFixed[ {rc, cond, A}, rng, {g, k}];
 				locC = getOptionalComponent[ ps, "constants"];
-				newConds = Map[ makeFML[ formula -> #]&, DeleteCases[ Append[ r, c], True]];
-				newGoal = makeFML[ formula -> f];
-				makeANDNODE[ makePRFINFO[ name -> forallGoal, used -> g, generated -> Prepend[ newConds, newGoal], "abf" -> rngConstants[ fix]], 
-					newSubgoal[ goal -> newGoal, kb -> joinKB[ newConds, k], "constants" -> Prepend[ locC, fix], rest]]
+				newGoal = makeGoalFML[ formula -> f];
+				newConds = Map[ makeAssumptionFML[ formula -> #]&, DeleteCases[ Append[ r, c], True]];
+				makeANDNODE[ makePRFINFO[ name -> forallGoal, used -> g, "abf" -> rngConstants[ fix]], 
+					toBeProved[ goal -> newGoal, kb -> joinKB[ newConds, k], "constants" -> Prepend[ locC, fix], rest]]
 			],
 			(* else *)
-			simp = makeFML[ formula -> simp];
-			makeANDNODE[ makePRFINFO[ name -> forallGoal, used -> g, generated -> simp], 
-				newSubgoal[ goal -> simp, kb -> k, rest]]
+			simp = makeGoalFML[ formula -> simp];
+			makeANDNODE[ makePRFINFO[ name -> forallGoal, used -> g], 
+				toBeProved[ goal -> simp, kb -> k, rest]]
 		]
 	]
+]
 
 inferenceRule[ forallKB] = 
-ps:PRFSIT$[ g_, K:{___, f:FML$[ _, _Forall$TM, __], ___}, id_, rest___?OptionQ] :> 
+ps:PRFSIT$[ g_, K:{___, f:FML$[ _, _Forall$TM, __], ___}, id_, rest___?OptionQ] :> performProofStep[
 	Catch[
         Module[ {faInst, fk = key@f, newConst, oldConst, inst},
             faInst = getOptionalComponent[ ps, "forallKB"];
@@ -209,14 +210,15 @@ ps:PRFSIT$[ g_, K:{___, f:FML$[ _, _Forall$TM, __], ___}, id_, rest___?OptionQ] 
             ];
             {newConst, oldConst} = constants[ ps];
             (* we instantiate with the "old" constants only, because the new ones will be treated by the 'instantiate'-rule separately *)
-            inst = instantiateForall[ f, Apply[ RNG$, oldConst]];            
-            makeANDNODE[ makePRFINFO[ name -> forallKB, used -> f, generated -> inst[[1]], "instantiation" -> inst[[2]]], 
-                newSubgoal[ goal -> g, kb -> joinKB[ inst[[1]], K], "forallKB" -> Prepend[ faInst, fk], rest]]
+            inst = instantiateForall[ f, Apply[ RNG$, oldConst]];        
+            makeANDNODE[ makePRFINFO[ name -> forallKB, used -> f, "instantiation" -> inst[[2]]], 
+                toBeProved[ goal -> g, kb -> joinKB[ inst[[1]], K], "forallKB" -> Prepend[ faInst, fk], rest]]
         ]
     ]
+]
 
 inferenceRule[ forallKBInteractive] = 
-ps:PRFSIT$[ g_, K:{___, f:FML$[ _, Forall$TM[ rng_, cond_, A_], __], ___}, id_, rest___?OptionQ] :> 
+ps:PRFSIT$[ g_, K:{___, f:FML$[ _, Forall$TM[ rng_, cond_, A_], __], ___}, id_, rest___?OptionQ] :> performProofStep[
     Module[ {rc, r, c, Ainst, fInst, inst},
         rc = rngToCondition[ rng];
         If[ !FreeQ[ rc, $Failed],
@@ -227,18 +229,19 @@ ps:PRFSIT$[ g_, K:{___, f:FML$[ _, Forall$TM[ rng_, cond_, A_], __], ___}, id_, 
             	(* interactive dialog has been canceled *)
                 $Failed,
                 (* else *)
-                fInst = makeFML[ formula -> Implies$TM[ And$TM[ r, c], Ainst]];
-                makeANDNODE[ makePRFINFO[ name -> forallKBInteractive, used -> f, generated -> fInst, "instantiation" -> inst], 
-                    newSubgoal[ goal -> g, kb -> prependKB[ K, fInst], rest]]
+                fInst = makeAssumptionFML[ formula -> Implies$TM[ And$TM[ r, c], Ainst]];
+                makeANDNODE[ makePRFINFO[ name -> forallKBInteractive, used -> f, "instantiation" -> inst], 
+                    toBeProved[ goal -> g, kb -> prependKB[ K, fInst], rest]]
             ]
         ]
     ]
+]
 
 (* ::Subsection:: *)
 (* EXITSTS *)
 
 inferenceRule[ existsGoal] = 
-PRFSIT$[ g:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], k_List, id_, rest___?OptionQ] :> 
+PRFSIT$[ g:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], k_List, id_, rest___?OptionQ] :> performProofStep[
 	Module[ {simp, rc, r, c, f, meta, newGoal},
 		simp = computeInProof[ u];
 		If[ MatchQ[ simp, _Exists$TM],
@@ -248,20 +251,21 @@ PRFSIT$[ g:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], k_List, id_, rest___?Opt
 				$Failed,
 				(* else *)
 				{{r, c, f}, meta} = introduceMeta[ {rc, cond, A}, rng, {g, k}];
-				newGoal = makeFML[ formula -> Apply[ And$TM, DeleteCases[ Join[ r, {c, f}], True]]];
-				makeANDNODE[ makePRFINFO[ name -> existsGoal, used -> g, generated -> newGoal, "meta" -> meta], 
-					newSubgoal[ goal -> newGoal, kb -> k, rest]]
+				newGoal = makeGoalFML[ formula -> Apply[ And$TM, DeleteCases[ Join[ r, {c, f}], True]]];
+				makeANDNODE[ makePRFINFO[ name -> existsGoal, used -> g, "meta" -> meta], 
+					toBeProved[ goal -> newGoal, kb -> k, rest]]
 
 			],
 			(* else: quantifier simplified *)
-			simp = makeFML[ formula -> simp];
-			makeANDNODE[ makePRFINFO[ name -> existsGoal, used -> g, generated -> simp], 
-				newSubgoal[ goal -> simp, kb -> k, rest]]
+			simp = makeGoalFML[ formula -> simp];
+			makeANDNODE[ makePRFINFO[ name -> existsGoal, used -> g], 
+				toBeProved[ goal -> simp, kb -> k, rest]]
 		]
 	]
+]
 	
 inferenceRule[ existsGoalInteractive] = 
-ps:PRFSIT$[ g:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], k_List, id_, rest___?OptionQ] :> 
+ps:PRFSIT$[ g:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], k_List, id_, rest___?OptionQ] :> performProofStep[
     Module[ {const, subst, rc, instRng, thinnedRng, newGoal},
     	const = getAllConstants[ ps];
         subst = instantiateExistGoalInteractive[ g, const, k];
@@ -275,12 +279,13 @@ ps:PRFSIT$[ g:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], k_List, id_, rest___?
             If[ !FreeQ[ rc, $Failed], 
 				$Failed,
 				(* else *)				
-            	newGoal = makeFML[ formula -> makeExist[ thinnedRng, rc, cond, A, subst]];
-            	makeANDNODE[ makePRFINFO[ name -> existsGoalInteractive, used -> g, generated -> newGoal, "instantiation" -> subst], 
-                	newSubgoal[ goal -> newGoal, kb -> k, rest]]
+            	newGoal = makeGoalFML[ formula -> makeExist[ thinnedRng, rc, cond, A, subst]];
+            	makeANDNODE[ makePRFINFO[ name -> existsGoalInteractive, used -> g, "instantiation" -> subst], 
+                	toBeProved[ goal -> newGoal, kb -> k, rest]]
             ]
         ]
     ]
+]
 
 makeExist[ RNG$[], cond1_List, cond2_, A_, subst_] := Apply[ And$TM, substituteFree[ DeleteCases[ Join[ cond1, {cond2, A}], True], subst]]
 makeExist[ r:RNG$[__], cond1_List, cond2_, A_, subst_] := 
@@ -289,22 +294,23 @@ makeExist[ args___] := unexpected[ makeExist, {args}]
 
   
 inferenceRule[ existsKB] = 
-ps:PRFSIT$[ g_, k:{pre___, e:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], post___}, id_, rest___?OptionQ] :> 
+ps:PRFSIT$[ g_, k:{pre___, e:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], post___}, id_, rest___?OptionQ] :> performProofStep[
 	Module[ {simp, r, c, f, fix, newConds, locC},
 		simp = computeInProof[ u];
 		If[ MatchQ[ simp, _Exists$TM],
 			(* no simplification *)
 			{{r, c, f}, fix} = arbitraryButFixed[ {rngToCondition[ rng], cond, A}, rng, {g, k}];
 			locC = Prepend[ getOptionalComponent[ ps, "constants"], fix];
-			newConds = Map[ makeFML[ formula -> #]&, DeleteCases[ Join[ r, {c, f}], True]];
-			makeANDNODE[ makePRFINFO[ name -> existsKB, used -> e, generated -> newConds, "abf" -> rngConstants[ fix]], 
-				newSubgoal[ goal -> g, kb -> joinKB[ newConds, {pre, post}], "constants" -> locC, rest]],
+			newConds = Map[ makeAssumptionFML[ formula -> #]&, DeleteCases[ Join[ r, {c, f}], True]];
+			makeANDNODE[ makePRFINFO[ name -> existsKB, used -> e, "abf" -> rngConstants[ fix]], 
+				toBeProved[ goal -> g, kb -> joinKB[ newConds, {pre, post}], "constants" -> locC, rest]],
 			(* else *)
-			simp = makeFML[ formula -> simp];
-			makeANDNODE[ makePRFINFO[ name -> existsKB, used -> e, generated -> simp], 
-				newSubgoal[ goal -> g, kb -> prependKB[ {pre, post}, simp], rest]]
+			simp = makeAssumptionFML[ formula -> simp];
+			makeANDNODE[ makePRFINFO[ name -> existsKB, used -> e], 
+				toBeProved[ goal -> g, kb -> prependKB[ {pre, post}, simp], rest]]
 		]
 	]
+]
 
 
 (* ::Section:: *)
@@ -322,7 +328,7 @@ ps:PRFSIT$[ g_, k:{pre___, e:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], post__
 	Otherwise generate one new goal or an alternative of several new goals.
 *)
 inferenceRule[ goalRewriting] = 
-this:PRFSIT$[ g:FML$[ _, _?isAtomicExpression, __], k_List, id_, rest___?OptionQ] :> 
+this:PRFSIT$[ g:FML$[ _, _?isAtomicExpression, __], k_List, id_, rest___?OptionQ] :> performProofStep[
 	Module[ {lastGoalRewriting, rules, usedSubsts, conds, newForms, newG, j, newNodes = {}},
 		lastGoalRewriting = getOptionalComponent[ this, "goalRewriting"];
 		If[
@@ -340,19 +346,20 @@ this:PRFSIT$[ g:FML$[ _, _?isAtomicExpression, __], k_List, id_, rest___?OptionQ
 			(* else: we have new rules *)
 			{newForms, usedSubsts, conds} = replaceListAndTrack[ formula@g, filterRules[ rules, key@g]];
 			Do[
-				newG = makeFML[ formula -> newForms[[j]]];
+				newG = makeGoalFML[ formula -> newForms[[j]]];
 				(* Goal rewriting should actually generate NO conditions. If a condition still appears, there must have gone something wrong *)
 				Assert[ conds[[j]]];
 				(* The second param to "goalRewriting" -> is unimportant, because there is a new goal, so we will not access it when the rule is applied next time.*)
+				(* We have to explicitly specify generated-> because otherwise each node would get all the formulas generated up to then *)
 				AppendTo[ newNodes, 
 					makeANDNODE[ makePRFINFO[ name -> goalRewriting, used -> Prepend[ usedSubsts[[j]], g], generated -> newG], 
-						newSubgoal[ goal -> newG, kb -> k, goalRules -> filterRules[ goalRules@this, Map[ key, usedSubsts[[j]]]], "goalRewriting" -> {key@g, {}}, rest]]],
+						toBeProved[ goal -> newG, kb -> k, goalRules -> filterRules[ goalRules@this, Map[ key, usedSubsts[[j]]]], "goalRewriting" -> {key@g, {}}, rest]]],
 				{j, Length[ newForms]}
 			];
 			Switch[ Length[ newNodes],
 				0,
-				makeANDNODE[ makePRFINFO[ name -> goalRewriting, used -> {}, generated -> {}], 
-						newSubgoal[ goal -> g, kb -> k, "goalRewriting" -> {key@g, Map[ First, goalRules@this]}, rest]],
+				makeANDNODE[ makePRFINFO[ name -> goalRewriting, used -> {}], 
+						toBeProved[ goal -> g, kb -> k, "goalRewriting" -> {key@g, Map[ First, goalRules@this]}, rest]],
 				1,
 				First[ newNodes],
 				_,
@@ -362,12 +369,13 @@ this:PRFSIT$[ g:FML$[ _, _?isAtomicExpression, __], k_List, id_, rest___?OptionQ
 			]            	
 		]
 	]
+]
 
 (* ::Section:: *)
 (* substitution *)
 
 inferenceRule[ elementarySubstitution] = 
-ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> 
+ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
 	Module[ {rules, usedSubst, cond, newForm, newG, substCond = {}, usedInCond = {}, newK = {}, substApplied = False, j, usedForms, genForms, replBy = {}},
 		rules = substRules@ps;
 		If[ rules === {},
@@ -377,7 +385,7 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :>
 			{newForm, usedSubst, cond} = replaceRepeatedAndTrack[ formula@g, rules];
 			If[ usedSubst =!= {},
 				(* rewrite applied *)
-				newG = makeFML[ formula -> newForm];
+				newG = makeGoalFML[ formula -> newForm];
 				If[ !TrueQ[ cond],
 					AppendTo[ substCond, cond];
 					AppendTo[ usedInCond, g]
@@ -394,7 +402,7 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :>
                 {newForm, usedSubst, cond} = replaceRepeatedAndTrack[ formula@k[[j]], rules];
                 If[ usedSubst =!= {},
                     (* rewrite applied *)
-                    newForm = makeFML[ formula -> newForm];
+                    newForm = makeAssumptionFML[ formula -> newForm];
                     If[ !TrueQ[ cond],
 						AppendTo[ substCond, cond];
 						AppendTo[ usedInCond, k[[j]]]
@@ -405,24 +413,26 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :>
 					AppendTo[ replBy, Union[ usedSubst]];
                     substApplied = True,
                     (* else: no subst in this formula *)
-                    appendToKB[ newK, k[[j]]]
+                    Block[ {$autoGenerateRules = False}, appendToKB[ newK, k[[j]]]] (* rewrite rules from this formula are already there *)
                 ],
                 {j, Length[ k]}
             ];
             (* Proof goals for checking the conditions are still missing *)
             If[ substApplied,
+            	(* We have to explicitly specify generated-> because we need the proper nesting *)
             	makeANDNODE[ makePRFINFO[ name -> elementarySubstitution, used -> usedForms, generated -> genForms, "usedSubst" -> replBy], 
-					newSubgoal[ goal -> newG, kb -> newK, rest]],
+					toBeProved[ goal -> newG, kb -> newK, rest]],
 				$Failed
             ]
 		]
 	]
+]
 
 (* ::Section:: *)
 (* Expand Definitions *)
 
 inferenceRule[ expandDef] = 
-ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> 
+ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
 	Module[ {rules, usedDefs, cond, new, newG, newForm, newK = {}, defExpand = False, defCond = {}, usedInCond = {}, j, usedForms, genForms, replBy = {}, newGoals},
 		rules = defRules@ps;
 		If[ rules === {},
@@ -433,7 +443,7 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :>
 			If[ usedDefs =!= {} && freeVariables[ cond] === {},
 				(* rewrite applied *)
 				(* in this case, the result is of the form {newForm, cond}, where cond are conditions to be fulfilled in order to allow the rewrite *)
-				newG = makeFML[ formula -> new];
+				newG = makeGoalFML[ formula -> new];
 				If[ !TrueQ[ cond],
 					AppendTo[ defCond, cond];
 					AppendTo[ usedInCond, g]
@@ -450,7 +460,7 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :>
                 {new, usedDefs, cond} = replaceAllAndTrack[ formula@k[[j]], rules];
                 If[ usedDefs =!= {} && freeVariables[ cond] === {},
                     (* rewrite applied *)
-                    newForm = makeFML[ formula -> new];
+                    newForm = makeAssumptionFML[ formula -> new];
 					If[ !TrueQ[ cond],
 						AppendTo[ defCond, cond];
 						AppendTo[ usedInCond, k[[j]]]
@@ -461,15 +471,15 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :>
 					AppendTo[ replBy, Union[ usedDefs]];
                     defExpand = True,
                     (* else: no def expansion in this formula *)
-                    appendToKB[ newK, k[[j]]]
+                    Block[ {$autoGenerateRules = False}, appendToKB[ newK, k[[j]]]] (* rewrite rules from this formula are already there *)
                 ],
                 {j, Length[ k]}
             ];
             If[ defExpand,
-            	newGoals = {newSubgoal[ goal -> newG, kb -> newK, rest]};
+            	newGoals = {toBeProved[ goal -> newG, kb -> newK, rest]};
             	If[ defCond =!= {},
-            		newForm = makeFML[ formula -> makeConjunction[ defCond, And$TM]];
-            		AppendTo[ newGoals, newSubgoal[ goal -> newForm, kb -> k, rest]],
+            		newForm = makeGoalFML[ formula -> makeConjunction[ defCond, And$TM]];
+            		AppendTo[ newGoals, toBeProved[ goal -> newForm, kb -> k, rest]],
             		(* else *)
             		newForm = True
             	];
@@ -479,12 +489,14 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :>
             	*)
             	AppendTo[ usedForms, usedInCond];
             	AppendTo[ genForms, {newForm}];
+            	(* We have to explicitly specify generated-> because we need the proper nesting *)
             	makeANDNODE[ makePRFINFO[ name -> expandDef, used -> usedForms, generated -> genForms, "usedDefs" -> replBy], 
 					newGoals],
 				$Failed
             ]
 		]
 	]
+]
 
 (* ::Section:: *)
 (* Instantiation *)
@@ -496,7 +508,7 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :>
 *)
 
 inferenceRule[ instantiate] = 
-ps:PRFSIT$[ g_, K_List, id_, rest___?OptionQ] :> 
+ps:PRFSIT$[ g_, K_List, id_, rest___?OptionQ] :> performProofStep[
 	Module[ {oldConst, newConst, univKB = Cases[ K, FML$[ _, _Forall$TM, _]], instForm, orig = {}, new = {}, inst = {}, i},
         (
         instForm = Map[ instantiateForall[ #, newConst]&, univKB];
@@ -514,11 +526,13 @@ ps:PRFSIT$[ g_, K_List, id_, rest___?OptionQ] :>
         	],
         	{i, Length[ instForm]}
         ];
+        (* We have to explicitly specify generated-> because we need the proper nesting *)
 		makeANDNODE[ makePRFINFO[ name -> instantiate, used -> orig, generated -> new, "instantiation" -> inst], 
-			newSubgoal[ goal -> g, kb -> Fold[ joinKB[ #2, #1]&, K, new], "constants" -> Join[ Apply[ List, newConst], oldConst], rest]
+			toBeProved[ goal -> g, kb -> Fold[ joinKB[ #2, #1]&, K, new], "constants" -> Join[ Apply[ List, newConst], oldConst], rest]
 		]
 		) /; ({newConst, oldConst} = constants[ ps]; newConst =!= {})
 	]
+]
 
 constants[ ps_PRFSIT$] :=
 	Module[{L = getOptionalComponent[ ps, "constants"], new, old},
@@ -540,7 +554,7 @@ instantiateForall[ f:FML$[ _, Forall$TM[ R1_RNG$, C_, A_], __], R2_RNG$] :=
     Module[ {possibleInst = Select[ Tuples[ {R1, R2}], compatibleRange], inst = {}, subst = {}, S, i},
         Do[
         	S = MapThread[ Rule, {rngVariables[ RNG$[ possibleInst[[i, 1]]]], rngConstants[ RNG$[ possibleInst[[i, 2]]]]}];
-            AppendTo[ inst, makeFML[ formula -> substituteFree[ simplifiedForall[ Forall$TM[ DeleteCases[ R1, possibleInst[[i, 1]]], C, A]], S]]];
+            AppendTo[ inst, makeAssumptionFML[ formula -> substituteFree[ simplifiedForall[ Forall$TM[ DeleteCases[ R1, possibleInst[[i, 1]]], C, A]], S]]];
             subst = Join[ subst, S],
         	{i, Length[ possibleInst]}
         ];

@@ -30,7 +30,7 @@ applyOnce[ ps_PRFSIT$] :=
 		newNodes = applyAllRules[ ps, allRules];
 		Switch[ Length[ newNodes],
 			0,
-			proofFails[ makePRFINFO[ name -> noApplicableRule, used -> Prepend[ kb@ps, goal@ps], "openPS" -> Drop[ Apply[ List, ps], 2]]],
+			makeTERMINALNODE[ makePRFINFO[ name -> noApplicableRule, used -> Prepend[ kb@ps, goal@ps], "openPS" -> Drop[ Apply[ List, ps], 2]], failed],
 			1,
 			First[ newNodes],
 			_,
@@ -65,7 +65,7 @@ applyOnceAndLevelSaturation[ ps_PRFSIT$] :=
 		];
 		Switch[ Length[ newNodes],
 			0,
-			proofFails[ makePRFINFO[ name -> noApplicableRule, used -> Prepend[ kb@ps, goal@ps], "openPS" -> Drop[ Apply[ List, ps], 2]]],
+			makeTERMINALNODE[ makePRFINFO[ name -> noApplicableRule, used -> Prepend[ kb@ps, goal@ps], "openPS" -> Drop[ Apply[ List, ps], 2]], failed],
 			1,
 			First[ newNodes],
 			_,
@@ -127,7 +127,7 @@ levelSaturation[ ps:PRFSIT$[ _, k_, _, rest___?OptionQ], sat1rules_List, sat2rul
 			makePRFSIT[ goal -> goal@ps, kb -> psKB, id -> id@ps, "lastSat" -> Map[ key, k], rest],
 			(* else *)
 			makeANDNODE[ makePRFINFO[ name -> levelSat, used -> usd, generated -> gen], 
-                newSubgoal[ goal -> goal@ps, kb -> psKB, "lastSat" -> Map[ key, k], rest]]
+                toBeProved[ goal -> goal@ps, kb -> psKB, "lastSat" -> Map[ key, k], rest]]
 		]
 	]
 levelSaturation[ args___] := unexpected[ levelSaturation, {args}]
@@ -147,9 +147,9 @@ extractGenerated[ args___] := unexpected[ extractGenerated, {args}]
 trySeveral[ ps_PRFSIT$] :=
     Module[ {},
         makeORNODE[ makePRFINFO[ name -> proofAlternatives, used -> {goal@ps}, generated -> {kb@ps}, id -> id@ps],
-        	{Apply[ newSubgoal[ goal -> #1, kb -> #2, #4, #5, #6, #7, #8,
+        	{Apply[ toBeProved[ goal -> #1, kb -> #2, #4, #5, #6, #7, #8,
         		Apply[ Sequence, Cases[ ps, HoldPattern[ (Rule|RuleDelayed)[_String, _]]]]]&, ps], 
-        	Apply[ newSubgoal[ goal -> #1, kb -> #2, #4, #5, #6, #7, #8,
+        	Apply[ toBeProved[ goal -> #1, kb -> #2, #4, #5, #6, #7, #8,
         		Apply[ Sequence, Cases[ ps, HoldPattern[ (Rule|RuleDelayed)[_String, _]]]]]&, ps]}
         	]
     ]

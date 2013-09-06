@@ -10,7 +10,6 @@ MessageName[ searchDepthLimit, "usage", lang] = "Proof terminates due to search 
 MessageName[ invalidProofNode, "usage", lang] = "A proof strategy returns an invalid proof node";
 MessageName[ noApplicableRule, "usage", lang] = "Proof fails since there is no applicable rule";
 MessageName[ levelSat, "usage", lang] = "Level saturation";
-MessageName[ this, "usage", lang] = "\'this\' is a name that can be used in inference rule programming in order to refer to the currently processed proof situation.";
 
 ] (* With *)
 

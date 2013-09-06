@@ -41,6 +41,8 @@ initProver[] :=
 		$TMAcurrentDepth = 1;
 		$TMAproofSearchRunning = False;
 		$rewriteRules = {};
+		$generated = {};
+		$autoGenerateRules = True;
 	]
 
 callProver[ ruleSetup:{_Hold, _List, _List}, strategy_, goal_FML$, kb_List, searchDepth_Integer, searchTime:(_Integer|Infinity)] :=
@@ -314,7 +316,6 @@ eliminateUnusedInit[ args___] := unexpected[ eliminateUnusedInit, {args}]
   PRFSIT$[ goal_FML$, kb_List, id_String, addInfo___?OptionQ], where
 
 	addInfo consists of required fields (in this order):
-	history->...  for the proof history,
 	rules->...  for the collection of proof rules to be used,
 	ruleActivity->... for a list representing the rules' activity,
 	rulePriority->... for a list representing the rules' priorities,
@@ -327,18 +328,19 @@ eliminateUnusedInit[ args___] := unexpected[ eliminateUnusedInit, {args}]
 	In addition, there are optional fields
   	"key"-> for arbitrary strings "key" (the datastructure can be expanded by additional components of this type at any time)
   	
-	The constructor understands options goal->, kb->, history->, id->, rules->, ruleActivity->, rulePriority->, strategy->, 
+	The constructor understands options goal->, kb->, id->, rules->, ruleActivity->, rulePriority->, strategy->, 
 		kbRules->, goalRules->, substRules->, defRules->, and "key"-> (for an arbitrary string "key").
 *)
 
-Options[ makePRFSIT] = {goal :> makeFML[], kb -> {}, id :> ToString[ Unique[ "PRFSIT$"]], history -> {}, rules -> Hold[], ruleActivity -> {}, rulePriority -> {}, strategy -> Identity,
+Options[ makePRFSIT] = {goal :> makeFML[], kb -> {}, id :> ToString[ Unique[ "PRFSIT$"]], rules -> Hold[], ruleActivity -> {}, rulePriority -> {}, strategy -> Identity,
 	kbRules -> {}, goalRules -> {}, substRules -> {}, defRules -> {}};
 makePRFSIT[ data___?OptionQ] :=
-	Module[{g, k, i, h, r, a, p, s, kr, gr, sr, dr},
-		{g, k, i, h, r, a, p, s, kr, gr, sr, dr} = 
-			{goal, kb, id, history, rules, ruleActivity, rulePriority, strategy, kbRules, goalRules, substRules, defRules} /. {data} /. Options[ makePRFSIT];
+	Module[{g, k, i, r, a, p, s, kr, gr, sr, dr},
+		{g, k, i, r, a, p, s, kr, gr, sr, dr} = 
+			{goal, kb, id, rules, ruleActivity, rulePriority, strategy, kbRules, goalRules, substRules, defRules} /. {data} /. Options[ makePRFSIT];
+		Assert[ ListQ[ $rewriteRules]];
 		{kr, gr, sr, dr} = MapThread[ Join, Append[ $rewriteRules, {kr, gr, sr, dr}]];
-		PRFSIT$[ g, k, i, history -> h, rules -> r, ruleActivity -> a, rulePriority -> p, strategy -> s,
+		PRFSIT$[ g, k, i, rules -> r, ruleActivity -> a, rulePriority -> p, strategy -> s,
 			kbRules -> kr, goalRules -> gr, substRules -> sr, defRules -> dr,
 			optComponents[ data]]
 	]
@@ -352,9 +354,6 @@ kb[ args___] := unexpected[ kb, {args}]
 
 id[ PRFSIT$[ _, _, i_String, ___]] := i
 (* default rule follows below, because we have id also for other datastructures *)
-
-history[ PRFSIT$[ _, _, _, ___, (Rule|RuleDelayed)[ history, val_], ___]] := val
-history[ args___] := unexpected[ history, {args}]
 
 rules[ PRFSIT$[ _, _, _, ___, rules -> Hold[ r_], ___]] := r
 rules[ args___] := unexpected[ rules, {args}]
@@ -387,11 +386,11 @@ proofValue[ _PRFSIT$] := pending
 (* default rule follows below, because we have proofValue also for other datastructures *)
 
 (* ::Subsection:: *)
-(* newSubgoal *)
+(* toBeProved *)
 
-Options[ newSubgoal] = Options[ makePRFSIT];
-newSubgoal[ data___?OptionQ] := checkProofSuccess[ makePRFSIT[ data]]
-newSubgoal[ args___] := unexpected[ newSubgoal, {args}]
+Options[ toBeProved] = Options[ makePRFSIT];
+toBeProved[ data___?OptionQ] := checkProofSuccess[ makePRFSIT[ data]]
+toBeProved[ args___] := unexpected[ toBeProved, {args}]
 
 checkProofSuccess[ ps_PRFSIT$] /; $TMAcheckSuccess := 
 	Module[{termRules = getActiveRulesType[ ps, "term"]}, 
@@ -415,7 +414,7 @@ checkProofSuccess[ args___] := unexpected[ checkProofSuccess, {args}]
   	in u_i are those used to generate those in g_i
 *)
 
-Options[ makePRFINFO] = {name -> "???", used -> {}, generated -> {}, id -> ""};
+Options[ makePRFINFO] = {name -> "???", used -> {}, generated :> $generated, id -> ""};
 makePRFINFO[ data___?OptionQ] :=
 	Module[{n, u, g, i},
 		{n, u, g, i} = {name, used, generated, id} /. {data} /. Options[ makePRFINFO];
@@ -443,11 +442,8 @@ id[ PRFINFO$[ _, _, _, i_String, ___]] := i
 isProofNode[ obj_] := MatchQ[ obj, _ANDNODE$|_ORNODE$|_TERMINALNODE$]
 isProofNode[ args___] := unexpected[ isProofNode, {args}]
 
-proofFails[ pi_PRFINFO$] := TERMINALNODE$[ pi, failed]
-proofFails[ args___] := unexpected[ proofFails, {args}]
-
-proofSucceeds[ pi_PRFINFO$] := TERMINALNODE$[ pi, proved]
-proofSucceeds[ args___] := unexpected[ proofSucceeds, {args}]
+makeTERMINALNODE[ pi_PRFINFO$, v:(failed|proved|disproved)] := TERMINALNODE$[ pi, v]
+makeTERMINALNODE[ args___] := unexpected[ makeTERMINALNODE, {args}]
 
 proofDisproved[ pi_PRFINFO$] := TERMINALNODE$[ pi, disproved]
 proofDisproved[ args___] := unexpected[ proofDisproved, {args}]
@@ -471,8 +467,8 @@ proofValue[ node_?isProofNode] := Last[ node]
 proofValue[ po_PRFOBJ$] := Last[ po]
 proofValue[ args___] := unexpected[ proofValue, {args}]
 
-subgoals[ _[ _PRFINFO$, subnodes___, _]] := {subnodes}
-subgoals[ args___] := unexpected[ subgoals, {args}]
+branches[ _[ _PRFINFO$, subnodes___, _]] := {subnodes}
+branches[ args___] := unexpected[ branches, {args}]
 
 makeANDNODE[ pi_PRFINFO$, subnode_] := ANDNODE$[ pi, subnode, pending]
 makeANDNODE[ pi_PRFINFO$, {subnodes__}] := ANDNODE$[ pi, subnodes, pending]
@@ -521,10 +517,10 @@ nodeValue[ ORNODE$, _List] := pending
 nodeValue[ PRFOBJ$, {v_}] := v
 nodeValue[ args___] := unexpected[ nodeValue, {args}]
 
-searchDepthExceeded[ ps_PRFSIT$] := proofFails[ makePRFINFO[ name -> searchDepthLimit, used -> Prepend[ kb@ps, goal@ps], id -> id@ps]]
+searchDepthExceeded[ ps_PRFSIT$] := makeTERMINALNODE[ makePRFINFO[ name -> searchDepthLimit, used -> Prepend[ kb@ps, goal@ps], id -> id@ps], failed]
 searchDepthExceeded[ args___] := unexpected[ searchDepthExceeded, {args}]
 
-noProofNode[ expr_, i_] := proofFails[ makePRFINFO[ name -> invalidProofNode, used -> {expr}, id -> i]]
+noProofNode[ expr_, i_] := makeTERMINALNODE[ makePRFINFO[ name -> invalidProofNode, used -> {expr}, id -> i], failed]
 noProofNode[ args___] := unexpected[ noProofNode, {args}]
 
 
@@ -710,10 +706,10 @@ makeInitialProofObject[ g_FML$, k_List, {r_Hold, act_List, prio_List}, s_] :=
         {thinnedKB, kr, gr, sr, dr} = trimKBforRewriting[ k];
         propagateProofValues[ 
             replaceProofSit[ dummyPO,
-            	{2} -> newSubgoal[ goal -> g, kb -> thinnedKB, id -> "InitialPS",
-            		history -> {},
-                	rules -> r, ruleActivity -> act, rulePriority -> prio, strategy -> s,
-                	substRules -> sr, defRules -> dr, kbRules -> kr, goalRules -> gr]]
+            	{2} -> toBeProved[ goal -> g, kb -> thinnedKB, id -> "InitialPS",
+                		rules -> r, ruleActivity -> act, rulePriority -> prio, strategy -> s,
+                		substRules -> sr, defRules -> dr, kbRules -> kr, goalRules -> gr]
+            ]
         ]
     ]
 makeInitialProofObject[ args___] := unexpected[ makeInitialProofObject, {args}]
@@ -802,6 +798,19 @@ pObjCells[ args___] := unexpected[ pObjCells, {args}]
 
 
 (* ::Section:: *)
+(* Inference rule programming *)
+
+SetAttributes[ performProofStep, HoldAll]
+
+performProofStep[ prog_] :=
+	Block[{$rewriteRules = {}, $generated = {}},
+		prog
+	]
+performProofStep[ args___] := unexpected[ performProofStep, {args}]
+
+
+
+(* ::Section:: *)
 (* register provers *)
 
 (*
@@ -828,22 +837,6 @@ Module[ {},
 	]
 registerStrategy[ args___] := unexpected[ registerStrategy, {args}]
 
-
-(* ::Section:: *)
-(* Prover programming *)
-
-SetAttributes[ makeInferenceRule, HoldAll]
-
-makeInferenceRule[ name_, ps_PRFSIT$, rhs_, usedForms_List] :=
-    inferenceRule[ name] =
-        this:ps :> 
-            Block[ {$rewriteRules = {}, $history = {name, usedForms}},
-                rhs /; !ruleAppliedBefore[ this.history, $history]
-            ]
-makeInferenceRule[ args___] := unexpected[ makeInferenceRule, {args}]
-
-ruleAppliedBefore[ history_List, step:{_, _}] := MemberQ[ history, step]
-ruleAppliedBefore[ args___] := unexpected[ ruleAppliedBefore, {args}]
 
 (* ::Section:: *)
 (* Package Initialization *)
