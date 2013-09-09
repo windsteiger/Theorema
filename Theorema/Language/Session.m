@@ -29,7 +29,7 @@ Begin["`Private`"]
 (* ::Section:: *)
 (* Preprocessing *)
 
-freshNames[ Hold[ f_[ lhs_, Program[ rhs_]]]] :=
+(*freshNames[ Hold[ f_[ lhs_, Program[ rhs_]]]] :=
 	Module[ {},
 		ReplacePart[ freshNames[ Hold[ f[ lhs, "DUMMY"]]], {1,2} -> freshNamesProg[ Hold[ rhs]]]
 	]
@@ -47,7 +47,26 @@ freshNamesProg[ expr_Hold] :=
 		repl = Map[ # -> freshSymbolProg[ Extract[ expr, #, Hold]]&, symPos];
 		ReleaseHold[ ReplacePart[ expr, repl]]
 	]
-freshNamesProg[ args___] := unexpected[ freshNamesProg, {args}]
+freshNamesProg[ args___] := unexpected[ freshNamesProg, {args}]*)
+
+(* amaletzk: Define "freshNames[]" in the way below, because otherwise parts with "Program" don't work *)
+freshNames[expr_Hold] :=
+	Module[ {symPos, repl, progPos, progSymPos},
+		progPos = Position[ expr, Program[_]];
+		symPos = DeleteCases[ Position[ expr, _Symbol], {0}, {1}, 1];
+		progSymPos = Cases[ symPos, x_ /; isSubPositionOfAny[ x, progPos]];
+		repl = Join[Map[ # -> freshSymbol[ Extract[ expr, #, Hold]]&, Complement[symPos, progSymPos]],
+					Map[ # -> freshSymbolProg[ Extract[ expr, #, Hold]]&, progSymPos]];
+		FlattenAt[ReplacePart[ expr, repl], progPos]
+	]
+freshNames[args___] := unexpected[ freshNames, {args}]
+
+isSubPositionOfAny[ pos_List, {first_List, rest___List}] /; isSubPosition[ pos, first] := True
+isSubPositionOfAny[ pos_List, {_List, rest___List}] := isSubPositionOfAny[ pos, {rest}]
+isSubPositionOfAny[ _List, _List] := False
+isSubPosition[ {f_Integer, l1___Integer}, {f_Integer, l2___Integer}] := isSubPosition[ {l1}, {l2}]
+isSubPosition[ {___Integer}, {}] := True
+isSubPosition[ _List, _List] := False
 
 freshSymbol[ Hold[ s_Symbol]] :=
     Module[ {name},
@@ -81,7 +100,10 @@ freshSymbolProg[ Hold[ s_Symbol]] :=
         	name = ToString[s];
         	If[ StringTake[ name, -1] === "$",
             	s,
-            	ToExpression[ name <> "$TM"]
+            	If [StringLength[ name] >= 3 && StringTake[ name, -2] === "$M",
+            		ToExpression[ StringDrop[ name, -2]],
+            		ToExpression[ name <> "$TM"]
+            	]
         	]
         ]
     ]
