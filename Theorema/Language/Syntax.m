@@ -196,6 +196,8 @@ MakeExpression[ RowBox[{"\[Piecewise]", GridBox[ c:{{_, "\[DoubleLeftArrow]"|"\[
 row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", "otherwise"}] := RowBox[ {"Clause", "[", RowBox[ {True, ",", e}], "]"}]
 row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", "o", ".", "w", "."}] := RowBox[ {"Clause", "[", RowBox[ {True, ",", e}], "]"}]
 row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", "o", ".", " ", "w", "."}] := RowBox[ {"Clause", "[", RowBox[ {True, ",", e}], "]"}]
+row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", RowBox[{"o", ".", "w", "."}]}] := RowBox[ {"Clause", "[", RowBox[ {True, ",", e}], "]"}]
+row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", RowBox[{"o", ".", " ", "w", "."}]}] := RowBox[ {"Clause", "[", RowBox[ {True, ",", e}], "]"}]
 row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", c_}] := RowBox[ {"Clause", "[", RowBox[ {c, ",", e}], "]"}]
 
 MakeExpression[ RowBox[ {"\[And]", RowBox[{"\[Piecewise]", GridBox[ c:{{_}..}, ___]}]}], fmt_] :=
