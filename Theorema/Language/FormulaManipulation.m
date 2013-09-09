@@ -214,10 +214,14 @@ isQuantifierFree[ args___] := unexpected[ isQuantifierFree, {args}]
 
 isSequenceFree[ expr_, level_:{1}] := 
 	FreeQ[ expr,
-		_Theorema`Language`SEQ$|
-		_Theorema`Computation`Language`SEQ$|
-		Theorema`Language`VAR$[_Theorema`Language`SEQ$]|
-		Theorema`Language`Computation`VAR$[_Theorema`Language`Computation`SEQ$], level]
+		_Theorema`Language`SEQ0$|
+		_Theorema`Computation`Language`SEQ0$|
+		Theorema`Language`VAR$[_Theorema`Language`SEQ0$]|
+		Theorema`Language`Computation`VAR$[_Theorema`Language`Computation`SEQ0$]|
+		_Theorema`Language`SEQ1$|
+		_Theorema`Computation`Language`SEQ1$|
+		Theorema`Language`VAR$[_Theorema`Language`SEQ1$]|
+		Theorema`Language`Computation`VAR$[_Theorema`Language`Computation`SEQ1$], level]
 isSequenceFree[ args___] := unexpected[ isSequenceFree, {args}]
 
 
