@@ -100,13 +100,15 @@ initGUI[] :=
         		{"Iff", RowBox[{"P", "\[Equivalent]","Q"}], False, True, False},
         		{"Forall", RowBox[{"\[ForAll]","P"}], False, True, False},
         		{"Exists", RowBox[{"\[Exists]","P"}], False, True, False},
-        		{"Equal", RowBox[{"A","=","B"}], False, False, False}
+        		{"Equal", RowBox[{"A","=","B"}], False, False, False},
+        		{"Let", UnderscriptBox["let",RowBox[{"A","=","\[Ellipsis]"}]], False, True, False}
         	},
         	{"Domains",
-        		{"isInteger", RowBox[{"A","\[Element]","\[DoubleStruckCapitalZ]"}], False, True, True},
-        		{"isRational", RowBox[{"A","\[Element]","\[DoubleStruckCapitalQ]"}], False, True, True},
-        		{"isSet", RowBox[{"A","=",RowBox[{"{","\[Ellipsis]","}"}]}], False, True, True},
-        		{"isSet", RowBox[{"A","=",RowBox[{"\[LeftAngleBracket]","\[Ellipsis]","\[RightAngleBracket]"}]}], False, True, True}
+        		{"isInteger", RowBox[{"isInteger","[","A","]"}], False, True, True},
+        		{"isRational", RowBox[{"isRational","[","A","]"}], False, True, True},
+        		{"isReal", RowBox[{"isReal","[","A","]"}], False, True, True},
+        		{"isSet", RowBox[{"isSet","[","A","]"}], False, True, True},
+        		{"isTuple", RowBox[{"isTuple","[","A","]"}], False, True, True}
         	},
         	{"Programming",
         		{"CaseDistinction", RowBox[{"\[Piecewise]",GridBox[{{"A"},{"B"}}]}], False, True, False},

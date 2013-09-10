@@ -62,6 +62,7 @@ And$TM[ a___] /; buiActive["And"] := And[ a]
 Or$TM[ a___] /; buiActive["Or"] := Or[ a]
 Implies$TM[ a__] /; buiActive["Implies"] := Implies[ a]
 Iff$TM[ a__] /; buiActive["Iff"] := Equivalent[ a]
+Abbrev$TM[ RNG$[ r__ABBRVRNG$], expr_] /; buiActive["Let"] := expr //. Map[ Apply[ Rule, #]&, {r}]
 
 rangeToIterator[ SETRNG$[ x_, A_Set$TM]] := { x, Apply[ List, A]}
 rangeToIterator[ 
@@ -383,17 +384,23 @@ isPositionSpec[ args___] := unexpected[ isPositionSpec, {args}]
 
 (* amaletzk: Although buiActive is checked twice, I don't want to convert the pretty-printable
    Element$TM[] into isInteger[], unless there is a chance it gets simplified *)
-\[DoubleStruckCapitalZ]$TM /: Element$TM[ x_, \[DoubleStruckCapitalZ]$TM] /; buiActive["isInteger"] := isInteger$TM[ x]
+\[DoubleStruckCapitalZ]$TM /: Element$TM[ x_, \[DoubleStruckCapitalZ]$TM] /; buiActive["IsElement"] && buiActive["isInteger"] := isInteger$TM[ x]
 isInteger$TM[ _Integer] /; buiActive["isInteger"] := True
 isInteger$TM[ True|False] /; buiActive["isInteger"] := False
 isInteger$TM[ _Rational|_Real|_Complex] /; buiActive["isInteger"] := False
 isInteger$TM[ _Set$TM|_Tuple$TM] /; buiActive["isInteger"] := False
 
-\[DoubleStruckCapitalQ]$TM /: Element$TM[ x_, \[DoubleStruckCapitalQ]$TM] /; buiActive["isRational"] := isRational$TM[ x]
+\[DoubleStruckCapitalQ]$TM /: Element$TM[ x_, \[DoubleStruckCapitalQ]$TM] /; buiActive["IsElement"] && buiActive["isRational"] := isRational$TM[ x]
 isRational$TM[ _Integer|_Rational] /; buiActive["isRational"] := True
 isRational$TM[ True|False] /; buiActive["isRational"] := False
 isRational$TM[ _Real|_Complex] /; buiActive["isRational"] := False
 isRational$TM[ _Set$TM|_Tuple$TM] /; buiActive["isRational"] := False
+
+\[DoubleStruckCapitalR]$TM /: Element$TM[ x_, \[DoubleStruckCapitalR]$TM] /; buiActive["IsElement"] && buiActive["isReal"] := isReal$TM[ x]
+isReal$TM[ _Integer|_Rational|_Real] /; buiActive["isReal"] := True
+isReal$TM[ True|False] /; buiActive["isReal"] := False
+isReal$TM[ _Complex] /; buiActive["isReal"] := False
+isReal$TM[ _Set$TM|_Tuple$TM] /; buiActive["isReal"] := False
 
 isSet$TM[ _Set$TM] /; buiActive["isSet"] := True
 isSet$TM[ True|False] /; buiActive["isSet"] := False
@@ -424,7 +431,7 @@ Module$TM[ l_[v___], body_] /; buiActive["Module"] := Apply[ Module, Hold[ {v}, 
 SetAttributes[ Do$TM, HoldAll]
 Do$TM[ body_, l_[v___]] /; buiActive["Do"] := Do[ body, {v}]
 
-CaseDistinction$TM[ c:Clause$TM[ _, _]..] := Piecewise[ Map[ clause2pw, {c}]]
+CaseDistinction$TM[ c:Clause$TM[ _, _]..] /; buiActive["CaseDistinction"] := Piecewise[ Map[ clause2pw, {c}]]
 clause2pw[ Clause$TM[ cond_, expr_]] := {expr, cond}
 
 
