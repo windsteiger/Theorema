@@ -1811,6 +1811,17 @@ langButtonData["AND2"] :=
 		translate["CONN2WEAKTooltip"],
 		"and"
 	}
+	
+langButtonData["NOT"] := 
+	{
+		If[ $buttonNat, 
+			translate["NOT"], 
+			DisplayForm[RowBox[{"\[Not]",
+				TagBox[ FrameBox["form"], "SelectionPlaceholder"]}]]],
+		RowBox[{"\[Not]", "\[SelectionPlaceholder]"}],
+		translate["NOTTooltip"],
+		"not"
+	}
 
 langButtonData["OR1"] := 
 	{
@@ -2001,7 +2012,7 @@ autoParenthesis[ args___] := unexpected[ autoParenthesis, {args}]
 
 allFormulae = {{"Sets", {}},
 			   {"Arithmetic", {}},
-			   {"Logic", {"AND2", "OR2", "IMPL2", "EQUIV2", "EQ", "EQUIVDEF", "EQDEF", "FORALL1", "FORALL2", "EXISTS1", "EXISTS2"}}
+			   {"Logic", {"AND2", "OR2", "NOT", "IMPL2", "EQUIV2", "EQ", "EQUIVDEF", "EQDEF", "FORALL1", "EXISTS1", "FORALL2", "EXISTS2"}}
 };
 
 makeButtonCategory[ {category_String, buttons_List}, cols_Integer:2] :=
