@@ -108,7 +108,10 @@ initGUI[] :=
         		{"isRational", RowBox[{"isRational","[","A","]"}], False, True, True},
         		{"isReal", RowBox[{"isReal","[","A","]"}], False, True, True},
         		{"isSet", RowBox[{"isSet","[","A","]"}], False, True, True},
-        		{"isTuple", RowBox[{"isTuple","[","A","]"}], False, True, True}
+        		{"isTuple", RowBox[{"isTuple","[","A","]"}], False, True, True},
+        		{"IntegerRange", RowBox[{"IntegerRange","[","A","]"}], False, True, True},
+        		{"RationalRange", RowBox[{"RationalRange","[","A","]"}], False, True, True},
+        		{"RealRange", RowBox[{"RealRange","[","A","]"}], False, True, True}
         	},
         	{"Programming",
         		{"CaseDistinction", RowBox[{"\[Piecewise]",GridBox[{{"A"},{"B"}}]}], False, True, False},

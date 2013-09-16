@@ -34,7 +34,44 @@ makeTuple[ SequenceOf$TM[ r_, __]] :=
 (* ::Section:: *)
 (* MakeBoxes *)
 
-MakeBoxes[ \[DoubleStruckCapitalN]0$TM, TheoremaForm] := SubscriptBox[ "\[DoubleStruckCapitalN]", "0"]
+(* ::Subsection:: *)
+(* Number domains *)
+
+MakeBoxes[ IntegerRange$TM[ l_Integer, DirectedInfinity[1], True, _], TheoremaForm] /; l === 1 :=
+	"\[DoubleStruckCapitalN]"
+MakeBoxes[ IntegerRange$TM[ l_Integer, DirectedInfinity[1], True, _], TheoremaForm] /; l >= 0 :=
+	SubscriptBox[ "\[DoubleStruckCapitalN]", MakeBoxes[ l, TheoremaForm]]
+MakeBoxes[ IntegerRange$TM[ l_Integer, u_, True, True], TheoremaForm] /; l >= 0 :=
+	SubscriptBox[ "\[DoubleStruckCapitalN]", RowBox[ {MakeBoxes[ l, TheoremaForm], ",", "\[Ellipsis]", ",", MakeBoxes[ u, TheoremaForm]}]]
+MakeBoxes[ IntegerRange$TM[ l_Integer, u_, False, True], TheoremaForm] /; l >= 0 :=
+	SubscriptBox[ "\[DoubleStruckCapitalN]", RowBox[ {RowBox[{"(", RowBox[ {MakeBoxes[ l, TheoremaForm], ",", "\[Ellipsis]", ",", MakeBoxes[ u, TheoremaForm]}]}], "]"}]]
+MakeBoxes[ IntegerRange$TM[ l_Integer, u_, True, False], TheoremaForm] /; l >= 0 :=
+	SubscriptBox[ "\[DoubleStruckCapitalN]", RowBox[ {RowBox[{"[", RowBox[ {MakeBoxes[ l, TheoremaForm], ",", "\[Ellipsis]", ",", MakeBoxes[ u, TheoremaForm]}]}], ")"}]]
+MakeBoxes[ IntegerRange$TM[ l_Integer, u_, False, False], TheoremaForm] /; l >= 0 :=
+	SubscriptBox[ "\[DoubleStruckCapitalN]", RowBox[{"(", RowBox[{MakeBoxes[ l, TheoremaForm], ",", "\[Ellipsis]", ",", MakeBoxes[ u, TheoremaForm]}], ")"}]]
+	
+rangeToLetter[ r_Symbol] :=
+	Switch[ r,
+		Theorema`Language`IntegerRange$TM, "\[DoubleStruckCapitalZ]",
+		Theorema`Language`RationalRange$TM, "\[DoubleStruckCapitalQ]",
+		Theorema`Language`RealRange$TM, "\[DoubleStruckCapitalR]"
+	]
+
+MakeBoxes[ (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[ DirectedInfinity[-1], DirectedInfinity[1], _, _], TheoremaForm] :=
+	rangeToLetter[ h]
+MakeBoxes[ (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[ l_, DirectedInfinity[1], True, _], TheoremaForm] :=
+	SubscriptBox[ rangeToLetter[ h], MakeBoxes[ l, TheoremaForm]]
+MakeBoxes[ (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[ l_, u_, True, True], TheoremaForm] :=
+	SubscriptBox[ rangeToLetter[ h], RowBox[ {MakeBoxes[ l, TheoremaForm], ",", "\[Ellipsis]", ",", MakeBoxes[ u, TheoremaForm]}]]
+MakeBoxes[ (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[ l_, u_, False, True], TheoremaForm] :=
+	SubscriptBox[ rangeToLetter[ h], RowBox[ {RowBox[{"(", RowBox[ {MakeBoxes[ l, TheoremaForm], ",", "\[Ellipsis]", ",", MakeBoxes[ u, TheoremaForm]}]}], "]"}]]
+MakeBoxes[ (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[ l_, u_, True, False], TheoremaForm] :=
+	SubscriptBox[ rangeToLetter[ h], RowBox[ {RowBox[{"[", RowBox[ {MakeBoxes[ l, TheoremaForm], ",", "\[Ellipsis]", ",", MakeBoxes[ u, TheoremaForm]}]}], ")"}]]
+MakeBoxes[ (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[ l_, u_, False, False], TheoremaForm] :=
+	SubscriptBox[ rangeToLetter[ h], RowBox[{"(", RowBox[{MakeBoxes[ l, TheoremaForm], ",", "\[Ellipsis]", ",", MakeBoxes[ u, TheoremaForm]}], ")"}]]
+
+(* ::Subsection:: *)
+(* Rest *)
 
 MakeBoxes[ Set$TM[ arg__], TheoremaForm] := MakeBoxes[ {arg}, TheoremaForm]
 MakeBoxes[ Set$TM[ ], TheoremaForm] := MakeBoxes[ "\[EmptySet]", TheoremaForm]

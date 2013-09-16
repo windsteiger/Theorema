@@ -215,10 +215,77 @@ MakeExpression[ RowBox[ {"\[DoubleLongLeftRightArrow]", RowBox[{"\[Piecewise]", 
 		MakeExpression[ RowBox[{"Iff", "[", RowBox[ clauses], "]"}], fmt]
 	] /; $parseTheoremaExpressions
 	
+	
 (* ::Subsubsection:: *)
 (* Number domains *)
 
-MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalN]", "0"], fmt_] := MakeExpression[ "\[DoubleStruckCapitalN]0", fmt] /; $parseTheoremaExpressions
+(* Important: If a limit is "Infinity", it doesn't matter whether the range is open or closed at this limit;
+				"Infinity" is always excluded!
+*)
+
+isLeftIntervalBracket[ b_] := MemberQ[ {"(", "["}, b]
+isRightIntervalBracket[ b_] := MemberQ[ {")", "]"}, b]
+isLeftClosed[ b_] := Switch[ b, "(", "False", "[", "True"]
+isRightClosed[ b_] := Switch[ b, ")", "False", "]", "True"]
+
+(* ::Subsubsubsection:: *)
+(* \[DoubleStruckCapitalN] *)
+
+(* Ellipsis-subscript without interval brackets *)
+MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalN]", RowBox[ {l_, ",", "\[Ellipsis]", ",", u_}]], fmt_] :=
+	MakeExpression[ RowBox[ {"IntegerRange", "[", RowBox[ {makeMaxBox[ l, "0"], ",", u, ",", "True", ",", "True"}], "]"}], fmt] /; $parseTheoremaExpressions
+
+(* Ellipsis-subscript with interval brackets
+	The following 3 definitions are essentially the same, we only take care of the several possibilities how
+	left/right brackets are arranged withing RowBox *)
+MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalN]", RowBox[ {RowBox[ {left_?isLeftIntervalBracket, RowBox[ {l_, ",", "\[Ellipsis]", ",", u_}]}], right_?isRightIntervalBracket}]], fmt_] :=
+	MakeExpression[ RowBox[ {"IntegerRange", "[", RowBox[ {makeMaxBox[ l, "0"], ",", u, ",", isLeftClosed[ left], ",", isRightClosed[ right]}], "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalN]", RowBox[ {left_?isLeftIntervalBracket, RowBox[ {RowBox[ {l_, ",", "\[Ellipsis]", ",", u_}], right_?isRightIntervalBracket}]}]], fmt_] :=
+	MakeExpression[ RowBox[ {"IntegerRange", "[", RowBox[ {makeMaxBox[ l, "0"], ",", u, ",", isLeftClosed[ left], ",", isRightClosed[ right]}], "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalN]", RowBox[ {left_?isLeftIntervalBracket, RowBox[ {l_, ",", "\[Ellipsis]", ",", u_}], right_?isRightIntervalBracket}]], fmt_] :=
+	MakeExpression[ RowBox[ {"IntegerRange", "[", RowBox[ {makeMaxBox[ l, "0"], ",", u, ",", isLeftClosed[ left], ",", isRightClosed[ right]}], "]"}], fmt] /; $parseTheoremaExpressions
+
+(* Single subscript indicating where to start from *)
+MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalN]", l_], fmt_] :=
+	MakeExpression[ RowBox[ {"IntegerRange", "[", RowBox[ {makeMaxBox[ l, "0"], ",", "Infinity", ",", "True", ",", "False"}], "]"}], fmt] /; $parseTheoremaExpressions
+
+(* No subscript at all; Start from 1 *)
+MakeExpression[ "\[DoubleStruckCapitalN]", fmt_] :=
+	MakeExpression[ RowBox[ {"IntegerRange", "[", RowBox[ {"1", ",", "Infinity", ",", "True", ",", "False"}], "]"}], fmt]
+
+makeMaxBox[ a_, b_] := RowBox[ {"max", "[", RowBox[ {"{", RowBox[ {a, ",", b}], "}"}], "]"}]
+
+(* ::Subsubsubsection:: *)
+(* \[DoubleStruckCapitalZ], \[DoubleStruckCapitalQ], \[DoubleStruckCapitalR] *)
+
+isZQR[ dom_] := MemberQ[ {"\[DoubleStruckCapitalZ]", "\[DoubleStruckCapitalQ]", "\[DoubleStruckCapitalR]"}, dom]
+
+makeDomainRange[ "\[DoubleStruckCapitalZ]"] := "IntegerRange"
+makeDomainRange[ "\[DoubleStruckCapitalQ]"] := "RationalRange"
+makeDomainRange[ "\[DoubleStruckCapitalR]"] := "RealRange"
+
+(* Ellipsis-subscript without interval brackets *)
+MakeExpression[ SubscriptBox[ dom_?isZQR, RowBox[ {l_, ",", "\[Ellipsis]", ",", u_}]], fmt_] :=
+	MakeExpression[ RowBox[ {makeDomainRange[ dom], "[", RowBox[ {l, ",", u, ",", "True", ",", "True"}], "]"}], fmt] /; $parseTheoremaExpressions
+
+(* Ellipsis-subscript with interval brackets
+	The following definitions are essentially the same, we only take care of the several possibilities how
+	left/right brackets are arranged withing RowBox *)
+MakeExpression[ SubscriptBox[ dom_?isZQR, RowBox[ {RowBox[ {left_?isLeftIntervalBracket, RowBox[ {l_, ",", "\[Ellipsis]", ",", u_}]}], right_?isRightIntervalBracket}]], fmt_] :=
+	MakeExpression[ RowBox[ {makeDomainRange[ dom], "[", RowBox[ {l, ",", u, ",", isLeftClosed[ left], ",", isRightClosed[ right]}], "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ SubscriptBox[ dom_?isZQR, RowBox[ {left_?isLeftIntervalBracket, RowBox[ {RowBox[ {l_, ",", "\[Ellipsis]", ",", u_}], right_?isRightIntervalBracket}]}]], fmt_] :=
+	MakeExpression[ RowBox[ {makeDomainRange[ dom], "[", RowBox[ {l, ",", u, ",", isLeftClosed[ left], ",", isRightClosed[ right]}], "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ SubscriptBox[ dom_?isZQR, RowBox[ {left_?isLeftIntervalBracket, RowBox[ {l_, ",", "\[Ellipsis]", ",", u_}], right_?isRightIntervalBracket}]], fmt_] :=
+	MakeExpression[ RowBox[ {makeDomainRange[ dom], "[", RowBox[ {l, ",", u, ",", isLeftClosed[ left], ",", isRightClosed[ right]}], "]"}], fmt] /; $parseTheoremaExpressions
+
+(* Single subscript indicating where to start from *)
+MakeExpression[ SubscriptBox[ dom_?isZQR, l_], fmt_] :=
+	MakeExpression[ RowBox[ {makeDomainRange[ dom], "[", RowBox[ {l, ",", "Infinity", ",", "True", ",", "False"}], "]"}], fmt] /; $parseTheoremaExpressions
+
+(* No subscript at all; Start from -Infinity *)
+MakeExpression[ dom_?isZQR, fmt_] :=
+	MakeExpression[ RowBox[ {makeDomainRange[ dom], "[", RowBox[ {RowBox[ {"-", "Infinity"}], ",", "Infinity", ",", "False", ",", "False"}], "]"}], fmt]
+
 
 
 (* ::Subsubsection:: *)
