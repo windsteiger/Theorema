@@ -247,7 +247,7 @@ SumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, dom_, form_] /; buiActive["Sum
 		Switch[ Length[ v],
 			0, Theorema`Computation`Knowledge`Underscript$TM[0, dom],
 			1, First[ v],
-			_, Fold[ dom[Plus$TM], dom[Plus$TM][First[v], v[[2]]], Drop[v, 2]]
+			_, Fold[ dom[Plus$TM], First[ v], Rest[ v]]
 		] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
 	
@@ -275,7 +275,7 @@ ProductOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, dom_, form_] /; buiActive[
 		Switch[ Length[ v],
 			0, Theorema`Computation`Knowledge`Underscript$TM[1, dom],
 			1, First[ v],
-			_, Fold[ dom[Times$TM], dom[Times$TM][First[v], v[[2]]], Drop[v, 2]]
+			_, Fold[ dom[Times$TM], First[ v], Rest[ v]]
 		] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
 	
@@ -386,19 +386,21 @@ isPositionSpec[ args___] := unexpected[ isPositionSpec, {args}]
    Element$TM[] into isInteger[], unless there is a chance it gets simplified *)
 \[DoubleStruckCapitalZ]$TM /: Element$TM[ x_, \[DoubleStruckCapitalZ]$TM] /; buiActive["IsElement"] && buiActive["isInteger"] := isInteger$TM[ x]
 isInteger$TM[ _Integer] /; buiActive["isInteger"] := True
-isInteger$TM[ True|False] /; buiActive["isInteger"] := False
+isInteger$TM[ True|False|I|Infinity|Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] /; buiActive["isInteger"] := False
 isInteger$TM[ _Rational|_Real|_Complex] /; buiActive["isInteger"] := False
 isInteger$TM[ _Set$TM|_Tuple$TM] /; buiActive["isInteger"] := False
 
 \[DoubleStruckCapitalQ]$TM /: Element$TM[ x_, \[DoubleStruckCapitalQ]$TM] /; buiActive["IsElement"] && buiActive["isRational"] := isRational$TM[ x]
 isRational$TM[ _Integer|_Rational] /; buiActive["isRational"] := True
-isRational$TM[ True|False] /; buiActive["isRational"] := False
+(* it is not known whether Catalan is rationl, therefore we leave "isRational[Catalan]" unevaluated *)
+isRational$TM[ True|False|I|Infinity|Pi|Degree|GoldenRatio|E|EulerGamma|Khinchin|Glaisher] /; buiActive["isRational"] := False
 isRational$TM[ _Real|_Complex] /; buiActive["isRational"] := False
 isRational$TM[ _Set$TM|_Tuple$TM] /; buiActive["isRational"] := False
 
-\[DoubleStruckCapitalR]$TM /: Element$TM[ x_, \[DoubleStruckCapitalR]$TM] /; buiActive["IsElement"] && buiActive["isReal"] := isReal$TM[ x]
+\[DoubleStruckCapitalR]$TM /: Element$TM[ x_, \[DoubleStruckCapitalR]$TM] /; buiActive["isReal"] := isReal$TM[ x]
 isReal$TM[ _Integer|_Rational|_Real] /; buiActive["isReal"] := True
 isReal$TM[ True|False] /; buiActive["isReal"] := False
+isReal$TM[ Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] /; buiActive["isReal"] := True
 isReal$TM[ _Complex] /; buiActive["isReal"] := False
 isReal$TM[ _Set$TM|_Tuple$TM] /; buiActive["isReal"] := False
 

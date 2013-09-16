@@ -134,8 +134,8 @@ PRFSIT$[ g:FML$[ _, Implies$TM[ P_, Q_], __], k_List, id_, rest___?OptionQ] :>
 	]
 
 inferenceRule[ modusPonens] = 
-ps:PRFSIT$[ g_, k:{___, impl:FML$[ _, Implies$TM[ P_, Q_], __], ___, lhs:FML$[ _, P_, __], ___}, id_, rest___?OptionQ]|
-ps:PRFSIT$[ g_, k:{___, lhs:FML$[ _, P_, __], ___, impl:FML$[ _, Implies$TM[ P_, Q_], __], ___}, id_, rest___?OptionQ] :> 
+ps:(PRFSIT$[ g_, k:{___, impl:FML$[ _, Implies$TM[ P_, Q_], __], ___, lhs:FML$[ _, P_, __], ___}, id_, rest___?OptionQ]|
+PRFSIT$[ g_, k:{___, lhs:FML$[ _, P_, __], ___, impl:FML$[ _, Implies$TM[ P_, Q_], __], ___}, id_, rest___?OptionQ]) :> 
 	Catch[
         Module[ {rhs, locInfo = ps.local, mp, implK = impl.key, lhsK = lhs.key},
             mp = getLocalInfo[ locInfo, "modusPonens"];
