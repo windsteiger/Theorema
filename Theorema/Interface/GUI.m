@@ -88,7 +88,9 @@ initGUI[] :=
         		{"Less", RowBox[{"A","<","B"}], False, True, False},
         		{"LessEqual", RowBox[{"A","\[LessEqual]","B"}], False, True, False},
         		{"Greater", RowBox[{"A",">","B"}], False, True, False},
-        		{"GreaterEqual", RowBox[{"A","\[GreaterEqual]","B"}], False, True, False}
+        		{"GreaterEqual", RowBox[{"A","\[GreaterEqual]","B"}], False, True, False},
+        		{"SumOf", RowBox[{"\[Sum]",SubscriptBox["A","i"]}], False, True, False},
+        		{"ProductOf", RowBox[{"\[Product]",SubscriptBox["A","i"]}], False, True, False}
         	},
         	{"Logic", 
         		{"Not", RowBox[{"\[Not]","P"}], False, True, False},
@@ -98,9 +100,21 @@ initGUI[] :=
         		{"Iff", RowBox[{"P", "\[Equivalent]","Q"}], True, True, False},
         		{"Forall", RowBox[{"\[ForAll]","P"}], False, True, False},
         		{"Exists", RowBox[{"\[Exists]","P"}], False, True, False},
-        		{"Equal", RowBox[{"A","=","B"}], True, False, False}
+        		{"Equal", RowBox[{"A","=","B"}], True, False, False},
+        		{"Let", UnderscriptBox["let",RowBox[{"A","=","\[Ellipsis]"}]], False, True, False}
+        	},
+        	{"Domains",
+        		{"isInteger", RowBox[{"isInteger","[","A","]"}], False, True, True},
+        		{"isRational", RowBox[{"isRational","[","A","]"}], False, True, True},
+        		{"isReal", RowBox[{"isReal","[","A","]"}], False, True, True},
+        		{"isSet", RowBox[{"isSet","[","A","]"}], False, True, True},
+        		{"isTuple", RowBox[{"isTuple","[","A","]"}], False, True, True},
+        		{"IntegerRange", RowBox[{"IntegerRange","[","A","]"}], False, True, True},
+        		{"RationalRange", RowBox[{"RationalRange","[","A","]"}], False, True, True},
+        		{"RealRange", RowBox[{"RealRange","[","A","]"}], False, True, True}
         	},
         	{"Programming",
+        		{"CaseDistinction", RowBox[{"\[Piecewise]",GridBox[{{"A"},{"B"}}]}], False, True, False},
         		{"Module", RowBox[{"Module","[","\[Ellipsis]","]"}], False, True, False},
         		{"Do", RowBox[{"Do","[","\[Ellipsis]","]"}], False, True, False},
         		{"While", RowBox[{"While","[","\[Ellipsis]","]"}], False, True, False},
@@ -1790,7 +1804,6 @@ savePreferences[ args___] := unexpected[ savePreferences, {args}]
 (* ::Section:: *)
 (* Math Tab *)
 
-
 langButtonData["AND1"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
@@ -1813,6 +1826,17 @@ langButtonData["AND2"] :=
 		RowBox[{"\[SelectionPlaceholder]", "\[And]", "\[Placeholder]"}],
 		translate["CONN2WEAKTooltip"],
 		"and"
+	}
+	
+langButtonData["NOT"] := 
+	{
+		If[ $buttonNat, 
+			translate["NOT"], 
+			DisplayForm[RowBox[{"\[Not]",
+				TagBox[ FrameBox["form"], "SelectionPlaceholder"]}]]],
+		RowBox[{"\[Not]", "\[SelectionPlaceholder]"}],
+		translate["NOTTooltip"],
+		"not"
 	}
 
 langButtonData["OR1"] := 
@@ -2004,7 +2028,7 @@ autoParenthesis[ args___] := unexpected[ autoParenthesis, {args}]
 
 allFormulae = {{"Sets", {}},
 			   {"Arithmetic", {}},
-			   {"Logic", {"AND2", "OR2", "IMPL2", "EQUIV2", "EQ", "EQUIVDEF", "EQDEF", "FORALL1", "FORALL2", "EXISTS1", "EXISTS2"}}
+			   {"Logic", {"AND2", "OR2", "NOT", "IMPL2", "EQUIV2", "EQ", "EQUIVDEF", "EQDEF", "FORALL1", "EXISTS1", "FORALL2", "EXISTS2"}}
 };
 
 makeButtonCategory[ {category_String, buttons_List}, cols_Integer:2] :=

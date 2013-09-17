@@ -228,10 +228,14 @@ isLogQuantifierFree[ args___] := unexpected[ isLogQuantifierFree, {args}]
 
 isSequenceFree[ expr_, level_:{1}] := 
 	FreeQ[ expr,
-		_Theorema`Language`SEQ$|
-		_Theorema`Computation`Language`SEQ$|
-		Theorema`Language`VAR$[_Theorema`Language`SEQ$]|
-		Theorema`Language`Computation`VAR$[_Theorema`Language`Computation`SEQ$], level]
+		_Theorema`Language`SEQ0$|
+		_Theorema`Computation`Language`SEQ0$|
+		Theorema`Language`VAR$[_Theorema`Language`SEQ0$]|
+		Theorema`Language`Computation`VAR$[_Theorema`Language`Computation`SEQ0$]|
+		_Theorema`Language`SEQ1$|
+		_Theorema`Computation`Language`SEQ1$|
+		Theorema`Language`VAR$[_Theorema`Language`SEQ1$]|
+		Theorema`Language`Computation`VAR$[_Theorema`Language`Computation`SEQ1$], level]
 isSequenceFree[ args___] := unexpected[ isSequenceFree, {args}]
 
 (* ::Subsubsection:: *)
@@ -333,9 +337,13 @@ execRight[ e_Hold, var_List] :=
 	]
 execRight[ args___] := unexpected[ execRight, {args}]
 
+stripVar[ v:Theorema`Language`VAR$[Theorema`Language`SEQ0$[a_]]] := v -> ToExpression[ "SEQ0$" <> ToString[a]]
+stripVar[ v:Theorema`Language`VAR$[Theorema`Language`SEQ1$[a_]]] := v -> ToExpression[ "SEQ1$" <> ToString[a]]
 stripVar[ v:Theorema`Language`VAR$[a_]] := v -> ToExpression[ "VAR$" <> ToString[a]]
 stripVar[ args___] := unexpected[ stripVar, {args}]
 
+varToPattern[ v:Theorema`Language`VAR$[Theorema`Language`SEQ0$[a_]]] := With[ {new = ToExpression[ "SEQ0$" <> ToString[a]]}, v :> Apply[ Pattern, {new, BlankNullSequence[]}]]
+varToPattern[ v:Theorema`Language`VAR$[Theorema`Language`SEQ1$[a_]]] := With[ {new = ToExpression[ "SEQ1$" <> ToString[a]]}, v :> Apply[ Pattern, {new, BlankSequence[]}]]
 varToPattern[ v:Theorema`Language`VAR$[a_]] := With[ {new = ToExpression[ "VAR$" <> ToString[a]]}, v :> Apply[ Pattern, {new, Blank[]}]]
 varToPattern[ args___] := unexpected[ varToPattern, {args}]
 
@@ -664,13 +672,13 @@ rngToCondition[ args___] := unexpected[ rngToCondition, {args}]
 singleRngToCondition[ Theorema`Language`SIMPRNG$[ v_]] := {}
 singleRngToCondition[ Theorema`Language`SETRNG$[ v_, S_]] := {Theorema`Language`Element$TM[ v, S]}
 singleRngToCondition[ Theorema`Language`STEPRNG$[ v_, l_Integer?NonNegative, h_Integer, 1]] := 
-	{Theorema`Language`GreaterEqual$TM[ v, l], Theorema`Language`LessEqual$TM[ v, h], Theorema`Language`Element$TM[ v, Theorema`Language`\[DoubleStruckCapitalN]0$TM]}
+	{Theorema`Language`GreaterEqual$TM[ v, l], Theorema`Language`LessEqual$TM[ v, h], Theorema`Language`Element$TM[ v, Theorema`Language`IntegerRange$TM[ 0, Infinity, True, False]]}
 singleRngToCondition[ Theorema`Language`STEPRNG$[ v_, l_Integer, h_Integer, 1]] := 
-	{Theorema`Language`GreaterEqual$TM[ v, l], Theorema`Language`LessEqual$TM[ v, h], Theorema`Language`Element$TM[ v, Theorema`Language`\[DoubleStruckCapitalZ]$TM]}
+	{Theorema`Language`GreaterEqual$TM[ v, l], Theorema`Language`LessEqual$TM[ v, h], Theorema`Language`Element$TM[ v, Theorema`Language`IntegerRange$TM[ -Infinity, Infinity, False, False]]}
 singleRngToCondition[ Theorema`Language`STEPRNG$[ v_, l_, h_, s_Integer]] := 
 	Module[ {new, step},
 		step = If[ s === 1, new, Theorema`Language`Times$TM[ new, s]];
-		{Theorema`Language`Exists$TM[ Theorema`Language`RNG$[ Theorema`Language`SETRNG$[ new, Theorema`Language`\[DoubleStruckCapitalN]0$TM]], True, 
+		{Theorema`Language`Exists$TM[ Theorema`Language`RNG$[ Theorema`Language`SETRNG$[ new, Theorema`Language`IntegerRange$TM[ 0, Infinity, True, False]]], True, 
 			Theorema`Language`And$TM[ Theorema`Language`Equal$TM[ v, Theorema`Language`Plus$TM[ l, step]],
 				If[ NonNegative[ s], Theorema`Language`LessEqual$TM, Theorema`Language`GreaterEqual$TM][ v, h]]]}
 	]
