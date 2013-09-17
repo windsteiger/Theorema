@@ -266,6 +266,8 @@ MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalN]", l_], fmt_] :=
 (* No subscript at all; Start from 1 *)
 MakeExpression[ "\[DoubleStruckCapitalN]", fmt_] :=
 	MakeExpression[ RowBox[ {"IntegerRange", "[", RowBox[ {"1", ",", "Infinity", ",", "True", ",", "False"}], "]"}], fmt]
+MakeExpression[ RowBox[ {l___, "\[DoubleStruckCapitalN]", r___}], fmt_] :=
+	MakeExpression[ RowBox[ {l, RowBox[ {"IntegerRange", "[", RowBox[ {"1", ",", "Infinity", ",", "True", ",", "False"}], "]"}], r}], fmt]
 
 makeMaxBox[ a_, b_] := RowBox[ {"max", "[", RowBox[ {"{", RowBox[ {a, ",", b}], "}"}], "]"}]
 
@@ -299,6 +301,8 @@ MakeExpression[ SubscriptBox[ dom_?isZQR, l_], fmt_] :=
 (* No subscript at all; Start from -Infinity *)
 MakeExpression[ dom_?isZQR, fmt_] :=
 	MakeExpression[ RowBox[ {makeDomainRange[ dom], "[", RowBox[ {RowBox[ {"-", "Infinity"}], ",", "Infinity", ",", "False", ",", "False"}], "]"}], fmt]
+MakeExpression[ RowBox[ {l___, dom_?isZQR, r___}], fmt_] :=
+	MakeExpression[ RowBox[ {l, RowBox[ {makeDomainRange[ dom], "[", RowBox[ {RowBox[ {"-", "Infinity"}], ",", "Infinity", ",", "False", ",", "False"}], "]"}], r}], fmt]
 
 
 (* ::Subsubsection:: *)
