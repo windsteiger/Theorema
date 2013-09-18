@@ -61,11 +61,11 @@ subProofHeaderId[ args___] := unexpected[ subProofHeaderId, {args}]
 (* Proof Cells *)
 
 formulaBox[ f_FML$] :=
-    Module[ {orig = f."origForm"},
+    Module[ {orig = getOptionalComponent[ f, "origForm"]},
         If[ orig === {},
-            ToBoxes[ f.formula, TheoremaForm],
+            ToBoxes[ formula@f, TheoremaForm],
             (* else *)
-            TooltipBox[ ToBoxes[ f.formula, TheoremaForm], ToBoxes[ orig, TheoremaForm]]
+            TooltipBox[ ToBoxes[ formula@f, TheoremaForm], ToBoxes[ orig, TheoremaForm]]
     	]
     ]
 formulaBox[ args___] := unexpected[ formulaBox, {args}]
@@ -73,8 +73,8 @@ formulaBox[ args___] := unexpected[ formulaBox, {args}]
 goalCell[ g_FML$, punct_String:""] :=
     With[ {pid = $proofStepID, formBox = formulaBox[ g]},
         Cell[ BoxData[ RowBox[ {formBox, punct}]], "Goal", 
-            CellFrameLabels->{{None, Cell[ makeLabel[ g.label], "GoalLabel"]}, {None, None}}, 
-            CellTags -> {g.id, pid},
+            CellFrameLabels -> {{None, Cell[ makeLabel[ label@g], "GoalLabel"]}, {None, None}}, 
+            CellTags -> {id@g, pid},
             CellEventActions -> {"MouseClicked" :> ($selectedProofStep = pid), PassEventsDown -> True}
         ]
     ]
@@ -84,8 +84,8 @@ goalCell[ args___] := unexpected[ goalCell, {args}]
 assumptionCell[ a_FML$, punct_String:""] := 
 	With[ {pid = $proofStepID, formBox = formulaBox[ a]}, 
 		Cell[ BoxData[ RowBox[ {formBox, punct}]], "Assumption", 
-			CellFrameLabels->{{None, Cell[ makeLabel[ a.label], "AssumptionLabel"]}, {None, None}}, 
-			CellTags -> {a.id, pid},
+			CellFrameLabels -> {{None, Cell[ makeLabel[ label@a], "AssumptionLabel"]}, {None, None}}, 
+			CellTags -> {id@a, pid},
 			CellEventActions -> {"MouseClicked" :> ($selectedProofStep = pid), PassEventsDown -> True}
 		]
 	]

@@ -41,6 +41,8 @@ initProver[] :=
 		$TMAcurrentDepth = 1;
 		$TMAproofSearchRunning = False;
 		$rewriteRules = {};
+		$generated = {};
+		$autoGenerateRules = True;
 	]
 
 callProver[ ruleSetup:{_Hold, _List, _List}, strategy_, goal_FML$, kb_List, searchDepth_Integer, searchTime:(_Integer|Infinity)] :=
@@ -54,7 +56,7 @@ callProver[ ruleSetup:{_Hold, _List, _List}, strategy_, goal_FML$, kb_List, sear
 		initFormulaLabel[];
 		timeElapsed = proofSearch[ searchDepth, searchTime];
 		$TMAproofSearchRunning = False;
-		{$TMAproofObject.proofValue, $TMAproofObject, timeElapsed}
+		{proofValue@$TMAproofObject, $TMAproofObject, timeElapsed}
 	]
 callProver[ args___] := unexpected[ callProver, {args}]
 
@@ -65,7 +67,7 @@ callProver[ args___] := unexpected[ callProver, {args}]
 proofSearch[ searchDepth_Integer, searchTime:(_Integer|Infinity)] :=
     Module[ {startTime = SessionTime[], openPSpos, openPS, selPSpos, selPS, pStrat, newSteps},
     	$proofAborted = False;
-        While[ SessionTime[] - startTime <= searchTime && !$proofAborted && $TMAproofObject.proofValue === pending && 
+        While[ SessionTime[] - startTime <= searchTime && !$proofAborted && proofValue@$TMAproofObject === pending && 
         	(openPSpos = positionRelevantSits[ $TMAproofObject]) =!= {},
             openPS = Extract[ $TMAproofObject, openPSpos];
             {selPS, selPSpos} = chooseNextPS[ openPS, openPSpos];
@@ -74,11 +76,11 @@ proofSearch[ searchDepth_Integer, searchTime:(_Integer|Infinity)] :=
             If[ $currentSearchLevel > searchDepth,
             	newSteps = searchDepthExceeded[ selPS],
             	(* else *)
-            	pStrat = selPS.strategy;
+            	pStrat = strategy@selPS;
             	newSteps = pStrat[ selPS]
             ];
             If[ !isProofNode[ newSteps],
-            	newSteps = noProofNode[ newSteps, selPS.id];
+            	newSteps = noProofNode[ newSteps, id@selPS];
 			];
             $TMAproofObject = replaceProofSit[ $TMAproofObject, selPSpos -> newSteps];
             $TMAproofObject = propagateProofValues[ $TMAproofObject];
@@ -97,7 +99,7 @@ proofSearchParallel[ searchDepth_Integer] :=
     Module[ {openPSpos},
     	$proofAborted = False;
     	SetSharedVariable[$TMAproofObject, $TMAproofTree];
-        While[ !$proofAborted && $TMAproofObject.proofValue === pending && (openPSpos = positionRelevantSits[ $TMAproofObject]) =!= {},
+        While[ !$proofAborted && proofValue@$TMAproofObject === pending && (openPSpos = positionRelevantSits[ $TMAproofObject]) =!= {},
         	ParallelTry[ proofSearchAtPos[ #, searchDepth]&, openPSpos];
         ]
     ]
@@ -110,11 +112,11 @@ proofSearchAtPos[ selPSpos_List, searchDepth_Integer] :=
         If[ Length[ selPSpos] > searchDepth,
             newSteps = searchDepthExceeded[ selPS],
             (* else *)
-            pStrat = selPS.strategy;
+            pStrat = strategy@selPS;
             newSteps = pStrat[ selPS]
         ];
         If[ !isProofNode[ newSteps],
-            newSteps = noProofNode[ newSteps, selPS.id];
+            newSteps = noProofNode[ newSteps, id@selPS];
         ];
         $TMAproofObject = replaceProofSit[ $TMAproofObject, selPSpos -> newSteps];
         $TMAproofObject = propagateProofValues[ $TMAproofObject]
@@ -138,8 +140,8 @@ stillRelevant[ pos_List, po_PRFOBJ$] :=
 		(* Given the node at position pos, we follow the path upwards and check all parent nodes *)
 		While[ path =!= {},
 			node = Extract[ po, path];
-			If[ (node.type === ANDNODE$ && node.proofValue === failed) ||
-				(node.type === ORNODE$ && node.proofValue === proved),
+			If[ (type@node === ANDNODE$ && proofValue@node === failed) ||
+				(type@node === ORNODE$ && proofValue@node === proved),
 				Return[ False]
 			];
 			path = Drop[ path, -1];
@@ -154,10 +156,10 @@ chooseNextPS[ ps_List, psPos_List] :=
 	]
 chooseNextPS[ ps_List, psPos_List] /; $interactiveProofSitSel && Length[ ps] > 1 :=
 	Module[{ psSel},
-		$selectedProofStep = ps[[1]].id;
+		$selectedProofStep = id@ps[[1]];
 		nextProofSitDialog[ ps];
 		NotebookClose[ $TMAproofNotebook];
-		{psSel} = Position[ ps, _?(#.id === $selectedProofStep&), {1}];
+		{psSel} = Position[ ps, _?(id[#] === $selectedProofStep&), {1}, Heads -> False];
 		{Extract[ ps, psSel], Extract[ psPos, psSel]}
 	]
 chooseNextPS[ args___] := unexpected[ chooseNextPS, {args}]
@@ -169,22 +171,26 @@ replaceProofSit[ po_PRFOBJ$, pos_ -> p_PRFSIT$] :=
 	Hence, we want to call replaceProofSit there in order to update the proof tree correspondingly.
 	*)
 	Module[ {},
-		$lastVisitedNode = p.id;
+		$lastVisitedNode = id@p;
 		ReplacePart[ po, pos -> p]
 	]
 	
 replaceProofSit[ po_PRFOBJ$, pos_ -> new:node_[___]] :=
-	Module[{parentID = Extract[ po, pos].id, sub},
+	Module[{parentID = id@Extract[ po, pos], sub},
 		sub = poToTree[ new];
-		$TMAproofTree = Join[ $TMAproofTree /. {parentID, pending, PRFSIT$, None} -> {new.id, new.proofValue, node, new.name}, sub];
-		$lastVisitedNode = new.id;
+		$TMAproofTree = Join[ $TMAproofTree /. {parentID, pending, PRFSIT$, None} -> {id@new, proofValue@new, node, name@new}, sub];
+		$lastVisitedNode = id@new;
 		ReplacePart[ po, pos -> new]
 	]
 replaceProofSit[ args___] := unexpected[ replaceProofSit, {args}]
 
 
 (* ::Subsubsection:: *)
-(* isOptComponent *)
+(* optComponent / isOptComponent *)
+
+optComponents[ data___?OptionQ] :=
+	Apply[ Sequence, DeleteDuplicates[ Select[ {data}, isOptComponent], #1[[1]] === #2[[1]]&]]
+optComponents[ args___] := unexpected[ optComponents, {args}]
 
 isOptComponent[ (Rule|RuleDelayed)[ _String, _]] := True
 isOptComponent[ _] := False
@@ -220,9 +226,9 @@ simplifyProof[ args___] := unexpected[ simplifyProof, {args}]
 		simpTree is the simplified proof tree and
 		used is a list of formula keys that are used within the simplified tree
 	*)
-simpNodes[ ORNODE$[ pi_, ___, p_ /; p.proofValue === proved, ___, proved], simp:{True, _, _}] :=
+simpNodes[ ORNODE$[ pi_, ___, p_ /; proofValue@p === proved, ___, proved], simp:{True, _, _}] :=
 	simpNodes[ p, simp]
-simpNodes[ ORNODE$[ pi_, a___, p_ /; p.proofValue === proved, b___, proved], simp:{False, _, _}] :=
+simpNodes[ ORNODE$[ pi_, a___, p_ /; proofValue@p === proved, b___, proved], simp:{False, _, _}] :=
 	Module[{sn, used},
 		{sn, used} = simpNodes[ p, simp];
 		{ORNODE$[ pi, a, sn, b, proved], used}
@@ -257,8 +263,8 @@ simpNodes[ ANDNODE$[ pi_, fsub_, rsub__, proved], simp:{sBranches_, sSteps_, sFo
 			{Apply[ ANDNODE$[ pi, ##, proved]&, sn], Union[ propUsed, allUsed]}
 		]		
 	]
-simpNodes[ node:TERMINALNODE$[ pi_, proved], simp_List] := {node, Map[ #.key &, Flatten[ pi.used]]}
-simpNodes[ node:PRFSIT$[ g_, kb_, ___], simp_List] := {node, Map[ #.key &, Prepend[ kb, g]]}
+simpNodes[ node:TERMINALNODE$[ pi_, proved], simp_List] := {node, Map[ key, Flatten[ used@pi]]}
+simpNodes[ node:PRFSIT$[ g_, kb_, ___], simp_List] := {node, Map[ key, Prepend[ kb, g]]}
 simpNodes[ args___] := unexpected[ simpNodes, {args}]
 
 (*	propagateUsed[ pi_PRFINFO$, u_List] computes a list of keys, which are used to generate all the keys in u.
@@ -267,11 +273,11 @@ simpNodes[ args___] := unexpected[ simpNodes, {args}]
 	Finally take the union of all these.
 *)
 propagateUsed[ pi_PRFINFO$, u_List] :=
-	Module[{gen = pi.generated, pUsed},
+	Module[{gen = generated@pi, pUsed},
 		(* The first entry in the position lists tells, in which component the formula is generated *)
 		pUsed = Map[ Take[ #, 1]&, DeleteCases[ Map[ Position[ gen, #]&, u], {}], {2}];
 		(* Extract the respective positions from used to get all formulae used und form their union *)
-		DeleteDuplicates[ Map[ #.key &, Flatten[ Extract[ pi.used, pUsed]]]]
+		DeleteDuplicates[ Map[ key, Flatten[ Extract[ used@pi, pUsed]]]]
 	]
 propagateUsed[ args___] := unexpected[ propagateUsed, {args}]
 
@@ -279,13 +285,13 @@ propagateUsed[ args___] := unexpected[ propagateUsed, {args}]
 	Eliminate unused formulae from generated formulae
 *)
 (* amaletzk: BUGFIX
-	Replaced formal argument "used" by "u", because otherwise "pi.used" causes an error
+	Replaced formal argument "used" by "u", because otherwise "used@pi" causes an error
 *)
 eliminateUnused[ pi_PRFINFO$, u_List] :=
-	Module[{gen = pi.generated, thinned, p},
-		thinned = DeleteCases[ gen, _?(!MemberQ[ u, #.key]&), {2}];
+	Module[{gen = generated@pi, thinned, p},
+		thinned = DeleteCases[ gen, _?(!MemberQ[ u, key[#]]&), {2}];
 		p = Position[ thinned, {}];
-		ReplacePart[ pi, {2 -> Delete[ pi.used, p], 3 -> Delete[ thinned, p]}]
+		ReplacePart[ pi, {2 -> Delete[ used@pi, p], 3 -> Delete[ thinned, p]}]
 	]
 eliminateUnused[ args___] := unexpected[ eliminateUnused, {args}]
 
@@ -293,8 +299,8 @@ eliminateUnused[ args___] := unexpected[ eliminateUnused, {args}]
 	Eliminate unused formulae from initial KB (the first one, i.e. the goal, must never be deleted).
 *)
 eliminateUnusedInit[ pi_PRFINFO$, used_List] :=
-	Module[{gen = pi.generated, thinnedKB},
-		thinnedKB = DeleteCases[ Rest[ gen[[1]]], _?(!MemberQ[ used, #.key]&)];
+	Module[{gen = generated@pi, thinnedKB},
+		thinnedKB = DeleteCases[ Rest[ gen[[1]]], _?(!MemberQ[ used, key[#]]&)];
 		ReplacePart[ pi, 3 -> {Prepend[ thinnedKB, gen[[1, 1]]]}]
 	]
 eliminateUnusedInit[ args___] := unexpected[ eliminateUnusedInit, {args}]
@@ -310,58 +316,81 @@ eliminateUnusedInit[ args___] := unexpected[ eliminateUnusedInit, {args}]
   PRFSIT$[ goal_FML$, kb_List, id_String, addInfo___?OptionQ], where
 
 	addInfo consists of required fields (in this order):
-	local->...  for local proof info,
 	rules->...  for the collection of proof rules to be used,
 	ruleActivity->... for a list representing the rules' activity,
 	rulePriority->... for a list representing the rules' priorities,
-	strategy->... for the strategy to be used.
+	strategy->... for the strategy to be used,
+	kbRules->... for rewrite rules for the kb,
+	goalRules->... for rewrite rules for the goal,
+	substRules->... for elementary substitution rules,
+	defRules->... for definition rewrite rules.
 	
 	In addition, there are optional fields
   	"key"-> for arbitrary strings "key" (the datastructure can be expanded by additional components of this type at any time)
   	
-	The constructor understands options goal->, kb->, local->, id->, rules->, ruleActivity->, rulePriority->, strategy->, and 
-	"key"-> (for an arbitrary string "key").
-  	The selectors for the datastructure are p.goal, p.kb, p.id, p.local, p.rules, p.ruleActivity, p.rulePriority, p.strategy, and p."key" (for an
-  	arbitrary string "key"). The special selector p.ruleSetup is a combination of p.rules, p.ruleActivity, and p.rulePriority.
+	The constructor understands options goal->, kb->, id->, rules->, ruleActivity->, rulePriority->, strategy->, 
+		kbRules->, goalRules->, substRules->, defRules->, and "key"-> (for an arbitrary string "key").
 *)
 
-Options[ makePRFSIT] = {goal :> makeFML[], kb -> {}, id :> ToString[ Unique[ "PRFSIT$"]], local -> {}, rules -> Hold[], ruleActivity -> {}, rulePriority -> {}, strategy -> Identity,
+Options[ makePRFSIT] = {goal :> makeFML[], kb -> {}, id :> ToString[ Unique[ "PRFSIT$"]], rules -> Hold[], ruleActivity -> {}, rulePriority -> {}, strategy -> Identity,
 	kbRules -> {}, goalRules -> {}, substRules -> {}, defRules -> {}};
 makePRFSIT[ data___?OptionQ] :=
-	Module[{g, k, i, l, r, a, p, s, kr, gr, sr, dr},
-		{g, k, i, l, r, a, p, s, kr, gr, sr, dr} = 
-			{goal, kb, id, local, rules, ruleActivity, rulePriority, strategy, kbRules, goalRules, substRules, defRules} /. {data} /. Options[ makePRFSIT];
+	Module[{g, k, i, r, a, p, s, kr, gr, sr, dr},
+		{g, k, i, r, a, p, s, kr, gr, sr, dr} = 
+			{goal, kb, id, rules, ruleActivity, rulePriority, strategy, kbRules, goalRules, substRules, defRules} /. {data} /. Options[ makePRFSIT];
+		Assert[ ListQ[ $rewriteRules]];
 		{kr, gr, sr, dr} = MapThread[ Join, Append[ $rewriteRules, {kr, gr, sr, dr}]];
-		PRFSIT$[ g, k, i, local -> l, rules -> r, ruleActivity -> a, rulePriority -> p, strategy -> s,
+		PRFSIT$[ g, k, i, rules -> r, ruleActivity -> a, rulePriority -> p, strategy -> s,
 			kbRules -> kr, goalRules -> gr, substRules -> sr, defRules -> dr,
-			Apply[ Sequence, Select[ {data}, isOptComponent]]]
+			optComponents[ data]]
 	]
 makePRFSIT[ args___] := unexpected[ makePRFSIT, {args}]
 
-(*
-	The selector p.rules immediately strips the Hold
-*)
-PRFSIT$ /: Dot[ PRFSIT$[ g_FML$, _, _, _, ___], goal] := g
-PRFSIT$ /: Dot[ PRFSIT$[ _, k_List, _, _, ___], kb] := k
-PRFSIT$ /: Dot[ PRFSIT$[ _, _, i_String, ___], id] := i
-PRFSIT$ /: Dot[ PRFSIT$[ _, _, _, _, rules -> Hold[r_], ruleActivity -> act_, rulePriority -> prio_, ___], ruleSetup] := {r, act, prio}
-PRFSIT$ /: Dot[ PRFSIT$[ _, _, _, _, rules -> Hold[r_], ___], rules] := r
-(* The following access should work for both standard (e.g. local, ruleActivity, rulePriority, strategy) and optional components, hence, key need not be a string *)
-PRFSIT$ /: Dot[ PRFSIT$[ _, _, _, ___, (Rule|RuleDelayed)[ key_, val_], ___], key_] := val
-(* Non-existing components should give $Failed *)
-PRFSIT$ /: Dot[ PRFSIT$[ _, _, _, ___], key_String] := $Failed
-PRFSIT$ /: Dot[ _PRFSIT$, proofValue] := pending
-PRFSIT$ /: Dot[ p_PRFSIT$, s___] := unexpected[ Dot, {p, s}]
+goal[ PRFSIT$[ g_FML$, _, _, ___]] := g
+goal[ args___] := unexpected[ goal, {args}]
 
-getPrincipalData[ args___] := unexpected[ getPrincipalData, {args}]
+kb[ PRFSIT$[ _, k_List, _, ___]] := k
+kb[ args___] := unexpected[ kb, {args}]
 
+id[ PRFSIT$[ _, _, i_String, ___]] := i
+(* default rule follows below, because we have id also for other datastructures *)
+
+rules[ PRFSIT$[ _, _, _, ___, rules -> Hold[ r_], ___]] := r
+rules[ args___] := unexpected[ rules, {args}]
+
+ruleActivity[ PRFSIT$[ _, _, _, ___, (Rule|RuleDelayed)[ ruleActivity, val_], ___]] := val
+ruleActivity[ args___] := unexpected[ ruleActivity, {args}]
+
+rulePriority[ PRFSIT$[ _, _, _, ___, (Rule|RuleDelayed)[ rulePriority, val_], ___]] := val
+rulePriority[ args___] := unexpected[ rulePriority, {args}]
+
+ruleSetup[ ps_PRFSIT$] := {rules@ps, ruleActivity@ps, rulePriority@ps}
+ruleSetup[ args___] := unexpected[ ruleSetup, {args}]
+
+strategy[ PRFSIT$[ _, _, _, ___, (Rule|RuleDelayed)[ strategy, val_], ___]] := val
+strategy[ args___] := unexpected[ strategy, {args}]
+
+kbRules[ PRFSIT$[ _, _, _, ___, (Rule|RuleDelayed)[ kbRules, val_], ___]] := val
+kbRules[ args___] := unexpected[ kbRules, {args}]
+
+goalRules[ PRFSIT$[ _, _, _, ___, (Rule|RuleDelayed)[ goalRules, val_], ___]] := val
+goalRules[ args___] := unexpected[ goalRules, {args}]
+
+substRules[ PRFSIT$[ _, _, _, ___, (Rule|RuleDelayed)[ substRules, val_], ___]] := val
+substRules[ args___] := unexpected[ substRules, {args}]
+
+defRules[ PRFSIT$[ _, _, _, ___, (Rule|RuleDelayed)[ defRules, val_], ___]] := val
+defRules[ args___] := unexpected[ defRules, {args}]
+
+proofValue[ _PRFSIT$] := pending
+(* default rule follows below, because we have proofValue also for other datastructures *)
 
 (* ::Subsection:: *)
-(* newSubgoal *)
+(* toBeProved *)
 
-Options[ newSubgoal] = Options[ makePRFSIT];
-newSubgoal[ data___?OptionQ] := checkProofSuccess[ makePRFSIT[ data]]
-newSubgoal[ args___] := unexpected[ newSubgoal, {args}]
+Options[ toBeProved] = Options[ makePRFSIT];
+toBeProved[ data___?OptionQ] := checkProofSuccess[ makePRFSIT[ data]]
+toBeProved[ args___] := unexpected[ toBeProved, {args}]
 
 checkProofSuccess[ ps_PRFSIT$] /; $TMAcheckSuccess := 
 	Module[{termRules = getActiveRulesType[ ps, "term"]}, 
@@ -378,19 +407,18 @@ checkProofSuccess[ args___] := unexpected[ checkProofSuccess, {args}]
 (*
   PRFINFO$[ name_, used_List, generated_List, id_String, addInfo___?OptionQ]
   
-	The consturctor understands options name->, used->, generated->, id->, and p."key" (for an
+	The consturctor understands options name->, used->, generated->, id->, and "key"-> (for an
   	arbitrary string "key").
-  	The selectors for the datastructure are p.name, p.used, p.generated, p.id, and p."key" (for an
-  	arbitrary string "key").
+
   	used and generated are list of lists {u_1,...,u_n} and {g_1,...,g_n} such that the formulae
   	in u_i are those used to generate those in g_i
 *)
 
-Options[ makePRFINFO] = {name -> "???", used -> {}, generated -> {}, id -> ""};
+Options[ makePRFINFO] = {name -> "???", used -> {}, generated :> $generated, id -> ""};
 makePRFINFO[ data___?OptionQ] :=
 	Module[{n, u, g, i},
 		{n, u, g, i} = {name, used, generated, id} /. {data} /. Options[ makePRFINFO];
-		makeRealPRFINFO[ n, u, g, i, Apply[ Sequence, Select[ {data}, isOptComponent]]]
+		makeRealPRFINFO[ n, u, g, i, optComponents[ data]]
 	]
 makePRFINFO[ args___] := unexpected[ makePRFINFO, {args}]
 
@@ -402,42 +430,10 @@ makeRealPRFINFO[ name_, u:{___List}, g:{___List}, "", rest___?OptionQ] := PRFINF
 makeRealPRFINFO[ name_, u:{___List}, g:{___List}, id_String, rest___?OptionQ] := PRFINFO$[ name, u, g, id, rest]
 makeRealPRFINFO[ args___] := unexpected[ makeRealPRFINFO, {args}]
 
-PRFINFO$ /: Dot[ PRFINFO$[ n_, _, _, _, ___], name] := n
-PRFINFO$ /: Dot[ PRFINFO$[ _, u_List, _, _, ___], used] := u
-PRFINFO$ /: Dot[ PRFINFO$[ _, _, g_List, _, ___], generated] := g
-PRFINFO$ /: Dot[ PRFINFO$[ _, _, _, i_String, ___], id] := i
-PRFINFO$ /: Dot[ PRFINFO$[ _, _, _, _, ___, (Rule|RuleDelayed)[ key_String, val_], ___], key_] := val
-PRFINFO$ /: Dot[ PRFINFO$[ _, _, _, _, ___], key_String] := {}
-PRFINFO$ /: Dot[ p_PRFINFO$, s___] := unexpected[ Dot, {p, s}]
-
-
-(* ::Subsection:: *)
-(* Local Info datastructure *)
-
-(*
-	Local Info datastructure is just a list of Mathematica options, i.e. {key1 -> val1, ..., keyn -> valn}
-	Also :> can be used
-*)
-
-getLocalInfo[ li_List, key_] :=
-	Module[{val = Replace[ key, li]},
-		If[ val === key,
-			(* a non-existing key yields a value {} *)
-			{},
-			val
-		]
-	]
-getLocalInfo[ args___] := unexpected[ getLocalInfo, {args}]
-
-putLocalInfo[ li_List, o1_, or__] := Fold[ putLocalInfo, li, {o1, or}]
-putLocalInfo[ li_List, type_[key_, val_]] :=
-	Module[{p = Position[ li, (Rule|RuleDelayed)[ key, _]]},
-		If[ p === {},
-			Append[ li, type[ key, val]],
-			ReplacePart[ li, p[[1]] -> type[ key, val]]
-		]
-	]
-putLocalInfo[ args___] := unexpected[ putLocalInfo, {args}]
+name[ PRFINFO$[ n_, _, _, _, ___]] := n
+used[ PRFINFO$[ _, u_List, _, _, ___]] := u
+generated[ PRFINFO$[ _, _, g_List, _, ___]] := g
+id[ PRFINFO$[ _, _, _, i_String, ___]] := i
 
 
 (* ::Subsection:: *)
@@ -446,23 +442,33 @@ putLocalInfo[ args___] := unexpected[ putLocalInfo, {args}]
 isProofNode[ obj_] := MatchQ[ obj, _ANDNODE$|_ORNODE$|_TERMINALNODE$]
 isProofNode[ args___] := unexpected[ isProofNode, {args}]
 
-proofFails[ pi_PRFINFO$] := TERMINALNODE$[ pi, failed]
-proofFails[ args___] := unexpected[ proofFails, {args}]
-
-proofSucceeds[ pi_PRFINFO$] := TERMINALNODE$[ pi, proved]
-proofSucceeds[ args___] := unexpected[ proofSucceeds, {args}]
+makeTERMINALNODE[ pi_PRFINFO$, v:(failed|proved|disproved)] := TERMINALNODE$[ pi, v]
+makeTERMINALNODE[ args___] := unexpected[ makeTERMINALNODE, {args}]
 
 proofDisproved[ pi_PRFINFO$] := TERMINALNODE$[ pi, disproved]
 proofDisproved[ args___] := unexpected[ proofDisproved, {args}]
 
-type /: Dot[ node_?isProofNode, type] := Head[ node]
-id /: Dot[ node_?isProofNode, id] := First[ node].id
-name /: Dot[ node_?isProofNode, name] := First[ node].name
-used /: Dot[ node_, used] := Apply[ Join, Map[ #.used&, Cases[ node, _PRFINFO$, 2]]]
-generated /: Dot[ node_, generated] := Apply[ Join, Map[ #.generated&, Cases[ node, _PRFINFO$, 2]]]
-proofValue /: Dot[ node_?isProofNode, proofValue] := Last[ node]
-proofValue /: Dot[ po_PRFOBJ$, proofValue] := Last[ po]
-subgoals /: Dot[ _[ _PRFINFO$, subnodes___, _], subgoals] := {subnodes}
+type[ node_?isProofNode] := Head[ node]
+type[ args___] := unexpected[ type, {args}]
+
+id[ node_?isProofNode] := id[ First[ node]] (* id of node is id of its PRFINFO *)
+id[ args___] := unexpected[ id, {args}]
+
+name[ node_?isProofNode] := name[ First[ node]]
+name[ args___] := unexpected[ name, {args}]
+
+used[ node_] := Apply[ Join, Map[ used, Cases[ node, _PRFINFO$, 2]]]
+used[ args___] := unexpected[ used, {args}]
+
+generated[ node_] := Apply[ Join, Map[ generated, Cases[ node, _PRFINFO$, 2]]]
+generated[ args___] := unexpected[ generated, {args}]
+
+proofValue[ node_?isProofNode] := Last[ node]
+proofValue[ po_PRFOBJ$] := Last[ po]
+proofValue[ args___] := unexpected[ proofValue, {args}]
+
+branches[ _[ _PRFINFO$, subnodes___, _]] := {subnodes}
+branches[ args___] := unexpected[ branches, {args}]
 
 makeANDNODE[ pi_PRFINFO$, subnode_] := ANDNODE$[ pi, subnode, pending]
 makeANDNODE[ pi_PRFINFO$, {subnodes__}] := ANDNODE$[ pi, subnodes, pending]
@@ -474,24 +480,24 @@ makeORNODE[ args___] := unexpected[ makeORNODE, {args}]
 poToTree[ _TERMINALNODE$|_PRFSIT$] := {}
 poToTree[ node_[ pi_PRFINFO$, sub___, val_]] :=
 	Module[{root, subTrees, topLevel},
-		root = {pi.id, val, node, pi.name};
+		root = {id@pi, val, node, name@pi};
 		subTrees = Flatten[ Map[ poToTree, {sub}]];
 		topLevel = Map[ (root -> poNodeToTreeNode[#])&, {sub}];
 		Join[ topLevel, subTrees]
 	]
 poToTree[ args___] := unexpected[ poToTree, {args}]
 
-poNodeToTreeNode[ ps_PRFSIT$] := { ps.id, pending, PRFSIT$, None}
-poNodeToTreeNode[ node_[ pi_PRFINFO$, ___, val_]] := { pi.id, val, node, pi.name}
+poNodeToTreeNode[ ps_PRFSIT$] := {id@ps, pending, PRFSIT$, None}
+poNodeToTreeNode[ node_[ pi_PRFINFO$, ___, val_]] := {id@pi, val, node, name@pi}
 poNodeToTreeNode[ args___] := unexpected[ poNodeToTreeNode, {args}]
 
 propagateProofValues[ poNode:node_[ pi_PRFINFO$, subnodes__, pending]] :=
 	Module[ {updSub, subVal, newVal},
 		updSub = Map[ propagateProofValues, {subnodes}];
-		subVal = Map[ #.proofValue&, updSub];
+		subVal = Map[ proofValue, updSub];
 		newVal = nodeValue[ node, subVal];
 		If[ newVal =!= pending,
-			$TMAproofTree = With[ {id = pi.id},
+			$TMAproofTree = With[ {id = id@pi},
 				$TMAproofTree /. {id, pending, t_, n_} -> {id, newVal, t, n}
 			]
 		];
@@ -511,10 +517,10 @@ nodeValue[ ORNODE$, _List] := pending
 nodeValue[ PRFOBJ$, {v_}] := v
 nodeValue[ args___] := unexpected[ nodeValue, {args}]
 
-searchDepthExceeded[ ps_PRFSIT$] := proofFails[ makePRFINFO[ name -> searchDepthLimit, used -> Prepend[ ps.kb, ps.goal], id -> ps.id]]
+searchDepthExceeded[ ps_PRFSIT$] := makeTERMINALNODE[ makePRFINFO[ name -> searchDepthLimit, used -> Prepend[ kb@ps, goal@ps], id -> id@ps], failed]
 searchDepthExceeded[ args___] := unexpected[ searchDepthExceeded, {args}]
 
-noProofNode[ expr_, i_] := proofFails[ makePRFINFO[ name -> invalidProofNode, used -> {expr}, id -> i]]
+noProofNode[ expr_, i_] := makeTERMINALNODE[ makePRFINFO[ name -> invalidProofNode, used -> {expr}, id -> i], failed]
 noProofNode[ args___] := unexpected[ noProofNode, {args}]
 
 
@@ -526,7 +532,7 @@ noProofNode[ args___] := unexpected[ noProofNode, {args}]
 getActiveRulesFilter[ ps_PRFSIT$, filter_, op_:Identity] := 
 	Module[{rules, act, prio, names},
 		(* Select names of active rules, delete rules of type filter, strings (category names) and inactive rules, finally apply op *)
-		{rules, act, prio} = ps.ruleSetup;
+		{rules, act, prio} = ruleSetup@ps;
 		names = op[ rules /. {{r_, _, _, _Integer, filter} -> Sequence[],
 			{r_ /; Replace[ r, act], _, _, _Integer, ___} -> r, _String | {r_Symbol, _, _, _Integer, ___} -> Sequence[]}];
 		If[ Depth[ names] == 2,
@@ -542,7 +548,7 @@ getActiveRulesFilter[ args___] := unexpected[ getActiveRulesFilter, {args}]
 getActiveRulesType[ ps_PRFSIT$, type_] :=
 	Module[{rules, act, prio, names},
 		(* Select flat list of names of active rules, delete strings (category names) and inactive rules *)
-		{rules, act, prio} = ps.ruleSetup;
+		{rules, act, prio} = ruleSetup@ps;
 		names = Cases[ rules, {r_ /; Replace[ r, act], _, _, _Integer, type} -> r, Infinity];
 		(* we have a flat list of rule names *)
 		names = Sort[ DeleteDuplicates[ names], Replace[ #1, prio] < Replace[ #2, prio] &];
@@ -683,26 +689,35 @@ proofNodeIndicator[ args___] := unexpected[ proofNodeIndicator, {args}]
 (* makeInitialProofObject *)
 
 makeInitialProofObject[ g_FML$, k_List, {r_Hold, act_List, prio_List}, s_] :=
-    Module[ {dummyPO, thinnedKB, dr, sr, gr, kr},
+    Module[ {dummyPO, thinnedKB, dr, sr, gr, kr, const},
         dummyPO = PRFOBJ$[
             makePRFINFO[ name -> initialProofSituation, generated -> Prepend[ k, g], id -> "OriginalPS"],
             PRFSIT$[ g, k, "InitialPS"],
             pending
         ];
         (* Use propagateProofValues and replaceProofSit in order to update the proof tree correspondingly *)
-        (* Handling of substitutions: we split k into
+        (* Handling of substitutions: from k we generate transformation rules relating to
         	"elementary substitutions", i.e. equalities or equivalences that do not introduce (logical) quantifiers,
-        	"definitions", i.e. equalities or equivalences that normally do introduce quantifiers on the rhs, and
-        	the rest.
-           We convert "elementary substitutions" and "definitions" into transformation rules
-           and put them into the local proof info. We don't put the corresponding original formulae into the KB then *)
+        	"definitions", i.e. equalities or equivalences that normally do introduce quantifiers on the rhs,
+        	"goal rewriting",
+        	"kb rewriting".
+           We put the generated rules into the respective components in the proof object. We don't put the original formulae corresponding to definitions and
+           elementary substitutions into the KB then *)
+        (* We try to figure out all constants available in the formulas *)
+        const = Cases[ Level[ 
+        	Append[ k, g] /. {_VAR$ -> "", _SEQ0$ -> "", _SEQ1$ -> "", _FIX$ -> "", True|False -> ""},
+        	{-1}], _Symbol | _?NumberQ];
+        If[ const =!= {},
+        	(* Mark the constants as new *)
+        	const = Map[ SIMPRNG$, Apply[ RNG$, const]]
+        ];        	
         {thinnedKB, kr, gr, sr, dr} = trimKBforRewriting[ k];
         propagateProofValues[ 
             replaceProofSit[ dummyPO,
-            	{2} -> newSubgoal[ goal -> g, kb -> thinnedKB, id -> "InitialPS",
-            		local -> {"elemSubstRules" -> sr, "definitionRules" -> dr, "kbRules" -> kr, "goalRules" -> gr},
-                	rules -> r, ruleActivity -> act, rulePriority -> prio, strategy -> s,
-                	substRules -> sr, defRules -> dr, kbRules -> kr, goalRules -> gr]]
+            	{2} -> toBeProved[ goal -> g, kb -> thinnedKB, id -> "InitialPS",
+                		rules -> r, ruleActivity -> act, rulePriority -> prio, strategy -> s,
+                		substRules -> sr, defRules -> dr, kbRules -> kr, goalRules -> gr, "constants" -> const]
+            ]
         ]
     ]
 makeInitialProofObject[ args___] := unexpected[ makeInitialProofObject, {args}]
@@ -766,8 +781,8 @@ proofObjectToCell[ TERMINALNODE$[ pi_PRFINFO$, pVal_], overallVal_] :=
 proofObjectToCell[ args___] := unexpected[ proofObjectToCell, {args}]
 
 subProofToCell[ PRFINFO$[ name_, used_List, gen_List, rest___], node_, pos_List, pVal_] :=
-	Cell[ CellGroupData[ Join[ subProofHeaderId[ node.id, name, used, gen, rest, node.proofValue, pos], {proofObjectToCell[ node, node.proofValue]}], 
-		cellStatus[ $proofCellStatus, node.proofValue, pVal]]]
+	Cell[ CellGroupData[ Join[ subProofHeaderId[ id@node, name, used, gen, rest, proofValue@node, pos], {proofObjectToCell[ node, proofValue@node]}], 
+		cellStatus[ $proofCellStatus, proofValue@node, pVal]]]
 subProofToCell[ args___] := unexpected[ subProofToCell, {args}]
 
 cellStatus[ Automatic, pending, pending] := Open
@@ -788,6 +803,19 @@ pSitCells[ args___] := unexpected[ pSitCells, {args}]
 pObjCells[ ] := pObjCells[ $TMAproofObject]
 pObjCells[ po_PRFOBJ$] := proofObjectToCell[ po]
 pObjCells[ args___] := unexpected[ pObjCells, {args}]
+
+
+(* ::Section:: *)
+(* Inference rule programming *)
+
+SetAttributes[ performProofStep, HoldAll]
+
+performProofStep[ prog_] :=
+	Block[{$rewriteRules = {}, $generated = {}},
+		Catch[ prog]
+	]
+performProofStep[ args___] := unexpected[ performProofStep, {args}]
+
 
 
 (* ::Section:: *)
@@ -816,6 +844,7 @@ Module[ {},
 		$registeredStrategies = Union[ $registeredStrategies, {s -> n}];
 	]
 registerStrategy[ args___] := unexpected[ registerStrategy, {args}]
+
 
 (* ::Section:: *)
 (* Package Initialization *)
