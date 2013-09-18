@@ -96,6 +96,19 @@ tmaToInputOperator[ args___] := unexpected[ tmaToInputOperator, {args}]
 
 
 (* ::Section:: *)
+(* Expression categories *)
+
+isQuantifierFormula[ e_] := MatchQ[ e, _Forall$TM|_Exists$TM]
+isQuantifierFormula[ args___] := unexpected[ isQuantifierFormula, {args}]
+
+isConnectiveFormula[ e_] := MatchQ[ e, _Not$TM|_And$TM|_Or$TM|_Implies$TM|_Iff$TM|_IffDef$TM]
+isConnectiveFormula[ args___] := unexpected[ isConnectiveFormula, {args}]
+
+isAtomicExpression[ e_] := !isQuantifierFormula[ e] && !isConnectiveFormula[ e]
+isAtomicExpression[ args___] := unexpected[ isAtomicExpression, {args}]
+
+
+(* ::Section:: *)
 (* Set and tuple constructor *)
 
 

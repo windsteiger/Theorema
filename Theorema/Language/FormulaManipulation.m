@@ -426,7 +426,7 @@ makeSingleRule[ {_Theorema`Language`Forall$TM|_Theorema`Language`Exists$TM, r_, 
 makeSingleRule[ {l_, r_, c_List, var_List}, ref_] /; With[ {fr = freeVariables[ Append[ c, r]], fl = freeVariables[ l]}, Complement[ fr, fl] =!= {} || Complement[ fl, var] =!= {}] := 
 	Sequence[]
 	
-makeSingleRule[ all:{l_, r_, c_List, var_List}, ref_] := {ref.key, mmaTransRule[ all, ref]}
+makeSingleRule[ all:{l_, r_, c_List, var_List}, ref_] := {key@ref, mmaTransRule[ all, ref]}
 
 (*
 	For backward rules we allow to introduce an existential quantifier if additional free variables occur.
@@ -538,7 +538,7 @@ replaceRepeatedAndTrack[ args___] := unexpected[ replaceRepeatedAndTrack, {args}
 	filterRules[ rules_List, keyList_] deletes rules with k in the keyList. It returns a list of rules of the form {k, l:>r}, not the plain Mma rules.
 *)
 filterRules[ rules_List, key:{_, _}] := Cases[ rules, {Except[ key], r_} -> r]
-filterRules[ rules_List, {keys:{_, _}..}] := DeleteCases[ rules, Alternatives[ keys]]
+filterRules[ rules_List, {keys:{_, _}..}] := DeleteCases[ rules, {Alternatives[ keys], _}]
 filterRules[ args___] := unexpected[ filterRules, {args}]
 
 
@@ -568,26 +568,53 @@ defKey[ args___] := unexpected[ defKey, {args}]
 defLabel[ ] := ToString[ $formulaLabel++]
 defLabel[ args___] := unexpected[ defLabel, {args}]
 
-initFormulaLabel[ ] := $formulaLabel = 1;
+initFormulaLabel[ ] := $formulaLabel = 0;
 initFormulaLabel[ args___] := unexpected[ initFormulaLabel, {args}]
 
-FML$ /: Dot[ FML$[ k_, _, __], key] := k
-FML$ /: Dot[ FML$[ _, fml_, __], formula] := fml
-FML$ /: Dot[ FML$[ _, _, l_, ___], label] := l
-FML$ /: Dot[ FML$[ k_, _, __], id] := k[[1]]
-FML$ /: Dot[ FML$[ k_, _, __], source] := k[[2]]
-FML$ /: Dot[ FML$[ _, _, _, ___, (Rule|RuleDelayed)[ key_String, val_], ___], key_] := val
-FML$ /: Dot[ FML$[ _, _, _, ___], key_String] := {}
-FML$ /: Dot[ f_FML$, s___] := unexpected[ Dot, {f, s}]
+key[ FML$[ k_, _, __]] := k
+key[ args___] := unexpected[ key, {args}]
+
+formula[ FML$[ _, fml_, __]] := fml
+formula[ args___] := unexpected[ formula, {args}]
+
+label[ FML$[ _, _, l_, ___]] := l
+label[ args___] := unexpected[ label, {args}]
+
+id[ FML$[ k_, _, __]] := k[[1]]
+(* default case implemented elsewhere *)
+
+source[ FML$[ k_, _, __]] := k[[2]]
+source[ args___] := unexpected[ source, {args}]
 
 formulaReference[ fml_FML$] :=
-    With[ { tag = fml.id, labelDisp = makeLabel[ fml.label], fmlDisp = theoremaDisplay[ fml.formula]},
+    With[ { tag = id@fml, labelDisp = makeLabel[ label@fml], fmlDisp = theoremaDisplay[ formula@fml]},
         Cell[ BoxData[ ToBoxes[
             Button[ Tooltip[ Mouseover[ Style[ labelDisp, "FormReference"], Style[ labelDisp, "FormReferenceHover"]], fmlDisp],
                NotebookLocate[ tag], Appearance->None]
         ]]]
        ]
 formulaReference[ args___] := unexpected[ formulaReference, {args}]
+
+(*
+	We provide different constructors for goal and assumptions -> allows to generate different labels
+*)
+makeGoalFML[ data___?OptionQ] :=
+	Module[ {l, form},
+		l = label /. {data} /. Options[ makeFML];
+		form = makeFML[ label -> With[ {sep = If[ StringMatchQ[ l, NumberString], "\[NumberSign]", "\[SpaceIndicator]"]}, "G" <> sep <> l], data];
+		AppendTo[ $generated, form];
+		form
+	]
+makeGoalFML[ args___] := unexpected[ makeGoalFML, {args}]
+
+makeAssumptionFML[ data___?OptionQ] :=
+	Module[ {l, form},
+		l = label /. {data} /. Options[ makeFML];
+		form = makeFML[ label -> With[ {sep = If[ StringMatchQ[ l, NumberString], "\[NumberSign]", "\[SpaceIndicator]"]}, "A" <> sep <> l], data];
+		AppendTo[ $generated, form];
+		form
+	]
+makeAssumptionFML[ args___] := unexpected[ makeAssumptionFML, {args}]
 
 
 (* ::Section:: *)
@@ -691,8 +718,13 @@ singleRngToCondition[ args___] := unexpected[ singleRngToCondition, {args}]
 (* KB operations *)
 
 (*
-	The kb operations put the rewrite rules for appropriate formulas into a global variable. When we
-	create a new proof sit (makePRFSIT) we put what has accumulated into the approriate places.
+	The kb operations put the rewrite rules for appropriate formulas into a global variable $rewriteRules. When we
+	create a new proof sit (makePRFSIT) we put what has accumulated in $rewriteRules into the approriate places. This means
+	that an inference rule MUST use the kb operations provided here to modify the kb and that a rule
+	will typically run inside a Block[ {$rewriteRules = {}}, ...], when it enriches the kb.
+	
+	There is a switch $autoGenerateRules, which can be used to turn off this feature, i.e. with $autoGenerateRules=False the
+	kb operations are just the list operations with the additional feature to avoid duplicate entries in the kb.
 *)
 
 (*
@@ -700,16 +732,18 @@ singleRngToCondition[ args___] := unexpected[ singleRngToCondition, {args}]
 	kb1 are new formula, where we need to check for rewrite rules and duplicates.
 	kb2 contains no duplicates and rewrite rules have already been generated.
 *)
-joinKB[ kb1:{___FML$}, kb2:{___FML$}] := Fold[ prependKB, kb2, Reverse[ kb1]]
+joinKB[ kb1:{___FML$}, kb2:{___FML$}] /; $autoGenerateRules := Fold[ prependKB, kb2, Reverse[ kb1]]
+(* When we don't need rewrite rules, it is more efficient using built-in ops instead of folding prependKB *)
+joinKB[ kb1:{___FML$}, kb2:{___FML$}] := DeleteDuplicates[ Join[ kb1, kb2], formula[ #1] === formula[ #2]&]
 joinKB[ args___] := unexpected[ joinKB, {args}]
 
-appendKB[ kb:{___FML$}, fml_FML$] := 
+appendKB[ kb:{___FML$}, fml_FML$] /; $autoGenerateRules := 
 	Module[ {member, trimmed},
-		member = Catch[ Scan[ If[fml.formula === #.formula, Throw[ True]]&, kb]; False];
+		member = Catch[ Scan[ If[ formula@fml === formula@#, Throw[ True]]&, kb]; False];
 		If[ member,
 			(* fml is already in kb, we leave kb unchanged *)
 			kb,
-			(* else *)
+			(* else: do the op and generate rewrite rules *)
 			trimmed = trimFormulaForRewriting[ fml];
 			(* put rewrite rules to global variable, even if all are empty *)
 			AppendTo[ $rewriteRules, Rest[ trimmed]];
@@ -717,15 +751,16 @@ appendKB[ kb:{___FML$}, fml_FML$] :=
 			Join[ kb, First[ trimmed]]
 		]
 	]
+appendKB[ kb:{___FML$}, fml_FML$] := DeleteDuplicates[ Append[ kb, fml], formula[ #1] === formula[ #2]&]
 appendKB[ args___] := unexpected[ appendKB, {args}]
 
-prependKB[ kb:{___FML$}, fml_FML$] := 
+prependKB[ kb:{___FML$}, fml_FML$] /; $autoGenerateRules := 
 	Module[ {member, trimmed},
-		member = Catch[ Scan[ If[fml.formula === #.formula, Throw[ True]]&, kb]; False];
+		member = Catch[ Scan[ If[ formula@fml === formula@#, Throw[ True]]&, kb]; False];
 		If[ member,
 			(* fml is already in kb, we leave kb unchanged *)
 			kb,
-			(* else *)
+			(* else: do the op and generate rewrite rules*)
 			trimmed = trimFormulaForRewriting[ fml];
 			(* put rewrite rules to global variable, even if all are empty *)
 			AppendTo[ $rewriteRules, Rest[ trimmed]];
@@ -733,6 +768,7 @@ prependKB[ kb:{___FML$}, fml_FML$] :=
 			Join[ First[ trimmed], kb]
 		]
 	]
+prependKB[ kb:{___FML$}, fml_FML$] := DeleteDuplicates[ Prepend[ kb, fml], formula[ #1] === formula[ #2]&]
 prependKB[ args___] := unexpected[ prependKB, {args}]
 
 SetAttributes[ appendToKB, HoldFirst]
