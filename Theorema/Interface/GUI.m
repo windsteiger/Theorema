@@ -107,6 +107,7 @@ initGUI[] :=
         		{"isInteger", RowBox[{"isInteger","[","A","]"}], False, True, True},
         		{"isRational", RowBox[{"isRational","[","A","]"}], False, True, True},
         		{"isReal", RowBox[{"isReal","[","A","]"}], False, True, True},
+        		{"isComplex", RowBox[{"isComplex","[","A","]"}], False, True, True},
         		{"isSet", RowBox[{"isSet","[","A","]"}], False, True, True},
         		{"isTuple", RowBox[{"isTuple","[","A","]"}], False, True, True},
         		{"IntegerRange", RowBox[{"IntegerRange","[","A","]"}], False, True, True},

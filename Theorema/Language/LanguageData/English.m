@@ -76,6 +76,7 @@ With[ {lang = "English"},
 	MessageName[isInteger$TM, "usage", lang] = "";
 	MessageName[isRational$TM, "usage", lang] = "";
 	MessageName[isReal$TM, "usage", lang] = "";
+	MessageName[isComplex$TM, "usage", lang] = "";
 	MessageName[isSet$TM, "usage", lang] = "";
 	MessageName[isTuple$TM, "usage", lang] = "";
 	MessageName[IntegerRange$TM, "usage", lang] = "";			

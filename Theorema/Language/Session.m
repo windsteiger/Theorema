@@ -78,7 +78,7 @@ freshSymbol[ Hold[ s_Symbol]] :=
         Switch[ Unevaluated[ s],
             (* We use ToExpression in order to have the symbol generated in the right context
                depending on whether we are in a computation or not *)
-            True|False, s,
+            _?isMathematicalConstant, s,
             DoubleLongRightArrow|DoubleRightArrow, ToExpression[ "Implies$TM"],
             DoubleLongLeftRightArrow|DoubleLeftRightArrow|Equivalent, ToExpression[ "Iff$TM"],
         	SetDelayed, ToExpression[ "EqualDef$TM"], 
@@ -101,7 +101,7 @@ freshSymbol[ args___] := unexpected[ freshSymbol, {args}]
 freshSymbolProg[ Hold[ s_Symbol]] :=
     Module[ {name},
         Switch[ Unevaluated[ s],
-            True|False, s,
+            _?isMathematicalConstant, s,
         	Set, ToExpression[ "Assign$TM"],
         	_,
         	name = ToString[s];
@@ -115,6 +115,9 @@ freshSymbolProg[ Hold[ s_Symbol]] :=
         ]
     ]
 freshSymbolProg[ args___] := unexpected[ freshSymbolProg, {args}]
+
+isMathematicalConstant[ True|False|I|Pi|E|Infinity|DirectedInfinity[_]|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaisher] := True
+isMathematicalConstant[ _] := False
 
 markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
     Module[ {s, seq, vars},

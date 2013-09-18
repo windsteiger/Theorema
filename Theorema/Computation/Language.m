@@ -324,35 +324,50 @@ Set$TM /: Cross$TM[ a__Set$TM] /; buiActive["CartesianProduct"] := Apply[Set$TM,
 Set$TM /: Element$TM[ p_,a_Set$TM] /; buiActive["IsElement"] := MemberQ[ a, p]
 
 Element$TM[ p_, (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[DirectedInfinity[-1], DirectedInfinity[1], _, _]] /; buiActive["IsElement"] && buiActive[StringDrop[SymbolName[h],-3]] :=
-	rangeToPredicate[ h][ p]
+	isInRangeDomain[ h, p]
 Element$TM[ p_, (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[DirectedInfinity[-1], u_, _, True]] /; buiActive["IsElement"] && buiActive[StringDrop[SymbolName[h],-3]] :=
-	And$TM[ rangeToPredicate[ h][ p], LessEqual$TM[ p, u]]
+	And[ isInRangeDomain[ h, p], LessEqual[ p, u]]
 Element$TM[ p_, (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[DirectedInfinity[-1], u_, _, False]] /; buiActive["IsElement"] && buiActive[StringDrop[SymbolName[h],-3]] :=
-	And$TM[ rangeToPredicate[ h][ p], Less$TM[ p, u]]
+	And[ isInRangeDomain[ h, p], Less[ p, u]]
 Element$TM[ p_, (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[l_, DirectedInfinity[1], True, _]] /; buiActive["IsElement"] && buiActive[StringDrop[SymbolName[h],-3]] :=
-	And$TM[ rangeToPredicate[ h][ p], GreaterEqual$TM[ p, l]]
+	And[ isInRangeDomain[ h, p], GreaterEqual[ p, l]]
 Element$TM[ p_, (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[l_, DirectedInfinity[1], False, _]] /; buiActive["IsElement"] && buiActive[StringDrop[SymbolName[h],-3]] :=
-	And$TM[ rangeToPredicate[ h][ p], Greater$TM[ p, l]]
+	And[ isInRangeDomain[ h, p], Greater[ p, l]]
 Element$TM[ p_, (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[l_, u_, True, True]] /; buiActive["IsElement"] && buiActive[StringDrop[SymbolName[h],-3]] :=
-	And$TM[ rangeToPredicate[ h][ p], GreaterEqual$TM[ p, l], LessEqual$TM[ p, u]]
+	And[ isInRangeDomain[ h, p], GreaterEqual[ p, l], LessEqual[ p, u]]
 Element$TM[ p_, (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[l_, u_, False, True]] /; buiActive["IsElement"] && buiActive[StringDrop[SymbolName[h],-3]] :=
-	And$TM[ rangeToPredicate[ h][ p], Greater$TM[ p, l], LessEqual$TM[ p, u]]
+	And[ isInRangeDomain[ h, p], Greater[ p, l], LessEqual[ p, u]]
 Element$TM[ p_, (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[l_, u_, True, False]] /; buiActive["IsElement"] && buiActive[StringDrop[SymbolName[h],-3]] :=
-	And$TM[ rangeToPredicate[ h][ p], GreaterEqual$TM[ p, l], Less$TM[ p, u]]
+	And[ isInRangeDomain[ h, p], GreaterEqual[ p, l], Less[ p, u]]
 Element$TM[ p_, (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[l_, u_, False, False]] /; buiActive["IsElement"] && buiActive[StringDrop[SymbolName[h],-3]] :=
-	And$TM[ rangeToPredicate[ h][ p], Greater$TM[ p, l], Less$TM[ p, u]]
+	And[ isInRangeDomain[ h, p], Greater[ p, l], Less[ p, u]]
 
 Set$TM /: \[ScriptCapitalP]$TM[ a_Set$TM] /; buiActive["PowerSet"] := Subsets[ a] /. List -> Set$TM
 Set$TM /: BracketingBar$TM[ a_Set$TM] /; buiActive["Cardinality"] && isSequenceFree[a] := Length[ a]
 Set$TM /: max$TM[ a_Set$TM] /; buiActive["MaximumElementSet"] := Max[a /. Set$TM -> List] /. Max -> max$TM
 Set$TM /: min$TM[ a_Set$TM] /; buiActive["MinimumElementSet"] := Min[ a/. Set$TM -> List] /. Min -> min$TM
 	
-rangeToPredicate[ h_Symbol] :=
-	Switch[h,
-		IntegerRange$TM, isInteger$TM,
-		RationalRange$TM, isRational$TM,
-		_, isReal$TM
-	]
+(* The following functions do precisely the same as isInteger$TM, isRational$TM, isReal$TM,
+	except that they work independent of "buiActive", which is needed for ranges.
+	isInteger$TM etc. is only called if membership cannot be decided, such that finally the
+	symbolic expression "isInteger[...]" results.
+	*)
+isInRangeDomain[ IntegerRange$TM, _Integer] := True
+isInRangeDomain[ IntegerRange$TM, True|False|I|DirectedInfinity[_]|Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] := False
+isInRangeDomain[ IntegerRange$TM, _Rational|_Real|_Complex] := False
+isInRangeDomain[ IntegerRange$TM, _Set$TM|_Tuple$TM] := False
+isInRangeDomain[ IntegerRange$TM, x_] := isInteger$TM[ x]
+isInRangeDomain[ RationalRange$TM, _Integer|_Rational] := True
+isInRangeDomain[ RationalRange$TM, True|False|I|DirectedInfinity[_]|Pi|Degree|GoldenRatio|E|EulerGamma|Khinchin|Glaisher] := False
+isInRangeDomain[ RationalRange$TM, _Real|_Complex] := False
+isInRangeDomain[ RationalRange$TM, _Set$TM|_Tuple$TM] := False
+isInRangeDomain[ RationalRange$TM, x_] := isRational$TM[ x]
+isInRangeDomain[ RealRange$TM, _Integer|_Rational|_Real] := True
+isInRangeDomain[ RealRange$TM, True|False|I|DirectedInfinity[_]] := False
+isInRangeDomain[ RealRange$TM, Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] := True
+isInRangeDomain[ RealRange$TM, _Complex] := False
+isInRangeDomain[ RealRange$TM, _Set$TM|_Tuple$TM] := False
+isInRangeDomain[ RealRange$TM, x_] := isReal$TM[ x]
 
 
 (* ::Section:: *)
@@ -412,10 +427,16 @@ isRational$TM[ _Real|_Complex] /; buiActive["isRational"] := False
 isRational$TM[ _Set$TM|_Tuple$TM] /; buiActive["isRational"] := False
 
 isReal$TM[ _Integer|_Rational|_Real] /; buiActive["isReal"] := True
-isReal$TM[ True|False|DirectedInfinity[_]] /; buiActive["isReal"] := False
+isReal$TM[ True|False|I|DirectedInfinity[_]] /; buiActive["isReal"] := False
 isReal$TM[ Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] /; buiActive["isReal"] := True
 isReal$TM[ _Complex] /; buiActive["isReal"] := False
 isReal$TM[ _Set$TM|_Tuple$TM] /; buiActive["isReal"] := False
+
+Element$TM[ p_, \[DoubleStruckCapitalC]$TM] /; buiActive["IsElement"] && buiActive["isComplex"] := isComplex$TM[ p]
+isComplex$TM[ _Integer|_Rational|_Real|_Complex] /; buiActive["isComplex"] := True
+isComplex$TM[ True|False|DirectedInfinity[_]] /; buiActive["isComplex"] := False
+isComplex$TM[ I|Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] /; buiActive["isComplex"] := True
+isComplex$TM[ _Set$TM|_Tuple$TM] /; buiActive["isComplex"] := False
 
 isSet$TM[ _Set$TM] /; buiActive["isSet"] := True
 isSet$TM[ True|False|I|DirectedInfinity[_]|Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] /; buiActive["isSet"] := False

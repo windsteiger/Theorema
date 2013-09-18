@@ -613,7 +613,8 @@ MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
     ]
 
 MakeBoxes[ s_Symbol, TheoremaForm] := 
-	Module[ {n = SymbolName[ s]},
+	(* We have to use "Unevaluated" here, because "I" is a symbol, but evaluates to "Complex[0, 1]" *)
+	Module[ {n = SymbolName[ Unevaluated[ s]]},
 		If[ StringLength[ n] > 3 && StringTake[ n, -3] === "$TM",
 			StringDrop[ n, -3],
 			n
