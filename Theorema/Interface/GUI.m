@@ -326,7 +326,7 @@ makeVkbButton[ label_, insert_, opts___?OptionQ] :=
 		buttonOp -> FrontEndExecute[ NotebookApply[ InputNotebook[], insert, Placeholder]],
 		opts]
     
-makeVkbButton[ label_, insert_, tooltip_, opts___?OptionQ] :=
+makeVkbButton[ label_, insert_, help_, alias_, opts___?OptionQ] :=
     DynamicModule[ {bs = "KBButton", size},
     	{size} = {ImageSize} /. {opts} /. Options[ makeVkbButton];
     	EventHandler[
@@ -339,7 +339,7 @@ makeVkbButton[ label_, insert_, tooltip_, opts___?OptionQ] :=
     				ImageSize -> size
     				],
     			label, "Mouse"],
-    		tooltip, TooltipDelay -> 0.5],
+    		"\[EscapeKey]"<> alias <>"\[EscapeKey]", TooltipDelay -> 0.5],
     		{"MouseDown" :> (bs = "KBButtonPress";),
     		 "MouseUp" :> (bs = "KBButton";)},
     		PassEventsDown -> True
