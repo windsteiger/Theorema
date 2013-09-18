@@ -689,7 +689,7 @@ proofNodeIndicator[ args___] := unexpected[ proofNodeIndicator, {args}]
 (* makeInitialProofObject *)
 
 makeInitialProofObject[ g_FML$, k_List, {r_Hold, act_List, prio_List}, s_] :=
-    Module[ {dummyPO, thinnedKB, dr, sr, gr, kr},
+    Module[ {dummyPO, thinnedKB, dr, sr, gr, kr, const},
         dummyPO = PRFOBJ$[
             makePRFINFO[ name -> initialProofSituation, generated -> Prepend[ k, g], id -> "OriginalPS"],
             PRFSIT$[ g, k, "InitialPS"],
@@ -703,12 +703,20 @@ makeInitialProofObject[ g_FML$, k_List, {r_Hold, act_List, prio_List}, s_] :=
         	"kb rewriting".
            We put the generated rules into the respective components in the proof object. We don't put the original formulae corresponding to definitions and
            elementary substitutions into the KB then *)
+        (* We try to figure out all constants available in the formulas *)
+        const = Cases[ Level[ 
+        	Append[ k, g] /. {_VAR$ -> "", _SEQ0$ -> "", _SEQ1$ -> "", _FIX$ -> "", True|False -> ""},
+        	{-1}], _Symbol | _?NumberQ];
+        If[ const =!= {},
+        	(* Mark the constants as new *)
+        	const = Map[ SIMPRNG$, Apply[ RNG$, const]]
+        ];        	
         {thinnedKB, kr, gr, sr, dr} = trimKBforRewriting[ k];
         propagateProofValues[ 
             replaceProofSit[ dummyPO,
             	{2} -> toBeProved[ goal -> g, kb -> thinnedKB, id -> "InitialPS",
                 		rules -> r, ruleActivity -> act, rulePriority -> prio, strategy -> s,
-                		substRules -> sr, defRules -> dr, kbRules -> kr, goalRules -> gr]
+                		substRules -> sr, defRules -> dr, kbRules -> kr, goalRules -> gr, "constants" -> const]
             ]
         ]
     ]
