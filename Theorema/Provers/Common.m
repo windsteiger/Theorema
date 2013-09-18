@@ -159,7 +159,7 @@ chooseNextPS[ ps_List, psPos_List] /; $interactiveProofSitSel && Length[ ps] > 1
 		$selectedProofStep = id@ps[[1]];
 		nextProofSitDialog[ ps];
 		NotebookClose[ $TMAproofNotebook];
-		{psSel} = Position[ ps, _?(id[#] === $selectedProofStep&), {1}];
+		{psSel} = Position[ ps, _?(id[#] === $selectedProofStep&), {1}, Heads -> False];
 		{Extract[ ps, psSel], Extract[ psPos, psSel]}
 	]
 chooseNextPS[ args___] := unexpected[ chooseNextPS, {args}]
@@ -804,7 +804,7 @@ SetAttributes[ performProofStep, HoldAll]
 
 performProofStep[ prog_] :=
 	Block[{$rewriteRules = {}, $generated = {}},
-		prog
+		Catch[ prog]
 	]
 performProofStep[ args___] := unexpected[ performProofStep, {args}]
 

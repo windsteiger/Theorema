@@ -201,20 +201,18 @@ ps:PRFSIT$[ g:FML$[ _, u:Forall$TM[ rng_, cond_, A_], __], k_List, id_, rest___?
 
 inferenceRule[ forallKB] = 
 ps:PRFSIT$[ g_, K:{___, f:FML$[ _, _Forall$TM, __], ___}, id_, rest___?OptionQ] :> performProofStep[
-	Catch[
-        Module[ {faInst, fk = key@f, newConst, oldConst, inst},
-            faInst = getOptionalComponent[ ps, "forallKB"];
-            If[ MemberQ[ faInst, fk],
-            	(* Rule forallKB has already been applied for those forms *)
-                Throw[ $Failed]
-            ];
-            {newConst, oldConst} = constants[ ps];
-            (* we instantiate with the "old" constants only, because the new ones will be treated by the 'instantiate'-rule separately *)
-            inst = instantiateForall[ f, Apply[ RNG$, oldConst]];        
-            makeANDNODE[ makePRFINFO[ name -> forallKB, used -> f, "instantiation" -> inst[[2]]], 
-                toBeProved[ goal -> g, kb -> joinKB[ inst[[1]], K], "forallKB" -> Prepend[ faInst, fk], rest]]
-        ]
-    ]
+	Module[ {faInst, fk = key@f, newConst, oldConst, inst},
+	    faInst = getOptionalComponent[ ps, "forallKB"];
+	    If[ MemberQ[ faInst, fk],
+                (* Rule forallKB has already been applied for those forms *)
+	        Throw[ $Failed]
+	    ];
+	    {newConst, oldConst} = constants[ ps];
+        (* we instantiate with the "old" constants only, because the new ones will be treated by the 'instantiate'-rule separately *)
+	    inst = instantiateForall[ f, Apply[ RNG$, oldConst]];
+	    makeANDNODE[ makePRFINFO[ name -> forallKB, used -> f, "instantiation" -> inst[[2]]], 
+	        toBeProved[ goal -> g, kb -> joinKB[ inst[[1]], K], "forallKB" -> Prepend[ faInst, fk], rest]]
+	]
 ]
 
 inferenceRule[ forallKBInteractive] = 
@@ -509,28 +507,31 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
 
 inferenceRule[ instantiate] = 
 ps:PRFSIT$[ g_, K_List, id_, rest___?OptionQ] :> performProofStep[
-	Module[ {oldConst, newConst, univKB = Cases[ K, FML$[ _, _Forall$TM, _]], instForm, orig = {}, new = {}, inst = {}, i},
-        (
+	Module[ {oldConst, newConst, univKB, instForm, orig = {}, new = {}, inst = {}, i}, 
+		{newConst, oldConst} = constants[ ps];
+		If[ newConst === {},
+			Throw[ $Failed]
+		];
+		univKB = Cases[ K, FML$[ _, _Forall$TM, _]];       
         instForm = Map[ instantiateForall[ #, newConst]&, univKB];
         (* for each form in univKB we get a list {forms, inst}, where
-        	forms is a list of instantiations of form and
-        	inst is a list of substitutions, such that inst_i applied to form gives forms_i.
+            forms is a list of instantiations of form and
+            inst is a list of substitutions, such that inst_i applied to form gives forms_i.
         *)
         Do[
-        	If[ instForm[[ i, 1]] === {},
-        		Continue[],
-        		(* else *)
-        		AppendTo[ orig, {univKB[[i]]}];
-        		AppendTo[ new, instForm[[ i, 1]]];
-        		AppendTo[ inst, instForm[[ i, 2]]]
-        	],
-        	{i, Length[ instForm]}
+            If[ instForm[[ i, 1]] === {},
+                Continue[],
+                (* else *)
+                AppendTo[ orig, {univKB[[i]]}];
+                AppendTo[ new, instForm[[ i, 1]]];
+                AppendTo[ inst, instForm[[ i, 2]]]
+            ],
+            {i, Length[ instForm]}
         ];
         (* We have to explicitly specify generated-> because we need the proper nesting *)
-		makeANDNODE[ makePRFINFO[ name -> instantiate, used -> orig, generated -> new, "instantiation" -> inst], 
-			toBeProved[ goal -> g, kb -> Fold[ joinKB[ #2, #1]&, K, new], "constants" -> Join[ Apply[ List, newConst], oldConst], rest]
-		]
-		) /; ({newConst, oldConst} = constants[ ps]; newConst =!= {})
+        makeANDNODE[ makePRFINFO[ name -> instantiate, used -> orig, generated -> new, "instantiation" -> inst], 
+            toBeProved[ goal -> g, kb -> Fold[ joinKB[ #2, #1]&, K, new], "constants" -> Join[ Apply[ List, newConst], oldConst], rest]
+        ]
 	]
 ]
 
