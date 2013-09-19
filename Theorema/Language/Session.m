@@ -29,7 +29,7 @@ Begin["`Private`"]
 (* ::Section:: *)
 (* Preprocessing *)
 
-freshNames[ Hold[ f_[ lhs_, Program[ rhs_]]]] :=
+(*freshNames[ Hold[ f_[ lhs_, Program[ rhs_]]]] :=
 	Module[ {},
 		ReplacePart[ freshNames[ Hold[ f[ lhs, "DUMMY"]]], {1,2} -> freshNamesProg[ Hold[ rhs]]]
 	]
@@ -52,7 +52,26 @@ freshNamesProg[ expr_Hold] :=
 		repl = Map[ # -> freshSymbolProg[ Extract[ expr, #, Hold]]&, symPos];
 		ReleaseHold[ ReplacePart[ expr, repl]]
 	]
-freshNamesProg[ args___] := unexpected[ freshNamesProg, {args}]
+freshNamesProg[ args___] := unexpected[ freshNamesProg, {args}]*)
+
+(* amaletzk: Define "freshNames[]" in the way below, because otherwise parts with "Program" don't work *)
+freshNames[expr_Hold] :=
+	Module[ {symPos, repl, progPos, progSymPos},
+		progPos = Position[ expr, Program[_]];
+		symPos = DeleteCases[ Position[ expr, _Symbol], {0}, {1}, 1];
+		progSymPos = Cases[ symPos, x_ /; isSubPositionOfAny[ x, progPos]];
+		repl = Join[Map[ # -> freshSymbol[ Extract[ expr, #, Hold]]&, Complement[symPos, progSymPos]],
+					Map[ # -> freshSymbolProg[ Extract[ expr, #, Hold]]&, progSymPos]];
+		FlattenAt[ReplacePart[ expr, repl], progPos]
+	]
+freshNames[args___] := unexpected[ freshNames, {args}]
+
+isSubPositionOfAny[ pos_List, {first_List, rest___List}] /; isSubPosition[ pos, first] := True
+isSubPositionOfAny[ pos_List, {_List, rest___List}] := isSubPositionOfAny[ pos, {rest}]
+isSubPositionOfAny[ _List, _List] := False
+isSubPosition[ {f_Integer, l1___Integer}, {f_Integer, l2___Integer}] := isSubPosition[ {l1}, {l2}]
+isSubPosition[ {___Integer}, {}] := True
+isSubPosition[ _List, _List] := False
 
 freshSymbol[ Hold[ s_Symbol]] :=
     Module[ {name},
@@ -88,28 +107,43 @@ freshSymbolProg[ Hold[ s_Symbol]] :=
         	name = ToString[s];
         	If[ StringTake[ name, -1] === "$",
             	s,
-            	ToExpression[ name <> "$TM"]
+            	If [StringLength[ name] >= 3 && StringTake[ name, -2] === "$M",
+            		ToExpression[ StringDrop[ name, -2]],
+            		ToExpression[ name <> "$TM"]
+            	]
         	]
         ]
     ]
 freshSymbolProg[ args___] := unexpected[ freshSymbolProg, {args}]
 
 markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
-    Module[ {s},
+    Module[ {s, seq, vars},
         (* all symbols sym specified as variables in r are translated into VAR$[sym]
            we substitute all symbols with matching "base name" (neglecting the context!) so that also
            symbols in different context get substituted. This is important when processing archives, because
            global variables in an archive live in the archive's private context, whereas the global declaration
            lives in the context of the loading notebook/archive. With the substitution below, the private`sym becomes 
            a VAR$[loading`sym] *)
-        s = Map[ sym_Symbol /; SymbolName[ sym] === SymbolName[ #] -> VAR$[ #]&, specifiedVariables[ r]];
-        replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {SEQ$, VAR$, FIX$}]
+           
+        (* amaletz: We have to keep the distinction between sequence variables and individual variables,
+        			because "SymbolName[]" would give an error if applied to compound expressions.
+        *)
+        vars = specifiedVariables[ r];
+        seq = Cases[vars, (SEQ0$|SEQ1$)[ _]];
+        vars = Complement[ vars, seq];
+        s = Join[Map[ (h:(SEQ0$|SEQ1$))[sym_Symbol] /; SymbolName[ sym] === SymbolName[ #] -> VAR$[h[ #]]&, seq[[All, 1]]],
+        		 Map[ sym_Symbol /; SymbolName[ sym] === SymbolName[ #] -> VAR$[ #]&, vars]];
+        replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {SEQ0$, SEQ1$, VAR$, FIX$}]
     ]
 
 markVariables[ Hold[ Theorema`Computation`Language`QU$[ r_Theorema`Computation`Language`RNG$, expr_]]] :=
-    Module[ {s},
-        s = Map[ sym_Symbol /; SymbolName[ Unevaluated[ sym]] === SymbolName[ Unevaluated[ #]] -> Theorema`Computation`Language`VAR$[ #]&, specifiedVariables[r]];
-        replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {Theorema`Computation`Language`SEQ$, Theorema`Computation`Language`VAR$}]
+    Module[ {s, seq, vars},
+    	vars = specifiedVariables[ r];
+        seq = Cases[vars, (Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$)[ _]];
+        vars = Complement[ vars, seq];
+        s = Join[Map[ (h:(Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$))[sym_Symbol] /; SymbolName[ sym] === SymbolName[ #] -> Theorema`Computation`Language`VAR$[h[ #]]&, seq[[All, 1]]],
+        		 Map[ sym_Symbol /; SymbolName[ sym] === SymbolName[ #] -> Theorema`Computation`Language`VAR$[ #]&, vars]];
+        replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {Theorema`Computation`Language`SEQ0$, Theorema`Computation`Language`SEQ1$, Theorema`Computation`Language`VAR$, Theorema`Computation`Language`FIX$}]
     ]
     
 markVariables[Hold[h_[e___]]] := applyHold[
@@ -773,7 +807,9 @@ displayBoxes[ args___] := unexpected[ displayBoxes, {args}]
 
 renameToStandardContext[ expr_] :=
 	Block[{$ContextPath = {"System`"}, $Context = "System`", stringExpr},
-		stringExpr = ToString[ expr];
+		(* BUGFIX amaletzk: added FullForm[], otherwise doesn't work if outermost symbol is built-in Power *)
+		stringExpr = ToString[ FullForm[ expr]];
+		
 		stringExpr = StringReplace[ stringExpr, "Theorema`Computation`" -> "Theorema`"];
 		$ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
         (* Set default context when not in an archive *)

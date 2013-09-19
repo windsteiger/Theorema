@@ -30,12 +30,12 @@ applyOnce[ ps_PRFSIT$] :=
 		newNodes = applyAllRules[ ps, allRules];
 		Switch[ Length[ newNodes],
 			0,
-			proofFails[ makePRFINFO[ name -> noApplicableRule, used -> Prepend[ ps.kb, ps.goal], "openPS" -> Drop[ Apply[ List, ps], 2]]],
+			makeTERMINALNODE[ makePRFINFO[ name -> noApplicableRule, used -> Prepend[ kb@ps, goal@ps], "openPS" -> Drop[ Apply[ List, ps], 2]], failed],
 			1,
 			First[ newNodes],
 			_,
 			makeORNODE[ 
-				makePRFINFO[ name -> proofAlternatives, used -> newNodes.used, generated -> newNodes.generated],
+				makePRFINFO[ name -> proofAlternatives, used -> used@newNodes, generated -> generated@newNodes],
 				newNodes]
 		]
 	]
@@ -45,7 +45,7 @@ applyOnceAndLevelSaturation[ ps_PRFSIT$] :=
 	Module[ {satps = ps, allRules = getActiveRulesFilter[ ps, "term"|"levelSat1"|"levelSat2", Flatten], 
 		sat1 = getActiveRulesType[ ps, "levelSat1"], 
 		sat2 = getActiveRulesType[ ps, "levelSat2"], newNodes, reSat},
-		If[ ps.id === "InitialPS",
+		If[ id@ps === "InitialPS",
 			satps = levelSaturation[ ps, sat1, sat2];
 			If[ isProofNode[ satps],
 				Return[ satps]
@@ -65,12 +65,12 @@ applyOnceAndLevelSaturation[ ps_PRFSIT$] :=
 		];
 		Switch[ Length[ newNodes],
 			0,
-			proofFails[ makePRFINFO[ name -> noApplicableRule, used -> Prepend[ ps.kb, ps.goal], "openPS" -> Drop[ Apply[ List, ps], 2]]],
+			makeTERMINALNODE[ makePRFINFO[ name -> noApplicableRule, used -> Prepend[ kb@ps, goal@ps], "openPS" -> Drop[ Apply[ List, ps], 2]], failed],
 			1,
 			First[ newNodes],
 			_,
 			makeORNODE[ 
-				makePRFINFO[ name -> proofAlternatives, used -> newNodes.used, generated -> newNodes.generated],
+				makePRFINFO[ name -> proofAlternatives, used -> used@newNodes, generated -> generated@newNodes],
 				newNodes]
 		]
 	]
@@ -79,14 +79,14 @@ applyOnceAndLevelSaturation[ args___] := unexpected[ applyOnceAndLevelSaturation
 (* ::Section:: *)
 (* Level saturation *)
 
-levelSaturation[ ps:PRFSIT$[ _, _, _, _, rest___?OptionQ], sat1rules_List, sat2rules_List] :=
-	Module[{locInfo = ps.local, satKB, psKB = ps.kb, l, posNew, posRearrKB, pairs = {}, i, j,
+levelSaturation[ ps:PRFSIT$[ _, k_, _, rest___?OptionQ], sat1rules_List, sat2rules_List] :=
+	Module[{satKB, psKB = k, l, posNew, posRearrKB, pairs = {}, i, j,
 			newForms, newPairs, newFrom1, newFrom2, usd={}, gen={}, nextGen},
-		l = Length[ psKB];
-		satKB = getLocalInfo[ locInfo, "lastSat"];
+		l = Length[ k];
+		satKB = getOptionalComponent[ ps, "lastSat"];
 		(* list of positions of new forms in KB since last saturation run
 		   Since KB is a plain unstructured list all positions are specified by exactly 1 integer *)
-		posNew = Position[ psKB, _?(!MemberQ[ satKB, #.key]&), {1}, Heads -> False];
+		posNew = Position[ k, _?(!MemberQ[ satKB, key[#]]&), {1}, Heads -> False];
 		(* we build a list with pos of new forms followed by pos of the remaining (old) forms *)
 		posRearrKB = Join[ posNew, Complement[ Map[ List, Range[ l]], posNew]];
 		(* we form a list of new forms and a list of pairs involving the new forms just based on the positions *)
@@ -95,17 +95,16 @@ levelSaturation[ ps:PRFSIT$[ _, _, _, _, rest___?OptionQ], sat1rules_List, sat2r
 				AppendTo[ pairs, {posRearrKB[[j]], posRearrKB[[i]]}],
 				{i, j+1, l}], 
 			{j, Length[ posNew]}];
-		newForms = Extract[ psKB, posNew];
+		newForms = Extract[ k, posNew];
 		Block[{$TMAcheckSuccess = False},
-			newFrom1 = Map[ applyAllRules[ #, sat1rules]&, Map[ dummyGoalPS[ #, locInfo]&, newForms]];
+			newFrom1 = Map[ applyAllRules[ #, sat1rules]&, Map[ dummyGoalPS[ #, rest]&, newForms]];
 		];
 		newFrom1 = Map[ extractGenerated, newFrom1];
-		newPairs = Map[ Extract[ psKB, #]&, pairs];
+		newPairs = Map[ Extract[ k, #]&, pairs];
 		Block[{$TMAcheckSuccess = False},
-			newFrom2 = Map[ applyAllRules[ #, sat2rules]&, Map[ dummyGoalPS[ #, locInfo]&, newPairs]];
+			newFrom2 = Map[ applyAllRules[ #, sat2rules]&, Map[ dummyGoalPS[ #, rest]&, newPairs]];
 		];
 		newFrom2 = Map[ extractGenerated, newFrom2];
-		locInfo = putLocalInfo[ locInfo, "lastSat" -> Map[ #.key&, psKB]];
 		Do[
 			nextGen = newFrom1[[j]];
 			If[ nextGen =!= {},
@@ -125,19 +124,19 @@ levelSaturation[ ps:PRFSIT$[ _, _, _, _, rest___?OptionQ], sat1rules_List, sat2r
 			{j, Length[ newFrom2]}
 		];
 		If[ gen === {},
-			makePRFSIT[ goal -> ps.goal, kb -> psKB, id -> ps.id, local -> locInfo, rest],
+			makePRFSIT[ goal -> goal@ps, kb -> psKB, id -> id@ps, "lastSat" -> Map[ key, k], rest],
 			(* else *)
 			makeANDNODE[ makePRFINFO[ name -> levelSat, used -> usd, generated -> gen], 
-                newSubgoal[ goal -> ps.goal, kb -> psKB, local -> locInfo, rest]]
+                toBeProved[ goal -> goal@ps, kb -> psKB, "lastSat" -> Map[ key, k], rest]]
 		]
 	]
 levelSaturation[ args___] := unexpected[ levelSaturation, {args}]
 
-dummyGoalPS[ f_FML$, loc_] := makePRFSIT[ kb -> {f}, id -> "dummy", local -> loc]
-dummyGoalPS[ pair:{_FML$, _FML$}, loc_] := makePRFSIT[ kb -> pair, id -> "dummy", local -> loc]
+dummyGoalPS[ f_FML$, rest___] := makePRFSIT[ kb -> {f}, id -> "dummy", rest]
+dummyGoalPS[ pair:{_FML$, _FML$}, rest___] := makePRFSIT[ kb -> pair, id -> "dummy", rest]
 dummyGoalPS[ args___] := unexpected[ dummyGoalPS, {args}]
 
-extractGenerated[ nodes_List] := Union[ Flatten[ Map[ #.generated&, nodes]], SameTest -> (#1.formula === #2.formula&)]
+extractGenerated[ nodes_List] := Union[ Flatten[ Map[ generated, nodes]], SameTest -> (formula[#1] === formula[#2]&)]
 extractGenerated[ args___] := unexpected[ extractGenerated, {args}]
 
 
@@ -147,10 +146,10 @@ extractGenerated[ args___] := unexpected[ extractGenerated, {args}]
 *)
 trySeveral[ ps_PRFSIT$] :=
     Module[ {},
-        makeORNODE[ makePRFINFO[ name -> proofAlternatives, used -> {ps.goal}, generated -> {ps.kb}, id -> ps.id],
-        	{Apply[ newSubgoal[ goal -> #1, kb -> #2, #4, #5, #6, #7, #8,
+        makeORNODE[ makePRFINFO[ name -> proofAlternatives, used -> {goal@ps}, generated -> {kb@ps}, id -> id@ps],
+        	{Apply[ toBeProved[ goal -> #1, kb -> #2, #4, #5, #6, #7, #8,
         		Apply[ Sequence, Cases[ ps, HoldPattern[ (Rule|RuleDelayed)[_String, _]]]]]&, ps], 
-        	Apply[ newSubgoal[ goal -> #1, kb -> #2, #4, #5, #6, #7, #8,
+        	Apply[ toBeProved[ goal -> #1, kb -> #2, #4, #5, #6, #7, #8,
         		Apply[ Sequence, Cases[ ps, HoldPattern[ (Rule|RuleDelayed)[_String, _]]]]]&, ps]}
         	]
     ]

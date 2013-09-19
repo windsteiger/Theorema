@@ -88,7 +88,9 @@ initGUI[] :=
         		{"Less", RowBox[{"A","<","B"}], False, True, False},
         		{"LessEqual", RowBox[{"A","\[LessEqual]","B"}], False, True, False},
         		{"Greater", RowBox[{"A",">","B"}], False, True, False},
-        		{"GreaterEqual", RowBox[{"A","\[GreaterEqual]","B"}], False, True, False}
+        		{"GreaterEqual", RowBox[{"A","\[GreaterEqual]","B"}], False, True, False},
+        		{"SumOf", RowBox[{"\[Sum]",SubscriptBox["A","i"]}], False, True, False},
+        		{"ProductOf", RowBox[{"\[Product]",SubscriptBox["A","i"]}], False, True, False}
         	},
         	{"Logic", 
         		{"Not", RowBox[{"\[Not]","P"}], False, True, False},
@@ -98,9 +100,21 @@ initGUI[] :=
         		{"Iff", RowBox[{"P", "\[Equivalent]","Q"}], True, True, False},
         		{"Forall", RowBox[{"\[ForAll]","P"}], False, True, False},
         		{"Exists", RowBox[{"\[Exists]","P"}], False, True, False},
-        		{"Equal", RowBox[{"A","=","B"}], True, False, False}
+        		{"Equal", RowBox[{"A","=","B"}], True, False, False},
+        		{"Let", UnderscriptBox["let",RowBox[{"A","=","\[Ellipsis]"}]], False, True, False}
+        	},
+        	{"Domains",
+        		{"isInteger", RowBox[{"isInteger","[","A","]"}], False, True, True},
+        		{"isRational", RowBox[{"isRational","[","A","]"}], False, True, True},
+        		{"isReal", RowBox[{"isReal","[","A","]"}], False, True, True},
+        		{"isSet", RowBox[{"isSet","[","A","]"}], False, True, True},
+        		{"isTuple", RowBox[{"isTuple","[","A","]"}], False, True, True},
+        		{"IntegerRange", RowBox[{"IntegerRange","[","A","]"}], False, True, True},
+        		{"RationalRange", RowBox[{"RationalRange","[","A","]"}], False, True, True},
+        		{"RealRange", RowBox[{"RealRange","[","A","]"}], False, True, True}
         	},
         	{"Programming",
+        		{"CaseDistinction", RowBox[{"\[Piecewise]",GridBox[{{"A"},{"B"}}]}], False, True, False},
         		{"Module", RowBox[{"Module","[","\[Ellipsis]","]"}], False, True, False},
         		{"Do", RowBox[{"Do","[","\[Ellipsis]","]"}], False, True, False},
         		{"While", RowBox[{"While","[","\[Ellipsis]","]"}], False, True, False},
@@ -326,7 +340,7 @@ makeVkbButton[ label_, insert_, opts___?OptionQ] :=
 		buttonOp -> FrontEndExecute[ NotebookApply[ InputNotebook[], insert, Placeholder]],
 		opts]
     
-makeVkbButton[ label_, insert_, tooltip_, opts___?OptionQ] :=
+makeVkbButton[ label_, insert_, help_, alias_, opts___?OptionQ] :=
     DynamicModule[ {bs = "KBButton", size},
     	{size} = {ImageSize} /. {opts} /. Options[ makeVkbButton];
     	EventHandler[
@@ -339,7 +353,7 @@ makeVkbButton[ label_, insert_, tooltip_, opts___?OptionQ] :=
     				ImageSize -> size
     				],
     			label, "Mouse"],
-    		tooltip, TooltipDelay -> 0.5],
+    		"\[EscapeKey]"<> alias <>"\[EscapeKey]", TooltipDelay -> 0.5],
     		{"MouseDown" :> (bs = "KBButtonPress";),
     		 "MouseUp" :> (bs = "KBButton";)},
     		PassEventsDown -> True
@@ -1332,7 +1346,7 @@ setCompEnv[ args___] := unexpected[ setCompEnv, {args}]
 
 printProveInfo[ goal_, kb_, rules_, strategy_, {pVal_, proofObj_}, {pTime_, sTime_}, searchDepth_] :=
     Module[ {kbAct, bui, buiAct},
-        kbAct = Map[ makeLabel[ #.label]&, kb];
+        kbAct = Map[ makeLabel[ label[#]]&, kb];
         bui = Cases[ DownValues[ buiActProve],
         	HoldPattern[ Verbatim[HoldPattern][ buiActProve[ op_String]] :> v_] -> {op, v}];
         buiAct = Cases[ bui, { op_, True} -> op];
@@ -1351,7 +1365,7 @@ printProveInfo[ goal_, kb_, rules_, strategy_, {pVal_, proofObj_}, {pTime_, sTim
         	Button[ translate["ShowProof"], displayProof[ proofObj], ImageSize -> Automatic, Method -> "Queued"]]], "ProofDisplay"]];
         NotebookWrite[ $proofInitNotebook, Cell[ ToBoxes[
         	OpenerView[ {Spacer[10], 
-            Column[ {OpenerView[ {Style[ translate[ "GoalProve"], "PIContent"], Style[ makeLabel[ goal.label], "PIContent"]}],
+            Column[ {OpenerView[ {Style[ translate[ "GoalProve"], "PIContent"], Style[ makeLabel[ label@goal], "PIContent"]}],
             	OpenerView[ {Style[ translate[ "KBprove"], "PIContent"], Style[ kbAct, "PIContent"]}],
                 OpenerView[ {Style[ translate[ "BuiProve"], "PIContent"], Style[ buiAct, "PIContent"]}],
                 OpenerView[ {Style[ translate[ "selProver"], "PIContent"], Style[ {rules, strategy}, "PIContent"]}],
@@ -1790,7 +1804,6 @@ savePreferences[ args___] := unexpected[ savePreferences, {args}]
 (* ::Section:: *)
 (* Math Tab *)
 
-
 langButtonData["AND1"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
@@ -1813,6 +1826,17 @@ langButtonData["AND2"] :=
 		RowBox[{"\[SelectionPlaceholder]", "\[And]", "\[Placeholder]"}],
 		translate["CONN2WEAKTooltip"],
 		"and"
+	}
+	
+langButtonData["NOT"] := 
+	{
+		If[ $buttonNat, 
+			translate["NOT"], 
+			DisplayForm[RowBox[{"\[Not]",
+				TagBox[ FrameBox["form"], "SelectionPlaceholder"]}]]],
+		RowBox[{"\[Not]", "\[SelectionPlaceholder]"}],
+		translate["NOTTooltip"],
+		"not"
 	}
 
 langButtonData["OR1"] := 
@@ -2004,7 +2028,7 @@ autoParenthesis[ args___] := unexpected[ autoParenthesis, {args}]
 
 allFormulae = {{"Sets", {}},
 			   {"Arithmetic", {}},
-			   {"Logic", {"AND2", "OR2", "IMPL2", "EQUIV2", "EQ", "EQUIVDEF", "EQDEF", "FORALL1", "FORALL2", "EXISTS1", "EXISTS2"}}
+			   {"Logic", {"AND2", "OR2", "NOT", "IMPL2", "EQUIV2", "EQ", "EQUIVDEF", "EQDEF", "FORALL1", "EXISTS1", "FORALL2", "EXISTS2"}}
 };
 
 makeButtonCategory[ {category_String, buttons_List}, cols_Integer:2] :=
@@ -2109,9 +2133,9 @@ nextProofSitDialog[ args___] := unexpected[ nextProofSitDialog, {args}]
 proofSitChoiceButtons[ ps_PRFSIT$, {num_Integer}] :=
 	Module[ {},
 		Cell[ CellGroupData[ 
-			{Cell[ TextData[{ Cell[ BoxData[ ToBoxes[ RadioButton[ Dynamic[ $selectedProofStep], ps.id]]]], 
+			{Cell[ TextData[{ Cell[ BoxData[ ToBoxes[ RadioButton[ Dynamic[ $selectedProofStep], id@ps]]]], 
    			"  ", translate[ "open proof situation"], " #" <> ToString[ num]}], "Section", ShowGroupOpener -> False],
-			pSitCells[ ps]}, Dynamic[ If[ $selectedProofStep === ps.id, Open, Closed]]]]
+			pSitCells[ ps]}, Dynamic[ If[ $selectedProofStep === id@ps, Open, Closed]]]]
 	]
 proofSitChoiceButtons[ args___] := unexpected[ proofSitChoiceButtons, {args}]
 
