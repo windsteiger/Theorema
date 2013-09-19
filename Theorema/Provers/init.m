@@ -63,9 +63,9 @@ subProofHeaderId[ args___] := unexpected[ subProofHeaderId, {args}]
 formulaBox[ f_FML$] :=
     Module[ {orig = getOptionalComponent[ f, "origForm"]},
         If[ orig === {},
-            ToBoxes[ formula@f, TheoremaForm],
+            theoremaBoxes[ formula@f],
             (* else *)
-            TooltipBox[ ToBoxes[ formula@f, TheoremaForm], ToBoxes[ orig, TheoremaForm]]
+            TooltipBox[ theoremaBoxes[ formula@f], theoremaBoxes[ orig]]
     	]
     ]
 formulaBox[ args___] := unexpected[ formulaBox, {args}]
@@ -110,7 +110,7 @@ textCell[ args___] := unexpected[ textCell, {args}]
 (*
 	Inline Theorema formulae inside a textCell
 *)
-inlineTheoremaExpression[ expr_] := Cell[ ToBoxes[ expr, TheoremaForm]]
+inlineTheoremaExpression[ expr_] := Cell[ theoremaBoxes[ expr]]
 inlineTheoremaExpression[ args___] := unexpected[ inlineTheoremaExpression, {args}]
 
 (* When grouping cells, note that the first element in the group must not be a group itself *)

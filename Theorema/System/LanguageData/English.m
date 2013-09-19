@@ -18,6 +18,7 @@ With[ {lang = "English"},
 
 (* Theorema`Language`Syntax` *)
 	MessageName[theoremaDisplay, "usage", lang] = "theoremaDisplay[expr] displays expr in Theorema syntax using the definitions for MakeBoxes[ expr, TheoremaForm].";	
+	MessageName[theoremaBoxes, "usage", lang] = "theoremaBoxes[expr] generates boxes for expr in Theorema syntax using the definitions for MakeBoxes[ expr, TheoremaForm].";	
 	MessageName[isQuantifierFormula, "usage", lang] = "isQuantifierFormula[ e] is true iff e is built up by a logical quantifier.";	
 	MessageName[isConnectiveFormula, "usage", lang] = "isConnectiveFormula[ e] is true iff e is built up by a logical connective.";	
 	MessageName[isAtomicExpression, "usage", lang] = "isAtomicExpression[ e] is true iff e is neither a quantifier nor a connective formula.";	
