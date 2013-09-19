@@ -1,7 +1,27 @@
+(* Theorema 
+    Copyright (C) 2010 The Theorema Group
+
+    This file is part of Theorema.2
+    
+    Theorema.2 is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Theorema.2 is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*)
+
+
 (* This file is loaded twice:
 	1) with "Theorema`Language`" in the context path so that the respective global symbols are taken from that context,
 	2) with "Theorema`Computation`Language`" in the context path so that the respective global symbols are taken from that context.
-		*)
+*)
 
 (* ::Section:: *)
 (* Language classification *)
@@ -73,6 +93,12 @@ MakeBoxes[ (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[ l_, u_, False, Fal
 (* ::Subsection:: *)
 (* Rest *)
 
+MakeBoxes[ Radical$TM[ e_, 2], TheoremaForm] :=
+	SqrtBox[ MakeBoxes[ e, TheoremaForm]]
+
+MakeBoxes[ Radical$TM[ e_, r_], TheoremaForm] :=
+	RadicalBox[ MakeBoxes[ e, TheoremaForm], MakeBoxes[ r, TheoremaForm]]
+
 MakeBoxes[ Set$TM[ arg__], TheoremaForm] := MakeBoxes[ {arg}, TheoremaForm]
 MakeBoxes[ Set$TM[ ], TheoremaForm] := MakeBoxes[ "\[EmptySet]", TheoremaForm]
 (* An unevaluated 'makeSet' will turn into makeSet$TM when renaming back to standard context ... *)
@@ -141,6 +167,7 @@ MakeBoxes[ CaseDistinction$TM[ c__], TheoremaForm] :=
         GridBox[ Map[ formatClause, {c}]]}]
 
 formatClause[ Clause$TM[ c_, e_]] := {MakeBoxes[ e, TheoremaForm], "\[DoubleLeftArrow]", MakeBoxes[ c, TheoremaForm]}
+
 
 (* ::Section:: *)
 (* Global Declarations Display *)

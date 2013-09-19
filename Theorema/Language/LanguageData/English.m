@@ -1,4 +1,21 @@
-(* ::Package:: *)
+(* Theorema 
+    Copyright (C) 2010 The Theorema Group
+
+    This file is part of Theorema.2
+    
+    Theorema.2 is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Theorema.2 is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*)
 
 With[ {lang = "English"},
 	MessageName[FIX$, "usage", lang] = "";
@@ -34,9 +51,11 @@ With[ {lang = "English"},
 	MessageName[IntegralOf$TM, "usage", lang] = "";
 	MessageName[Abbrev$TM, "usage", lang] = "";
 	MessageName[Plus$TM, "usage", lang] = "";
+	MessageName[Subtract$TM, "usage", lang] = "";
 	MessageName[Times$TM, "usage", lang] = "";
+	MessageName[Divide$TM, "usage", lang] = "";
 	MessageName[Power$TM, "usage", lang] = "";
-	MessageName[Sqrt$TM, "usage", lang] = "";
+	MessageName[Radical$TM, "usage", lang] = "";
 	MessageName[Less$TM, "usage", lang] = "";
 	MessageName[LessEqual$TM, "usage", lang] = "";
 	MessageName[Greater$TM, "usage", lang] = "";
