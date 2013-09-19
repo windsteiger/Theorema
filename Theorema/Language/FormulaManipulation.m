@@ -478,7 +478,7 @@ mmaTransRule[ args___] := unexpected[ mmaTransRule, {args}]
 	form is a list of formulas used for replacement, i.e. the formulas from which the rewrite rules have been derived,
 	cond is a condition, under which the replacement is allowed.
 *)
-replaceAndTrack[ expr:_Theorema`Language`VAR$|_Theorema`Language`SEQ$|_Theorema`Language`FIX$, _List] := {expr, {}, True}
+replaceAndTrack[ expr:_Theorema`Language`VAR$|_Theorema`Language`SEQ0$|_Theorema`Language`SEQ1$|_Theorema`Language`FIX$, _List] := {expr, {}, True}
 
 replaceAndTrack[ expr_, repl_List] :=
 	Module[ {e, uc},
@@ -503,7 +503,7 @@ replaceListAndTrack[ args___] := unexpected[ replaceListAndTrack, {args}]
 
 replaceAllAndTrack[ expr_, repl_List] := 
 	Module[ {e, uc},
-		{e, uc} = Reap[ replaceAllExcept[ expr, repl, {}, Heads -> {Theorema`Language`VAR$, Theorema`Language`SEQ$, Theorema`Language`FIX$}], {"ref", "cond"}];
+		{e, uc} = Reap[ replaceAllExcept[ expr, repl, {}, Heads -> {Theorema`Language`VAR$, Theorema`Language`SEQ0$, Theorema`Language`SEQ1$, Theorema`Language`FIX$}], {"ref", "cond"}];
 		If[ uc === {{}, {}},
 			{e, {}, True},
 			(* else *)
@@ -516,7 +516,7 @@ replaceRepeatedAndTrack[ expr_, repl_List] :=
 (* We take care that no infinite rewritings occur using "MaxIterations" *)
 	Module[ {e, uc},
 		{e, uc} = Reap[ 
-			Quiet[ replaceRepeatedExcept[expr, repl, {}, Heads -> {Theorema`Language`VAR$, Theorema`Language`SEQ$, Theorema`Language`FIX$}, MaxIterations -> 5], 
+			Quiet[ replaceRepeatedExcept[expr, repl, {}, Heads -> {Theorema`Language`VAR$, Theorema`Language`SEQ0$, Theorema`Language`SEQ1$, Theorema`Language`FIX$}, MaxIterations -> 5], 
 					ReplaceRepeated::rrlim],
 				{"ref", "cond"}];
 		If[ uc === {{}, {}},
@@ -535,9 +535,11 @@ replaceRepeatedAndTrack[ args___] := unexpected[ replaceRepeatedAndTrack, {args}
 	key is the key of the formula, to which the rules are intended to be applied.
 	filterRules[ rules_List, key_] filters rules and returns the plain Mathematica rewrite rules that are applicable to the formula with key 'key'.
 		It deletes rules where k=key because they are derived from the formula to which they should now be applied.
+	filterRules[ rules_List, None] filters none of the rules and returns the plain Mathematica rewrite rules.
 	filterRules[ rules_List, keyList_] deletes rules with k in the keyList. It returns a list of rules of the form {k, l:>r}, not the plain Mma rules.
 *)
 filterRules[ rules_List, key:{_, _}] := Cases[ rules, {Except[ key], r_} -> r]
+filterRules[ rules_List, None] := Map[ Part[ #, 2]&, rules]
 filterRules[ rules_List, {keys:{_, _}..}] := DeleteCases[ rules, {Alternatives[ keys], _}]
 filterRules[ args___] := unexpected[ filterRules, {args}]
 

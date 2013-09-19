@@ -1,10 +1,18 @@
-(* ::Package:: *)
+(* Theorema 
+    Copyright (C) 2010 The Theorema Group
 
-(* 
-Theorema editor: W. Windsteiger
-Author(s):       W. Windsteiger
+    This program is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-What is the purpose of the Theorema editor? Read more in /ProgrammersDoc/Guidelines.nb#1871658360
+    This program is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
 BeginPackage["Theorema`Language`Syntax`"];
@@ -277,8 +285,9 @@ MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalN]", l_], fmt_] :=
 	MakeExpression[ RowBox[ {"IntegerRange", "[", RowBox[ {makeMaxBox[ l, "0"], ",", "Infinity", ",", "True", ",", "False"}], "]"}], fmt] /; $parseTheoremaExpressions
 
 (* No subscript at all; Start from 1 *)
-MakeExpression[ "\[DoubleStruckCapitalN]", fmt_] :=
-	MakeExpression[ RowBox[ {"IntegerRange", "[", RowBox[ {"1", ",", "Infinity", ",", "True", ",", "False"}], "]"}], fmt]
+(*MakeExpression[ "\[DoubleStruckCapitalN]", fmt_] :=
+	MakeExpression[ RowBox[ {"IntegerRange", "[", RowBox[ {"1", ",", "Infinity", ",", "True", ",", "False"}], "]"}], fmt] /; $parseTheoremaExpressions
+*)
 
 makeMaxBox[ a_, b_] := RowBox[ {"max", "[", RowBox[ {"{", RowBox[ {a, ",", b}], "}"}], "]"}]
 
@@ -310,9 +319,9 @@ MakeExpression[ SubscriptBox[ dom_?isZQR, l_], fmt_] :=
 	MakeExpression[ RowBox[ {makeDomainRange[ dom], "[", RowBox[ {l, ",", "Infinity", ",", "True", ",", "False"}], "]"}], fmt] /; $parseTheoremaExpressions
 
 (* No subscript at all; Start from -Infinity *)
-MakeExpression[ dom_?isZQR, fmt_] :=
+(*MakeExpression[ dom_?isZQR, fmt_] :=
 	MakeExpression[ RowBox[ {makeDomainRange[ dom], "[", RowBox[ {RowBox[ {"-", "Infinity"}], ",", "Infinity", ",", "False", ",", "False"}], "]"}], fmt]
-
+*)
 
 (* ::Subsubsection:: *)
 (* Tuple notations *)

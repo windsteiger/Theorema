@@ -380,7 +380,7 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
 			(* There are no substitutions available -> rule does not apply *)
 			$Failed,
 			(* else: we have substitutions *)
-			{newForm, usedSubst, cond} = replaceRepeatedAndTrack[ formula@g, rules];
+			{newForm, usedSubst, cond} = replaceRepeatedAndTrack[ formula@g, filterRules[ rules, None]];
 			If[ usedSubst =!= {},
 				(* rewrite applied *)
 				newG = makeGoalFML[ formula -> newForm];
@@ -397,7 +397,7 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
 			genForms = {{newG}};
 			AppendTo[ replBy, Union[ usedSubst]];
 			Do[
-                {newForm, usedSubst, cond} = replaceRepeatedAndTrack[ formula@k[[j]], rules];
+                {newForm, usedSubst, cond} = replaceRepeatedAndTrack[ formula@k[[j]], filterRules[ rules, key@k[[j]]]];
                 If[ usedSubst =!= {},
                     (* rewrite applied *)
                     newForm = makeAssumptionFML[ formula -> newForm];
@@ -419,7 +419,7 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
             If[ substApplied,
             	(* We have to explicitly specify generated-> because we need the proper nesting *)
             	makeANDNODE[ makePRFINFO[ name -> elementarySubstitution, used -> usedForms, generated -> genForms, "usedSubst" -> replBy], 
-					toBeProved[ goal -> newG, kb -> newK, rest]],
+					toBeProved[ goal -> newG, kb -> newK, substRules -> {}, rest]],
 				$Failed
             ]
 		]
@@ -437,7 +437,7 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
 			(* There are no definitions available at all in this proof -> expanding defs does not apply *)
 			$Failed,
 			(* else: we have definition rewrite rules *)
-			{new, usedDefs, cond} = replaceAllAndTrack[ formula@g, rules];
+			{new, usedDefs, cond} = replaceAllAndTrack[ formula@g, filterRules[ rules, None]];
 			If[ usedDefs =!= {} && freeVariables[ cond] === {},
 				(* rewrite applied *)
 				(* in this case, the result is of the form {newForm, cond}, where cond are conditions to be fulfilled in order to allow the rewrite *)
@@ -455,7 +455,7 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
 			genForms = {{newG}};
 			AppendTo[ replBy, Union[ usedDefs]];
 			Do[
-                {new, usedDefs, cond} = replaceAllAndTrack[ formula@k[[j]], rules];
+                {new, usedDefs, cond} = replaceAllAndTrack[ formula@k[[j]], filterRules[ rules, None]];
                 If[ usedDefs =!= {} && freeVariables[ cond] === {},
                     (* rewrite applied *)
                     newForm = makeAssumptionFML[ formula -> new];

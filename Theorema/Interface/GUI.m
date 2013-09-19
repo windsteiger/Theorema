@@ -1346,6 +1346,7 @@ setCompEnv[ args___] := unexpected[ setCompEnv, {args}]
 
 printProveInfo[ goal_, kb_, rules_, strategy_, {pVal_, proofObj_}, {pTime_, sTime_}, searchDepth_] :=
     Module[ {kbAct, bui, buiAct},
+    	(* pTime (prove time) and sTime (simplification time) currently unused, should be displayed somewhere *)
         kbAct = Map[ makeLabel[ label[#]]&, kb];
         bui = Cases[ DownValues[ buiActProve],
         	HoldPattern[ Verbatim[HoldPattern][ buiActProve[ op_String]] :> v_] -> {op, v}];

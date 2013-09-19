@@ -57,8 +57,13 @@ freshNamesProg[ args___] := unexpected[ freshNamesProg, {args}]*)
 (* amaletzk: Define "freshNames[]" in the way below, because otherwise parts with "Program" don't work *)
 freshNames[expr_Hold] :=
 	Module[ {symPos, repl, progPos, progSymPos},
+		(* There are certain expressions, into which we do not want to go deeper for substituting fresh names. 
+		   An example is a META$[__] expression representing a meta-variable in a proof, which has a list as
+		   its 3rd parameter. Going into it would turn the list into a Set$TM ... 
+		   If other cases occur in the future, just add a suitable transformation here BEFORE the replaceable
+		   positions are computed. *)
 		progPos = Position[ expr, Program[_]];
-		symPos = DeleteCases[ Position[ expr, _Symbol], {0}, {1}, 1];
+		symPos = DeleteCases[ Position[ expr /. {META$[__] -> META$[]}, _Symbol], {0}, {1}, 1];
 		progSymPos = Cases[ symPos, x_ /; isSubPositionOfAny[ x, progPos]];
 		repl = Join[Map[ # -> freshSymbol[ Extract[ expr, #, Hold]]&, Complement[symPos, progSymPos]],
 					Map[ # -> freshSymbolProg[ Extract[ expr, #, Hold]]&, progSymPos]];
@@ -78,7 +83,11 @@ freshSymbol[ Hold[ s_Symbol]] :=
         Switch[ Unevaluated[ s],
             (* We use ToExpression in order to have the symbol generated in the right context
                depending on whether we are in a computation or not *)
-            True|False, s,
+            True|False|Infinity, s,
+            ToExpression["\[DoubleStruckCapitalN]"], ToExpression[ "IntegerRange$TM[ 1, Infinity, True, False]"],
+            ToExpression["\[DoubleStruckCapitalZ]"], ToExpression[ "IntegerRange$TM[ -Infinity, Infinity, False, False]"],
+            ToExpression["\[DoubleStruckCapitalQ]"], ToExpression[ "RationalRange$TM[ -Infinity, Infinity, False, False]"],
+            ToExpression["\[DoubleStruckCapitalR]"], ToExpression[ "RealRange$TM[ -Infinity, Infinity, False, False]"],
             DoubleLongRightArrow|DoubleRightArrow, ToExpression[ "Implies$TM"],
             DoubleLongLeftRightArrow|DoubleLeftRightArrow|Equivalent, ToExpression[ "Iff$TM"],
         	SetDelayed, ToExpression[ "EqualDef$TM"], 

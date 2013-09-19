@@ -65,25 +65,38 @@ callProver[ args___] := unexpected[ callProver, {args}]
 (* proofSearch *)
 
 proofSearch[ searchDepth_Integer, searchTime:(_Integer|Infinity)] :=
-    Module[ {startTime = SessionTime[], openPSpos, openPS, selPSpos, selPS, pStrat, newSteps},
+    Module[ {startTime = SessionTime[], openPSpos, selPSpos, selPS, pStrat, newSteps},
     	$proofAborted = False;
+        (* As long as there is something to do, run the basic search loop.
+           Time limit not reached, proof not aborted interactively, proof still pending, open proof sits available.
+           If pending, then open proof sits should be available, still we check to be on the save side, otherwise
+           choosing the next sit might lead to errors. We need to extract the open sits anyway, so the effort is not in vain.
+        *)
         While[ SessionTime[] - startTime <= searchTime && !$proofAborted && proofValue@$TMAproofObject === pending && 
         	(openPSpos = positionRelevantSits[ $TMAproofObject]) =!= {},
-            openPS = Extract[ $TMAproofObject, openPSpos];
-            {selPS, selPSpos} = chooseNextPS[ openPS, openPSpos];
+        	(* choose the next proof sit to continue *)
+            {selPS, selPSpos} = chooseNextPS[ openPSpos];
             $currentSearchLevel = Length[ selPSpos];
+            (* we record the depth of the tree, it is a parameter for computing the size for displaying the proof tree in the GUI *)
             $TMAcurrentDepth = Max[ $TMAcurrentDepth, $currentSearchLevel];
             If[ $currentSearchLevel > searchDepth,
+            (* if search depth limit is reached, put a failing leaf *)
             	newSteps = searchDepthExceeded[ selPS],
-            	(* else *)
+            	(* else: if search depth limit is not yet reached ...*)
+            	(* get the strategy from the proof sit ...*)
             	pStrat = strategy@selPS;
+            	(* and apply it to the selected proof sit*)
             	newSteps = pStrat[ selPS]
             ];
+            (* Security check: if newSteps is something invalid (should never be, but buggy strategy or buggy rules could do that *)
             If[ !isProofNode[ newSteps],
             	newSteps = noProofNode[ newSteps, id@selPS];
 			];
+			(* replace the open proof sit with the new subtree ...*)
             $TMAproofObject = replaceProofSit[ $TMAproofObject, selPSpos -> newSteps];
+            (* and propagate the proof value *)
             $TMAproofObject = propagateProofValues[ $TMAproofObject];
+            (* return value: elapsed time *)
             SessionTime[] - startTime
         ]
     ]
@@ -150,17 +163,19 @@ stillRelevant[ pos_List, po_PRFOBJ$] :=
 	]
 stillRelevant[ args___] := unexpected[ stillRelevant, {args}]
 
-chooseNextPS[ ps_List, psPos_List] :=
-	Module[{},
-		{First[ ps], First[ psPos]}
+chooseNextPS[ psPos_List] :=
+	Module[{openPS},
+        openPS = Extract[ $TMAproofObject, psPos];
+		Map[ First, {openPS, psPos}]
 	]
-chooseNextPS[ ps_List, psPos_List] /; $interactiveProofSitSel && Length[ ps] > 1 :=
-	Module[{ psSel},
-		$selectedProofStep = id@ps[[1]];
-		nextProofSitDialog[ ps];
+chooseNextPS[ psPos_List] /; $interactiveProofSitSel && Length[ psPos] > 1 :=
+	Module[{ openPS, psSel},
+		openPS = Extract[ $TMAproofObject, openPSpos];
+		$selectedProofStep = id[ openPS[[1]]];
+		nextProofSitDialog[ openPS];
 		NotebookClose[ $TMAproofNotebook];
-		{psSel} = Position[ ps, _?(id[#] === $selectedProofStep&), {1}, Heads -> False];
-		{Extract[ ps, psSel], Extract[ psPos, psSel]}
+		{psSel} = Position[ openPS, _?(id[#] === $selectedProofStep&), {1}, Heads -> False];
+		Map[ Extract[ #, psSel]&, {openPS, psPos}]
 	]
 chooseNextPS[ args___] := unexpected[ chooseNextPS, {args}]
        	
@@ -704,12 +719,12 @@ makeInitialProofObject[ g_FML$, k_List, {r_Hold, act_List, prio_List}, s_] :=
            We put the generated rules into the respective components in the proof object. We don't put the original formulae corresponding to definitions and
            elementary substitutions into the KB then *)
         (* We try to figure out all constants available in the formulas *)
-        const = Cases[ Level[ 
+        const = DeleteDuplicates[ Cases[ Level[ 
         	Append[ k, g] /. {_VAR$ -> "", _SEQ0$ -> "", _SEQ1$ -> "", _FIX$ -> "", True|False -> ""},
-        	{-1}], _Symbol | _?NumberQ];
+        	{-1}], _Symbol | _?NumberQ]];
         If[ const =!= {},
         	(* Mark the constants as new *)
-        	const = Map[ SIMPRNG$, Apply[ RNG$, const]]
+        	const = {Map[ SIMPRNG$, Apply[ RNG$, const]]}
         ];        	
         {thinnedKB, kr, gr, sr, dr} = trimKBforRewriting[ k];
         propagateProofValues[ 
