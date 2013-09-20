@@ -781,7 +781,7 @@ processComputation[ x:Theorema`Computation`Language`nE] :=
 	]
 processComputation[x_] := Module[ { procSynt, res},
 	procSynt = markVariables[ freshNames[ Hold[x]]];
-	printComputationInfo[];
+	printComputationInfo[]; (* should be moved to closeComputation[] in order to print info after the result, analogous then for proof info *)
 	setComputationContext[ "compute"];
 	res = Catch[ ReleaseHold[ procSynt]];
 	setComputationContext[ "none"];
