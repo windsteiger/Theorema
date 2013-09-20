@@ -89,6 +89,7 @@ initGUI[] :=
         		{"LessEqual", RowBox[{"A","\[LessEqual]","B"}], False, True, False},
         		{"Greater", RowBox[{"A",">","B"}], False, True, False},
         		{"GreaterEqual", RowBox[{"A","\[GreaterEqual]","B"}], False, True, False},
+        		{"AbsValue", RowBox[{"\[LeftBracketingBar]", "A", "\[RightBracketingBar]"}], False, True, False},
         		{"SumOf", RowBox[{"\[Sum]",SubscriptBox["A","i"]}], False, True, False},
         		{"ProductOf", RowBox[{"\[Product]",SubscriptBox["A","i"]}], False, True, False}
         	},

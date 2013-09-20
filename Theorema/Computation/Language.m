@@ -50,6 +50,8 @@ Less$TM[ a__] /; buiActive["Less"] := Less[ a]
 LessEqual$TM[ a__] /; buiActive["LessEqual"] := LessEqual[ a]
 Greater$TM[ a__] /; buiActive["Greater"] := Greater[ a]
 GreaterEqual$TM[ a__] /; buiActive["GreaterEqual"] := GreaterEqual[ a]
+BracketingBar$TM[ a:(_Integer|_Rational|_Real|_Complex|_DirectedInfinity)] /; buiActive["AbsValue"] := Abs[ a]
+BracketingBar$TM[ a:(Pi|E|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaisher)] /; buiActive["AbsValue"] := a
 
 
 
