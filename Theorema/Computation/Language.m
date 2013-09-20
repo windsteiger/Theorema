@@ -417,6 +417,19 @@ isPositionSpec[ Tuple$TM[ p__]] := Apply[ And, Map[ isPositionSpec, {p}]]
 isPositionSpec[ _] := False
 isPositionSpec[ args___] := unexpected[ isPositionSpec, {args}]
 
+(* If max$TM is applied to sets or tuples and built-in Max doesn't completely evaluate, max$TM[x___] remains (where
+	x___ is just a sequence of elements). Hence, we also have to deal with that case, but, in order not to get into
+	an infinite loop, we have to check whether Max[x___] really simplifies. This has to be done with max$TM, because
+	the corresponding Mma function does not have the same name (lower-case vs. upper-case)! Same with min$TM. *)
+max$TM[ x___] :=
+	Module[{e},
+		(e /. Max -> max$TM) /; (e = Max[ x]; Not[ Hold[ Max[ x]] === Apply[ Hold, {e}]])
+	]
+min$TM[ x___] :=
+	Module[{e},
+		(e /. Min -> min$TM) /; (e = Min[ x]; Not[ Hold[ Min[ x]] === Apply[ Hold, {e}]])
+	]
+
 
 (* ::Section:: *)
 (* Domains and Data Types *)
