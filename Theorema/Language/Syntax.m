@@ -1,10 +1,20 @@
-(* ::Package:: *)
+(* Theorema 
+    Copyright (C) 2010 The Theorema Group
 
-(* 
-Theorema editor: W. Windsteiger
-Author(s):       W. Windsteiger
+    This file is part of Theorema.2
+    
+    Theorema.2 is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
 
-What is the purpose of the Theorema editor? Read more in /ProgrammersDoc/Guidelines.nb#1871658360
+    Theorema.2 is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
 BeginPackage["Theorema`Language`Syntax`"];
@@ -13,8 +23,17 @@ Needs["Theorema`Common`"]
 
 Begin["`Private`"]
 
-theoremaDisplay[ expr_] := DisplayForm[ ToBoxes[ expr, TheoremaForm]]
+theoremaDisplay[ expr_] := DisplayForm[ theoremaBoxes[ expr]]
 theoremaDisplay[ args___] := unexpected[ theoremaDisplay, {args}]
+
+theoremaBoxes[ expr_] := stripOutermostParen[ ToBoxes[ expr, TheoremaForm]]
+theoremaBoxes[ args___] := unexpected[ theoremaBoxes, {args}]
+
+(* The ToBoxes sometimes produces parentheses also around the entire expression. This is the place to remove them before display *)
+stripOutermostParen[ FormBox[ RowBox[ {TagBox["(", "AutoParentheses"], e___, TagBox[")", "AutoParentheses"]}], TheoremaForm]] := e
+stripOutermostParen[ e_] := e
+stripOutermostParen[ args___] := unexpected[ stripOutermostParen, {args}]
+
 
 (* $tmaNonStandardOperators is initialized here and gets values added in Expression.m *)
 $tmaNonStandardOperators = {};
@@ -198,6 +217,16 @@ MakeExpression[ RowBox[{UnderscriptBox[ "let", rng_], form_}], fmt_] :=
         fmt]
      ] /; $parseTheoremaExpressions
 
+(* ::Subsubsection:: *)
+(* Special arithmetic *)
+
+(* we do not want that a-b is automatically converted to a+(-b), this should only be under built-in subtract. *)
+
+MakeExpression[ RowBox[ {a_, "-", b_, c___}], fmt_] := MakeExpression[ RowBox[ {RowBox[ {"Subtract", "[", a, ",", b, "]"}], c}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {a_, "/", b_, c___}], fmt_] := MakeExpression[ RowBox[ {RowBox[ {"Divide", "[", a, ",", b, "]"}], c}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ FractionBox[ a_, b_], fmt_] := MakeExpression[ RowBox[ {"Divide", "[", a, ",", b, "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ SqrtBox[ a_], fmt_] := MakeExpression[ RowBox[ {"Radical", "[", a, ",", 2, "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ RadicalBox[ a_, b_], fmt_] := MakeExpression[ RowBox[ {"Radical", "[", a, ",", b, "]"}], fmt] /; $parseTheoremaExpressions
 
 (* ::Subsubsection:: *)
 (* Special connectives *)
@@ -606,6 +635,16 @@ MakeBoxes[ (op_?isNonStandardOperatorName)[ arg___], TheoremaForm] :=
         MakeBoxes[ b[ arg], TheoremaForm]
     ]
 
+(*
+	Parenthesizing of expressions is an issue that may need more attention in an improved implementation.
+	Current solution: 
+	1) Basically, we let Mma do the formatting including setting parentheses.
+	2) We parenthesize expressions with "AutoParenthesies" like in input, except for 
+			expressions that format as f[...] and
+			expressions starting with a "("
+	3) We do not parenthesize arithmetic expressions.
+	4) On demand, more exceptions can be implemented at this point.
+*)
 MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
     With[ {b = tmaToInputOperator[ op]},
     	(* Special cases, because otherwise And uses && and Or uses || *)
@@ -615,11 +654,23 @@ MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
     		Or,
     		tmaInfixBox[ {arg}, "\[Or]"],
     		Not,
-    		RowBox[{ "\[Not]", MakeBoxes[ arg, TheoremaForm]}],
+    		RowBox[{ "\[Not]", parenthesize[ arg]}],
+    		Plus|Times|Power,
+    		MakeBoxes[ b[ arg], TheoremaForm],
     		_,
-        	MakeBoxes[ b[ arg], TheoremaForm]
+    		parenthesize[ b[ arg]]
     	]
     ]
+
+parenthesize[ b_[ arg___]] :=
+    Module[ {res = MakeBoxes[ b[ arg], TheoremaForm]},
+        If[ MatchQ[ res, RowBox[ {ToString[ b], "[", ___}]|RowBox[ {"(", ___, ")"}]],
+            res,
+            RowBox[ {TagBox[ "(", "AutoParentheses"], res, TagBox[ ")", "AutoParentheses"]}]
+        ]
+    ]
+parenthesize[ e_] := MakeBoxes[ e, TheoremaForm]
+parenthesize[ args___] := unexpected[ parenthesize, {args}]
 
 MakeBoxes[ s_Symbol, TheoremaForm] := 
 	Module[ {n = SymbolName[ s]},
@@ -662,224 +713,6 @@ MakeBoxes[ (dom_?(isUnderscriptDomain[ MakeBoxes[ #, TheoremaForm]]&))[ op_][ a_
 	
 tmaInfixBox[ args_List, op_] := RowBox[ Riffle[ Map[ MakeBoxes[ #, TheoremaForm]&, args], op]]
 tmaInfixBox[ args___] := unexpected[ tmaInfixBox, {args}]
-
-(*
-
-SetAttributes[\[Bullet]\[Bullet]range,HoldAll];
-
-\[Bullet]range::usage="\[Bullet]range[range1,...] represents a range specification (mostly for variables). One single \[Bullet]range-object can contain more than one range specification.";
-
-\[Bullet]\[Bullet]range::usage="\[Bullet]\[Bullet]range[range1,...] represents a range specification (mostly for variables). One single \[Bullet]\[Bullet]range-object can contain more than one range specification.";
-
-ToRangeBox[x_]/;PrintMessage[ToRangeBox::usage]:=Null
-
-ToHoldingRangeBox::usage="ToHoldingRangeBox[box] produces the range specification of a quantifier (with all the necessary attributes).";
-
-ToTMRangeBox::usage="ToTMRangeBox[box] produces the range specification of a quantifier (without any attributes).";
-
-
-
-ToHoldingRangeBox[x_]:=ToPreliminaryRangeBox[x]/.rangeToHoldingRange
-
-ToTMRangeBox[x_]:=ToPreliminaryRangeBox[x]/.holdingRangeToRange
-
-MakeRangeSequence::usage="MakeRangeSequence[boxes]] reads the individual range specifications.";
-
-MakeRangeSequence[GridBox[{{s_},r__}]]:=Sequence[MakeRangeSequence[s],",",MakeRangeSequence[GridBox[{r}]]]
-
-MakeRangeSequence[GridBox[{{s_}}]]:=MakeRangeSequence[s]
-
-MakeRangeSequence[RowBox[{"(",x_,")"}]]:=x/;$SessionIdentifier==="Prog"
-
-MakeRangeSequence[RowBox[{"(",x_,")"}]]:=MakeRangeSequence[x]
-
-SetAttributes[\[Bullet]\[Bullet]predRange,HoldFirst];
-
-\[Bullet]predRange::usage="\[Bullet]predRange[x,pred] denotes that the variable `x` statisfies the unary predicate `pred`.";
-
-\[Bullet]\[Bullet]predRange::usage="\[Bullet]\[Bullet]predRange[x,pred] denotes that the variable `x` statisfies the unary predicate `pred`.";
-
-MakeRangeSequence[RowBox[{pred_,"[",x_,"]"}]]:=RowBox[{"\[Bullet]predRange","[",x,",",pred,"]"}]
-
-MakeRangeSequence[RowBox[{pred_,"[",RowBox[{x_}],"]"}]]:=RowBox[{"\[Bullet]predRange","[",x,",",pred,"]"}]
-
-MakeRangeSequence[RowBox[{pred_,"[",RowBox[{x_,",",y__}],"]"}]]:=Sequence[RowBox[{"\[Bullet]predRange","[",x,",",pred,"]"}],",",MakeRangeSequence[RowBox[{pred,"[",RowBox[{y}],"]"}]]]
-
-SetAttributes[\[Bullet]\[Bullet]setRange,HoldFirst];
-
-\[Bullet]setRange::usage="\[Bullet]setRange[x,s] denotes that the variable `x` ranges over the set `s`.";
-
-\[Bullet]\[Bullet]setRange::usage="\[Bullet]\[Bullet]setRange[x,s] denotes that the variable `x` ranges over the set `s`.";
-
-MakeRangeSequence[RowBox[{i_, ",", j__,",",RowBox[{k_, "\[Element]", s_}]}]]:=Sequence[RowBox[{"\[Bullet]setRange","[",i,",",s,"]"}],",",MakeRangeSequence[RowBox[{j,",",RowBox[{k, "\[Element]", s}]}]]]
-
-MakeRangeSequence[RowBox[{j_,",",RowBox[{k_, "\[Element]", s_}]}]]:=Sequence[RowBox[{"\[Bullet]setRange","[",j,",",s,"]"}],",",RowBox[{"\[Bullet]setRange","[",k,",",s,"]"}]]
-
-MakeRangeSequence[RowBox[{k_,"\[Element]",s_}]]:=RowBox[{"\[Bullet]setRange","[",k,",",s,"]"}]
-
-SetAttributes[\[Bullet]\[Bullet]integerRange,HoldFirst];
-
-\[Bullet]integerRange::usage="\[Bullet]integerRange[i,lower,upper] denotes that the variable `i` ranges over all integers from `lower` to `upper`.";
-
-\[Bullet]\[Bullet]integerRange::usage="\[Bullet]\[Bullet]integerRange[i,lower,upper] denotes that the variable `i` ranges over all integers from `lower` to `upper`.";
-
-MakeRangeSequence[RowBox[{i_, ",", j__,",",n      RowBox[{k_, "=", lower_}], ",", "...", ",", upper_}]]:=Sequence[RowBox[{"\[Bullet]integerRange","[",i,",",lower,",",upper,"]"}],",",MakeRangeSequence[RowBox[{j,",",n      RowBox[{k, "=", lower}], ",", "...", ",", upper}]]]
-
-MakeRangeSequence[RowBox[{j_, ",", n      RowBox[{k_, "=", lower_}], ",", "...", ",", upper_}]]:=Sequence[RowBox[{"\[Bullet]integerRange","[",j,",",lower,",",upper,"]"}],",",RowBox[{"\[Bullet]integerRange","[",k,",",lower,",",upper,"]"}]]
-
-MakeRangeSequence[RowBox[{RowBox[{k_,"=",lower_}],",","...",",",upper_}]]:=n	RowBox[{"\[Bullet]integerRange","[",k,",",lower,",",upper,"]"}]
-
-MakeRangeSequence[RowBox[{i_,",",j__,",",RowBox[{k_,"=",lower_}],",","..."}]]:=n	Sequence[RowBox[{"\[Bullet]integerRange","[",i,",",lower,",","\[Infinity]","]"}],",",MakeRangeSequence[RowBox[{j,",",RowBox[{k,"=",lower}],",","..."}]]]
-
-MakeRangeSequence[RowBox[{j_,",",RowBox[{k_,"=",lower_}],",","..."}]]:=n	Sequence[RowBox[{"\[Bullet]integerRange","[",j,",",lower,",","\[Infinity]","]"}],",",RowBox[{"\[Bullet]integerRange","[",k,",",lower,",","\[Infinity]","]"}]]
-
-MakeRangeSequence[RowBox[{RowBox[{k_,"=",lower_}],",","..."}]]:=n	RowBox[{"\[Bullet]integerRange","[",k,",",lower,",","\[Infinity]","]"}]
-
-MakeRangeSequence[RowBox[{i_,",",j__,",",RowBox[{k_,"=","..."}],",",upper_}]]:=n	Sequence[RowBox[{"\[Bullet]integerRange","[",i,",",RowBox[{"-", "\[Infinity]"}],",",upper,"]"}],",",MakeRangeSequence[RowBox[{j,",",RowBox[{k,"=","..."}],",",upper}]]]
-
-MakeRangeSequence[RowBox[{j_,",",RowBox[{k_,"=","..."}],",",upper_}]]:=n	Sequence[RowBox[{"\[Bullet]integerRange","[",j,",",RowBox[{"-", "\[Infinity]"}],",",upper,"]"}],",",RowBox[{"\[Bullet]integerRange","[",k,",",RowBox[{"-", "\[Infinity]"}],",",upper,"]"}]]
-
-MakeRangeSequence[RowBox[{RowBox[{k_,"=","..."}],",",upper_}]]:=n	RowBox[{"\[Bullet]integerRange","[",k,",",RowBox[{"-", "\[Infinity]"}],",",upper,"]"}]
-
-MakeRangeSequence[RowBox[{i_,",",j__,",",RowBox[{k_,"=","..."}]}]]:=n	Sequence[RowBox[{"\[Bullet]integerRange","[",i,",",RowBox[{"-", "\[Infinity]"}],",","\[Infinity]","]"}],",",nMakeRangeSequence[RowBox[{j,",",RowBox[{k,"=","..."}]}]]]
-
-MakeRangeSequence[RowBox[{j_,",",RowBox[{k_,"=","..."}]}]]:=n	Sequence[RowBox[{"\[Bullet]integerRange","[",j,",",RowBox[{"-", "\[Infinity]"}],",","\[Infinity]","]"}],",",n	RowBox[{"\[Bullet]integerRange","[",k,",",RowBox[{"-", "\[Infinity]"}],",","\[Infinity]","]"}]]
-
-MakeRangeSequence[RowBox[{k_,"=","..."}]]:=n	RowBox[{"\[Bullet]integerRange","[",k,",",RowBox[{"-", "\[Infinity]"}],",","\[Infinity]","]"}]
-
-SetAttributes[\[Bullet]\[Bullet]domainRange,HoldFirst];
-
-\[Bullet]domainRange::usage="\[Bullet]domainRange[i,domain,lower,upper] denotes that the variable `i` ranges over all elements of the enumerable domain `domain` from `lower` to `upper`.";
-
-\[Bullet]\[Bullet]domainRange::usage="\[Bullet]\[Bullet]domainRange[i,domain,lower,upper] denotes that the variable `i` ranges over all elements of the enumerable domain `domain` from `lower` to `upper`.";
-
-MakeRangeSequence[RowBox[{i_,",",j__,",",RowBox[{k_,UnderscriptBox["=",domain_],lower_}],",","...",",",upper_}]]:=Sequence[RowBox[{"\[Bullet]domainRange","[",i,",",domain,",",lower,",",upper,"]"}],",",MakeRangeSequence[RowBox[{j,",",RowBox[{k,UnderscriptBox["=",domain],lower}],",","...",",",upper}]]]
-
-MakeRangeSequence[RowBox[{j_,",",RowBox[{k_,UnderscriptBox["=",domain_],lower_}],",","...",",",upper_}]]:=Sequence[RowBox[{"\[Bullet]domainRange","[",j,",",domain,",",lower,",",upper,"]"}],",",RowBox[{"\[Bullet]domainRange","[",k,",",domain,",",lower,",",upper,"]"}]]
-
-MakeRangeSequence[RowBox[{RowBox[{k_,UnderscriptBox["=",domain_],lower_}],",","...",",",upper_}]]:=(DeclareUnderscriptDomain[domain];RowBox[{"\[Bullet]domainRange","[",k,",",domain,",",lower,",",upper,"]"}])
-
-MakeRangeSequence[RowBox[{i_,",",j__,",",RowBox[{k_,UnderscriptBox["=",domain_],lower_}],",","..."}]]:=Sequence[n		RowBox[{"\[Bullet]domainRange","[",i,",",domain,",",lower,",",RowBox[{domain,"[","Last","]"}],"]"}],",",n		MakeRangeSequence[RowBox[{j,",",RowBox[{k,UnderscriptBox["=",domain],lower}],",","..."}]]]
-
-MakeRangeSequence[RowBox[{j_,",",RowBox[{k_,UnderscriptBox["=",domain_],lower_}],",","..."}]]:=Sequence[n		RowBox[{"\[Bullet]domainRange","[",j,",",domain,",",lower,",",RowBox[{domain,"[","Last","]"}],"]"}],",",n		RowBox[{"\[Bullet]domainRange","[",k,",",domain,",",lower,",",RowBox[{domain,"[","Last","]"}],"]"}]]
-
-MakeRangeSequence[RowBox[{RowBox[{k_,UnderscriptBox["=",domain_],lower_}],",","..."}]]:=(DeclareUnderscriptDomain[domain];RowBox[{"\[Bullet]domainRange","[",k,",",domain,",",lower,",",RowBox[{domain,"[","Last","]"}],"]"}])
-
-MakeRangeSequence[n		RowBox[{i_,",",j__,",",RowBox[{k_,UnderscriptBox["=",domain_],"..."}],",",upper_}]]:=Sequence[n		RowBox[{"\[Bullet]domainRange","[",i,",",domain,",",RowBox[{domain,"[","First","]"}],",",upper,"]"}],",",MakeRangeSequence[n		RowBox[{j,",",RowBox[{k,UnderscriptBox["=",domain],"..."}],",",upper}]]]
-
-MakeRangeSequence[n		RowBox[{j_,",",RowBox[{k_,UnderscriptBox["=",domain_],"..."}],",",upper_}]]:=Sequence[n		RowBox[{"\[Bullet]domainRange","[",j,",",domain,",",RowBox[{domain,"[","First","]"}],",",upper,"]"}],",",n		RowBox[{"\[Bullet]domainRange","[",k,",",domain,",",RowBox[{domain,"[","First","]"}],",",upper,"]"}]]
-
-MakeRangeSequence[RowBox[{RowBox[{k_,UnderscriptBox["=",domain_],"..."}],",",upper_}]]:=(DeclareUnderscriptDomain[domain];RowBox[{"\[Bullet]domainRange","[",k,",",domain,",",RowBox[{domain,"[","First","]"}],",",upper,"]"}])
-
-MakeRangeSequence[RowBox[{i_,",",j__,",",RowBox[{k_,UnderscriptBox["=",domain_],"..."}]}]]:=Sequence[RowBox[{"\[Bullet]domainRange","[",i,",",domain,",",RowBox[{domain,"[","First","]"}],",",RowBox[{domain,"[","Last","]"}],"]"}],",",MakeRangeSequence[RowBox[{j,",",RowBox[{k,UnderscriptBox["=",domain],"..."}]}]]]
-
-MakeRangeSequence[RowBox[{j_,",",RowBox[{k_,UnderscriptBox["=",domain_],"..."}]}]]:=Sequence[RowBox[{"\[Bullet]domainRange","[",j,",",domain,",",RowBox[{domain,"[","First","]"}],",",RowBox[{domain,"[","Last","]"}],"]"}],",",RowBox[{"\[Bullet]domainRange","[",k,",",domain,",",RowBox[{domain,"[","First","]"}],",",RowBox[{domain,"[","Last","]"}],"]"}]]
-
-MakeRangeSequence[RowBox[{k_,UnderscriptBox["=",domain_],"..."}]]:=n	(DeclareUnderscriptDomain[domain];RowBox[{"\[Bullet]domainRange","[",k,",",domain,",",RowBox[{domain,"[","First","]"}],",",RowBox[{domain,"[","Last","]"}],"]"}])
-
-SetAttributes[\[Bullet]\[Bullet]limitRange,HoldFirst];
-
-MakeRangeSequence[RowBox[{i_, ",", j__, ",",RowBox[{k_,UnderscriptBox["\[LongRightArrow]"|"\[RightArrow]"|"->",dom_], s_}]}]]:=n	Sequence[RowBox[{"\[Bullet]limitRange","[",i,",",s,",",dom,"]"}],",",n		MakeRangeSequence[RowBox[{j,",",RowBox[{k, "\[LongRightArrow]", s}]}]]]
-
-MakeRangeSequence[n    RowBox[{j_, ",", n      RowBox[{k_, UnderscriptBox["\[LongRightArrow]"|"\[RightArrow]"|"->",dom_], s_}]}]]:=Sequence[RowBox[{"\[Bullet]limitRange","[",j,",",s,",",dom,"]"}],",",RowBox[{"\[Bullet]limitRange","[",k,",",s,",",dom,"]"}]]
-
-MakeRangeSequence[RowBox[{k_,UnderscriptBox["\[LongRightArrow]"|"\[RightArrow]"|"->",dom_],s_}]]:=RowBox[{"\[Bullet]limitRange","[",k,",",s,",",dom,"]"}]
-
-MakeRangeSequence[RowBox[{i_, ",", j__, ",",RowBox[{k_,"\[LongRightArrow]"|"\[RightArrow]"|"->", s_}]}]]:=n	Sequence[RowBox[{"\[Bullet]limitRange","[",i,",",s,",","None","]"}],",",n		MakeRangeSequence[RowBox[{j,",",RowBox[{k, "\[LongRightArrow]", s}]}]]]
-
-MakeRangeSequence[n    RowBox[{j_, ",", n      RowBox[{k_, "\[LongRightArrow]"|"\[RightArrow]"|"->", s_}]}]]:=Sequence[RowBox[{"\[Bullet]limitRange","[",j,",",s,",","None","]"}],",",RowBox[{"\[Bullet]limitRange","[",k,",",s,",","None","]"}]]
-
-MakeRangeSequence[RowBox[{k_,"\[LongRightArrow]"|"\[RightArrow]"|"->",s_}]]:=RowBox[{"\[Bullet]limitRange","[",k,",",s,",","None","]"}]
-
-SetAttributes[\[Bullet]\[Bullet]simpleRange,HoldFirst];
-
-
-\[Bullet]locval::usage="\[Bullet]locval[x,v] declares `v` as a local value for `x`.";
-
-MakeRangeSequence[RowBox[{x_,"="|"\[LeftArrow]"|"\[LongLeftArrow]",v_}]]:=RowBox[{"\[Bullet]locval","[",RowBox[{x,",",v}],"]"}]
-
-MakeRangeBoxes::usage="MakeRangeBoxes[x,f] produces the nice-looking output for the range 'x' in output form 'f'.";
-
-SetAttributes[MakeRangeBoxes,HoldAll];
-
-MakeRangeBoxes[(\[Bullet]range|\[Bullet]\[Bullet]range)[x_Pattern,y___],f_]:=RowBox[{"(",RowBox[MakePatternRangeBoxes[{x,y},f]],")"}]
-
-MakeRangeBoxes[(\[Bullet]range|\[Bullet]\[Bullet]range)[x:(_[_Pattern,___]),y___],f_]:=RowBox[{"(",RowBox[MakePatternRangeBoxes[{x,y},f]],")"}]
-
-MakeRangeBoxes[(\[Bullet]range|\[Bullet]\[Bullet]range)[x_],f_]:=MakeSingleRangeBoxes[x,f]
-
-MakeRangeBoxes[(\[Bullet]range|\[Bullet]\[Bullet]range)[x:(__ \[Bullet]simpleRange|__ \[Bullet]\[Bullet]simpleRange)],f_]:=RowBox[MakeSimpleRangeBoxes[{x},f]]
-
-MakeRangeBoxes[(\[Bullet]range|\[Bullet]\[Bullet]range)[x__],f_]:=GridBox[MakeMultipleRangeBoxes[{x},f]]
-
-MakeRangeBoxes[x_,f_]:=(PrintMessage[Theorema::strangeRange,ToString[x]];
-MakeBoxes[x,f])
-
-ClearAll[MakeSingleRangeBoxes];
-((SetAttributes[MakeSingleRangeBoxes,HoldAll];))
-
-MakeSingleRangeBoxes[(\[Bullet]simpleRange|\[Bullet]\[Bullet]simpleRange)[x_],f_]:=MakeBoxes[x,f]
-
-MakeSingleRangeBoxes[(\[Bullet]predRange|\[Bullet]\[Bullet]predRange)[x_,t_],f_]:=MakeSingleRangeBoxes[\[Bullet]simpleRange[x],f]/;(TypeVar/.SessionContext[x])===\[Bullet]\[Bullet]predRange[x,t]
-
-MakeSingleRangeBoxes[(\[Bullet]predRange|\[Bullet]\[Bullet]predRange)[x_,t_],f_]:=MakeBoxes[t[x],f]
-
-MakeSingleRangeBoxes[(\[Bullet]setRange|\[Bullet]\[Bullet]setRange)[x_,s_],f_]:=MakeSingleRangeBoxes[\[Bullet]simpleRange[x],f]/;(TypeVar/.SessionContext[x])===\[Bullet]\[Bullet]setRange[x,s]
-
-MakeSingleRangeBoxes[(\[Bullet]setRange|\[Bullet]\[Bullet]setRange)[x_,s_],f_]:=RowBox[{MakeBoxes[x,f],"\[Element]",MakeBoxes[s,f]}]
-
-MakeSingleRangeBoxes[(\[Bullet]integerRange|\[Bullet]\[Bullet]integerRange)[x_,lower_,upper_],f_]:=MakeSingleRangeBoxes[\[Bullet]simpleRange[x],f]/;(TypeVar/.SessionContext[x])===\[Bullet]\[Bullet]integerRange[x,lower,upper]
-
-MakeSingleRangeBoxes[(\[Bullet]integerRange|\[Bullet]\[Bullet]integerRange)[x_,lower_,upper_],f_]:=RowBox[{RowBox[{MakeBoxes[x,f],"=",MakeBoxes[lower,f]}],",","...",",",MakeBoxes[upper,f]}]
-
-MakeSingleRangeBoxes[(\[Bullet]domainRange|\[Bullet]\[Bullet]domainRange)[x_,domain_,lower_,upper_],f_]:=MakeSingleRangeBoxes[\[Bullet]simpleRange[x],f]/;(TypeVar/.SessionContext[x])===\[Bullet]\[Bullet]domainRange[x,domain,lower,upper]
-
-MakeSingleRangeBoxes[(\[Bullet]domainRange|\[Bullet]\[Bullet]domainRange)[x_,domain_,lower_,upper_],f_]:=RowBox[{RowBox[{MakeBoxes[x,f],UnderscriptBox["=",MakeBoxes[domain,f]],MakeBoxes[lower,f]}],",","...",",",MakeBoxes[upper,f]}]
-
-MakeSingleRangeBoxes[(\[Bullet]limitRange|\[Bullet]\[Bullet]limitRange)[x_,y_],f_]:=MakeSingleRangeBoxes[\[Bullet]simpleRange[x],f]/;(TypeVar/.SessionContext[x])===\[Bullet]\[Bullet]limitRange[x,y]
-
-MakeSingleRangeBoxes[(\[Bullet]limitRange|\[Bullet]\[Bullet]limitRange)[x_,y_],f_]:=RowBox[{MakeBoxes[x,f],"->",MakeBoxes[y,f]}]
-
-MakeSingleRangeBoxes[(\[Bullet]locval)[x_,y_],f_]:=RowBox[{MakeBoxes[x,f],"\[LeftArrow]",MakeBoxes[y,f]}]
-
-MakeSingleRangeBoxes[x_,f_]:=(PrintMessage[Theorema::strangeRange,ToString[x]];
-RowBox[{"(",MakeBoxes[x,f],")"}])
-
-SetAttributes[MakeSimpleRangeBoxes,HoldAll];
-
-MakeSimpleRangeBoxes[{(\[Bullet]simpleRange|\[Bullet]\[Bullet]simpleRange)[x_]},f_]:={MakeBoxes[x,f]}
-
-MakeSimpleRangeBoxes[{(\[Bullet]simpleRange|\[Bullet]\[Bullet]simpleRange)[x_],y__},f_]:=Prepend[Prepend[MakeSimpleRangeBoxes[{y},f],","],MakeBoxes[x,f]]
-
-SetAttributes[MakeMultipleRangeBoxes,HoldAll];
-
-MakeMultipleRangeBoxes[{x_},f_]:={{MakeSingleRangeBoxes[x,f]}}
-
-MakeMultipleRangeBoxes[{x_,y__},f_]:=Prepend[MakeMultipleRangeBoxes[{y},f],{MakeSingleRangeBoxes[x,f]}]
-
-SetAttributes[MakePatternRangeBoxes,HoldAll]
-
-MakePatternRangeBoxes[{x_},f_]:={MakeBoxes[x,f]}
-
-MakePatternRangeBoxes[{x_,y__},f_]:=Prepend[Prepend[MakePatternRangeBoxes[{y},f],","],MakeBoxes[x,f]]
-
-
-ToConditionBox[]:="True"
-
-ToConditionBox[RowBox[{}]]:="True"
-
-ToConditionBox[RowBox[{s_}]]:=ToConditionBox[s]
-
-ToConditionBox[s_]:=s
-
-ToConditionBox[s__]:=RowBox[{s}]
-
-SetAttributes[MakeConditionBoxes,HoldAll];
-
-MakeConditionBoxes[x_,f_]:=MakeBoxes[x,f];
-
-
-*)
 
 initParser[];
 

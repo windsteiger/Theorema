@@ -1,4 +1,21 @@
-(* ::Package:: *)
+(* Theorema 
+    Copyright (C) 2010 The Theorema Group
+
+    This file is part of Theorema.2
+    
+    Theorema.2 is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Theorema.2 is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*)
 
 BeginPackage["Theorema`Computation`Language`"]
 
@@ -43,8 +60,11 @@ setComputationContext[ args___] := unexpected[ setComputationContext, {args}]
 
    
 Plus$TM[ a___] /; buiActive["Plus"] := Plus[ a]
+Subtract$TM[ a___] /; buiActive["Subtract"] := Subtract[ a]
 Times$TM[ a___] /; buiActive["Times"] := Times[ a]
+Divide$TM[ a___] /; buiActive["Divide"] := Divide[ a]
 Power$TM[ a_, b_] /; buiActive["Power"] := Power[ a, b]
+Radical$TM[ a_, b_] /; buiActive["Radical"] := Power[ a, 1/b]
 Equal$TM[ a_, b_] /; buiActive["Equal"] := a == b
 Less$TM[ a__] /; buiActive["Less"] := Less[ a]
 LessEqual$TM[ a__] /; buiActive["LessEqual"] := LessEqual[ a]
