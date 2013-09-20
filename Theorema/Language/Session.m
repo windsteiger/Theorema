@@ -54,24 +54,69 @@ freshNamesProg[ expr_Hold] :=
 	]
 freshNamesProg[ args___] := unexpected[ freshNamesProg, {args}]*)
 
-(* amaletzk: Define "freshNames[]" in the way below, because otherwise parts with "Program" don't work *)
-freshNames[expr_Hold] :=
-	Module[ {symPos, repl, progPos, progSymPos},
-		progPos = Position[ expr, Program[_]];
-		symPos = DeleteCases[ Position[ expr, _Symbol], {0}, {1}, 1];
-		progSymPos = Cases[ symPos, x_ /; isSubPositionOfAny[ x, progPos]];
-		repl = Join[Map[ # -> freshSymbol[ Extract[ expr, #, Hold]]&, Complement[symPos, progSymPos]],
-					Map[ # -> freshSymbolProg[ Extract[ expr, #, Hold]]&, progSymPos]];
-		FlattenAt[ReplacePart[ expr, repl], progPos]
-	]
+(* amaletzk: Define "freshNames[]", "freshNamesProg[]" in the way below, because otherwise parts with "Program" don't work.
+	Maybe the case "Theorema`Computation`Language`Program" should also be included, such that "Program"-constructs
+	work in computation cells as well. *)
+freshNames[ Hold[ Program[ arg_]]] := freshNamesProg[ Hold[ arg], False]
+freshNames[ Hold[ h_[ args___]]] := applyHold[ freshNames[ Hold[ h]], freshNames[ Hold[ args]]]
+freshNames[ Hold[ f_, rest__]] := joinHold[ freshNames[ Hold[ f]], freshNames[ Hold[ rest]]]
+freshNames[ Hold[ ]] := Hold[ ]
+freshNames[ Hold[ s_Symbol]] := wrapHold[ freshSymbol[ Hold[ s]]]
+freshNames[ Hold[ s_String]] := ToExpression[ "\"\<" <> s <> "\>\"", InputForm, Hold]
+freshNames[ x_Hold] := x
 freshNames[args___] := unexpected[ freshNames, {args}]
 
-isSubPositionOfAny[ pos_List, {first_List, rest___List}] /; isSubPosition[ pos, first] := True
-isSubPositionOfAny[ pos_List, {_List, rest___List}] := isSubPositionOfAny[ pos, {rest}]
-isSubPositionOfAny[ _List, _List] := False
-isSubPosition[ {f_Integer, l1___Integer}, {f_Integer, l2___Integer}] := isSubPosition[ {l1}, {l2}]
-isSubPosition[ {___Integer}, {}] := True
-isSubPosition[ _List, _List] := False
+(* The second argument of "freshNamesProg[]" is a boolean value that is true iff the expression occurs inside
+	some special Mathematica functions: Module$M, Do$M, For$M, While$M, Which$M, Switch$M
+	There, lists and other symbols should be transformed just as in "freshSymbol[]" rather than in "freshSymbolProg[]" *)
+freshNamesProg[ Hold[ Program[ arg_]], tma_] := freshNamesProg[ Hold[ arg], tma]
+
+(* Module$M, Do$M etc. have to be treated differently than For$M, While$M etc., because their Mathematica-counterparts
+	require Lists at certain positions, whereas For$M, While$M etc. don't.
+	We have to write "Theorema`Knowledge`Module$M" instead of "Module$M", because "Module$M" is no symbol known
+	to Theorema (Language/LanguageData/English.m), whereas "Program" is. Same with others. *)
+freshNamesProg[ Hold[ Theorema`Knowledge`Module$M[ List[ vars___], b_]], tma_] :=
+	applyHold[ freshNamesProg[ Hold[ Theorema`Knowledge`Module$M], True], joinHold[ applyHoldList[ freshNamesProg[ Hold[ vars], True]], freshNamesProg[ Hold[ b], True]]]
+freshNamesProg[ Hold[ Theorema`Knowledge`Do$M[ b_, iter__List]], tma_] :=
+	applyHold[ freshNamesProg[ Hold[ Theorema`Knowledge`Do$M], True], joinHold[ freshNamesProg[ Hold[ b], True], makeIterator[ Hold[ iter]]]]
+freshNamesProg[ Hold[ Theorema`Knowledge`Table$M[ expr_, iter__List]], tma_] :=
+	applyHold[ freshNamesProg[ Hold[ Theorema`Knowledge`Table$M], True], joinHold[ freshNamesProg[ Hold[ expr], True], makeIterator[ Hold[ iter]]]]
+(* Although one can use Theorema's "SumOf" and "ProductOf", we cannot prevent users from using "Sum$M" and "Product$M". *)
+freshNamesProg[ Hold[ Theorema`Knowledge`Sum$M[ expr_, iter__List]], tma_] :=
+	applyHold[ freshNamesProg[ Hold[ Theorema`Knowledge`Sum$M], True], joinHold[ freshNamesProg[ Hold[ expr], True], makeIterator[ Hold[ iter]]]]
+freshNamesProg[ Hold[ Theorema`Knowledge`Product$M[ expr_, iter__List]], tma_] :=
+	applyHold[ freshNamesProg[ Hold[ Theorema`Knowledge`Product$M], True], joinHold[ freshNamesProg[ Hold[ expr], True], makeIterator[ Hold[ iter]]]]
+
+(* makeIterator[] handles the various possible iterators that can be passed to Do[] *)
+makeIterator[ Hold[ f_List, rest___List]] :=
+	joinHold[ makeSingleIterator[ Hold[ f]], makeIterator[ Hold[ rest]]]
+makeIterator[ Hold[ ]] := Hold[ ]
+makeSingleIterator[ Hold[ { var_Symbol, {values___}}]] :=
+	applyHoldList[ joinHold[ freshNamesProg[ Hold[ var], True], applyHoldList[ freshNamesProg[ Hold[ values], True]]]]
+makeSingleIterator[ Hold[ { iter__}]] :=
+	applyHoldList[ freshNamesProg[ Hold[ iter], True]]
+makeSingleIterator[args___] := unexpected[ makeSingleIterator, {args}]
+
+(* applyHoldList[] transforms "Hold[x___]" into "Hold[List$TM[x___]]", leaving x___ unevaluated *)
+applyHoldList[ expr_Hold] := ReplacePart[ Hold[ expr], {1, 0} -> List$TM]
+
+freshNamesProg[ Hold[ h_Symbol[ args___]], tma_] :=
+	Module[ {name = SymbolName[ Unevaluated[ h]]},
+		If[ StringLength[ name] >= 3 && StringTake[ name, -2] === "$M",
+			applyHold[ freshNamesProg[ Hold[ h], True], freshNamesProg[ Hold[ args], MemberQ[ {"For$M", "While$M", "Which$M", "Switch$M"}, name]]],
+		(*else*)
+			applyHold[ freshNamesProg[ Hold[ h], tma], freshNamesProg[ Hold[ args], tma]]
+		]
+	]
+	
+freshNamesProg[ Hold[ h_[ args___]], tma_] := applyHold[ freshNamesProg[ Hold[ h], tma], freshNamesProg[ Hold[ args], tma]]
+freshNamesProg[ Hold[ f_, rest__], tma_] := joinHold[ freshNamesProg[ Hold[ f], tma], freshNamesProg[ Hold[ rest], tma]]
+freshNamesProg[ Hold[ ], _] := Hold[ ]
+freshNamesProg[ Hold[ s_Symbol], False] := wrapHold[ freshSymbolProg[ Hold[ s]]]
+freshNamesProg[ Hold[ s_Symbol], True] := wrapHold[ freshSymbolTmaProg[ Hold[ s]]]
+freshNamesProg[ Hold[ s_String], _] := freshNames[ Hold[ s]]
+freshNamesProg[ x_Hold, _] := x
+freshNamesProg[args___] := unexpected[ freshNamesProg, {args}]
 
 freshSymbol[ Hold[ s_Symbol]] :=
     Module[ {name},
@@ -91,8 +136,9 @@ freshSymbol[ Hold[ s_Symbol]] :=
         	_,
         	name = ToString[ Unevaluated[s]];
         	If[ StringTake[ name, -1] === "$" || (StringLength[ name] >= 3 && StringTake[ name, -3] === "$TM"),
-            	s,
-            	ToExpression[ name <> "$TM"]
+        		(* Neither s nor "name$TM" must be evaluated! *)
+            	Hold[ s],
+            	ToExpression[ name <> "$TM", InputForm, Hold]
         	]
         ]
     ]
@@ -105,19 +151,52 @@ freshSymbolProg[ Hold[ s_Symbol]] :=
         	Set, ToExpression[ "Assign$TM"],
         	_,
         	name = ToString[s];
-        	If[ StringTake[ name, -1] === "$",
-            	s,
+        	If[ StringTake[ name, -1] === "$" || (StringLength[ name] >= 3 && StringTake[ name, -3] === "$TM"),
+            	Hold[ s],
             	If [StringLength[ name] >= 3 && StringTake[ name, -2] === "$M",
-            		ToExpression[ StringDrop[ name, -2]],
-            		ToExpression[ name <> "$TM"]
+            		s,
+            		ToExpression[ name <> "$TM", InputForm, Hold]
             	]
         	]
         ]
     ]
 freshSymbolProg[ args___] := unexpected[ freshSymbolProg, {args}]
 
-isMathematicalConstant[ True|False|I|Pi|E|Infinity|DirectedInfinity[_]|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaisher] := True
+(* freshSymbolTmaProg[] is a mixture between freshSymbol[] and freshSymbolProg[] that behaves basically like
+	freshSymbol[], with 3 important differences:
+	- "Set" is not transformed into "Equal$TM" but into "Assign$TM"
+	- "SetDelayed" is not transformed into "EqualDef$TM" but into "SetDelayed$TM"
+	- no "$TM" is appended to symbols having suffix "$M"
+	This is because after all we are still inside "Program[]"! *)
+freshSymbolTmaProg[ Hold[ s_Symbol]] :=
+    Module[ {name},
+        Switch[ Unevaluated[ s],
+            (* We use ToExpression in order to have the symbol generated in the right context
+               depending on whether we are in a computation or not *)
+            _?isMathematicalConstant, s,
+            DoubleLongRightArrow|DoubleRightArrow, ToExpression[ "Implies$TM"],
+            DoubleLongLeftRightArrow|DoubleLeftRightArrow|Equivalent, ToExpression[ "Iff$TM"], 
+        	Set, ToExpression[ "Assign$TM"],
+        	Wedge, ToExpression[ "And$TM"],
+        	Vee, ToExpression[ "Or$TM"],
+        	List, makeSet,
+        	AngleBracket, makeTuple,
+        	_,
+        	name = ToString[ Unevaluated[s]];
+        	If[ StringTake[ name, -1] === "$" || (StringLength[ name] >= 3 && (StringTake[ name, -3] === "$TM" || StringTake[ name, -2] === "$M")),
+            	Hold[ s],
+            	ToExpression[ name <> "$TM", InputForm, Hold]
+        	]
+        ]
+    ]
+freshSymbolTmaProg[ args___] := unexpected[ freshSymbol, {args}]
+
+isMathematicalConstant[ True|False|I|Pi|E|Infinity|DirectedInfinity|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaisher] := True
 isMathematicalConstant[ _] := False
+
+(* wrapHold[] wraps "Hold" around its argument, unless there is already a Hold. *)
+wrapHold[ expr_Hold] := expr
+wrapHold[ expr_] := Hold[ expr]
 
 markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
     Module[ {s, seq, vars},
@@ -811,7 +890,10 @@ displayBoxes[ args___] := unexpected[ displayBoxes, {args}]
 renameToStandardContext[ expr_] :=
 	Block[{$ContextPath = {"System`"}, $Context = "System`", stringExpr},
 		(* BUGFIX amaletzk: added FullForm[], otherwise doesn't work if outermost symbol is built-in Power *)
-		stringExpr = ToString[ FullForm[ expr]];
+		(* The result of $M functions may be Lists; They have to be transformed into tuples BEFORE freshNames[]
+			is applied, because otherwise they are transformed into sets.
+			We don't use makeTuple[] here, because otherwise we get problems with contexts. *)
+		stringExpr = ToString[ FullForm[ expr] /. List -> Tuple$TM];
 		
 		stringExpr = StringReplace[ stringExpr, "Theorema`Computation`" -> "Theorema`"];
 		$ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];

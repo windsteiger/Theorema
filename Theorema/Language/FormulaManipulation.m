@@ -307,7 +307,7 @@ executableForm[ {(Theorema`Language`Iff$TM|Theorema`Language`IffDef$TM|Theorema`
         	right = execRight[ Hold[r], var]},
         	(* The complicated DUMMY$COND... construction is necessary because the key itself contains strings,
         	   and we need to get the escaped strings into the Hold *)
-            StringReplace[ left <> "/;" <> execRight[ Hold[ cond], var] <> ":=" <> right,
+            StringReplace[ left <> "/;" <> execCondition[ Hold[ cond], var] <> ":=" <> right,
             	{ "DUMMY$COND" -> "Theorema`Common`kbSelectCompute[" <> ToString[ key, InputForm] <> "]",
             		"Theorema`Language`" -> "Theorema`Computation`Language`",
             		"Theorema`Knowledge`" -> "Theorema`Computation`Knowledge`"}
@@ -328,14 +328,39 @@ execLeft[ e_Hold, var_List] :=
 	]
 execLeft[ args___] := unexpected[ execLeft, {args}]
 
+(* execCondition does precisely the same what execRight previously did, i.e. it leaves symbols
+	with suffix "$M" unchanged. *)
+execCondition[ e_Hold, var_List] := 
+	Module[ {s},
+		s = substituteFree[ e, Map[ stripVar, var]] /. {Theorema`Language`Assign$TM -> Set,
+			Theorema`Language`SetDelayed$TM -> SetDelayed, 
+			Theorema`Language`CompoundExpression$TM -> CompoundExpression,
+			Theorema`Language`List$TM -> List};
+		ReleaseHold[ Map[ Function[ expr, ToString[ Unevaluated[ expr]], {HoldAll}], s]]
+	]
+execCondition[ args___] := unexpected[ execCondition, {args}]
+
 execRight[ e_Hold, var_List] := 
 	Module[ {s},
 		s = substituteFree[ e, Map[ stripVar, var]] /. {Theorema`Language`Assign$TM -> Set,
 			Theorema`Language`SetDelayed$TM -> SetDelayed, 
-			Theorema`Language`CompoundExpression$TM -> CompoundExpression};
-		ReleaseHold[ Map[ Function[ expr, ToString[ Unevaluated[ expr]], {HoldAll}], s]]
+			Theorema`Language`CompoundExpression$TM -> CompoundExpression,
+			Theorema`Language`List$TM -> List};
+		ReleaseHold[ Map[ Function[ expr, toRightString[ Hold[ expr]], {HoldAll}], s]]
 	]
 execRight[ args___] := unexpected[ execRight, {args}]
+
+toRightString[ Hold[x_]] := First[ toRightStringAux[ Hold[ x]]]
+toRightStringAux[ Hold[s_Symbol]] :=
+	Module[ {name},
+		{StringDrop[ name, -2]} /; StringLength[ name = SymbolName[ Unevaluated[ s]]] > 2 && StringTake[ name, -2] === "$M"
+	]
+toRightStringAux[ Hold[head_[ args___]]] :=
+	{StringJoin[ toRightStringAux[ Hold[head]], "[", StringJoin[ Riffle[ toRightStringAux[ Hold[args]], ","]], "]"]}
+toRightStringAux[ Hold[s_String]] := {ToString[ s, InputForm]}
+toRightStringAux[ Hold[s_]] := {ToString[ Unevaluated[s]]}
+toRightStringAux[ Hold[first_, rest__]] := Join[ toRightStringAux[ Hold[first]], toRightStringAux[ Hold[rest]]]
+toRightStringAux[ Hold[]] := {}
 
 stripVar[ v:Theorema`Language`VAR$[Theorema`Language`SEQ0$[a_]]] := v -> ToExpression[ "SEQ0$" <> ToString[a]]
 stripVar[ v:Theorema`Language`VAR$[Theorema`Language`SEQ1$[a_]]] := v -> ToExpression[ "SEQ1$" <> ToString[a]]
@@ -462,7 +487,7 @@ mmaTransRule[ {l_, r_, c_List, var_List}, ref_] :=
                right = execRight[ Hold[r], var]},
             ToExpression[ 
             	"RuleDelayed[" <> left <> "," <> 
-            	"Sow[" <> ToString[ ref, InputForm] <> ",\"ref\"]; Sow[" <> execRight[ Hold[ cond], var] <> ",\"cond\"];" <> right <> "]"
+            	"Sow[" <> ToString[ ref, InputForm] <> ",\"ref\"]; Sow[" <> execCondition[ Hold[ cond], var] <> ",\"cond\"];" <> right <> "]"
             ]
         ]
         
