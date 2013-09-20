@@ -143,7 +143,9 @@ MakeBoxes[ FIX$[ c_, n_Integer] /; n<9, TheoremaForm] :=
 MakeBoxes[ FIX$[ c_, n_Integer], TheoremaForm] := StyleBox[ SuperscriptBox[ MakeBoxes[ c, TheoremaForm], RowBox[{"(", MakeBoxes[ n, StandardForm], ")"}]], "ExpressionABF"]
 
 metaAnnotations = {"*", "**", "***", "\[Dagger]", "\[DoubleDagger]"};
-MakeBoxes[ META$[ c_, n_Integer, dep_List] /; n<5, TheoremaForm] := StyleBox[ SuperscriptBox[ MakeBoxes[ c, TheoremaForm], metaAnnotations[[n+1]]], "ExpressionMeta"]
+MakeBoxes[ META$[ c_, n_Integer, dep_List] /; n<5, TheoremaForm] := TooltipBox[ 
+	StyleBox[ SuperscriptBox[ MakeBoxes[ c, TheoremaForm], metaAnnotations[[n+1]]], "ExpressionMeta"], 
+	RowBox[{"may depend on ", MakeBoxes[ dep, TheoremaForm]}]]
 MakeBoxes[ META$[ c_, n_Integer, dep_List], TheoremaForm] := StyleBox[ SuperscriptBox[ MakeBoxes[ c, TheoremaForm], RowBox[{"(", MakeBoxes[ n, StandardForm], ")"}]], "ExpressionMeta"]
 
 MakeBoxes[ r_RNG$, TheoremaForm] := makeRangeBox[ r, TheoremaForm]

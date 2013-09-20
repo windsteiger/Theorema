@@ -78,7 +78,13 @@ freshSymbol[ Hold[ s_Symbol]] :=
         Switch[ Unevaluated[ s],
             (* We use ToExpression in order to have the symbol generated in the right context
                depending on whether we are in a computation or not *)
-            True|False, s,
+            True|False|Infinity, s,
+            (* processing the number domain symbols by MakeExpression does not work, I think MakeExpression is only
+               applied to boxes and not to individual symbols. We convert them to respective ranges here. *)
+            ToExpression["\[DoubleStruckCapitalN]"], ToExpression[ "IntegerRange$TM[ 1, Infinity, True, False]"],
+            ToExpression["\[DoubleStruckCapitalZ]"], ToExpression[ "IntegerRange$TM[ -Infinity, Infinity, False, False]"],
+            ToExpression["\[DoubleStruckCapitalQ]"], ToExpression[ "RationalRange$TM[ -Infinity, Infinity, False, False]"],
+            ToExpression["\[DoubleStruckCapitalR]"], ToExpression[ "RealRange$TM[ -Infinity, Infinity, False, False]"],
             DoubleLongRightArrow|DoubleRightArrow, ToExpression[ "Implies$TM"],
             DoubleLongLeftRightArrow|DoubleLeftRightArrow|Equivalent, ToExpression[ "Iff$TM"],
         	SetDelayed, ToExpression[ "EqualDef$TM"], 
