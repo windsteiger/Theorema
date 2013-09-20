@@ -84,6 +84,8 @@ freshSymbol[ Hold[ s_Symbol]] :=
             (* We use ToExpression in order to have the symbol generated in the right context
                depending on whether we are in a computation or not *)
             True|False|Infinity, s,
+            (* processing the number domain symbols by MakeExpression does not work, I think MakeExpression is only
+               applied to boxes and not to individual symbols. We convert them to respective ranges here. *)
             ToExpression["\[DoubleStruckCapitalN]"], ToExpression[ "IntegerRange$TM[ 1, Infinity, True, False]"],
             ToExpression["\[DoubleStruckCapitalZ]"], ToExpression[ "IntegerRange$TM[ -Infinity, Infinity, False, False]"],
             ToExpression["\[DoubleStruckCapitalQ]"], ToExpression[ "RationalRange$TM[ -Infinity, Infinity, False, False]"],
@@ -786,7 +788,7 @@ processComputation[x_] := Module[ { procSynt, res},
 	res = Catch[ ReleaseHold[ procSynt]];
 	setComputationContext[ "none"];
 	(*NotebookWrite[ EvaluationNotebook[], Cell[ ToBoxes[ res, TheoremaForm], "ComputationResult", CellLabel -> "Out["<>ToString[$Line]<>"]="]];*)
-	(* We force the MakeBoxes[ ..., TheoremaForm] to apply by setting $PrePrint=displayBoxes in the CellProlog of a computation cell.
+	(* We force the MakeBoxes[ ..., TheoremaForm] to apply by setting $PrePrint in the CellProlog of a computation cell.
 	   Unsetting $PrePrint in the CellEpilog ensures this behaviour only for Theorema computation *)
 	renameToStandardContext[ res]
 ]
@@ -811,7 +813,7 @@ closeComputation[] :=
     ]
 closeComputation[args___] := unexcpected[ closeComputation, {args}]
 
-displayBoxes[ expr_] := RawBoxes[ ToBoxes[ expr, TheoremaForm]]
+displayBoxes[ expr_] := RawBoxes[ theoremaBoxes[ expr]]
 displayBoxes[ args___] := unexpected[ displayBoxes, {args}]
 
 renameToStandardContext[ expr_] :=

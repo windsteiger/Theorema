@@ -82,8 +82,11 @@ initGUI[] :=
         	},
         	{"Arithmetic",
         		{"Plus", RowBox[{"A","+","B"}], False, True, False},
-        		{"Times", RowBox[{"A","*","B"}], False, True, False},
+         		{"Subtract", RowBox[{"A","-","B"}], False, True, False},
+	       		{"Times", RowBox[{"A","*","B"}], False, True, False},
+	       		{"Divide", RowBox[{"A","/","B"}], False, True, False},
         		{"Power", SuperscriptBox[ "A", "B"], False, True, False},
+        		{"Radical", RadicalBox[ "A", "B"], False, True, False},
         		{"Equal", RowBox[{"A","=","B"}], False, False, False},
         		{"Less", RowBox[{"A","<","B"}], False, True, False},
         		{"LessEqual", RowBox[{"A","\[LessEqual]","B"}], False, True, False},
@@ -868,7 +871,7 @@ structViewBuiltin[{category_String, rest__List}, tags_, task_String] :=
         sub = Transpose[Map[structViewBuiltin[#, tags, task] &, {rest}]];
         compTags = Apply[Union, sub[[2]]];
         opGroup = partitionFill[ sub[[1]], 4];
-        {OpenerView[{headerViewBuiltin[category, compTags, task], Grid[ opGroup, Alignment -> {Left, Baseline}]}, 
+        {OpenerView[{headerViewBuiltin[category, compTags, task], Grid[ opGroup, Alignment -> {Left, Baseline}, Spacings -> {2, Automatic}, ItemSize -> Full]}, 
         	ToExpression["Dynamic[$builtinStructState$"<>category<>"]"]], 
          compTags}
     ]     
@@ -879,19 +882,19 @@ structViewBuiltin[ item:List[__List], tags_, task_String] :=
         compTags = Apply[Union, sub[[2]]];
         {Column[sub[[1]]], compTags}
     ]
-    
+
 structViewBuiltin[ {op_String, display_, _, _, _}, tags_, task_String] :=
     Module[ { },
         {Switch[ task,
             "prove",
-            Row[{Checkbox[ Dynamic[ buiActProve[op]]], Style[ DisplayForm[ display], "FormalTextInputFormula"]}, 
-                Spacer[10]],
+            Row[{Checkbox[ Dynamic[ buiActProve[op]]], Tooltip[ Style[ DisplayForm[ display], "FormalTextInputFormula"], op]}, 
+                Spacer[2]],
             "compute",
-          	Row[{Checkbox[ Dynamic[ buiActComputation[op]]], Style[ DisplayForm[ display], "FormalTextInputFormula"]}, 
-          		Spacer[10]],
+          	Row[{Checkbox[ Dynamic[ buiActComputation[op]]], Tooltip[ Style[ DisplayForm[ display], "FormalTextInputFormula"], op]}, 
+          		Spacer[2]],
             "solve",
-          	Row[{Checkbox[ Dynamic[ buiActSolve[op]]], Style[ DisplayForm[ display], "FormalTextInputFormula"]}, 
-          		Spacer[10]]
+          	Row[{Checkbox[ Dynamic[ buiActSolve[op]]], Tooltip[ Style[ DisplayForm[ display], "FormalTextInputFormula"], op]}, 
+          		Spacer[2]]
         ], {op}}
     ]
 
@@ -905,15 +908,15 @@ headerViewBuiltin[ category_String, tags_, task_String] :=
     		"prove",
     		Row[{Checkbox[ Dynamic[ allTrue[ tags, buiActProve], 
         		setAll[ tags, buiActProve, #] &]], 
-          		Style[ translate[category], "Section"]}, Spacer[10]],
+          		Style[ translate[category], "Section"]}, Spacer[4]],
     		"compute",
         	Row[{Checkbox[ Dynamic[ allTrue[ tags, buiActComputation], 
         		setAll[ tags, buiActComputation, #] &]], 
-          		Style[ translate[category], "Section"]}, Spacer[10]],
+          		Style[ translate[category], "Section"]}, Spacer[4]],
           	"solve",
           	Row[{Checkbox[ Dynamic[ allTrue[ tags, buiActSolve], 
         		setAll[ tags, buiActSolve, #] &]], 
-          		Style[ translate[category], "Section"]}, Spacer[10]]
+          		Style[ translate[category], "Section"]}, Spacer[4]]
     	]
     ]
 
