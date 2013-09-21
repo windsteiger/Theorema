@@ -212,7 +212,7 @@ MakeExpression[ RowBox[ {"\[Or]", RowBox[{"\[Piecewise]", GridBox[ c:{{_}..}, __
 		MakeExpression[ RowBox[{"Or", "[", RowBox[ clauses], "]"}], fmt]
 	] /; $parseTheoremaExpressions
 	
-MakeExpression[ RowBox[ {"\[DoubleLongLeftRightArrow]", RowBox[{"\[Piecewise]", GridBox[ c:{{_}..}, ___]}]}], fmt_] :=
+MakeExpression[ RowBox[ {"\[DoubleLongLeftRightArrow]"|"\[DoubleLeftRightArrow]", RowBox[{"\[Piecewise]", GridBox[ c:{{_}..}, ___]}]}], fmt_] :=
 	With[ {clauses = Riffle[ Map[ First, c], ","]},
 		MakeExpression[ RowBox[{"Iff", "[", RowBox[ clauses], "]"}], fmt]
 	] /; $parseTheoremaExpressions

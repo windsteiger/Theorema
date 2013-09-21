@@ -1830,6 +1830,18 @@ langButtonData["AND2"] :=
 		"and"
 	}
 	
+langButtonData["AND3"] := 
+	{
+		If[ TrueQ[ $buttonNat], 
+			translate["AND3"], 
+			DisplayForm[RowBox[{"\[And]", "\[Piecewise]", GridBox[{{TagBox[ FrameBox[SubscriptBox["e","1"]], "SelectionPlaceholder"]},
+				{"\[VerticalEllipsis]"},
+				{TagBox[ FrameBox[SubscriptBox["e","n"]], "Placeholder"]}}]}]]],
+		RowBox[{"\[And]", "\[Piecewise]", GridBox[{{"\[SelectionPlaceholder]"}, {"\[SelectionPlaceholder]"}}]}],
+		translate["CONNTooltip"],
+		"andn"
+	}
+	
 langButtonData["NOT"] := 
 	{
 		If[ $buttonNat, 
@@ -1863,6 +1875,18 @@ langButtonData["OR2"] :=
 		RowBox[{"\[SelectionPlaceholder]", "\[Or]", "\[Placeholder]"}],
 		translate["CONN2WEAKTooltip"],
 		"or"
+	}
+	
+langButtonData["OR3"] := 
+	{
+		If[ TrueQ[ $buttonNat], 
+			translate["OR3"], 
+			DisplayForm[RowBox[{"\[Or]", "\[Piecewise]", GridBox[{{TagBox[ FrameBox[SubscriptBox["e","1"]], "SelectionPlaceholder"]},
+				{"\[VerticalEllipsis]"},
+				{TagBox[ FrameBox[SubscriptBox["e","n"]], "Placeholder"]}}]}]]],
+		RowBox[{"\[Or]", "\[Piecewise]", GridBox[{{"\[SelectionPlaceholder]"}, {"\[SelectionPlaceholder]"}}]}],
+		translate["CONNTooltip"],
+		"orn"
 	}
 
 langButtonData["IMPL1"] := 
@@ -1914,6 +1938,18 @@ langButtonData["EQUIV2"] :=
 			TagBox[ "\[DoubleLeftRightArrow]", Identity, SyntaxForm->"a\[Implies]b"], "\[Placeholder]"}],
 		translate["CONN2WEAKTooltip"],
 		"equiv"
+	}
+	
+langButtonData["EQUIV3"] := 
+	{
+		If[ TrueQ[ $buttonNat], 
+			translate["EQUIV3"], 
+			DisplayForm[RowBox[{"\[DoubleLeftRightArrow]", "\[Piecewise]", GridBox[{{TagBox[ FrameBox[SubscriptBox["e","1"]], "SelectionPlaceholder"]},
+				{"\[VerticalEllipsis]"},
+				{TagBox[ FrameBox[SubscriptBox["e","n"]], "Placeholder"]}}]}]]],
+		RowBox[{"\[DoubleLeftRightArrow]", "\[Piecewise]", GridBox[{{"\[SelectionPlaceholder]"}, {"\[SelectionPlaceholder]"}}]}],
+		translate["CONNTooltip"],
+		"equivn"
 	}
 
 langButtonData["EQ"] := 
@@ -2006,6 +2042,16 @@ langButtonData["EXISTS2"] :=
 		"exrc"
 	}
 	
+langButtonData["LET"] := 
+	{
+		If[ TrueQ[ $buttonNat], 
+			translate["LET"], 
+			DisplayForm[RowBox[{UnderscriptBox[ "let", RowBox[ {Placeholder["a"], "=", Placeholder["x"]}]], SelectionPlaceholder["expr"]}]]],
+		RowBox[{UnderscriptBox[ "let", RowBox[ {"\[Placeholder]", "=", "\[Placeholder]"}]], "\[SelectionPlaceholder]"}],
+		translate["LETTooltip"],
+		"let"
+	}
+	
 langButtonData[args___] :=
     unexpected[langButtonData, {args}]
 
@@ -2030,7 +2076,7 @@ autoParenthesis[ args___] := unexpected[ autoParenthesis, {args}]
 
 allFormulae = {{"Sets", {}},
 			   {"Arithmetic", {}},
-			   {"Logic", {"AND2", "OR2", "NOT", "IMPL2", "EQUIV2", "EQ", "EQUIVDEF", "EQDEF", "FORALL1", "EXISTS1", "FORALL2", "EXISTS2"}}
+			   {"Logic", {"AND2", "OR2", "NOT", "IMPL2", "EQUIV2", "EQ", "EQUIVDEF", "EQDEF", "FORALL1", "EXISTS1", "FORALL2", "EXISTS2", "AND3", "OR3", "EQUIV3", "LET"}}
 };
 
 makeButtonCategory[ {category_String, buttons_List}, cols_Integer:2] :=
