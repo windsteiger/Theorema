@@ -1,12 +1,14 @@
 (* Theorema 
     Copyright (C) 2010 The Theorema Group
 
-    This program is free software: you can redistribute it and/or modify
+    This file is part of Theorema 2.0
+    
+    Theorema 2.0 is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    This program is distributed in the hope that it will be useful,
+    Theorema 2.0 is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
@@ -368,6 +370,64 @@ this:PRFSIT$[ g:FML$[ _, _?isAtomicExpression, __], k_List, id_, rest___?OptionQ
 		]
 	]
 ]
+
+(* ::Section:: *)
+(* Knowledge Rewriting *)
+(*
+	In the proof situations "KBRewriting"-> we store {{k1, {key1, ..., keyn}}, ...,{km, {key1, ..., keyn}}}, where
+	kj is the key of the j-th kb entry and
+	keyi are the keys of the rewrite rules that were available when the rule was applied to kj.
+	
+	The idea is that if we try to rewrite kj, then we look what happened at the last rewrite: say {kj, {key1, ..., keyn}}.
+	If kj has not yet been rewritten then use all rules available in kbRules, otherwise use just "new" kbRules. If there are no new rules then continue with kj+1,
+	otherwise rewrite. Do a proof step that documents which rules have already been tried at which kj.
+*)
+
+inferenceRule[ knowledgeRewriting] = 
+this:PRFSIT$[ g_FML$, k_List, id_, rest___?OptionQ] :> performProofStep[
+	Module[ {rules, lastKBRewriting, rewritable, lastKjRewriting, usedSubsts, conds, newForms, newKB = {}, usedForRW = {}, j, i, thisKBRewriting = {}, pos},
+		If[ kbRules@this === {},
+			Catch[ $Failed]
+		];
+		lastKBRewriting = getOptionalComponent[ this, "KBRewriting"];
+		rewritable = Cases[ k, FML$[ _, _?isAtomicExpression, __]];
+		(* try to rewrite each atomic formula individually *)
+		Do[
+			AppendTo[ thisKBRewriting, {key@rewritable[[j]], Map[ First, kbRules@this]}];
+			lastKjRewriting = Cases[ lastKBRewriting, {key@rewritable[[j]], rkj_} -> rkj];
+			If[ lastKjRewriting === {},
+				(* if kj has not been rewritten yet, use all rewrite rules *)
+				rules = kbRules@this,
+				(* else: use only new ones *)
+				rules = DeleteCases[ kbRules@this, {Apply[ Alternatives, lastKjRewriting], _}];
+				If[ rules === {},
+					Continue[];
+				]
+			];
+			(* there are potential rules for kj *)
+			(* do not use a rule derived from kj to kj itself *)
+			{newForms, usedSubsts, conds} = replaceListAndTrack[ formula@rewritable[[j]], filterRules[ rules, key@rewritable[[j]]]];
+			(* walk through newForms and join them to the newKB *)
+			Do[
+				pos = {};
+				If[ TrueQ[ conds[[i]]] || !MemberQ[ pos = posInKB[ Map[ formula, k], Apply[ List, conds[[i]]]], {}],
+					(* conditions are True or all fulfilled in k *)
+					AppendTo[ newKB, {makeAssumptionFML[ formula -> newForms[[i]]]}];
+					(* pos contains a list of positions of plain formulas in the list of plain formulas. 
+					   When we extract exactly these positions from the whole KB we get the whole formula datastructures *)
+					AppendTo[ usedForRW, Prepend[ Join[ usedSubsts[[i]], Extract[ k, Flatten[ pos, 1]]], rewritable[[j]]]];
+				],
+				{i, Length[ newForms]}
+			], 
+			{j, Length[ rewritable]}
+		];
+		makeANDNODE[ makePRFINFO[ name -> knowledgeRewriting, used -> usedForRW, generated -> newKB], 
+			toBeProved[ goal -> g, kb -> joinKB[ Flatten[ newKB], k], "KBRewriting" -> thisKBRewriting, rest]]
+	]
+]
+
+posInKB[ kb_List, forms_List] := Map[ Position[ kb, #, {1}]&, forms]
+posInKB[ args___] := unexpected[ posInKB, {args}]
 
 (* ::Section:: *)
 (* substitution *)

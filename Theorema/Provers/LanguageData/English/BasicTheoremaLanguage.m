@@ -184,6 +184,21 @@ proofStepText[ goalRewriting, lang, {{origGoal_, rewrittenBy_}}, {{g_}}, ___] :=
 	{textCell[ "By ", formulaReference[ rewrittenBy], " the goal ", formulaReference[ origGoal], " can be reduced to"],
 	goalCell[ g, "."]};
 	
+proofStepText[ knowledgeRewriting, lang, {}, {}, ___] := {};
+(* Case: knowledge rewriting applicable, but no rewrite possible *)	
+
+proofStepText[ knowledgeRewriting, lang, u_, g_, ___] := 
+(* Case: new knowledge generated *)
+    Module[ {stepText = {textCell["We augment the knowledge base:"]}, j},
+        Do[
+            stepText = Append[ stepText, 
+            	cellGroup[ {textCell[ "From ", formulaReference[ u[[j, 1]]], ", using ", formulaReferenceSequence[ Rest[ u[[j]]], lang], ", we can deduce "],
+            		assumptionListCells[ g[[j]], ",", "."]}]],
+            {j, Length[ g]}
+        ];
+        stepText
+    ];
+	
 proofStepText[ elementarySubstitution, lang, u_, g_, ___, "usedSubst" -> subs_List, ___] := 
 	(* u, g, and subs have same length.
 	   u is a list of singleton lists, u[[i,1]] are the formulae that are rewritten

@@ -1,6 +1,21 @@
-(* ::Package:: *)
+(* Theorema 
+    Copyright (C) 2010 The Theorema Group
 
-(* Mathematica Package *)
+    This file is part of Theorema 2.0
+    
+    Theorema 2.0 is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Theorema 2.0 is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*)
 
 BeginPackage["Theorema`Language`FormulaManipulation`"]
 
@@ -392,20 +407,26 @@ makeRules[ {form:Theorema`Language`Equal$TM[ l_, r_], c_List, var_List}, ref_] :
         {forward, backward, {makeSingleRule[ {l, r, c, var}, ref], makeSingleRule[ {r, l, c, var}, ref]}}
     ]
 (* We do not introduce backward rules for the negated implications *)
-makeRules[ {form:Theorema`Language`And$TM[ f__], c:{__}, var_List}, ref_] := 
-	{Join[ 
-		MapIndexed[ makeSingleRule[ {#1, form, Drop[ c, #2], var}, ref]&, c],
+(*
+	For (A & B) => C we could generate forward rules:
+		1) A => C (under condition B)
+		2) B => C (under condition A)
+	When we augment the KB, in order to apply 1) we need A in the KB and check whether B is fulfilled, i.e. B is in the KB.
+	Similarly, for 2) we also need both A and B in the KB.
+	Thus, there is no benefit in generating both 1) and 2), we just use 1).
+*)
+makeRules[ {form:Theorema`Language`And$TM[ f__], c:{c1_, cr___}, var_List}, ref_] := 
+	{Append[ 
 		Map[ makeSingleRule[ 
 				{simplifiedNot[ Theorema`Language`Not$TM[ #]], makeDisjunction[ Map[ simplifiedNot[ Theorema`Language`Not$TM[ #]]&, c], Theorema`Language`Or$TM], {}, var}, 
-				ref]&, {f}]
+				ref]&, {f}],
+		makeSingleRule[ {c1, form, {cr}, var}, ref]
 	], 
 	Map[ makeSingleRule[ {#, makeConjunction[ c, Theorema`Language`And$TM], {}, var}, ref, "backward"]&, {f}],
 	{}}
-makeRules[ {form_, c:{__}, var_List}, ref_] := 
-	{Append[
-		MapIndexed[ makeSingleRule[ {#1, form, Drop[ c, #2], var}, ref]&, c],
-		makeSingleRule[ {simplifiedNot[ Theorema`Language`Not$TM[ form]], makeDisjunction[ Map[ simplifiedNot[ Theorema`Language`Not$TM[ #]]&, c], Theorema`Language`Or$TM], {}, var}, ref]
-	], 
+makeRules[ {form_, c:{c1_, cr___}, var_List}, ref_] := 
+	{{makeSingleRule[ {c1, form, {cr}, var}, ref],
+	  makeSingleRule[ {simplifiedNot[ Theorema`Language`Not$TM[ form]], makeDisjunction[ Map[ simplifiedNot[ Theorema`Language`Not$TM[ #]]&, c], Theorema`Language`Or$TM], {}, var}, ref]}, 
 	{makeSingleRule[ {form, makeConjunction[ c, Theorema`Language`And$TM], {}, var}, ref, "backward"]},
 	{}}
 makeRules[ {form_, c_List, var_List}, ref_] := {{}, {}, {}}
@@ -601,18 +622,30 @@ formulaReference[ args___] := unexpected[ formulaReference, {args}]
 	We provide different constructors for goal and assumptions -> allows to generate different labels
 *)
 makeGoalFML[ data___?OptionQ] :=
-	Module[ {l, form},
+	Module[ {l, form, newLabel},
 		l = label /. {data} /. Options[ makeFML];
-		form = makeFML[ label -> With[ {sep = If[ StringMatchQ[ l, NumberString], "\[NumberSign]", "\[SpaceIndicator]"]}, "G" <> sep <> l], data];
+		newLabel = If[ StringMatchQ[ l, "G"~~"\[NumberSign]"|"\[SpaceIndicator]"~~__],
+			(* If label already has the goal marker, then don't add it once more *)
+			l,
+			(* else: add goal marker *) 
+			With[ {sep = If[ StringMatchQ[ l, NumberString], "\[NumberSign]", "\[SpaceIndicator]"]}, "G" <> sep <> l]
+		];
+		form = makeFML[ label -> newLabel, data];
 		AppendTo[ $generated, form];
 		form
 	]
 makeGoalFML[ args___] := unexpected[ makeGoalFML, {args}]
 
 makeAssumptionFML[ data___?OptionQ] :=
-	Module[ {l, form},
+	Module[ {l, form, newLabel},
 		l = label /. {data} /. Options[ makeFML];
-		form = makeFML[ label -> With[ {sep = If[ StringMatchQ[ l, NumberString], "\[NumberSign]", "\[SpaceIndicator]"]}, "A" <> sep <> l], data];
+		newLabel = If[ StringMatchQ[ l, "A"~~"\[NumberSign]"|"\[SpaceIndicator]"~~__],
+			(* If label already has the assumption marker, then don't add it once more *)
+			l,
+			(* else: add assumption marker *) 
+			With[ {sep = If[ StringMatchQ[ l, NumberString], "\[NumberSign]", "\[SpaceIndicator]"]}, "A" <> sep <> l]
+		];		
+		form = makeFML[ label -> newLabel, data];
 		AppendTo[ $generated, form];
 		form
 	]

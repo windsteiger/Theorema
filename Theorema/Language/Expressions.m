@@ -1,14 +1,14 @@
 (* Theorema 
     Copyright (C) 2010 The Theorema Group
 
-    This file is part of Theorema.2
+    This file is part of Theorema 2.0
     
-    Theorema.2 is free software: you can redistribute it and/or modify
+    Theorema 2.0 is free software: you can redistribute it and/or modify
     it under the terms of the GNU General Public License as published by
     the Free Software Foundation, either version 3 of the License, or
     (at your option) any later version.
 
-    Theorema.2 is distributed in the hope that it will be useful,
+    Theorema 2.0 is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
     MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
     GNU General Public License for more details.
@@ -143,9 +143,7 @@ MakeBoxes[ FIX$[ c_, n_Integer] /; n<9, TheoremaForm] :=
 MakeBoxes[ FIX$[ c_, n_Integer], TheoremaForm] := StyleBox[ SuperscriptBox[ MakeBoxes[ c, TheoremaForm], RowBox[{"(", MakeBoxes[ n, StandardForm], ")"}]], "ExpressionABF"]
 
 metaAnnotations = {"*", "**", "***", "\[Dagger]", "\[DoubleDagger]"};
-MakeBoxes[ META$[ c_, n_Integer, dep_List] /; n<5, TheoremaForm] := TooltipBox[ 
-	StyleBox[ SuperscriptBox[ MakeBoxes[ c, TheoremaForm], metaAnnotations[[n+1]]], "ExpressionMeta"], 
-	RowBox[{"may depend on ", MakeBoxes[ dep, TheoremaForm]}]]
+MakeBoxes[ META$[ c_, n_Integer, dep_List] /; n<5, TheoremaForm] := StyleBox[ SuperscriptBox[ MakeBoxes[ c, TheoremaForm], metaAnnotations[[n+1]]], "ExpressionMeta"]
 MakeBoxes[ META$[ c_, n_Integer, dep_List], TheoremaForm] := StyleBox[ SuperscriptBox[ MakeBoxes[ c, TheoremaForm], RowBox[{"(", MakeBoxes[ n, StandardForm], ")"}]], "ExpressionMeta"]
 
 MakeBoxes[ r_RNG$, TheoremaForm] := makeRangeBox[ r, TheoremaForm]
