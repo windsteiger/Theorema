@@ -198,7 +198,7 @@ substituteFree[ Hold[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Languag
 		applyHold[ Hold[q], joinHold[ substituteFree[ Hold[r], vars], joinHold[ substituteFree[ Hold[cond], vars], substituteFree[ Hold[form], vars]]]]
 	]
 substituteFree[ Hold[ f_[x___]], rules_List] :=
-	Module[ { sx = Map[ substituteFree[ Hold[#], rules]&, Hold[x]]},
+	Module[ { sx = Map[ substituteFree[ #, rules]&, Map[ Hold, Hold[x]]]},
 		sx = Fold[ joinHold, Hold[], {ReleaseHold[ sx]}];
 		applyHold[ substituteFree[ Hold[f], rules], sx]
 	]

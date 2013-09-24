@@ -59,6 +59,7 @@ BracketingBar$TM[ a:(Pi|E|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaishe
 (* Logic *)
 
 
+SetAttributes[ {And$TM, Or$TM}, HoldAll]
 Not$TM[ a_] /; buiActive["Not"] := Not[ a]
 And$TM[ pre___, a_, mid___, a_, post___] /; buiActive["And"] := And$TM[ pre, a, mid, post]
 And$TM[ a___] /; buiActive["And"] := And[ a]
@@ -69,10 +70,11 @@ Iff$TM[ a__] /; buiActive["Iff"] := Equivalent[ a]
 
 (* We replace the free variables one after the other, because some might depend on others, and a
 	single "substitueFree" doesn't work properly then. This could also be good for global abbreviations ... *)
+SetAttributes[ Abbrev$TM, HoldRest]
 Abbrev$TM[ RNG$[ f_ABBRVRNG$, r__ABBRVRNG$], expr_] /; buiActive["Let"] :=
 	Abbrev$TM[ RNG$[ f], Abbrev$TM[ RNG$[ r], expr]]
 Abbrev$TM[ rng:RNG$[ ABBRVRNG$[ l_, r_]], expr_] /; buiActive["Let"] :=
-	substituteFree[ ReleaseHold[ markVariables[ Hold[ QU$[ rng, expr]]]], {l -> r}]
+	ReleaseHold[ substituteFree[ Hold[ expr], {l -> r}]]
 
 rangeToIterator[ SETRNG$[ x_, A_Set$TM]] := { x, Apply[ List, A]}
 rangeToIterator[ 
@@ -487,8 +489,9 @@ Module$TM[ l_[v___], body_] /; buiActive["Module"] := Apply[ Module, Hold[ {v}, 
 SetAttributes[ Do$TM, HoldAll]
 Do$TM[ body_, l_[v___]] /; buiActive["Do"] := Do[ body, {v}]
 
-CaseDistinction$TM[ c:Clause$TM[ _, _]..] /; buiActive["CaseDistinction"] := Piecewise[ Map[ clause2pw, {c}]]
-clause2pw[ Clause$TM[ cond_, expr_]] := {expr, cond}
+SetAttributes[ CaseDistinction$TM, HoldAll]
+CaseDistinction$TM[ c:Clause$TM[ _, _]..] /; buiActive["CaseDistinction"] :=
+	Apply[Piecewise, Hold[{c}] /. Clause$TM[cond_, expr_] -> {expr, cond}]
 
 
 
