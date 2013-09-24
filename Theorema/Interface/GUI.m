@@ -1947,7 +1947,7 @@ langButtonData["EQUIV3"] :=
 			DisplayForm[RowBox[{"\[DoubleLeftRightArrow]", "\[Piecewise]", GridBox[{{TagBox[ FrameBox[SubscriptBox["e","1"]], "SelectionPlaceholder"]},
 				{"\[VerticalEllipsis]"},
 				{TagBox[ FrameBox[SubscriptBox["e","n"]], "Placeholder"]}}]}]]],
-		RowBox[{"\[DoubleLeftRightArrow]", "\[Piecewise]", GridBox[{{"\[SelectionPlaceholder]"}, {"\[SelectionPlaceholder]"}}]}],
+		RowBox[{"\[DoubleLeftRightArrow]", "\[Piecewise]", GridBox[{{"\[SelectionPlaceholder]"}, {"\[Placeholder]"}}]}],
 		translate["CONNTooltip"],
 		"equivn"
 	}
@@ -2052,6 +2052,27 @@ langButtonData["LET"] :=
 		"let"
 	}
 	
+langButtonData["CASEDIST"] := 
+	{
+		If[ TrueQ[ $buttonNat], 
+			translate["CASEDIST"], 
+			DisplayForm[RowBox[{"\[Piecewise]",
+				GridBox[{
+					{TagBox[ FrameBox[SubscriptBox["e","1"]], "SelectionPlaceholder"], "\[DoubleLeftArrow]", TagBox[ FrameBox[SubscriptBox["c","1"]], "Placeholder"]},
+					{"", "\[VerticalEllipsis]", ""},
+					{TagBox[ FrameBox[SubscriptBox["e","n"]], "Placeholder"], "\[DoubleLeftArrow]", TagBox[ FrameBox[SubscriptBox["c","n"]], "Placeholder"]}
+				}]
+			}]]],
+		RowBox[{"\[Piecewise]",
+			GridBox[{
+				{"\[SelectionPlaceholder]", "\[DoubleLeftArrow]", "\[Placeholder]"},
+				{"\[Placeholder]", "\[DoubleLeftArrow]", "\[Placeholder]"}
+			}]
+		}],
+		translate["CASEDISTTooltip"],
+		"cdist"
+	}
+	
 langButtonData[args___] :=
     unexpected[langButtonData, {args}]
 
@@ -2076,7 +2097,7 @@ autoParenthesis[ args___] := unexpected[ autoParenthesis, {args}]
 
 allFormulae = {{"Sets", {}},
 			   {"Arithmetic", {}},
-			   {"Logic", {"AND2", "OR2", "NOT", "IMPL2", "EQUIV2", "EQ", "EQUIVDEF", "EQDEF", "FORALL1", "EXISTS1", "FORALL2", "EXISTS2", "AND3", "OR3", "EQUIV3", "LET"}}
+			   {"Logic", {"AND2", "OR2", "NOT", "IMPL2", "EQUIV2", "EQ", "EQUIVDEF", "EQDEF", "FORALL1", "EXISTS1", "FORALL2", "EXISTS2", "AND3", "OR3", "EQUIV3", "CASEDIST", "LET"}}
 };
 
 makeButtonCategory[ {category_String, buttons_List}, cols_Integer:2] :=
