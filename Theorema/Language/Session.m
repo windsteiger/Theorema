@@ -922,7 +922,12 @@ renameToStandardContext[ expr_] :=
 		stringExpr = StringReplace[ stringExpr, "Theorema`Computation`" -> "Theorema`"];
 		$ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
         (* Set default context when not in an archive *)
-        ReleaseHold[ freshNames[ Hold["EXPR"] /. "EXPR" -> ToExpression[ stringExpr]]]
+        (* BUGFIX amaletzk: We need to prevent the expression from being evaluated, because
+        	it could contain some "Set", "CompoundExpression", etc. appearing inside Theorema symbols
+        	with attribute "HoldAll" (e.g. "Module$TM"). However, since those symbols only have their
+        	attributes in Computation-context, and the context is replaced by normal context above,
+        	the "HoldAll" gets lost and evaluation may happen. *)
+        ReleaseHold[ freshNames[ ToExpression[ stringExpr, InputForm, Hold]]]
 	]
 renameToStandardContext[ args___] := unexpected[ renameToStandardContext, {args}]
 

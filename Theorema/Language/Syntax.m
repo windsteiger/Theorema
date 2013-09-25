@@ -240,28 +240,28 @@ isLeftClosed[ b_] := Switch[ b, "(", "False", "[", "True"]
 isRightClosed[ b_] := Switch[ b, ")", "False", "]", "True"]
 posInfBox = RowBox[ {"DirectedInfinity", "[", "1", "]"}]
 negInfBox = RowBox[ {"DirectedInfinity", "[", RowBox[ {"-", "1"}], "]"}]
-makeRangeBox[ head_String, l_, u_, leftClosed_, rightClosed_] := RowBox[ {head, "[", RowBox[ {l, u, leftClosed, rightClosed}], "]"}]
+makeDomainRangeBox[ head_String, l_, u_, leftClosed_, rightClosed_] := RowBox[ {head, "[", RowBox[ {l, ",", u, ",", leftClosed, ",", rightClosed}], "]"}]
 
 (* ::Subsubsubsection:: *)
 (* \[DoubleStruckCapitalN] *)
 
 (* Ellipsis-subscript without interval brackets *)
 MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalN]", RowBox[ {l_, ",", "\[Ellipsis]", ",", u_}]], fmt_] :=
-	MakeExpression[ makeRangeBox[ "IntegerRange", makeMaxBox[ l, "0"], u, "True", "True"], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+	MakeExpression[ makeDomainRangeBox[ "IntegerRange", makeMaxBox[ l, "0"], u, "True", "True"], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 
 (* Ellipsis-subscript with interval brackets
 	The following 3 definitions are essentially the same, we only take care of the several possibilities how
 	left/right brackets are arranged withing RowBox *)
 MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalN]", RowBox[ {RowBox[ {left_?isLeftIntervalBracket, RowBox[ {l_, ",", "\[Ellipsis]", ",", u_}]}], right_?isRightIntervalBracket}]], fmt_] :=
-	MakeExpression[ makeRangeBox[ "IntegerRange", makeMaxBox[ l, "0"], u, isLeftClosed[ left], isRightClosed[ right]], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+	MakeExpression[ makeDomainRangeBox[ "IntegerRange", makeMaxBox[ l, "0"], u, isLeftClosed[ left], isRightClosed[ right]], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalN]", RowBox[ {left_?isLeftIntervalBracket, RowBox[ {RowBox[ {l_, ",", "\[Ellipsis]", ",", u_}], right_?isRightIntervalBracket}]}]], fmt_] :=
-	MakeExpression[ makeRangeBox[ "IntegerRange", makeMaxBox[ l, "0"], u, isLeftClosed[ left], isRightClosed[ right]], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+	MakeExpression[ makeDomainRangeBox[ "IntegerRange", makeMaxBox[ l, "0"], u, isLeftClosed[ left], isRightClosed[ right]], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalN]", RowBox[ {left_?isLeftIntervalBracket, RowBox[ {l_, ",", "\[Ellipsis]", ",", u_}], right_?isRightIntervalBracket}]], fmt_] :=
-	MakeExpression[ makeRangeBox[ "IntegerRange", makeMaxBox[ l, "0"], u, isLeftClosed[ left], isRightClosed[ right]], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+	MakeExpression[ makeDomainRangeBox[ "IntegerRange", makeMaxBox[ l, "0"], u, isLeftClosed[ left], isRightClosed[ right]], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 
 (* Single subscript indicating where to start from *)
 MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalN]", l_], fmt_] :=
-	MakeExpression[ makeRangeBox[ "IntegerRange", makeMaxBox[ l, "0"], posInfBox, "True", "False"], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+	MakeExpression[ makeDomainRangeBox[ "IntegerRange", makeMaxBox[ l, "0"], posInfBox, "True", "False"], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 
 (* No subscript at all; Start from 1.
 	This case, unfortunately, can reasonably only be handled in "freshSymbol[]" in "Session.m" *)
@@ -279,21 +279,21 @@ makeDomainRange[ "\[DoubleStruckCapitalR]"] := "RealRange"
 
 (* Ellipsis-subscript without interval brackets *)
 MakeExpression[ SubscriptBox[ dom_?isZQR, RowBox[ {l_, ",", "\[Ellipsis]", ",", u_}]], fmt_] :=
-	MakeExpression[ makeRangeBox[ makeDomainRange[ dom], l, u, "True", "True"], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+	MakeExpression[ makeDomainRangeBox[ makeDomainRange[ dom], l, u, "True", "True"], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 
 (* Ellipsis-subscript with interval brackets
 	The following definitions are essentially the same, we only take care of the several possibilities how
 	left/right brackets are arranged withing RowBox *)
 MakeExpression[ SubscriptBox[ dom_?isZQR, RowBox[ {RowBox[ {left_?isLeftIntervalBracket, RowBox[ {l_, ",", "\[Ellipsis]", ",", u_}]}], right_?isRightIntervalBracket}]], fmt_] :=
-	MakeExpression[ makeRangeBox[ makeDomainRange[ dom], l, u, isLeftClosed[ left], isRightClosed[ right]], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+	MakeExpression[ makeDomainRangeBox[ makeDomainRange[ dom], l, u, isLeftClosed[ left], isRightClosed[ right]], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 MakeExpression[ SubscriptBox[ dom_?isZQR, RowBox[ {left_?isLeftIntervalBracket, RowBox[ {RowBox[ {l_, ",", "\[Ellipsis]", ",", u_}], right_?isRightIntervalBracket}]}]], fmt_] :=
-	MakeExpression[ makeRangeBox[ makeDomainRange[ dom], l, u, isLeftClosed[ left], isRightClosed[ right]], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+	MakeExpression[ makeDomainRangeBox[ makeDomainRange[ dom], l, u, isLeftClosed[ left], isRightClosed[ right]], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 MakeExpression[ SubscriptBox[ dom_?isZQR, RowBox[ {left_?isLeftIntervalBracket, RowBox[ {l_, ",", "\[Ellipsis]", ",", u_}], right_?isRightIntervalBracket}]], fmt_] :=
-	MakeExpression[ makeRangeBox[ makeDomainRange[ dom], l, u, isLeftClosed[ left], isRightClosed[ right]], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+	MakeExpression[ makeDomainRangeBox[ makeDomainRange[ dom], l, u, isLeftClosed[ left], isRightClosed[ right]], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 
 (* Single subscript indicating where to start from *)
 MakeExpression[ SubscriptBox[ dom_?isZQR, l_], fmt_] :=
-	MakeExpression[ makeRangeBox[ makeDomainRange[ dom], l, posInfBox, "True", "False"], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+	MakeExpression[ makeDomainRangeBox[ makeDomainRange[ dom], l, posInfBox, "True", "False"], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 
 (* No subscript at all; Start from -Infinity.
 	This case, unfortunately, can reasonably only be handled in "freshSymbol[]" in "Session.m" *)
