@@ -503,7 +503,7 @@ mmaTransRule[ args___] := unexpected[ mmaTransRule, {args}]
 	form is a list of formulas used for replacement, i.e. the formulas from which the rewrite rules have been derived,
 	cond is a condition, under which the replacement is allowed.
 *)
-replaceAndTrack[ expr:_Theorema`Language`VAR$|_Theorema`Language`SEQ$|_Theorema`Language`FIX$, _List] := {expr, {}, True}
+replaceAndTrack[ expr:_Theorema`Language`VAR$|_Theorema`Language`SEQ0$|_Theorema`Language`SEQ1$|_Theorema`Language`FIX$, _List] := {expr, {}, True}
 
 replaceAndTrack[ expr_, repl_List] :=
 	Module[ {e, uc},
@@ -527,8 +527,11 @@ replaceListAndTrack[ expr_, repl_List] :=
 replaceListAndTrack[ args___] := unexpected[ replaceListAndTrack, {args}]
 
 replaceAllAndTrack[ expr_, repl_List] := 
-	Module[ {e, uc},
-		{e, uc} = Reap[ replaceAllExcept[ expr, repl, {}, Heads -> {Theorema`Language`VAR$, Theorema`Language`SEQ$, Theorema`Language`FIX$}], {"ref", "cond"}];
+(* BUGFIX amaletzk: repl might not be a plain list of rewrite rules, but instead consist of 2-element-lists
+	originating from "makeSingleRule[]". Hence, we need to make it plain, if necessary.
+	Same in "replaceRepeatedAndTrack[]". *)
+	Module[ {e, uc, plainRepl = Switch[ repl, {{_, _}..}, Map[ Last, repl], _, repl]},
+		{e, uc} = Reap[ replaceAllExcept[ expr, plainRepl, {}, Heads -> {Theorema`Language`VAR$, Theorema`Language`SEQ0$, Theorema`Language`SEQ1$, Theorema`Language`FIX$}], {"ref", "cond"}];
 		If[ uc === {{}, {}},
 			{e, {}, True},
 			(* else *)
@@ -539,9 +542,9 @@ replaceAllAndTrack[ args___] := unexpected[ replaceAllAndTrack, {args}]
 
 replaceRepeatedAndTrack[ expr_, repl_List] := 
 (* We take care that no infinite rewritings occur using "MaxIterations" *)
-	Module[ {e, uc},
+	Module[ {e, uc, plainRepl = Switch[ repl, {{_, _}..}, Map[ Last, repl], _, repl]},
 		{e, uc} = Reap[ 
-			Quiet[ replaceRepeatedExcept[expr, repl, {}, Heads -> {Theorema`Language`VAR$, Theorema`Language`SEQ$, Theorema`Language`FIX$}, MaxIterations -> 5], 
+			Quiet[ replaceRepeatedExcept[expr, plainRepl, {}, Heads -> {Theorema`Language`VAR$, Theorema`Language`SEQ0$, Theorema`Language`SEQ1$, Theorema`Language`FIX$}, MaxIterations -> 5], 
 					ReplaceRepeated::rrlim],
 				{"ref", "cond"}];
 		If[ uc === {{}, {}},

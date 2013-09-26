@@ -331,7 +331,8 @@ Set$TM /: Intersection$TM[ a__Set$TM] /; buiActive["Intersection"] := Intersecti
 Set$TM /: Backslash$TM[ a_Set$TM,b_Set$TM] /; buiActive["Difference"] := Complement[a, b] /. List -> Set$TM
 Set$TM /: EmptyUpTriangle$TM[ a_Set$TM,b_Set$TM] /; buiActive["SymmetricDifference"] := Union[Complement[a, b], Complement[b, a]] /. List -> Set$TM
 Set$TM /: Cross$TM[ a__Set$TM] /; buiActive["CartesianProduct"] := Apply[Set$TM, Replace[Tuples[{a}],List[x__]:> Tuple$TM[x] ,{1}]]
-Set$TM /: Element$TM[ p_,a_Set$TM] /; buiActive["IsElement"] := MemberQ[ a, p]
+Set$TM /: Element$TM[ p_,a_Set$TM] /; buiActive["IsElement"] && MemberQ[ a, p] := True
+Set$TM /: Element$TM[ p_,a_Set$TM] /; buiActive["IsElement"] && isVariableFree[a] := False
 
 Element$TM[ p_, (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[DirectedInfinity[-1], DirectedInfinity[1], _, _]] /; buiActive["IsElement"] && buiActive[StringDrop[SymbolName[h],-3]] :=
 	isInRangeDomain[ h, p]
