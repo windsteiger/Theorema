@@ -95,6 +95,152 @@ tmaToInputOperator[ op_Symbol] :=
 tmaToInputOperator[ args___] := unexpected[ tmaToInputOperator, {args}]	
 
 
+(* In the following list,
+	- the first element of each item is the symbol of the operator,
+	- the second element is a list of possible syntax of the operator according to Mathematica,
+	- the third element is the full name of the operator.
+	Note that the second elements are not needed so far, but I think it is good to keep them for possible future use.
+	Also note that the meaning of Infix/Prefix/Postfix is the following:
+		If operator "?" with name "f" has "Infix" as possible syntax, then any expression of the form "a?b" is
+		automatically transformed into "f[a, b]" (by Mathematica), whereas "a?" and "?b" would result in syntax
+		errors. This behaviour is NOT affected by the Theorema parsing rules, which only transform "?"
+		(without arguments) into "f".
+	*)
+$tmaOperators = {
+	{"/@", {Infix}, "Map"}, {"//@", {Infix}, "MapAll"},
+	{"@@", {Infix}, "Apply"}, {";;", {Infix}, "Span"},
+	{"\[Rule]", {Infix}, "Rule"}, {"\[RuleDelayed]", {Infix}, "RuleDelayed"},
+	{"\[VerticalTilde]", {Infix}, "VerticalTilde"}, {"\[VerticalBar]", {Infix}, "VerticalBar"},
+	{"\[NotVerticalBar]", {Infix}, "NotVerticalBar"}, {"\[DoubleVerticalBar]", {Infix}, "DoubleVerticalBar"},
+	{"\[NotDoubleVerticalBar]", {Infix}, "NotDoubleVerticalBar"}, {"\[UpTee]", {Infix}, "UpTee"},
+	{"\[DownTee]", {Infix}, "DownTee"}, {"\[RightVector]", {Infix}, "RightVector"},
+	{"\[LeftVector]", {Infix}, "LeftVector"}, {"\[LeftRightVector]", {Infix}, "LeftRightVector"},
+	{"\[DownRightVector]", {Infix}, "DownRightVector"}, {"\[DownLeftVector]", {Infix}, "DownLeftVector"},
+	{"\[DownLeftRightVector]", {Infix}, "DownLeftRightVector"}, {"\[RightTeeVector]", {Infix}, "RightTeeVector"},
+	{"\[LeftTeeVector]", {Infix}, "LeftTeeVector"}, {"\[DownRightTeeVector]", {Infix}, "DownRightTeeVector"},
+	{"\[DownLeftTeeVector]", {Infix}, "DownLeftTeeVector"}, {"\[RightVectorBar]", {Infix}, "RightVectorBar"},
+	{"\[LeftVectorBar]", {Infix}, "LeftVectorBar"}, {"\[DownRightVectorBar]", {Infix}, "DownRightVectorBar"},
+	{"\[DownLeftVectorBar]", {Infix}, "DownLeftVectorBar"}, {"\[Equilibrium]", {Infix}, "Equilibrium"},
+	{"\[ReverseEquilibrium]", {Infix}, "ReverseEquilibrium"}, {"\[LeftUpVector]", {Infix}, "LeftUpVector"},
+	{"\[LeftDownVector]", {Infix}, "LeftDownVector"}, {"\[LeftUpDownVector]", {Infix}, "LeftUpDownVector"},
+	{"\[RightUpVector]", {Infix}, "RightUpVector"}, {"\[RightDownVector]", {Infix}, "RightDownVector"},
+	{"\[RightUpDownVector]", {Infix}, "RightUpDownVector"}, {"\[LeftUpTeeVector]", {Infix}, "LeftUpTeeVector"},
+	{"\[LeftDownTeeVector]", {Infix}, "LeftDownTeeVector"}, {"\[RightUpTeeVector]", {Infix}, "RightUpTeeVector"},
+	{"\[RightDownTeeVector]", {Infix}, "RightDownTeeVector"}, {"\[LeftUpVectorBar]", {Infix}, "LeftUpVectorBar"},
+	{"\[LeftDownVectorBar]", {Infix}, "LeftDownVectorBar"}, {"\[RightUpVectorBar]", {Infix}, "RightUpVectorBar"},
+	{"\[RightDownVectorBar]", {Infix}, "RightDownVectorBar"}, {"\[DownLeftVectorBar]", {Infix}, "DownLeftVectorBar"},
+	{"\[UpEquilibrium]", {Infix}, "UpEquilibrium"}, {"\[ReverseUpEquilibrium]", {Infix}, "ReverseUpEquilibrium"},
+	{"\[RightArrow]", {Infix}, "RightArrow"}, {"\[LeftArrow]", {Infix}, "LeftArrow"},
+	{"\[LeftRightArrow]", {Infix}, "LeftRightArrow"}, {"\[LongRightArrow]", {Infix}, "LongRightArrow"},
+	{"\[LongLeftArrow]", {Infix}, "LongLeftArrow"}, {"\[LongLeftRightArrow]", {Infix}, "LongLeftRightArrow"},
+	{"\[ShortRightArrow]", {Infix}, "ShortRightArrow"}, {"\[ShortLeftArrow]", {Infix}, "ShortLeftArrow"},
+	{"\[RightTeeArrow]", {Infix}, "RightTeeArrow"}, {"\[LeftTeeArrow]", {Infix}, "LeftTeeArrow"},
+	{"\[RightArrowBar]", {Infix}, "RightArrowBar"}, {"\[LeftArrowBar]", {Infix}, "LeftArrowBar"},
+	{"\[DoubleRightArrow]", {Infix}, "DoubleRightArrow"}, {"\[DoubleLeftArrow]", {Infix}, "DoubleLeftArrow"},
+	{"\[DoubleLeftRightArrow]", {Infix}, "DoubleLeftRightArrow"}, {"\[DoubleLongRightArrow]", {Infix}, "DoubleLongRightArrow"},
+	{"\[DoubleLongLeftArrow]", {Infix}, "DoubleLongLeftArrow"}, {"\[DoubleLongLeftRightArrow]", {Infix}, "DoubleLongLeftRightArrow"},
+	{"\[DownArrow]", {Infix}, "DownArrow"}, {"\[UpDownArrow]", {Infix}, "UpDownArrow"},
+	{"\[UpTeeArrow]", {Infix}, "UpTeeArrow"}, {"\[DownTeeArrow]", {Infix}, "DownTeeArrow"},
+	{"\[UpArrowBar]", {Infix}, "UpArrowBar"}, {"\[DownArrowBar]", {Infix}, "DownArrowBar"},
+	{"\[DoubleUpArrow]", {Infix}, "DoubleUpArrow"}, {"\[DoubleDownArrow]", {Infix}, "DoubleDownArrow"},
+	{"\[DoubleUpDownArrow]", {Infix}, "DoubleUpDownArrow"}, {"\[RightArrowLeftArrow]", {Infix}, "RightArrowLeftArrow"},
+	{"\[LeftArrowRightArrow]", {Infix}, "LeftArrowRightArrow"}, {"\[UpArrowDownArrow]", {Infix}, "UpArrowDownArrow"},
+	{"\[DownArrowUpArrow]", {Infix}, "DownArrowUpArrow"}, {"\[LowerRightArrow]", {Infix}, "LowerRightArrow"},
+	{"\[LowerLeftArrow]", {Infix}, "LowerLeftArrow"}, {"\[UpperLeftArrow]", {Infix}, "UpperLeftArrow"},
+	{"\[UpperRightArrow]", {Infix}, "UpperRightArrow"}, {"++", {Postfix}, "Increment"},
+	{"--", {Postfix}, "Decrement"}, {"!", {Postfix}, "Factorial"},
+	{"!!", {Postfix}, "Factorial2"}, {"<>", {Infix}, "StringJoin"},
+	{"^", {Infix}, "Power"}, {"\[Del]", {Prefix}, "Del"},
+	{"\[Square]", {Prefix}, "Square"}, {"\[SmallCircle]", {Infix}, "SmallCircle"},
+	{"\[CircleDot]", {Infix}, "CircleDot"}, {"**", {Infix}, "NonCommutativeMultiply"},
+	{"\[Cross]", {Infix}, "Cross"}, {".", {Infix}, "Dot"},
+	{"+", {Infix, Prefix}, "Plus"}, {"\[PlusMinus]", {Infix, Prefix}, "PlusMinus"},
+	{"\[MinusPlus]", {Infix, Prefix}, "MinusPlus"}, {"\[Diamond]", {Infix}, "Diamond"},
+	{"\[CircleTimes]", {Infix, Prefix}, "CircleTimes"}, {"\[CenterDot]", {Infix}, "CenterDot"},
+	{"*", {Infix}, "Times"}, {"\[Times]", {Infix}, "Times"},
+	{"\[Star]", {Infix}, "Star"}, {"\[Coproduct]", {Infix, Prefix}, "Coproduct"},
+	{"\[CirclePlus]", {Infix}, "CirclePlus"}, {"\[CircleMinus]", {Infix}, "CircleMinus"},
+	{"\[Conjugate]", {Postfix}, "Conjugate"}, {"\[Transpose]", {Postfix}, "Transpose"},
+	{"\[ConjugateTranspose]", {Postfix}, "ConjugateTranspose"}, {"\[HermitianConjugate]", {Postfix}, "HermitianConjugate"},
+	{"\[Backslash]", {Infix}, "Backslash"}, {"\[Intersection]", {Infix}, "Intersection"},
+	{"\[Union]", {Infix}, "Union"}, {"\[UnionPlus]", {Infix}, "UnionPlus"},
+	{"\[SquareIntersection]", {Infix}, "SquareIntersection"}, {"\[SquareUnion]", {Infix}, "SquareUnion"},
+	{"\[Element]", {Infix}, "Element"}, {"\[NotElement]", {Infix}, "NotElement"},
+	{"\[ReverseElement]", {Infix}, "ReverseElement"}, {"\[NotReverseElement]", {Infix}, "NotReverseElement"},
+	{"\[Subset]", {Infix}, "Subset"}, {"\[NotSubset]", {Infix}, "NotSubset"},
+	{"\[Superset]", {Infix}, "Superset"}, {"\[NotSuperset]", {Infix}, "NotSuperset"},
+	{"\[SubsetEqual]", {Infix}, "SubsetEqual"}, {"\[NotSubsetEqual]", {Infix}, "NotSubsetEqual"},
+	{"\[SupersetEqual]", {Infix}, "SupersetEqual"}, {"\[NotSupersetEqual]", {Infix}, "NotSupersetEqual"},
+	{">=", {Infix}, "GreaterEqual"}, {"\[GreaterEqual]", {Infix}, "GreaterEqual"},
+	{"\[NotGreaterEqual]", {Infix}, "NotGreaterEqual"}, {"\[GreaterSlantEqual]", {Infix}, "GreaterEqual"},
+	{"\[NotGreaterSlantEqual]", {Infix}, "NotGreaterSlantEqual"}, {"\[GreaterFullEqual]", {Infix}, "GreaterFullEqual"},
+	{"\[NotGreaterFullEqual]", {Infix}, "NotGreaterFullEqual"}, {"\[GreaterTilde]", {Infix}, "GreaterTilde"},
+	{"\[NotGreaterTilde]", {Infix}, "NotGreaterTilde"}, {"\[GreaterGreater]", {Infix}, "GreaterGreater"},
+	{"\[NotGreaterGreater]", {Infix}, "NotGreaterGreater"}, {"\[NestedGreaterGreater]", {Infix}, "NestedGreaterGreater"},
+	{"\[NotNestedGreaterGreater]", {Infix}, "NotNestedGreaterGreater"}, {">", {Infix}, "Greater"},
+	{"\[NotGreater]", {Infix}, "NotGreater"}, {"<=", {Infix}, "LessEqual"},
+	{"\[LessEqual]", {Infix}, "LessEqual"}, {"\[NotLessEqual]", {Infix}, "NotLessEqual"},
+	{"\[LessSlantEqual]", {Infix}, "LessEqual"}, {"\[NotLessSlantEqual]", {Infix}, "NotLessSlantEqual"},
+	{"\[LessFullEqual]", {Infix}, "LessFullEqual"}, {"\[NotLessFullEqual]", {Infix}, "NotLessFullEqual"},
+	{"\[LessTilde]", {Infix}, "LessTilde"}, {"\[NotLessTilde]", {Infix}, "NotLessTilde"},
+	{"\[LessLess]", {Infix}, "LessLess"}, {"\[NotLessLess]", {Infix}, "NotLessLess"},
+	{"\[NestedLessLess]", {Infix}, "NestedLessLess"}, {"\[NotNestedLessLess]", {Infix}, "NotNestedLessLess"},
+	{"<", {Infix}, "Less"}, {"\[NotLess]", {Infix}, "NotLess"},
+	{"\[GreaterLess]", {Infix}, "GreaterLess"}, {"\[NotGreaterLess]", {Infix}, "NotGreaterLess"},
+	{"\[LessGreater]", {Infix}, "LessGreater"}, {"\[NotLessGreater]", {Infix}, "NotLessGreater"},
+	{"\[GreaterEqualLess]", {Infix}, "GreaterEqualLess"}, {"\[LessEqualGreater]", {Infix}, "LessEqualGreater"},
+	{"\[Succeeds]", {Infix}, "Succeeds"}, {"\[NotSucceeds]", {Infix}, "NotSucceeds"},
+	{"\[SucceedsEqual]", {Infix}, "SucceedsEqual"}, {"\[NotSucceedsEqual]", {Infix}, "NotSucceedsEqual"},
+	{"\[SucceedsSlantEqual]", {Infix}, "SucceedsSlantEqual"}, {"\[NotSucceedsSlantEqual]", {Infix}, "NotSucceedsSlantEqual"},
+	{"\[SucceedsTilde]", {Infix}, "SucceedsTilde"}, {"\[NotSucceedsTilde]", {Infix}, "NotSucceedsTilde"},
+	{"\[Precedes]", {Infix}, "Precedes"}, {"\[NotPrecedes]", {Infix}, "NotPrecedes"},
+	{"\[PrecedesEqual]", {Infix}, "PrecedesEqual"}, {"\[NotPrecedesEqual]", {Infix}, "NotPrecedesEqual"},
+	{"\[PrecedesSlantEqual]", {Infix}, "PrecedesSlantEqual"}, {"\[NotPrecedesSlantEqual]", {Infix}, "NotPrecedesSlantEqual"},
+	{"\[PrecedesTilde]", {Infix}, "PrecedesTilde"}, {"\[NotPrecedesTilde]", {Infix}, "NotPrecedesTilde"},
+	{"\[RightTriangle]", {Infix}, "RightTriangle"}, {"\[NotRightTriangle]", {Infix}, "NotRightTriangle"},
+	{"\[RightTriangleEqual]", {Infix}, "RightTriangleEqual"}, {"\[NotRightTriangleEqual]", {Infix}, "NotRightTriangleEqual"},
+	{"\[RightTriangleBar]", {Infix}, "RightTriangleBar"}, {"\[NotRightTriangleBar]", {Infix}, "NotRightTriangleBar"},
+	{"\[LeftTriangle]", {Infix}, "LeftTriangle"}, {"\[NotLeftTriangle]", {Infix}, "NotLeftTriangle"},
+	{"\[LeftTriangleEqual]", {Infix}, "LeftTriangleEqual"}, {"\[NotLeftTriangleEqual]", {Infix}, "NotLeftTriangleEqual"},
+	{"\[LeftTriangleBar]", {Infix}, "LeftTriangleBar"}, {"\[NotLeftTriangleBar]", {Infix}, "NotLeftTriangleBar"},
+	{"\[SquareSuperset]", {Infix}, "SquareSuperset"}, {"\[NotSquareSuperset]", {Infix}, "NotSquareSuperset"},
+	{"\[SquareSupersetEqual]", {Infix}, "SquareSupersetEqual"}, {"\[NotSquareSupersetEqual]", {Infix}, "NotSquareSupersetEqual"},
+	{"\[SquareSubset]", {Infix}, "SquareSubset"}, {"\[NotSquareSubset]", {Infix}, "NotSquareSubset"},
+	{"\[SquareSubsetEqual]", {Infix}, "SquareSubsetEqual"}, {"\[NotSquareSubsetEqual]", {Infix}, "NotSquareSubsetEqual"},
+	{"=", {Infix}, "Set"}, {":=", {Infix}, "SetDelayed"},
+	{"\[Equal]", {Infix}, "Equal"}, {"==", {Infix}, "Equal"},
+	{"\[LongEqual]", {Infix}, "Equal"}, {"!=", {Infix}, "Unequal"},
+	{"\[NotEqual]", {Infix}, "Unequal"}, {"===", {Infix}, "SameQ"},
+	{"=!=", {Infix}, "UnsameQ"}, {"\[Congruent]", {Infix}, "Congruent"},
+	{"\[NotCongruent]", {Infix}, "NotCongruent"}, {"\[Tilde]", {Infix}, "Tilde"},
+	{"\[NotTilde]", {Infix}, "NotTilde"}, {"\[TildeTilde]", {Infix}, "TildeTilde"},
+	{"\[NotTildeTilde]", {Infix}, "NotTildeTilde"}, {"\[TildeEqual]", {Infix}, "TildeEqual"},
+	{"\[NotTildeEqual]", {Infix}, "NotTildeEqual"}, {"\[TildeFullEqual]", {Infix}, "TildeFullEqual"},
+	{"\[NotTildeFullEqual]", {Infix}, "NotTildeFullEqual"}, {"\[EqualTilde]", {Infix}, "EqualTilde"},
+	{"\[NotEqualTilde]", {Infix}, "NotEqualTilde"}, {"\[HumpEqual]", {Infix}, "HumpEqual"},
+	{"\[NotHumpEqual]", {Infix}, "NotHumpEqual"}, {"\[HumpDownHump]", {Infix}, "HumpDownHump"},
+	{"\[NotHumpDownHump]", {Infix}, "NotHumpDownHump"}, {"\[DotEqual]", {Infix}, "DotEqual"},
+	{"\[Proportional]", {Infix}, "Proportional"}, {"\[Proportion]", {Infix}, "Proportion"},
+	{"\[Vee]", {Infix}, "Vee"}, {"\[Wedge]", {Infix}, "Wedge"},
+	{"\[Or]", {Infix}, "Or"}, {"\[And]", {Infix}, "And"},
+	{"\[Not]", {Prefix}, "Not"}, {"\[Xor]", {Infix}, "Xor"},
+	{"\[Nand]", {Infix}, "Nand"}, {"\[Nor]", {Infix}, "Nor"},
+	{"\[Implies]", {Infix}, "Implies"}, {"\[Therefore]", {Infix}, "Therefore"},
+	{"\[Because]", {Infix}, "Because"}, {"\[RightTee]", {Infix}, "RightTee"},
+	{"\[LeftTee]", {Infix}, "LeftTee"}, {"\[DoubleRightTee]", {Infix}, "DoubleRightTee"},
+	{"\[DoubleLeftTee]", {Infix}, "DoubleLeftTee"}, {"\[SuchThat]", {Infix}, "SuchThat"}};
+	
+$tmaOperatorSymbols = Map[ First, $tmaOperators];
+$tmaOperatorNames = Flatten[ ToExpression[ Map[ {"Theorema`Knowledge`" <> Last[#] <> "$TM", "Theorema`Computation`Knowledge`" <> Last[#] <> "$TM"} &, $tmaOperators]]];
+$tmaOperatorToName = Dispatch[ Map[ Rule[ First[#], Last[#]] &, $tmaOperators]];
+$tmaNameToOperator = Dispatch[ MapThread[ Rule, {$tmaOperatorNames, Flatten[ Map[ {#, #}&, $tmaOperatorSymbols]]}]];
+
+(* We need this attribute, because otherwise expressions (not only operator symbols!) are evaluated when "MakeBoxes" is called. *)	
+SetAttributes[ isTmaOperatorName, HoldAllComplete];
+isTmaOperatorSymbol[ op_String] := MemberQ[ $tmaOperatorSymbols, op]
+isTmaOperatorName[ op_Symbol] := MemberQ[ $tmaOperatorNames, op]
+
+
 (* ::Section:: *)
 (* Set and tuple constructor *)
 
@@ -561,6 +707,35 @@ getSingleRangeVar[ r_] :=
 getSingleRangeVar[ args___] := unexpected[ getSingleRangeVar, {args}]
 
 
+(* ::Subsubsection:: *)
+(* Operators *)
+
+
+MakeExpression[ RowBox[ {h_, "[", RowBox[ {op_String?isTmaOperatorSymbol}], "]"}], fmt_] :=
+	MakeExpression[ RowBox[ {h, "[", RowBox[ {Replace[ op, $tmaOperatorToName]}], "]"}], fmt] /; ($parseTheoremaExpressions || $parseTheoremaGlobals)
+MakeExpression[ RowBox[ {h_, "[", RowBox[ {pre___, ld_?isLeftDelimiter, op_String?isTmaOperatorSymbol}], "]"}], fmt_] :=
+	MakeExpression[ RowBox[ {h, "[", RowBox[ {pre, ld, Replace[ op, $tmaOperatorToName]}], "]"}], fmt] /; ($parseTheoremaExpressions || $parseTheoremaGlobals)
+MakeExpression[ RowBox[ {h_, "[", RowBox[ {op_String?isTmaOperatorSymbol, rd_?isRightDelimiter, post___}], "]"}], fmt_] :=
+	MakeExpression[ RowBox[ {h, "[", RowBox[ {Replace[ op, $tmaOperatorToName], rd, post}], "]"}], fmt] /; ($parseTheoremaExpressions || $parseTheoremaGlobals)
+MakeExpression[ RowBox[ {h_, "[", RowBox[ {pre___, ld_?isLeftDelimiter, op_String?isTmaOperatorSymbol, rd_?isRightDelimiter, post___}], "]"}], fmt_] :=
+	MakeExpression[ RowBox[ {h, "[", RowBox[ {pre, ld, Replace[ op, $tmaOperatorToName], rd, post}], "]"}], fmt] /; ($parseTheoremaExpressions || $parseTheoremaGlobals)
+
+MakeExpression[ RowBox[ {op_String?isTmaOperatorSymbol}], fmt_] :=
+	MakeExpression[ RowBox[ {Replace[ op, $tmaOperatorToName]}], fmt] /; ($parseTheoremaExpressions || $parseTheoremaGlobals)
+MakeExpression[ RowBox[ {pre___, ld_?isLeftDelimiter, op_String?isTmaOperatorSymbol}], fmt_] :=
+	MakeExpression[ RowBox[ {pre, ld, Replace[ op, $tmaOperatorToName]}], fmt] /; ($parseTheoremaExpressions || $parseTheoremaGlobals)
+MakeExpression[ RowBox[ {op_String?isTmaOperatorSymbol, rd_?isRightDelimiter, post___}], fmt_] :=
+	MakeExpression[ RowBox[ {Replace[ op, $tmaOperatorToName], rd, post}], fmt] /; ($parseTheoremaExpressions || $parseTheoremaGlobals)
+MakeExpression[ RowBox[ {pre___, ld_?isLeftDelimiter, op_String?isTmaOperatorSymbol, rd_?isRightDelimiter, post___}], fmt_] :=
+	MakeExpression[ RowBox[ {pre, ld, Replace[ op, $tmaOperatorToName], rd, post}], fmt] /; ($parseTheoremaExpressions || $parseTheoremaGlobals)
+	
+MakeExpression[op_String?isTmaOperatorSymbol, fmt_] := MakeExpression[Replace[op, $tmaOperatorToName], fmt] /; ($parseTheoremaExpressions || $parseTheoremaGlobals)
+ 
+isLeftDelimiter[ s_String] :=
+	MemberQ[ {"[", "(", "{", "\[LeftAngleBracket]", "\[LeftBracketingBar]", "\[LeftFloor]", "\[LeftCeiling]", "\[LeftDoubleBracket]", "\[LeftDoubleBracketingBar]", ",", ";"}, s]
+isRightDelimiter[ s_String] :=
+	MemberQ[ {"[", "]", ")", "}", "\[RightAngleBracket]", "\[RightBracketingBar]", "\[RightFloor]", "\[RightCeiling]", "\[RightDoubleBracket]", "\[RightDoubleBracketingBar]", ",", ";"}, s]
+
 
 (* ::Section:: *)
 (* MakeBoxes *)
@@ -605,7 +780,9 @@ MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
         	MakeBoxes[ b[ arg], TheoremaForm]
     	]
     ]
-
+    
+MakeBoxes[ s_?isTmaOperatorName, TheoremaForm] := Replace[ s, $tmaNameToOperator]
+    
 MakeBoxes[ s_Symbol, TheoremaForm] := 
 	(* We have to use "Unevaluated" here, because "I" is a symbol, but evaluates to "Complex[0, 1]" *)
 	Module[ {n = SymbolName[ Unevaluated[ s]]},
@@ -614,6 +791,7 @@ MakeBoxes[ s_Symbol, TheoremaForm] :=
 			n
 		]
 	]
+	
 
 
 (* ::Subsection:: *)
