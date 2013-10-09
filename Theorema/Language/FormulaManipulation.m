@@ -548,8 +548,12 @@ replaceListAndTrack[ expr_, repl_List] :=
 replaceListAndTrack[ args___] := unexpected[ replaceListAndTrack, {args}]
 
 replaceAllAndTrack[ expr_, repl_List] := 
-	Module[ {e, uc},
-		{e, uc} = Reap[ replaceAllExcept[ expr, repl, {}, Heads -> {Theorema`Language`VAR$, Theorema`Language`SEQ0$, Theorema`Language`SEQ1$, Theorema`Language`FIX$}], {"ref", "cond"}];
+(* BUGFIX amaletzk: repl might not be a plain list of rewrite rules, but instead consist of 2-element-lists
+	originating from "makeSingleRule[]". Hence, we need to make it plain, if necessary.
+	Same in "replaceRepeatedAndTrack[]". *)
+(* WW Let's look into this: I think the calling program should pass a flat list. If so, use "plain" instead of "plainRepl" *)
+	Module[ {e, uc, plainRepl = Switch[ repl, {{_, _}..}, Map[ Last, repl], _, repl]},
+		{e, uc} = Reap[ replaceAllExcept[ expr, plainRepl, {}, Heads -> {Theorema`Language`VAR$, Theorema`Language`SEQ0$, Theorema`Language`SEQ1$, Theorema`Language`FIX$}], {"ref", "cond"}];
 		If[ uc === {{}, {}},
 			{e, {}, True},
 			(* else *)
@@ -560,9 +564,9 @@ replaceAllAndTrack[ args___] := unexpected[ replaceAllAndTrack, {args}]
 
 replaceRepeatedAndTrack[ expr_, repl_List] := 
 (* We take care that no infinite rewritings occur using "MaxIterations" *)
-	Module[ {e, uc},
+	Module[ {e, uc, plainRepl = Switch[ repl, {{_, _}..}, Map[ Last, repl], _, repl]},
 		{e, uc} = Reap[ 
-			Quiet[ replaceRepeatedExcept[expr, repl, {}, Heads -> {Theorema`Language`VAR$, Theorema`Language`SEQ0$, Theorema`Language`SEQ1$, Theorema`Language`FIX$}, MaxIterations -> 5], 
+			Quiet[ replaceRepeatedExcept[expr, plainRepl, {}, Heads -> {Theorema`Language`VAR$, Theorema`Language`SEQ0$, Theorema`Language`SEQ1$, Theorema`Language`FIX$}, MaxIterations -> 5], 
 					ReplaceRepeated::rrlim],
 				{"ref", "cond"}];
 		If[ uc === {{}, {}},

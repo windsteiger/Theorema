@@ -129,11 +129,14 @@ MakeBoxes[ IffDef$TM[ l_, r_], TheoremaForm] :=
 
 MakeBoxes[ SEQ0$[ v_], TheoremaForm] := RowBox[ {MakeBoxes[ v, TheoremaForm], "..."}]
 MakeBoxes[ SEQ1$[ v_], TheoremaForm] := RowBox[ {MakeBoxes[ v, TheoremaForm], ".."}]
+MakeBoxes[ VAR$[ v_?isTmaOperatorName][args___], TheoremaForm] := MakeBoxes[ v[args], TheoremaForm]
 MakeBoxes[ VAR$[ v_], TheoremaForm] := StyleBox[ MakeBoxes[ v, TheoremaForm], "ExpressionVariable"]
 abfAnnotations = {
 	{OverscriptBox, {"_", "^", "~"}}, 
 	{SuperscriptBox, {"\[Prime]", "\[Prime]\[Prime]", "\[Prime]\[Prime]\[Prime]"}},
 	{UnderscriptBox, {"_", "~"}}};
+(* We only convert the 0-th a.b.f. operator into Infix/Prefix/Postifx form, because otherwise the abfAnnotations don't work. *)
+MakeBoxes[ FIX$[ c_?isTmaOperatorName, 0][args___], TheoremaForm] := MakeBoxes[ c[args], TheoremaForm]
 MakeBoxes[ FIX$[ c_, 0], TheoremaForm] := StyleBox[ MakeBoxes[ c, TheoremaForm], "ExpressionABF"]
 MakeBoxes[ FIX$[ c_, n_Integer] /; n<9, TheoremaForm] := 
 	Module[{i,j},
