@@ -29,94 +29,31 @@ Begin["`Private`"]
 (* ::Section:: *)
 (* Preprocessing *)
 
-(*freshNames[ Hold[ f_[ lhs_, Program[ rhs_]]]] :=
-	Module[ {},
-		ReplacePart[ freshNames[ Hold[ f[ lhs, "DUMMY"]]], {1,2} -> freshNamesProg[ Hold[ rhs]]]
-	]
+(* amaletzk: Define "freshNames[]", "freshNamesProg[]" in the way below, because otherwise parts with "Program" don't work.
+	Maybe the case "Theorema`Computation`Language`Program" should also be included, such that "Program"-constructs
+	work in computation cells as well. *)
 freshNames[expr_Hold] :=
-	Module[ {symPos, repl},
+	Module[ {symPos, repl, progPos, progSymPos},
+		progPos = Position[ expr, Program[_]];
 		(* There are certain expressions, into which we do not want to go deeper for substituting fresh names. 
 		   An example is a META$[__] expression representing a meta-variable in a proof, which has a list as
 		   its 3rd parameter. Going into it would turn the list into a Set$TM ... 
 		   If other cases occur in the future, just add a suitable transformation here BEFORE the replaceable
 		   positions are computed. *)
 		symPos = DeleteCases[ Position[ expr /. {META$[__] -> META$[]}, _Symbol], {0}, {1}, 1];
-		repl = Map[ # -> freshSymbol[ Extract[ expr, #, Hold]]&, symPos];
-		ReplacePart[ expr, repl]
+		progSymPos = Cases[ symPos, x_ /; isSubPositionOfAny[ x, progPos]];
+		repl = Join[Map[ # -> freshSymbol[ Extract[ expr, #, Hold]]&, Complement[symPos, progSymPos]],
+					Map[ # -> freshSymbolProg[ Extract[ expr, #, Hold]]&, progSymPos]];		
+		(* amaletzk: The "FlattenAt" simply replaces every "Program[p]" by "p". *)
+		FlattenAt[ReplacePart[ expr, repl], progPos]
 	]
 freshNames[args___] := unexpected[ freshNames, {args}]
 
-freshNamesProg[ expr_Hold] :=
-	Module[ {symPos, repl},
-		symPos = DeleteCases[ Position[ expr, _Symbol], {0}, {1}, 1];
-		repl = Map[ # -> freshSymbolProg[ Extract[ expr, #, Hold]]&, symPos];
-		ReleaseHold[ ReplacePart[ expr, repl]]
-	]
-freshNamesProg[ args___] := unexpected[ freshNamesProg, {args}]*)
-
-(* amaletzk: Define "freshNames[]", "freshNamesProg[]" in the way below, because otherwise parts with "Program" don't work.
-	Maybe the case "Theorema`Computation`Language`Program" should also be included, such that "Program"-constructs
-	work in computation cells as well. *)
-freshNames[ Hold[ Program[ arg_]]] := freshNamesProg[ Hold[ arg], False]
-freshNames[ Hold[ h_[ args___]]] := applyHold[ freshNames[ Hold[ h]], freshNames[ Hold[ args]]]
-freshNames[ Hold[ f_, rest__]] := joinHold[ freshNames[ Hold[ f]], freshNames[ Hold[ rest]]]
-freshNames[ Hold[ ]] := Hold[ ]
-freshNames[ Hold[ s_Symbol]] := wrapHold[ freshSymbol[ Hold[ s]]]
-freshNames[ Hold[ s_String]] := ToExpression[ "\"\<" <> s <> "\>\"", InputForm, Hold]
-freshNames[ x_Hold] := x
-freshNames[args___] := unexpected[ freshNames, {args}]
-
-(* The second argument of "freshNamesProg[]" is a boolean value that is true iff the expression occurs inside
-	some special Mathematica functions: Module$M, Do$M, For$M, While$M, Which$M, Switch$M
-	There, lists and other symbols should be transformed just as in "freshSymbol[]" rather than in "freshSymbolProg[]" *)
-freshNamesProg[ Hold[ Program[ arg_]], tma_] := freshNamesProg[ Hold[ arg], tma]
-
-(* Module$M, Do$M etc. have to be treated differently than For$M, While$M etc., because their Mathematica-counterparts
-	require Lists at certain positions, whereas For$M, While$M etc. don't.
-	We have to write "Theorema`Knowledge`Module$M" instead of "Module$M", because "Module$M" is no symbol known
-	to Theorema (Language/LanguageData/English.m), whereas "Program" is. Same with others. *)
-freshNamesProg[ Hold[ Theorema`Knowledge`Module$M[ List[ vars___], b_]], tma_] :=
-	applyHold[ freshNamesProg[ Hold[ Theorema`Knowledge`Module$M], True], joinHold[ applyHoldList[ freshNamesProg[ Hold[ vars], True]], freshNamesProg[ Hold[ b], True]]]
-freshNamesProg[ Hold[ Theorema`Knowledge`Do$M[ b_, iter__List]], tma_] :=
-	applyHold[ freshNamesProg[ Hold[ Theorema`Knowledge`Do$M], True], joinHold[ freshNamesProg[ Hold[ b], True], makeIterator[ Hold[ iter]]]]
-freshNamesProg[ Hold[ Theorema`Knowledge`Table$M[ expr_, iter__List]], tma_] :=
-	applyHold[ freshNamesProg[ Hold[ Theorema`Knowledge`Table$M], True], joinHold[ freshNamesProg[ Hold[ expr], True], makeIterator[ Hold[ iter]]]]
-(* Although one can use Theorema's "SumOf" and "ProductOf", we cannot prevent users from using "Sum$M" and "Product$M". *)
-freshNamesProg[ Hold[ Theorema`Knowledge`Sum$M[ expr_, iter__List]], tma_] :=
-	applyHold[ freshNamesProg[ Hold[ Theorema`Knowledge`Sum$M], True], joinHold[ freshNamesProg[ Hold[ expr], True], makeIterator[ Hold[ iter]]]]
-freshNamesProg[ Hold[ Theorema`Knowledge`Product$M[ expr_, iter__List]], tma_] :=
-	applyHold[ freshNamesProg[ Hold[ Theorema`Knowledge`Product$M], True], joinHold[ freshNamesProg[ Hold[ expr], True], makeIterator[ Hold[ iter]]]]
-
-(* makeIterator[] handles the various possible iterators that can be passed to Do[] *)
-makeIterator[ Hold[ f_List, rest___List]] :=
-	joinHold[ makeSingleIterator[ Hold[ f]], makeIterator[ Hold[ rest]]]
-makeIterator[ Hold[ ]] := Hold[ ]
-makeSingleIterator[ Hold[ { var_Symbol, {values___}}]] :=
-	applyHoldList[ joinHold[ freshNamesProg[ Hold[ var], True], applyHoldList[ freshNamesProg[ Hold[ values], True]]]]
-makeSingleIterator[ Hold[ { iter__}]] :=
-	applyHoldList[ freshNamesProg[ Hold[ iter], True]]
-makeSingleIterator[args___] := unexpected[ makeSingleIterator, {args}]
-
-(* applyHoldList[] transforms "Hold[x___]" into "Hold[List$TM[x___]]", leaving x___ unevaluated *)
-applyHoldList[ expr_Hold] := ReplacePart[ Hold[ expr], {1, 0} -> List$TM]
-
-freshNamesProg[ Hold[ h_Symbol[ args___]], tma_] :=
-	Module[ {name = SymbolName[ Unevaluated[ h]]},
-		If[ StringLength[ name] >= 3 && StringTake[ name, -2] === "$M",
-			applyHold[ freshNamesProg[ Hold[ h], True], freshNamesProg[ Hold[ args], MemberQ[ {"For$M", "While$M", "Which$M", "Switch$M"}, name]]],
-		(*else*)
-			applyHold[ freshNamesProg[ Hold[ h], tma], freshNamesProg[ Hold[ args], tma]]
-		]
-	]
-	
-freshNamesProg[ Hold[ h_[ args___]], tma_] := applyHold[ freshNamesProg[ Hold[ h], tma], freshNamesProg[ Hold[ args], tma]]
-freshNamesProg[ Hold[ f_, rest__], tma_] := joinHold[ freshNamesProg[ Hold[ f], tma], freshNamesProg[ Hold[ rest], tma]]
-freshNamesProg[ Hold[ ], _] := Hold[ ]
-freshNamesProg[ Hold[ s_Symbol], False] := wrapHold[ freshSymbolProg[ Hold[ s]]]
-freshNamesProg[ Hold[ s_Symbol], True] := wrapHold[ freshSymbolTmaProg[ Hold[ s]]]
-freshNamesProg[ Hold[ s_String], _] := freshNames[ Hold[ s]]
-freshNamesProg[ x_Hold, _] := x
-freshNamesProg[args___] := unexpected[ freshNamesProg, {args}]
+isSubPositionOfAny[ pos_List, l_List] := Catch[ (Scan[ If[isSubPosition[pos, #], Throw[True]]&, l]; False)]
+isSubPosition[ l1_List, l2_List] :=
+	With[{len = Length[l2]}, 
+ 		Length[l1] >= len && l1[[1 ;; len]] === l2[[1 ;; len]]
+ 	]
 
 freshSymbol[ Hold[ s_Symbol]] :=
     Module[ {name},
@@ -125,13 +62,13 @@ freshSymbol[ Hold[ s_Symbol]] :=
                depending on whether we are in a computation or not *)
             _?isMathematicalConstant, s,
             Theorema`Computation`Knowledge`\[DoubleStruckCapitalN]|Theorema`Knowledge`\[DoubleStruckCapitalN],
-            	ToExpression[ "IntegerRange$TM[1, DirectedInfinity[1], True, False]", InputForm, Hold],
+            	ToExpression[ "IntegerRange$TM[1, DirectedInfinity[1], True, False]"],
             Theorema`Computation`Knowledge`\[DoubleStruckCapitalZ]|Theorema`Knowledge`\[DoubleStruckCapitalZ],
-            	ToExpression[ "IntegerRange$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]", InputForm, Hold],
+            	ToExpression[ "IntegerRange$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]"],
             Theorema`Computation`Knowledge`\[DoubleStruckCapitalQ]|Theorema`Knowledge`\[DoubleStruckCapitalQ],
-            	ToExpression[ "RationalRange$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]", InputForm, Hold],
+            	ToExpression[ "RationalRange$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]"],
             Theorema`Computation`Knowledge`\[DoubleStruckCapitalR]|Theorema`Knowledge`\[DoubleStruckCapitalR],
-            	ToExpression[ "RealRange$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]", InputForm, Hold],
+            	ToExpression[ "RealRange$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]"],
             DoubleLongRightArrow|DoubleRightArrow, ToExpression[ "Implies$TM"],
             DoubleLongLeftRightArrow|DoubleLeftRightArrow|Equivalent, ToExpression[ "Iff$TM"],
         	SetDelayed, ToExpression[ "EqualDef$TM"], 
@@ -144,9 +81,8 @@ freshSymbol[ Hold[ s_Symbol]] :=
         	_,
         	name = ToString[ Unevaluated[s]];
         	If[ StringTake[ name, -1] === "$" || (StringLength[ name] >= 3 && StringTake[ name, -3] === "$TM"),
-        		(* Neither s nor "name$TM" must be evaluated! *)
-            	Hold[ s],
-            	ToExpression[ name <> "$TM", InputForm, Hold]
+        		s,
+            	ToExpression[ name <> "$TM"]
         	]
         ]
     ]
@@ -157,70 +93,30 @@ freshSymbolProg[ Hold[ s_Symbol]] :=
         Switch[ Unevaluated[ s],
             _?isMathematicalConstant, s,
             Theorema`Computation`Knowledge`\[DoubleStruckCapitalN]|Theorema`Knowledge`\[DoubleStruckCapitalN],
-            	ToExpression[ "IntegerRange$TM[1, DirectedInfinity[1], True, False]", InputForm, Hold],
+            	ToExpression[ "IntegerRange$TM[1, DirectedInfinity[1], True, False]"],
             Theorema`Computation`Knowledge`\[DoubleStruckCapitalZ]|Theorema`Knowledge`\[DoubleStruckCapitalZ],
-            	ToExpression[ "IntegerRange$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]", InputForm, Hold],
+            	ToExpression[ "IntegerRange$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]"],
             Theorema`Computation`Knowledge`\[DoubleStruckCapitalQ]|Theorema`Knowledge`\[DoubleStruckCapitalQ],
-            	ToExpression[ "RationalRange$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]", InputForm, Hold],
+            	ToExpression[ "RationalRange$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]"],
             Theorema`Computation`Knowledge`\[DoubleStruckCapitalR]|Theorema`Knowledge`\[DoubleStruckCapitalR],
-            	ToExpression[ "RealRange$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]", InputForm, Hold],
+            	ToExpression[ "RealRange$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]"],
         	Set, ToExpression[ "Assign$TM"],
         	_,
         	name = ToString[s];
-        	If[ StringTake[ name, -1] === "$" || (StringLength[ name] >= 3 && StringTake[ name, -3] === "$TM"),
-            	Hold[ s],
-            	If [StringLength[ name] >= 3 && StringTake[ name, -2] === "$M",
-            		s,
-            		ToExpression[ name <> "$TM", InputForm, Hold]
-            	]
+        	Which[
+        			StringTake[ name, -1] === "$" || (StringLength[ name] >= 3 && StringTake[ name, -3] === "$TM"),
+        			s,
+        			StringLength[ name] >= 3 && StringTake[ name, -2] === "$M",
+        			s,
+        			True,
+        			ToExpression[ name <> "$TM"]
         	]
         ]
     ]
 freshSymbolProg[ args___] := unexpected[ freshSymbolProg, {args}]
 
-(* freshSymbolTmaProg[] is a mixture between freshSymbol[] and freshSymbolProg[] that behaves basically like
-	freshSymbol[], with 3 important differences:
-	- "Set" is not transformed into "Equal$TM" but into "Assign$TM"
-	- "SetDelayed" is not transformed into "EqualDef$TM" but into "SetDelayed$TM"
-	- no "$TM" is appended to symbols having suffix "$M"
-	This is because after all we are still inside "Program[]"! *)
-freshSymbolTmaProg[ Hold[ s_Symbol]] :=
-    Module[ {name},
-        Switch[ Unevaluated[ s],
-            (* We use ToExpression in order to have the symbol generated in the right context
-               depending on whether we are in a computation or not *)
-            _?isMathematicalConstant, s,
-            Theorema`Computation`Knowledge`\[DoubleStruckCapitalN]|Theorema`Knowledge`\[DoubleStruckCapitalN],
-            	ToExpression[ "IntegerRange$TM[1, DirectedInfinity[1], True, False]", InputForm, Hold],
-            Theorema`Computation`Knowledge`\[DoubleStruckCapitalZ]|Theorema`Knowledge`\[DoubleStruckCapitalZ],
-            	ToExpression[ "IntegerRange$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]", InputForm, Hold],
-            Theorema`Computation`Knowledge`\[DoubleStruckCapitalQ]|Theorema`Knowledge`\[DoubleStruckCapitalQ],
-            	ToExpression[ "RationalRange$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]", InputForm, Hold],
-            Theorema`Computation`Knowledge`\[DoubleStruckCapitalR]|Theorema`Knowledge`\[DoubleStruckCapitalR],
-            	ToExpression[ "RealRange$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]", InputForm, Hold],
-            DoubleLongRightArrow|DoubleRightArrow, ToExpression[ "Implies$TM"],
-            DoubleLongLeftRightArrow|DoubleLeftRightArrow|Equivalent, ToExpression[ "Iff$TM"], 
-        	Set, ToExpression[ "Assign$TM"],
-        	Wedge, ToExpression[ "And$TM"],
-        	Vee, ToExpression[ "Or$TM"],
-        	List, makeSet,
-        	AngleBracket, makeTuple,
-        	_,
-        	name = ToString[ Unevaluated[s]];
-        	If[ StringTake[ name, -1] === "$" || (StringLength[ name] >= 3 && (StringTake[ name, -3] === "$TM" || StringTake[ name, -2] === "$M")),
-            	Hold[ s],
-            	ToExpression[ name <> "$TM", InputForm, Hold]
-        	]
-        ]
-    ]
-freshSymbolTmaProg[ args___] := unexpected[ freshSymbol, {args}]
-
-isMathematicalConstant[ True|False|I|Pi|E|Infinity|DirectedInfinity|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaisher] := True
-isMathematicalConstant[ _] := False
-
-(* wrapHold[] wraps "Hold" around its argument, unless there is already a Hold. *)
-wrapHold[ expr_Hold] := expr
-wrapHold[ expr_] := Hold[ expr]
+isMathematicalConstant[ s_Symbol] :=
+	MemberQ[ {True,False,I,Pi,E,Infinity,DirectedInfinity,Degree,EulerGamma,GoldenRatio,Catalan,Khinchin,Glaisher}, s]
 
 markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
     Module[ {s, seq, vars},
