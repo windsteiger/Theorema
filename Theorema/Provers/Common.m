@@ -47,6 +47,8 @@ initProver[] :=
 
 callProver[ ruleSetup:{_Hold, _List, _List}, strategy_, goal_FML$, kb_List, searchDepth_Integer, searchTime:(_Integer|Infinity)] :=
 	Module[ {timeElapsed},
+		$rewriteRules = {};
+		$generated = {};
 		$TMAproofSearchRunning = True;
 		$TMAcurrentDepth = 2;
 		$TMAproofTree = makeInitialProofTree[ ];
