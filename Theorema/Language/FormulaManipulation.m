@@ -860,9 +860,13 @@ trimFormulaForRewriting[ form_FML$] :=
                subst coming from equalities are in pos 3, equivalences produce identical forward and backward rules, hence we take only the forward in pos 1
                and join them *)
             sRules = Apply[ Join, Delete[ formulaToRules[ form], 2]],
-            FML$[ _, _?(!FreeQ[ #, _Theorema`Language`IffDef$TM|_Theorema`Language`EqualDef$TM]&), __],
+            (* explicit definitions -> rewrite rules *)
+            FML$[ _, _?(!FreeQ[ #, _Theorema`Language`IffDef$TM|Theorema`Language`EqualDef$TM[ _, Except[ _Theorema`Language`Such$TM|_Theorema`Language`SuchUnique$TM]]]&), __],
             (* definition rules come in pos 3 *)
             dRules = formulaToRules[ form][[3]],
+            (* implicit definitions -> stay untouched *)
+            FML$[ _, _?(!FreeQ[ #, Theorema`Language`EqualDef$TM[ _, _Theorema`Language`Such$TM|_Theorema`Language`SuchUnique$TM]]&), __],
+            AppendTo[ kbForm, form],
             _,
             {kbRules, goalRules, sRules} = formulaToRules[ form];
             AppendTo[ kbForm, form]
