@@ -721,9 +721,7 @@ makeInitialProofObject[ g_FML$, k_List, {r_Hold, act_List, prio_List}, s_] :=
            We put the generated rules into the respective components in the proof object. We don't put the original formulae corresponding to definitions and
            elementary substitutions into the KB then *)
         (* We try to figure out all constants available in the formulas *)
-        const = DeleteDuplicates[ Cases[ Level[ 
-        	Append[ k, g] /. {_VAR$ -> "", _SEQ0$ -> "", _SEQ1$ -> "", _FIX$ -> "", True|False -> ""},
-        	{-1}], _Symbol | _?NumberQ]];
+        const = guessConstants[ Append[ k, g]];
         If[ const =!= {},
         	(* Mark the constants as new *)
         	const = {Map[ SIMPRNG$, Apply[ RNG$, const]]}
@@ -739,6 +737,16 @@ makeInitialProofObject[ g_FML$, k_List, {r_Hold, act_List, prio_List}, s_] :=
     ]
 makeInitialProofObject[ args___] := unexpected[ makeInitialProofObject, {args}]
 
+guessConstants[ expr_] :=
+	Module[ {hiddenSpecials, objConst},
+		(* PREDRNG$ contains the predicate at Level -1 (as leaf). Not excluding PREDRNG$ would give those, and they would be 
+			used for instanciation of variables *)
+		hiddenSpecials = expr /. {_VAR$ -> "", _META$ -> "", _PREDRNG$ -> "", True|False -> ""};
+		objConst = DeleteDuplicates[ Cases[ Level[ hiddenSpecials, {-1}], _Symbol | _?NumberQ]];
+        Join[ objConst, DeleteDuplicates[ Cases[ hiddenSpecials, _SEQ0$|_SEQ1$|_FIX$, Infinity]]]
+	]
+guessConstants[ args___] := unexpected[ guessConstants, {args}]
+
 
 (* ::Subsubsection:: *)
 (* makeInitialProofTree *)
@@ -750,7 +758,7 @@ makeInitialProofTree[ args___] := unexpected[ makeInitialProofTree, {args}]
 (* displayProof *)
 
 displayProof[ p_PRFOBJ$] :=
-	Module[{ cells, tree = poToTree[ p]},
+	Module[ {cells, tree = poToTree[ p]},
 		cells = proofObjectToCell[ p];
 		$TMAproofObject = p;
 		$TMAproofNotebook = tmaNotebookPut[ Notebook[ cells], "Proof"];
@@ -771,7 +779,7 @@ displayProof[ args___] := unexpected[ displayProof, {args}]
 	If proof text is deactivated, the result is {}. Proof texts are composed in such a way that {} simply cancels out and therfore no text appears.
 *)
 proofObjectToCell[ PRFOBJ$[ pi_PRFINFO$, sub_, pVal_]] := 
-	Module[{ cellList = proofObjectToCell[ pi, pVal]},
+	Module[ {cellList = proofObjectToCell[ pi, pVal]},
 		Join[ cellList, {proofObjectToCell[ sub, pVal]}]
 	]
 proofObjectToCell[ PRFINFO$[ name_?ruleTextActive, u_, g_, id_String, rest___?OptionQ], pVal_] := proofStepTextId[ id, name, u, g, rest, pVal]
