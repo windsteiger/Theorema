@@ -64,7 +64,9 @@ With[ {lang = "English"},
 	MessageName[simplifiedOr, "usage", lang] = "";	
 	MessageName[simplifiedImplies, "usage", lang] = "";	
 	MessageName[simplifiedForall, "usage", lang] = "";	
-	MessageName[thinnedExpression, "usage", lang] = "";	
+	MessageName[thinnedExpression, "usage", lang] = "";
+	(* We need "markVariables" in Computation/Language for the local version of "Let" *)
+	MessageName[markVariables, "usage", lang] = "";	
 	MessageName[substituteFree, "usage", lang] = "";	
 	MessageName[isSequenceFree, "usage", lang] = "";
 	MessageName[isQuantifierFree, "usage", lang] = "";	
