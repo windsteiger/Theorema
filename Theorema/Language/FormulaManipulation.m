@@ -261,6 +261,60 @@ isVariableFree[ expr_, level_:{1}] :=
 		_Theorema`Language`VAR$|_Theorema`Computation`Language`VAR$, level]
 isVariableFree[ args___] := unexpected[ isVariableFree, {args}]
 
+
+(* ::Subsubsection:: *)
+(* getInstances *)
+
+(* def is a formula, maybe quantified, which contains an implicit def as innermost part
+	returns:
+	l ... a list of instances of the left side without free variables
+	r ... a transformation rule that can be used to generate appropriate instances of the right side *)
+getDefInstances[ expr_, def_] :=
+	Module[{strip, mmaPatt, defRule, l},
+		strip = stripUniversalQuantifiers[ def];
+		{mmaPatt, defRule} = makePatternRule[ strip];
+		l = Select[ Cases[ expr, mmaPatt, Infinity], freeVariables[#] === {}&];
+		{l, defRule} 
+	]
+getDefInstances[ args___] := unexpected[ getDefInstances, {args}]
+
+(* makePatternRule[ ...] returns a list {l, r}, where
+	l is a Mma pattern for the Left side of the definition
+	r is a rule of the form {l, dummyTMAKB$_} :> ..., 
+	which can be applied to {instance of l, K} and returns
+	{} if the required conditions of the implicit definition are not satisfied by the instance of l or
+	{rng, body, pos} where 
+		rng is the range of the such-quantifier,
+		body is the instanciated body of the definition, and
+		pos is a list of positions, where the conditions of the implicit definition occur in K
+*)
+makePatternRule[ {Theorema`Language`EqualDef$TM[ l_, (Theorema`Language`Such$TM|Theorema`Language`SuchUnique$TM)[ rng_, cond_, body_]], c_List, var_List}] :=
+    With[ {left = execLeft[ Hold[l], var], 
+           newBody = makeConjunction[ Join[ rngToCondition[ rng], {cond, body}], Theorema`Language`And$TM]},
+        {ToExpression[ left],
+        ToExpression[ 
+            "RuleDelayed[{" <> left <> ", dummyTMAKB$_}," <> 
+            "Module[ {pos}, If[ (pos=Theorema`Common`checkAllConds[" <> execRight[ Hold[ c], var] <> ", dummyTMAKB$])=!=False, {" <>
+            ToString[ rng] <> "," <>  execRight[ Hold[ newBody], var] <> ",pos}, {}]]]"
+        ]}
+    ]
+makePatternRule[ args___] := unexpected[ makePatternRule, {args}]
+
+(* Checks whether all c_i are contained in K and returns
+	{} if c is empty (can be interpreted as True, since ALL c_i of empty list are contained in K) or
+	a list of positions where the c_i occur in K
+	False if at least one of the c_i is not in K 
+	*)
+checkAllConds[ c_List, K_List] :=
+	Module[{pos},
+		pos = Map[ Position[ K, #, {1}]&, c];
+		If[ MemberQ[ pos, {}],
+			False,
+			pos
+		]
+	]
+checkAllConds[ args___] := unexpected[ checkAllConds, {args}]
+
 (* ::Subsubsection:: *)
 (* transferToComputation *)
 
@@ -380,11 +434,13 @@ toRightStringAux[ Hold[]] := {}
 stripVar[ v:Theorema`Language`VAR$[Theorema`Language`SEQ0$[a_]]] := v -> ToExpression[ "SEQ0$" <> ToString[a]]
 stripVar[ v:Theorema`Language`VAR$[Theorema`Language`SEQ1$[a_]]] := v -> ToExpression[ "SEQ1$" <> ToString[a]]
 stripVar[ v:Theorema`Language`VAR$[a_]] := v -> ToExpression[ "VAR$" <> ToString[a]]
+stripVar[ v:Theorema`Language`META$[a_]] := v -> ToExpression[ "META$" <> ToString[a]]
 stripVar[ args___] := unexpected[ stripVar, {args}]
 
 varToPattern[ v:Theorema`Language`VAR$[Theorema`Language`SEQ0$[a_]]] := With[ {new = ToExpression[ "SEQ0$" <> ToString[a]]}, v :> Apply[ Pattern, {new, BlankNullSequence[]}]]
 varToPattern[ v:Theorema`Language`VAR$[Theorema`Language`SEQ1$[a_]]] := With[ {new = ToExpression[ "SEQ1$" <> ToString[a]]}, v :> Apply[ Pattern, {new, BlankSequence[]}]]
 varToPattern[ v:Theorema`Language`VAR$[a_]] := With[ {new = ToExpression[ "VAR$" <> ToString[a]]}, v :> Apply[ Pattern, {new, Blank[]}]]
+varToPattern[ v:Theorema`Language`META$[a_]] := With[ {new = ToExpression[ "META$" <> ToString[a]]}, v :> Apply[ Pattern, {new, Blank[]}]]
 varToPattern[ args___] := unexpected[ varToPattern, {args}]
 
 (* ::Subsubsection:: *)

@@ -31,7 +31,8 @@ MessageName[ multipleGoalRewriting, "usage", lang] = "Goal can be rewritten in s
 MessageName[ goalRewriting, "usage", lang] = "Goal rewriting based on (quantified) implications and equivalences in the knowledge base";
 MessageName[ knowledgeRewriting, "usage", lang] = "Knowledge rewriting based on (quantified) implications and equivalences in the knowledge base";
 MessageName[ elementarySubstitution, "usage", lang] = "Elementary substitution based on equalities and equivalences in the knowledge base";
-MessageName[ expandDef, "usage", lang] = "Expand definitions";
+MessageName[ expandDef, "usage", lang] = "Expand explicit definitions";
+MessageName[ implicitDef, "usage", lang] = "Handle implicit function definitions";
 MessageName[ eqGoal, "usage", lang] = "Prove equalities";
 MessageName[ instantiate, "usage", lang] = "Instantiate using constants available in the proof";
 
@@ -280,6 +281,19 @@ subProofHeader[ expandDef, lang, u_, g_, ___, "usedDefs" -> defs_List, ___, {1}]
 subProofHeader[ expandDef, lang, u_, {___, {cond_}}, ___, "usedDefs" -> defs_List, ___, {2}] := {textCell[ "In order to validate the expansion of the definitions above, we have to check"],
 	goalCell[ cond, "."]
 	};	
+
+proofStepText[ implicitDef, lang, {}, {}, ___] := {};
+
+proofStepText[ implicitDef, lang, u_, g_, ___] := 
+	Module[ {stepText = {textCell[ "We use knowledge about implicitly defined functions."]}},
+		If[ u[[1]] =!= {},
+			stepText = Join[ stepText,
+				{textCell[ "Due to ", formulaReferenceSequence[ u[[1]], lang], " it suffices to prove"],
+				goalCell[ g[[1, 1]], "."]}
+			]
+		];
+		(* continue and print the rest. TBD *)		
+	];
 	
 proofStepText[ instantiate, lang, u_, {}, ___] := 
 	(* Instantiation has been tried, but none of them could be successfully applied *)
