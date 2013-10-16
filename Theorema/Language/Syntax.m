@@ -179,6 +179,7 @@ $tmaOperators = {
 	{"*", {Infix}, "Times"}, {"\[Times]", {Infix}, "Times"},
 	{"\[Star]", {Infix}, "Star"}, {"\[Coproduct]", {Infix, Prefix}, "Coproduct"},
 	{"\[CirclePlus]", {Infix}, "CirclePlus"}, {"\[CircleMinus]", {Infix}, "CircleMinus"},
+	{"-", {Infix, Prefix}, "Subtract"}, {"/", {Infix}, "Divide"},
 	{"\[Conjugate]", {Postfix}, "Conjugate"}, {"\[Transpose]", {Postfix}, "Transpose"},
 	{"\[ConjugateTranspose]", {Postfix}, "ConjugateTranspose"}, {"\[HermitianConjugate]", {Postfix}, "HermitianConjugate"},
 	{"\[Backslash]", {Infix}, "Backslash"}, {"\[Intersection]", {Infix}, "Intersection"},
@@ -250,14 +251,17 @@ $tmaOperators = {
 	{"\[DoubleLeftTee]", {Infix}, "DoubleLeftTee"}, {"\[SuchThat]", {Infix}, "SuchThat"}};
 	
 $tmaOperatorSymbols = Map[ First, $tmaOperators];
-$tmaOperatorNames = Flatten[ ToExpression[ Map[ {"Theorema`Knowledge`" <> Last[#] <> "$TM", "Theorema`Computation`Knowledge`" <> Last[#] <> "$TM"} &, $tmaOperators]]];
+(* We must not add contexts (like "Theorema`Knowledge`" etc.) to the operator names, as it is done with quantifiers,
+	because some of them (like "Plus") appear in context "Theorema`Language`". Copying each of the more than 200
+	operator names 4 times (for the 4 possible contexts) seems to be a bit too inefficient. *)
+$tmaOperatorNames = Map[ (Last[#] <> "$TM")&, $tmaOperators];
 $tmaOperatorToName = Dispatch[ Map[ Rule[ First[#], Last[#]] &, $tmaOperators]];
-$tmaNameToOperator = Dispatch[ MapThread[ Rule, {$tmaOperatorNames, Flatten[ Map[ {#, #}&, $tmaOperatorSymbols]]}]];
+$tmaNameToOperator = Dispatch[ MapThread[ Rule, {$tmaOperatorNames, $tmaOperatorSymbols}]];
 
 (* We need this attribute, because otherwise expressions (not only operator symbols!) are evaluated when "MakeBoxes" is called. *)	
 SetAttributes[ isTmaOperatorName, HoldAllComplete];
 isTmaOperatorSymbol[ op_String] := MemberQ[ $tmaOperatorSymbols, op]
-isTmaOperatorName[ op_Symbol] := MemberQ[ $tmaOperatorNames, op]
+isTmaOperatorName[ op_Symbol] := Quiet[ Check[ MemberQ[ $tmaOperatorNames, SymbolName[ op]], False]]
 
 
 (* ::Section:: *)
@@ -671,7 +675,7 @@ standardGlobalQuantifier[ args___] := unexpected[ standardGlobalQuantifier, {arg
 Clear[ toRangeBox, makeRangeSequence]
 
 toRangeBox[s_] :=
-    RowBox[{"RNG$", "[", makeRangeSequence[s], "]"}]            
+    RowBox[{"RNG$", "[", makeRangeSequence[s], "]"}]           
 toRangeBox[args___] := unexpected[ toRangeBox, {args}]
 
 makeRangeSequence[ RowBox[{v_, "\[Element]", s_}]] :=
@@ -686,6 +690,9 @@ makeRangeSequence[ RowBox[{p_, "[", RowBox[{x__, ",", v_}], "]"}]] :=
 		makeSinglePredRange[ v, p]]
 
 makeRangeSequence[ RowBox[{p_, "[", RowBox[{v_}], "]"}]] :=
+	makeSinglePredRange[ v, p]
+	
+makeRangeSequence[ RowBox[{p_, "[", v:RowBox[{_, ".."|"..."}], "]"}]] :=
 	makeSinglePredRange[ v, p]
 
 makeRangeSequence[ RowBox[{p_, "[", v_String, "]"}]] :=
@@ -844,7 +851,7 @@ parenthesize[ b_[ arg___]] :=
 parenthesize[ e_] := MakeBoxes[ e, TheoremaForm]
 parenthesize[ args___] := unexpected[ parenthesize, {args}]
     
-MakeBoxes[ s_?isTmaOperatorName, TheoremaForm] := Replace[ s, $tmaNameToOperator]
+MakeBoxes[ s_?isTmaOperatorName, TheoremaForm] := Replace[ SymbolName[ s], $tmaNameToOperator]
     
 MakeBoxes[ s_Symbol, TheoremaForm] := 
 	(* We have to use "Unevaluated" here, because "I" is a symbol, but evaluates to "Complex[0, 1]" *)
