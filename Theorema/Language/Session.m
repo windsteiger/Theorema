@@ -115,8 +115,9 @@ freshSymbolProg[ Hold[ s_Symbol]] :=
     ]
 freshSymbolProg[ args___] := unexpected[ freshSymbolProg, {args}]
 
-isMathematicalConstant[ s_Symbol] :=
-	MemberQ[ {True,False,I,Pi,E,Infinity,DirectedInfinity,Degree,EulerGamma,GoldenRatio,Catalan,Khinchin,Glaisher}, s]
+SetAttributes[isMathematicalConstant, HoldAll];
+isMathematicalConstant[ True|False|I|Pi|E|Infinity|DirectedInfinity|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaisher] := True
+isMathematicalConstant[ _] := False
 
 markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
     Module[ {s, seq, vars},

@@ -90,7 +90,7 @@ Iff$TM[ a__] /; buiActive["Iff"] := Equivalent[ a]
 
 (* We replace the free variables one after the other, because some might depend on others, and a
 	single "substitueFree" doesn't work properly then. This could also be good for global abbreviations ... *)
-SetAttributes[ Abbrev$TM, HoldRest]
+SetAttributes[ Abbrev$TM, HoldAll]
 Abbrev$TM[ RNG$[ f_ABBRVRNG$, r__ABBRVRNG$], expr_] /; buiActive["Let"] :=
 	Abbrev$TM[ RNG$[ f], Abbrev$TM[ RNG$[ r], expr]]
 Abbrev$TM[ rng:RNG$[ ABBRVRNG$[ l_, r_]], expr_] /; buiActive["Let"] :=
