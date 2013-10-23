@@ -290,7 +290,7 @@ getDefInstances[ args___] := unexpected[ getDefInstances, {args}]
 *)
 makePatternRule[ {Theorema`Language`EqualDef$TM[ l_, (Theorema`Language`Such$TM|Theorema`Language`SuchUnique$TM)[ rng_, cond_, body_]], c_List, var_List}] :=
     With[ {left = execLeft[ Hold[l], var], 
-           newBody = makeConjunction[ Join[ rngToCondition[ rng], {cond, body}], Theorema`Language`And$TM]},
+           newBody = simplifiedAnd[ makeConjunction[ Join[ rngToCondition[ rng], {cond, body}], Theorema`Language`And$TM]]},
         {ToExpression[ left],
         ToExpression[ 
             "RuleDelayed[{" <> left <> ", dummyTMAKB$_}," <> 
@@ -310,7 +310,7 @@ checkAllConds[ c_List, K_List] :=
 		pos = Map[ Position[ K, #, {1}]&, c];
 		If[ MemberQ[ pos, {}],
 			False,
-			pos
+			Apply[ Join, pos]
 		]
 	]
 checkAllConds[ args___] := unexpected[ checkAllConds, {args}]

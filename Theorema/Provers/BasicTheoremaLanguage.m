@@ -570,7 +570,7 @@ ps:PRFSIT$[ g_, K_List, id_, rest___?OptionQ] :> performProofStep[
 				(* there are no terms to which this definition could apply, we mark the defintion to be removed from the KB *)
 				AppendTo[ delPos, implDefPos[[k]]],
 				(* else *)
-				{subst, newK} = makeImplDefSubst[ implDefTerms, checkRule, K];
+				{subst, newK} = makeImplDefSubst[ implDefTerms, checkRule, Map[ formula, K]];
 				Which[ 
 					Length[ subst] === 0,
 					(* no subst possible, try next def *)
@@ -595,22 +595,25 @@ ps:PRFSIT$[ g_, K_List, id_, rest___?OptionQ] :> performProofStep[
 				]
 			],
 			(* else: do the substitutions *)
-			{newG, usedCond} = Reap[ g /. subst];
+			{newG, usedCond} = Reap[ formula@g /. subst];
 			If[ usedCond === {},
 				(* no subst in goal *)
+				newG = g;
 				allUsed = {{}};
 				allGenerated = {{}},
 				(* new goal by substitution *)
-				allUsed = {Prepend[ Extract[ K, usedCond[[1]]], Extract[ K, usedPos]]};
+				(* Reap gives a list with only one list (all Sows without tag) of positions. We take this one list and form the union of positions *)
+				allUsed = {Join[ {g, Extract[ K, usedPos]}, Extract[ K, Apply[ Union, usedCond[[1]]]]]};
 				newG = makeGoalFML[ formula -> newG];
 				allGenerated = {{newG}}
 			];
 			(* Do the same like for goal for all in KB *)
 			Do[
-				{newForm, usedCond} = Reap[ K[[k]] /. subst];
+				If[ {k} === usedPos, Continue[]]; (* don't rewrite the def itself *)
+				{newForm, usedCond} = Reap[ formula@K[[k]] /. subst];
 				If[ usedCond === {},
 					Continue[],
-					AppendTo[ allUsed, Prepend[ Extract[ K, usedCond[[1]]], Extract[ K, usedPos]]];
+					AppendTo[ allUsed, Join[ {K[[k]], Extract[ K, usedPos]}, Extract[ K, Apply[ Union, usedCond[[1]]]]]];
 					newForm = makeAssumptionFML[ formula -> newForm];
 					AppendTo[ allGenerated, {newForm}];
 					(* we don't generate rewrite rules for the subst form, because it will not become a rewrite formula if it wasn't one before *)
@@ -621,10 +624,11 @@ ps:PRFSIT$[ g_, K_List, id_, rest___?OptionQ] :> performProofStep[
 			(* Eventually delete superfluous defs. Don't do this earlier, because otherwise positions of used assumptions might get mixed up *)
 			substKB = Delete[ substKB, delPos];
 			(* add the characteristic properties to the KB and register them as newly generated *)
-			Insert[ allUsed, {Extract[ K, usedPos]}, 2];
-			Insert[ allGenerated, Map[ makeAssumptionFML[ formula -> #]&, newK], 2];
-        	makeANDNODE[ makePRFINFO[ name -> implicitDef, used -> allUsed, generated -> allGenerated], 
-            	toBeProved[ goal -> g, kb -> joinKB[ allGenerated[[2]], substKB], rest]
+			PrependTo[ allUsed, {Extract[ K, usedPos]}];
+			PrependTo[ allGenerated, Map[ makeAssumptionFML[ formula -> #]&, newK]];
+        	makeANDNODE[ makePRFINFO[ name -> implicitDef, used -> allUsed, generated -> allGenerated,
+        								"introConstFor" -> Map[ Extract[ #, {{2, 2}, {1}}]&, subst]], 
+            	toBeProved[ goal -> newG, kb -> joinKB[ allGenerated[[1]], substKB], rest]
         	]
 		]
 	]
@@ -638,8 +642,9 @@ makeImplDefSubst[ terms_List, def_RuleDelayed, K_List] :=
 				(* condition of the implicit definition is not fulfilled for this term *)
 				Continue[],
 				(* else *)
-				{abf, fix} = arbitraryButFixed[ newBody[[2]], newBody[[1]], K];
-				AppendTo[ allSubst, With[ {pos = newBody[[3]]}, terms[[k]] :> (Sow[ pos]; rngConstants[ fix])]];
+				{abf, fix} = arbitraryButFixed[ newBody[[2]], newBody[[1]], {K, newK}];
+				(* newBody can only have the ONE variable from the such-quantifier as free variable, hence there is only ONE constant in fix *)
+				AppendTo[ allSubst, With[ {pos = newBody[[3]], const = rngConstants[ fix][[1]]}, terms[[k]] :> (Sow[ pos]; const)]];
 				AppendTo[ newK, abf];
 			],
 			{k, Length[ terms]}

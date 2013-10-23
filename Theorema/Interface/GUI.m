@@ -2183,7 +2183,6 @@ getExistGoalInstanceDialog[ v_, fix_, {g_, kb_}] :=
     ]
 getExistGoalInstanceDialog[ args___] := unexpected[ getExistGoalInstanceDialog, {args}]
 
-SetAttributes[ nextProofSitDialog, HoldFirst]
 nextProofSitDialog[ ps_List] :=
     Module[ {proofCells, showProof = False},
         proofCells = pObjCells[];

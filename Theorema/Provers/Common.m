@@ -172,8 +172,8 @@ chooseNextPS[ psPos_List] :=
 	]
 chooseNextPS[ psPos_List] /; $interactiveProofSitSel && Length[ psPos] > 1 :=
 	Module[{ openPS, psSel},
-		openPS = Extract[ $TMAproofObject, openPSpos];
-		$selectedProofStep = id[ openPS[[1]]];
+		openPS = Extract[ $TMAproofObject, psPos];
+		(*$selectedProofStep = id[ openPS[[1]]];*)
 		nextProofSitDialog[ openPS];
 		NotebookClose[ $TMAproofNotebook];
 		{psSel} = Position[ openPS, _?(id[#] === $selectedProofStep&), {1}, Heads -> False];
@@ -197,6 +197,9 @@ replaceProofSit[ po_PRFOBJ$, pos_ -> new:node_[___]] :=
 		sub = poToTree[ new];
 		$TMAproofTree = Join[ $TMAproofTree /. {parentID, pending, PRFSIT$, None} -> {id@new, proofValue@new, node, name@new}, sub];
 		$lastVisitedNode = id@new;
+		If[ TrueQ[$interactiveProofSitSel],
+			$selectedProofStep = id[ Extract[ new, First[ Position[ new, _PRFSIT$, Infinity, 1]]]];
+		];
 		ReplacePart[ po, pos -> new]
 	]
 replaceProofSit[ args___] := unexpected[ replaceProofSit, {args}]

@@ -263,7 +263,7 @@ subProofHeader[ expandDef, lang, u_, g_, ___, "usedDefs" -> defs_List, ___, {1}]
 		If[ u[[1]] =!= g[[1]],
 			repl = defs[[1]];
 			suffix = If[ Length[ repl] == 1, "", "s"];
-			stepText = { textCell[ "In order to prove ", formulaReference[ u[[1, 1]]], ", using definition" <> suffix <> " ", 
+			stepText = {textCell[ "In order to prove ", formulaReference[ u[[1, 1]]], ", using definition" <> suffix <> " ", 
 				formulaReferenceSequence[ repl, lang], ", we now have to show"],
 				goalCell[ g[[1, 1]], "."]}
 		];
@@ -274,7 +274,7 @@ subProofHeader[ expandDef, lang, u_, g_, ___, "usedDefs" -> defs_List, ___, {1}]
 			stepText = Join[ stepText, 
 				{textCell[ "From ", formulaReference[ u[[j, 1]]], " we know, by definition" <> suffix <> " ", formulaReferenceSequence[ repl, lang], ","], 
 				assumptionCell[ g[[j, 1]]]}],
-			{j, 2, Length[g]-1}
+			{j, 2, Length[g]-1} (* the last is the new goal for a condition in the rewrite or True if no condition is there -> we go only to Length-1 *)
 		];
 		stepText
 	];
@@ -284,15 +284,26 @@ subProofHeader[ expandDef, lang, u_, {___, {cond_}}, ___, "usedDefs" -> defs_Lis
 
 proofStepText[ implicitDef, lang, {}, {}, ___] := {};
 
-proofStepText[ implicitDef, lang, u_, g_, ___] := 
-	Module[ {stepText = {textCell[ "We use knowledge about implicitly defined functions."]}},
-		If[ u[[1]] =!= {},
+proofStepText[ implicitDef, lang, u_, g_, ___, "introConstFor" -> termConst_List, ___] := 
+	Module[ {stepText, j},
+		stepText = {textCell[ "For the implicitly defined function ", formulaReference[ u[[1, 1]]], " we introduce new constants ", 
+			inlineTheoremaExpressionSeq[ Apply[ EqualDef$TM, termConst, {1}], lang], " such that"],
+			assumptionListCells[ g[[1]], ",", "."]};
+		(* g[[2]] is the new goal. {} if no rewrite happened in the goal *)
+		If[ g[[2]] =!= {},
 			stepText = Join[ stepText,
-				{textCell[ "Due to ", formulaReferenceSequence[ u[[1]], lang], " it suffices to prove"],
-				goalCell[ g[[1, 1]], "."]}
+				{textCell[ "For proving ", formulaReference[ u[[2, 1]]], ", due to ", formulaReferenceSequence[ Rest[ u[[2]]], lang], ", it suffices now to prove"],
+				goalCell[ g[[2, 1]], "."]}
 			]
 		];
-		(* continue and print the rest. TBD *)		
+		(* Each of the remaining is an expansion in the KB. Produce a line of text for each of them *)
+		Do[
+			stepText = Join[ stepText, 
+				{textCell[ "The assumption ", formulaReference[ u[[j, 1]]], " becomes (due to ", formulaReferenceSequence[ Rest[ u[[j]]], lang], ")"], 
+				assumptionCell[ g[[j, 1]]]}],
+			{j, 3, Length[g]}
+		];
+		stepText
 	];
 	
 proofStepText[ instantiate, lang, u_, {}, ___] := 

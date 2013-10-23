@@ -660,7 +660,7 @@ SetAttributes[ Module$TM, HoldAll]
 Module$TM[ l_[v___], body_] /; buiActive["Module"] := Apply[ Module, Hold[ {v}, body]]
 
 SetAttributes[ Do$TM, HoldAll]
-Do$TM[ body_, l_[v___]] /; buiActive["Do"] := Do[ body, {v}]
+Do$TM[ body_, l_[v___]] /; buiActive["Do"] := Apply[ Do, Hold[ body, {v}]]
 
 SetAttributes[ CaseDistinction$TM, HoldAll]
 CaseDistinction$TM[ c:Clause$TM[ _, _]..] /; buiActive["CaseDistinction"] :=
