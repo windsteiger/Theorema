@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       145,          7]
-NotebookDataLength[      6878,        200]
-NotebookOptionsPosition[      4478,        145]
-NotebookOutlinePosition[      4942,        165]
-CellTagsIndexPosition[      4899,        162]
+NotebookDataLength[      6915,        201]
+NotebookOptionsPosition[      4515,        146]
+NotebookOutlinePosition[      4979,        166]
+CellTagsIndexPosition[      4936,        163]
 MenuPosition->0
 WindowFrame->Normal*)
 
@@ -37,6 +37,7 @@ The options defined for the style below will be used at the Notebook level.\
 
 Cell[StyleData["Notebook"],
  CreateCellID->True,
+ DefaultNewCellStyle->"Computation",
  ShowStringCharacters->True,
  CounterAssignments->{{"TheoremaFormulaCounter" -> 0}},
  ShowPredictiveInterface -> False]
@@ -169,38 +170,38 @@ Cell[613, 23, 191, 4, 65, "Text"],
 Cell[CellGroupData[{
 Cell[829, 31, 44, 0, 54, "Section"],
 Cell[876, 33, 99, 2, 46, "Text"],
-Cell[978, 37, 168, 4, 40, 27, 0, "StyleData", "Notebook", "All",
+Cell[978, 37, 205, 5, 40, 27, 0, "StyleData", "Notebook", "All",
  CounterAssignments->{{"TheoremaFormulaCounter" -> 0}}]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[1183, 46, 23, 0, 54, "Section"],
-Cell[1209, 48, 126, 1, 46, 73, 0, "StyleData", "EnvironmentText", "All"]
+Cell[1220, 47, 23, 0, 54, "Section"],
+Cell[1246, 49, 126, 1, 46, 73, 0, "StyleData", "EnvironmentText", "All"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[1372, 54, 27, 0, 54, "Section"],
-Cell[1402, 56, 344, 5, 47, 76, 0, "StyleData", "GlobalDeclaration", "All"],
-Cell[1749, 63, 127, 3, 17, 34, 0, "StyleData", "OpenEnvironment", "All"],
-Cell[1879, 68, 137, 2, 40, 36, 0, "StyleData", "EnvironmentHeader", "All"],
-Cell[2019, 72, 447, 9, 47, 83, 1, "StyleData", "FormalTextInputFormula", \
+Cell[1409, 55, 27, 0, 54, "Section"],
+Cell[1439, 57, 344, 5, 47, 76, 0, "StyleData", "GlobalDeclaration", "All"],
+Cell[1786, 64, 127, 3, 17, 34, 0, "StyleData", "OpenEnvironment", "All"],
+Cell[1916, 69, 137, 2, 40, 36, 0, "StyleData", "EnvironmentHeader", "All"],
+Cell[2056, 73, 447, 9, 47, 83, 1, "StyleData", "FormalTextInputFormula", \
 "All"],
-Cell[2469, 83, 114, 2, 40, 39, 0, "StyleData", "EndEnvironmentMarker", \
+Cell[2506, 84, 114, 2, 40, 39, 0, "StyleData", "EndEnvironmentMarker", \
 "All"],
-Cell[2586, 87, 128, 3, 17, 35, 0, "StyleData", "CloseEnvironment", "All"],
-Cell[2717, 92, 451, 8, 47, 70, 0, "StyleData", "Computation", "All"],
-Cell[3171, 102, 74, 0, 40, 74, 0, "StyleData", "ComputationInfo", "All"],
-Cell[3248, 104, 77, 0, 47, 77, 0, "StyleData", "ComputationResult", "All"],
-Cell[3328, 106, 65, 1, 40, 28, 0, "StyleData", "OpenProof", "All"],
-Cell[3396, 109, 71, 0, 40, 71, 0, "StyleData", "ProofDisplay", "All"],
-Cell[3470, 111, 68, 0, 40, 68, 0, "StyleData", "ProofInfo", "All"],
-Cell[3541, 113, 67, 1, 40, 29, 0, "StyleData", "CloseProof", "All"],
-Cell[3611, 116, 71, 0, 35, 71, 0, "StyleData", "CILabel", "All"],
-Cell[3685, 118, 28, 0, 40, 28, 0, "StyleData", "CIContent", "All"],
-Cell[3716, 120, 71, 0, 35, 71, 0, "StyleData", "PILabel", "All"],
-Cell[3790, 122, 28, 0, 40, 28, 0, "StyleData", "PIContent", "All"],
-Cell[3821, 124, 145, 3, 40, 30, 0, "StyleData", "OpenArchive", "All"],
-Cell[3969, 129, 161, 4, 40, 30, 0, "StyleData", "ArchiveInfo", "All"],
-Cell[4133, 135, 155, 3, 40, 31, 0, "StyleData", "CloseArchive", "All"],
-Cell[4291, 140, 171, 2, 47, 73, 0, "StyleData", "IncludeArchive", "All"]
+Cell[2623, 88, 128, 3, 17, 35, 0, "StyleData", "CloseEnvironment", "All"],
+Cell[2754, 93, 451, 8, 47, 70, 0, "StyleData", "Computation", "All"],
+Cell[3208, 103, 74, 0, 40, 74, 0, "StyleData", "ComputationInfo", "All"],
+Cell[3285, 105, 77, 0, 47, 77, 0, "StyleData", "ComputationResult", "All"],
+Cell[3365, 107, 65, 1, 40, 28, 0, "StyleData", "OpenProof", "All"],
+Cell[3433, 110, 71, 0, 40, 71, 0, "StyleData", "ProofDisplay", "All"],
+Cell[3507, 112, 68, 0, 40, 68, 0, "StyleData", "ProofInfo", "All"],
+Cell[3578, 114, 67, 1, 40, 29, 0, "StyleData", "CloseProof", "All"],
+Cell[3648, 117, 71, 0, 35, 71, 0, "StyleData", "CILabel", "All"],
+Cell[3722, 119, 28, 0, 40, 28, 0, "StyleData", "CIContent", "All"],
+Cell[3753, 121, 71, 0, 35, 71, 0, "StyleData", "PILabel", "All"],
+Cell[3827, 123, 28, 0, 40, 28, 0, "StyleData", "PIContent", "All"],
+Cell[3858, 125, 145, 3, 40, 30, 0, "StyleData", "OpenArchive", "All"],
+Cell[4006, 130, 161, 4, 40, 30, 0, "StyleData", "ArchiveInfo", "All"],
+Cell[4170, 136, 155, 3, 40, 31, 0, "StyleData", "CloseArchive", "All"],
+Cell[4328, 141, 171, 2, 47, 73, 0, "StyleData", "IncludeArchive", "All"]
 }, Open  ]]
 }
 ]
