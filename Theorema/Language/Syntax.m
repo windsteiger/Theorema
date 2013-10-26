@@ -834,6 +834,7 @@ MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
     	]
     ]
 
+SetAttributes[ parenthesize, HoldAllComplete]
 parenthesize[ b_[ arg___]] :=
     Module[ {res = MakeBoxes[ b[ arg], TheoremaForm]},
         If[ MatchQ[ res, RowBox[ {ToString[ b], "[", ___}]|RowBox[ {"(", ___, ")"}]],

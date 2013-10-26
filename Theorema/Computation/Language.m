@@ -65,6 +65,7 @@ Times$TM[ a___] /; buiActive["Times"] := Times[ a]
 Divide$TM[ a___] /; buiActive["Divide"] := Divide[ a]
 Power$TM[ a_, b_] /; buiActive["Power"] := Power[ a, b]
 Radical$TM[ a_, b_] /; buiActive["Radical"] := Power[ a, 1/b]
+Factorial$TM[ a_] /; buiActive["Factorial"] := a!
 Equal$TM[ a_, b_] /; buiActive["Equal"] := a == b
 Less$TM[ a__] /; buiActive["Less"] := Less[ a]
 LessEqual$TM[ a__] /; buiActive["LessEqual"] := LessEqual[ a]
