@@ -119,7 +119,9 @@ cellGroup[ args___] := unexpected[ cellGroup, {args}]
 
 End[]
 
-Get[ "Theorema`Provers`Strategies`"]
-Get[ "Theorema`Provers`BasicTheoremaLanguage`"]
+(* Load all prover packages *)
+Map[ Get, Select[
+	FileNames[ "*.m", FileNameJoin[ {$TheoremaDirectory, "Theorema", "Provers"}]],
+	!StringMatchQ[ #, ___ ~~ "Common.m" | "init.m" ~~ EndOfString]&]];
 
 EndPackage[]
