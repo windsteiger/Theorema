@@ -2086,7 +2086,7 @@ makeLangButton[ bname_String] :=
 					FrontEndExecute[{NotebookApply[ InputNotebook[], bd[[2]], Placeholder]}],
 					FrontEndExecute[{NotebookApply[ InputNotebook[], RowBox[ {autoParenthesis[ "("], bd[[2]], autoParenthesis[ ")"]}], Placeholder]}]
 				], Appearance -> "DialogBox", Alignment -> {Left, Top}, ImageSize -> All],
-				"\[EscapeKey]"<>bd[[4]]<>"\[EscapeKey]", TooltipDelay -> 0.5]
+				"Press \[ShiftKey] to omit parentheses\nKeyboard shortcut: \[EscapeKey]"<>bd[[4]]<>"\[EscapeKey]", TooltipDelay -> 0.5]
     ]
 makeLangButton[args___] :=
     unexpected[makeLangButton, {args}]
