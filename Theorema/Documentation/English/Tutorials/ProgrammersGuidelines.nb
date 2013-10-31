@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[     14411,        531]
-NotebookOptionsPosition[     10244,        373]
-NotebookOutlinePosition[     10659,        389]
-CellTagsIndexPosition[     10616,        386]
+NotebookDataLength[     14455,        532]
+NotebookOptionsPosition[     10293,        374]
+NotebookOutlinePosition[     10702,        390]
+CellTagsIndexPosition[     10659,        387]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -177,9 +177,10 @@ structures: short names, all upper case, ending in $, e.g. VAR$.\nUnevaluated \
 fresh names (in order to avoid evaluation by ",
  StyleBox["Mathematica",
   FontSlant->"Italic"],
- "): lower case, ending in $TM, e.g. plus$TM."
+ "): upper case, ending in $TM, e.g. Plus$TM."
 }], "Text",
- CellChangeTimes->{{3.513058375917258*^9, 3.513058615650928*^9}},
+ CellChangeTimes->{{3.513058375917258*^9, 3.513058615650928*^9}, {
+  3.591835775673883*^9, 3.591835782294556*^9}},
  CellID->824571219]
 }, Open  ]],
 
@@ -372,7 +373,7 @@ Cell["XXXX", "TutorialRelatedLinks",
 }, Open  ]]
 },
 WindowSize->{700, 770},
-WindowMargins->{{330, Automatic}, {137, Automatic}},
+WindowMargins->{{330, Automatic}, {137, 119}},
 FrontEndVersion->"8.0 for Linux x86 (32-bit) (February 23, 2011)",
 StyleDefinitions->FrontEnd`FileName[{"Wolfram"}, "TutorialPageStyles.nb", 
   CharacterEncoding -> "UTF-8"]
@@ -454,81 +455,81 @@ Cell[3920, 162, 117, 2, 43, "Section",
 Cell[CellGroupData[{
 Cell[4062, 168, 129, 2, 41, "Subsubsection",
  CellID->322908692],
-Cell[4194, 172, 495, 10, 144, "Text",
+Cell[4194, 172, 544, 11, 150, "Text",
  CellID->824571219]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[4726, 187, 131, 2, 41, "Subsubsection",
+Cell[4775, 188, 131, 2, 41, "Subsubsection",
  CellID->808805643],
 Cell[CellGroupData[{
-Cell[4882, 193, 179, 4, 23, "Text",
+Cell[4931, 194, 179, 4, 23, "Text",
  CellID->168153129],
-Cell[5064, 199, 217, 5, 26, "Input",
+Cell[5113, 200, 217, 5, 26, "Input",
  CellID->1908198389]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[5318, 209, 386, 8, 42, "Text",
+Cell[5367, 210, 386, 8, 42, "Text",
  CellID->1551789716],
-Cell[5707, 219, 262, 5, 46, "Input",
+Cell[5756, 220, 262, 5, 46, "Input",
  CellID->927943111]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[6006, 229, 544, 10, 108, "Text",
+Cell[6055, 230, 544, 10, 108, "Text",
  CellID->318801287],
-Cell[6553, 241, 144, 3, 26, "Input",
+Cell[6602, 242, 144, 3, 26, "Input",
  CellID->1351933892]
 }, Open  ]],
-Cell[6712, 247, 177, 4, 23, "Text",
+Cell[6761, 248, 177, 4, 23, "Text",
  CellID->1166297507]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[6926, 256, 145, 2, 41, "Subsubsection",
+Cell[6975, 257, 145, 2, 41, "Subsubsection",
  CellID->612761324],
 Cell[CellGroupData[{
-Cell[7096, 262, 238, 5, 40, "Text",
+Cell[7145, 263, 238, 5, 40, "Text",
  CellID->1807041091],
-Cell[7337, 269, 331, 8, 26, "Input",
+Cell[7386, 270, 331, 8, 26, "Input",
  CellID->1383636587]
 }, Open  ]],
-Cell[7683, 280, 317, 6, 42, "Text",
+Cell[7732, 281, 317, 6, 42, "Text",
  CellID->255831916]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[8037, 291, 122, 2, 41, "Subsubsection",
+Cell[8086, 292, 122, 2, 41, "Subsubsection",
  CellID->1007040944],
 Cell[CellGroupData[{
-Cell[8184, 297, 312, 8, 40, "Text",
+Cell[8233, 298, 312, 8, 40, "Text",
  CellID->961204065],
-Cell[8499, 307, 198, 4, 26, "Input",
+Cell[8548, 308, 198, 4, 26, "Input",
  CellID->1358998773]
 }, Open  ]]
 }, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[8758, 318, 117, 2, 44, "Section",
+Cell[8807, 319, 117, 2, 43, "Section",
  CellID->549865337],
 Cell[CellGroupData[{
-Cell[8900, 324, 176, 3, 41, "Subsubsection",
+Cell[8949, 325, 176, 3, 41, "Subsubsection",
  CellID->1871658360],
-Cell[9079, 329, 608, 12, 91, "Text",
+Cell[9128, 330, 608, 12, 91, "Text",
  CellID->1469832235]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[9724, 346, 65, 1, 72, "TutorialMoreAboutSection",
+Cell[9773, 347, 65, 1, 72, "TutorialMoreAboutSection",
  CellID->23220180],
-Cell[9792, 349, 54, 1, 22, "TutorialMoreAbout",
+Cell[9841, 350, 54, 1, 22, "TutorialMoreAbout",
  CellID->1567025153]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[9883, 355, 72, 1, 72, "RelatedTutorialsSection",
+Cell[9932, 356, 72, 1, 72, "RelatedTutorialsSection",
  CellID->415694126],
-Cell[9958, 358, 52, 1, 22, "RelatedTutorials",
+Cell[10007, 359, 52, 1, 22, "RelatedTutorials",
  CellID->806871991]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[10047, 364, 98, 1, 72, "TutorialRelatedLinksSection",
+Cell[10096, 365, 98, 1, 72, "TutorialRelatedLinksSection",
  CellID->415694148],
-Cell[10148, 367, 56, 1, 22, "TutorialRelatedLinks",
+Cell[10197, 368, 56, 1, 22, "TutorialRelatedLinks",
  CellID->415694149]
 }, Open  ]]
 }, Open  ]]
