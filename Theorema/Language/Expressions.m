@@ -70,8 +70,10 @@ MakeBoxes[ IntegerInterval$TM[ l_?NonNegative, u_, True, False], TheoremaForm] :
 MakeBoxes[ IntegerInterval$TM[ l_?NonNegative, u_, False, False], TheoremaForm] :=
 	SubscriptBox[ "\[DoubleStruckCapitalN]", RowBox[{"(", RowBox[{MakeBoxes[ l, TheoremaForm], ",", "\[Ellipsis]", ",", MakeBoxes[ u, TheoremaForm]}], ")"}]]
 	
-MakeBoxes[ IntegerQR$TM[ m_], TheoremaForm] :=
+MakeBoxes[ IntegerQuotientRing$TM[ m_], TheoremaForm] :=
 	SubscriptBox[ "\[DoubleStruckCapitalZ]", MakeBoxes[ m, TheoremaForm]]
+MakeBoxes[ IntegerQuotientRingPM$TM[ m_], TheoremaForm] :=
+	SubsuperscriptBox[ "\[DoubleStruckCapitalZ]", MakeBoxes[ m, TheoremaForm], "\[PlusMinus]"]
 	
 intervalToLetter[ r_Symbol] :=
 	Switch[ r,

@@ -382,6 +382,10 @@ MakeExpression[ RowBox[{UnderscriptBox[ "let", rng_], form_}], fmt_] :=
 
 (* we do not want that a-b is automatically converted to a+(-b), this should only be under built-in subtract. *)
 
+MakeExpression[ RowBox[ {"-", a_, c___}], fmt_] :=
+	MakeExpression[ RowBox[ {RowBox[ {"Minus", "[", a, "]"}], c}], fmt] /;
+		($parseTheoremaExpressions &&
+		!NumberQ[ quietToAtom[ a]])		(* amaletzk: We don't want to convert negative numbers into "Minus[...]". *)
 MakeExpression[ RowBox[ {a_, "-", b_, c___}], fmt_] := MakeExpression[ RowBox[ {RowBox[ {"Subtract", "[", a, ",", b, "]"}], c}], fmt] /; $parseTheoremaExpressions
 MakeExpression[ RowBox[ {a_, "/", b_, c___}], fmt_] := MakeExpression[ RowBox[ {RowBox[ {"Divide", "[", a, ",", b, "]"}], c}], fmt] /; $parseTheoremaExpressions
 MakeExpression[ FractionBox[ a_, b_], fmt_] := MakeExpression[ RowBox[ {"Divide", "[", a, ",", b, "]"}], fmt] /; $parseTheoremaExpressions
@@ -531,9 +535,11 @@ MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalZ]", l_], fmt_] :=
 		If[ TrueQ[ NonPositive[ lex]],
 			MakeExpression[ makeDomainIntervalBox[ "IntegerInterval", l, posInfBox, "True", "False"], fmt],
 			(*else*)
-			MakeExpression[ RowBox[ {"IntegerQR", "[", l, "]"}], fmt]
+			MakeExpression[ RowBox[ {"IntegerQuotientRing", "[", l, "]"}], fmt]
 		]
 	] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+MakeExpression[ SubsuperscriptBox[ "\[DoubleStruckCapitalZ]", m_, "\[PlusMinus]"], fmt_] :=
+	MakeExpression[ RowBox[ {"IntegerQuotientRingPM", "[", m, "]"}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 MakeExpression[ SubscriptBox[ dom:("\[DoubleStruckCapitalQ]"|"\[DoubleStruckCapitalR]"), l_], fmt_] :=
 	MakeExpression[ makeDomainIntervalBox[ makeDomainInterval[ dom], l, posInfBox, "True", "False"], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 

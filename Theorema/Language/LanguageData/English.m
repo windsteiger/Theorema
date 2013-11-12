@@ -110,7 +110,8 @@ With[ {lang = "English"},
 	MessageName[RealInterval$TM, "usage", lang] = "";	
 	MessageName[\[DoubleStruckCapitalC]$TM, "usage", lang] = "";	
 	MessageName[\[DoubleStruckCapitalC]P$TM, "usage", lang] = "";
-	MessageName[IntegerQR$TM, "usage", lang] = "";
+	MessageName[IntegerQuotientRing$TM, "usage", lang] = "";
+	MessageName[IntegerQuotientRingPM$TM, "usage", lang] = "";
 	MessageName[CaseDistinction$TM, "usage", lang] = "";	
 	MessageName[Clause$TM, "usage", lang] = "";	
     (* Mathematica programming language *)
