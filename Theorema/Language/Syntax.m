@@ -118,17 +118,14 @@ tmaToInputOperator[ args___] := unexpected[ tmaToInputOperator, {args}]
 	- the first element of each item is the symbol of the operator,
 	- the second element is a list of possible syntax of the operator according to Mathematica,
 	- the third element is the full name of the operator.
-	Note that the second elements are not needed so far, but I think it is good to keep them for possible future use.
-	Also note that the meaning of Infix/Prefix/Postfix is the following:
-		If operator "?" with name "f" has "Infix" as possible syntax, then any expression of the form "a?b" is
-		automatically transformed into "f[a, b]" (by Mathematica), whereas "a?" and "?b" would result in syntax
-		errors. This behaviour is NOT affected by the Theorema parsing rules, which only transform "?"
-		(without arguments) into "f".
+	Note that Infix/Prefix/Postfix are, up to now, only used for correct output but not for parsing -
+	They do not affect parsing in any way!
 	*)
 $tmaOperators = {
 	{"/@", {Infix}, "Map"}, {"//@", {Infix}, "MapAll"},
 	{"@@", {Infix}, "Apply"}, {";;", {Infix}, "Span"},
 	{"\[Rule]", {Infix}, "Rule"}, {"\[RuleDelayed]", {Infix}, "RuleDelayed"},
+	{"\[UndirectedEdge]", {Infix}, "UndirectedEdge"}, {"\[DirectedEdge]", {Infix}, "DirectedEdge"},
 	{"\[VerticalTilde]", {Infix}, "VerticalTilde"}, {"\[VerticalBar]", {Infix}, "VerticalBar"},
 	{"\[NotVerticalBar]", {Infix}, "NotVerticalBar"}, {"\[DoubleVerticalBar]", {Infix}, "DoubleVerticalBar"},
 	{"\[NotDoubleVerticalBar]", {Infix}, "NotDoubleVerticalBar"}, {"\[UpTee]", {Infix}, "UpTee"},
@@ -260,8 +257,17 @@ $tmaNameToOperator = Dispatch[ MapThread[ Rule, {$tmaOperatorNames, $tmaOperator
 
 (* We need this attribute, because otherwise expressions (not only operator symbols!) are evaluated when "MakeBoxes" is called. *)	
 SetAttributes[ isTmaOperatorName, HoldAllComplete];
-isTmaOperatorSymbol[ op_String] := MemberQ[ $tmaOperatorSymbols, op]
 isTmaOperatorName[ op_Symbol] := Quiet[ Check[ MemberQ[ $tmaOperatorNames, SymbolName[ op]], False]]
+isTmaOperatorSymbol[ op_String] := MemberQ[ $tmaOperatorSymbols, op]
+isTmaOperatorBox[ (OverscriptBox|SubscriptBox)[ op_, __]] := isTmaOperatorBox[ op]
+isTmaOperatorBox[ (UnderscriptBox|SuperscriptBox)[ op_, _]] := isTmaOperatorBox[ op]
+isTmaOperatorBox[ (UnderoverscriptBox|SubsuperscriptBox)[ op_, _, _]] := isTmaOperatorBox[ op]
+(* In the following definition the second alternative ensures that "Plus_0" is also transformed into
+	"Annotated[Plus, SubScript[0]]", not only "+_0". *)
+isTmaOperatorBox[ op_String] := isTmaOperatorSymbol[ op] || MemberQ[ $tmaOperatorNames, op <> "$TM"]
+isTmaOperatorBox[ _] := False
+
+getTmaOperatorForms[ op_Symbol] := First[ Cases[ $tmaOperators, {_, forms_, StringDrop[ SymbolName[ op], -3]} -> forms]]
 
 
 (* ::Section:: *)
@@ -298,6 +304,10 @@ makeTuple[ x___] := ToExpression[ "Tuple$TM"][x]
 
 MakeExpression[RowBox[{a_, TagBox[op_, Identity, ___], b_}], fmt_] := 
 	MakeExpression[RowBox[{a, op, b}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+MakeExpression[RowBox[{TagBox[op_, Identity, ___], b_}], fmt_] := 
+	MakeExpression[RowBox[{op, b}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+MakeExpression[RowBox[{a_, TagBox[op_, Identity, ___]}], fmt_] := 
+	MakeExpression[RowBox[{a, op}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 
 MakeExpression[RowBox[{ TagBox[ "(", "AutoParentheses"], expr_, TagBox[ ")", "AutoParentheses"]}], fmt_] := 
 	MakeExpression[ expr, fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
@@ -394,20 +404,30 @@ row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", "otherwise"}] :=
 row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", "\[Placeholder]"}] := RowBox[ {"Clause", "[", RowBox[ {"True", ",", e}], "]"}]
 row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", c_}] := RowBox[ {"Clause", "[", RowBox[ {c, ",", e}], "]"}]
 
+(* amaletzk: Use "collectColumn" instead of "First" to treat nested GridBoxes correctly.
+	Reason: If one enters a new row to a GridBox by hitting "Ctrl+Enter", it might be that the new row
+	is in fact not added to the outermost GridBox, but rather a new GridBox is created. Still, it looks as if
+	the row was added to the outermost GridBox, so finding the error would be complicated (for the user).
+	However, I think there is no need to do this also with "CaseDistinction", because there 3 columns are required
+	anyway, and adding a new row either REALLY adds a new row to the outermost GridBox, or, if not, it is easy to see
+	that something went wrong. *)
 MakeExpression[ RowBox[ {"\[And]", RowBox[{"\[Piecewise]", GridBox[ c:{{_}..}, ___]}]}], fmt_] :=
-	With[ {clauses = Riffle[ Map[ First, c], ","]},
+	With[ {clauses = Riffle[ Map[ collectColumn, c], ","]},
 		MakeExpression[ RowBox[{"And", "[", RowBox[ clauses], "]"}], fmt]
 	] /; $parseTheoremaExpressions
 
 MakeExpression[ RowBox[ {"\[Or]", RowBox[{"\[Piecewise]", GridBox[ c:{{_}..}, ___]}]}], fmt_] :=
-	With[ {clauses = Riffle[ Map[ First, c], ","]},
+	With[ {clauses = Riffle[ Map[ collectColumn, c], ","]},
 		MakeExpression[ RowBox[{"Or", "[", RowBox[ clauses], "]"}], fmt]
 	] /; $parseTheoremaExpressions
 	
 MakeExpression[ RowBox[ {"\[DoubleLongLeftRightArrow]"|"\[DoubleLeftRightArrow]", RowBox[{"\[Piecewise]", GridBox[ c:{{_}..}, ___]}]}], fmt_] :=
-	With[ {clauses = Riffle[ Map[ First, c], ","]},
+	With[ {clauses = Riffle[ Map[ collectColumn, c], ","]},
 		MakeExpression[ RowBox[{"Iff", "[", RowBox[ clauses], "]"}], fmt]
 	] /; $parseTheoremaExpressions
+	
+collectColumn[ {GridBox[ l:{{_}..}, ___]}] := Apply[ Sequence, Map[ collectColumn, l]]
+collectColumn[ {x_}] := x
 	
 
 (* ::Subsubsection:: *)
@@ -422,7 +442,7 @@ MakeExpression[ RowBox[ {SubscriptBox[ "max", ord_], "[", arg_, "]"}], fmt_] :=
 (* ::Subsubsection:: *)
 (* Number domains *)
 
-(* Important: If a limit is "Infinity", it doesn't matter whether the range is open or closed at this limit;
+(* Important: If a limit is "Infinity", it doesn't matter whether the interval is open or closed at this limit;
 				"Infinity" is always excluded!
 *)
 
@@ -432,32 +452,54 @@ isLeftClosed[ b_] := Switch[ b, "(", "False", "[", "True"]
 isRightClosed[ b_] := Switch[ b, ")", "False", "]", "True"]
 posInfBox = RowBox[ {"DirectedInfinity", "[", "1", "]"}]
 negInfBox = RowBox[ {"DirectedInfinity", "[", RowBox[ {"-", "1"}], "]"}]
-makeDomainRangeBox[ head_String, l_, u_, leftClosed_, rightClosed_] := RowBox[ {head, "[", RowBox[ {l, ",", u, ",", leftClosed, ",", rightClosed}], "]"}]
+makeDomainIntervalBox[ head_String, l_, u_, leftClosed_, rightClosed_] := RowBox[ {head, "[", RowBox[ {l, ",", u, ",", leftClosed, ",", rightClosed}], "]"}]
+
+quietToAtom[ s_] :=
+	Block[ {$parseTheoremaExpressions = False, $parseTheoremaGlobals = False},
+		Module[ {out = Quiet[ Check[ ToExpression[ s, StandardForm, Hold], $Failed]]},
+			If[ out =!= $Failed && out === Apply[ Hold, {ReleaseHold[ out]}],
+				out = ReleaseHold[ out];
+				If[ !AtomQ[ out], out = $Failed],
+				out = $Failed
+			];
+			out
+		]
+	]
 
 (* ::Subsubsubsection:: *)
 (* \[DoubleStruckCapitalN] *)
 
 (* Ellipsis-subscript without interval brackets *)
 MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalN]", RowBox[ {l_, ",", "\[Ellipsis]", ",", u_}]], fmt_] :=
-	MakeExpression[ makeDomainRangeBox[ "IntegerRange", makeMaxBox[ l, "0"], u, "True", "True"], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+	MakeExpression[ makeDomainIntervalBox[ "IntegerInterval", makeMaxBox[ l, "0"], u, "True", "True"], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 
 (* Ellipsis-subscript with interval brackets
 	The following 3 definitions are essentially the same, we only take care of the several possibilities how
 	left/right brackets are arranged withing RowBox *)
 MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalN]", RowBox[ {RowBox[ {left_?isLeftIntervalBracket, RowBox[ {l_, ",", "\[Ellipsis]", ",", u_}]}], right_?isRightIntervalBracket}]], fmt_] :=
-	MakeExpression[ makeDomainRangeBox[ "IntegerRange", makeMaxBox[ l, "0"], u, isLeftClosed[ left], isRightClosed[ right]], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+	MakeExpression[ makeDomainIntervalBox[ "IntegerInterval", makeMaxBox[ l, "0"], u, isLeftClosed[ left], isRightClosed[ right]], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalN]", RowBox[ {left_?isLeftIntervalBracket, RowBox[ {RowBox[ {l_, ",", "\[Ellipsis]", ",", u_}], right_?isRightIntervalBracket}]}]], fmt_] :=
-	MakeExpression[ makeDomainRangeBox[ "IntegerRange", makeMaxBox[ l, "0"], u, isLeftClosed[ left], isRightClosed[ right]], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+	MakeExpression[ makeDomainIntervalBox[ "IntegerInterval", makeMaxBox[ l, "0"], u, isLeftClosed[ left], isRightClosed[ right]], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalN]", RowBox[ {left_?isLeftIntervalBracket, RowBox[ {l_, ",", "\[Ellipsis]", ",", u_}], right_?isRightIntervalBracket}]], fmt_] :=
-	MakeExpression[ makeDomainRangeBox[ "IntegerRange", makeMaxBox[ l, "0"], u, isLeftClosed[ left], isRightClosed[ right]], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+	MakeExpression[ makeDomainIntervalBox[ "IntegerInterval", makeMaxBox[ l, "0"], u, isLeftClosed[ left], isRightClosed[ right]], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 
 (* Single subscript indicating where to start from *)
 MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalN]", l_], fmt_] :=
-	MakeExpression[ makeDomainRangeBox[ "IntegerRange", makeMaxBox[ l, "0"], posInfBox, "True", "False"], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+	MakeExpression[ makeDomainIntervalBox[ "IntegerInterval", makeMaxBox[ l, "0"], posInfBox, "True", "False"], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 
 (* No subscript at all; Start from 1.
 	This case, unfortunately, can reasonably only be handled in "freshSymbol[]" in "Session.m" *)
 
+makeMaxBox[ a_, b_] :=
+	Module[ {aex = quietToAtom[ a], bex = quietToAtom[ a]},
+		Which[ TrueQ[ Quiet[ Check[ aex >= bex, False]]],
+			a,
+			TrueQ[ Quiet[ Check[ bex >= aex, False]]],
+			b,
+			True,
+			RowBox[ {"max", "[", RowBox[ {"{", RowBox[ {a, ",", b}], "}"}], "]"}]
+		]
+	]
 makeMaxBox[ a_, b_] := RowBox[ {"max", "[", RowBox[ {"{", RowBox[ {a, ",", b}], "}"}], "]"}]
 
 (* ::Subsubsubsection:: *)
@@ -465,30 +507,44 @@ makeMaxBox[ a_, b_] := RowBox[ {"max", "[", RowBox[ {"{", RowBox[ {a, ",", b}], 
 
 isZQR[ dom_] := MemberQ[ {"\[DoubleStruckCapitalZ]", "\[DoubleStruckCapitalQ]", "\[DoubleStruckCapitalR]"}, dom]
 
-makeDomainRange[ "\[DoubleStruckCapitalZ]"] := "IntegerRange"
-makeDomainRange[ "\[DoubleStruckCapitalQ]"] := "RationalRange"
-makeDomainRange[ "\[DoubleStruckCapitalR]"] := "RealRange"
+makeDomainInterval[ "\[DoubleStruckCapitalZ]"] := "IntegerInterval"
+makeDomainInterval[ "\[DoubleStruckCapitalQ]"] := "RationalInterval"
+makeDomainInterval[ "\[DoubleStruckCapitalR]"] := "RealInterval"
 
 (* Ellipsis-subscript without interval brackets *)
 MakeExpression[ SubscriptBox[ dom_?isZQR, RowBox[ {l_, ",", "\[Ellipsis]", ",", u_}]], fmt_] :=
-	MakeExpression[ makeDomainRangeBox[ makeDomainRange[ dom], l, u, "True", "True"], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+	MakeExpression[ makeDomainIntervalBox[ makeDomainInterval[ dom], l, u, "True", "True"], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 
 (* Ellipsis-subscript with interval brackets
 	The following definitions are essentially the same, we only take care of the several possibilities how
 	left/right brackets are arranged withing RowBox *)
 MakeExpression[ SubscriptBox[ dom_?isZQR, RowBox[ {RowBox[ {left_?isLeftIntervalBracket, RowBox[ {l_, ",", "\[Ellipsis]", ",", u_}]}], right_?isRightIntervalBracket}]], fmt_] :=
-	MakeExpression[ makeDomainRangeBox[ makeDomainRange[ dom], l, u, isLeftClosed[ left], isRightClosed[ right]], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+	MakeExpression[ makeDomainIntervalBox[ makeDomainInterval[ dom], l, u, isLeftClosed[ left], isRightClosed[ right]], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 MakeExpression[ SubscriptBox[ dom_?isZQR, RowBox[ {left_?isLeftIntervalBracket, RowBox[ {RowBox[ {l_, ",", "\[Ellipsis]", ",", u_}], right_?isRightIntervalBracket}]}]], fmt_] :=
-	MakeExpression[ makeDomainRangeBox[ makeDomainRange[ dom], l, u, isLeftClosed[ left], isRightClosed[ right]], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+	MakeExpression[ makeDomainIntervalBox[ makeDomainInterval[ dom], l, u, isLeftClosed[ left], isRightClosed[ right]], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 MakeExpression[ SubscriptBox[ dom_?isZQR, RowBox[ {left_?isLeftIntervalBracket, RowBox[ {l_, ",", "\[Ellipsis]", ",", u_}], right_?isRightIntervalBracket}]], fmt_] :=
-	MakeExpression[ makeDomainRangeBox[ makeDomainRange[ dom], l, u, isLeftClosed[ left], isRightClosed[ right]], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+	MakeExpression[ makeDomainIntervalBox[ makeDomainInterval[ dom], l, u, isLeftClosed[ left], isRightClosed[ right]], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 
 (* Single subscript indicating where to start from *)
-MakeExpression[ SubscriptBox[ dom_?isZQR, l_], fmt_] :=
-	MakeExpression[ makeDomainRangeBox[ makeDomainRange[ dom], l, posInfBox, "True", "False"], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalZ]", l_], fmt_] :=
+	Module[ {lex = quietToAtom[ l]},
+		If[ TrueQ[ NonPositive[ lex]],
+			MakeExpression[ makeDomainIntervalBox[ "IntegerInterval", l, posInfBox, "True", "False"], fmt],
+			(*else*)
+			MakeExpression[ RowBox[ {"IntegerQR", "[", l, "]"}], fmt]
+		]
+	] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+MakeExpression[ SubscriptBox[ dom:("\[DoubleStruckCapitalQ]"|"\[DoubleStruckCapitalR]"), l_], fmt_] :=
+	MakeExpression[ makeDomainIntervalBox[ makeDomainInterval[ dom], l, posInfBox, "True", "False"], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 
 (* No subscript at all; Start from -Infinity.
 	This case, unfortunately, can reasonably only be handled in "freshSymbol[]" in "Session.m" *)
+	
+(* ::Subsubsubsection:: *)
+(* \[DoubleStruckCapitalC] *)
+
+MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalC]", "P"], fmt_] :=
+	MakeExpression[ "\[DoubleStruckCapitalC]P", fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 
 (* ::Subsubsection:: *)
 (* Tuple notations *)
@@ -509,6 +565,7 @@ MakeExpression[ RowBox[{left_,"\[EmptyUpTriangle]", right_}], fmt_] :=
 	The assumption is that prefix/infix/postfix operators with underscript are used for operators, which 
 	translate correctly to some expression when used without the underscript.
 *)
+
 (* PREFIX *)
 MakeExpression[ RowBox[ {UnderscriptBox[ "-", dom_], r_}], fmt_] :=
     Module[ {},
@@ -521,11 +578,11 @@ MakeExpression[ RowBox[ {UnderscriptBox[ "-", dom_], r_}], fmt_] :=
 MakeExpression[ RowBox[ {UnderscriptBox[ op_, dom_], r_}], fmt_] :=
     Module[ {expr = MakeExpression[ RowBox[{op, r}], fmt]},
     	(* expr is the form that would result without the underscript, say f[r] *)
-        With[ {aux = expr[[1, 0]]},
+        With[ {aux = Extract[ expr, {1, 0}, Hold]},
     		(* We memorize for output, that dom has been introduced as a domain underscript *)
     		registerDomainOperator[ op, aux, Prefix, dom];
         	(* From expr we now fetch the head, i.e. "f". We then generate dom[f][r] *)
-            MakeExpression[ RowBox[ {RowBox[ {dom, "[", aux, "]"}], "[", r, "]"}], fmt]
+            MakeExpression[ RowBox[ {RowBox[ {dom, "[", Apply[ makeTmaBoxes, aux], "]"}], "[", r, "]"}], fmt]
         ]
     ] /; $parseTheoremaExpressions
 
@@ -549,12 +606,12 @@ MakeExpression[ RowBox[ {l_, UnderscriptBox[ "/", dom_], r_}], fmt_] :=
 MakeExpression[ RowBox[ {l_, UnderscriptBox[ op_, dom_], r_}], fmt_] :=
     Module[ {expr = MakeExpression[ RowBox[{l, op, r}], fmt]},
     	(* expr is the form that would result without the underscript, say f[l,r] with HoldComplete wrapped around, so expr[[1,0]] gives the desired Head, say "f".  *)
-        With[ {aux = expr[[1, 0]]},
+        With[ {aux = Extract[ expr, {1, 0}, Hold]},
     		(* We memorize for output, that dom has been introduced as a domain underscript *)
     		registerDomainOperator[ op, aux, Infix, dom];
         	(* From expr we now fetch the head, i.e. "f", and the box form of the parameters, i.e. box form of "x,y".
         	   We then generate dom[f][x,y] *)
-            MakeExpression[ RowBox[ {RowBox[ {dom, "[", aux, "]"}], "[", RowBox[ {l, ",", r}], "]"}], fmt]
+            MakeExpression[ RowBox[ {RowBox[ {dom, "[", Apply[ makeTmaBoxes, aux], "]"}], "[", RowBox[ {l, ",", r}], "]"}], fmt]
         ]
     ] /; $parseTheoremaExpressions
 
@@ -562,11 +619,11 @@ MakeExpression[ RowBox[ {l_, UnderscriptBox[ op_, dom_], r_}], fmt_] :=
 MakeExpression[ RowBox[ {l_, UnderscriptBox[ op_, dom_]}], fmt_] :=
     Module[ {expr = MakeExpression[ RowBox[{l, op}], fmt]},
     	(* expr is the form that would result without the underscript, say f[l] *)
-        With[ {aux = expr[[1, 0]]},
+        With[ {aux = Extract[ expr, {1, 0}, Hold]},
     		(* We memorize for output, that dom has been introduced as a domain underscript *)
     		registerDomainOperator[ op, aux, Postfix, dom];
         	(* From expr we now fetch the head, i.e. "f". We then generate dom[f][r] *)
-            MakeExpression[ RowBox[ {RowBox[ {dom, "[", aux, "]"}], "[", l, "]"}], fmt]
+            MakeExpression[ RowBox[ {RowBox[ {dom, "[", Apply[ makeTmaBoxes, aux], "]"}], "[", l, "]"}], fmt]
         ]
     ] /; $parseTheoremaExpressions
 
@@ -758,6 +815,15 @@ getSingleRangeVar[ args___] := unexpected[ getSingleRangeVar, {args}]
 (* ::Subsubsection:: *)
 (* Operators *)
 
+(* The definitions in this subsubsection turn "+" into "Plus", if it appears without arguments; This also
+	happens in case of sub/super/over -scripted symbols (like "+_0"). *)
+
+(* Underscript is treated differently than the others, because it is assumed to be a domain underscript;
+	See Section 'Under-, Over-, Sub-, Superscripts', Subsection 'Underscript without arguments'. *)
+MakeExpression[ (h:(OverscriptBox|SubscriptBox|SuperscriptBox))[ op_?isTmaOperatorBox, sc_], fmt_] :=
+	MakeExpression[ makeAnnotation[ h, op, sc], fmt] /; ($parseTheoremaExpressions || $parseTheoremaGlobals)
+MakeExpression[ (h:(UnderoverscriptBox|SubsuperscriptBox))[ op_?isTmaOperatorBox, sc1_, sc2_], fmt_] :=
+	MakeExpression[ makeAnnotation[ h, op, sc1, sc2], fmt] /; ($parseTheoremaExpressions || $parseTheoremaGlobals)
 
 MakeExpression[ RowBox[ {h_, "[", RowBox[ {op_String?isTmaOperatorSymbol}], "]"}], fmt_] :=
 	MakeExpression[ RowBox[ {h, "[", RowBox[ {Replace[ op, $tmaOperatorToName]}], "]"}], fmt] /; ($parseTheoremaExpressions || $parseTheoremaGlobals)
@@ -779,14 +845,86 @@ MakeExpression[ RowBox[ {pre___, ld_?isLeftDelimiter, op_String?isTmaOperatorSym
 	
 MakeExpression[op_String?isTmaOperatorSymbol, fmt_] := MakeExpression[Replace[op, $tmaOperatorToName], fmt] /; ($parseTheoremaExpressions || $parseTheoremaGlobals)
  
-isLeftDelimiter[ s_String] :=
+isLeftDelimiter[ s_] :=
 	MemberQ[ {"[", "(", "{", "\[LeftAngleBracket]", "\[LeftBracketingBar]", "\[LeftFloor]", "\[LeftCeiling]", "\[LeftDoubleBracket]", "\[LeftDoubleBracketingBar]", ",", ";"}, s]
-isRightDelimiter[ s_String] :=
+isRightDelimiter[ s_] :=
 	MemberQ[ {"[", "]", ")", "}", "\[RightAngleBracket]", "\[RightBracketingBar]", "\[RightFloor]", "\[RightCeiling]", "\[RightDoubleBracket]", "\[RightDoubleBracketingBar]", ",", ";"}, s]
 
+(* Remark: We do NOT use "Subscript" below, but "SubScript" (upper-case "S"!), since "Subscript" already
+	has some meaning in Theorema (accessing parts of tuples). Same for other script boxes. *)
+SetAttributes[ makeAnnotation, HoldAllComplete];
+makeAnnotation[ SubscriptBox, f_, sc_] := RowBox[ {"Annotated", "[", RowBox[ {f, ",", RowBox[ {"SubScript", "[", sc, "]"}]}], "]"}]
+makeAnnotation[ SuperscriptBox, f_, sc_] := RowBox[ {"Annotated", "[", RowBox[ {f, ",", RowBox[ {"SuperScript", "[", sc, "]"}]}], "]"}]
+makeAnnotation[ OverscriptBox, f_, sc_] := RowBox[ {"Annotated", "[", RowBox[ {f, ",", RowBox[ {"OverScript", "[", sc, "]"}]}], "]"}]
+makeAnnotation[ SubsuperscriptBox, f_, sc1_, sc2_] := RowBox[ {"Annotated", "[", RowBox[ {f, ",", RowBox[ {"SubScript", "[", sc1, "]"}], ",", RowBox[ {"SuperScript", "[", sc2, "]"}]}], "]"}]
+makeAnnotation[ UnderoverscriptBox, f_, sc1_, sc2_] := RowBox[ {"Annotated", "[", RowBox[ {f, ",", RowBox[ {"UnderScript", "[", sc1, "]"}], ",", RowBox[ {"OverScript", "[", sc2, "]"}]}], "]"}]
+
+(* ::Subsection:: *)
+(* Under-, Over-, Sub-, Superscripts *)
+
+(* The definitions in this subsection handle sub/super/over -scripted operator symbols (like "+_0") if they
+	appear WITH arguments. The case when they appear without arguments is treated above. *)
+	
+(* ::Subsubsection:: *)
+(* Prefix *)
+
+MakeExpression[ RowBox[ {(h:(OverscriptBox|SubscriptBox|SuperscriptBox))[ op_?isTmaOperatorBox, sc_], r_}], fmt_] :=
+	Module[ {f, expr = MakeExpression[ RowBox[ {op, r}], fmt]},
+		(* Getting the head of the first part of expr in the way below prevents it from being evaluated.
+			makeTmaBoxes is needed because the head could be a compound expression, and since it is fed to
+			MakeExpression again afterwards, it should rather be a box than an expression.
+			Note that we cannot simply write "(MakeBoxes[#, TheoremaForm])&", because we would lose the
+			HoldAllComplete-attribute in this case, which is needed (especially if the domain underscript is "D"). *)
+		f = Extract[ expr, {1, 0}, makeTmaBoxes];
+		MakeExpression[ RowBox[ {makeAnnotation[ h, f, sc], "[", r, "]"}], fmt]
+	] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {(h:(UnderoverscriptBox|SubsuperscriptBox))[ op_?isTmaOperatorBox, sc1_, sc2_], r_}], fmt_] :=
+	Module[ {f, expr = MakeExpression[ RowBox[ {op, r}], fmt]},
+		f = Extract[ expr, {1, 0}, makeTmaBoxes];
+		MakeExpression[ RowBox[ {makeAnnotation[ h, f, sc1, sc2], "[", r, "]"}], fmt]
+	] /; $parseTheoremaExpressions
+	
+(* ::Subsubsection:: *)
+(* Postfix *)
+
+MakeExpression[ RowBox[ {l_, (h:(OverscriptBox|SubscriptBox|SuperscriptBox))[ op_?isTmaOperatorBox, sc_]}], fmt_] :=
+	Module[ {f, expr = MakeExpression[ RowBox[ {l, op}], fmt]},
+		f = Extract[ expr, {1, 0}, makeTmaBoxes];
+		MakeExpression[ RowBox[ {makeAnnotation[ h, f, sc], "[", l, "]"}], fmt]
+	] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {l_, (h:(UnderoverscriptBox|SubsuperscriptBox))[ op_?isTmaOperatorBox, sc1_, sc2_]}], fmt_] :=
+	Module[ {f, expr = MakeExpression[ RowBox[ {l, op}], fmt]},
+		f = Extract[ expr, {1, 0}, makeTmaBoxes];
+		MakeExpression[ RowBox[ {makeAnnotation[ h, f, sc1, sc2], "[", l, "]"}], fmt]
+	] /; $parseTheoremaExpressions
+	
+(* ::Subsubsection:: *)
+(* Infix *)
+	
+MakeExpression[ RowBox[ {l_, (h:(OverscriptBox|SubscriptBox|SuperscriptBox))[ op_?isTmaOperatorBox, sc_], r_}], fmt_] :=
+	Module[ {f, expr = MakeExpression[ RowBox[ {l, op, r}], fmt]},
+		f = Extract[ expr, {1, 0}, makeTmaBoxes];
+		MakeExpression[ RowBox[ {makeAnnotation[ h, f, sc], "[", RowBox[ {l, ",", r}], "]"}], fmt]
+	] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {l_, (h:(UnderoverscriptBox|SubsuperscriptBox))[ op_?isTmaOperatorBox, sc1_, sc2_], r_}], fmt_] :=
+	Module[ {f, expr = MakeExpression[ RowBox[ {l, op, r}], fmt]},
+		f = Extract[ expr, {1, 0}, makeTmaBoxes];
+		MakeExpression[ RowBox[ {makeAnnotation[ h, f, sc1, sc2], "[", RowBox[ {l, ",", r}], "]"}], fmt]
+	] /; $parseTheoremaExpressions
+	
+(* ::Subsubsection:: *)
+(* Underscript without arguments *)
+
+MakeExpression[ UnderscriptBox[ op_, dom_], fmt_] :=
+	MakeExpression[ RowBox[ {dom, "[", op, "]"}], fmt] /; ($parseTheoremaExpressions || $parseTheoremaGlobals)
+	
+	
 
 (* ::Section:: *)
 (* MakeBoxes *)
+
+SetAttributes[makeTmaBoxes, HoldAllComplete];
+makeTmaBoxes[ b_] := MakeBoxes[ b, TheoremaForm]
 
 
 MakeBoxes[ (q_?isQuantifierName)[ rng_, True, form_], TheoremaForm] := 
@@ -825,7 +963,8 @@ MakeBoxes[ (op_?isNonStandardOperatorName)[ arg___], TheoremaForm] :=
 	4) On demand, more exceptions can be implemented at this point.
 *)
 MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
-    With[ {b = tmaToInputOperator[ op]},
+	With[ {b = tmaToInputOperator[ op]},
+    Module[ {form, sym},
     	(* Special cases, because otherwise And uses && and Or uses || *)
     	Switch[ b,
     		And,
@@ -837,10 +976,35 @@ MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
     		Plus|Times|Power,
     		MakeBoxes[ b[ arg], TheoremaForm],
     		_,
-    		parenthesize[ b[ arg]]
+    		If[ isTmaOperatorName[ op],
+    			(* This if-branch treats the case where 'op' is a Theorema operator occuring with non-empty
+    				argument list. *)
+    			sym = Replace[ SymbolName[ op], $tmaNameToOperator];
+    			form = getTmaOperatorForms[ op];
+    			If[ Length[ HoldComplete[ arg]] == 1,
+    				Which[
+						MemberQ[ form, Prefix],
+						RowBox[ {sym, MakeBoxes[ arg, TheoremaForm]}],
+						MemberQ[ form, Postfix],
+						RowBox[ {MakeBoxes[ arg, TheoremaForm], sym}],
+						True,
+						RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}], "[", MakeBoxes[ arg, TheoremaForm], "]"}]
+					],
+					(*else*)
+					If[ MemberQ[ form, Infix],
+						tmaInfixBox[ {arg}, sym],
+						RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}], "[",
+								RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ arg]]], ","]], "]"}]
+					]
+    			],
+    			(*else*)
+    			parenthesize[ b[ arg]]
+    		]
     	]
     ]
+	]
 
+SetAttributes[ parenthesize, HoldAllComplete]; (* otherwise evaluation might happen *)
 parenthesize[ b_[ arg___]] :=
     Module[ {res = MakeBoxes[ b[ arg], TheoremaForm]},
         If[ MatchQ[ res, RowBox[ {ToString[ b], "[", ___}]|RowBox[ {"(", ___, ")"}]],
@@ -850,8 +1014,13 @@ parenthesize[ b_[ arg___]] :=
     ]
 parenthesize[ e_] := MakeBoxes[ e, TheoremaForm]
 parenthesize[ args___] := unexpected[ parenthesize, {args}]
-    
+
+(* The following definitions turn "Plus" into "+" if it occurs without arguments or with an empty
+	argument list. The case when it occurs with a non-empty argument list is treated above, in the
+	definition with "isStandardOperatorSymbol". Annotated operators are treated in 'Expressions.m'. *)
 MakeBoxes[ s_?isTmaOperatorName, TheoremaForm] := Replace[ SymbolName[ s], $tmaNameToOperator]
+MakeBoxes[ s_?isTmaOperatorName[], TheoremaForm] :=
+	RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], Replace[ SymbolName[ s], $tmaNameToOperator], TagBox[ ")", "AutoParentheses"]}], "[", "]"}]
     
 MakeBoxes[ s_Symbol, TheoremaForm] := 
 	(* We have to use "Unevaluated" here, because "I" is a symbol, but evaluates to "Complex[0, 1]" *)
@@ -869,32 +1038,41 @@ MakeBoxes[ s_Symbol, TheoremaForm] :=
 
 
 MakeBoxes[ (dom_?(isUnderscriptDomain[ MakeBoxes[ #, TheoremaForm]]&))[ op_][ a_], TheoremaForm] :=
-	Module[ {opSymPre = operatorSymbol[ ToExpression[ MakeBoxes[ op, TheoremaForm]], Prefix],
-		opSymPost = operatorSymbol[ ToExpression[ MakeBoxes[ op, TheoremaForm]], Postfix]},
-		Which[
-			StringQ[ opSymPre],
-			RowBox[ {UnderscriptBox[ opSymPre, MakeBoxes[ dom, TheoremaForm]], MakeBoxes[ a, TheoremaForm]}],
-			StringQ[ opSymPost],
-			RowBox[ {MakeBoxes[ a, TheoremaForm], UnderscriptBox[ opSymPost, MakeBoxes[ dom, TheoremaForm]]}],
-			True,
-			MakeBoxes[ Underscript[ op, dom][ a], TheoremaForm]
+	Block[ {$parseTheoremaExpressions = True, $parseTheoremaGlobals = True},
+		Module[ {opSymPre = operatorSymbol[ ToExpression[ MakeBoxes[ op, TheoremaForm], StandardForm, Hold], Prefix],
+			opSymPost = operatorSymbol[ ToExpression[ MakeBoxes[ op, TheoremaForm], StandardForm, Hold], Postfix]},
+			Which[
+				!MatchQ[ opSymPre, _operatorSymbol],
+				RowBox[ {UnderscriptBox[ opSymPre, MakeBoxes[ dom, TheoremaForm]], MakeBoxes[ a, TheoremaForm]}],
+				!MatchQ[ opSymPost, _operatorSymbol],
+				RowBox[ {MakeBoxes[ a, TheoremaForm], UnderscriptBox[ opSymPost, MakeBoxes[ dom, TheoremaForm]]}],
+				True,
+				MakeBoxes[ Underscript[ op, dom][ a], TheoremaForm]
+			]
 		]
 	]
 	
 MakeBoxes[ (dom_?(isUnderscriptDomain[ MakeBoxes[ #, TheoremaForm]]&))[ op_][ a_, b_], TheoremaForm] :=
-	Module[ {opSym = operatorSymbol[ ToExpression[ MakeBoxes[ op, TheoremaForm]], Infix]},
-		Which[
-			StringQ[ opSym],
-			tmaInfixBox[ {a, b}, UnderscriptBox[ opSym, MakeBoxes[ dom, TheoremaForm]]],
-			True,
-			MakeBoxes[ Underscript[ op, dom][ a, b], TheoremaForm]
+	Block[ {$parseTheoremaExpressions = True, $parseTheoremaGlobals = True},
+		Module[ {opSym = operatorSymbol[ ToExpression[ MakeBoxes[ op, TheoremaForm], StandardForm, Hold], Infix]},
+			Which[
+				MatchQ[ opSym, _operatorSymbol],
+				MakeBoxes[ Underscript[ op, dom][ a, b], TheoremaForm],
+				True,
+				tmaInfixBox[ {a, b}, UnderscriptBox[ opSym, MakeBoxes[ dom, TheoremaForm]]]
+			]
 		]
 	]
 	
 MakeBoxes[ (dom_?(isUnderscriptDomain[ MakeBoxes[ #, TheoremaForm]]&))[ op_][ a___], TheoremaForm] :=
 	MakeBoxes[ Underscript[ op, dom][ a], TheoremaForm]
 	
-tmaInfixBox[ args_List, op_] := RowBox[ Riffle[ Map[ MakeBoxes[ #, TheoremaForm]&, args], op]]
+(* Transform domain operator without arguments into UnderscriptBox *)
+MakeBoxes[ (dom_?(isUnderscriptDomain[ MakeBoxes[ #, TheoremaForm]]&))[ op_], TheoremaForm] :=
+	MakeBoxes[ Underscript[ op, dom], TheoremaForm]
+	
+SetAttributes[ tmaInfixBox, HoldFirst];
+tmaInfixBox[ args_List, op_] := RowBox[ Riffle[ Map[ makeTmaBoxes, args], op]]
 tmaInfixBox[ args___] := unexpected[ tmaInfixBox, {args}]
 
 initParser[];
