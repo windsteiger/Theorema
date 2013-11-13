@@ -112,6 +112,7 @@ With[ {lang = "English"},
 	MessageName[\[DoubleStruckCapitalC]P$TM, "usage", lang] = "";
 	MessageName[IntegerQuotientRing$TM, "usage", lang] = "";
 	MessageName[IntegerQuotientRingPM$TM, "usage", lang] = "";
+	MessageName[\[Epsilon]$TM, "usage", lang] = "";
 	MessageName[CaseDistinction$TM, "usage", lang] = "";	
 	MessageName[Clause$TM, "usage", lang] = "";	
     (* Mathematica programming language *)

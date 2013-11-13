@@ -101,7 +101,7 @@ MakeBoxes[ (h:IntegerInterval$TM|RationalInterval$TM|RealInterval$TM)[ l_, u_, F
 	SubscriptBox[ intervalToLetter[ h], RowBox[{"(", RowBox[{MakeBoxes[ l, TheoremaForm], ",", "\[Ellipsis]", ",", MakeBoxes[ u, TheoremaForm]}], ")"}]]
 	
 MakeBoxes[ \[DoubleStruckCapitalC]P$TM, TheoremaForm] :=
-	SubscriptBox[ MakeBoxes[ "\[DoubleStruckCapitalC]", TheoremaForm], "P"]
+	SubscriptBox[ "\[DoubleStruckCapitalC]", "P"]
 	
 	
 	

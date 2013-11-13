@@ -57,12 +57,20 @@ setComputationContext[ args___] := unexpected[ setComputationContext, {args}]
 (* ::Section:: *)
 (* Arithmetic *)
 
+(* "buiActiveArithmetic" extends "buiActive" such that the activation of "Subtract" etc. can also
+	be determined in one stroke. *)
+buiActiveArithmetic["Subtract"] := buiActive["Plus"] && buiActive["Minus"]
+buiActiveArithmetic["MultInverse"] := buiActive["MultInverse"] || buiActive["Power"]
+buiActiveArithmetic["Divide"] := buiActive["Times"] && (buiActive["MultInverse"] || buiActive["Power"])
+buiActiveArithmetic[s_String] := buiActive[s]
 
    
 Plus$TM[ a___] /; buiActive["Plus"] := Plus[ a]
-Subtract$TM[ a___] /; buiActive["Subtract"] := Subtract[ a]
+Minus$TM[ a_] /; buiActive["Minus"] := Minus[ a]
+Subtract$TM[ a_, b_] /; buiActiveArithmetic["Subtract"] := Subtract[ a, b] (* "Subtract" requires exactly 2 arguments. *)
 Times$TM[ a___] /; buiActive["Times"] := Times[ a]
-Divide$TM[ a___] /; buiActive["Divide"] := Divide[ a]
+Power$TM[ a_, -1] /; buiActiveArithmetic["MultInverse"] := Power[ a, -1]
+Divide$TM[ a_, b_] /; buiActiveArithmetic["Divide"] := Divide[ a, b] (* "Divide" requires exactly 2 arguments. *)
 Power$TM[ a_, b_] /; buiActive["Power"] := Power[ a, b]
 Radical$TM[ a_, b_] /; buiActive["Radical"] := Power[ a, 1/b]
 Equal$TM[ a_, b_] /; buiActive["Equal"] := a == b
@@ -72,6 +80,185 @@ Greater$TM[ a__] /; buiActive["Greater"] := Greater[ a]
 GreaterEqual$TM[ a__] /; buiActive["GreaterEqual"] := GreaterEqual[ a]
 BracketingBar$TM[ a:(_Integer|_Rational|_Real|_Complex|_DirectedInfinity)] /; buiActive["AbsValue"] := Abs[ a]
 BracketingBar$TM[ a:(Pi|E|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaisher)] /; buiActive["AbsValue"] := a
+
+(* "isValidArgNum", called on a symbol 's' and an integer 'n' gives True iff 's' is a function symbol that can
+	be called with 'n' numbers and returns a number (that's why relations are not considered as functions),
+	AND which, in addition to that, has an analogue in Mathematica with the same name withot "$TM"
+	(that's why "Radical$TM" is not considered as an arithmetical operation and therefore has to be treated separately). *)
+isValidArgNum[ Plus$TM|Times$TM, _Integer?NonNegative] := True
+isValidArgNum[ Subtract$TM|Divide$TM|Power$TM, 2] := True
+isValidArgNum[ Minus$TM, 1] := True
+isValidArgNum[ _, _] := False
+
+(* Although the following definitions do exactly the same thing (only that they are defined for the different
+	intervals), I think it is not possible to only give 1 definition dealing with all of those intervals at once
+	(alternatives ("|") unfortunately don't work). *)
+	
+(* Note that we have to treat the case "Power[a, -1]" differently, since -1 does not have to be in the domain. *)
+(dom_IntegerInterval$TM)[Power$TM][ a_, -1] /; buiActive["IntegerInterval"] && buiActiveArithmetic["MultInverse"] && isInInterval[ a, dom] :=
+	Module[ {out},
+		out /; (out = Power[ a, -1]; isInInterval[ out, dom])
+	]
+(dom_IntegerInterval$TM)[Radical$TM][ a_, b_] /; buiActive["IntegerInterval"] && buiActive["Radical"] && isInInterval[ a, dom] && isInInterval[ b, dom] :=
+	Module[ {out},
+		out /; (out = Power[ a, Power[ b, -1]]; isInInterval[ out, dom])
+	]
+(dom_IntegerInterval$TM)[op_Symbol][ a___] /; buiActive["IntegerInterval"] && isValidArgNum[ op, Length[{a}]] && Apply[ And, Map[ isInInterval[ #, dom]&, Hold[ a]]] :=
+	Module[ {out, opShortName, opShort},
+		out /; And[
+					opShortName = StringDrop[ SymbolName[ op], -3]; buiActiveArithmetic[ opShortName],
+					opShort = ToExpression[ opShortName]; out = opShort[ a]; isInInterval[ out, dom]
+				  ]
+	]
+	
+(dom_RationalInterval$TM)[Power$TM][ a_, -1] /; buiActive["RationalInterval"] && buiActiveArithmetic["MultInverse"] && isInInterval[ a, dom] :=
+	Module[ {out},
+		out /; (out = Power[ a, -1]; isInInterval[ out, dom])
+	]
+(dom_RationalInterval$TM)[Radical$TM][ a_, b_] /; buiActive["RationalInterval"] && buiActive["Radical"] && isInInterval[ a, dom] && isInInterval[ b, dom] :=
+	Module[ {out},
+		out /; (out = Power[ a, Power[ b, -1]]; isInInterval[ out, dom])
+	]
+(dom_RationalInterval$TM)[op_Symbol][ a___] /; buiActive["RationalInterval"] && isValidArgNum[ op, Length[{a}]] && Apply[ And, Map[ isInInterval[ #, dom]&, Hold[ a]]] :=
+	Module[ {out, opShortName, opShort},
+		out /; And[
+					opShortName = StringDrop[ SymbolName[ op], -3]; buiActiveArithmetic[ opShortName],
+					opShort = ToExpression[ opShortName]; out = opShort[ a]; isInInterval[ out, dom]
+				  ]
+	]
+	
+(dom_RealInterval$TM)[Power$TM][ a_, -1] /; buiActive["RealInterval"] && buiActiveArithmetic["MultInverse"] && isInInterval[ a, dom] :=
+	Module[ {out},
+		out /; (out = Power[ a, -1]; isInInterval[ out, dom])
+	]
+(dom_RealInterval$TM)[Radical$TM][ a_, b_] /; buiActive["RealInterval"] && buiActive["Radical"] && isInInterval[ a, dom] && isInInterval[ b, dom] :=
+	Module[ {out},
+		out /; (out = Power[ a, Power[ b, -1]]; isInInterval[ out, dom])
+	]
+(dom_RealInterval$TM)[op_Symbol][ a___] /; buiActive["RealInterval"] && isValidArgNum[ op, Length[{a}]] && Apply[ And, Map[ isInInterval[ #, dom]&, Hold[ a]]] :=
+	Module[ {out, opShortName, opShort},
+		out /; And[
+					opShortName = StringDrop[ SymbolName[ op], -3]; buiActiveArithmetic[ opShortName],
+					opShort = ToExpression[ opShortName]; out = opShort[ a]; isInInterval[ out, dom]
+				  ]
+	]
+
+\[DoubleStruckCapitalC]$TM[Power$TM][ a_, -1] /; buiActive["\[DoubleStruckCapitalC]"] && buiActiveArithmetic["MultInverse"] && isComplex[ a] && a != 0 :=
+	Power[ a, -1]
+\[DoubleStruckCapitalC]$TM[Radical$TM][ a_, b_] /; buiActive["\[DoubleStruckCapitalC]"] && buiActive["Radical"] && isComplex[ a] && isComplex[ b] :=
+	Module[ {out},
+		out /; (out = Power[ a, Power[ b, -1]]; isComplex[ out])
+	]
+\[DoubleStruckCapitalC]$TM[op_Symbol][ a___] /; buiActive["\[DoubleStruckCapitalC]"] && isValidArgNum[ op, Length[{a}]] && Apply[ And, Map[ isComplex, Hold[ a]]] :=
+	Module[ {out, opShortName, opShort},
+		out /; And[
+					opShortName = StringDrop[ SymbolName[ op], -3]; buiActiveArithmetic[ opShortName],
+					opShort = ToExpression[ opShortName]; out = opShort[ a]; isComplex[ out]
+				  ]
+	]
+	
+\[DoubleStruckCapitalC]P$TM[Power$TM][ a:Tuple$TM[ _?Positive, _], -1] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActiveArithmetic["MultInverse"] && isComplexP[ a] :=
+	polarPower[ a, -1]
+\[DoubleStruckCapitalC]P$TM[Radical$TM][ a_Tuple$TM, b:Tuple$TM[ _?Positive, _]] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActive["Radical"] && isComplexP[ a] && isComplexP[ b] :=
+	Module[ {out},
+		out /; (out = polarPower[ a, polarPower[ b, -1]]; isComplexP[ out])
+	]
+(* We implement some operations on polar-complexes separately due to efficiency. *)
+\[DoubleStruckCapitalC]P$TM[Minus$TM][ a:Tuple$TM[ r_, phi_]] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActive["Minus"] && isComplexP[ a] :=
+	Tuple$TM[ r, If[ phi >= Pi, phi - Pi, phi + Pi]]
+\[DoubleStruckCapitalC]P$TM[Times$TM][ a:Tuple$TM[ ra_, phia_], b:Tuple$TM[ rb_, phib_]] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActive["Times"] && isComplexP[ a] && isComplexP[ b] :=
+	Tuple$TM[ ra * rb, phia + phib]
+\[DoubleStruckCapitalC]P$TM[Divide$TM][ a:Tuple$TM[ ra_, phia_], b:Tuple$TM[ rb_?Positive, phib_]] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActiveArithmetic["Divide"] && isComplexP[ a] && isComplexP[ b] :=
+	Tuple$TM[ ra / rb, phia - phib]
+\[DoubleStruckCapitalC]P$TM[Power$TM][ a_Tuple$TM, b_Tuple$TM] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActive["Power"] && isComplexP[ a] && isComplexP[ b] :=
+	Module[ {out},
+		out /; (out = polarPower[ a, b]; isComplexP[ out])
+	]
+\[DoubleStruckCapitalC]P$TM[op_Symbol][ a___Tuple$TM] /; buiActive["\[DoubleStruckCapitalC]P"] && isValidArgNum[ op, Length[{a}]] && Apply[ And, Map[ isComplexP, Hold[ a]]] :=
+	Module[ {outCartesian, out, opShortName, opShort, aCartesian},
+		out /; And[
+					opShortName = StringDrop[ SymbolName[ op], -3]; buiActiveArithmetic[ opShortName],
+					opShort = ToExpression[ opShortName];
+					aCartesian = Map[ (First[#] * (Cos[Last[#]] + I * Sin[Last[#]]))&, Hold[ a]];
+					outCartesian = Apply[ opShort, aCartesian];
+					out = Tuple$TM[ Abs[ outCartesian], Arg[ outCartesian]];
+					isComplexP[ out]
+				  ]
+	]
+	
+polarPower[ Tuple$TM[ r_, phi_], -1] := Tuple$TM[ Power[ r, -1], -phi]
+polarPower[ Tuple$TM[ 0, _], Tuple$TM[0, _]] := Indeterminate
+polarPower[ _Tuple$TM, Tuple$TM[0, _]] := Tuple$TM[ 1, 0]
+polarPower[ Tuple$TM[ ra_, phia_], Tuple$TM[ rb_, phib_]] :=
+	Module[ {breal, bim, outr},
+		breal = rb * Cos[ phib];
+		bim = rb * Sin[ phib];
+		Which[
+			Positive[ ra],
+			outr = Power[ ra, breal] * Exp[ -phia * bim];
+			If[ bim == 0,
+				Tuple$TM[outr, breal * phia],
+				Tuple$TM[outr, breal * phia + bim * Log[ ra]]
+			],
+			Positive[ breal] && bim == 0,
+			Tuple$TM[0, 0],
+			True,
+			Indeterminate
+		]
+	]
+
+(* "isBinaryRelation" gives True for all binary relations that take two numbers as input, AND which, in addition
+	to that, have an analogue in Mathematica with the same name withot "$TM". *)
+isBinaryRelation[ Equal$TM|Less$TM|LessEqual$TM|Greater$TM|GreaterEqual$TM] := True
+isBinaryRelation[ _] := False
+
+(* Although the following definitions do exactly the same thing (only that they are defined for the different
+	intervals), I think it is not possible to only give 1 definition dealing with all of those intervals at once
+	(alternatives ("|") unfortunately don't work). *)
+(dom_IntegerInterval$TM)[rel_Symbol?isBinaryRelation][ a_, b_] /; buiActive["IntegerInterval"] && isInInterval[ a, dom] && isInInterval[ b, dom] :=
+	Module[ {relShortName, relShort},
+		(relShort = ToExpression[ relShortName];
+		relShort[ a, b]) /; (relShortName = StringDrop[ SymbolName[ rel], -3]; buiActive[ relShortName])
+	]
+(dom_RationalInterval$TM)[rel_Symbol?isBinaryRelation][ a_, b_] /; buiActive["RationalInterval"] && isInInterval[ a, dom] && isInInterval[ b, dom] :=
+	Module[ {relShortName, relShort},
+		(relShort = ToExpression[ relShortName];
+		relShort[ a, b]) /; (relShortName = StringDrop[ SymbolName[ rel], -3]; buiActive[ relShortName])
+	]
+(dom_RealInterval$TM)[rel_Symbol?isBinaryRelation][ a_, b_] /; buiActive["RealInterval"] && isInInterval[ a, dom] && isInInterval[ b, dom] :=
+	Module[ {relShortName, relShort},
+		(relShort = ToExpression[ relShortName];
+		relShort[ a, b]) /; (relShortName = StringDrop[ SymbolName[ rel], -3]; buiActive[ relShortName])
+	]
+(* The only relation that makes sense for complex numbers is equality, since no meaningful order relations
+	are defined (give error by Mathematica). *)
+\[DoubleStruckCapitalC]$TM[Equal$TM][ a_, b_] /; buiActive["\[DoubleStruckCapitalC]"] && buiActive["Equal"] && isComplex[ a] && isComplex[ b] :=
+	a == b
+\[DoubleStruckCapitalC]P$TM[Equal$TM][ a:Tuple$TM[ ra_, phia_], b:Tuple$TM[ rb_, phib_]] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActive["Equal"] && isComplexP[ a] && isComplexP[ b] :=
+	ra == rb && (ra == 0 || EvenQ[ (phia - phib) / Pi])
+
+
+
+(* ::Section:: *)
+(* Ring Constants/Operations *)
+
+(dom_IntegerInterval$TM)[0] /; buiActive["IntegerInterval"] && isInInterval[ 0, dom] := 0
+(dom_RationalInterval$TM)[0] /; buiActive["RationalInterval"] && isInInterval[ 0, dom] := 0
+(dom_RealInterval$TM)[0] /; buiActive["RealInterval"] && isInInterval[ 0, dom] := 0
+\[DoubleStruckCapitalC]$TM[0] /; buiActive["\[DoubleStruckCapitalC]"] := 0
+\[DoubleStruckCapitalC]P$TM[0] /; buiActive["\[DoubleStruckCapitalC]P"] := Tuple$TM[0, 0]
+
+(dom_IntegerInterval$TM)[1] /; buiActive["IntegerInterval"] && isInInterval[ 1, dom] := 1
+(dom_RationalInterval$TM)[1] /; buiActive["RationalInterval"] && isInInterval[ 1, dom] := 1
+(dom_RealInterval$TM)[1] /; buiActive["RealInterval"] && isInInterval[ 1, dom] := 1
+\[DoubleStruckCapitalC]$TM[1] /; buiActive["\[DoubleStruckCapitalC]"] := 1
+\[DoubleStruckCapitalC]P$TM[1] /; buiActive["\[DoubleStruckCapitalC]P"] := Tuple$TM[1, 0]
+
+(dom_IntegerInterval$TM)[\[Epsilon]$TM][ a_] /; buiActive["IntegerInterval"] && buiActive["isInteger"] := isInInterval[ a, dom]
+(dom_RationalInterval$TM)[\[Epsilon]$TM][ a_] /; buiActive["RationalInterval"] && buiActive["isRational"] := isInInterval[ a, dom]
+(dom_RealInterval$TM)[\[Epsilon]$TM][ a_] /; buiActive["RealInterval"] && buiActive["isReal"] := isInInterval[ a, dom]
+\[DoubleStruckCapitalC]$TM[\[Epsilon]$TM][ a_] /; buiActive["\[DoubleStruckCapitalC]"] && buiActive["isComplex"] := isComplex[ a]
+\[DoubleStruckCapitalC]P$TM[\[Epsilon]$TM][ a_] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActive["isComplexP"] := isComplexP[ a]
 
 
 
@@ -369,142 +556,203 @@ Set$TM /: min$TM[ Set$TM[ e___]] /; buiActive["MinimumElementSet"] :=
 
 
 (* ::Section:: *)
-(* Number Ranges *)
+(* Number Domains *)
 
-IntegerRange$TM[ l_?isRealOrInf, r_?isRealOrInf, lc:(True|False), rc:(True|False)] /; buiActive["IntegerRange"] && rangeSize[ IntegerRange$TM, l, r, lc, rc] === 0 := Set$TM[ ]
-RationalRange$TM[ l_?isRealOrInf, r_?isRealOrInf, lc:(True|False), rc:(True|False)] /; buiActive["RationalRange"] && rangeSize[ RationalRange$TM, l, r, lc, rc] === 0 := Set$TM[ ]
-RealRange$TM[ l_?isRealOrInf, r_?isRealOrInf, lc:(True|False), rc:(True|False)] /; buiActive["RealRange"] && rangeSize[ RealRange$TM, l, r, lc, rc] === 0 := Set$TM[ ]
 
-Set$TM /: Equal$TM[ a:(h:(IntegerRange$TM|RationalRange$TM|RealRange$TM))[ al_?isRealOrInf, ar_?isRealOrInf, alc:(True|False), arc:(True|False)],
+(* ::Subsection:: *)
+(* simplification to empty sets *)
+
+IntegerInterval$TM[ l_?isRealOrInf, r_?isRealOrInf, lc:(True|False), rc:(True|False)] /; buiActive["IntegerInterval"] && intervalSize[ IntegerInterval$TM, l, r, lc, rc] === 0 := Set$TM[ ]
+RationalInterval$TM[ l_?isRealOrInf, r_?isRealOrInf, lc:(True|False), rc:(True|False)] /; buiActive["RationalInterval"] && intervalSize[ RationalInterval$TM, l, r, lc, rc] === 0 := Set$TM[ ]
+RealInterval$TM[ l_?isRealOrInf, r_?isRealOrInf, lc:(True|False), rc:(True|False)] /; buiActive["RealInterval"] && intervalSize[ RealInterval$TM, l, r, lc, rc] === 0 := Set$TM[ ]
+
+
+(* ::Subsection:: *)
+(* equality *)
+
+Set$TM /: Equal$TM[ a:(h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ al_?isRealOrInf, ar_?isRealOrInf, alc:(True|False), arc:(True|False)],
 		b:Set$TM[ e___?isNumericQuantity]] :=
 	Module[ {rs},
-		SameQ[ rs, Length[ b], Length[ Select[ b, isInRange[ #, a]&]]] /; buiActive["SetEqual"] && buiActive[StringDrop[SymbolName[h], -3]] && ((rs = rangeSize[h, al, ar, alc, arc]) =!= $Failed)
+		SameQ[ rs, Length[ b], Length[ Select[ b, isInInterval[ #, a]&]]] /; buiActive["SetEqual"] && buiActive[StringDrop[SymbolName[h], -3]] && ((rs = intervalSize[h, al, ar, alc, arc]) =!= $Failed)
 	]
-Set$TM /: Equal$TM[ a_Set$TM, b:(_IntegerRange$TM|_RationalRange$TM|_RealRange$TM)] /; buiActive["SetEqual"] := Equal$TM[ b, a]
-	
-IntegerRange$TM /: Equal$TM[ IntegerRange$TM[ al_?isRealOrInf, ar_?isRealOrInf, alc:(True|False), arc:(True|False)],
-		IntegerRange$TM[ bl_?isRealOrInf, br_?isRealOrInf, blc:(True|False), brc:(True|False)]] /; buiActive["SetEqual"] && buiActive["IntegerRange"] :=
-	And[ integerBoundary["left", al, alc] == integerBoundary["left", bl, blc], integerBoundary["right", ar, arc] == integerBoundary["right", br, brc]]
-IntegerRange$TM /: Equal$TM[ IntegerRange$TM[ al_?isRealOrInf, ar_?isRealOrInf, alc:(True|False), arc:(True|False)],
-		(b:(RationalRange$TM|RealRange$TM))[ bl_?isRealOrInf, br_?isRealOrInf, blc:(True|False), brc:(True|False)]] /; buiActive["SetEqual"] && buiActive["IntegerRange"] && buiActive[StringDrop[SymbolName[b],-3]] :=
-	And[ SameQ[ 1, rangeSize[IntegerRange$TM, al, ar, alc, arc], rangeSize[b, bl, br, blc, brc]], integerBoundary["left", al, alc] == bl]
-IntegerRange$TM /: Equal$TM[ a:(_RationalRange$TM|_RealRange$TM), b_IntegerRange$TM] /; buiActive["SetEqual"] := Equal$TM[ b, a]
+Set$TM /: Equal$TM[ a_Set$TM, b:(_IntegerInterval$TM|_RationalInterval$TM|_RealInterval$TM)] /; buiActive["SetEqual"] := Equal$TM[ b, a]
+Set$TM /: Equal$TM[ _Set$TM, b:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive["SetEqual"] && buiActive[StringDrop[SymbolName[b], -3]] := False
+Set$TM /: Equal$TM[ b:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM), _Set$TM] /; buiActive["SetEqual"] && buiActive[StringDrop[SymbolName[b], -3]] := False
 
-RationalRange$TM /: Equal$TM[ RationalRange$TM[ al_?isRealOrInf, ar_?isRealOrInf, alc:(True|False), arc:(True|False)],
-		RationalRange$TM[ bl_?isRealOrInf, br_?isRealOrInf, blc:(True|False), brc:(True|False)]] /; buiActive["SetEqual"] && buiActive["RationalRange"] :=
+\[DoubleStruckCapitalC]$TM /: Equal$TM[ (a:IntegerInterval$TM|RationalInterval$TM|RealInterval$TM)[ ___], \[DoubleStruckCapitalC]$TM] :=
+	False /; buiActive["SetEqual"] && buiActive[StringDrop[SymbolName[a], -3]] && buiActive["\[DoubleStruckCapitalC]"]
+\[DoubleStruckCapitalC]$TM /: Equal$TM[ \[DoubleStruckCapitalC]$TM, (a:IntegerInterval$TM|RationalInterval$TM|RealInterval$TM)[ ___]] :=
+	False /; buiActive["SetEqual"] && buiActive[StringDrop[SymbolName[a], -3]] && buiActive["\[DoubleStruckCapitalC]"]
+\[DoubleStruckCapitalC]P$TM /: Equal$TM[ (a:IntegerInterval$TM|RationalInterval$TM|RealInterval$TM)[ ___], \[DoubleStruckCapitalC]P$TM] :=
+	False /; buiActive["SetEqual"] && buiActive[StringDrop[SymbolName[a], -3]] && buiActive["\[DoubleStruckCapitalC]P"]
+\[DoubleStruckCapitalC]P$TM /: Equal$TM[ \[DoubleStruckCapitalC]P$TM, (a:IntegerInterval$TM|RationalInterval$TM|RealInterval$TM)[ ___]] :=
+	False /; buiActive["SetEqual"] && buiActive[StringDrop[SymbolName[a], -3]] && buiActive["\[DoubleStruckCapitalC]P"]
+	
+\[DoubleStruckCapitalC]$TM /: Equal$TM[ \[DoubleStruckCapitalC]$TM, \[DoubleStruckCapitalC]P$TM] :=
+	False /; buiActive["SetEqual"] && buiActive["\[DoubleStruckCapitalC]"] && buiActive["\[DoubleStruckCapitalC]P"]
+\[DoubleStruckCapitalC]$TM /: Equal$TM[ \[DoubleStruckCapitalC]$TM, \[DoubleStruckCapitalC]$TM] :=
+	True /; buiActive["SetEqual"] && buiActive["\[DoubleStruckCapitalC]"]
+\[DoubleStruckCapitalC]P$TM /: Equal$TM[ \[DoubleStruckCapitalC]P$TM, \[DoubleStruckCapitalC]$TM] :=
+	False /; buiActive["SetEqual"] && buiActive["\[DoubleStruckCapitalC]"] && buiActive["\[DoubleStruckCapitalC]P"]
+\[DoubleStruckCapitalC]P$TM /: Equal$TM[ \[DoubleStruckCapitalC]P$TM, \[DoubleStruckCapitalC]P$TM] :=
+	True /; buiActive["SetEqual"] && buiActive["\[DoubleStruckCapitalC]P"]
+
+IntegerInterval$TM /: Equal$TM[ IntegerInterval$TM[ al_?isRealOrInf, ar_?isRealOrInf, alc:(True|False), arc:(True|False)],
+		IntegerInterval$TM[ bl_?isRealOrInf, br_?isRealOrInf, blc:(True|False), brc:(True|False)]] /; buiActive["SetEqual"] && buiActive["IntegerInterval"] :=
+	And[ integerBoundary["left", al, alc] == integerBoundary["left", bl, blc], integerBoundary["right", ar, arc] == integerBoundary["right", br, brc]]
+IntegerInterval$TM /: Equal$TM[ IntegerInterval$TM[ al_?isRealOrInf, ar_?isRealOrInf, alc:(True|False), arc:(True|False)],
+		(b:(RationalInterval$TM|RealInterval$TM))[ bl_?isRealOrInf, br_?isRealOrInf, blc:(True|False), brc:(True|False)]] /; buiActive["SetEqual"] && buiActive["IntegerInterval"] && buiActive[StringDrop[SymbolName[b],-3]] :=
+	And[ SameQ[ 1, intervalSize[IntegerInterval$TM, al, ar, alc, arc], intervalSize[b, bl, br, blc, brc]], integerBoundary["left", al, alc] == bl]
+IntegerInterval$TM /: Equal$TM[ a:(_RationalInterval$TM|_RealInterval$TM), b_IntegerInterval$TM] /; buiActive["SetEqual"] := Equal$TM[ b, a]
+
+RationalInterval$TM /: Equal$TM[ RationalInterval$TM[ al_?isRealOrInf, ar_?isRealOrInf, alc:(True|False), arc:(True|False)],
+		RationalInterval$TM[ bl_?isRealOrInf, br_?isRealOrInf, blc:(True|False), brc:(True|False)]] /; buiActive["SetEqual"] && buiActive["RationalInterval"] :=
 	Module[ {alcc, arcc, blcc, brcc},
 		(al === bl && ar === br && alcc === blcc && arcc === brcc) /;
-				(alcc = If[ alc && isInRangeDomain[ RationalRange$TM, al], True, False, $Failed];
-				arcc = If[ arc && isInRangeDomain[ RationalRange$TM, ar], True, False, $Failed];
-				blcc = If[ blc && isInRangeDomain[ RationalRange$TM, bl], True, False, $Failed];
-				brcc = If[ brc && isInRangeDomain[ RationalRange$TM, br], True, False, $Failed];
+				(alcc = If[ alc && isInIntervalDomain[ RationalInterval$TM, al], True, False, $Failed];
+				arcc = If[ arc && isInIntervalDomain[ RationalInterval$TM, ar], True, False, $Failed];
+				blcc = If[ blc && isInIntervalDomain[ RationalInterval$TM, bl], True, False, $Failed];
+				brcc = If[ brc && isInIntervalDomain[ RationalInterval$TM, br], True, False, $Failed];
 				Xor[ alcc =!= $Failed, blcc === $Failed] && Xor[ arcc =!= $Failed, brcc === $Failed])
 	]
-RationalRange$TM /: Equal$TM[ RationalRange$TM[ al_?isRealOrInf, ar_?isRealOrInf, alc:(True|False), arc:(True|False)],
-		RealRange$TM[ bl_?isRealOrInf, br_?isRealOrInf, blc:(True|False), brc:(True|False)]] :=
+RationalInterval$TM /: Equal$TM[ RationalInterval$TM[ al_?isRealOrInf, ar_?isRealOrInf, alc:(True|False), arc:(True|False)],
+		RealInterval$TM[ bl_?isRealOrInf, br_?isRealOrInf, blc:(True|False), brc:(True|False)]] :=
 	Module[ {rs},
-		And[ SameQ[ 1, rs, rangeSize[RealRange$TM, bl, br, blc, brc]], al == bl] /;
-				buiActive["SetEqual"] && buiActive["RationalRange"] && buiActive["RealRange"] && ((rs = rangeSize[RationalRange$TM, al, ar, alc, arc]) =!= $Failed)
+		And[ SameQ[ 1, rs, intervalSize[RealInterval$TM, bl, br, blc, brc]], al == bl] /;
+				buiActive["SetEqual"] && buiActive["RationalInterval"] && buiActive["RealInterval"] && ((rs = intervalSize[RationalInterval$TM, al, ar, alc, arc]) =!= $Failed)
 	]
-RationalRange$TM /: Equal$TM[ a_RealRange$TM, b_RationalRange$TM] /; buiActive["SetEqual"] := Equal$TM[ b, a]
+RationalInterval$TM /: Equal$TM[ a_RealInterval$TM, b_RationalInterval$TM] /; buiActive["SetEqual"] := Equal$TM[ b, a]
 
-RealRange$TM /: Equal$TM[ RealRange$TM[ al_?isRealOrInf, ar_?isRealOrInf, alc:(True|False), arc:(True|False)],
-		RealRange$TM[ bl_?isRealOrInf, br_?isRealOrInf, blc:(True|False), brc:(True|False)]] /; buiActive["SetEqual"] && buiActive["RealRange"] :=
+RealInterval$TM /: Equal$TM[ RealInterval$TM[ al_?isRealOrInf, ar_?isRealOrInf, alc:(True|False), arc:(True|False)],
+		RealInterval$TM[ bl_?isRealOrInf, br_?isRealOrInf, blc:(True|False), brc:(True|False)]] /; buiActive["SetEqual"] && buiActive["RealInterval"] :=
 	With[ {alcc = Switch[ al, _DirectedInfinity, False, _, alc],
 			arcc = Switch[ ar, _DirectedInfinity, False, _, arc],
 			blcc = Switch[ bl, _DirectedInfinity, False, _, blc],
 			brcc = Switch[ br, _DirectedInfinity, False, _, brc]},
 		And[ al == bl, ar == br, alcc === blcc, arcc === brcc]
 	]
+	
+	
+(* ::Subsection:: *)
+(* intersection *)
 
-Set$TM /: Intersection$TM[ a:(h:(IntegerRange$TM|RationalRange$TM|RealRange$TM))[ _?isRealOrInf, _?isRealOrInf, True|False, True|False],
+Set$TM /: Intersection$TM[ a:(h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ _?isRealOrInf, _?isRealOrInf, True|False, True|False],
 		b:Set$TM[ ___?isNumericQuantity]] /; buiActive["Intersection"] && buiActive[StringDrop[SymbolName[h],-3]] :=
-	Select[ b, isInRange[ #, a]&]
-Set$TM /: Intersection$TM[ a_Set$TM, b:(_IntegerRange$TM|_RationalRange$TM|_RealRange$TM)] /; buiActive["Intersection"] := Intersection$TM[ b, a]
+	Select[ b, isInInterval[ #, a]&]
+Set$TM /: Intersection$TM[ a_Set$TM, b:(_IntegerInterval$TM|_RationalInterval$TM|_RealInterval$TM)] /; buiActive["Intersection"] := Intersection$TM[ b, a]
+Set$TM /: Intersection$TM[ \[DoubleStruckCapitalC]$TM, b:Set$TM[ ___?isNumericQuantity]] /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]"] :=
+	Select[ b, isComplex]
+Set$TM /: Intersection$TM[ b_Set$TM, \[DoubleStruckCapitalC]$TM] /; buiActive["Intersection"] := Intersection$TM[ \[DoubleStruckCapitalC]$TM, b]
+Set$TM /: Intersection$TM[ \[DoubleStruckCapitalC]P$TM, b:Set$TM[ ___?isNumericQuantity]] /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]"] :=
+	Select[ b, isComplex]
+Set$TM /: Intersection$TM[ b_Set$TM, \[DoubleStruckCapitalC]P$TM] /; buiActive["Intersection"] := Intersection$TM[ \[DoubleStruckCapitalC]P$TM, b]
+
+\[DoubleStruckCapitalC]$TM /: Intersection$TM[ \[DoubleStruckCapitalC]$TM, b:((h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ ___])] :=
+	b /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]"] && buiActive[StringDrop[SymbolName[h], -3]]
+\[DoubleStruckCapitalC]$TM /: Intersection$TM[ b:((h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ ___]), \[DoubleStruckCapitalC]$TM] :=
+	b /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]"] && buiActive[StringDrop[SymbolName[h], -3]]
+\[DoubleStruckCapitalC]P$TM /: Intersection$TM[ \[DoubleStruckCapitalC]P$TM, (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ ___]] :=
+	Set$TM[ ] /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]P"] && buiActive[StringDrop[SymbolName[h], -3]]
+\[DoubleStruckCapitalC]P$TM /: Intersection$TM[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ ___], \[DoubleStruckCapitalC]P$TM] :=
+	Set$TM[ ] /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]P"] && buiActive[StringDrop[SymbolName[h], -3]]
+	
+\[DoubleStruckCapitalC]$TM /: Intersection$TM[ \[DoubleStruckCapitalC]$TM, \[DoubleStruckCapitalC]$TM] :=
+	\[DoubleStruckCapitalC]$TM /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]"]
+\[DoubleStruckCapitalC]$TM /: Intersection$TM[ \[DoubleStruckCapitalC]$TM, \[DoubleStruckCapitalC]P$TM] :=
+	Set$TM[ ] /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]"] && buiActive["\[DoubleStruckCapitalC]P"]
+\[DoubleStruckCapitalC]P$TM /: Intersection$TM[ \[DoubleStruckCapitalC]P$TM, \[DoubleStruckCapitalC]$TM] :=
+	Set$TM[ ] /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]P"] && buiActive["\[DoubleStruckCapitalC]"]
+\[DoubleStruckCapitalC]P$TM /: Intersection$TM[ \[DoubleStruckCapitalC]P$TM, \[DoubleStruckCapitalC]P$TM] :=
+	\[DoubleStruckCapitalC]P$TM /; buiActive["Intersection"] buiActive["\[DoubleStruckCapitalC]P"]
 		
-IntegerRange$TM /: Intersection$TM[ a:IntegerRange$TM[ _?isRealOrInf, _?isRealOrInf, True|False, True|False],
-		b:(h:(IntegerRange$TM|RationalRange$TM|RealRange$TM))[ _?isRealOrInf, _?isRealOrInf, True|False, True|False]] /;
-			buiActive["Intersection"] && buiActive["IntegerRange"] && buiActive[StringDrop[SymbolName[h],-3]] :=
-	IntegerRange$TM[ intersectRanges[ a, b]]
-IntegerRange$TM /: Intersection$TM[ a:(_RationalRange$TM|_RealRange$TM), b_IntegerRange$TM] /; buiActive["Intersection"] := Intersection$TM[ b, a]
+IntegerInterval$TM /: Intersection$TM[ a:IntegerInterval$TM[ _?isRealOrInf, _?isRealOrInf, True|False, True|False],
+		b:(h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ _?isRealOrInf, _?isRealOrInf, True|False, True|False]] /;
+			buiActive["Intersection"] && buiActive["IntegerInterval"] && buiActive[StringDrop[SymbolName[h],-3]] :=
+	IntegerInterval$TM[ intersectIntervals[ a, b]]
+IntegerInterval$TM /: Intersection$TM[ a:(_RationalInterval$TM|_RealInterval$TM), b_IntegerInterval$TM] /; buiActive["Intersection"] := Intersection$TM[ b, a]
 
-RationalRange$TM /: Intersection$TM[ a:RationalRange$TM[ _?isRealOrInf, _?isRealOrInf, True|False, True|False],
-		b:(h:(RationalRange$TM|RealRange$TM))[ _?isRealOrInf, _?isRealOrInf, True|False, True|False]] /;
-			buiActive["Intersection"] && buiActive["RationalRange"] && buiActive[StringDrop[SymbolName[h],-3]] :=
-	RationalRange$TM[ intersectRanges[ a, b]]
-RationalRange$TM /: Intersection$TM[ a_RationalRange$TM, b_RealRange$TM] /; buiActive["Intersection"] := Intersection$TM[ b, a]
+RationalInterval$TM /: Intersection$TM[ a:RationalInterval$TM[ _?isRealOrInf, _?isRealOrInf, True|False, True|False],
+		b:(h:(RationalInterval$TM|RealInterval$TM))[ _?isRealOrInf, _?isRealOrInf, True|False, True|False]] /;
+			buiActive["Intersection"] && buiActive["RationalInterval"] && buiActive[StringDrop[SymbolName[h],-3]] :=
+	RationalInterval$TM[ intersectIntervals[ a, b]]
+RationalInterval$TM /: Intersection$TM[ a_RationalInterval$TM, b_RealInterval$TM] /; buiActive["Intersection"] := Intersection$TM[ b, a]
 
-RealRange$TM /: Intersection$TM[ a:RealRange$TM[ _?isRealOrInf, _?isRealOrInf, True|False, True|False],
-		b:RealRange$TM[ _?isRealOrInf, _?isRealOrInf, True|False, True|False]] /; buiActive["Intersection"] && buiActive["RealRange"] :=
-	RealRange$TM[ intersectRanges[ a, b]]
+RealInterval$TM /: Intersection$TM[ a:RealInterval$TM[ _?isRealOrInf, _?isRealOrInf, True|False, True|False],
+		b:RealInterval$TM[ _?isRealOrInf, _?isRealOrInf, True|False, True|False]] /; buiActive["Intersection"] && buiActive["RealInterval"] :=
+	RealInterval$TM[ intersectIntervals[ a, b]]
 
-Element$TM[ p_, h:(_IntegerRange$TM|_RationalRange$TM|_RealRange$TM)] /; buiActive["IsElement"] && buiActive[StringDrop[SymbolName[Head[h]],-3]] := isInRange[ p, h]
 
-IntegerRange$TM /: BracketingBar$TM[ IntegerRange$TM[ l_?isRealOrInf, r_?isRealOrInf, lc:(True|False), rc:(True|False)]] /; buiActive["Cardinality"] && buiActive["IntegerRange"] :=
-	rangeSize[ IntegerRange$TM, l, r, lc, rc]
-RationalRange$TM /: BracketingBar$TM[ RationalRange$TM[ l_?isRealOrInf, r_?isRealOrInf, lc:(True|False), rc:(True|False)]] :=
+(* ::Subsection:: *)
+(* element *)
+
+\[DoubleStruckCapitalC]$TM /: Element$TM[ p_, \[DoubleStruckCapitalC]$TM] /; buiActive["IsElement"] && buiActive["\[DoubleStruckCapitalC]"] := isComplex[ p]
+\[DoubleStruckCapitalC]P$TM /: Element$TM[ p_, \[DoubleStruckCapitalC]P$TM] /; buiActive["IsElement"] && buiActive["\[DoubleStruckCapitalC]P"] := isComplexP[ p]
+Element$TM[ p_, h:(_IntegerInterval$TM|_RationalInterval$TM|_RealInterval$TM)] /; buiActive["IsElement"] && buiActive[StringDrop[SymbolName[Head[h]],-3]] := isInInterval[ p, h]
+
+
+(* ::Subsection:: *)
+(* cardinality *)
+
+\[DoubleStruckCapitalC]$TM /: BracketingBar$TM[ \[DoubleStruckCapitalC]$TM] /; buiActive["Cardinality"] && buiActive["\[DoubleStruckCapitalC]"] := Infinity
+\[DoubleStruckCapitalC]P$TM /: BracketingBar$TM[ \[DoubleStruckCapitalC]P$TM] /; buiActive["Cardinality"] && buiActive["\[DoubleStruckCapitalC]P"] := Infinity
+IntegerInterval$TM /: BracketingBar$TM[ IntegerInterval$TM[ l_?isRealOrInf, r_?isRealOrInf, lc:(True|False), rc:(True|False)]] /; buiActive["Cardinality"] && buiActive["IntegerInterval"] :=
+	intervalSize[ IntegerInterval$TM, l, r, lc, rc]
+RationalInterval$TM /: BracketingBar$TM[ RationalInterval$TM[ l_?isRealOrInf, r_?isRealOrInf, lc:(True|False), rc:(True|False)]] :=
 	Module[ {rs},
-		rs /; buiActive["Cardinality"] && buiActive["RationalRange"] && ((rs = rangeSize[ RationalRange$TM, l, r, lc, rc]) =!= $Failed)
+		rs /; buiActive["Cardinality"] && buiActive["RationalInterval"] && ((rs = intervalSize[ RationalInterval$TM, l, r, lc, rc]) =!= $Failed)
 	]
-RealRange$TM /: BracketingBar$TM[ RealRange$TM[ l_?isRealOrInf, r_?isRealOrInf, lc:(True|False), rc:(True|False)]] /; buiActive["Cardinality"] && buiActive["RealRange"] :=
-	rangeSize[ RealRange$TM, l, r, lc, rc]
+RealInterval$TM /: BracketingBar$TM[ RealInterval$TM[ l_?isRealOrInf, r_?isRealOrInf, lc:(True|False), rc:(True|False)]] /; buiActive["Cardinality"] && buiActive["RealInterval"] :=
+	intervalSize[ RealInterval$TM, l, r, lc, rc]
 	
-IntegerRange$TM /: min$TM[ IntegerRange$TM[ l_?isRealOrInf, _?isRealOrInf, lc:(True|False), True|False]] /; buiActive["MinimumElementSet"] && buiActive["IntegerRange"] && l > -Infinity :=
+	
+(* ::Subsection:: *)
+(* min/max *)
+
+IntegerInterval$TM /: min$TM[ IntegerInterval$TM[ l_?isRealOrInf, _?isRealOrInf, lc:(True|False), True|False]] /; buiActive["MinimumElementSet"] && buiActive["IntegerInterval"] && l > -Infinity :=
 	integerBoundary[ "left", l, lc]
-RationalRange$TM /: min$TM[ RationalRange$TM[ l_?isInRangeDomain[ RationalRange$TM, #]&, _?isRealOrInf, True, True|False]] /; buiActive["MinimumElementSet"] && buiActive["RationalRange"] :=
+RationalInterval$TM /: min$TM[ RationalInterval$TM[ l_?isInIntervalDomain[ RationalInterval$TM, #]&, _?isRealOrInf, True, True|False]] /; buiActive["MinimumElementSet"] && buiActive["RationalInterval"] :=
 	l
-RealRange$TM /: min$TM[ RealRange$TM[ l_?isRealOrInf, _?isRealOrInf, True, True|False]] /; buiActive["MinimumElementSet"] && buiActive["RealRange"] && l > -Infinity :=
+RealInterval$TM /: min$TM[ RealInterval$TM[ l_?isRealOrInf, _?isRealOrInf, True, True|False]] /; buiActive["MinimumElementSet"] && buiActive["RealInterval"] && l > -Infinity :=
 	l
 	
-IntegerRange$TM /: max$TM[ IntegerRange$TM[ _?isRealOrInf, r_?isRealOrInf, True|False, rc:(True|False)]] /; buiActive["MaximumElementSet"] && buiActive["IntegerRange"] && r < Infinity :=
+IntegerInterval$TM /: max$TM[ IntegerInterval$TM[ _?isRealOrInf, r_?isRealOrInf, True|False, rc:(True|False)]] /; buiActive["MaximumElementSet"] && buiActive["IntegerInterval"] && r < Infinity :=
 	integerBoundary[ "right", r, rc]
-RationalRange$TM /: max$TM[ RationalRange$TM[ _?isRealOrInf, r_?isInRangeDomain[ RationalRange$TM, #]&, True|False, True]] /; buiActive["MaximumElementSet"] && buiActive["RationalRange"] :=
+RationalInterval$TM /: max$TM[ RationalInterval$TM[ _?isRealOrInf, r_?isInIntervalDomain[ RationalInterval$TM, #]&, True|False, True]] /; buiActive["MaximumElementSet"] && buiActive["RationalInterval"] :=
 	r
-RealRange$TM /: max$TM[ RealRange$TM[ _?isRealOrInf, r_?isRealOrInf, True|False, True]] /; buiActive["MaximumElementSet"] && buiActive["RealRange"] && r < Infinity :=
+RealInterval$TM /: max$TM[ RealInterval$TM[ _?isRealOrInf, r_?isRealOrInf, True|False, True]] /; buiActive["MaximumElementSet"] && buiActive["RealInterval"] && r < Infinity :=
 	r
 
-isInRange[ p_, (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[DirectedInfinity[-1], DirectedInfinity[1], _, _]] :=
-	isInRangeDomain[ h, p]
-isInRange[ p_, (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[DirectedInfinity[-1], u_, _, True]] :=
-	And[ isInRangeDomain[ h, p], LessEqual[ p, u]]
-isInRange[ p_, (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[DirectedInfinity[-1], u_, _, False]] :=
-	And[ isInRangeDomain[ h, p], Less[ p, u]]
-isInRange[ p_, (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[l_, DirectedInfinity[1], True, _]] :=
-	And[ isInRangeDomain[ h, p], GreaterEqual[ p, l]]
-isInRange[ p_, (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[l_, DirectedInfinity[1], False, _]] :=
-	And[ isInRangeDomain[ h, p], Greater[ p, l]]
-isInRange[ p_, (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[l_, u_, True, True]] :=
-	And[ isInRangeDomain[ h, p], GreaterEqual[ p, l], LessEqual[ p, u]]
-isInRange[ p_, (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[l_, u_, False, True]] :=
-	And[ isInRangeDomain[ h, p], Greater[ p, l], LessEqual[ p, u]]
-isInRange[ p_, (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[l_, u_, True, False]] :=
-	And[ isInRangeDomain[ h, p], GreaterEqual[ p, l], Less[ p, u]]
-isInRange[ p_, (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[l_, u_, False, False]] :=
-	And[ isInRangeDomain[ h, p], Greater[ p, l], Less[ p, u]]
-(* The following functions do precisely the same as isInteger$TM, isRational$TM, isReal$TM,
-	except that they work independent of "buiActive", which is needed for ranges.
-	isInteger$TM etc. is only called if membership cannot be decided, such that finally the
-	symbolic expression "isInteger[...]" results.
-	*)
-isInRangeDomain[ IntegerRange$TM, _Integer] := True
-isInRangeDomain[ IntegerRange$TM, True|False|I|DirectedInfinity[_]|Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] := False
-isInRangeDomain[ IntegerRange$TM, _Rational|_Real|_Complex] := False
-isInRangeDomain[ IntegerRange$TM, _Set$TM|_Tuple$TM] := False
-isInRangeDomain[ IntegerRange$TM, x_] := isInteger$TM[ x]
-isInRangeDomain[ RationalRange$TM, _Integer|_Rational] := True
-isInRangeDomain[ RationalRange$TM, True|False|I|DirectedInfinity[_]|Pi|Degree|GoldenRatio|E|EulerGamma|Khinchin|Glaisher] := False
-isInRangeDomain[ RationalRange$TM, _Real|_Complex] := False
-isInRangeDomain[ RationalRange$TM, _Set$TM|_Tuple$TM] := False
-isInRangeDomain[ RationalRange$TM, x_] := isRational$TM[ x]
-isInRangeDomain[ RealRange$TM, _Integer|_Rational|_Real] := True
-isInRangeDomain[ RealRange$TM, True|False|I|DirectedInfinity[_]] := False
-isInRangeDomain[ RealRange$TM, Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] := True
-isInRangeDomain[ RealRange$TM, _Complex] := False
-isInRangeDomain[ RealRange$TM, _Set$TM|_Tuple$TM] := False
-isInRangeDomain[ RealRange$TM, x_] := isReal$TM[ x]
+
+(* ::Subsection:: *)
+(* auxiliary functions *)
+
+isInInterval[ p_, (h:IntegerInterval$TM|RationalInterval$TM|RealInterval$TM)[DirectedInfinity[-1], DirectedInfinity[1], _, _]] :=
+	isInIntervalDomain[ h, p]
+isInInterval[ p_, (h:IntegerInterval$TM|RationalInterval$TM|RealInterval$TM)[DirectedInfinity[-1], u_, _, True]] :=
+	And[ isInIntervalDomain[ h, p], LessEqual[ p, u]]
+isInInterval[ p_, (h:IntegerInterval$TM|RationalInterval$TM|RealInterval$TM)[DirectedInfinity[-1], u_, _, False]] :=
+	And[ isInIntervalDomain[ h, p], Less[ p, u]]
+isInInterval[ p_, (h:IntegerInterval$TM|RationalInterval$TM|RealInterval$TM)[l_, DirectedInfinity[1], True, _]] :=
+	And[ isInIntervalDomain[ h, p], GreaterEqual[ p, l]]
+isInInterval[ p_, (h:IntegerInterval$TM|RationalInterval$TM|RealInterval$TM)[l_, DirectedInfinity[1], False, _]] :=
+	And[ isInIntervalDomain[ h, p], Greater[ p, l]]
+isInInterval[ p_, (h:IntegerInterval$TM|RationalInterval$TM|RealInterval$TM)[l_, u_, True, True]] :=
+	And[ isInIntervalDomain[ h, p], GreaterEqual[ p, l], LessEqual[ p, u]]
+isInInterval[ p_, (h:IntegerInterval$TM|RationalInterval$TM|RealInterval$TM)[l_, u_, False, True]] :=
+	And[ isInIntervalDomain[ h, p], Greater[ p, l], LessEqual[ p, u]]
+isInInterval[ p_, (h:IntegerInterval$TM|RationalInterval$TM|RealInterval$TM)[l_, u_, True, False]] :=
+	And[ isInIntervalDomain[ h, p], GreaterEqual[ p, l], Less[ p, u]]
+isInInterval[ p_, (h:IntegerInterval$TM|RationalInterval$TM|RealInterval$TM)[l_, u_, False, False]] :=
+	And[ isInIntervalDomain[ h, p], Greater[ p, l], Less[ p, u]]
+
+(* The only thing that function "isInIntervalDomain" does is to provide a shortcut, such that one does not have to
+	distinguish all the time between the 3 different intervals; "isInIntervalDomain" does the job. *)
+isInIntervalDomain[ IntegerInterval$TM, a_] := isInteger[ a]
+isInIntervalDomain[ RationalInterval$TM, a_] := isRational[ a]
+isInIntervalDomain[ RealInterval$TM, a_] := isReal[ a]
 
 (* isRealOrInf returns True iff its argument is either a real number or real infinity. These are the only
-	values that make sense as range boundaries. *)
+	values that make sense as interval boundaries. *)
 isRealOrInf[ _Integer|_Rational|_Real] := True
 isRealOrInf[ DirectedInfinity[1|-1]] := True
 isRealOrInf[ Pi|E|EulerGamma|GoldenRatio|Degree|Catalan|Khinchin|Glaisher] := True
@@ -515,13 +763,13 @@ isNumericQuantity[ _Complex|I|_DirectedInfinity] := True
 isNumericQuantity[ _] := False
 
 (* Since we allow arbitrary real numbers as boundaries, we need to compute the actual integer boundaries
-	of the range, also taking into account open/closed ranges. *)
+	of the interval, also taking into account open/closed intervals. *)
 integerBoundary[ "left", b_, c_] := With[ {bb = Ceiling[ b]}, If[ c || bb > b, bb, bb + 1]]
 integerBoundary[ "right", b_, c_] := With[ {bb = Floor[ b]}, If[ c || bb < b, bb, bb - 1]]
 
-(* rangeSize[] returns $Failed if the cardinality of RationalRange$TM[Catalan, Catalan, True, True]
+(* intervalSize[] returns $Failed if the cardinality of RationalInterval$TM[Catalan, Catalan, True, True]
 	should be determined. If Catalan is rational, the cardinality is 1, otherwise it is 0. *)
-rangeSize[ IntegerRange$TM, l_, r_, lc_, rc_] :=
+intervalSize[ IntegerInterval$TM, l_, r_, lc_, rc_] :=
 	Module[ {ll = integerBoundary[ "left", l, lc],
 			rr = integerBoundary[ "right", r, rc]},
 		If[ ll == rr,
@@ -533,10 +781,10 @@ rangeSize[ IntegerRange$TM, l_, r_, lc_, rc_] :=
 			Max[ 0, rr - ll + 1]
 		]
 	]
-rangeSize[ ran:(RealRange$TM|RationalRange$TM), l_, r_, lc_, rc_] :=
+intervalSize[ ran:(RealInterval$TM|RationalInterval$TM), l_, r_, lc_, rc_] :=
 	If[ lc && rc,
 		Which[
-			l == r, If[ isInRangeDomain[ ran, l], 1, 0, $Failed],
+			l == r, If[ isInIntervalDomain[ ran, l], 1, 0, $Failed],
 			l > r, 0,
 			True, Infinity
 		],
@@ -547,7 +795,7 @@ rangeSize[ ran:(RealRange$TM|RationalRange$TM), l_, r_, lc_, rc_] :=
 		]
 	]
 
-intersectRanges[ _[ al_, ar_, alc_, arc_], _[ bl_, br_, blc_, brc_]] :=
+intersectIntervals[ _[ al_, ar_, alc_, arc_], _[ bl_, br_, blc_, brc_]] :=
 	Module[ {l = Max[ al, bl], r = Min[ ar, br]},
 		Apply[ Sequence, {l, r, (al < l || alc) && (bl < l || blc), (ar > r || arc) && (br > r || brc)}]
 	]
@@ -603,46 +851,66 @@ isPositionSpec[ args___] := unexpected[ isPositionSpec, {args}]
 
 
 (* ::Section:: *)
-(* Domains and Data Types *)
+(* Data Types *)
 
-isInteger$TM[ _Integer] /; buiActive["isInteger"] := True
-isInteger$TM[ True|False|I|DirectedInfinity[_]|Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] /; buiActive["isInteger"] := False
-isInteger$TM[ _Rational|_Real|_Complex] /; buiActive["isInteger"] := False
-isInteger$TM[ _Set$TM|_Tuple$TM] /; buiActive["isInteger"] := False
-isInteger$TM[ (h:(IntegerRange$TM|RationalRange$TM|RealRange$TM))[ ___]] /; buiActive["isInteger"] && buiActive[StringDrop[SymbolName[h],-3]] := False
+isInteger$TM[ a_] /; buiActive["isInteger"] := isInteger[ a]
+isRational$TM[ a_] /; buiActive["isRational"] := isRational[ a]
+isReal$TM[ a_] /; buiActive["isReal"] := isReal[ a]
+isComplex$TM[ a_] /; buiActive["isComplex"] := isComplex[ a]
+isComplexP$TM[ a_] /; buiActive["isComplexP"] := isComplexP[ a]
+isSet$TM[ a_] /; buiActive["isSet"] := isSet[ a]
+isTuple$TM[ a_] /; buiActive["isTuple"] := isTuple[ a]
 
-isRational$TM[ _Integer|_Rational] /; buiActive["isRational"] := True
+
+isInteger[ _Integer] := True
+isInteger[ True|False|I|DirectedInfinity[_]|Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] := False
+isInteger[ _Rational|_Real|_Complex] := False
+isInteger[ _Set$TM|_Tuple$TM] := False
+isInteger[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQR$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
+isInteger[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
+
+isRational[ _Integer|_Rational] := True
 (* it is not known whether Catalan is rational, therefore we leave "isRational[Catalan]" unevaluated *)
-isRational$TM[ True|False|I|DirectedInfinity[_]|Pi|Degree|GoldenRatio|E|EulerGamma|Khinchin|Glaisher] /; buiActive["isRational"] := False
-isRational$TM[ _Real|_Complex] /; buiActive["isRational"] := False
-isRational$TM[ _Set$TM|_Tuple$TM] /; buiActive["isRational"] := False
-isRational$TM[ (h:(IntegerRange$TM|RationalRange$TM|RealRange$TM))[ ___]] /; buiActive["isRational"] && buiActive[StringDrop[SymbolName[h],-3]] := False
+isRational[ True|False|I|DirectedInfinity[_]|Pi|Degree|GoldenRatio|E|EulerGamma|Khinchin|Glaisher] := False
+isRational[ _Real|_Complex] := False
+isRational[ _Set$TM|_Tuple$TM] := False
+isRational[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQR$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
+isRational[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
 
-isReal$TM[ _Integer|_Rational|_Real] /; buiActive["isReal"] := True
-isReal$TM[ True|False|I|DirectedInfinity[_]] /; buiActive["isReal"] := False
-isReal$TM[ Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] /; buiActive["isReal"] := True
-isReal$TM[ _Complex] /; buiActive["isReal"] := False
-isReal$TM[ _Set$TM|_Tuple$TM] /; buiActive["isReal"] := False
-isReal$TM[ (h:(IntegerRange$TM|RationalRange$TM|RealRange$TM))[ ___]] /; buiActive["isReal"] && buiActive[StringDrop[SymbolName[h],-3]] := False
+isReal[ _Integer|_Rational|_Real] := True
+isReal[ True|False|I|DirectedInfinity[_]] := False
+isReal[ Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] := True
+isReal[ _Complex] := False
+isReal[ _Set$TM|_Tuple$TM] := False
+isReal[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQR$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
+isReal[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
 
-Element$TM[ p_, \[DoubleStruckCapitalC]$TM] /; buiActive["IsElement"] && buiActive["isComplex"] := isComplex$TM[ p]
-isComplex$TM[ _Integer|_Rational|_Real|_Complex] /; buiActive["isComplex"] := True
-isComplex$TM[ True|False|DirectedInfinity[_]] /; buiActive["isComplex"] := False
-isComplex$TM[ I|Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] /; buiActive["isComplex"] := True
-isComplex$TM[ _Set$TM|_Tuple$TM] /; buiActive["isComplex"] := False
-isComplex$TM[ (h:(IntegerRange$TM|RationalRange$TM|RealRange$TM))[ ___]] /; buiActive["isComplex"] && buiActive[StringDrop[SymbolName[h],-3]] := False
+isComplex[ _Integer|_Rational|_Real|_Complex] := True
+isComplex[ True|False|DirectedInfinity[_]] := False
+isComplex[ I|Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] := True
+isComplex[ _Set$TM|_Tuple$TM] := False
+isComplex[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQR$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
+isComplex[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
 
-isSet$TM[ _Set$TM] /; buiActive["isSet"] := True
-isSet$TM[ True|False|I|DirectedInfinity[_]|Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] /; buiActive["isSet"] := False
-isSet$TM[ _Integer|_Rational|_Real|_Complex] /; buiActive["isSet"] := False
-isSet$TM[ _Tuple$TM] /; buiActive["isSet"] := False
-isSet$TM[ (h:(IntegerRange$TM|RationalRange$TM|RealRange$TM))[ ___]] /; buiActive["isSet"] && buiActive[StringDrop[SymbolName[h],-3]] := True
+isComplexP[ True|False|DirectedInfinity[_]|I|Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] := False
+isComplexP[ Tuple$TM[ a_, b_]] := isReal[ a] && isReal[ b] && a >= 0
+isComplexP[ _Integer|_Rational|_Real|_Complex|_Set$TM|_Tuple$TM] := False
+isComplexP[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQR$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
+isComplexP[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
 
-isTuple$TM[ _Tuple$TM] /; buiActive["isTuple"] := True
-isTuple$TM[ True|False|I|DirectedInfinity[_]|Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] /; buiActive["isTuple"] := False
-isTuple$TM[ _Integer|_Rational|_Real|_Complex] /; buiActive["isTuple"] := False
-isTuple$TM[ _Set$TM] /; buiActive["isTuple"] := False
-isTuple$TM[ (h:(IntegerRange$TM|RationalRange$TM|RealRange$TM))[ ___]] /; buiActive["isTuple"] && buiActive[StringDrop[SymbolName[h],-3]] := False
+isSet[ _Set$TM] := True
+isSet[ True|False|I|DirectedInfinity[_]|Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] := False
+isSet[ _Integer|_Rational|_Real|_Complex] := False
+isSet[ _Tuple$TM] := False
+isSet[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQR$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := True
+isSet[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := True
+
+isTuple[ _Tuple$TM] := True
+isTuple[ True|False|I|DirectedInfinity[_]|Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] := False
+isTuple[ _Integer|_Rational|_Real|_Complex] := False
+isTuple[ _Set$TM] := False
+isTuple[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQR$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
+isTuple[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
 
 
 (* ::Section:: *)
