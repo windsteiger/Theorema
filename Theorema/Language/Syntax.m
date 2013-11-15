@@ -532,7 +532,7 @@ MakeExpression[ SubscriptBox[ dom_?isZQR, RowBox[ {left_?isLeftIntervalBracket, 
 (* Single subscript indicating where to start from *)
 MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalZ]", l_], fmt_] :=
 	Module[ {lex = quietToAtom[ l]},
-		If[ TrueQ[ NonPositive[ lex]],
+		If[ TrueQ[ Negative[ lex]],
 			MakeExpression[ makeDomainIntervalBox[ "IntegerInterval", l, posInfBox, "True", "False"], fmt],
 			(*else*)
 			MakeExpression[ RowBox[ {"IntegerQuotientRing", "[", l, "]"}], fmt]
@@ -922,7 +922,10 @@ MakeExpression[ RowBox[ {l_, (h:(UnderoverscriptBox|SubsuperscriptBox))[ op_?isT
 (* Underscript without arguments *)
 
 MakeExpression[ UnderscriptBox[ op_, dom_], fmt_] :=
-	MakeExpression[ RowBox[ {dom, "[", op, "]"}], fmt] /; ($parseTheoremaExpressions || $parseTheoremaGlobals)
+	Module[ {},
+		registerDomainOperator[ dom];
+		MakeExpression[ RowBox[ {dom, "[", op, "]"}], fmt]
+	] /; ($parseTheoremaExpressions || $parseTheoremaGlobals)
 	
 	
 
