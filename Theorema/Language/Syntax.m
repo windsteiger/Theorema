@@ -114,6 +114,18 @@ tmaToInputOperator[ op_Symbol] :=
 tmaToInputOperator[ args___] := unexpected[ tmaToInputOperator, {args}]	
 
 
+isLeftDelimiter[ s_] :=
+	MemberQ[ {"[", "(", "{", "\[LeftAngleBracket]", "\[LeftBracketingBar]",
+				"\[LeftFloor]", "\[LeftCeiling]", "\[LeftDoubleBracket]",
+				"\[LeftDoubleBracketingBar]", ",", ";"},
+			s]
+isRightDelimiter[ s_] :=
+	MemberQ[ {"[", "]", ")", "}", "\[RightAngleBracket]", "\[RightBracketingBar]",
+				"\[RightFloor]", "\[RightCeiling]", "\[RightDoubleBracket]",
+				"\[RightDoubleBracketingBar]", ",", ";"},
+			s]
+	
+	
 (* In the following list,
 	- the first element of each item is the symbol of the operator,
 	- the second element is a list of possible syntax of the operator according to Mathematica,
@@ -302,11 +314,15 @@ makeTuple[ x___] := ToExpression[ "Tuple$TM"][x]
 (* MakeExpression *)
 
 
-MakeExpression[RowBox[{a_, TagBox[op_, Identity, ___], b_}], fmt_] := 
+MakeExpression[RowBox[{a:Except[ _?isLeftDelimiter], TagBox[op_, Identity, ___], b_?isRightDelimiter}], fmt_] := 
+	MakeExpression[RowBox[{RowBox[{a, op}], b}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+MakeExpression[RowBox[{a_?isLeftDelimiter, TagBox[op_, Identity, ___], b:Except[ _?isRightDelimiter]}], fmt_] := 
+	MakeExpression[RowBox[{a, RowBox[{op, b}]}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+MakeExpression[RowBox[{a:Except[ _?isLeftDelimiter], TagBox[op_, Identity, ___], b:Except[ _?isRightDelimiter]}], fmt_] := 
 	MakeExpression[RowBox[{a, op, b}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
-MakeExpression[RowBox[{TagBox[op_, Identity, ___], b_}], fmt_] := 
+MakeExpression[RowBox[{TagBox[op_, Identity, ___], b:Except[ _?isRightDelimiter]}], fmt_] := 
 	MakeExpression[RowBox[{op, b}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
-MakeExpression[RowBox[{a_, TagBox[op_, Identity, ___]}], fmt_] := 
+MakeExpression[RowBox[{a:Except[ _?isLeftDelimiter], TagBox[op_, Identity, ___]}], fmt_] := 
 	MakeExpression[RowBox[{a, op}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 
 MakeExpression[RowBox[{ TagBox[ "(", "AutoParentheses"], expr_, TagBox[ ")", "AutoParentheses"]}], fmt_] := 
@@ -572,6 +588,35 @@ MakeExpression[ RowBox[{left_,"\[EmptyUpTriangle]", right_}], fmt_] :=
 	translate correctly to some expression when used without the underscript.
 *)
 
+(* DELIMITERS *)
+MakeExpression[ RowBox[ {UnderscriptBox[ op_, dom_], r_?isRightDelimiter}], fmt_] :=
+    Module[ {},
+    	registerDomainOperator[ dom];
+        MakeExpression[ RowBox[ {RowBox[ {dom, "[", op, "]"}], r}], fmt]
+    ] /; $parseTheoremaExpressions
+    
+MakeExpression[ RowBox[ {l_?isLeftDelimiter, UnderscriptBox[ op_, dom_]}], fmt_] :=
+    Module[ {},
+    	registerDomainOperator[ dom];
+        MakeExpression[ RowBox[ {l, RowBox[ {dom, "[", op, "]"}]}], fmt]
+    ] /; $parseTheoremaExpressions
+    
+MakeExpression[ RowBox[ {l_?isLeftDelimiter, UnderscriptBox[ op_, dom_], r_?isRightDelimiter}], fmt_] :=
+    Module[ {},
+    	registerDomainOperator[ dom];
+        MakeExpression[ RowBox[ {l, RowBox[ {dom, "[", op, "]"}], r}], fmt]
+    ] /; $parseTheoremaExpressions
+    
+MakeExpression[ RowBox[ {l_?isLeftDelimiter, u_UnderscriptBox, r_}], fmt_] :=
+    Module[ {},
+        MakeExpression[ RowBox[ {l, RowBox[ {u, r}]}], fmt]
+    ] /; $parseTheoremaExpressions
+    
+MakeExpression[ RowBox[ {l_, u_UnderscriptBox, r_?isRightDelimiter}], fmt_] :=
+    Module[ {},
+        MakeExpression[ RowBox[ {RowBox[ {l, u}], r}], fmt]
+    ] /; $parseTheoremaExpressions
+
 (* PREFIX *)
 MakeExpression[ RowBox[ {UnderscriptBox[ "-", dom_], r_}], fmt_] :=
     Module[ {},
@@ -634,6 +679,11 @@ MakeExpression[ RowBox[ {l_, UnderscriptBox[ op_, dom_]}], fmt_] :=
     ] /; $parseTheoremaExpressions
 
 (* GENERAL *)
+MakeExpression[ RowBox[ {UnderscriptBox[ op_, dom_], RowBox[ {"[", p___, "]"}]}], fmt_] :=
+	Module[ {},
+    	registerDomainOperator[ dom];
+        MakeExpression[ RowBox[ {RowBox[ {dom, "[", op, "]"}], "[", p, "]"}], fmt]
+    ] /; $parseTheoremaExpressions
 MakeExpression[ RowBox[ {UnderscriptBox[ op_, dom_], "[", p___, "]"}], fmt_] :=
 	Module[ {},
     	registerDomainOperator[ dom];
@@ -850,11 +900,6 @@ MakeExpression[ RowBox[ {pre___, ld_?isLeftDelimiter, op_String?isTmaOperatorSym
 	MakeExpression[ RowBox[ {pre, ld, Replace[ op, $tmaOperatorToName], rd, post}], fmt] /; ($parseTheoremaExpressions || $parseTheoremaGlobals)
 	
 MakeExpression[op_String?isTmaOperatorSymbol, fmt_] := MakeExpression[Replace[op, $tmaOperatorToName], fmt] /; ($parseTheoremaExpressions || $parseTheoremaGlobals)
- 
-isLeftDelimiter[ s_] :=
-	MemberQ[ {"[", "(", "{", "\[LeftAngleBracket]", "\[LeftBracketingBar]", "\[LeftFloor]", "\[LeftCeiling]", "\[LeftDoubleBracket]", "\[LeftDoubleBracketingBar]", ",", ";"}, s]
-isRightDelimiter[ s_] :=
-	MemberQ[ {"[", "]", ")", "}", "\[RightAngleBracket]", "\[RightBracketingBar]", "\[RightFloor]", "\[RightCeiling]", "\[RightDoubleBracket]", "\[RightDoubleBracketingBar]", ",", ";"}, s]
 
 (* Remark: We do NOT use "Subscript" below, but "SubScript" (upper-case "S"!), since "Subscript" already
 	has some meaning in Theorema (accessing parts of tuples). Same for other script boxes. *)

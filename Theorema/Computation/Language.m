@@ -57,21 +57,23 @@ setComputationContext[ args___] := unexpected[ setComputationContext, {args}]
 (* ::Section:: *)
 (* Arithmetic *)
 
-(* "buiActiveArithmetic" extends "buiActive" such that the activation of "Subtract" etc. can also
+(* "buiActiveArithmetic" extends "buiActive" such that the activation of "Subtract" and "Divide" can also
 	be determined in one stroke. *)
 buiActiveArithmetic["Subtract"] := buiActive["Plus"] && buiActive["Minus"]
-buiActiveArithmetic["MultInverse"] := buiActive["MultInverse"] || buiActive["Power"]
 buiActiveArithmetic["Divide"] := buiActive["Times"] && (buiActive["MultInverse"] || buiActive["Power"])
 buiActiveArithmetic[s_String] := buiActive[s]
+
+(* "buiActivePower" determines whether "Power" is activated for the given exponent. *)
+buiActivePower[-1] := buiActive["MultInverse"] || buiActive["Power"]
+buiActivePower[_] := buiActive["Power"]
 
    
 Plus$TM[ a___] /; buiActive["Plus"] := Plus[ a]
 Minus$TM[ a_] /; buiActive["Minus"] := Minus[ a]
 Subtract$TM[ a_, b_] /; buiActiveArithmetic["Subtract"] := Subtract[ a, b] (* "Subtract" requires exactly 2 arguments. *)
 Times$TM[ a___] /; buiActive["Times"] := Times[ a]
-Power$TM[ a_, -1] /; buiActiveArithmetic["MultInverse"] := Power[ a, -1]
 Divide$TM[ a_, b_] /; buiActiveArithmetic["Divide"] := Divide[ a, b] (* "Divide" requires exactly 2 arguments. *)
-Power$TM[ a_, b_] /; buiActive["Power"] := Power[ a, b]
+Power$TM[ a_, b_] /; buiActivePower[ b] := Power[ a, b]
 Radical$TM[ a_, b_] /; buiActive["Radical"] := Power[ a, 1/b]
 Equal$TM[ a_, b_] /; buiActive["Equal"] := a == b
 Less$TM[ a__] /; buiActive["Less"] := Less[ a]
@@ -86,7 +88,7 @@ BracketingBar$TM[ a:(Pi|E|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaishe
 	AND which, in addition to that, has an analogue in Mathematica with the same name withot "$TM"
 	(that's why "Radical$TM" is not considered as an arithmetical operation and therefore has to be treated separately). *)
 isValidArgNum[ Plus$TM|Times$TM, _Integer?NonNegative] := True
-isValidArgNum[ Subtract$TM|Divide$TM|Power$TM, 2] := True
+isValidArgNum[ Subtract$TM|Divide$TM, 2] := True
 isValidArgNum[ Minus$TM, 1] := True
 isValidArgNum[ _, _] := False
 
@@ -94,12 +96,13 @@ isValidArgNum[ _, _] := False
 	intervals), I think it is not possible to only give 1 definition dealing with all of those intervals at once
 	(alternatives ("|") unfortunately don't work in this case). *)
 	
-(* Note that we have to treat the case "Power[a, -1]" differently, since -1 does not have to be in the domain. *)
-(dom_IntegerInterval$TM)[Power$TM][ a_, -1] /; buiActive["IntegerInterval"] && buiActiveArithmetic["MultInverse"] && isInInterval[ a, dom] :=
+(* Note that we have to treat the case "Power[a, b]" differently, since 'b' does not have to be in the domain.
+	Same for "Radical[a, b]". *)
+(dom_IntegerInterval$TM)[Power$TM][ a_, b_] /; buiActive["IntegerInterval"] && buiActivePower[ b] && isInInterval[ a, dom] :=
 	Module[ {out},
-		out /; (out = Power[ a, -1]; isInInterval[ out, dom])
+		out /; (out = Power[ a, b]; isInInterval[ out, dom])
 	]
-(dom_IntegerInterval$TM)[Radical$TM][ a_, b_] /; buiActive["IntegerInterval"] && buiActive["Radical"] && isInInterval[ a, dom] && isInInterval[ b, dom] :=
+(dom_IntegerInterval$TM)[Radical$TM][ a_, b_] /; buiActive["IntegerInterval"] && buiActive["Radical"] && isInInterval[ a, dom] :=
 	Module[ {out},
 		out /; (out = Power[ a, Power[ b, -1]]; isInInterval[ out, dom])
 	]
@@ -111,11 +114,11 @@ isValidArgNum[ _, _] := False
 				  ]
 	]
 	
-(dom_RationalInterval$TM)[Power$TM][ a_, -1] /; buiActive["RationalInterval"] && buiActiveArithmetic["MultInverse"] && isInInterval[ a, dom] :=
+(dom_RationalInterval$TM)[Power$TM][ a_, b_] /; buiActive["RationalInterval"] && buiActivePower[ b] && isInInterval[ a, dom] :=
 	Module[ {out},
-		out /; (out = Power[ a, -1]; isInInterval[ out, dom])
+		out /; (out = Power[ a, b]; isInInterval[ out, dom])
 	]
-(dom_RationalInterval$TM)[Radical$TM][ a_, b_] /; buiActive["RationalInterval"] && buiActive["Radical"] && isInInterval[ a, dom] && isInInterval[ b, dom] :=
+(dom_RationalInterval$TM)[Radical$TM][ a_, b_] /; buiActive["RationalInterval"] && buiActive["Radical"] && isInInterval[ a, dom] :=
 	Module[ {out},
 		out /; (out = Power[ a, Power[ b, -1]]; isInInterval[ out, dom])
 	]
@@ -127,11 +130,11 @@ isValidArgNum[ _, _] := False
 				  ]
 	]
 	
-(dom_RealInterval$TM)[Power$TM][ a_, -1] /; buiActive["RealInterval"] && buiActiveArithmetic["MultInverse"] && isInInterval[ a, dom] :=
+(dom_RealInterval$TM)[Power$TM][ a_, b_] /; buiActive["RealInterval"] && buiActivePower[ b] && isInInterval[ a, dom] :=
 	Module[ {out},
-		out /; (out = Power[ a, -1]; isInInterval[ out, dom])
+		out /; (out = Power[ a, b]; isInInterval[ out, dom])
 	]
-(dom_RealInterval$TM)[Radical$TM][ a_, b_] /; buiActive["RealInterval"] && buiActive["Radical"] && isInInterval[ a, dom] && isInInterval[ b, dom] :=
+(dom_RealInterval$TM)[Radical$TM][ a_, b_] /; buiActive["RealInterval"] && buiActive["Radical"] && isInInterval[ a, dom] :=
 	Module[ {out},
 		out /; (out = Power[ a, Power[ b, -1]]; isInInterval[ out, dom])
 	]
@@ -143,9 +146,11 @@ isValidArgNum[ _, _] := False
 				  ]
 	]
 
-\[DoubleStruckCapitalC]$TM[Power$TM][ a_, -1] /; buiActive["\[DoubleStruckCapitalC]"] && buiActiveArithmetic["MultInverse"] && isComplex[ a] && a != 0 :=
-	Power[ a, -1]
-\[DoubleStruckCapitalC]$TM[Radical$TM][ a_, b_] /; buiActive["\[DoubleStruckCapitalC]"] && buiActive["Radical"] && isComplex[ a] && isComplex[ b] :=
+\[DoubleStruckCapitalC]$TM[Power$TM][ a_, b_] /; buiActive["\[DoubleStruckCapitalC]"] && buiActivePower[ b] && isComplex[ a] :=
+	Module[ {out},
+		out /; (out = Power[ a, b]; isComplex[ out])
+	]
+\[DoubleStruckCapitalC]$TM[Radical$TM][ a_, b_] /; buiActive["\[DoubleStruckCapitalC]"] && buiActive["Radical"] && isComplex[ a] :=
 	Module[ {out},
 		out /; (out = Power[ a, Power[ b, -1]]; isComplex[ out])
 	]
@@ -157,13 +162,15 @@ isValidArgNum[ _, _] := False
 				  ]
 	]
 	
-\[DoubleStruckCapitalC]P$TM[Power$TM][ a:Tuple$TM[ _?Positive, _], -1] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActiveArithmetic["MultInverse"] && isComplexP[ a] :=
-	polarPower[ a, -1]
 \[DoubleStruckCapitalC]P$TM[Radical$TM][ a_Tuple$TM, b:Tuple$TM[ _?Positive, _]] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActive["Radical"] && isComplexP[ a] && isComplexP[ b] :=
 	Module[ {out},
 		out /; (out = polarPower[ a, polarPower[ b, -1]]; isComplexP[ out])
 	]
-(* We implement some operations on polar-complexes separately due to efficiency. *)
+\[DoubleStruckCapitalC]P$TM[Radical$TM][ a:Tuple$TM[ r_, phi_], b_] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActive["Radical"] && isComplexP[ a] :=
+	Module[ {out},
+		out /; (out = polarPower[ a, Power[ b, -1]]; isComplexP[ out])
+	]
+(* We implement some operations on polar-complexes separately because of efficiency. *)
 \[DoubleStruckCapitalC]P$TM[Minus$TM][ a:Tuple$TM[ r_, phi_]] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActive["Minus"] && isComplexP[ a] :=
 	Tuple$TM[ r, If[ phi >= Pi, phi - Pi, phi + Pi]]
 \[DoubleStruckCapitalC]P$TM[Times$TM][ a:Tuple$TM[ ra_, phia_], b:Tuple$TM[ rb_, phib_]] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActive["Times"] && isComplexP[ a] && isComplexP[ b] :=
@@ -173,6 +180,10 @@ isValidArgNum[ _, _] := False
 \[DoubleStruckCapitalC]P$TM[Power$TM][ a_Tuple$TM, b_Tuple$TM] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActive["Power"] && isComplexP[ a] && isComplexP[ b] :=
 	Module[ {out},
 		out /; (out = polarPower[ a, b]; isComplexP[ out])
+	]
+\[DoubleStruckCapitalC]P$TM[Power$TM][ a:Tuple$TM[ r_, phi_], b_] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActivePower[ b] && isComplexP[ a] :=
+	Module[ {out},
+		out /; (out = Tuple$TM[ Power[ r, b], phi * b]; isComplexP[ out])
 	]
 \[DoubleStruckCapitalC]P$TM[op_Symbol][ a___Tuple$TM] /; buiActive["\[DoubleStruckCapitalC]P"] && isValidArgNum[ op, Length[{a}]] && Apply[ And, Map[ isComplexP, Hold[ a]]] :=
 	Module[ {outCartesian, out, opShortName, opShort, aCartesian},
@@ -185,8 +196,7 @@ isValidArgNum[ _, _] := False
 					isComplexP[ out]
 				  ]
 	]
-	
-polarPower[ Tuple$TM[ r_, phi_], -1] := Tuple$TM[ Power[ r, -1], -phi]
+
 polarPower[ Tuple$TM[ 0, _], Tuple$TM[0, _]] := Indeterminate
 polarPower[ _Tuple$TM, Tuple$TM[0, _]] := Tuple$TM[ 1, 0]
 polarPower[ Tuple$TM[ ra_, phia_], Tuple$TM[ rb_, phib_]] :=
@@ -207,21 +217,17 @@ polarPower[ Tuple$TM[ ra_, phia_], Tuple$TM[ rb_, phib_]] :=
 		]
 	]
 	
-IntegerQuotientRing$TM[ m_?isModulus][Power$TM][ a_?isInteger, -1] /; buiActive["IntegerQuotientRing"] && buiActiveArithmetic["MultInverse"] && Positive[ a] && a < m :=
-	Module[ {out},
-		out /; Quiet[ Check[ out = PowerMod[ a, -1, m]; True, False]]
-	]
 IntegerQuotientRing$TM[ m_?isModulus][Divide$TM][ a_?isInteger, b_?isInteger] /; buiActive["IntegerQuotientRing"] && buiActive["Radical"] && NonNegative[ a] && a < m && Positive[ b] && b < m:=
 	Module[ {gcd, qr},
 		Mod[ First[ qr] * gcd[[2, 1]], m] /; (gcd = ExtendedGCD[ b, m]; qr = QuotientRemainder[ a, First[ gcd]]; Last[ qr] === 0)
 	]
-IntegerQuotientRing$TM[ m_?isModulus][Radical$TM][ a_?isInteger, b_?isInteger] /; buiActive["IntegerQuotientRing"] && buiActive["Radical"] && NonNegative[ a] && a < m && NonNegative[ b] && b < m:=
+(* We use "PowerMod" rather than "Mod[Power[..]]", because it is much more efficient
+	(according to Mathematica's documentation center). *)
+IntegerQuotientRing$TM[ m_?isModulus][Radical$TM][ a_?isInteger, b_] /; buiActive["IntegerQuotientRing"] && buiActive["Radical"] && NonNegative[ a] && a < m :=
 	Module[ {out},
 		out /; Quiet[ Check[ out = PowerMod[ a, Power[ b, -1], m]; True, False]]
 	]
-(* We use "PowerMod" rather than "Mod[Power[..]]", because it is much more efficient
-	(due to Mathematica's documentation center). *)
-IntegerQuotientRing$TM[ m_?isModulus][Power$TM][ a_?isInteger, b_?isInteger] /; buiActive["IntegerQuotientRing"] && buiActive["Power"] && NonNegative[ a] && a < m && NonNegative[ b] && b < m:=
+IntegerQuotientRing$TM[ m_?isModulus][Power$TM][ a_?isInteger, b_] /; buiActive["IntegerQuotientRing"] && buiActivePower[ b] && NonNegative[ a] && a < m :=
 	Module[ {out},
 		out /; Quiet[ Check[ out = PowerMod[ a, b, m]; True, False]]
 	]
@@ -233,21 +239,17 @@ IntegerQuotientRing$TM[ m_?isModulus][op_Symbol][ a___?isInteger] /; buiActive["
 					]
 	]
 	
-IntegerQuotientRingPM$TM[ m_?isModulus][Power$TM][ a_?isInteger, -1] /; buiActive["IntegerQuotientRingPM"] && buiActiveArithmetic["MultInverse"] && lowerPM[ m] <= a <= upperPM[ m] :=
-	Module[ {out},
-		representPM[ out, m] /; Quiet[ Check[ out = PowerMod[ a, -1, m]; True, False]]
-	]
 IntegerQuotientRingPM$TM[ m_?isModulus][Divide$TM][ a_?isInteger, b_?isInteger] /; buiActive["IntegerQuotientRingPM"] && buiActive["Radical"] && lowerPM[ m] <= a <= upperPM[ m] && lowerPM[ m] <= b <= upperPM[ m] :=
 	Module[ {gcd, qr},
 		representPM[ First[ qr] * gcd[[2, 1]], m] /; (gcd = ExtendedGCD[ b, m]; qr = QuotientRemainder[ a, First[ gcd]]; Last[ qr] === 0)
 	]
-IntegerQuotientRingPM$TM[ m_?isModulus][Radical$TM][ a_?isInteger, b_?isInteger] /; buiActive["IntegerQuotientRingPM"] && buiActive["Radical"] && lowerPM[ m] <= a <= upperPM[ m] && lowerPM[ m] <= b <= upperPM[ m] :=
+(* We use "PowerMod" rather than "Mod[Power[..]]", because it is much more efficient
+	(according to Mathematica's documentation center). *)
+IntegerQuotientRingPM$TM[ m_?isModulus][Radical$TM][ a_?isInteger, b_] /; buiActive["IntegerQuotientRingPM"] && buiActive["Radical"] && lowerPM[ m] <= a <= upperPM[ m] :=
 	Module[ {out},
 		representPM[ out, m] /; Quiet[ Check[ out = PowerMod[ a, Power[ b, -1], m]; True, False]]
 	]
-(* We use "PowerMod" rather than "Mod[Power[..]]", because it is much more efficient
-	(according to Mathematica's documentation center). *)
-IntegerQuotientRingPM$TM[ m_?isModulus][Power$TM][ a_?isInteger, b_?isInteger] /; buiActive["IntegerQuotientRingPM"] && buiActive["Power"] && lowerPM[ m] <= a <= upperPM[ m] && lowerPM[ m] <= b <= upperPM[ m] :=
+IntegerQuotientRingPM$TM[ m_?isModulus][Power$TM][ a_?isInteger, b_] /; buiActive["IntegerQuotientRingPM"] && buiActivePower[ b] && lowerPM[ m] <= a <= upperPM[ m] :=
 	Module[ {out},
 		representPM[ out, m] /; Quiet[ Check[ out = PowerMod[ a, b, m]; True, False]]
 	]
@@ -321,13 +323,13 @@ IntegerQuotientRingPM$TM[ m_?isModulus][0] /; buiActive["IntegerQuotientRingPM"]
 IntegerQuotientRing$TM[ m_?isModulus][1] /; buiActive["IntegerQuotientRing"] && m > 1 := 1
 IntegerQuotientRingPM$TM[ m_?isModulus][1] /; buiActive["IntegerQuotientRingPM"] && m > 1 := 1
 
-(dom_IntegerInterval$TM)[\[Epsilon]$TM][ a_] /; buiActive["IntegerInterval"] && buiActive["isInteger"] := isInInterval[ a, dom]
-(dom_RationalInterval$TM)[\[Epsilon]$TM][ a_] /; buiActive["RationalInterval"] && buiActive["isRational"] := isInInterval[ a, dom]
-(dom_RealInterval$TM)[\[Epsilon]$TM][ a_] /; buiActive["RealInterval"] && buiActive["isReal"] := isInInterval[ a, dom]
-\[DoubleStruckCapitalC]$TM[\[Epsilon]$TM][ a_] /; buiActive["\[DoubleStruckCapitalC]"] && buiActive["isComplex"] := isComplex[ a]
-\[DoubleStruckCapitalC]P$TM[\[Epsilon]$TM][ a_] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActive["isComplexP"] := isComplexP[ a]
-IntegerQuotientRing$TM[ m_?isModulus][\[Epsilon]$TM][ a_] /; buiActive["IntegerQuotientRing"] && buiActive["isInteger"] := isInteger[ a] && 0 <= a && a <= m-1
-IntegerQuotientRingPM$TM[ m_?isModulus][\[Epsilon]$TM][ a_] /; buiActive["IntegerQuotientRingPM"] && buiActive["isInteger"] := isInteger[ a] && lowerPM[ m] <= a && a <= upperPM[ m]
+(dom_IntegerInterval$TM)[Element$TM][ a_] /; buiActive["IntegerInterval"] := isInInterval[ a, dom]
+(dom_RationalInterval$TM)[Element$TM][ a_] /; buiActive["RationalInterval"] := isInInterval[ a, dom]
+(dom_RealInterval$TM)[Element$TM][ a_] /; buiActive["RealInterval"] := isInInterval[ a, dom]
+\[DoubleStruckCapitalC]$TM[Element$TM][ a_] /; buiActive["\[DoubleStruckCapitalC]"] := isComplex[ a]
+\[DoubleStruckCapitalC]P$TM[Element$TM][ a_] /; buiActive["\[DoubleStruckCapitalC]P"] := isComplexP[ a]
+IntegerQuotientRing$TM[ m_?isModulus][Element$TM][ a_] /; buiActive["IntegerQuotientRing"] := isInteger[ a] && 0 <= a && a <= m-1
+IntegerQuotientRingPM$TM[ m_?isModulus][Element$TM][ a_] /; buiActive["IntegerQuotientRingPM"] := isInteger[ a] && lowerPM[ m] <= a && a <= upperPM[ m]
 
 
 
