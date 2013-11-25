@@ -817,17 +817,13 @@ renameToStandardContext[ expr_] :=
 		(* The result of $M functions may be Lists; They have to be transformed into tuples BEFORE freshNames[]
 			is applied, because otherwise they are transformed into sets.
 			We don't use makeTuple[] here, because otherwise we get problems with contexts. *)
-		stringExpr = ToString[ FullForm[ expr] /. List -> Tuple$TM];
+		(* amaletzk: I think it's better to have the "Hold" already here, and not only below in "ToExpression" ... *)
+		stringExpr = ToString[ FullForm[ Hold[ expr]] /. List -> Tuple$TM];
 		
 		stringExpr = StringReplace[ stringExpr, "Theorema`Computation`" -> "Theorema`"];
 		$ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
         (* Set default context when not in an archive *)
-        (* BUGFIX amaletzk: We need to prevent the expression from being evaluated, because
-        	it could contain some "Set", "CompoundExpression", etc. appearing inside Theorema symbols
-        	with attribute "HoldAll" (e.g. "Module$TM"). However, since those symbols only have their
-        	attributes in Computation-context, and the context is replaced by normal context above,
-        	the "HoldAll" gets lost and evaluation may happen. *)
-        ReleaseHold[ freshNames[ ToExpression[ stringExpr, InputForm, Hold]]]
+        ReleaseHold[ freshNames[ ToExpression[ stringExpr]]]
 	]
 renameToStandardContext[ args___] := unexpected[ renameToStandardContext, {args}]
 

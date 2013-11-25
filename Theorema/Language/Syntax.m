@@ -798,6 +798,9 @@ makeRangeSequence[ RowBox[{x___, y_, ",", RowBox[{v_, "\[Element]", s_}]}]] :=
     Sequence[ makeRangeSequence[ RowBox[{x, RowBox[{y, "\[Element]", s}]}]], ",",
     	makeSingleSetRange[ v, s]]
 
+makeRangeSequence[ RowBox[{p_, RowBox[ {"[", x__, "]"}]}]] :=
+	makeRangeSequence[ RowBox[ {p, "[", x, "]"}]]
+		
 makeRangeSequence[ RowBox[{p_, "[", RowBox[{x__, ",", v_}], "]"}]] :=
 	Sequence[ makeRangeSequence[ RowBox[{p, "[", RowBox[{x}], "]"}]], ",",
 		makeSinglePredRange[ v, p]]
