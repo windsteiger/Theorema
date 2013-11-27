@@ -168,6 +168,9 @@ thinnedExpression[ args___] := unexpected[ thinnedExpression, {args}]
 
 freeVariables[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[x__], cond_, expr_]] := 
 	Complement[ freeVariables[ {x, cond, expr}], rngVariables[ r]]
+(* Some quantifiers (e.g. "Let") don't have a condition. *)
+freeVariables[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[x__], expr_]] := 
+	Complement[ freeVariables[ {x, expr}], rngVariables[ r]]
 freeVariables[ Hold[ l___]] := freeVariables[ {l}]
 freeVariables[ l_List] := Apply[ Union, Map[ freeVariables, l]]
 freeVariables[ f_[x___]] := freeVariables[ {f, x}]
