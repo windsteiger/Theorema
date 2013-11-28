@@ -65,10 +65,10 @@ freshSymbol[ Hold[ s_Symbol]] :=
             _?isMathematicalConstant, s,
             (* processing the number domain symbols by MakeExpression does not work, I think MakeExpression is only
                applied to boxes and not to individual symbols. We convert them to respective ranges here. *)
-            ToExpression["\[DoubleStruckCapitalN]"], ToExpression[ "IntegerRange$TM[ 1, Infinity, True, False]"],
-            ToExpression["\[DoubleStruckCapitalZ]"], ToExpression[ "IntegerRange$TM[ -Infinity, Infinity, False, False]"],
-            ToExpression["\[DoubleStruckCapitalQ]"], ToExpression[ "RationalRange$TM[ -Infinity, Infinity, False, False]"],
-            ToExpression["\[DoubleStruckCapitalR]"], ToExpression[ "RealRange$TM[ -Infinity, Infinity, False, False]"],
+            ToExpression["\[DoubleStruckCapitalN]"], ToExpression[ "IntegerInterval$TM[ 1, Infinity, True, False]"],
+            ToExpression["\[DoubleStruckCapitalZ]"], ToExpression[ "IntegerInterval$TM[ -Infinity, Infinity, False, False]"],
+            ToExpression["\[DoubleStruckCapitalQ]"], ToExpression[ "RationalInterval$TM[ -Infinity, Infinity, False, False]"],
+            ToExpression["\[DoubleStruckCapitalR]"], ToExpression[ "RealInterval$TM[ -Infinity, Infinity, False, False]"],
             DoubleLongRightArrow|DoubleRightArrow, ToExpression[ "Implies$TM"],
             DoubleLongLeftRightArrow|DoubleLeftRightArrow|Equivalent, ToExpression[ "Iff$TM"],
         	SetDelayed, ToExpression[ "EqualDef$TM"], 
@@ -93,13 +93,13 @@ freshSymbolProg[ Hold[ s_Symbol]] :=
         Switch[ Unevaluated[ s],
             _?isMathematicalConstant, s,
             Theorema`Computation`Knowledge`\[DoubleStruckCapitalN]|Theorema`Knowledge`\[DoubleStruckCapitalN],
-            	ToExpression[ "IntegerRange$TM[1, DirectedInfinity[1], True, False]"],
+            	ToExpression[ "IntegerInterval$TM[1, DirectedInfinity[1], True, False]"],
             Theorema`Computation`Knowledge`\[DoubleStruckCapitalZ]|Theorema`Knowledge`\[DoubleStruckCapitalZ],
-            	ToExpression[ "IntegerRange$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]"],
+            	ToExpression[ "IntegerInterval$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]"],
             Theorema`Computation`Knowledge`\[DoubleStruckCapitalQ]|Theorema`Knowledge`\[DoubleStruckCapitalQ],
-            	ToExpression[ "RationalRange$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]"],
+            	ToExpression[ "RationalInterval$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]"],
             Theorema`Computation`Knowledge`\[DoubleStruckCapitalR]|Theorema`Knowledge`\[DoubleStruckCapitalR],
-            	ToExpression[ "RealRange$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]"],
+            	ToExpression[ "RealInterval$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]"],
         	Set, ToExpression[ "Assign$TM"],
         	_,
         	name = ToString[s];
@@ -115,8 +115,9 @@ freshSymbolProg[ Hold[ s_Symbol]] :=
     ]
 freshSymbolProg[ args___] := unexpected[ freshSymbolProg, {args}]
 
-isMathematicalConstant[ s_Symbol] :=
-	MemberQ[ {True,False,I,Pi,E,Infinity,DirectedInfinity,Degree,EulerGamma,GoldenRatio,Catalan,Khinchin,Glaisher}, s]
+SetAttributes[isMathematicalConstant, HoldAll];
+isMathematicalConstant[ Indeterminate|True|False|I|Pi|E|Infinity|DirectedInfinity|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaisher] := True
+isMathematicalConstant[ _] := False
 
 markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
     Module[ {s, seq, vars},

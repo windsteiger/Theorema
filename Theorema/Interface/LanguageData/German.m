@@ -33,6 +33,7 @@ With[ {lang = "German"},
     translate["nA", lang] = "nicht verf\[UDoubleDot]gbar";
     translate["noKnowl", lang] = "Kein Wissen verf\[UDoubleDot]gbar";
    
+    translate["Operators", lang] = "Operatoren";
     translate["Sets", lang] = "Mengen";
     translate["Tuples", lang] = "Tupel";
     translate["Arithmetic", lang] = "Arithmetik";

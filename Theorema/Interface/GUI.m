@@ -80,9 +80,9 @@ initGUI[] :=
         	},
         	{"Arithmetic",
         		{"Plus", RowBox[{"A","+","B"}], False, True, False},
-         		{"Subtract", RowBox[{"A","-","B"}], False, True, False},
+         		{"Minus", RowBox[{"-","A"}], False, True, False},
 	       		{"Times", RowBox[{"A","*","B"}], False, True, False},
-	       		{"Divide", RowBox[{"A","/","B"}], False, True, False},
+	       		{"MultInverse", SuperscriptBox[ "A", "-1"], False, True, False},
         		{"Power", SuperscriptBox[ "A", "B"], False, True, False},
         		{"Radical", RadicalBox[ "A", "B"], False, True, False},
         		{"Factorial", RowBox[ {"A", "!"}], False, True, False},
@@ -111,11 +111,16 @@ initGUI[] :=
         		{"isRational", RowBox[{"isRational","[","A","]"}], False, True, True},
         		{"isReal", RowBox[{"isReal","[","A","]"}], False, True, True},
         		{"isComplex", RowBox[{"isComplex","[","A","]"}], False, True, True},
+        		{"isComplexP", RowBox[{"isComplexP","[","A","]"}], False, True, True},
         		{"isSet", RowBox[{"isSet","[","A","]"}], False, True, True},
         		{"isTuple", RowBox[{"isTuple","[","A","]"}], False, True, True},
-        		{"IntegerRange", RowBox[{"IntegerRange","[","A","]"}], False, True, True},
-        		{"RationalRange", RowBox[{"RationalRange","[","A","]"}], False, True, True},
-        		{"RealRange", RowBox[{"RealRange","[","A","]"}], False, True, True}
+        		{"IntegerQuotientRing", SubscriptBox["\[DoubleStruckCapitalZ]", "m"], False, True, True},
+        		{"IntegerQuotientRingPM", SubsuperscriptBox["\[DoubleStruckCapitalZ]", "m", "\[PlusMinus]"], False, True, True},
+        		{"IntegerInterval", RowBox[{"\[DoubleStruckCapitalZ]"}], False, True, True},
+        		{"RationalInterval", RowBox[{"\[DoubleStruckCapitalQ]"}], False, True, True},
+        		{"RealInterval", RowBox[{"\[DoubleStruckCapitalR]"}], False, True, True},
+        		{"\[DoubleStruckCapitalC]", RowBox[{"\[DoubleStruckCapitalC]"}], False, True, True},
+        		{"\[DoubleStruckCapitalC]P", SubscriptBox["\[DoubleStruckCapitalC]", "P"], False, True, True}
         	},
         	{"Programming",
         		{"CaseDistinction", RowBox[{"\[Piecewise]",GridBox[{{"A"},{"B"}}]}], False, True, False},
@@ -1848,7 +1853,7 @@ langButtonData["AND3"] :=
 			DisplayForm[RowBox[{"\[And]", "\[Piecewise]", GridBox[{{TagBox[ FrameBox[SubscriptBox["e","1"]], "SelectionPlaceholder"]},
 				{"\[VerticalEllipsis]"},
 				{TagBox[ FrameBox[SubscriptBox["e","n"]], "Placeholder"]}}]}]]],
-		RowBox[{"\[And]", "\[Piecewise]", GridBox[{{"\[SelectionPlaceholder]"}, {"\[SelectionPlaceholder]"}}]}],
+		RowBox[{"\[And]", "\[Piecewise]", GridBox[{{"\[SelectionPlaceholder]"}, {"\[Placeholder]"}}]}],
 		translate["CONNTooltip"],
 		"andn"
 	}
@@ -1895,7 +1900,7 @@ langButtonData["OR3"] :=
 			DisplayForm[RowBox[{"\[Or]", "\[Piecewise]", GridBox[{{TagBox[ FrameBox[SubscriptBox["e","1"]], "SelectionPlaceholder"]},
 				{"\[VerticalEllipsis]"},
 				{TagBox[ FrameBox[SubscriptBox["e","n"]], "Placeholder"]}}]}]]],
-		RowBox[{"\[Or]", "\[Piecewise]", GridBox[{{"\[SelectionPlaceholder]"}, {"\[SelectionPlaceholder]"}}]}],
+		RowBox[{"\[Or]", "\[Piecewise]", GridBox[{{"\[SelectionPlaceholder]"}, {"\[Placeholder]"}}]}],
 		translate["CONNTooltip"],
 		"orn"
 	}
@@ -2084,6 +2089,85 @@ langButtonData["CASEDIST"] :=
 		"cdist"
 	}
 	
+langButtonData["SINGLEOP"] := 
+	{
+		If[ TrueQ[ $buttonNat], 
+			translate["SINGLEOP"], 
+			DisplayForm[ TagBox[ FrameBox["\[CircleDot]"], "SelectionPlaceholder"]]],
+		TagBox[ "\[SelectionPlaceholder]", Identity],
+		translate["0ANNOPTooltip"],
+		"op"
+	}
+	
+langButtonData["OVEROP"] := 
+	{
+		If[ TrueQ[ $buttonNat], 
+			translate["OVEROP"], 
+			DisplayForm[ OverscriptBox[ TagBox[ FrameBox["\[CircleDot]"], "SelectionPlaceholder"],
+										TagBox[ FrameBox["A"], "Placeholder"]]]],
+		OverscriptBox[ "\[SelectionPlaceholder]", "\[Placeholder]"],
+		translate["1ANNOPTooltip"],
+		"oop"
+	}
+	
+langButtonData["UNDEROVEROP"] := 
+	{
+		If[ TrueQ[ $buttonNat], 
+			translate["UNDEROVEROP"], 
+			DisplayForm[ UnderoverscriptBox[ TagBox[ FrameBox["\[CircleDot]"], "SelectionPlaceholder"],
+										TagBox[ FrameBox["A"], "Placeholder"],
+										TagBox[ FrameBox["B"], "Placeholder"]]]],
+		UnderoverscriptBox[ "\[SelectionPlaceholder]", "\[Placeholder]", "\[Placeholder]"],
+		translate["2ANNOPTooltip"],
+		"uoop"
+	}
+	
+langButtonData["SUBOP"] := 
+	{
+		If[ TrueQ[ $buttonNat], 
+			translate["SUBOP"], 
+			DisplayForm[ SubscriptBox[ TagBox[ FrameBox["\[CircleDot]"], "SelectionPlaceholder"],
+										TagBox[ FrameBox["A"], "Placeholder"]]]],
+		SubscriptBox[ "\[SelectionPlaceholder]", "\[Placeholder]"],
+		translate["1ANNOPTooltip"],
+		"subop"
+	}
+	
+langButtonData["SUPEROP"] := 
+	{
+		If[ TrueQ[ $buttonNat], 
+			translate["SUPEROP"], 
+			DisplayForm[ SuperscriptBox[ TagBox[ FrameBox["\[CircleDot]"], "SelectionPlaceholder"],
+										TagBox[ FrameBox["A"], "Placeholder"]]]],
+		SuperscriptBox[ "\[SelectionPlaceholder]", "\[Placeholder]"],
+		translate["1ANNOPTooltip"],
+		"supop"
+	}
+	
+langButtonData["SUBSUPEROP"] := 
+	{
+		If[ TrueQ[ $buttonNat], 
+			translate["SUBSUPEROP"], 
+			DisplayForm[ SubsuperscriptBox[ TagBox[ FrameBox["\[CircleDot]"], "SelectionPlaceholder"],
+										TagBox[ FrameBox["A"], "Placeholder"],
+										TagBox[ FrameBox["B"], "Placeholder"]]]],
+		SubsuperscriptBox[ "\[SelectionPlaceholder]", "\[Placeholder]", "\[Placeholder]"],
+		translate["2ANNOPTooltip"],
+		"subsupop"
+	}
+	
+langButtonData["OVERSUBOP"] := 
+	{
+		If[ TrueQ[ $buttonNat], 
+			translate["OVERSUBOP"], 
+			DisplayForm[ SubscriptBox[ OverscriptBox[ TagBox[ FrameBox["\[CircleDot]"], "SelectionPlaceholder"],
+													TagBox[ FrameBox["A"], "Placeholder"]],
+										TagBox[ FrameBox["B"], "Placeholder"]]]],
+		SubscriptBox[ OverscriptBox[ "\[SelectionPlaceholder]", "\[Placeholder]"], "\[Placeholder]"],
+		translate["2ANNOPTooltip"],
+		"osop"
+	}
+	
 langButtonData[args___] :=
     unexpected[langButtonData, {args}]
 
@@ -2108,7 +2192,8 @@ autoParenthesis[ args___] := unexpected[ autoParenthesis, {args}]
 
 allFormulae = {{"Sets", {}},
 			   {"Arithmetic", {}},
-			   {"Logic", {"AND2", "OR2", "NOT", "IMPL2", "EQUIV2", "EQ", "EQUIVDEF", "EQDEF", "FORALL1", "EXISTS1", "FORALL2", "EXISTS2", "AND3", "OR3", "EQUIV3", "CASEDIST", "LET"}}
+			   {"Logic", {"AND2", "OR2", "NOT", "IMPL2", "EQUIV2", "EQ", "EQUIVDEF", "EQDEF", "FORALL1", "EXISTS1", "FORALL2", "EXISTS2", "AND3", "OR3", "EQUIV3", "CASEDIST", "LET"}},
+			   {"Operators", {"SUBOP", "SUPEROP", "SUBSUPEROP", "OVEROP", "UNDEROVEROP", "OVERSUBOP", "SINGLEOP"}}
 };
 
 makeButtonCategory[ {category_String, buttons_List}, cols_Integer:2] :=

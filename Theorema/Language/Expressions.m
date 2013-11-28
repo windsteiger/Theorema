@@ -57,38 +57,125 @@ makeTuple[ SequenceOf$TM[ r_, __]] :=
 (* ::Subsection:: *)
 (* Number domains *)
 
-MakeBoxes[ IntegerRange$TM[ l_Integer, DirectedInfinity[1], True, _], TheoremaForm] /; l === 1 :=
+MakeBoxes[ IntegerInterval$TM[ 1, DirectedInfinity[1], True, _], TheoremaForm] :=
 	"\[DoubleStruckCapitalN]"
-MakeBoxes[ IntegerRange$TM[ l_Integer, DirectedInfinity[1], True, _], TheoremaForm] /; l >= 0 :=
+MakeBoxes[ IntegerInterval$TM[ l_?NonNegative, DirectedInfinity[1], True, _], TheoremaForm] :=
 	SubscriptBox[ "\[DoubleStruckCapitalN]", MakeBoxes[ l, TheoremaForm]]
-MakeBoxes[ IntegerRange$TM[ l_Integer, u_, True, True], TheoremaForm] /; l >= 0 :=
+MakeBoxes[ IntegerInterval$TM[ l_?NonNegative, u_, True, True], TheoremaForm] :=
 	SubscriptBox[ "\[DoubleStruckCapitalN]", RowBox[ {MakeBoxes[ l, TheoremaForm], ",", "\[Ellipsis]", ",", MakeBoxes[ u, TheoremaForm]}]]
-MakeBoxes[ IntegerRange$TM[ l_Integer, u_, False, True], TheoremaForm] /; l >= 0 :=
+MakeBoxes[ IntegerInterval$TM[ l_?NonNegative, u_, False, True], TheoremaForm] :=
 	SubscriptBox[ "\[DoubleStruckCapitalN]", RowBox[ {RowBox[{"(", RowBox[ {MakeBoxes[ l, TheoremaForm], ",", "\[Ellipsis]", ",", MakeBoxes[ u, TheoremaForm]}]}], "]"}]]
-MakeBoxes[ IntegerRange$TM[ l_Integer, u_, True, False], TheoremaForm] /; l >= 0 :=
+MakeBoxes[ IntegerInterval$TM[ l_?NonNegative, u_, True, False], TheoremaForm] :=
 	SubscriptBox[ "\[DoubleStruckCapitalN]", RowBox[ {RowBox[{"[", RowBox[ {MakeBoxes[ l, TheoremaForm], ",", "\[Ellipsis]", ",", MakeBoxes[ u, TheoremaForm]}]}], ")"}]]
-MakeBoxes[ IntegerRange$TM[ l_Integer, u_, False, False], TheoremaForm] /; l >= 0 :=
+MakeBoxes[ IntegerInterval$TM[ l_?NonNegative, u_, False, False], TheoremaForm] :=
 	SubscriptBox[ "\[DoubleStruckCapitalN]", RowBox[{"(", RowBox[{MakeBoxes[ l, TheoremaForm], ",", "\[Ellipsis]", ",", MakeBoxes[ u, TheoremaForm]}], ")"}]]
 	
-rangeToLetter[ r_Symbol] :=
+MakeBoxes[ IntegerQuotientRing$TM[ m_], TheoremaForm] :=
+	SubscriptBox[ "\[DoubleStruckCapitalZ]", MakeBoxes[ m, TheoremaForm]]
+MakeBoxes[ IntegerQuotientRingPM$TM[ m_], TheoremaForm] :=
+	SubsuperscriptBox[ "\[DoubleStruckCapitalZ]", MakeBoxes[ m, TheoremaForm], "\[PlusMinus]"]
+	
+intervalToLetter[ r_Symbol] :=
 	Switch[ r,
-		Theorema`Language`IntegerRange$TM, "\[DoubleStruckCapitalZ]",
-		Theorema`Language`RationalRange$TM, "\[DoubleStruckCapitalQ]",
-		Theorema`Language`RealRange$TM, "\[DoubleStruckCapitalR]"
+		Theorema`Language`IntegerInterval$TM, "\[DoubleStruckCapitalZ]",
+		Theorema`Language`RationalInterval$TM, "\[DoubleStruckCapitalQ]",
+		Theorema`Language`RealInterval$TM, "\[DoubleStruckCapitalR]"
 	]
 
-MakeBoxes[ (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[ DirectedInfinity[-1], DirectedInfinity[1], _, _], TheoremaForm] :=
-	rangeToLetter[ h]
-MakeBoxes[ (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[ l_, DirectedInfinity[1], True, _], TheoremaForm] :=
-	SubscriptBox[ rangeToLetter[ h], MakeBoxes[ l, TheoremaForm]]
-MakeBoxes[ (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[ l_, u_, True, True], TheoremaForm] :=
-	SubscriptBox[ rangeToLetter[ h], RowBox[ {MakeBoxes[ l, TheoremaForm], ",", "\[Ellipsis]", ",", MakeBoxes[ u, TheoremaForm]}]]
-MakeBoxes[ (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[ l_, u_, False, True], TheoremaForm] :=
-	SubscriptBox[ rangeToLetter[ h], RowBox[ {RowBox[{"(", RowBox[ {MakeBoxes[ l, TheoremaForm], ",", "\[Ellipsis]", ",", MakeBoxes[ u, TheoremaForm]}]}], "]"}]]
-MakeBoxes[ (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[ l_, u_, True, False], TheoremaForm] :=
-	SubscriptBox[ rangeToLetter[ h], RowBox[ {RowBox[{"[", RowBox[ {MakeBoxes[ l, TheoremaForm], ",", "\[Ellipsis]", ",", MakeBoxes[ u, TheoremaForm]}]}], ")"}]]
-MakeBoxes[ (h:IntegerRange$TM|RationalRange$TM|RealRange$TM)[ l_, u_, False, False], TheoremaForm] :=
-	SubscriptBox[ rangeToLetter[ h], RowBox[{"(", RowBox[{MakeBoxes[ l, TheoremaForm], ",", "\[Ellipsis]", ",", MakeBoxes[ u, TheoremaForm]}], ")"}]]
+MakeBoxes[ (h:IntegerInterval$TM|RationalInterval$TM|RealInterval$TM)[ DirectedInfinity[-1], DirectedInfinity[1], _, _], TheoremaForm] :=
+	intervalToLetter[ h]
+MakeBoxes[ IntegerInterval$TM[ l_, DirectedInfinity[1], True, _], TheoremaForm] :=
+	If[ TrueQ[ NonPositive[ l]],
+		SubscriptBox[ "\[DoubleStruckCapitalZ]", MakeBoxes[ l, TheoremaForm]],
+		SubscriptBox[ "\[DoubleStruckCapitalZ]", RowBox[ {MakeBoxes[ l, TheoremaForm], ",", "\[Ellipsis]", ",", "\[Infinity]"}]]
+	]
+MakeBoxes[ (h:RationalInterval$TM|RealInterval$TM)[ l_, DirectedInfinity[1], True, _], TheoremaForm] :=
+	SubscriptBox[ intervalToLetter[ h], MakeBoxes[ l, TheoremaForm]]
+MakeBoxes[ (h:IntegerInterval$TM|RationalInterval$TM|RealInterval$TM)[ l_, u_, True, True], TheoremaForm] :=
+	SubscriptBox[ intervalToLetter[ h], RowBox[ {MakeBoxes[ l, TheoremaForm], ",", "\[Ellipsis]", ",", MakeBoxes[ u, TheoremaForm]}]]
+MakeBoxes[ (h:IntegerInterval$TM|RationalInterval$TM|RealInterval$TM)[ l_, u_, False, True], TheoremaForm] :=
+	SubscriptBox[ intervalToLetter[ h], RowBox[ {RowBox[{"(", RowBox[ {MakeBoxes[ l, TheoremaForm], ",", "\[Ellipsis]", ",", MakeBoxes[ u, TheoremaForm]}]}], "]"}]]
+MakeBoxes[ (h:IntegerInterval$TM|RationalInterval$TM|RealInterval$TM)[ l_, u_, True, False], TheoremaForm] :=
+	SubscriptBox[ intervalToLetter[ h], RowBox[ {RowBox[{"[", RowBox[ {MakeBoxes[ l, TheoremaForm], ",", "\[Ellipsis]", ",", MakeBoxes[ u, TheoremaForm]}]}], ")"}]]
+MakeBoxes[ (h:IntegerInterval$TM|RationalInterval$TM|RealInterval$TM)[ l_, u_, False, False], TheoremaForm] :=
+	SubscriptBox[ intervalToLetter[ h], RowBox[{"(", RowBox[{MakeBoxes[ l, TheoremaForm], ",", "\[Ellipsis]", ",", MakeBoxes[ u, TheoremaForm]}], ")"}]]
+	
+MakeBoxes[ \[DoubleStruckCapitalC]P$TM, TheoremaForm] :=
+	SubscriptBox[ "\[DoubleStruckCapitalC]", "P"]
+	
+	
+	
+(* ::Subsection:: *)
+(* Annotated Operators *)
+	
+(* ::Subsubsection:: *)
+(* annotated operators without arguments *)
+
+MakeBoxes[ Annotated$TM[ op_, SubScript$TM[ sc__]], TheoremaForm] :=
+	MakeBoxes[ Subscript[ op, sc], TheoremaForm]
+	
+MakeBoxes[ Annotated$TM[ op_, SuperScript$TM[ sc_]], TheoremaForm] :=
+	MakeBoxes[ Superscript[ op, sc], TheoremaForm]
+MakeBoxes[ Annotated$TM[ op_, SuperScript$TM[ sc__]], TheoremaForm] :=
+	SuperscriptBox[ MakeBoxes[ op, TheoremaForm], RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ sc]]], ","]]]
+	
+MakeBoxes[ Annotated$TM[ op_, SubScript$TM[ sub_], SuperScript$TM[ sup_]], TheoremaForm] :=
+	MakeBoxes[ Subsuperscript[ op, sub, sup], TheoremaForm]
+MakeBoxes[ Annotated$TM[ op_, SubScript$TM[ sub__], SuperScript$TM[ sup__]], TheoremaForm] :=
+	SubsuperscriptBox[ MakeBoxes[ op, TheoremaForm],
+		RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ sub]]], ","]],
+		RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ sup]]], ","]]]
+		
+MakeBoxes[ Annotated$TM[ op_, OverScript$TM[ sc__]], TheoremaForm] :=
+	MakeBoxes[ Overscript[ op, sc], TheoremaForm]
+
+MakeBoxes[ Annotated$TM[ op_, UnderScript$TM[ un_], OverScript$TM[ ov_]], TheoremaForm] :=
+	MakeBoxes[ Underoverscript[ op, un, ov], TheoremaForm]
+MakeBoxes[ Annotated$TM[ op_, UnderScript$TM[ un__], OverScript$TM[ ov__]], TheoremaForm] :=
+	UnderoverscriptBox[ MakeBoxes[ op, TheoremaForm],
+		RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ un]]], ","]],
+		RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ ov]]], ","]]]
+	
+	
+(* ::Subsubsection:: *)
+(* annotated operators with arguments *)
+
+MakeBoxes[ aop_Annotated$TM[], TheoremaForm] :=
+	Module[ {op, symbols, sym = MakeBoxes[ aop, TheoremaForm]},
+		RowBox[
+			{RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}], "[", "]"}
+		] /; (symbols = Cases[ aop, _Symbol, Infinity, 1];
+				Length[ symbols] > 0 && (op = First[ symbols]; isTmaOperatorName[ op]))
+	]
+MakeBoxes[ aop_Annotated$TM[ a_], TheoremaForm] :=
+	Module[ {op, symbols, form, sym = MakeBoxes[ aop, TheoremaForm]},
+		(
+		form = getTmaOperatorForms[ op];
+		Which[
+			MemberQ[ form, Prefix],
+			RowBox[ {sym, MakeBoxes[ a, TheoremaForm]}],
+			MemberQ[ form, Postfix],
+			RowBox[ {MakeBoxes[ a, TheoremaForm], sym}],
+			True,
+			RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}],
+				"[", MakeBoxes[ a, TheoremaForm], "]"}]
+		]
+		) /; (symbols = Cases[ aop, _Symbol, Infinity, 1];
+				Length[ symbols] > 0 && (op = First[ symbols]; isTmaOperatorName[ op]))
+	]
+MakeBoxes[ aop_Annotated$TM[ a__], TheoremaForm] :=
+	Module[ {op, symbols, form, sym = MakeBoxes[ aop, TheoremaForm]},
+		(
+		form = getTmaOperatorForms[ op];
+		If[ MemberQ[ form, Infix],
+			tmaInfixBox[ {a}, sym],
+			RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}], "[",
+								RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ a]]], ","]], "]"}]
+		]
+		) /; (symbols = Cases[ aop, _Symbol, Infinity, 1];
+				Length[ symbols] > 0 && (op = First[ symbols]; isTmaOperatorName[ op]))
+	]
+	
 
 (* ::Subsection:: *)
 (* Rest *)
