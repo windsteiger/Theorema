@@ -132,6 +132,7 @@ initGUI[] :=
         $tcActionView = 1;
         (* Init status of opener views *)
         Scan[ ToExpression, Map[ "$builtinStructState$" <> # <> "=True"&, Map[ First, $tmaBuiltins]]];
+        Scan[ ToExpression, Map[ "$tcSessMathOpener$" <> # <> "=True"&, Map[ First, allFormulae]]];
         $tcAllFormulaeOpener = True;
         $tcAllDeclOpener = True;
 		$kbStruct = {};
@@ -1333,7 +1334,14 @@ printComputationInfo[] :=
             ]}, False]], "ComputationInfo"]];
     ]
 printComputationInfo[args___] := unexcpected[ printComputationInfo, {args}]
-
+(*DynamicModule[{tab = 0}, 
+ Dynamic[Column[
+   Join[{ButtonBar[{"1" :> (tab = 1), "2" :> (tab = 2), 
+       "0" :> (tab = 0)}]},
+    If[tab === 0,
+     {},
+     {Pane[f[tab], Automatic]}]]]]]*)
+     
 setCompEnv[ kb_List, bui_List] :=
 	Module[{},
 		Clear[kbSelectCompute];
@@ -2105,8 +2113,9 @@ allFormulae = {{"Sets", {}},
 
 makeButtonCategory[ {category_String, buttons_List}, cols_Integer:2] :=
 	OpenerView[{
-		Style[ translate[ category], "Section"],
+		Style[ translate[ category], "LabeledLabel"],
 		Grid[ partitionFill[ Map[ makeLangButton, buttons], cols], Alignment -> {Left, Top}]},
+		(* I have no idea why I need the explicit context here, in similar situations for other dynamic object it works without ... *)
 		ToExpression["Dynamic[ Theorema`Interface`GUI`Private`$tcSessMathOpener$"<>category<>"]"]
 		]
 
