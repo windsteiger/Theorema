@@ -85,6 +85,7 @@ initGUI[] :=
 	       		{"MultInverse", SuperscriptBox[ "A", "-1"], False, True, False},
         		{"Power", SuperscriptBox[ "A", "B"], False, True, False},
         		{"Radical", RadicalBox[ "A", "B"], False, True, False},
+        		{"Factorial", RowBox[ {"A", "!"}], False, True, False},
         		{"Equal", RowBox[{"A","=","B"}], False, False, False},
         		{"Less", RowBox[{"A","<","B"}], False, True, False},
         		{"LessEqual", RowBox[{"A","\[LessEqual]","B"}], False, True, False},
@@ -136,6 +137,7 @@ initGUI[] :=
         $tcActionView = 1;
         (* Init status of opener views *)
         Scan[ ToExpression, Map[ "$builtinStructState$" <> # <> "=True"&, Map[ First, $tmaBuiltins]]];
+        Scan[ ToExpression, Map[ "$tcSessMathOpener$" <> # <> "=True"&, Map[ First, allFormulae]]];
         $tcAllFormulaeOpener = True;
         $tcAllDeclOpener = True;
 		$kbStruct = {};
@@ -1337,7 +1339,14 @@ printComputationInfo[] :=
             ]}, False]], "ComputationInfo"]];
     ]
 printComputationInfo[args___] := unexcpected[ printComputationInfo, {args}]
-
+(*DynamicModule[{tab = 0}, 
+ Dynamic[Column[
+   Join[{ButtonBar[{"1" :> (tab = 1), "2" :> (tab = 2), 
+       "0" :> (tab = 0)}]},
+    If[tab === 0,
+     {},
+     {Pane[f[tab], Automatic]}]]]]]*)
+     
 setCompEnv[ kb_List, bui_List] :=
 	Module[{},
 		Clear[kbSelectCompute];
@@ -2169,7 +2178,7 @@ makeLangButton[ bname_String] :=
 					FrontEndExecute[{NotebookApply[ InputNotebook[], bd[[2]], Placeholder]}],
 					FrontEndExecute[{NotebookApply[ InputNotebook[], RowBox[ {autoParenthesis[ "("], bd[[2]], autoParenthesis[ ")"]}], Placeholder]}]
 				], Appearance -> "DialogBox", Alignment -> {Left, Top}, ImageSize -> All],
-				"\[EscapeKey]"<>bd[[4]]<>"\[EscapeKey]", TooltipDelay -> 0.5]
+				translate[ "Press shift to omit parentheses\nKeyboard shortcut:"]<>" \[EscapeKey]"<>bd[[4]]<>"\[EscapeKey]", TooltipDelay -> 0.5]
     ]
 makeLangButton[args___] :=
     unexpected[makeLangButton, {args}]
@@ -2189,9 +2198,11 @@ allFormulae = {{"Sets", {}},
 
 makeButtonCategory[ {category_String, buttons_List}, cols_Integer:2] :=
 	OpenerView[{
-		Style[ translate[ category], "Section"],
+		Style[ translate[ category], "LabeledLabel"],
 		Grid[ partitionFill[ Map[ makeLangButton, buttons], cols], Alignment -> {Left, Top}]},
-		ToExpression["Dynamic[$tcSessMathOpener$"<>category<>"]"]]
+		(* I have no idea why I need the explicit context here, in similar situations for other dynamic object it works without ... *)
+		ToExpression["Dynamic[ Theorema`Interface`GUI`Private`$tcSessMathOpener$"<>category<>"]"]
+		]
 
 makeButtonCategory[ args___] := unexpected[ makeButtonCategory, {args}]
 
@@ -2268,7 +2279,6 @@ getExistGoalInstanceDialog[ v_, fix_, {g_, kb_}] :=
     ]
 getExistGoalInstanceDialog[ args___] := unexpected[ getExistGoalInstanceDialog, {args}]
 
-SetAttributes[ nextProofSitDialog, HoldFirst]
 nextProofSitDialog[ ps_List] :=
     Module[ {proofCells, showProof = False},
         proofCells = pObjCells[];

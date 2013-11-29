@@ -75,6 +75,7 @@ Times$TM[ a___] /; buiActive["Times"] := Times[ a]
 Divide$TM[ a_, b_] /; buiActiveArithmetic["Divide"] := Divide[ a, b] (* "Divide" requires exactly 2 arguments. *)
 Power$TM[ a_, b_] /; buiActivePower[ b] := Power[ a, b]
 Radical$TM[ a_, b_] /; buiActive["Radical"] := Power[ a, 1/b]
+Factorial$TM[ a_] /; buiActive["Factorial"] := a!
 Equal$TM[ a_, b_] /; buiActive["Equal"] := a == b
 Less$TM[ a__] /; buiActive["Less"] := Less[ a]
 LessEqual$TM[ a__] /; buiActive["LessEqual"] := LessEqual[ a]
@@ -1034,7 +1035,7 @@ SetAttributes[ Module$TM, HoldAll]
 Module$TM[ l_[v___], body_] /; buiActive["Module"] := Apply[ Module, Hold[ {v}, body]]
 
 SetAttributes[ Do$TM, HoldAll]
-Do$TM[ body_, l_[v___]] /; buiActive["Do"] := Do[ body, {v}]
+Do$TM[ body_, l_[v___]] /; buiActive["Do"] := Apply[ Do, Hold[ body, {v}]]
 
 SetAttributes[ CaseDistinction$TM, HoldAll]
 CaseDistinction$TM[ c:Clause$TM[ _, _]..] /; buiActive["CaseDistinction"] :=

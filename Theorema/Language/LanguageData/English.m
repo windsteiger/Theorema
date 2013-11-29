@@ -62,6 +62,7 @@ With[ {lang = "English"},
 	MessageName[Divide$TM, "usage", lang] = "";
 	MessageName[Power$TM, "usage", lang] = "";
 	MessageName[Radical$TM, "usage", lang] = "";
+	MessageName[Factorial$TM, "usage", lang] = "";
 	MessageName[Less$TM, "usage", lang] = "";
 	MessageName[LessEqual$TM, "usage", lang] = "";
 	MessageName[Greater$TM, "usage", lang] = "";

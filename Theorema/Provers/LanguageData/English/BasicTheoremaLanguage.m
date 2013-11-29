@@ -31,7 +31,8 @@ MessageName[ multipleGoalRewriting, "usage", lang] = "Goal can be rewritten in s
 MessageName[ goalRewriting, "usage", lang] = "Goal rewriting based on (quantified) implications and equivalences in the knowledge base";
 MessageName[ knowledgeRewriting, "usage", lang] = "Knowledge rewriting based on (quantified) implications and equivalences in the knowledge base";
 MessageName[ elementarySubstitution, "usage", lang] = "Elementary substitution based on equalities and equivalences in the knowledge base";
-MessageName[ expandDef, "usage", lang] = "Expand definitions";
+MessageName[ expandDef, "usage", lang] = "Expand explicit definitions";
+MessageName[ implicitDef, "usage", lang] = "Handle implicit function definitions";
 MessageName[ eqGoal, "usage", lang] = "Prove equalities";
 MessageName[ instantiate, "usage", lang] = "Instantiate using constants available in the proof";
 
@@ -262,7 +263,7 @@ subProofHeader[ expandDef, lang, u_, g_, ___, "usedDefs" -> defs_List, ___, {1}]
 		If[ u[[1]] =!= g[[1]],
 			repl = defs[[1]];
 			suffix = If[ Length[ repl] == 1, "", "s"];
-			stepText = { textCell[ "In order to prove ", formulaReference[ u[[1, 1]]], ", using definition" <> suffix <> " ", 
+			stepText = {textCell[ "In order to prove ", formulaReference[ u[[1, 1]]], ", using definition" <> suffix <> " ", 
 				formulaReferenceSequence[ repl, lang], ", we now have to show"],
 				goalCell[ g[[1, 1]], "."]}
 		];
@@ -273,13 +274,37 @@ subProofHeader[ expandDef, lang, u_, g_, ___, "usedDefs" -> defs_List, ___, {1}]
 			stepText = Join[ stepText, 
 				{textCell[ "From ", formulaReference[ u[[j, 1]]], " we know, by definition" <> suffix <> " ", formulaReferenceSequence[ repl, lang], ","], 
 				assumptionCell[ g[[j, 1]]]}],
-			{j, 2, Length[g]-1}
+			{j, 2, Length[g]-1} (* the last is the new goal for a condition in the rewrite or True if no condition is there -> we go only to Length-1 *)
 		];
 		stepText
 	];
 subProofHeader[ expandDef, lang, u_, {___, {cond_}}, ___, "usedDefs" -> defs_List, ___, {2}] := {textCell[ "In order to validate the expansion of the definitions above, we have to check"],
 	goalCell[ cond, "."]
 	};	
+
+proofStepText[ implicitDef, lang, {}, {}, ___] := {};
+
+proofStepText[ implicitDef, lang, u_, g_, ___, "introConstFor" -> termConst_List, ___] := 
+	Module[ {stepText, j},
+		stepText = {textCell[ "For the implicitly defined function ", formulaReference[ u[[1, 1]]], " we introduce new constants ", 
+			inlineTheoremaExpressionSeq[ Apply[ EqualDef$TM, termConst, {1}], lang], " such that"],
+			assumptionListCells[ g[[1]], ",", "."]};
+		(* g[[2]] is the new goal. {} if no rewrite happened in the goal *)
+		If[ g[[2]] =!= {},
+			stepText = Join[ stepText,
+				{textCell[ "For proving ", formulaReference[ u[[2, 1]]], ", due to ", formulaReferenceSequence[ Rest[ u[[2]]], lang], ", it suffices now to prove"],
+				goalCell[ g[[2, 1]], "."]}
+			]
+		];
+		(* Each of the remaining is an expansion in the KB. Produce a line of text for each of them *)
+		Do[
+			stepText = Join[ stepText, 
+				{textCell[ "The assumption ", formulaReference[ u[[j, 1]]], " becomes (due to ", formulaReferenceSequence[ Rest[ u[[j]]], lang], ")"], 
+				assumptionCell[ g[[j, 1]]]}],
+			{j, 3, Length[g]}
+		];
+		stepText
+	];
 	
 proofStepText[ instantiate, lang, u_, {}, ___] := 
 	(* Instantiation has been tried, but none of them could be successfully applied *)
