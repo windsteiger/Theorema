@@ -166,6 +166,9 @@ thinnedExpression[ args___] := unexpected[ thinnedExpression, {args}]
 (* freeVariables *)
 
 
+(* Some quantifiers (e.g. "Sum") can be used together with subscripts. *)
+freeVariables[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[x__], cond_, sub_, expr_]] := 
+	Complement[ freeVariables[ {x, cond, sub, expr}], rngVariables[ r]]
 freeVariables[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[x__], cond_, expr_]] := 
 	Complement[ freeVariables[ {x, cond, expr}], rngVariables[ r]]
 (* Some quantifiers (e.g. "Let") don't have a condition. *)
