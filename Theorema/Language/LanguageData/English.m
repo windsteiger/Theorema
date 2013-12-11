@@ -42,6 +42,7 @@ With[ {lang = "English"},
 	MessageName[SetEqual$TM, "usage", lang] = "";
 	MessageName[Not$TM, "usage", lang] = "";
 	MessageName[Iff$TM, "usage", lang] = "";
+	MessageName[Componentwise$TM, "usage", lang] = "";
 	MessageName[Implies$TM, "usage", lang] = "";
 	MessageName[And$TM, "usage", lang] = "";
 	MessageName[Or$TM, "usage", lang] = "";
@@ -113,8 +114,7 @@ With[ {lang = "English"},
 	MessageName[\[DoubleStruckCapitalC]P$TM, "usage", lang] = "";
 	MessageName[IntegerQuotientRing$TM, "usage", lang] = "";
 	MessageName[IntegerQuotientRingPM$TM, "usage", lang] = "";
-	MessageName[CaseDistinction$TM, "usage", lang] = "";	
-	MessageName[Clause$TM, "usage", lang] = "";	
+	MessageName[Piecewise$TM, "usage", lang] = "";	
     (* Mathematica programming language *)
 	MessageName[Program, "usage", lang] = "";	
 	MessageName[Module$TM, "usage", lang] = "";	

@@ -104,7 +104,8 @@ initGUI[] :=
         		{"Forall", RowBox[{"\[ForAll]","P"}], False, True, False},
         		{"Exists", RowBox[{"\[Exists]","P"}], False, True, False},
         		{"Equal", RowBox[{"A","=","B"}], True, False, False},
-        		{"Let", UnderscriptBox["let",RowBox[{"A","=","\[Ellipsis]"}]], False, True, False}
+        		{"Let", UnderscriptBox["let",RowBox[{"A","=","\[Ellipsis]"}]], False, True, False},
+        		{"Componentwise", RowBox[{"P", "@", "A"}], False, True, False}
         	},
         	{"Domains",
         		{"isInteger", RowBox[{"isInteger","[","A","]"}], False, True, True},

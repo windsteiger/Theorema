@@ -346,6 +346,7 @@ Or$TM[ pre___, a_, mid___, a_, post___] /; buiActive["Or"] := Or$TM[ pre, a, mid
 Or$TM[ a___] /; buiActive["Or"] := Or[ a]
 Implies$TM[ a__] /; buiActive["Implies"] := Implies[ a]
 Iff$TM[ a__] /; buiActive["Iff"] := Equivalent[ a]
+Componentwise$TM[ P_, args___] /; buiActive["Componentwise"] := Apply[ And, Map[ P, Hold[args]]]
 
 (* We replace the free variables one after the other, because some might depend on others, and a
 	single "substitueFree" doesn't work properly then. This could also be good for global abbreviations ... *)
@@ -1037,10 +1038,23 @@ Module$TM[ l_[v___], body_] /; buiActive["Module"] := Apply[ Module, Hold[ {v}, 
 SetAttributes[ Do$TM, HoldAll]
 Do$TM[ body_, l_[v___]] /; buiActive["Do"] := Apply[ Do, Hold[ body, {v}]]
 
-SetAttributes[ CaseDistinction$TM, HoldAll]
-CaseDistinction$TM[ c:Clause$TM[ _, _]..] /; buiActive["CaseDistinction"] :=
-	Apply[Piecewise, Hold[{c}] /. Clause$TM[cond_, expr_] -> {expr, cond}]
-
+SetAttributes[ Piecewise$TM, HoldAll]
+Piecewise$TM[ Tuple$TM[ clauses___Tuple$TM, Tuple$TM[ e_, True]]] /; buiActive["CaseDistinction"] :=
+	Piecewise$TM[ Tuple$TM[ clauses], e]
+Piecewise$TM[ clauses:Tuple$TM[ __Tuple$TM]] /; buiActive["CaseDistinction"] :=
+	Piecewise$TM[ clauses, 0]
+Piecewise$TM[ Tuple$TM[ clauses___Tuple$TM], default_] /; buiActive["CaseDistinction"] :=
+	Module[ {r, s},
+		If[ MatchQ[ r, _Piecewise],
+			ReplacePart[ Apply[ Piecewise$TM, r], {{1, 0} :> Tuple$TM, {1, _, 0} :> Tuple$TM}],
+			r
+		] /; (
+				s = ReplacePart[ Hold[ {clauses}, default], {1, _, 0} :> List];
+				r = Apply[ Piecewise, s];
+				!MatchQ[ r, _Piecewise] || Apply[ Hold, r] =!= s
+			)
+	]
+	
 
 
 (* We assume that all lists not treated by the above constructs should in fact be sets *)

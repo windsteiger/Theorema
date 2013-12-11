@@ -134,7 +134,7 @@ isRightDelimiter[ s_] :=
 	They do not affect parsing in any way!
 	*)
 $tmaOperators = {
-	{"/@", {Infix}, "Map"}, {"//@", {Infix}, "MapAll"},
+	{"@", {Infix}, "Componentwise"}, {"/@", {Infix}, "Map"}, {"//@", {Infix}, "MapAll"},
 	{"@@", {Infix}, "Apply"}, {";;", {Infix}, "Span"},
 	{"\[Rule]", {Infix}, "Rule"}, {"\[RuleDelayed]", {Infix}, "RuleDelayed"},
 	{"\[UndirectedEdge]", {Infix}, "UndirectedEdge"}, {"\[DirectedEdge]", {Infix}, "DirectedEdge"},
@@ -414,21 +414,26 @@ MakeExpression[ RadicalBox[ a_, b_], fmt_] := MakeExpression[ RowBox[ {"Radical"
 
 MakeExpression[ RowBox[{left_, RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], right_}], fmt_] :=
     MakeExpression[ RowBox[{"IffDef", "[", RowBox[{left, ",", right}], "]"}], fmt] /; $parseTheoremaExpressions
+    
+MakeExpression[ RowBox[{P_, "@", RowBox[ {"(", RowBox[ {args1:PatternSequence[ _, ","]..., arg_}], ")"}]}], fmt_] :=
+    MakeExpression[ RowBox[{"Componentwise", "[", RowBox[{P, ",", args1, arg}], "]"}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+MakeExpression[ RowBox[{P_, "@", right_}], fmt_] :=
+    MakeExpression[ RowBox[{"Componentwise", "[", RowBox[{P, ",", right}], "]"}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 
 MakeExpression[ RowBox[{"\[Piecewise]", GridBox[ c:{{_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", _}..}, ___]}], fmt_] :=
 	With[ {clauses = Riffle[ Map[ row2clause, c], ","]},
-    	MakeExpression[ RowBox[{"CaseDistinction", "[", RowBox[ clauses], "]"}], fmt]
+    	MakeExpression[ RowBox[{"Piecewise", "[", RowBox[ {"Tuple", "[", RowBox[ clauses], "]"}], "]"}], fmt]
 	] /; $parseTheoremaExpressions
 
-row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", "otherwise"}] := RowBox[ {"Clause", "[", RowBox[ {"True", ",", e}], "]"}]
-row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", "\[Placeholder]"}] := RowBox[ {"Clause", "[", RowBox[ {"True", ",", e}], "]"}]
-row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", c_}] := RowBox[ {"Clause", "[", RowBox[ {c, ",", e}], "]"}]
+row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", "otherwise"}] := RowBox[ {"Tuple", "[", RowBox[ {e, ",", "True"}], "]"}]
+row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", "\[Placeholder]"}] := RowBox[ {"Tuple", "[", RowBox[ {e, ",", "True"}], "]"}]
+row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", c_}] := RowBox[ {"Tuple", "[", RowBox[ {e, ",", c}], "]"}]
 
 (* amaletzk: Use "collectColumn" instead of "First" to treat nested GridBoxes correctly.
 	Reason: If one enters a new row to a GridBox by hitting "Ctrl+Enter", it might be that the new row
 	is in fact not added to the outermost GridBox, but rather a new GridBox is created. Still, it looks as if
 	the row was added to the outermost GridBox, so finding the error would be complicated (for the user).
-	However, I think there is no need to do this also with "CaseDistinction", because there 3 columns are required
+	However, I think there is no need to do this also with "Piecewise", because there 3 columns are required
 	anyway, and adding a new row either REALLY adds a new row to the outermost GridBox, or, if not, it is easy to see
 	that something went wrong. *)
 MakeExpression[ RowBox[ {"\[And]", RowBox[{"\[Piecewise]", GridBox[ c:{{_}..}, ___]}]}], fmt_] :=
