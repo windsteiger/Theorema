@@ -1338,14 +1338,33 @@ printComputationInfo[] :=
                 ]}
             ]}, False]], "ComputationInfo"]];
     ]
+    
+printComputationInfo[ cellID_Integer] := 
+	Module[ {nbDir},
+		nbDir = createPerNotebookDirectory[ CurrentValue[ "NotebookFullFileName"]];
+		(* generate cache in both formats, one for internal use, plain .m for sharing notebooks with users on different platforms *)
+		DumpSave[ FileNameJoin[ {nbDir, ToString[ cellID] <> ".mx"}], {buiActComputation, kbSelectCompute}];
+		Put[ Definition[ buiActComputation], Definition[ kbSelectCompute], FileNameJoin[ {nbDir, ToString[ cellID] <> ".m"}]];
+		DynamicModule[ {showTab = 0}, 
+			CellPrint[ Cell[ BoxData[
+				ToBoxes[ Column[
+					{ButtonBar[{"1" :> (showTab = 1), "2" :> (showTab = 2), "0" :> openCloseCurrent[ ButtonNotebook[]]}]}
+						]]], "ComputationInfo"]];
+			CellPrint[ Cell[ BoxData[
+				ToBoxes[ Dynamic[ 
+							Pane[ displayCache[ cellID, showTab], Automatic]
+						]]], "CIContent"]]
+		]
+	]
 printComputationInfo[args___] := unexcpected[ printComputationInfo, {args}]
-(*DynamicModule[{tab = 0}, 
- Dynamic[Column[
-   Join[{ButtonBar[{"1" :> (tab = 1), "2" :> (tab = 2), 
-       "0" :> (tab = 0)}]},
-    If[tab === 0,
-     {},
-     {Pane[f[tab], Automatic]}]]]]]*)
+
+openCloseCurrent[ nb_NotebookObject] :=
+	Module[{},
+		SelectionMove[ nb, All, CellGroup];
+		FrontEndExecute[ FrontEndToken[ "OpenCloseGroup"]];
+		SelectionMove[ nb, After, CellGroup]
+	]
+openCloseCurrent[ args___] := unexpected[ openCloseCurrent, {args}]
      
 setCompEnv[ kb_List, bui_List] :=
 	Module[{},
@@ -1490,18 +1509,52 @@ newCloseEnvCell[args___] :=
 
 makeNbNewButton[] :=
 	Button[ translate["tcSessTabNbTabButtonNewLabel"],
-		NotebookCreate[ StyleDefinitions -> makeColoredStylesheet[ "Notebook"]],
+		createNbRememberLocation[ ],
 		Alignment -> {Left, Top}, Method -> "Queued"]
 makeNbNewButton[ args___] := unexpected[ makeNbNewButton, {args}]
 		
+createNbRememberLocation[ ] :=
+	Module[{file, dir},
+		If[ ValueQ[ $dirLastOpened],
+			dir = $dirLastOpened,
+			dir = $HomeDirectory
+		];
+		file = SystemDialogInput[ "FileSave", {dir, {translate["fileTypeNotebook"] -> {"*.nb"}}}];
+		If[ StringQ[ file] && !FileExistsQ[ file],
+			$dirLastOpened = DirectoryName[ file];
+			trustNotebookDirectory[ $dirLastOpened];
+			NotebookSave[
+				NotebookCreate[ StyleDefinitions -> makeColoredStylesheet[ "Notebook"]],
+				file
+			];
+			createPerNotebookDirectory[ file];
+		]
+	]
+createNbRememberLocation[ args___] := unexpected[ createFileRememberLocation, {args}]
+
+trustNotebookDirectory[ dir_String] :=
+	Module[{tPath, cleanDir, nbSecurOpts = Options[ $FrontEnd, "NotebookSecurityOptions"]},
+		(* remove trailing pathname separator, e.g. "/" *)
+		If[ StringTake[ dir, -StringLength[ $PathnameSeparator]] === $PathnameSeparator,
+			cleanDir = StringDrop[ dir, -StringLength[ $PathnameSeparator]],
+			cleanDir = dir
+		];
+		(* be careful in future: maybe NotebookSecurityOptions moves to a system-specific context in future versions of Mma *)
+		tPath = "TrustedPath" /. (Global`NotebookSecurityOptions /. nbSecurOpts);
+		(* add dir to the trusted paths *)
+		Apply[ SetOptions[ $FrontEnd, #]&,
+			Options[ $FrontEnd, "NotebookSecurityOptions"] /. HoldPattern[ "TrustedPath" -> _] -> ("TrustedPath" -> DeleteDuplicates[ Append[ tPath, cleanDir]])]
+	]
+trustNotebookDirectory[ args___] := unexpected[ trustNotebookDirectory, {args}]
+
 makeNbOpenButton[ ] :=
 	Button[ translate["tcSessTabNbTabButtonOpenLabel"],
-		openFileRememberLocation[ ],
+		openNbRememberLocation[ ],
 		Method -> "Queued"
 	]
 makeNbOpenButton[ args___] := unexpected[ makeNbOpenButton, {args}]
 
-openFileRememberLocation[ ] :=
+openNbRememberLocation[ ] :=
 	Module[{file, dir},
 		If[ ValueQ[ $dirLastOpened],
 			dir = $dirLastOpened,
@@ -1510,10 +1563,51 @@ openFileRememberLocation[ ] :=
 		file = SystemDialogInput[ "FileOpen", {dir, {translate["fileTypeNotebook"] -> {"*.nb"}}}];
 		If[ StringQ[ file] && FileExistsQ[ file],
 			$dirLastOpened = DirectoryName[ file];
+			trustNotebookDirectory[ $dirLastOpened];
 			NotebookOpen[ file, StyleDefinitions -> makeColoredStylesheet[ "Notebook"]]
 		]
 	]
-openFileRememberLocation[ args___] := unexpected[ openFileRememberLocation, {args}]
+openNbRememberLocation[ args___] := unexpected[ openNbRememberLocation, {args}]
+
+(* create per-notebook directory, return the name *)
+createPerNotebookDirectory[ nb_NotebookObject] := 
+	Module[ {nbDir = CurrentValue[ nb, "NotebookDirectory"], file}, 
+		(* nbDir is the per-notebook directory, in which we store all files belonging to this notebook *)
+		If[ nbDir === $Failed,
+			(* nb has not yet been saved, it's an Untitled-... *)
+			file = saveNbRememberLocation[ nb],
+			(* else: use full name *)
+			file = CurrentValue[ nb, "NotebookFullFileName"]
+		];
+		createPerNotebookDirectory[ file]		
+	]
+createPerNotebookDirectory[ file_String] :=
+	Module[ {nbDir}, 
+		(* nbDir is the per-notebook directory, in which we store all files belonging to this notebook *)
+		nbDir = FileNameJoin[ {DirectoryName[ file], FileBaseName[ file]}];
+		If[ !DirectoryQ[ nbDir],
+			(* create the dir if it does not yet exist *)
+			CreateDirectory[ nbDir]
+		];
+		nbDir		
+	]
+createPerNotebookDirectory[ args___] := unexpected[ createPerNotebookDirectory, {args}]
+
+(* saveNbRememberLocation[ nb_NotebookObject] saves nb, asks for filename, returns filename *)
+saveNbRememberLocation[ nb_NotebookObject] :=
+	Module[{file, dir},
+		If[ ValueQ[ $dirLastOpened],
+			dir = $dirLastOpened,
+			dir = $HomeDirectory
+		];
+		file = SystemDialogInput[ "FileSave", {dir, {translate["fileTypeNotebook"] -> {"*.nb"}}}];
+		If[ StringQ[ file],
+			$dirLastOpened = DirectoryName[ file];
+			NotebookSave[ nb, file]
+		];
+		file
+	]
+saveNbRememberLocation[ args___] := unexpected[ saveNbRememberLocation, {args}]
 
 envButtonData["DEF"] := "tcSessTabEnvTabButtonDefLabel";
 envButtonData["THM"] := "tcSessTabEnvTabButtonThmLabel";
@@ -1750,7 +1844,7 @@ setPreferences[ ] :=
 			RadioButton[Dynamic[$buttonNat], True], translate["tcSessTabMathTabBSnat"]}}, Spacings -> {{{4, 0.5}}, Automatic}], 
     		translate["tcSessTabMathTabBS"], {{Top, Left}}]
     	}],
-    	Spacer[{1,260}],
+    	Spacer[{1,230}],
 		savePreferencesButton[]
 	}
 	]

@@ -773,12 +773,10 @@ SetAttributes[processComputation, HoldAll];
 
 processComputation[ x:Theorema`Computation`Language`nE] := 
 	Module[{},
-		printComputationInfo[];
 		$Failed
 	]
 processComputation[x_] := Module[ { procSynt, res},
 	procSynt = markVariables[ freshNames[ Hold[x]]];
-	printComputationInfo[]; (* should be moved to closeComputation[] in order to print info after the result, analogous then for proof info *)
 	setComputationContext[ "compute"];
 	res = Check[ Catch[ ReleaseHold[ procSynt]], $Failed];
 	setComputationContext[ "none"];
@@ -791,6 +789,7 @@ processComputation[args___] := unexcpected[ processComputation, {args}]
 
 openComputation[] := 
 	Module[{},
+		$evalCellID = CurrentValue[ "CellID"];
 		$parseTheoremaExpressions = True;
 		$ContextPath = Join[ 
 			{"Theorema`Computation`Language`"}, 
@@ -805,6 +804,7 @@ closeComputation[] :=
         End[];
 		$ContextPath = Select[ $ContextPath, (!StringMatchQ[ #, "Theorema`Computation`" ~~ __])&];
 		$parseTheoremaExpressions = False;
+		printComputationInfo[ $evalCellID];
     ]
 closeComputation[args___] := unexcpected[ closeComputation, {args}]
 
