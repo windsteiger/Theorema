@@ -82,17 +82,18 @@ makeDisjunction[ args___] := unexpected[ makeDisjunction, {args}]
 (* simplifiedAnd *)
 
 simplifiedAnd[ True] := True
-simplifiedAnd[ h_[ True...]] := True
-simplifiedAnd[ h_[ ___, False, ___]] := False
+simplifiedAnd[ (Theorema`Language`And$TM|Theorema`Computation`Language`And$TM)[ True...]] := True
+simplifiedAnd[ (Theorema`Language`And$TM|Theorema`Computation`Language`And$TM)[ ___, False, ___]] := False
 
-simplifiedAnd[ expr_] :=  
-	Module[ {simp = Flatten[ expr //. {True -> Sequence[], (Theorema`Language`And$TM|Theorema`Computation`Language`And$TM)[a_] -> a}]},
+simplifiedAnd[ expr:(h:Theorema`Language`And$TM|Theorema`Computation`Language`And$TM)[__]] :=  
+	Module[ {simp = DeleteCases[ Flatten[ expr //. h[a_] -> a], True]},
 		If[ Length[ simp] === 0,
 			True,
 			(* else *)
 			simp
 		]
 	]
+simplifiedAnd[ expr_] := expr
 simplifiedAnd[ args___] := unexpected[ simplifiedAnd, {args}]
 
 (* ::Subsubsection:: *)
@@ -101,14 +102,15 @@ simplifiedAnd[ args___] := unexpected[ simplifiedAnd, {args}]
 simplifiedOr[ h_[ False...]] := False
 simplifiedOr[ h_[ ___, True, ___]] := True
 
-simplifiedOr[ expr_] :=  
-	Module[ {simp = Flatten[ expr //. {False -> Sequence[], (Theorema`Language`Or$TM|Theorema`Computation`Language`Or$TM)[a_] -> a}]},
+simplifiedOr[ expr:(h:Theorema`Language`Or$TM|Theorema`Computation`Language`Or$TM)[__]] :=  
+	Module[ {simp = DeleteCases[ Flatten[ expr //. h[a_] -> a], False]},
 		If[ Length[ simp] === 0,
 			False,
 			(* else *)
 			simp
 		]
 	]
+simplifiedOr[ expr_] := expr
 simplifiedOr[ args___] := unexpected[ simplifiedOr, {args}]
 
 
@@ -350,7 +352,17 @@ stripUniversalQuantifiers[ Theorema`Language`Implies$TM[ l_, r_]] :=
 stripUniversalQuantifiers[ expr_] := {expr, {}, {}}
 stripUniversalQuantifiers[ args___] := unexpected[ stripUniversalQuantifiers, {args}]
 
-joinConditions[ c_List, newCond_Theorema`Language`And$TM] := Join[ Apply[ List, simplifiedAnd[ newCond]], c]
+joinConditions[ c_List, newCond_Theorema`Language`And$TM] := 
+	Module[ {simp = simplifiedAnd[ newCond]}, 
+		Switch[ simp,
+			True,
+			c,
+			_Theorema`Language`And$TM,
+			Join[ Apply[ List, simp], c],
+			_,
+			Prepend[ c, simp]
+		]
+	]
 joinConditions[ c_List, newCond_] := Prepend[ c, newCond]
 joinConditions[ args___] := unexpected[ joinConditions, {args}]
 
@@ -525,10 +537,23 @@ makeSingleRule[ {l_?NumberQ, r_, c_List, var_List}, ref_] := Sequence[]
 makeSingleRule[ {_Theorema`Language`And$TM|_Theorema`Language`Or$TM|_Theorema`Language`Implies$TM|_Theorema`Language`Iff$TM, r_, c_List, var_List}, ref_] := Sequence[]
 makeSingleRule[ {_Theorema`Language`Forall$TM|_Theorema`Language`Exists$TM, r_, c_List, var_List}, ref_] := Sequence[]
 (* If the free variables left/right do not coincide, then do not generate a rewrite rule *)
-makeSingleRule[ {l_, r_, c_List, var_List}, ref_] /; With[ {fr = freeVariables[ Append[ c, r]], fl = freeVariables[ l]}, Complement[ fr, fl] =!= {} || Complement[ fl, var] =!= {}] := 
+makeSingleRule[ {l_, r_, c_List, var_List}, ref_] /; With[ {fr = freeVariables[ r], fl = freeVariables[ l]}, Complement[ fr, fl] =!= {} || Complement[ fl, var] =!= {}] := 
 	Sequence[]
-	
+(* If the condition has additional variables, they can be existentially quantified:
+	forall x,y: P[x,y] => (f[x]=g[x])  <=>  forall x: (exists y: P[x,y]) => (f[x]=g[x]) *)
+makeSingleRule[ {l_, r_, c_List, var_List}, ref_] := 
+	Module[ {addVars = Complement[ freeVariables[ c], freeVariables[ l]], newC},
+		If[ addVars === {},
+			newC = c,
+			(* else *)
+			newC = {Theorema`Language`Exists$TM[ Apply[ Theorema`Language`RNG$, Map[ Theorema`Language`SIMPRNG$, addVars]], True, 
+				makeConjunction[ c, Theorema`Language`And$TM]]}
+		];
+		{key@ref, mmaTransRule[ {l, r, newC, var}, ref]}
+	]
+(*
 makeSingleRule[ all:{l_, r_, c_List, var_List}, ref_] := {key@ref, mmaTransRule[ all, ref]}
+*)
 
 (*
 	For backward rules we allow to introduce an existential quantifier if additional free variables occur.
