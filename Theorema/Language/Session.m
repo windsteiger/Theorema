@@ -817,7 +817,8 @@ renameToStandardContext[ expr_] :=
 		(* The result of $M functions may be Lists; They have to be transformed into tuples BEFORE freshNames[]
 			is applied, because otherwise they are transformed into sets.
 			We don't use makeTuple[] here, because otherwise we get problems with contexts. *)
-		stringExpr = ToString[ FullForm[ expr] /. List -> Tuple$TM];
+		(* Do not substitute into a META$, because a META$ has a list of a.b.f. constants at pos. 3 *)
+		stringExpr = ToString[ replaceAllExcept[ FullForm[ expr], {List -> Tuple$TM}, {}, Heads -> {Theorema`Computation`Language`META$}]];
 		
 		stringExpr = StringReplace[ stringExpr, "Theorema`Computation`" -> "Theorema`"];
 		$ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];

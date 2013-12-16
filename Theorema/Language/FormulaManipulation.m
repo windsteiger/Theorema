@@ -446,13 +446,13 @@ toRightStringAux[ Hold[]] := {}
 stripVar[ v:Theorema`Language`VAR$[Theorema`Language`SEQ0$[a_]]] := v -> ToExpression[ "SEQ0$" <> ToString[a]]
 stripVar[ v:Theorema`Language`VAR$[Theorema`Language`SEQ1$[a_]]] := v -> ToExpression[ "SEQ1$" <> ToString[a]]
 stripVar[ v:Theorema`Language`VAR$[a_]] := v -> ToExpression[ "VAR$" <> ToString[a]]
-stripVar[ v:Theorema`Language`META$[a_]] := v -> ToExpression[ "META$" <> ToString[a]]
+stripVar[ v:Theorema`Language`META$[a_, n_, ___]] := v -> ToExpression[ "META$" <> ToString[a] <> ToString[n]]
 stripVar[ args___] := unexpected[ stripVar, {args}]
 
 varToPattern[ v:Theorema`Language`VAR$[Theorema`Language`SEQ0$[a_]]] := With[ {new = ToExpression[ "SEQ0$" <> ToString[a]]}, v :> Apply[ Pattern, {new, BlankNullSequence[]}]]
 varToPattern[ v:Theorema`Language`VAR$[Theorema`Language`SEQ1$[a_]]] := With[ {new = ToExpression[ "SEQ1$" <> ToString[a]]}, v :> Apply[ Pattern, {new, BlankSequence[]}]]
 varToPattern[ v:Theorema`Language`VAR$[a_]] := With[ {new = ToExpression[ "VAR$" <> ToString[a]]}, v :> Apply[ Pattern, {new, Blank[]}]]
-varToPattern[ v:Theorema`Language`META$[a_]] := With[ {new = ToExpression[ "META$" <> ToString[a]]}, v :> Apply[ Pattern, {new, Blank[]}]]
+varToPattern[ v:Theorema`Language`META$[a_, n_, ___]] := With[ {new = ToExpression[ "META$" <> ToString[a] <> ToString[n]]}, v :> Apply[ Pattern, {new, Blank[]}]]
 varToPattern[ args___] := unexpected[ varToPattern, {args}]
 
 (* ::Subsubsection:: *)
@@ -797,7 +797,7 @@ introduceMeta[ expr_, rng_Theorema`Language`RNG$, forms_List:{}] :=
 		If no META$[ v, n, ...] occurs in kb, then n'+1 is -Infinity, we take 0 instead to create the first new meta variable META$[ v, 0, c]. *)
 	Module[{vars = specifiedVariables[ rng], const, subs},
 		const = Union[ Cases[ forms, _Theorema`Language`FIX$, Infinity]];
-		subs = Map[ Theorema`Language`VAR$[ #] -> Theorema`Language`META$[ #, Max[ Cases[ forms, Theorema`Language`META$[ #, n_] -> n, Infinity]] + 1, const]&, vars] /. -Infinity -> 0;
+		subs = Map[ Theorema`Language`VAR$[ #] -> Theorema`Language`META$[ #, Max[ Cases[ forms, Theorema`Language`META$[ #, n_, ___] -> n, Infinity]] + 1, const]&, vars] /. -Infinity -> 0;
 		{substituteFree[ expr, subs], Map[ Part[ #, 2]&, subs]} 
 	]
 introduceMeta[ args___] := unexpected[ introduceMeta, {args}]
