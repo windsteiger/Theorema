@@ -72,6 +72,7 @@ With[ {lang = "English"},
 	MessageName[isQuantifierFree, "usage", lang] = "";	
 	MessageName[isLogQuantifierFree, "usage", lang] = "";	
 	MessageName[isVariableFree, "usage", lang] = "";
+	MessageName[isGround, "usage", lang] = "";
 	MessageName[getDefInstances, "usage", lang] = "";	
 	MessageName[checkAllConds, "usage", lang] = "";	
 	MessageName[transferToComputation, "usage", lang] = "";	

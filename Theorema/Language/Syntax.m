@@ -305,7 +305,7 @@ isAtomicExpression[ args___] := unexpected[ isAtomicExpression, {args}]
 	they could stay in front of the rules loaded in "Computation`". Keep in mind that Expression.m is loaded twice!
 *)
 
-makeSet[ x___] /; isVariableFree[ {x}] := Apply[ ToExpression[ "Set$TM"], Union[ {x}]]
+makeSet[ x___] := Apply[ ToExpression[ "Set$TM"], Union[ {x}]]
 makeTuple[ x___] := ToExpression[ "Tuple$TM"][x]
 
 

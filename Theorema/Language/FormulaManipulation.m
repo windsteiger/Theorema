@@ -267,6 +267,16 @@ isVariableFree[ expr_, level_:{1}] :=
 		_Theorema`Language`VAR$|_Theorema`Computation`Language`VAR$, level]
 isVariableFree[ args___] := unexpected[ isVariableFree, {args}]
 
+(* ::Subsubsection:: *)
+(* ground expressions *)
+
+isGround[ expr_, level_:Infinity] := 
+	FreeQ[ expr,
+		_Theorema`Language`VAR$|_Theorema`Computation`Language`VAR$|
+		_Theorema`Language`FIX$|_Theorema`Computation`Language`FIX$|
+		_Theorema`Language`META$|_Theorema`Computation`Language`META$, level]
+isGround[ args___] := unexpected[ isGround, {args}]
+
 
 (* ::Subsubsection:: *)
 (* getInstances *)
