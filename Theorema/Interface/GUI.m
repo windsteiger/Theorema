@@ -60,7 +60,8 @@ initGUI[] :=
                 {"Cardinality", RowBox[{"\[LeftBracketingBar]", "A", "\[RightBracketingBar]"}], False, True, False},
                 {"PowerSet", RowBox[{"\[ScriptCapitalP]","[", "A", "]"}], False, True, False},
                 {"MaximumElementSet", RowBox[{"max","[", "A", "]"}], False, True, False},
-                {"MinimumElementSet", RowBox[{"min","[", "A", "]"}], False, True, False}
+                {"MinimumElementSet", RowBox[{"min","[", "A", "]"}], False, True, False},
+                {"AnElement", RowBox[{"\[AE]","[", "A", "]"}], False, True, False}
         	},
         	{"Tuples",
         		{"Subscript", SubscriptBox[ "T", "i"], False, True, False},

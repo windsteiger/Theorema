@@ -623,6 +623,7 @@ Set$TM /: min$TM[ Set$TM[ e___]] /; buiActive["MinimumElementSet"] :=
 	Module[ {s},
 		(s /. Min -> min$TM /. {min$TM[x_Set$TM] :> min$TM[x], min$TM[x___] :> min$TM[Set$TM[x]]}) /; (s = Min[ e]; Apply[ Hold, {s}] =!= Hold[ Min[ e]])
 	]
+Set$TM /: \[AE]$TM[ Set$TM[ a_, ___]] /; buiActive["AnElement"] := a
 	
 
 

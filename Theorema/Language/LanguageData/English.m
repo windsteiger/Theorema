@@ -68,6 +68,7 @@ With[ {lang = "English"},
 	MessageName[LessEqual$TM, "usage", lang] = "";
 	MessageName[Greater$TM, "usage", lang] = "";
 	MessageName[GreaterEqual$TM, "usage", lang] = "";
+	MessageName[\[AE]$TM, "usage", lang] = "";
 	MessageName[Element$TM, "usage", lang] = "";
 	MessageName[IntersectionOf$TM, "usage", lang] = "";
     MessageName[Intersection$TM, "usage", lang] = "";
