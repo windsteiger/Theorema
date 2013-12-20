@@ -185,13 +185,17 @@ freeVariables[ args___] := unexpected[ freeVariables, {args}]
 (* ::Subsubsection:: *)
 (* rngVariables *)
 
-rngVariables[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[r___]] := Map[ First, {r}]
+(* It is certainly better not to evaluate anything apart from the range variable here (especially in connection
+	with "Let"). Same with "rngConstants", and maybe also with "extractVar" (?) *)
+SetAttributes[ rngVariables, HoldAll];
+rngVariables[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[r___]] := Apply[ List, Replace[ Hold[r], {_[f_,___]:>f}, {1}]]
 rngVariables[ args___] := unexpected[ rngVariables, {args}]
 
 (* ::Subsubsection:: *)
 (* rngConstants *)
 
-rngConstants[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[r___]] := Map[ First, {r}]
+SetAttributes[ rngConstants, HoldAll];
+rngConstants[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[r___]] := Apply[ List, Replace[ Hold[r], {_[f_,___]:>f}, {1}]]
 rngConstants[ args___] := unexpected[ rngConstants, {args}]
 
 
@@ -213,10 +217,22 @@ extractVar[ args___] := unexpected[ extractVar, {args}]
 Clear[ substituteFree]
 substituteFree[ expr_Hold, {}] := expr
 substituteFree[ Hold[], _] := Hold[]
+(* Some quantifiers (e.g. "Sum") can be used together with subscripts. *)
+substituteFree[ Hold[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[ rng__], cond_, sub_, form_]], rules_List] :=
+	Module[ {qvars = rngVariables[ r], vars},
+		vars = Select[ rules, !MemberQ[ qvars, #[[1]]]&];
+		applyHold[ Hold[q], joinHold[ substituteFree[ Hold[r], vars], joinHold[ substituteFree[ Hold[cond], vars], joinHold[ substituteFree[ Hold[sub], vars], substituteFree[ Hold[form], vars]]]]]
+	]
 substituteFree[ Hold[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[ rng__], cond_, form_]], rules_List] :=
 	Module[ {qvars = rngVariables[ r], vars},
 		vars = Select[ rules, !MemberQ[ qvars, #[[1]]]&];
 		applyHold[ Hold[q], joinHold[ substituteFree[ Hold[r], vars], joinHold[ substituteFree[ Hold[cond], vars], substituteFree[ Hold[form], vars]]]]
+	]
+(* Some quantifiers (e.g. "Let") don't have a condition. *)
+substituteFree[ Hold[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[ rng__], form_]], rules_List] :=
+	Module[ {qvars = rngVariables[ r], vars},
+		vars = Select[ rules, !MemberQ[ qvars, #[[1]]]&];
+		applyHold[ Hold[q], joinHold[ substituteFree[ Hold[r], vars], substituteFree[ Hold[form], vars]]]
 	]
 substituteFree[ Hold[ f_[x___]], rules_List] :=
 	Module[ { sx = Map[ substituteFree[ #, rules]&, Map[ Hold, Hold[x]]]},
