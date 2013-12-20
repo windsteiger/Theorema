@@ -131,6 +131,7 @@ With[ {lang = "English"},
 	translate["selGoal", lang] = "Selected Proof Goal";
 	translate["selectedRules",lang] = "Selected Rules";
 	translate["selKB", lang] = "Selected Knowledge Base";
+	translate["selBui", lang] = "Selected Built-ins";
 	translate["selProver", lang] = "Selected Prover";
 	translate["prove", lang] = "Prove!";
 	translate["OKnext", lang] = "OK, next ...";
@@ -198,6 +199,7 @@ With[ {lang = "English"},
 	    
 (* Theorema`Language`Session` *)
     translate["notUniqueLabel", lang] = "These labels are not unique in the notebook: ``\n\nThis is just a warning, you can continue,\nbut referencing formulae from this notebook\nmight turn out to be confusing.";
+    translate["cantCreateDir", lang] = "Cannot create directory ``.";
     translate["noArchName", lang] = "No archive name available for chosen archive. Check file content.";
     translate["Global Declarations"] = "Global Declarations valid at this cell";
     translate["None"] = "None";

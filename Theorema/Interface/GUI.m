@@ -215,16 +215,16 @@ openTheoremaCommander[ ] /; $Notebooks :=
         		{
         			(* session *){sessionCompose[], sessionInspect[], sessionArchive[]},
         			(* prove *)  {Dynamic[ Refresh[ displaySelectedGoal[], UpdateInterval -> 2]],
-        				Dynamic[Refresh[displayKBBrowser["prove"], TrackedSymbols :> {$kbStruct}]],
-        				displayBuiltinBrowser["prove"],
+        				Dynamic[ Refresh[ displayKBBrowser["prove"], TrackedSymbols :> {$kbStruct}]],
+        				Dynamic[ Refresh[ displayBuiltinBrowser["prove"], TrackedSymbols :> {buiActProve}]],
         				Dynamic[ Refresh[ selectProver[], TrackedSymbols :> {$selectedRuleSet, $selectedStrategy,$keyWord}]],
         				Dynamic[ Refresh[ submitProveTask[ ], TrackedSymbols :> {$selectedProofGoal, $selectedProofKB, $selectedSearchDepth, $selectedSearchTime}]],
         				Dynamic[ Refresh[ proofNavigation[ $TMAproofTree], TrackedSymbols :> {$TMAproofTree, $TMAproofSearchRunning, $TMAproofNotebook, ruleTextActive, $proofTreeScale, $selectedProofStep}]]},
         			(* compute *){compSetup[],
-        				Dynamic[Refresh[displayKBBrowser["compute"], TrackedSymbols :> {$kbStruct}]],
-        				displayBuiltinBrowser["compute"]},
+        				Dynamic[ Refresh[ displayKBBrowser["compute"], TrackedSymbols :> {$kbStruct}]],
+        				Dynamic[ Refresh[ displayBuiltinBrowser["compute"], TrackedSymbols :> {buiActComputation}]]},
         			(* solve *)  {Dynamic[Refresh[displayKBBrowser["solve"], TrackedSymbols :> {$kbStruct}]],
-        				displayBuiltinBrowser["solve"]},
+        				Dynamic[ Refresh[ displayBuiltinBrowser["solve"], TrackedSymbols :> {buiActSolve}]]},
         			(* prefs *)  {setPreferences[ ]}
         		}
         	], TrackedSymbols :> {$Language}]],
@@ -691,11 +691,6 @@ structView[ file_, {head:Cell[ sec_, style:"Title"|"Section"|"Subsection"|"Subsu
     	]
     ]
     
-(* group with header and no content -> ignore    
-structView[file_, {Cell[sec_, "Title"|"Section"|"Subsection"|"Subsubsection"|"Subsubsubsection"|"EnvironmentHeader", ___]}, tags_, task_] :=
-	Sequence[]
-*)
-
 (* list processed componentwise *) 
 structView[ file_, item_List, tags_, task_] :=
     Module[ {content, views, compTags},
@@ -714,10 +709,6 @@ structView[ file_, item_List, tags_, task_] :=
     	]
     ]
 
-(*If item_List is empty
-structView[file_, {}, tags_, task_] := Sequence[];
-*)
- 
 (* input cell with cell tags *)
 structView[ file_, Cell[ content_, "FormalTextInputFormula", a___, CellTags -> cellTags_, b___], tags_, task_] :=
     Module[ { isEval, formPos, cleanCellTags, keyTags, formulaLabel, idLabel, nbAvail},
@@ -890,7 +881,7 @@ structViewBuiltin[{category_String, rest__List}, tags_, task_String] :=
         compTags = Apply[Union, sub[[2]]];
         opGroup = partitionFill[ sub[[1]], 4];
         {OpenerView[{headerViewBuiltin[category, compTags, task], Grid[ opGroup, Alignment -> {Left, Baseline}, Spacings -> {2, Automatic}, ItemSize -> Full]}, 
-        	ToExpression["Dynamic[$builtinStructState$"<>category<>"]"]], 
+        	ToExpression["Dynamic[Theorema`Interface`GUI`Private`$builtinStructState$"<>category<>"]"]], 
          compTags}
     ]     
     
@@ -942,46 +933,50 @@ headerViewBuiltin[args___] :=
     unexpected[ headerViewBuiltin, {args}]
 
 
-(*================================= ResultBuiltin START ==========================================*)
+(* ::Subsection:: *)
+(* Summary of used builtins *)
 
-(*
-Produces list of {catigory_String,children_List}.
-If all children are selected children_List contains only one "all" child.
-
-Example: resultBuiltin[$tmaBuiltins,{},"prove"]
-Returns: selected Builtins of task_String.
-*) 
-
-summarizeBuiltins[ l_List, task_String] := Map[ resultBuiltin[ #, task]&, Cases[ l, {_String, {_, _, True|False, True|False, True|False}..}, Infinity]]
+summarizeBuiltins[ task_String, l_List:$tmaBuiltins] := 
+	Module[ {cat},
+		cat = Map[ resultBuiltin[ #, task]&, l];
+		Column[ Apply[ Join, Map[ #[[1]]&, cat]]]		
+	]
 summarizeBuiltins[args___] := unexpected[ summarizeBuiltins, {args}]
    
 resultBuiltin[{category_String, rest__List}, task_String] :=
-    Module[ {sub, complete},
-        sub = Transpose[ Map[ resultBuiltin[ #, task] &, {rest}]];
-        complete = Apply[ And, sub[[2]]];
-        If[ complete,
-        	"[" <> category <> "]",
-        	{category, Apply[ Join, sub[[1]]]}
+    Module[ {sub, opAct, opInact, subCat},
+        sub = Map[ resultBuiltin[ #, task] &, {rest}];
+        opAct = Cases[ sub, {op_String, True} -> op];
+        opInact = Cases[ sub, {op_String, False} -> op];
+        subCat = Cases[ sub, {_List, _}];
+        Which[ 
+        	opInact === {} && Apply[ And, Map[ #[[2]]&, subCat]],
+        	(* all True *)
+        	{{"\[Checkmark] [" <> category <> "]"}, True},
+        	opAct === {} && Not[ Apply[ Or, Map[ #[[2]]&, subCat]]],
+        	{{Style[ category, "ComponentEmpty"]}, False},
+        	True,
+        	{{OpenerView[ {category,
+        		Column[ Join[
+        			{Row[ Prepend[ Riffle[ Map[ Style[ #, "ComponentActive"]&, opAct], ","], "\[Checkmark] "]], 
+        			Row[ Riffle[ Map[ Style[ #, "ComponentInactive"]&, opInact], ","]]}, 
+        			Map[ #[[1]]&, subCat]]]}, True]}, Undefined}
         ]
     ] 
-    
+ 
 resultBuiltin[ {op_String, display_, _, _, _}, task_String] :=
-		If[ Switch[ task,
+	{op, Switch[ task,
     		"prove",
     		buiActProve[ op],
     		"compute",
     		buiActComputation[ op],        	
           	"solve",
-          	buiActSolve[ op]],
-        {{op}, True},
-        {{}, False}
-		]
+          	buiActSolve[ op]]}        	
 
 resultBuiltin[args___] :=
     unexpected[ resultBuiltin, {args}]
 
-(*====================================== ResultBuiltin END ==========================================*)
-    
+  
 
 (* ::Subsubsection:: *)
 (* structViewRules *)
@@ -1052,9 +1047,9 @@ resetDefaultRules[] :=
 		&,list];		
 	]
 
-displaySelectedRules[Hold[ rs_]] := 
+displaySelectedRules[ Hold[ rs_]] := 
 	Module[{list},
-		(*Select checked list_ from allRules_*)  
+		(* Select checked list_ from allRules_ *)  
 		list = Cases[rs,{r_Symbol,True,text_,p_Integer,___}->{r,text,p},Infinity];
 		(*Sort list_ by priority_*)
 		list = Sort[list,#1[[3]]<#2[[3]]&];
@@ -1244,7 +1239,8 @@ submitProveTask[ ] :=
 				Method -> "Queued", Active -> ($selectedProofGoal =!= {})],
 			Column[{
 				Labeled[ displaySelectedGoal[ $selectedProofGoal], translate["selGoal"], {{Top, Left}}],
-				Labeled[ displaySelectedKB[], translate["selKB"], {{Top, Left}}]
+				Labeled[ displaySelectedKB[], translate["selKB"], {{Top, Left}}],
+				Labeled[ summarizeBuiltins[ "prove"], translate["selBui"], {{Top, Left}}]
 			}],
 			
 			Column[{				
@@ -1296,7 +1292,7 @@ execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, str
 	Module[{po, pv, pt, st},
 		{pv, po, pt} = callProver[ rules, strategy, goal, kb, searchDepth, searchTime];
 		{po, st} = simplifyProof[ po, simplification];
-		printProveInfo[ goal, kb, ruleSet, strategy, {pv, po}, {pt, st}, searchDepth];
+		printProveInfo[ pv, pt, st];
 	]
 execProveCall[ args___] := unexpected[ execProveCall, {args}]
 
@@ -1353,44 +1349,71 @@ printComputationInfo[] :=
 printComputationInfo[ cellID_Integer] := 
 	Module[ {nbDir},
 		nbDir = createPerNotebookDirectory[ CurrentValue[ "NotebookFullFileName"]];
-		(* generate cache in both formats, one for internal use, plain .m for sharing notebooks with users on different platforms *)
-		DumpSave[ FileNameJoin[ {nbDir, ToString[ cellID] <> ".mx"}], {buiActComputation, kbSelectCompute}];
-		Put[ Definition[ buiActComputation], Definition[ kbSelectCompute], FileNameJoin[ {nbDir, ToString[ cellID] <> ".m"}]];
-		DynamicModule[ {showTab = 0}, 
+		(* Generate cache only in plain .m format, since this allows sharing notebooks with users on different platforms.
+			Also, loading a .m-file allows dynamic objects to react to new settings, whereas loading a .mx-file has no effect on dynamics.
+			I assume the speed gain from using mx is neglectable *)
+		Put[ Definition[ buiActComputation], Definition[ kbSelectCompute], FileNameJoin[ {nbDir, "c" <> ToString[ cellID] <> ".m"}]];
+		With[ {dir = nbDir},
 			CellPrint[ Cell[ BoxData[
-				ToBoxes[ Column[
-					{ButtonBar[{"1" :> (showTab = 1), "2" :> (showTab = 2), "0" :> openCloseCurrent[ ButtonNotebook[]]}]}
-						]]], "ComputationInfo"]];
-			CellPrint[ Cell[ BoxData[
-				ToBoxes[ Dynamic[ 
-							Pane[ displayCache[ cellID, showTab], Automatic]
-						]]], "CIContent"]]
-		]
+				ToBoxes[ DynamicModule[ {showTab = 1}, 
+					OpenerView[ {"",
+						Column[ {ButtonBar[{
+								translate["tcComputeTabKBTabLabel"] :> (showTab = 1), 
+								translate["tcComputeTabBuiltinTabLabel"] :> (showTab = 2), 
+								translate["RestoreEnv"] :> setCompEnv[ cellID, dir]}],
+							Dynamic[ Pane[ displayComputationCache[ cellID, dir, showTab], {250, 100}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]]}, 
+							Alignment -> Right]}, 
+						False]
+				]]], "ComputationInfo"]]
+		];
 	]
 printComputationInfo[args___] := unexcpected[ printComputationInfo, {args}]
-
-openCloseCurrent[ nb_NotebookObject] :=
-	Module[{},
-		SelectionMove[ nb, All, CellGroup];
-		FrontEndExecute[ FrontEndToken[ "OpenCloseGroup"]];
-		SelectionMove[ nb, After, CellGroup]
-	]
-openCloseCurrent[ args___] := unexpected[ openCloseCurrent, {args}]
      
-setCompEnv[ kb_List, bui_List] :=
+setCompEnv[ cellID_Integer, dir_String] :=
 	Module[{},
-		Clear[kbSelectCompute];
-		kbSelectCompute[_] := False;
-		Scan[(kbSelectCompute[#[[1]]] = #[[2]])&, kb];
-		Scan[(buiActComputation[#[[1]]] = #[[2]])&, bui]
+		Clear[ kbSelectCompute];
+		Get[ "c" <> ToString[ cellID] <> ".m", Path -> {dir}];
 	]
 setCompEnv[ args___] := unexpected[ setCompEnv, {args}]
 
+displayComputationCache[ cellID_Integer, dir_String, tab_Integer] :=
+	Block[ {kbSelectCompute, buiActComputation},
+		Get[ "c" <> ToString[ cellID] <> "`", Path -> {dir}];
+		Switch[ tab,
+			1, (* display kb *)
+			Map[ displayFormulaFromKey, Cases[ DownValues[ kbSelectCompute],
+        		HoldPattern[ Verbatim[HoldPattern][ kbSelectCompute[ k_List]] :> True] -> k]],
+			2, (* display builtin *)
+			summarizeBuiltins[ "compute"],
+			_, (* undefined *)
+			"???"
+		]
+	]
+displayComputationCache[ cellID_Integer, dir_String, tab_] := displayComputationCache[ cellID, dir, 1]
+displayComputationCache[ args___] := unexpected[ displayComputationCache, {args}]
+
+displayFormulaFromKey[ k_List] :=
+	Module[ {form},
+		form = Select[ $tmaEnv, key[ #] === k&];
+		If[ form === {},
+			Button[ "???", evalFormulaFromKey[ k], Appearance -> None],
+			form = form[[1]];
+			Tooltip[ label@form, theoremaDisplay[ formula@form]]
+		]
+	]
+displayFormulaFromKey[ args___] := unexpected[ displayFormulaFromKey, {args}]
+
+evalFormulaFromKey[ k_List] :=
+	With[ { file = Part[ StringSplit[ k[[2]], ":"], 2]},
+        NotebookLocate[ {file, k[[1]]}];
+        FrontEndTokenExecute[ "EvaluateCells"];
+       ]
+evalFormulaFromKey[ args___] := unexpected[ evalFormulaFromKey, {args}]
 
 (* ::Subsubsection:: *)
 (* printProofInfo *)
 
-
+(*
 printProveInfo[ goal_, kb_, rules_, strategy_, {pVal_, proofObj_}, {pTime_, sTime_}, searchDepth_] :=
     Module[ {kbAct, bui, buiAct},
     	(* pTime (prove time) and sTime (simplification time) currently unused, should be displayed somewhere *)
@@ -1426,6 +1449,30 @@ printProveInfo[ goal_, kb_, rules_, strategy_, {pVal_, proofObj_}, {pTime_, sTim
             ]}, False]], "ProofInfo"]];
         NotebookWrite[ $proofInitNotebook, Cell[ "\[EmptySquare]", "CloseProof"]];
     ]
+*)
+printProveInfo[ pVal_, pTime_, sTime_] := 
+	Module[ {nbDir, cellID = getCellIDFromKey[ key@$selectedProofGoal], showTab},
+		nbDir = createPerNotebookDirectory[ CurrentValue[ "NotebookFullFileName"]];
+		(* Generate cache only in plain .m format, since this allows sharing notebooks with users on different platforms.
+			Also, loading a .m-file allows dynamic objects to react to new settings, whereas loading a .mx-file has no effect on dynamics.
+			I assume the speed gain from using mx is neglectable *)
+		Put[ Definition[ $TMAproofObject], FileNameJoin[ {nbDir, "p" <> cellID <> "-ProofObject.m"}]];
+		Put[ Definition[ buiActComputation], Definition[ kbSelectCompute], FileNameJoin[ {nbDir, "p" <> cellID <> ".m"}]];
+        If[ NotebookFind[ $proofInitNotebook, makeProofIDTag[ $selectedProofGoal], All, CellTags] === $Failed,
+			NotebookFind[ $proofInitNotebook, id@$selectedProofGoal, All, CellTags];
+			NotebookFind[ $proofInitNotebook, "CloseEnvironment", Next, CellStyle];
+			SelectionMove[ $proofInitNotebook, After, CellGroup],
+			SelectionMove[ $proofInitNotebook, All, CellGroup]
+		];
+		SetSelectedNotebook[ $proofInitNotebook];
+        NotebookWrite[ $proofInitNotebook, Cell[ TextData[ {translate[ "Proof of"]<>" ", formulaReference[ goal], ": ", 
+        	Cell[ BoxData[ ToBoxes[ proofStatusIndicator[ pVal]]]], ToBoxes[ ButtonBar[{"1" :> (showTab = 1), "2" :> (showTab = 2), "0" :> openCloseCurrent[ ButtonNotebook[]]}]]}],
+        	"ProofInfo", CellTags -> makeProofIDTag[ goal]]];
+		NotebookWrite[ $proofInitNotebook, Cell[ BoxData[ With[ {box = ToBoxes[ Dynamic[ Pane[ displayProofCache[ cellID, showTab], Automatic]]]}, 
+			DynamicModuleBox[ {showTab = 1}, box]
+				]], "PIContent"]]
+	]
+
 printProveInfo[args___] := unexcpected[ printProveInfo, {args}]
 
 setProveEnv[ goal_, kb_List, bui_List, ruleSet_, strategy_, allRules_List, searchDepth_] :=
@@ -1523,40 +1570,6 @@ makeNbNewButton[] :=
 		createNbRememberLocation[ ],
 		Alignment -> {Left, Top}, Method -> "Queued"]
 makeNbNewButton[ args___] := unexpected[ makeNbNewButton, {args}]
-		
-createNbRememberLocation[ ] :=
-	Module[{file, dir},
-		If[ ValueQ[ $dirLastOpened],
-			dir = $dirLastOpened,
-			dir = $HomeDirectory
-		];
-		file = SystemDialogInput[ "FileSave", {dir, {translate["fileTypeNotebook"] -> {"*.nb"}}}];
-		If[ StringQ[ file] && !FileExistsQ[ file],
-			$dirLastOpened = DirectoryName[ file];
-			trustNotebookDirectory[ $dirLastOpened];
-			NotebookSave[
-				NotebookCreate[ StyleDefinitions -> makeColoredStylesheet[ "Notebook"]],
-				file
-			];
-			createPerNotebookDirectory[ file];
-		]
-	]
-createNbRememberLocation[ args___] := unexpected[ createFileRememberLocation, {args}]
-
-trustNotebookDirectory[ dir_String] :=
-	Module[{tPath, cleanDir, nbSecurOpts = Options[ $FrontEnd, "NotebookSecurityOptions"]},
-		(* remove trailing pathname separator, e.g. "/" *)
-		If[ StringTake[ dir, -StringLength[ $PathnameSeparator]] === $PathnameSeparator,
-			cleanDir = StringDrop[ dir, -StringLength[ $PathnameSeparator]],
-			cleanDir = dir
-		];
-		(* be careful in future: maybe NotebookSecurityOptions moves to a system-specific context in future versions of Mma *)
-		tPath = "TrustedPath" /. (Global`NotebookSecurityOptions /. nbSecurOpts);
-		(* add dir to the trusted paths *)
-		Apply[ SetOptions[ $FrontEnd, #]&,
-			Options[ $FrontEnd, "NotebookSecurityOptions"] /. HoldPattern[ "TrustedPath" -> _] -> ("TrustedPath" -> DeleteDuplicates[ Append[ tPath, cleanDir]])]
-	]
-trustNotebookDirectory[ args___] := unexpected[ trustNotebookDirectory, {args}]
 
 makeNbOpenButton[ ] :=
 	Button[ translate["tcSessTabNbTabButtonOpenLabel"],
@@ -1564,61 +1577,7 @@ makeNbOpenButton[ ] :=
 		Method -> "Queued"
 	]
 makeNbOpenButton[ args___] := unexpected[ makeNbOpenButton, {args}]
-
-openNbRememberLocation[ ] :=
-	Module[{file, dir},
-		If[ ValueQ[ $dirLastOpened],
-			dir = $dirLastOpened,
-			dir = $HomeDirectory
-		];
-		file = SystemDialogInput[ "FileOpen", {dir, {translate["fileTypeNotebook"] -> {"*.nb"}}}];
-		If[ StringQ[ file] && FileExistsQ[ file],
-			$dirLastOpened = DirectoryName[ file];
-			trustNotebookDirectory[ $dirLastOpened];
-			NotebookOpen[ file, StyleDefinitions -> makeColoredStylesheet[ "Notebook"]]
-		]
-	]
-openNbRememberLocation[ args___] := unexpected[ openNbRememberLocation, {args}]
-
-(* create per-notebook directory, return the name *)
-createPerNotebookDirectory[ nb_NotebookObject] := 
-	Module[ {nbDir = CurrentValue[ nb, "NotebookDirectory"], file}, 
-		(* nbDir is the per-notebook directory, in which we store all files belonging to this notebook *)
-		If[ nbDir === $Failed,
-			(* nb has not yet been saved, it's an Untitled-... *)
-			file = saveNbRememberLocation[ nb],
-			(* else: use full name *)
-			file = CurrentValue[ nb, "NotebookFullFileName"]
-		];
-		createPerNotebookDirectory[ file]		
-	]
-createPerNotebookDirectory[ file_String] :=
-	Module[ {nbDir}, 
-		(* nbDir is the per-notebook directory, in which we store all files belonging to this notebook *)
-		nbDir = FileNameJoin[ {DirectoryName[ file], FileBaseName[ file]}];
-		If[ !DirectoryQ[ nbDir],
-			(* create the dir if it does not yet exist *)
-			CreateDirectory[ nbDir]
-		];
-		nbDir		
-	]
-createPerNotebookDirectory[ args___] := unexpected[ createPerNotebookDirectory, {args}]
-
-(* saveNbRememberLocation[ nb_NotebookObject] saves nb, asks for filename, returns filename *)
-saveNbRememberLocation[ nb_NotebookObject] :=
-	Module[{file, dir},
-		If[ ValueQ[ $dirLastOpened],
-			dir = $dirLastOpened,
-			dir = $HomeDirectory
-		];
-		file = SystemDialogInput[ "FileSave", {dir, {translate["fileTypeNotebook"] -> {"*.nb"}}}];
-		If[ StringQ[ file],
-			$dirLastOpened = DirectoryName[ file];
-			NotebookSave[ nb, file]
-		];
-		file
-	]
-saveNbRememberLocation[ args___] := unexpected[ saveNbRememberLocation, {args}]
+		
 
 envButtonData["DEF"] := "tcSessTabEnvTabButtonDefLabel";
 envButtonData["THM"] := "tcSessTabEnvTabButtonThmLabel";

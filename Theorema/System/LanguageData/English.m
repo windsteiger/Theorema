@@ -36,6 +36,7 @@ With[ {lang = "English"},
 	MessageName[$formulaCounterName,"usage", lang] = "Name of formulaCounter in the notebook options in CounterAssignments parameter.";
 	MessageName[cellIDLabel, "usage", lang] = "cellIDLabel[cellID_Integer] returns string label for the given integer CellID value.";
 	MessageName[getCellIDLabel, "usage", lang] = "getCellIDLabel[ cellTags] finds the cellID label in cellTags.";
+	MessageName[getCellIDFromKey, "usage", lang] = "getCellIDFromKey[ key] extracts the cellID from the formula key.";
 	MessageName[getCleanCellTags,"usage", lang] = "getCleanCellTags[cellTags] returns all CellTags except tags used as cell/formula keys in cell/formula identification.";
 	MessageName[getKeyTags,"usage", lang] = "getKeyTags[cellTags] returns all CellTags used as cell/formula keys in cell/formula identification.";
 	MessageName[cellTagsToString,"usage", lang] = "cellTagsToString[cellTags] converts a list of cell tags into a single string.";
@@ -51,6 +52,9 @@ With[ {lang = "English"},
 	MessageName[kbSelectSolve, "usage", lang] = "kbSelectCompute[ f] indicates whether the formula labeled f should go into the KB for solve.";
 	MessageName[makeTmaExpression, "usage", lang] = "makeTmaExpression[ e] turns e into an expression in Theorema language.";
 	MessageName[computeInProof, "usage", lang] = "computeInProof[expr] computes expr within a proof.";
+	MessageName[createNbRememberLocation, "usage", lang] = "createNbRememberLocation[] creates a new notebook and stores the location for the next notebook operation.";
+	MessageName[openNbRememberLocation, "usage", lang] = "openNbRememberLocation[] opens a notebook and stores the location for the next notebook operation.";
+	MessageName[createPerNotebookDirectory, "usage", lang] = "createPerNotebookDirectory[ file] creates a cache directory for the notebook file.";
 
 (* Theorema`Language`FormulaManipulation` *)
 	MessageName[freeVariables, "usage", lang] = "";	

@@ -307,6 +307,14 @@ getCellLabel[ args___] := unexpected[ getCellLabel, {args}]
 getCellIDLabel[ cellTags_] := getCellLabel[ cellTags, "ID"]
 getCellIDLabel[ args___] := unexpected[ getCellIDLabel, {args}]
 
+(* Extract the CellID from the formula key *)
+getCellIDFromKey[ k_List] :=
+	Module[{lab},
+		lab = getCellIDLabel[ k];
+		Part[ StringSplit[ lab, $cellTagKeySeparator], 2]
+	]
+getCellIDFromKey[ args___] := unexpected[ getCellIDFromKey, {args}]
+
 getCellSourceLabel[ cellTags_] := getCellLabel[ cellTags, "Source"]
 getCellSourceLabel[ args___] := unexpected[ getCellSourceLabel, {args}]
 
@@ -847,6 +855,102 @@ computeInProof[ expr_] :=
 	]
 computeInProof[ args___] := unexpected[ computeInProof, {args}]
 
+
+(* ::Section:: *)
+(* Notebook operations *)
+
+createNbRememberLocation[ ] :=
+	Module[{file, dir},
+		If[ ValueQ[ $dirLastOpened],
+			dir = $dirLastOpened,
+			dir = $HomeDirectory
+		];
+		file = SystemDialogInput[ "FileSave", {dir, {translate["fileTypeNotebook"] -> {"*.nb"}}}];
+		If[ StringQ[ file] && !FileExistsQ[ file],
+			$dirLastOpened = DirectoryName[ file];
+			trustNotebookDirectory[ $dirLastOpened];
+			NotebookSave[
+				NotebookCreate[ StyleDefinitions -> makeColoredStylesheet[ "Notebook"]],
+				file
+			];
+			createPerNotebookDirectory[ file];
+		]
+	]
+createNbRememberLocation[ args___] := unexpected[ createFileRememberLocation, {args}]
+
+trustNotebookDirectory[ dir_String] :=
+	Module[{tPath, cleanDir, nbSecurOpts = Options[ $FrontEnd, "NotebookSecurityOptions"]},
+		(* remove trailing pathname separator, e.g. "/" *)
+		If[ StringTake[ dir, -StringLength[ $PathnameSeparator]] === $PathnameSeparator,
+			cleanDir = StringDrop[ dir, -StringLength[ $PathnameSeparator]],
+			cleanDir = dir
+		];
+		(* be careful in future: maybe NotebookSecurityOptions moves to a system-specific context in future versions of Mma *)
+		tPath = "TrustedPath" /. (Global`NotebookSecurityOptions /. nbSecurOpts);
+		(* add dir to the trusted paths *)
+		Apply[ SetOptions[ $FrontEnd, #]&,
+			Options[ $FrontEnd, "NotebookSecurityOptions"] /. HoldPattern[ "TrustedPath" -> _] -> ("TrustedPath" -> DeleteDuplicates[ Append[ tPath, cleanDir]])]
+	]
+trustNotebookDirectory[ args___] := unexpected[ trustNotebookDirectory, {args}]
+
+openNbRememberLocation[ ] :=
+	Module[{file, dir},
+		If[ ValueQ[ $dirLastOpened],
+			dir = $dirLastOpened,
+			dir = $HomeDirectory
+		];
+		file = SystemDialogInput[ "FileOpen", {dir, {translate["fileTypeNotebook"] -> {"*.nb"}}}];
+		If[ StringQ[ file] && FileExistsQ[ file],
+			$dirLastOpened = DirectoryName[ file];
+			trustNotebookDirectory[ $dirLastOpened];
+			NotebookOpen[ file, StyleDefinitions -> makeColoredStylesheet[ "Notebook"]]
+		]
+	]
+openNbRememberLocation[ args___] := unexpected[ openNbRememberLocation, {args}]
+
+(* create per-notebook directory, return the name *)
+createPerNotebookDirectory[ nb_NotebookObject] := 
+	Module[ {nbDir = CurrentValue[ nb, "NotebookDirectory"], file}, 
+		(* nbDir is the per-notebook directory, in which we store all files belonging to this notebook *)
+		If[ nbDir === $Failed,
+			(* nb has not yet been saved, it's an Untitled-... *)
+			file = saveNbRememberLocation[ nb],
+			(* else: use full name *)
+			file = CurrentValue[ nb, "NotebookFullFileName"]
+		];
+		createPerNotebookDirectory[ file]		
+	]
+createPerNotebookDirectory[ file_String] :=
+	Module[ {nbDir, new}, 
+		(* nbDir is the per-notebook directory, in which we store all files belonging to this notebook *)
+		nbDir = FileNameJoin[ {DirectoryName[ file], FileBaseName[ file]}];
+		If[ DirectoryQ[ nbDir],
+			new = nbDir,
+			(* create the dir if it does not yet exist *)
+			new = CreateDirectory[ nbDir];
+			If[ new === $Failed,
+				notification[ translate[ "cantCreateDir"], nbDir]
+			]
+		];
+		new		
+	]
+createPerNotebookDirectory[ args___] := unexpected[ createPerNotebookDirectory, {args}]
+
+(* saveNbRememberLocation[ nb_NotebookObject] saves nb, asks for filename, returns filename *)
+saveNbRememberLocation[ nb_NotebookObject] :=
+	Module[{file, dir},
+		If[ ValueQ[ $dirLastOpened],
+			dir = $dirLastOpened,
+			dir = $HomeDirectory
+		];
+		file = SystemDialogInput[ "FileSave", {dir, {translate["fileTypeNotebook"] -> {"*.nb"}}}];
+		If[ StringQ[ file],
+			$dirLastOpened = DirectoryName[ file];
+			NotebookSave[ nb, file]
+		];
+		file
+	]
+saveNbRememberLocation[ args___] := unexpected[ saveNbRememberLocation, {args}]
 
 (* ::Section:: *)
 (* end of package *)
