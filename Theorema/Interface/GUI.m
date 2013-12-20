@@ -59,9 +59,11 @@ initGUI[] :=
                 {"CartesianProduct", RowBox[{"A","\[Cross]","B"}], False, True, False},
                 {"Cardinality", RowBox[{"\[LeftBracketingBar]", "A", "\[RightBracketingBar]"}], False, True, False},
                 {"PowerSet", RowBox[{"\[ScriptCapitalP]","[", "A", "]"}], False, True, False},
+                {"AnElement", RowBox[{"\[AE]","[", "A", "]"}], False, True, False},
                 {"MaximumElementSet", RowBox[{"max","[", "A", "]"}], False, True, False},
                 {"MinimumElementSet", RowBox[{"min","[", "A", "]"}], False, True, False},
-                {"AnElement", RowBox[{"\[AE]","[", "A", "]"}], False, True, False}
+                {"MaximumOf", RowBox[{"max",SubscriptBox["A","i"]}], False, True, False},
+                {"MinimumOf", RowBox[{"min",SubscriptBox["A","i"]}], False, True, False}
         	},
         	{"Tuples",
         		{"Subscript", SubscriptBox[ "T", "i"], False, True, False},

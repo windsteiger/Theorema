@@ -362,9 +362,10 @@ rangeToIterator[
 rangeToIterator[ _] := $Failed
 rangeToIterator[ args___] := unexpected[ rangeToIterator, {args}]
 
-ClearAll[ Forall$TM, Exists$TM, SequenceOf$TM, SumOf$TM, ProductOf$TM, SetOf$TM, TupleOf$TM]
+ClearAll[ Forall$TM, Exists$TM, SequenceOf$TM, SumOf$TM, ProductOf$TM,
+	SetOf$TM, TupleOf$TM, MaximumOf$TM, MinimumOf$TM]
 Scan[ SetAttributes[ #, HoldRest] &, {Forall$TM, Exists$TM, 
-  SequenceOf$TM, SumOf$TM, ProductOf$TM, SetOf$TM, TupleOf$TM}]
+  SequenceOf$TM, SumOf$TM, ProductOf$TM, SetOf$TM, TupleOf$TM, MaximumOf$TM, MinimumOf$TM}]
 Scan[ SetAttributes[ #, HoldFirst] &, {SETRNG$, STEPRNG$}]
 
 Forall$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["Forall"] := 
@@ -509,6 +510,9 @@ TupleOf$TM[ RNG$[ r__], cond_, form_] :=
 		Apply[ makeTuple, s] /; (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
 	]
   	
+(* We have to split several summations into individual ones,
+	because the various ranges may depend on each other, and this does not work in connection with
+	"sequenceOfIteration". Same with "ProductOf", "MaximumOf", etc. *)
 SumOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["SumOf"] :=
  	Module[ {splitC},
  		splitC = splitAnd[ cond, {r[[1]]}];
@@ -599,6 +603,52 @@ valueIteration[ $Failed, _, _] := $Failed
 valueIteration[ args___] := unexpected[ valueIteration, {args}]
 
 
+MaximumOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["MaximumOf"] :=
+ 	Module[ {splitC},
+ 		splitC = splitAnd[ cond, {r[[1]]}];
+ 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 			MaximumOf$TM[ RNG$[r], rc, MaximumOf$TM[ RNG$[s], sc, form]]
+ 		]
+	]
+MaximumOf$TM[ RNG$[ r_], cond_, form_] /; buiActive["MaximumOf"] :=
+	Module[ {v},
+		max$TM[ Apply[ makeSet, v]] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+	]
+MaximumOf$TM[ RNG$[ r_, s__], cond_, ord_, form_] /; buiActive["MaximumOf"] :=
+ 	Module[ {splitC},
+ 		splitC = splitAnd[ cond, {r[[1]]}];
+ 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 			MaximumOf$TM[ RNG$[r], rc, ord, MaximumOf$TM[ RNG$[s], sc, ord, form]]
+ 		]
+	]
+MaximumOf$TM[ RNG$[ r_], cond_, ord_, form_] /; buiActive["MaximumOf"] :=
+	Module[ {v},
+		Subscript$TM[ max$TM, ord][ Apply[ makeSet, v]] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+	]
+	
+MinimumOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["MinimumOf"] :=
+ 	Module[ {splitC},
+ 		splitC = splitAnd[ cond, {r[[1]]}];
+ 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 			MinimumOf$TM[ RNG$[r], rc, MinimumOf$TM[ RNG$[s], sc, form]]
+ 		]
+	]
+MinimumOf$TM[ RNG$[ r_], cond_, form_] /; buiActive["MinimumOf"] :=
+	Module[ {v},
+		min$TM[ Apply[ makeSet, v]] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+	]
+MinimumOf$TM[ RNG$[ r_, s__], cond_, ord_, form_] /; buiActive["MinimumOf"] :=
+ 	Module[ {splitC},
+ 		splitC = splitAnd[ cond, {r[[1]]}];
+ 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 			MinimumOf$TM[ RNG$[r], rc, ord, MinimumOf$TM[ RNG$[s], sc, ord, form]]
+ 		]
+	]
+MinimumOf$TM[ RNG$[ r_], cond_, ord_, form_] /; buiActive["MinimumOf"] :=
+	Module[ {v},
+		Subscript$TM[ min$TM, ord][ Apply[ makeSet, v]] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+	]
+	
 
 (* ::Section:: *)
 (* Sets *)
@@ -621,13 +671,54 @@ Set$TM /: max$TM[ Set$TM[ e___?isGround]] /; buiActive["MaximumElementSet"] :=
 	Module[ {s},
 		(s /. Max -> max$TM /. {max$TM[x_Set$TM] :> max$TM[x], max$TM[x___] :> max$TM[Set$TM[x]]}) /; (s = Max[ e]; Apply[ Hold, {s}] =!= Hold[ Max[ e]])
 	]
+Set$TM /: Subscript$TM[ max$TM, ord_][ Set$TM[ e___?isGround]] /; buiActive["MaximumElementSet"] :=
+	Module[ {res},
+		If[ Length[ res] === 1,
+			First[ res],
+			Subscript$TM[ max$TM, ord][ Apply[ Set$TM, res]]
+		] /; (res = max[ {e}, ord]; Length[ res] === 1 || res =!= {e})
+	]
 Set$TM /: min$TM[ Set$TM[ e___?isGround]] /; buiActive["MinimumElementSet"] :=
 	Module[ {s},
 		(s /. Min -> min$TM /. {min$TM[x_Set$TM] :> min$TM[x], min$TM[x___] :> min$TM[Set$TM[x]]}) /; (s = Min[ e]; Apply[ Hold, {s}] =!= Hold[ Min[ e]])
 	]
+Set$TM /: Subscript$TM[ min$TM, ord_][ Set$TM[ e___?isGround]] /; buiActive["MinimumElementSet"] :=
+	Module[ {res},
+		If[ Length[ res] === 1,
+			First[ res],
+			Subscript$TM[ min$TM, ord][ Apply[ Set$TM, res]]
+		] /; (res = min[ {e}, ord]; Length[ res] === 1 || res =!= {e})
+	]
 Set$TM /: \[AE]$TM[ Set$TM[ a_, ___]] /; buiActive["AnElement"] := a
 	
 
+(* amaletzk: The following implementation of "max" and "min" has linear complexity in the length of the
+	input. One could, however, also compare all elements with each other (leads to quadratic complexity)
+	to obtain a better result. 'Better' means that all elements which cannot be the maximum/minimum are
+	certainly removed. This cannot be guaranteed in the current version! *)
+max[ {}, _] := {DirectedInfinity[-1]}
+max[ {a_}, _] := {a}
+max[ {a_, b__}, ord_] := max[ {b}, ord, a, {}]
+max[ {m_, b___}, ord_, m_, u_List] := max[ {b}, ord, m, u]
+max[ {a_, b___}, ord_, m_, u_List] :=
+	If[ ord[ a, m],
+		max[ {b}, ord, m, u],
+		max[ {b}, ord, a, u],
+		max[ {b}, ord, m, Union[ u, {a}]]
+	]
+max[ {}, _, m_, u_List] := Prepend[ u, m]
+
+min[ {}, _] := {DirectedInfinity[1]}
+min[ {a_}, _] := {a}
+min[ {a_, b__}, ord_] := min[ {b}, ord, a, {}]
+min[ {m_, b___}, ord_, m_, u_List] := min[ {b}, ord, m, u]
+min[ {a_, b___}, ord_, m_, u_List] :=
+	If[ ord[ a, m],
+		min[ {b}, ord, a, u],
+		min[ {b}, ord, m, u],
+		min[ {b}, ord, m, Union[ u, {a}]]
+	]
+min[ {}, _, m_, u_List] := Prepend[ u, m]
 
 
 
@@ -935,9 +1026,23 @@ Tuple$TM /: max$TM[ Tuple$TM[ e___?isGround]] /; buiActive["Max"] :=
 	Module[ {s},
 		(s /. Max -> max$TM /. {max$TM[x_Tuple$TM] :> max$TM[x], max$TM[x___] :> max$TM[Tuple$TM[x]]}) /; (s = Max[ e]; Apply[ Hold, {s}] =!= Hold[ Max[ e]])
 	]
+Tuple$TM /: Subscript$TM[ max$TM, ord_][ Tuple$TM[ e___?isGround]] /; buiActive["Max"] :=
+	Module[ {res},
+		If[ Length[ res] === 1,
+			First[ res],
+			Subscript$TM[ max$TM, ord][ Apply[ Tuple$TM, res]]
+		] /; (res = max[ {e}, ord]; Length[ res] === 1 || res =!= {e})
+	]
 Tuple$TM /: min$TM[ Tuple$TM[ e___?isGround]] /; buiActive["Min"] :=
 	Module[ {s},
 		(s /. Min -> min$TM /. {min$TM[x_Tuple$TM] :> min$TM[x], min$TM[x___] :> min$TM[Tuple$TM[x]]}) /; (s = Min[ e]; Apply[ Hold, {s}] =!= Hold[ Min[ e]])
+	]
+Tuple$TM /: Subscript$TM[ min$TM, ord_][ Tuple$TM[ e___?isGround]] /; buiActive["Min"] :=
+	Module[ {res},
+		If[ Length[ res] === 1,
+			First[ res],
+			Subscript$TM[ min$TM, ord][ Apply[ Tuple$TM, res]]
+		] /; (res = min[ {e}, ord]; Length[ res] === 1 || res =!= {e})
 	]
 
 Tuple$TM /: BracketingBar$TM[ a_Tuple$TM?isSequenceFree] /; buiActive["Length"] := Length[ a]

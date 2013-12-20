@@ -200,15 +200,15 @@ $tmaOperators = {
 	{"\[Superset]", {Infix}, "Superset"}, {"\[NotSuperset]", {Infix}, "NotSuperset"},
 	{"\[SubsetEqual]", {Infix}, "SubsetEqual"}, {"\[NotSubsetEqual]", {Infix}, "NotSubsetEqual"},
 	{"\[SupersetEqual]", {Infix}, "SupersetEqual"}, {"\[NotSupersetEqual]", {Infix}, "NotSupersetEqual"},
-	{">=", {Infix}, "GreaterEqual"}, {"\[GreaterEqual]", {Infix}, "GreaterEqual"},
+	{"\[GreaterEqual]", {Infix}, "GreaterEqual"}, {">=", {Infix}, "GreaterEqual"},
 	{"\[NotGreaterEqual]", {Infix}, "NotGreaterEqual"}, {"\[GreaterSlantEqual]", {Infix}, "GreaterEqual"},
 	{"\[NotGreaterSlantEqual]", {Infix}, "NotGreaterSlantEqual"}, {"\[GreaterFullEqual]", {Infix}, "GreaterFullEqual"},
 	{"\[NotGreaterFullEqual]", {Infix}, "NotGreaterFullEqual"}, {"\[GreaterTilde]", {Infix}, "GreaterTilde"},
 	{"\[NotGreaterTilde]", {Infix}, "NotGreaterTilde"}, {"\[GreaterGreater]", {Infix}, "GreaterGreater"},
 	{"\[NotGreaterGreater]", {Infix}, "NotGreaterGreater"}, {"\[NestedGreaterGreater]", {Infix}, "NestedGreaterGreater"},
 	{"\[NotNestedGreaterGreater]", {Infix}, "NotNestedGreaterGreater"}, {">", {Infix}, "Greater"},
-	{"\[NotGreater]", {Infix}, "NotGreater"}, {"<=", {Infix}, "LessEqual"},
-	{"\[LessEqual]", {Infix}, "LessEqual"}, {"\[NotLessEqual]", {Infix}, "NotLessEqual"},
+	{"\[NotGreater]", {Infix}, "NotGreater"}, {"\[LessEqual]", {Infix}, "LessEqual"},
+	{"<=", {Infix}, "LessEqual"}, {"\[NotLessEqual]", {Infix}, "NotLessEqual"},
 	{"\[LessSlantEqual]", {Infix}, "LessEqual"}, {"\[NotLessSlantEqual]", {Infix}, "NotLessSlantEqual"},
 	{"\[LessFullEqual]", {Infix}, "LessFullEqual"}, {"\[NotLessFullEqual]", {Infix}, "NotLessFullEqual"},
 	{"\[LessTilde]", {Infix}, "LessTilde"}, {"\[NotLessTilde]", {Infix}, "NotLessTilde"},
@@ -238,8 +238,8 @@ $tmaOperators = {
 	{"\[SquareSubsetEqual]", {Infix}, "SquareSubsetEqual"}, {"\[NotSquareSubsetEqual]", {Infix}, "NotSquareSubsetEqual"},
 	{"=", {Infix}, "Set"}, {":=", {Infix}, "SetDelayed"},
 	{"\[Equal]", {Infix}, "Equal"}, {"==", {Infix}, "Equal"},
-	{"\[LongEqual]", {Infix}, "Equal"}, {"!=", {Infix}, "Unequal"},
-	{"\[NotEqual]", {Infix}, "Unequal"}, {"===", {Infix}, "SameQ"},
+	{"\[LongEqual]", {Infix}, "Equal"}, {"\[NotEqual]", {Infix}, "Unequal"},
+	{"!=", {Infix}, "Unequal"}, {"===", {Infix}, "SameQ"},
 	{"=!=", {Infix}, "UnsameQ"}, {"\[Congruent]", {Infix}, "Congruent"},
 	{"\[NotCongruent]", {Infix}, "NotCongruent"}, {"\[Tilde]", {Infix}, "Tilde"},
 	{"\[NotTilde]", {Infix}, "NotTilde"}, {"\[TildeTilde]", {Infix}, "TildeTilde"},
@@ -372,16 +372,16 @@ MakeExpression[ RowBox[{UnderscriptBox[ SubscriptBox[ q_?isQuantifierSymbol, dom
 MakeExpression[ RowBox[{UnderscriptBox[ UnderscriptBox[ SubscriptBox[ q_?isQuantifierSymbol, dom_], rng_], cond_], form_}], fmt_] :=
     subscriptedQuantifier[ Replace[ q, $tmaQuantifierToName], rng, cond, dom, form, fmt] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{UnderoverscriptBox[ q:"\[Sum]"|"\[Product]", low:RowBox[{_, "=", _}], high_], form_}], fmt_] :=
+MakeExpression[ RowBox[{UnderoverscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min", low:RowBox[{_, "=", _}], high_], form_}], fmt_] :=
     standardQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[{low, ",", "\[Ellipsis]", ",", high}], "True", form, fmt] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{UnderscriptBox[ UnderoverscriptBox[ q:"\[Sum]"|"\[Product]", low:RowBox[{_, "=", _}], high_], cond_], form_}], fmt_] :=
+MakeExpression[ RowBox[{UnderscriptBox[ UnderoverscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min", low:RowBox[{_, "=", _}], high_], cond_], form_}], fmt_] :=
     standardQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[{low, ",", "\[Ellipsis]", ",", high}], cond, form, fmt] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{UnderoverscriptBox[ SubscriptBox[ q:"\[Sum]"|"\[Product]", dom_], low:RowBox[{_, "=", _}], high_], form_}], fmt_] :=
+MakeExpression[ RowBox[{UnderoverscriptBox[ SubscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min", dom_], low:RowBox[{_, "=", _}], high_], form_}], fmt_] :=
     subscriptedQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[{low, ",", "\[Ellipsis]", ",", high}], "True", dom, form, fmt] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{UnderscriptBox[ UnderoverscriptBox[ SubscriptBox[ q:"\[Sum]"|"\[Product]", dom_], low:RowBox[{_, "=", _}], high_], cond_], form_}], fmt_] :=
+MakeExpression[ RowBox[{UnderscriptBox[ UnderoverscriptBox[ SubscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min", dom_], low:RowBox[{_, "=", _}], high_], cond_], form_}], fmt_] :=
     subscriptedQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[{low, ",", "\[Ellipsis]", ",", high}], cond, dom, form, fmt] /; $parseTheoremaExpressions
    
 MakeExpression[ RowBox[{UnderscriptBox[ "let", rng_], form_}], fmt_] :=
@@ -458,10 +458,10 @@ collectColumn[ {x_}] := x
 (* ::Subsubsection:: *)
 (* Indexed functions *)
 
-MakeExpression[ RowBox[ {SubscriptBox[ "max", ord_], "[", arg_, "]"}], fmt_] :=
-	With[ {g = RowBox[ {Unique["a"], ord, Unique["b"]}]},
-		MakeExpression[ RowBox[ {"max", "[", arg, ",", g, "]"}], fmt]
-	]/; $parseTheoremaExpressions
+(* amaletzk: Just leave subscripted functions as they are, such that, e.g., "min_<[A]" is transformed
+	into "Subscript[min, <][A]", because this also works if functions are given without arguments. *)
+(* MakeExpression[ RowBox[ {SubscriptBox[ f:("max"|"min"), ord_], "[", arg_, "]"}], fmt_] :=
+	MakeExpression[ RowBox[ {f, "[", arg, ",", ord, "]"}], fmt] /; $parseTheoremaExpressions *)
 
 	
 (* ::Subsubsection:: *)
