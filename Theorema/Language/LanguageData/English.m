@@ -82,6 +82,7 @@ With[ {lang = "English"},
     MessageName[Cross$TM, "usage", lang] = "";
     MessageName[max$TM, "usage", lang] = "";
     MessageName[min$TM, "usage", lang] = "";
+    MessageName[UnionOf$TM, "usage", lang] = "";
 	MessageName[Union$TM, "usage", lang] = "";
 	MessageName[Tuple$TM, "usage", lang] = "";	
 	MessageName[TupleOf$TM, "usage", lang] = "";	

@@ -63,7 +63,9 @@ initGUI[] :=
                 {"MaximumElementSet", RowBox[{"max","[", "A", "]"}], False, True, False},
                 {"MinimumElementSet", RowBox[{"min","[", "A", "]"}], False, True, False},
                 {"MaximumOf", RowBox[{"max",SubscriptBox["A","i"]}], False, True, False},
-                {"MinimumOf", RowBox[{"min",SubscriptBox["A","i"]}], False, True, False}
+                {"MinimumOf", RowBox[{"min",SubscriptBox["A","i"]}], False, True, False},
+                {"UnionOf", RowBox[{"\[Union]",SubscriptBox["A","i"]}], False, True, False},
+        		{"IntersectionOf", RowBox[{"\[Intersection]",SubscriptBox["A","i"]}], False, True, False}
         	},
         	{"Tuples",
         		{"Subscript", SubscriptBox[ "T", "i"], False, True, False},

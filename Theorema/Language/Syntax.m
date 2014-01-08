@@ -372,16 +372,16 @@ MakeExpression[ RowBox[{UnderscriptBox[ SubscriptBox[ q_?isQuantifierSymbol, dom
 MakeExpression[ RowBox[{UnderscriptBox[ UnderscriptBox[ SubscriptBox[ q_?isQuantifierSymbol, dom_], rng_], cond_], form_}], fmt_] :=
     subscriptedQuantifier[ Replace[ q, $tmaQuantifierToName], rng, cond, dom, form, fmt] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{UnderoverscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min", low:RowBox[{_, "=", _}], high_], form_}], fmt_] :=
+MakeExpression[ RowBox[{UnderoverscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min"|"\[Union]"|"\[Intersection]", low:RowBox[{_, "=", _}], high_], form_}], fmt_] :=
     standardQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[{low, ",", "\[Ellipsis]", ",", high}], "True", form, fmt] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{UnderscriptBox[ UnderoverscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min", low:RowBox[{_, "=", _}], high_], cond_], form_}], fmt_] :=
+MakeExpression[ RowBox[{UnderscriptBox[ UnderoverscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min"|"\[Union]"|"\[Intersection]", low:RowBox[{_, "=", _}], high_], cond_], form_}], fmt_] :=
     standardQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[{low, ",", "\[Ellipsis]", ",", high}], cond, form, fmt] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{UnderoverscriptBox[ SubscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min", dom_], low:RowBox[{_, "=", _}], high_], form_}], fmt_] :=
+MakeExpression[ RowBox[{UnderoverscriptBox[ SubscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min"|"\[Union]"|"\[Intersection]", dom_], low:RowBox[{_, "=", _}], high_], form_}], fmt_] :=
     subscriptedQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[{low, ",", "\[Ellipsis]", ",", high}], "True", dom, form, fmt] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{UnderscriptBox[ UnderoverscriptBox[ SubscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min", dom_], low:RowBox[{_, "=", _}], high_], cond_], form_}], fmt_] :=
+MakeExpression[ RowBox[{UnderscriptBox[ UnderoverscriptBox[ SubscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min"|"\[Union]"|"\[Intersection]", dom_], low:RowBox[{_, "=", _}], high_], cond_], form_}], fmt_] :=
     subscriptedQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[{low, ",", "\[Ellipsis]", ",", high}], cond, dom, form, fmt] /; $parseTheoremaExpressions
    
 MakeExpression[ RowBox[{UnderscriptBox[ "let", rng_], form_}], fmt_] :=

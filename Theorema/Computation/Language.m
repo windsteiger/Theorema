@@ -363,9 +363,10 @@ rangeToIterator[ _] := $Failed
 rangeToIterator[ args___] := unexpected[ rangeToIterator, {args}]
 
 ClearAll[ Forall$TM, Exists$TM, SequenceOf$TM, SumOf$TM, ProductOf$TM,
-	SetOf$TM, TupleOf$TM, MaximumOf$TM, MinimumOf$TM]
+	SetOf$TM, TupleOf$TM, MaximumOf$TM, MinimumOf$TM, UnionOf$TM, IntersectionOf$TM]
 Scan[ SetAttributes[ #, HoldRest] &, {Forall$TM, Exists$TM, 
-  SequenceOf$TM, SumOf$TM, ProductOf$TM, SetOf$TM, TupleOf$TM, MaximumOf$TM, MinimumOf$TM}]
+  SequenceOf$TM, SumOf$TM, ProductOf$TM, SetOf$TM, TupleOf$TM, MaximumOf$TM, MinimumOf$TM,
+  UnionOf$TM, IntersectionOf$TM}]
 Scan[ SetAttributes[ #, HoldFirst] &, {SETRNG$, STEPRNG$}]
 
 Forall$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["Forall"] := 
@@ -522,7 +523,7 @@ SumOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["SumOf"] :=
 	]
 SumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["SumOf"] :=
 	Module[ {v},
-		(Apply[ Plus$TM, v]) /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Plus$TM, 0]) =!= $Failed
 	]
 SumOf$TM[ RNG$[ r_, s__], cond_, dom_, form_] /; buiActive["SumOf"] :=
  	Module[ {splitC},
@@ -533,19 +534,7 @@ SumOf$TM[ RNG$[ r_, s__], cond_, dom_, form_] /; buiActive["SumOf"] :=
 	]
 SumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, dom_, form_] /; buiActive["SumOf"] :=
 	Module[ {v},
-		(* amaletz: The reason why it's done in that 'complicated' way is the following:
-		   The 0-element might not be defined in "dom", which is no problem, but if it's not
-		   defined and one just folds the function using it as the initial element, it will
-		   always appear as a symbolic expression in the final result. However, if there is at
-		   least 1 value in "v", then the 0-element is not needed at all.
-		   Also, "Apply" cannot be used, because the domain functions can only deal with EXACTLY
-		   2 arguments (in addition to that, we cannot even rely on associativity).
-		*)
-		Switch[ Length[ v],
-			0, Theorema`Computation`Knowledge`Underscript$TM[0, dom],
-			1, First[ v],
-			_, Fold[ dom[Plus$TM], First[ v], Rest[ v]]
-		] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, dom[Plus$TM], Theorema`Computation`Knowledge`Underscript$TM[0, dom]]) =!= $Failed
 	]
 	
 ProductOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["ProductOf"] :=
@@ -557,7 +546,7 @@ ProductOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["ProductOf"] :=
 	]
 ProductOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["ProductOf"] :=
 	Module[ {v},
-		(Apply[ Times$TM, v]) /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Times$TM, 1]) =!= $Failed
 	]
 ProductOf$TM[ RNG$[ r_, s__], cond_, dom_, form_] /; buiActive["ProductOf"] :=
  	Module[ {splitC},
@@ -568,15 +557,40 @@ ProductOf$TM[ RNG$[ r_, s__], cond_, dom_, form_] /; buiActive["ProductOf"] :=
 	]
 ProductOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, dom_, form_] /; buiActive["ProductOf"] :=
 	Module[ {v},
-		(* See comment in function "SumOf$TM" *)
-		Switch[ Length[ v],
-			0, Theorema`Computation`Knowledge`Underscript$TM[1, dom],
-			1, First[ v],
-			_, Fold[ dom[Times$TM], First[ v], Rest[ v]]
-		] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, dom[Times$TM], Theorema`Computation`Knowledge`Underscript$TM[1, dom]]) =!= $Failed
 	]
 	
 SetAttributes[ valueIteration, HoldRest]
+valueIteration[ {x_, iter__}, cond_, term_, op_, def_] :=  
+ Module[ {val = $Null, ci, comp, i},
+ 	(* "$Null" is meant to indicate that "val" does not have a value yet. *)
+	Catch[
+		Do[
+			If[ TrueQ[ cond],
+				ci = True,
+				ci = ReleaseHold[ substituteFree[ Hold[ cond], {x -> i}]]
+			];
+			If[ ci,
+				comp = ReleaseHold[ substituteFree[ Hold[ term], {x -> i}]];
+				If[ val === $Null,
+					val = comp,
+					val = op[ val, comp]
+				],
+				(*else*)
+				Continue[],
+				(*default*)
+				Throw[ $Failed];
+			],
+			{i, iter}
+		]; (*end do*)
+		If[ val === $Null,
+			def,
+			val
+		]
+	] (*end catch*)
+ ]
+valueIteration[ _List, _, _, _, _] := $Failed
+valueIteration[ $Failed, _, _, _, _] := $Failed
 valueIteration[ {x_, iter__}, cond_, term_] :=  
  Module[ {val = {}, ci, comp, i},
 	Catch[
@@ -587,7 +601,7 @@ valueIteration[ {x_, iter__}, cond_, term_] :=
 			];
 			If[ ci,
 				comp = ReleaseHold[ substituteFree[ Hold[ term], {x -> i}]];
-				AppendTo[val, comp],
+				AppendTo[ val, comp],
 				(*else*)
 				Continue[],
 				(*default*)
@@ -649,6 +663,52 @@ MinimumOf$TM[ RNG$[ r_], cond_, ord_, form_] /; buiActive["MinimumOf"] :=
 		Subscript$TM[ min$TM, ord][ Apply[ makeSet, v]] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
 	
+UnionOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["UnionOf"] :=
+ 	Module[ {splitC},
+ 		splitC = splitAnd[ cond, {r[[1]]}];
+ 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 			UnionOf$TM[ RNG$[r], rc, UnionOf$TM[ RNG$[s], sc, form]]
+ 		]
+	]
+UnionOf$TM[ RNG$[ r_], cond_, form_] /; buiActive["UnionOf"] :=
+	Module[ {v},
+		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Union$TM, Set$TM[]]) =!= $Failed
+	]
+UnionOf$TM[ RNG$[ r_, s__], cond_, dom_, form_] /; buiActive["UnionOf"] :=
+ 	Module[ {splitC},
+ 		splitC = splitAnd[ cond, {r[[1]]}];
+ 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 			UnionOf$TM[ RNG$[r], rc, dom, UnionOf$TM[ RNG$[s], sc, dom, form]]
+ 		]
+	]
+UnionOf$TM[ RNG$[ r_], cond_, dom_, form_] /; buiActive["UnionOf"] :=
+	Module[ {v},
+		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Annotated$TM[ Union$TM, SubScript$TM[ dom]], Set$TM[]]) =!= $Failed
+	]
+	
+IntersectionOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["IntersectionOf"] :=
+ 	Module[ {splitC},
+ 		splitC = splitAnd[ cond, {r[[1]]}];
+ 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 			IntersectionOf$TM[ RNG$[r], rc, IntersectionOf$TM[ RNG$[s], sc, form]]
+ 		]
+	]
+IntersectionOf$TM[ RNG$[ r_], cond_, form_] /; buiActive["IntersectionOf"] :=
+	Module[ {v},
+		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Intersection$TM, $Failed]) =!= $Failed
+	]
+IntersectionOf$TM[ RNG$[ r_, s__], cond_, dom_, form_] /; buiActive["IntersectionOf"] :=
+ 	Module[ {splitC},
+ 		splitC = splitAnd[ cond, {r[[1]]}];
+ 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 			IntersectionOf$TM[ RNG$[r], rc, dom, IntersectionOf$TM[ RNG$[s], sc, dom, form]]
+ 		]
+	]
+IntersectionOf$TM[ RNG$[ r_], cond_, dom_, form_] /; buiActive["IntersectionOf"] :=
+	Module[ {v},
+		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Annotated$TM[ Intersection$TM, SubScript$TM[ dom]], $Failed]) =!= $Failed
+	]
+	
 
 (* ::Section:: *)
 (* Sets *)
@@ -658,13 +718,17 @@ Set$TM /: SubsetEqual$TM[a_Set$TM?isGround, b_Set$TM?isGround] /; buiActive["Sub
 Set$TM /: Subset$TM[a_Set$TM?isGround, b_Set$TM?isGround] /; buiActive["Subset"] := And[SubsetEqual$TM[a,b],Not[Equal$TM[a, b]]]
 Set$TM /: SupersetEqual$TM[a_Set$TM?isGround, b_Set$TM?isGround] /; buiActive["SupersetEqual"] := SubsetEqual$TM[b, a]
 Set$TM /: Superset$TM[a_Set$TM?isGround, b_Set$TM?isGround] /; buiActive["Superset"] := Subset$TM[b, a]
-Set$TM /: Union$TM[ a__Set$TM?isGround] /; buiActive["Union"] := Union[ a] /. List -> Set$TM
+Set$TM /: Union$TM[ a___Set$TM?isGround] /; buiActive["Union"] := Union[ a] /. List -> Set$TM (* "Union" also works with 0 arguments, in contrast to "Intersection" *)
+Set$TM /: Annotated$TM[ Union$TM, SubScript$TM[ dom_]][ a___Set$TM?isGround] /; buiActive["Union"] := Union[ a, SameTest -> (TrueQ[ dom[Equal$TM][ #1, #2]]&)] /. List -> Set$TM
 Set$TM /: Intersection$TM[ a__Set$TM?isGround] /; buiActive["Intersection"] := Intersection[ a] /. List -> Set$TM
+Set$TM /: Annotated$TM[ Intersection$TM, SubScript$TM[ dom_]][ a__Set$TM?isGround] /; buiActive["Intersection"] := Intersection[ a, SameTest -> (TrueQ[ dom[Equal$TM][ #1, #2]]&)] /. List -> Set$TM
 Set$TM /: Backslash$TM[ a_Set$TM?isGround, b_Set$TM?isGround] /; buiActive["Difference"] := Complement[a, b] /. List -> Set$TM
 Set$TM /: EmptyUpTriangle$TM[ a_Set$TM?isGround, b_Set$TM?isGround] /; buiActive["SymmetricDifference"] := Union[Complement[a, b], Complement[b, a]] /. List -> Set$TM
 Set$TM /: Cross$TM[ a__Set$TM?isGround] /; buiActive["CartesianProduct"] := Apply[Set$TM, Replace[Tuples[{a}],List[x__]:> Tuple$TM[x] ,{1}]]
 Set$TM /: Element$TM[ p_, a_Set$TM] /; buiActive["IsElement"] && MemberQ[ a, p] := True
 Set$TM /: Element$TM[ p_, a_Set$TM?isGround] /; buiActive["IsElement"] := False
+Set$TM /: Annotated$TM[ Element$TM, SubScript$TM[ dom_]][ p_, a_Set$TM] /; buiActive["IsElement"] && MemberQ[ a, _?(dom[Equal$TM][p, #]&)] := True
+Set$TM /: Annotated$TM[ Element$TM, SubScript$TM[ dom_]][ p_, a_Set$TM?isGround] /; buiActive["IsElement"] := False
 Set$TM /: \[ScriptCapitalP]$TM[ a_Set$TM?isGround] /; buiActive["PowerSet"] := Subsets[ a] /. List -> Set$TM
 Set$TM /: BracketingBar$TM[ a_Set$TM?isGround] /; buiActive["Cardinality"] && isSequenceFree[a] := Length[ a]
 Set$TM /: max$TM[ Set$TM[ e___?isGround]] /; buiActive["MaximumElementSet"] :=
