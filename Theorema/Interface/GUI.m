@@ -161,9 +161,6 @@ initGUI[] :=
 		$ShiftActive = 0;
 		$TMAactDecl = translate[ "None"];
 		$proofTreeScale = 1;
-		If[ $Notebooks,
-			openTheoremaCommander[]
-		];
 	]
 
 initBuiltins[ l_List] :=
@@ -181,6 +178,17 @@ initBuiltins[ l_List] :=
     ]
 initBuiltins[ args___] := unexpected[ initBuiltins, {args}]
 
+resetDefaultRules[] :=
+	Module[ {rs, list},
+		rs = basicTheoremaLanguageRules;
+		list = Cases[rs, {r_Symbol, active_, text_, p_Integer, ___}, Infinity];
+		Scan[
+			ruleActive[ #[[1]]] = #[[2]];
+    		ruleTextActive[ #[[1]]] = #[[3]];
+    		rulePriority[ #[[1]]] = #[[4]];&, list];		
+	]
+
+initGUI[];
 
 
 (* ::Section:: *)
@@ -262,7 +270,6 @@ activitiesView[ activitiesLab:{__String}, actionLabs:{{___String}..}, views:{{__
             Alignment -> {{Center, Left}, {Center, Top}}, Spacings -> {0, 0}, Background -> TMAcolor[1]]
         ]
 activitiesView[ args___] := unexpected[ activitiesView, {args}]
-
 
 (* ::Subsubsection:: *)
 (* virtualKeyboard *)
@@ -936,7 +943,9 @@ headerViewBuiltin[args___] :=
 (* ::Subsection:: *)
 (* Summary of used builtins *)
 
-summarizeBuiltins[ task_String, l_List:$tmaBuiltins] := 
+summarizeBuiltins[ task_String] := summarizeBuiltins[ task, $tmaBuiltins]
+
+summarizeBuiltins[ task_String, l_List] := 
 	Module[ {cat},
 		cat = Map[ resultBuiltin[ #, task]&, l];
 		Column[ Apply[ Join, Map[ #[[1]]&, cat]]]		
@@ -1036,43 +1045,31 @@ structViewRules[ Hold[ rs_]] :=
 testNoMatch[s_String,p_String]:=Not[StringMatchQ[ s,p]]
 testNoMatch[s_,p_]:=True
 
-resetDefaultRules[] :=
-	Module[{rs, list},
-		rs = basicTheoremaLanguageRules;
-		list = Cases[rs,{r_Symbol,active_,text_,p_Integer,___},Infinity];
-		Map[
-			ruleActive[ #[[1]]] = #[[2]];
-    		ruleTextActive[ #[[1]]] = #[[3]];
-    		rulePriority[ #[[1]]] = #[[4]];
-		&,list];		
-	]
-
 displaySelectedRules[ Hold[ rs_]] := 
-	Module[{list},
+	Module[ {actRules},
 		(* Select checked list_ from allRules_ *)  
-		list = Cases[rs,{r_Symbol,True,text_,p_Integer,___}->{r,text,p},Infinity];
+		actRules = Cases[ rs, {r_Symbol?ruleActive, _, _, _Integer, ___} -> r, Infinity];
 		(*Sort list_ by priority_*)
-		list = Sort[list,#1[[3]]<#2[[3]]&];
+		actRules = Sort[ actRules, rulePriority[#1] < rulePriority[#2]&];
 		Pane[		
-			Column[Map[makeRuleRow[#]&,list]],
-			ImageSize->{360,200},
-			Scrollbars->{False,True}
+			Column[ Map[ makeRuleRow, actRules]],
+			ImageSize -> {360,200},
+			Scrollbars -> {False, True}
 		]	
 	]
 
-makeRuleRow[{r_Symbol, textActive:(True|False), p_Integer},___] := 
-	Module[{}, 
-		Style[
-		Row[{
-			Tooltip[If[textActive,"\[CheckmarkedBox]","\[EmptySquare]"], MessageName[ ruleTextActive, "usage"]],Spacer[5],
-			MessageName[ r, "usage"]
-		}]
-		,LineBreakWithin -> False]
+makeRuleRow[r_Symbol] := 
+	Module[ {}, 
+		Style[ 
+			Row[{ "(" <> ToString[ rulePriority[ r]] <> ")", Spacer[2],
+				Tooltip[ showProofTextPic[ ruleTextActive[ r]], MessageName[ ruleTextActive, "usage"]], Spacer[5], MessageName[ r, "usage"]}],
+			LineBreakWithin -> False]
 	]
 
 (*Draws toggler icon *) 
-showProofTextPic[ active_] = Graphics[ {If[ active, GrayLevel[0], GrayLevel[0.7]], 
-	{Thin, Line[{{0, 0}, {4, 0}, {4, 4}, {0, 4}, {0, 0}}], Table[ Line[{{1, i}, {3, i}}], {i, 1, 3}]}}, ImageSize -> {15, 15}, PlotRange -> {{-1, 5}, {-1, 5}}];
+(* showProofTextPic[ active_] = Graphics[ {If[ active, GrayLevel[0], GrayLevel[0.7]], 
+	{Thin, Line[{{0, 0}, {4, 0}, {4, 4}, {0, 4}, {0, 0}}], Table[ Line[{{1, i}, {3, i}}], {i, 1, 3}]}}, ImageSize -> {15, 15}, PlotRange -> {{-1, 5}, {-1, 5}}];*)
+showProofTextPic[ active_] = If[ active, "\:270D", "\:2751"];
 
 (*Responsible for rule *) 
 structViewRules[ {r_Symbol, active:(True|False), textActive:(True|False), p_Integer, ___}, tags_] :=
@@ -1245,7 +1242,7 @@ submitProveTask[ ] :=
 			
 			Column[{				
 				Labeled[ displaySelectedRules[ $selectedRuleSet], translate[ "selectedRules"]<>":", {{Top,Left}}],
-				Labeled[ MessageName[ Evaluate[ $selectedStrategy], "usage"], translate[ "pStrat"]<>":", Left],
+				Labeled[ Tooltip[ $selectedStrategy /. $registeredStrategies, MessageName[ Evaluate[ $selectedStrategy], "usage"]], translate[ "pStrat"]<>":", Left],
 				Labeled[ $selectedSearchDepth, translate[ "sDepth"]<>":", Left],
 				Labeled[ $selectedSearchTime, translate[ "sTime"]<>":", Left],
 				Labeled[
@@ -2373,8 +2370,9 @@ proofSitChoiceButtons[ args___] := unexpected[ proofSitChoiceButtons, {args}]
 (* ::Section:: *)
 (* end of package *)
 
-
-initGUI[];
+If[ $Notebooks,
+	openTheoremaCommander[]
+];
 
 End[]; (* End Private Context *)
 
