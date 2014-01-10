@@ -256,7 +256,9 @@ closeTheoremaCommander[ args___] := unexpected[ closeTheoremaCommander, {args}]
 
 activitiesView[ activitiesLab:{__String}, actionLabs:{{___String}..}, views:{{__}..}] :=
         Dynamic[
-        Grid[{{Button[ "", Background -> TMAcolor[1], Appearance -> Frameless, FrameMargins -> 5], 
+        Grid[{{
+        	Button[ Style[ "\:2328", Large, FontColor -> TMAcolor[0]], 
+        		Background -> TMAcolor[1], Appearance -> Frameless, FrameMargins -> 0, ContentPadding -> False], 
         	Row[ MapIndexed[
                 Button[ Mouseover[ Style[ #1, "TabLabel2"], Style[ #1, "TabLabel2Over"]], $tcActionView = #2[[1]],
                 	Background -> If[ $tcActionView === #2[[1]], TMAcolor[0], TMAcolor[5]]] &,
@@ -1669,7 +1671,6 @@ allEnvironments = {"DEF", "THM", "LMA", "PRP", "COR", "CNJ", "ALG", "EXM"};
 
 sessionCompose[] :=
     Column[{
-    	Button[ translate[ "Virtual Keyboard"], virtualKeyboard[]],
     	Labeled[ Row[ {makeNbNewButton[], makeNbOpenButton[]}, Spacer[5]],
     		translate[ "Notebooks"], {{Top, Left}}],
     	Labeled[ Grid[ Partition[ Map[ makeEnvButton, allEnvironments], 4]],
