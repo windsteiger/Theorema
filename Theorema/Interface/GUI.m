@@ -141,7 +141,7 @@ initGUI[] :=
         $tcAllFormulaeOpener = True;
         $tcAllDeclOpener = True;
 		$kbStruct = {};
-		$keyWord = "";
+		$ruleFilterKW = "";
 		$initLabel = "???";
 		$labelSeparator = ",";
 		$cellTagKeySeparator = ":";
@@ -225,7 +225,7 @@ openTheoremaCommander[ ] /; $Notebooks :=
         			(* prove *)  {Dynamic[ Refresh[ displaySelectedGoal[], UpdateInterval -> 2]],
         				Dynamic[ Refresh[ displayKBBrowser["prove"], TrackedSymbols :> {$kbStruct}]],
         				Dynamic[ Refresh[ displayBuiltinBrowser["prove"], TrackedSymbols :> {buiActProve}]],
-        				Dynamic[ Refresh[ selectProver[], TrackedSymbols :> {$selectedRuleSet, $selectedStrategy,$keyWord}]],
+        				Dynamic[ Refresh[ selectProver[], TrackedSymbols :> {$selectedRuleSet, $selectedStrategy, $ruleFilterKW}]],
         				Dynamic[ Refresh[ submitProveTask[ ], TrackedSymbols :> {$selectedProofGoal, $selectedProofKB, $selectedSearchDepth, $selectedSearchTime}]],
         				Dynamic[ Refresh[ proofNavigation[ $TMAproofTree], TrackedSymbols :> {$TMAproofTree, $TMAproofSearchRunning, $TMAproofNotebook, ruleTextActive, $proofTreeScale, $selectedProofStep}]]},
         			(* compute *){compSetup[],
@@ -1012,19 +1012,18 @@ Clear[displaySelectedRules];
 structViewRules[ {category_String},___] := Sequence[];
 
 (*Responsible for groupe name of rules *)
-structViewRules[{category_String, r__}, tags_, open_:False] :=
+structViewRules[ {category_String, r__}, tags_, open_:False] :=
     Module[ {sub, compTags, structControl},
-		sub = Map[structViewRules[#, tags] &, {r}];
-		If[ sub==={},Return[{{},{}}]];
-        sub = Transpose[sub];
-        compTags = Apply[Union, sub[[2]]];
+		sub = Map[ structViewRules[ #, tags] &, {r}];
+		If[ sub === {}, Return[ {{}, {}}]];
+        sub = Transpose[ sub];
+        compTags = Apply[ Union, sub[[2]]];
         structControl = "Theorema`Interface`GUI`Private`$ruleStructState$" <> ToString[ Hash[ category]];
         If[ open && MatchQ[ ToExpression[ structControl], _Symbol],
         	ToExpression[ structControl <> "=True"]
         ];
-        {OpenerView[{structViewRules[category, compTags], Column[sub[[1]]]}, 
-        	ToExpression[StringReplace["Dynamic[NEWSYM]", 
-        		"NEWSYM" -> structControl]]], 
+        {OpenerView[ {structViewRules[ category, compTags], Column[ sub[[1]]]}, 
+        	ToExpression[ StringReplace[ "Dynamic[NEWSYM]", "NEWSYM" -> structControl]]], 
          compTags}
     ]
 
@@ -1034,12 +1033,10 @@ structViewRules[{category_String}, tags_, open_]:=Sequence[];
 
 structViewRules[ Hold[ rs_]] := 
 	Module[{list = {}},
-		If[StringLength[$keyWord]>2,		
-			list = DeleteCases[rs,{r_Symbol/;testNoMatch[MessageName[ r, "usage"],"*"<>$keyWord<>"*"],t_,text_,p_Integer ,___}, Infinity];
-			
-			structViewRules[ list, {}, True]
-			
-		,
+		If[ StringLength[ $ruleFilterKW] > 2,		
+			list = DeleteCases[ rs, {r_Symbol /; testNoMatch[ MessageName[ r, "usage"], "*" <> $ruleFilterKW <> "*"], t_, text_, p_Integer ,___}, Infinity];
+			structViewRules[ list, {}, True],
+			(* else *)
 			structViewRules[ rs, {}, True]
 		]
 	]
@@ -1142,15 +1139,6 @@ displayBuiltinBrowser[ task_String] :=
   }]
 displayBuiltinBrowser[args___] := unexcpected[ displayBuiltinBrowser, {args}]
 
-makeSearchButton[]:= 
-	Module[{},		
-		Row[{
-		Button["Search",CreateDialog[{TextCell["Enter a name: "],
-			InputField[Dynamic[nm],String],DefaultButton[DialogReturn[$keyWord=nm]]}]],		
-		Button["Show all",$keyWord = ""]
-		}]
-	]	
-
 selectProver[ ] :=
     Column[{
     	Button[ translate[ "OKnext"], $tcActionView++],
@@ -1163,22 +1151,21 @@ selectProver[ ] :=
 			{view, $allRules} = structViewRules[ $selectedRuleSet];								
     		
     		Labeled[ Column[{
-				Row[{
-				Button["Search",
-				CreateDialog[
-					{
-						TextCell["Enter a keyword: "],
-						InputField[Dynamic[$keyWord],String,ContinuousAction->True],
-						DefaultButton[DialogReturn[]]						
-					},
-					WindowTitle-> "Search rules by keyword"
-				]
-			],			
-			Button["Set rules to default",resetDefaultRules[]],
-			Button["Show all",$keyWord = ""]
-				}],
-			Row[ {"Filtered by: ", $keyWord}],
-				view}], translate[ "pRulesSetup"], {{ Top, Left}}]],
+				Row[{	
+				Button[ translate[ "RestoreDefaults"], resetDefaultRules[]],
+				Button[ translate[ "ShowAll"], $ruleFilterKW = ""]},
+				Spacer[2]],
+				With[ {label = Row[ {translate[ "FilteredBy"], InputField[ $ruleFilterKW, String]}]},
+					Button[ label,
+						CreateDialog[{
+							Row[ {translate[ "Keyword"], InputField[ Dynamic[ $ruleFilterKW], String, ContinuousAction -> True]}],
+							DefaultButton[ DialogReturn[]]},
+							WindowTitle-> translate[ "FilterRulesWindow"]
+						],
+						Appearance -> "Frameless"
+					]
+				],
+				If[ view === {}, translate[ "noRules"], view]}], translate[ "pRulesSetup"], {{Top, Left}}]],
     	Labeled[ Tooltip[ PopupMenu[ Dynamic[ $selectedStrategy], Map[ MapAt[ translate, #, {2}]&, $registeredStrategies]],
     		With[ {ss = $selectedStrategy}, MessageName[ ss, "usage"]]], 
     		translate[ "pStrat"], {{ Top, Left}}],
@@ -1536,6 +1523,7 @@ closeEnv[args___] :=
     unexpected[closeEnv, {args}]
 
 newFormulaCell[ "COMPUTE"] = Cell[BoxData["\[SelectionPlaceholder]"], "Computation"]	
+newFormulaCell[ "DECLARATION"] = Cell[BoxData["\[SelectionPlaceholder]"], "GlobalDeclaration"]	
 newFormulaCell[ style_, label_:$initLabel] = Cell[BoxData["\[SelectionPlaceholder]"], "FormalTextInputFormula", CellTags->{label}]	
 newFormulaCell[args___] :=
     unexpected[newFormulaCell, {args}]
@@ -1565,13 +1553,13 @@ newCloseEnvCell[args___] :=
 
 
 makeNbNewButton[] :=
-	Button[ translate["tcSessTabNbTabButtonNewLabel"],
+	Button[ translate[ "New"],
 		createNbRememberLocation[ ],
 		Alignment -> {Left, Top}, Method -> "Queued"]
 makeNbNewButton[ args___] := unexpected[ makeNbNewButton, {args}]
 
 makeNbOpenButton[ ] :=
-	Button[ translate["tcSessTabNbTabButtonOpenLabel"],
+	Button[ translate["Open"],
 		openNbRememberLocation[ ],
 		Method -> "Queued"
 	]
@@ -1595,8 +1583,13 @@ makeEnvButton[ bname_String] :=
     ]
 makeEnvButton[args___] := unexpected[makeEnvButton, {args}]
 
-makeFormButton[] := Button[ translate["tcSessTabEnvTabButtonFormLabel"], insertNewFormulaCell[ "Env"], Alignment -> {Left, Top}, ImageSize -> Automatic]
-makeFormButton[args___] := unexpected[makeFormButton, {args}]
+makeFormButton[] := Button[ translate[ "New"], insertNewFormulaCell[ "Env"], Alignment -> {Left, Top}, ImageSize -> Automatic]
+makeFormButton[args___] := unexpected[ makeFormButton, {args}]
+
+makeNewDeclButton[] :=
+    Button[ translate[ "New"], insertNewFormulaCell[ "DECLARATION"], Alignment -> {Left, Top}, ImageSize -> Automatic]
+makeNewDeclButton[args___] := unexpected[ makeNewDeclButton, {args}]
+
 
 makeDeclButtons[] := Row[ Map[ makeDeclBut, {"VAR", "VARCOND", "COND", "ABBREV"}], Spacer[5]]
 makeDeclButtons[args___] := unexpected[ makeDeclButtons, {args}]
@@ -1677,7 +1670,7 @@ sessionCompose[] :=
     		translate[ "Environments"], {{Top, Left}}],
     	Labeled[ Column[ {makeFormButton[], Dynamic[ Refresh[ langButtons[], TrackedSymbols :> {$buttonNat}]]}, Left, Spacer[2]],
     		translate[ "Formulae"], {{Top, Left}}],
-    	Labeled[ Column[ {makeDeclButtons[]}, Left, Spacer[2]],
+    	Labeled[ Column[ {makeNewDeclButton[], makeDeclButtons[]}, Left, Spacer[2]],
     		translate[ "Declarations"], {{Top, Left}}]
     }]
 sessionCompose[args___] :=
@@ -1708,7 +1701,7 @@ sessionArchive[] :=
 sessionArchive[args___] := unexpected[sessionArchive, {args}]
 
 makeArchCreateButton[] :=
-	Button[ translate["tcLangTabArchTabButtonNewLabel"], 
+	Button[ translate[ "New"], 
 		insertNewArchive[ NotebookCreate[ StyleDefinitions -> makeColoredStylesheet[ "Notebook"]]], Alignment -> {Left, Top}, Method -> "Queued"]
 makeArchNewButton[args___] := unexpected[makeArchNewButton, {args}]
 
@@ -2284,9 +2277,8 @@ compSetup[args___] :=
     unexpected[compSetup, {args}]
 
 makeCompButton[] :=
-    Button[ translate["tcComputeTabSetupTabButtonCompLabel"], insertNewFormulaCell[ "COMPUTE"], Alignment -> {Left, Top}]
-makeCompButton[args___] :=
-    unexpected[makeCompButton, {args}]
+    Button[ translate[ "New"], insertNewFormulaCell[ "COMPUTE"], Alignment -> {Left, Top}]
+makeCompButton[args___] := unexpected[makeCompButton, {args}]
 
 
 partitionFill[ l_List, n_Integer, default_:""] := Partition[ PadRight[ l, n*Ceiling[ Length[ l]/n], default], n]
