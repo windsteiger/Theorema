@@ -1333,21 +1333,22 @@ printComputationInfo[] :=
     ]
     
 printComputationInfo[ cellID_Integer] := 
-	Module[ {nbDir},
+	Module[ {nbDir, file},
 		nbDir = createPerNotebookDirectory[ CurrentValue[ "NotebookFullFileName"]];
 		(* Generate cache only in plain .m format, since this allows sharing notebooks with users on different platforms.
 			Also, loading a .m-file allows dynamic objects to react to new settings, whereas loading a .mx-file has no effect on dynamics.
 			I assume the speed gain from using mx is neglectable *)
-		Put[ Definition[ buiActComputation], Definition[ kbSelectCompute], FileNameJoin[ {nbDir, "c" <> ToString[ cellID] <> ".m"}]];
-		With[ {dir = nbDir},
+		file = FileNameJoin[ {nbDir, "c" <> ToString[ cellID]}];
+		saveComputationCacheDisplay[ cellID, file];
+		With[ {fn = file},
 			CellPrint[ Cell[ BoxData[
 				ToBoxes[ DynamicModule[ {showTab = 1}, 
 					OpenerView[ {"",
 						Column[ {ButtonBar[{
 								translate["tcComputeTabKBTabLabel"] :> (showTab = 1), 
 								translate["tcComputeTabBuiltinTabLabel"] :> (showTab = 2), 
-								translate["RestoreEnv"] :> setCompEnv[ cellID, dir]}],
-							Dynamic[ Pane[ displayComputationCache[ cellID, dir, showTab], {250, 100}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]]}, 
+								translate["RestoreEnv"] :> setCompEnv[ fn]}],
+							Dynamic[ Pane[ Get[ fn <> ToString[ -showTab] <> ".m"], {0.7*CurrentValue[ "WindowSize"][[1]], 100}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]]}, 
 							Alignment -> Right]}, 
 						False]
 				]]], "ComputationInfo"]]
@@ -1355,10 +1356,10 @@ printComputationInfo[ cellID_Integer] :=
 	]
 printComputationInfo[args___] := unexcpected[ printComputationInfo, {args}]
      
-setCompEnv[ cellID_Integer, dir_String] :=
+setCompEnv[ file_String] :=
 	Module[{},
 		Clear[ kbSelectCompute];
-		Get[ "c" <> ToString[ cellID] <> ".m", Path -> {dir}];
+		Get[ file <> ".m"];
 	]
 setCompEnv[ args___] := unexpected[ setCompEnv, {args}]
 
@@ -1377,6 +1378,15 @@ displayComputationCache[ cellID_Integer, dir_String, tab_Integer] :=
 	]
 displayComputationCache[ cellID_Integer, dir_String, tab_] := displayComputationCache[ cellID, dir, 1]
 displayComputationCache[ args___] := unexpected[ displayComputationCache, {args}]
+
+saveComputationCacheDisplay[ cellID_Integer, file_String] :=
+	Module[ {},
+		Put[ Definition[ buiActComputation], Definition[ kbSelectCompute], file <> ".m"];
+		Put[ Map[ displayFormulaFromKey, Cases[ DownValues[ kbSelectCompute],
+        		HoldPattern[ Verbatim[HoldPattern][ kbSelectCompute[ k_List]] :> True] -> k]], file <> "-1.m"];
+		Put[ summarizeBuiltins[ "compute"], file <> "-2.m"];
+	]
+saveComputationCacheDisplay[ args___] := unexpected[ saveComputationCacheDisplay, {args}]
 
 displayFormulaFromKey[ k_List] :=
 	Module[ {form},
