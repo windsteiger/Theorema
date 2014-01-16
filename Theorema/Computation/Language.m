@@ -731,58 +731,39 @@ Set$TM /: Annotated$TM[ Element$TM, SubScript$TM[ dom_]][ p_, a_Set$TM] /; buiAc
 Set$TM /: Annotated$TM[ Element$TM, SubScript$TM[ dom_]][ p_, a_Set$TM?isGround] /; buiActive["IsElement"] := False
 Set$TM /: \[ScriptCapitalP]$TM[ a_Set$TM?isGround] /; buiActive["PowerSet"] := Subsets[ a] /. List -> Set$TM
 Set$TM /: BracketingBar$TM[ a_Set$TM?isGround] /; buiActive["Cardinality"] && isSequenceFree[a] := Length[ a]
-Set$TM /: max$TM[ Set$TM[ e___?isGround]] /; buiActive["MaximumElementSet"] :=
+Set$TM /: max$TM[ Set$TM[ e__]] /; buiActive["MaximumElementSet"] :=
 	Module[ {s},
 		(s /. Max -> max$TM /. {max$TM[x_Set$TM] :> max$TM[x], max$TM[x___] :> max$TM[Set$TM[x]]}) /; (s = Max[ e]; Apply[ Hold, {s}] =!= Hold[ Max[ e]])
 	]
-Set$TM /: Subscript$TM[ max$TM, ord_][ Set$TM[ e___?isGround]] /; buiActive["MaximumElementSet"] :=
+Set$TM /: Subscript$TM[ max$TM, ord_][ Set$TM[ e__]] /; buiActive["MaximumElementSet"] :=
 	Module[ {res},
-		If[ Length[ res] === 1,
-			First[ res],
-			Subscript$TM[ max$TM, ord][ Apply[ Set$TM, res]]
-		] /; (res = max[ {e}, ord]; Length[ res] === 1 || res =!= {e})
+		First[ res] /; (res = max[ {e}, ord]; Length[ res] === 1)
 	]
-Set$TM /: min$TM[ Set$TM[ e___?isGround]] /; buiActive["MinimumElementSet"] :=
+Set$TM /: min$TM[ Set$TM[ e__]] /; buiActive["MinimumElementSet"] :=
 	Module[ {s},
 		(s /. Min -> min$TM /. {min$TM[x_Set$TM] :> min$TM[x], min$TM[x___] :> min$TM[Set$TM[x]]}) /; (s = Min[ e]; Apply[ Hold, {s}] =!= Hold[ Min[ e]])
 	]
-Set$TM /: Subscript$TM[ min$TM, ord_][ Set$TM[ e___?isGround]] /; buiActive["MinimumElementSet"] :=
+Set$TM /: Subscript$TM[ min$TM, ord_][ Set$TM[ e__]] /; buiActive["MinimumElementSet"] :=
 	Module[ {res},
-		If[ Length[ res] === 1,
-			First[ res],
-			Subscript$TM[ min$TM, ord][ Apply[ Set$TM, res]]
-		] /; (res = min[ {e}, ord]; Length[ res] === 1 || res =!= {e})
+		First[ res] /; (res = min[ {e}, ord]; Length[ res] === 1)
 	]
 Set$TM /: \[AE]$TM[ Set$TM[ a_, ___]] /; buiActive["AnElement"] := a
 	
 
-(* amaletzk: The following implementation of "max" and "min" has linear complexity in the length of the
-	input. One could, however, also compare all elements with each other (leads to quadratic complexity)
-	to obtain a better result. 'Better' means that all elements which cannot be the maximum/minimum are
-	certainly removed. This cannot be guaranteed in the current version! *)
-max[ {}, _] := {DirectedInfinity[-1]}
-max[ {a_}, _] := {a}
-max[ {a_, b__}, ord_] := max[ {b}, ord, a, {}]
-max[ {m_, b___}, ord_, m_, u_List] := max[ {b}, ord, m, u]
-max[ {a_, b___}, ord_, m_, u_List] :=
-	If[ ord[ a, m],
-		max[ {b}, ord, m, u],
-		max[ {b}, ord, a, u],
-		max[ {b}, ord, m, Union[ u, {a}]]
-	]
-max[ {}, _, m_, u_List] := Prepend[ u, m]
+(* amaletzk: The following implementation of "max" and "min" has quadratic complexity in the length of the
+	input. One could, however, also compare only successive elements, but this method would only give
+	the right result in case of a linear ordering, not in case of an arbitrary partial ordering! *)
+max[ l:{___, a_, ___}, ord_] /; greatest[ a, l, ord] := {a}
+max[ _List, _] := {}
 
-min[ {}, _] := {DirectedInfinity[1]}
-min[ {a_}, _] := {a}
-min[ {a_, b__}, ord_] := min[ {b}, ord, a, {}]
-min[ {m_, b___}, ord_, m_, u_List] := min[ {b}, ord, m, u]
-min[ {a_, b___}, ord_, m_, u_List] :=
-	If[ ord[ a, m],
-		min[ {b}, ord, a, u],
-		min[ {b}, ord, m, u],
-		min[ {b}, ord, m, Union[ u, {a}]]
-	]
-min[ {}, _, m_, u_List] := Prepend[ u, m]
+greatest[ _, {}, _] := True
+greatest[ a_, {b_, rest___}, ord_] := TrueQ[ ord[ b, a] || a == b] && greatest[ a, {rest}, ord]
+
+min[ l:{___, a_, ___}, ord_] /; smallest[ a, l, ord] := {a}
+min[ _List, _] := {}
+
+smallest[ _, {}, _] := True
+smallest[ a_, {b_, rest___}, ord_] := TrueQ[ ord[ a, b] || a == b] && smallest[ a, {rest}, ord]
 
 
 
@@ -1086,27 +1067,21 @@ Tuple$TM /: CupCap$TM[a__Tuple$TM] /; buiActive["Join"] := Join[ a]
 Tuple$TM /: Element$TM[p_, a_Tuple$TM] /; buiActive["IsElement"] && MemberQ[a, p] := True
 Tuple$TM /: Element$TM[p_, a_Tuple$TM?isGround] /; buiActive["IsElement"] := False
 
-Tuple$TM /: max$TM[ Tuple$TM[ e___?isGround]] /; buiActive["Max"] :=
+Tuple$TM /: max$TM[ Tuple$TM[ e__]] /; buiActive["Max"] :=
 	Module[ {s},
 		(s /. Max -> max$TM /. {max$TM[x_Tuple$TM] :> max$TM[x], max$TM[x___] :> max$TM[Tuple$TM[x]]}) /; (s = Max[ e]; Apply[ Hold, {s}] =!= Hold[ Max[ e]])
 	]
-Tuple$TM /: Subscript$TM[ max$TM, ord_][ Tuple$TM[ e___?isGround]] /; buiActive["Max"] :=
+Tuple$TM /: Subscript$TM[ max$TM, ord_][ Tuple$TM[ e__]] /; buiActive["Max"] :=
 	Module[ {res},
-		If[ Length[ res] === 1,
-			First[ res],
-			Subscript$TM[ max$TM, ord][ Apply[ Tuple$TM, res]]
-		] /; (res = max[ {e}, ord]; Length[ res] === 1 || res =!= {e})
+		First[ res] /; (res = max[ {e}, ord]; Length[ res] === 1)
 	]
-Tuple$TM /: min$TM[ Tuple$TM[ e___?isGround]] /; buiActive["Min"] :=
+Tuple$TM /: min$TM[ Tuple$TM[ e__]] /; buiActive["Min"] :=
 	Module[ {s},
 		(s /. Min -> min$TM /. {min$TM[x_Tuple$TM] :> min$TM[x], min$TM[x___] :> min$TM[Tuple$TM[x]]}) /; (s = Min[ e]; Apply[ Hold, {s}] =!= Hold[ Min[ e]])
 	]
-Tuple$TM /: Subscript$TM[ min$TM, ord_][ Tuple$TM[ e___?isGround]] /; buiActive["Min"] :=
+Tuple$TM /: Subscript$TM[ min$TM, ord_][ Tuple$TM[ e__]] /; buiActive["Min"] :=
 	Module[ {res},
-		If[ Length[ res] === 1,
-			First[ res],
-			Subscript$TM[ min$TM, ord][ Apply[ Tuple$TM, res]]
-		] /; (res = min[ {e}, ord]; Length[ res] === 1 || res =!= {e})
+		First[ res] /; (res = min[ {e}, ord]; Length[ res] === 1)
 	]
 
 Tuple$TM /: BracketingBar$TM[ a_Tuple$TM?isSequenceFree] /; buiActive["Length"] := Length[ a]
