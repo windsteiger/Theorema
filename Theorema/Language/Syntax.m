@@ -627,7 +627,9 @@ MakeExpression[ RowBox[ {UnderscriptBox[ "-", dom_], r_}], fmt_] :=
     Module[ {},
     	(* Special case: unary minus *)
     	(* We memorize for output, that dom has been introduced as a domain underscript *)
-    	registerDomainOperator[ "-", Minus, Prefix, dom];
+    	(* We need a "Hold" here, because the other operations also get a "Hold", and otherwise
+    		converting expressions back to Theorema syntax does not work properly. *)
+    	registerDomainOperator[ "-", Hold[Minus], Prefix, dom];
         MakeExpression[ RowBox[ {RowBox[ {dom, "[", "Minus", "]"}], "[", r, "]"}], fmt]
     ] /; $parseTheoremaExpressions
 
@@ -647,7 +649,7 @@ MakeExpression[ RowBox[ {l_, UnderscriptBox[ "-", dom_], r_}], fmt_] :=
     Module[ {},
     	(* Special case: subtract *)
     	(* We memorize for output, that dom has been introduced as a domain underscript *)
-    	registerDomainOperator[ "-", Subtract, Infix, dom];
+    	registerDomainOperator[ "-", Hold[Subtract], Infix, dom];
         MakeExpression[ RowBox[ {RowBox[ {dom, "[", "Subtract", "]"}], "[", RowBox[ {l, ",", r}], "]"}], fmt]
     ] /; $parseTheoremaExpressions
 
@@ -655,7 +657,7 @@ MakeExpression[ RowBox[ {l_, UnderscriptBox[ "/", dom_], r_}], fmt_] :=
     Module[ {},
     	(* Special case: divide *)
     	(* We memorize for output, that dom has been introduced as a domain underscript *)
-    	registerDomainOperator[ "/", Divide, Infix, dom];
+    	registerDomainOperator[ "/", Hold[Divide], Infix, dom];
         MakeExpression[ RowBox[ {RowBox[ {dom, "[", "Divide", "]"}], "[", RowBox[ {l, ",", r}], "]"}], fmt]
     ] /; $parseTheoremaExpressions
 
