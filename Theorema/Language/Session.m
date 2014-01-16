@@ -860,7 +860,7 @@ computeInProof[ args___] := unexpected[ computeInProof, {args}]
 (* Notebook operations *)
 
 createNbRememberLocation[ ] :=
-	Module[{file, dir},
+	Module[{file, dir, fpMode},
 		If[ ValueQ[ $dirLastOpened],
 			dir = $dirLastOpened,
 			dir = $HomeDirectory
@@ -869,10 +869,16 @@ createNbRememberLocation[ ] :=
 		If[ StringQ[ file] && !FileExistsQ[ file],
 			$dirLastOpened = DirectoryName[ file];
 			trustNotebookDirectory[ $dirLastOpened];
+			(* Fiddling in the FrontEnd options is a workaround caused by a Mma bug (under Linux?), 
+			   which causes an error message when saving a notebook and other notebooks are open
+			   at the same time. Once this bug is corrected, we can just NotebookSave[ NotebookCreate[ ...]]. *)
+			fpMode = Replace[ Global`FileChangeProtection, Options[ $FrontEnd, Global`FileChangeProtection]];
+			SetOptions[ $FrontEnd, Global`FileChangeProtection -> None];
 			NotebookSave[
 				NotebookCreate[ StyleDefinitions -> makeColoredStylesheet[ "Notebook"]],
 				file
 			];
+			SetOptions[ $FrontEnd, Global`FileChangeProtection -> fpMode];
 			createPerNotebookDirectory[ file];
 		]
 	]
