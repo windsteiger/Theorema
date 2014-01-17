@@ -182,6 +182,7 @@ With[ {lang = "English"},
     translate["BuiProve", lang] = "Builtins used in proof";
     translate["KBprove", lang] = "Knowledge used in proof";
     translate["RestoreEnv", lang] = "Restore environment";
+    translate["RestoreEnvLong", lang] = "Really restore all relevant settings to the values they had when this action was performed last time?";
     translate["ResetBui", lang] = "Reset built-ins";
     translate["Proof of", lang] = "Proof of";
     translate["ShowProof", lang] = "Show proof";

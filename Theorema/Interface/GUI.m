@@ -1340,8 +1340,8 @@ printComputationInfo[ cellID_Integer] :=
 			I assume the speed gain from using mx is neglectable *)
 		file = FileNameJoin[ {nbDir, "c" <> ToString[ cellID]}];
 		saveComputationCacheDisplay[ cellID, file];
-		With[ {fn = file},
-			CellPrint[ Cell[ BoxData[
+		With[ {fn = file <> "-display.m"},
+			(*CellPrint[ Cell[ BoxData[
 				ToBoxes[ DynamicModule[ {showTab = 1}, 
 					OpenerView[ {"",
 						Column[ {ButtonBar[{
@@ -1351,7 +1351,10 @@ printComputationInfo[ cellID_Integer] :=
 							Dynamic[ Pane[ Get[ fn <> ToString[ -showTab] <> ".m"], {0.7*CurrentValue[ "WindowSize"][[1]], 100}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]]}, 
 							Alignment -> Right]}, 
 						False]
-				]]], "ComputationInfo"]]
+				]]], "ComputationInfo"]];
+				*)
+			CellPrint[ Cell[ "", "ComputationInfo"]];
+			CellPrint[ Cell[ BoxData[ ToBoxes[ Dynamic[ Get[ fn]]]], "ComputationInfoBody"]]
 		];
 	]
 printComputationInfo[args___] := unexcpected[ printComputationInfo, {args}]
@@ -1359,7 +1362,7 @@ printComputationInfo[args___] := unexcpected[ printComputationInfo, {args}]
 setCompEnv[ file_String] :=
 	Module[{},
 		Clear[ kbSelectCompute];
-		Get[ file <> ".m"];
+		Get[ file];
 	]
 setCompEnv[ args___] := unexpected[ setCompEnv, {args}]
 
@@ -1380,12 +1383,20 @@ displayComputationCache[ cellID_Integer, dir_String, tab_] := displayComputation
 displayComputationCache[ args___] := unexpected[ displayComputationCache, {args}]
 
 saveComputationCacheDisplay[ cellID_Integer, file_String] :=
-	Module[ {},
-		Put[ Definition[ buiActComputation], Definition[ kbSelectCompute], file <> ".m"];
-		Put[ Map[ displayFormulaFromKey, Cases[ DownValues[ kbSelectCompute],
-        		HoldPattern[ Verbatim[HoldPattern][ kbSelectCompute[ k_List]] :> True] -> k]], file <> "-1.m"];
-		Put[ summarizeBuiltins[ "compute"], file <> "-2.m"];
-	]
+	With[ {fn = file <> ".m"},
+		Put[ Definition[ buiActComputation], Definition[ kbSelectCompute], fn];
+		Put[ 
+			TabView[ {
+				translate["tcComputeTabKBTabLabel"] -> Map[ displayFormulaFromKey, Cases[ DownValues[ kbSelectCompute],
+        			HoldPattern[ Verbatim[HoldPattern][ kbSelectCompute[ k_List]] :> True] -> k]],
+        		translate["tcComputeTabBuiltinTabLabel"] -> summarizeBuiltins[ "compute"],
+        		translate["RestoreEnv"] -> Row[ {translate["RestoreEnvLong"], Button[ translate[ "OK"], setCompEnv[ fn]]}, Spacer[5]]
+				},
+				ImageSize -> Automatic
+			],
+			file <> "-display.m"];
+	]	
+	
 saveComputationCacheDisplay[ args___] := unexpected[ saveComputationCacheDisplay, {args}]
 
 displayFormulaFromKey[ k_List] :=
