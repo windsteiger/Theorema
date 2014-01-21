@@ -257,7 +257,8 @@ $tmaOperators = {
 	{"\[Implies]", {Infix}, "Implies"}, {"\[Therefore]", {Infix}, "Therefore"},
 	{"\[Because]", {Infix}, "Because"}, {"\[RightTee]", {Infix}, "RightTee"},
 	{"\[LeftTee]", {Infix}, "LeftTee"}, {"\[DoubleRightTee]", {Infix}, "DoubleRightTee"},
-	{"\[DoubleLeftTee]", {Infix}, "DoubleLeftTee"}, {"\[SuchThat]", {Infix}, "SuchThat"}};
+	{"\[DoubleLeftTee]", {Infix}, "DoubleLeftTee"}, {"\[SuchThat]", {Infix}, "SuchThat"},
+	{"\[Distributed]", {Infix}, "Distributed"}, {"\[Conditioned]", {Infix}, "Conditioned"}};
 	
 $tmaOperatorSymbols = Map[ First, $tmaOperators];
 (* We must not add contexts (like "Theorema`Knowledge`" etc.) to the operator names, as it is done with quantifiers,

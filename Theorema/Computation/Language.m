@@ -713,24 +713,132 @@ IntersectionOf$TM[ RNG$[ r_], cond_, dom_, form_] /; buiActive["IntersectionOf"]
 (* ::Section:: *)
 (* Sets *)
 
-Set$TM /: Equal$TM[a__Set$TM?isGround] /; buiActive["SetEqual"] := SameQ[a]
-Set$TM /: SubsetEqual$TM[a_Set$TM?isGround, b_Set$TM?isGround] /; buiActive["SubsetEqual"] := Equal$TM[Intersection[a, b],a]
-Set$TM /: Subset$TM[a_Set$TM?isGround, b_Set$TM?isGround] /; buiActive["Subset"] := And[SubsetEqual$TM[a,b],Not[Equal$TM[a, b]]]
-Set$TM /: SupersetEqual$TM[a_Set$TM?isGround, b_Set$TM?isGround] /; buiActive["SupersetEqual"] := SubsetEqual$TM[b, a]
-Set$TM /: Superset$TM[a_Set$TM?isGround, b_Set$TM?isGround] /; buiActive["Superset"] := Subset$TM[b, a]
-Set$TM /: Union$TM[ a___Set$TM?isGround] /; buiActive["Union"] := Union[ a] /. List -> Set$TM (* "Union" also works with 0 arguments, in contrast to "Intersection" *)
-Set$TM /: Annotated$TM[ Union$TM, SubScript$TM[ dom_]][ a___Set$TM?isGround] /; buiActive["Union"] := Union[ a, SameTest -> (TrueQ[ dom[Equal$TM][ #1, #2]]&)] /. List -> Set$TM
-Set$TM /: Intersection$TM[ a__Set$TM?isGround] /; buiActive["Intersection"] := Intersection[ a] /. List -> Set$TM
-Set$TM /: Annotated$TM[ Intersection$TM, SubScript$TM[ dom_]][ a__Set$TM?isGround] /; buiActive["Intersection"] := Intersection[ a, SameTest -> (TrueQ[ dom[Equal$TM][ #1, #2]]&)] /. List -> Set$TM
-Set$TM /: Backslash$TM[ a_Set$TM?isGround, b_Set$TM?isGround] /; buiActive["Difference"] := Complement[a, b] /. List -> Set$TM
-Set$TM /: EmptyUpTriangle$TM[ a_Set$TM?isGround, b_Set$TM?isGround] /; buiActive["SymmetricDifference"] := Union[Complement[a, b], Complement[b, a]] /. List -> Set$TM
-Set$TM /: Cross$TM[ a__Set$TM?isGround] /; buiActive["CartesianProduct"] := Apply[Set$TM, Replace[Tuples[{a}],List[x__]:> Tuple$TM[x] ,{1}]]
-Set$TM /: Element$TM[ p_, a_Set$TM] /; buiActive["IsElement"] && MemberQ[ a, p] := True
-Set$TM /: Element$TM[ p_, a_Set$TM?isGround] /; buiActive["IsElement"] := False
-Set$TM /: Annotated$TM[ Element$TM, SubScript$TM[ dom_]][ p_, a_Set$TM] /; buiActive["IsElement"] && MemberQ[ a, _?(dom[Equal$TM][p, #]&)] := True
-Set$TM /: Annotated$TM[ Element$TM, SubScript$TM[ dom_]][ p_, a_Set$TM?isGround] /; buiActive["IsElement"] := False
-Set$TM /: \[ScriptCapitalP]$TM[ a_Set$TM?isGround] /; buiActive["PowerSet"] := Subsets[ a] /. List -> Set$TM
-Set$TM /: BracketingBar$TM[ a_Set$TM?isGround] /; buiActive["Cardinality"] && isSequenceFree[a] := Length[ a]
+Set$TM /: Equal$TM[a__Set$TM] /; buiActive["SetEqual"] && SameQ[a] := True
+Set$TM /: Equal$TM[_Set$TM] /; buiActive["SetEqual"] := True
+Set$TM /: Equal$TM[a_Set$TM, b_Set$TM, c__Set$TM] /; buiActive["SetEqual"] :=
+	Equal$TM[ a, b] && Map[ Equal$TM[ a, #]&, And[ c]]
+Set$TM /: Equal$TM[a_Set$TM, b_Set$TM] /; buiActive["SetEqual"] :=
+	Module[ {res},
+		res /; (res = subseteq[ a, b, Equal$TM];
+				If[ res === True,
+					res = subseteq[ b, a, Equal$TM]
+				];
+				MatchQ[ res, True|False])
+	]
+Set$TM /: Annotated$TM[Equal$TM, SubScript$TM[ _]][_Set$TM] /; buiActive["SetEqual"] := True
+Set$TM /: Annotated$TM[Equal$TM, SubScript$TM[ dom_]][a_Set$TM, b_Set$TM, c__Set$TM] /; buiActive["SetEqual"] :=
+	dom[Equal$TM][ a, b] && Map[ dom[Equal$TM][ a, #]&, And[ c]]
+Set$TM /: Annotated$TM[Equal$TM, SubScript$TM[ dom_]][a_Set$TM, b_Set$TM] /; buiActive["SetEqual"] :=
+	Module[ {res},
+		res /; (res = subseteq[ a, b, dom[Equal$TM]];
+				If[ res === True,
+					res = subseteq[ b, a, dom[Equal$TM]]
+				];
+				MatchQ[ res, True|False])
+	]
+Set$TM /: SubsetEqual$TM[a_Set$TM, b_Set$TM] /; buiActive["SubsetEqual"] :=
+	Module[ {res},
+		res /; (res = subseteq[ a, b, Equal$TM]; MatchQ[ res, True|False])
+	]
+Set$TM /: Annotated$TM[SubsetEqual$TM, SubScript$TM[ dom_]][a_Set$TM, b_Set$TM] /; buiActive["SubsetEqual"] :=
+		Module[ {res},
+		res /; (res = subseteq[ a, b, dom[Equal$TM]]; MatchQ[ res, True|False])
+	]
+Set$TM /: Subset$TM[a_Set$TM, b_Set$TM] /; buiActive["Subset"] :=
+	Module[ {res},
+		res /; (res = subseteq[ a, b, Equal$TM];
+				If[ res === True,
+					res = !subseteq[ b, a, Equal$TM]
+				];
+				MatchQ[ res, True|False])
+	]
+Set$TM /: Annotated$TM[Subset$TM, SubScript$TM[ dom_]][a_Set$TM, b_Set$TM] /; buiActive["Subset"] :=
+	Module[ {res},
+		res /; (res = subseteq[ a, b, dom[Equal$TM]];
+				If[ res === True,
+					res = !subseteq[ b, a, dom[Equal$TM]]
+				];
+				MatchQ[ res, True|False])
+	]
+Set$TM /: SupersetEqual$TM[a_Set$TM, b_Set$TM] /; buiActive["SupersetEqual"] :=
+	Module[ {res},
+		res /; (res = subseteq[ b, a, Equal$TM]; MatchQ[ res, True|False])
+	]
+Set$TM /: Annotated$TM[SupersetEqual$TM, SubScript$TM[ dom_]][a_Set$TM, b_Set$TM] /; buiActive["SupersetEqual"] :=
+	Module[ {res},
+		res /; (res = subseteq[ b, a, dom[Equal$TM]]; MatchQ[ res, True|False])
+	]
+Set$TM /: Superset$TM[a_Set$TM, b_Set$TM] /; buiActive["Superset"] :=
+	Module[ {res},
+		res /; (res = subseteq[ b, a, Equal$TM];
+				If[ res === True,
+					res = !subseteq[ a, b, Equal$TM]
+				];
+				MatchQ[ res, True|False])
+	]
+Set$TM /: Annotated$TM[Superset$TM, SubScript$TM[ dom_]][a_Set$TM, b_Set$TM] /; buiActive["Superset"] :=
+	Module[ {res},
+		res /; (res = subseteq[ b, a, dom[Equal$TM]];
+				If[ res === True,
+					res = !subseteq[ a, b, dom[Equal$TM]]
+				];
+				MatchQ[ res, True|False])
+	]
+
+(* "Union" can be implemented in this nice way (in contrast to "Intersection", "Complement", ...),
+	because in any case it does not harm to put more elements into the resulting set than actually needed
+	(some might be equal).
+	Also note that it is possible to form the union over 0 sets, whereas the intersection of 0 sets is not defined. *)
+Set$TM /: Union$TM[ a___Set$TM] /; buiActive["Union"] := Union[ a, SameTest -> (TrueQ[ Equal$TM[ #1, #2]]&)]
+Set$TM /: Annotated$TM[ Union$TM, SubScript$TM[ dom_]][ a___Set$TM] /; buiActive["Union"] := Union[ a, SameTest -> (TrueQ[ dom[Equal$TM][ #1, #2]]&)]
+Set$TM /: Intersection$TM[ a_Set$TM, b___Set$TM] /; buiActive["Intersection"] :=
+	Module[ {res = Set$TM[]},
+		res /; (Scan[ If[ ElementOfAll[#, {b}, Equal$TM], AppendTo[res, #], Null, res = False; Return[]] &, a]; res =!= False)
+	]
+Set$TM /: Annotated$TM[ Intersection$TM, SubScript$TM[ dom_]][ a_Set$TM, b___Set$TM] /; buiActive["Intersection"] :=
+	Module[ {res = Set$TM[]},
+		res /; (Scan[ If[ ElementOfAll[#, {b}, dom[Equal$TM]], AppendTo[res, #], Null, res = False; Return[]] &, a]; res =!= False)
+	]
+Set$TM /: Backslash$TM[ a_Set$TM, b_Set$TM] /; buiActive["Difference"] :=
+	Module[ {res = Set$TM[]},
+		res /; (Scan[ If[ ElementOf[#, b, Equal$TM], Null, AppendTo[res, #], res = False; Return[]] &, a]; res =!= False)
+	]
+Set$TM /: Annotated$TM[ Backslash$TM, SubScript$TM[ dom_]][ a_Set$TM, b_Set$TM] /; buiActive["Difference"] :=
+	Module[ {res = Set$TM[]},
+		res /; (Scan[ If[ ElementOf[#, b, dom[Equal$TM]], Null, AppendTo[res, #], res = False; Return[]] &, a]; res =!= False)
+	]
+Set$TM /: EmptyUpTriangle$TM[ a_Set$TM, b_Set$TM] /; buiActive["SymmetricDifference"] :=
+	Module[ {res = Set$TM[]},
+		res /;
+			(Scan[ If[ ElementOf[#, b, Equal$TM], Null, AppendTo[res, #], res = False; Return[]] &, a];
+			If[ res === False,
+				False,
+				Scan[ If[ ElementOf[#, a, Equal$TM], Null, AppendTo[res, #], res = False; Return[]] &, b];
+				res =!= False
+			])
+	]
+Set$TM /: Annotated$TM[ EmptyUpTriangle$TM, SubScript$TM[ dom_]][ a_Set$TM, b_Set$TM] /; buiActive["SymmetricDifference"] :=
+	Module[ {res = Set$TM[]},
+		res /;
+			(Scan[ If[ ElementOf[#, b, dom[Equal$TM]], Null, AppendTo[res, #], res = False; Return[]] &, a];
+			If[ res === False,
+				False,
+				Scan[ If[ ElementOf[#, a, dom[Equal$TM]], Null, AppendTo[res, #], res = False; Return[]] &, b];
+				res =!= False
+			])
+	]
+Set$TM /: Cross$TM[ a__Set$TM] /; buiActive["CartesianProduct"] := Apply[Set$TM, Replace[Tuples[{a}],List[x__]:> Tuple$TM[x] ,{1}]]
+Set$TM /: Element$TM[ p_, a_Set$TM] /; buiActive["IsElement"] :=
+	Module[ {res},
+		res /; (res = ElementOf[ p, a, Equal$TM]; MatchQ[ res, True|False])
+	]
+Set$TM /: Annotated$TM[ Element$TM, SubScript$TM[dom_]][ p_, a_Set$TM] /; buiActive["IsElement"] :=
+	Module[ {res},
+		res /; (res = ElementOf[ p, a, dom[Equal$TM]]; MatchQ[ res, True|False])
+	]
+Set$TM /: \[ScriptCapitalP]$TM[ a_Set$TM] /; buiActive["PowerSet"] := Subsets[ a] /. List -> Set$TM
+Set$TM /: BracketingBar$TM[ a_Set$TM?isSequenceFree] /; buiActive["Cardinality"] && pairwiseDistinct[ a, Equal$TM] :=
+	Length[ a]
 Set$TM /: max$TM[ Set$TM[ e__]] /; buiActive["MaximumElementSet"] :=
 	Module[ {s},
 		(s /. Max -> max$TM /. {max$TM[x_Set$TM] :> max$TM[x], max$TM[x___] :> max$TM[Set$TM[x]]}) /; (s = Max[ e]; Apply[ Hold, {s}] =!= Hold[ Max[ e]])
@@ -765,6 +873,18 @@ min[ _List, _] := {}
 smallest[ _, {}, _] := True
 smallest[ a_, {b_, rest___}, ord_] := TrueQ[ ord[ a, b] || a == b] && smallest[ a, {rest}, ord]
 
+ElementOf[ p_, a_, test_] := Apply[ Or, Map[ (test[ p, #])&, Apply[ Hold, a]]]
+ElementOfAll[ p_, {a_, rest___}, test_] := ElementOf[ p, a, test] && ElementOfAll[ p, {rest}, test]
+ElementOfAll[ _, {}, _] := True
+
+pairwiseDistinct[ _[ f_, rest___], test_] := ElementOf[ f, {rest}, test] === False && pairwiseDistinct[ {rest}, test]
+pairwiseDistinct[ _[], _] := True
+
+subseteq[ a_, b_, test_] :=
+	Module[ {res = True},
+		Scan[ If[ ElementOf[#, b, test], Null, res = False; Return[], res = Null] &, a];
+		res
+	]
 
 
 (* ::Section:: *)
@@ -1058,14 +1178,39 @@ Tuple$TM /: Subscript$TM[ a_Tuple$TM?isSequenceFree, LeftArrow$TM[ b_]] /; buiAc
 Tuple$TM /: Subscript$TM[a_Tuple$TM?isGround, d:(LeftArrowBar$TM[_]..)] /; buiActive["Delete"] := Fold[ DeleteCases[ #1, #2[[1]]]&, a, {d}] 
 
 Tuple$TM /: Equal$TM[a__Tuple$TM] /; buiActive["TupleEqual"] && SameQ[a ] := True
-Tuple$TM /: Equal$TM[a__Tuple$TM?isGround] /; buiActive["TupleEqual"] := False
+Tuple$TM /: Equal$TM[a__Tuple$TM?isSequenceFree] /; buiActive["TupleEqual"] :=
+	Module[ {res},
+		res /; (res = If[ Apply[ SameQ, Map[ Length, Hold[ a]]],
+						Map[ Replace[#, {x__} :> Equal$TM[ x]] &, Apply[ And, Transpose[
+							Map[ Replace[ #, Tuple$TM[ x__] :> {x}]&, {a}]]]
+							],
+						False
+					];
+				MatchQ[ res, True|False])
+	]
+Tuple$TM /: Annotated$TM[Equal$TM, SubScript$TM[ dom_]][a__Tuple$TM?isSequenceFree] /; buiActive["TupleEqual"] :=
+	Module[ {res},
+		res /; (res = If[ Apply[ SameQ, Map[ Length, Hold[ a]]],
+						Map[ Replace[#, {x__} :> dom[Equal$TM][ x]] &, Apply[ And, Transpose[
+							Map[ Replace[ #, Tuple$TM[ x__] :> {x}]&, {a}]]]
+							],
+						False
+					];
+				MatchQ[ res, True|False])
+	]
 
 Tuple$TM /: Cup$TM[a_Tuple$TM, p_] /; buiActive["Append"] := Append[ a, p]
 Tuple$TM /: Cap$TM[p_, a_Tuple$TM] /; buiActive["Prepend"] := Prepend[ a, p]
 Tuple$TM /: CupCap$TM[a__Tuple$TM] /; buiActive["Join"] := Join[ a]
 
-Tuple$TM /: Element$TM[p_, a_Tuple$TM] /; buiActive["IsElement"] && MemberQ[a, p] := True
-Tuple$TM /: Element$TM[p_, a_Tuple$TM?isGround] /; buiActive["IsElement"] := False
+Tuple$TM /: Element$TM[ p_, a_Tuple$TM] /; buiActive["IsElement"] :=
+	Module[ {res},
+		res /; (res = ElementOf[ p, a, Equal$TM]; MatchQ[ res, True|False])
+	]
+Tuple$TM /: Annotated$TM[ Element$TM, SubScript$TM[ dom_]][ p_, a_Tuple$TM] /; buiActive["IsElement"] :=
+	Module[ {res},
+		res /; (res = ElementOf[ p, a, dom[Equal$TM]]; MatchQ[ res, True|False])
+	]
 
 Tuple$TM /: max$TM[ Tuple$TM[ e__]] /; buiActive["Max"] :=
 	Module[ {s},

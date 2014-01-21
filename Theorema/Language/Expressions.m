@@ -216,6 +216,9 @@ MakeBoxes[ IffDef$TM[ l_, r_], TheoremaForm] :=
         
 MakeBoxes[ Componentwise$TM[ P_, args___], TheoremaForm] :=
     RowBox[ {MakeBoxes[ P, TheoremaForm], "@", RowBox[ {"(", RowBox[ Riffle[ Map[ makeTmaBoxes, {args}], ","]], ")"}]}]
+    
+MakeBoxes[ EmptyUpTriangle$TM[ a_, b_], TheoremaForm] :=
+	RowBox[ {MakeBoxes[ a, TheoremaForm], "\[EmptyUpTriangle]", MakeBoxes[ b, TheoremaForm]}]
 
 MakeBoxes[ SEQ0$[ v_], TheoremaForm] := RowBox[ {MakeBoxes[ v, TheoremaForm], "..."}]
 MakeBoxes[ SEQ1$[ v_], TheoremaForm] := RowBox[ {MakeBoxes[ v, TheoremaForm], ".."}]
