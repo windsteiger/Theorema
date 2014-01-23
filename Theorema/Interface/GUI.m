@@ -1139,6 +1139,11 @@ displayBuiltinBrowser[ task_String] :=
   }]
 displayBuiltinBrowser[args___] := unexcpected[ displayBuiltinBrowser, {args}]
 
+$allProveSettings = Hold[ $selectedProofGoal, $selectedProofKB, $selectedRuleSet, $selectedStrategy, $selectedSearchDepth, $selectedSearchTime,
+	$eliminateBranches, $eliminateSteps, $eliminateFormulae,
+	$interactiveProofSitSel, $interactiveNewProofSitFilter, $proofCellStatus,
+	kbSelectProve, buiActProve, ruleActive];
+
 selectProver[ ] :=
     Column[{
     	Button[ translate[ "OKnext"], $tcActionView++],
@@ -1315,7 +1320,7 @@ proofNavigation[ args___] := unexpected[ proofNavigation, {args}]
 
 (* this function is called during a computation (see processComputation[])
    effect: print a cell containg information about the environment settings for that computation *)
-printComputationInfo[] :=
+(*printComputationInfo[] :=
     Module[ {kbAct, bui, buiAct},
         kbAct = Cases[ $tmaEnv, FML$[ k_, _, l_, ___] /; kbSelectCompute[k] -> l];
         bui = Cases[ DownValues[ buiActComputation],
@@ -1331,7 +1336,7 @@ printComputationInfo[] :=
                 ]}
             ]}, False]], "ComputationInfo"]];
     ]
-    
+*)    
 printComputationInfo[ cellID_Integer] := 
 	Module[ {nbDir, file},
 		nbDir = createPerNotebookDirectory[ CurrentValue[ "NotebookFullFileName"]];
@@ -1341,20 +1346,8 @@ printComputationInfo[ cellID_Integer] :=
 		file = FileNameJoin[ {nbDir, "c" <> ToString[ cellID]}];
 		saveComputationCacheDisplay[ cellID, file];
 		With[ {fn = file <> "-display.m"},
-			(*CellPrint[ Cell[ BoxData[
-				ToBoxes[ DynamicModule[ {showTab = 1}, 
-					OpenerView[ {"",
-						Column[ {ButtonBar[{
-								translate["tcComputeTabKBTabLabel"] :> (showTab = 1), 
-								translate["tcComputeTabBuiltinTabLabel"] :> (showTab = 2), 
-								translate["RestoreEnv"] :> setCompEnv[ fn]}],
-							Dynamic[ Pane[ Get[ fn <> ToString[ -showTab] <> ".m"], {0.7*CurrentValue[ "WindowSize"][[1]], 100}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]]}, 
-							Alignment -> Right]}, 
-						False]
-				]]], "ComputationInfo"]];
-				*)
 			CellPrint[ Cell[ "", "ComputationInfo"]];
-			CellPrint[ Cell[ BoxData[ ToBoxes[ Dynamic[ Get[ fn]]]], "ComputationInfoBody"]]
+			CellPrint[ Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ Get[ fn], None]]]], "ComputationInfoBody"]]
 		];
 	]
 printComputationInfo[args___] := unexcpected[ printComputationInfo, {args}]
@@ -1366,6 +1359,7 @@ setCompEnv[ file_String] :=
 	]
 setCompEnv[ args___] := unexpected[ setCompEnv, {args}]
 
+(*
 displayComputationCache[ cellID_Integer, dir_String, tab_Integer] :=
 	Block[ {kbSelectCompute, buiActComputation},
 		Get[ "c" <> ToString[ cellID] <> "`", Path -> {dir}];
@@ -1381,7 +1375,7 @@ displayComputationCache[ cellID_Integer, dir_String, tab_Integer] :=
 	]
 displayComputationCache[ cellID_Integer, dir_String, tab_] := displayComputationCache[ cellID, dir, 1]
 displayComputationCache[ args___] := unexpected[ displayComputationCache, {args}]
-
+*)
 saveComputationCacheDisplay[ cellID_Integer, file_String] :=
 	With[ {fn = file <> ".m"},
 		Put[ Definition[ buiActComputation], Definition[ kbSelectCompute], fn];
@@ -1458,13 +1452,13 @@ printProveInfo[ goal_, kb_, rules_, strategy_, {pVal_, proofObj_}, {pTime_, sTim
     ]
 *)
 printProveInfo[ pVal_, pTime_, sTime_] := 
-	Module[ {nbDir, cellID = getCellIDFromKey[ key@$selectedProofGoal], showTab},
-		nbDir = createPerNotebookDirectory[ CurrentValue[ "NotebookFullFileName"]];
+	Module[ {nbDir, cellID = getCellIDFromKey[ key@$selectedProofGoal], file},
+		nbDir = createPerNotebookDirectory[ CurrentValue[ $proofInitNotebook, "NotebookFullFileName"]];
 		(* Generate cache only in plain .m format, since this allows sharing notebooks with users on different platforms.
 			Also, loading a .m-file allows dynamic objects to react to new settings, whereas loading a .mx-file has no effect on dynamics.
 			I assume the speed gain from using mx is neglectable *)
-		Put[ Definition[ $TMAproofObject], FileNameJoin[ {nbDir, "p" <> cellID <> "-ProofObject.m"}]];
-		Put[ Definition[ buiActComputation], Definition[ kbSelectCompute], FileNameJoin[ {nbDir, "p" <> cellID <> ".m"}]];
+		file = FileNameJoin[ {nbDir, "p" <> cellID}];
+		saveProveCacheDisplay[ pTime, sTime, file];
         If[ NotebookFind[ $proofInitNotebook, makeProofIDTag[ $selectedProofGoal], All, CellTags] === $Failed,
 			NotebookFind[ $proofInitNotebook, id@$selectedProofGoal, All, CellTags];
 			NotebookFind[ $proofInitNotebook, "CloseEnvironment", Next, CellStyle];
@@ -1472,16 +1466,28 @@ printProveInfo[ pVal_, pTime_, sTime_] :=
 			SelectionMove[ $proofInitNotebook, All, CellGroup]
 		];
 		SetSelectedNotebook[ $proofInitNotebook];
-        NotebookWrite[ $proofInitNotebook, Cell[ TextData[ {translate[ "Proof of"]<>" ", formulaReference[ goal], ": ", 
-        	Cell[ BoxData[ ToBoxes[ proofStatusIndicator[ pVal]]]], ToBoxes[ ButtonBar[{"1" :> (showTab = 1), "2" :> (showTab = 2), "0" :> openCloseCurrent[ ButtonNotebook[]]}]]}],
-        	"ProofInfo", CellTags -> makeProofIDTag[ goal]]];
-		NotebookWrite[ $proofInitNotebook, Cell[ BoxData[ With[ {box = ToBoxes[ Dynamic[ Pane[ displayProofCache[ cellID, showTab], Automatic]]]}, 
-			DynamicModuleBox[ {showTab = 1}, box]
-				]], "PIContent"]]
+		With[ {fnpo = file <> "-po.m", fnd = file <> "-display.m"},
+        	NotebookWrite[ $proofInitNotebook, Cell[ TextData[ {Cell[ BoxData[ ToBoxes[ proofStatusIndicator[ pVal]]]], " " <> translate[ "Proof of"] <> " ",
+        		formulaReference[ $selectedProofGoal], ":   ",
+				Cell[ BoxData[ ToBoxes[ Button[ translate["ShowProof"], displayProof[ Get[ fnpo]], ImageSize -> Automatic, Appearance -> None, Method -> "Queued"]]]]}],
+        		"ProofInfo",
+        		CellTags -> makeProofIDTag[ $selectedProofGoal],
+        		CellFrameLabels -> {{None, Cell[ BoxData[ ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeGroup[ ButtonNotebook[]]]]]}, {None, None}}]];
+			NotebookWrite[ $proofInitNotebook, Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ Get[ fnd], None]]]], "ProofInfoBody"]]
+		]
 	]
 
 printProveInfo[args___] := unexcpected[ printProveInfo, {args}]
 
+removeGroup[ nb_NotebookObject] :=
+	Module[{},
+		SelectionMove[ nb, All, ButtonCell];
+		SelectionMove[ nb, All, CellGroup];
+		NotebookDelete[ nb];
+	]
+removeGroup[][ args___] := unexpected[ removeGroup[], {args}]
+
+(*
 setProveEnv[ goal_, kb_List, bui_List, ruleSet_, strategy_, allRules_List, searchDepth_] :=
 	Module[{},
 		$selectedProofGoal = goal;
@@ -1497,10 +1503,66 @@ setProveEnv[ goal_, kb_List, bui_List, ruleSet_, strategy_, allRules_List, searc
 		$selectedStrategy = strategy;
 		$selectedSearchDepth = searchDepth;
 	]
+	*)
+setProveEnv[ file_String] :=
+	Module[ {},
+		Clear[ kbSelectProve, ruleActive];
+		Get[ file];
+	]
 setProveEnv[ args___] := unexpected[ setProveEnv, {args}]
 
 makeProofIDTag[ FML$[ id_, _, __]] := Apply[ StringJoin, Riffle[ Prepend[ id, "Proof"], "|"]]
 makeProofIDTag[ args___] := unexpected[ makeProofIDTag, {args}]
+
+saveProveCacheDisplay[ pTime_, sTime_, file_String] :=
+	With[ {fn = file <> ".m"},
+		Put[ Definition[ $TMAproofTree], Definition[ $TMAproofObject], file <> "-po.m"];
+		Apply[ Put[ ##, fn]&, Map[ Definition, $allProveSettings]];
+		Put[ 
+			TabView[ {
+				translate["tcProveTabKBTabLabel"] -> Map[ displayFormulaFromKey, Cases[ DownValues[ kbSelectProve],
+        			HoldPattern[ Verbatim[HoldPattern][ kbSelectProve[ k_List]] :> True] -> k]],
+        		translate["tcProveTabBuiltinTabLabel"] -> summarizeBuiltins[ "prove"],
+        		translate["tcProveTabProverTabLabel"] -> summarizeProverSettings[ pTime, sTime],
+        		translate["RestoreEnv"] -> Row[ {translate["RestoreEnvLong"], Button[ translate[ "OK"], setProveEnv[ fn]]}, Spacer[5]]
+				},
+				ImageSize -> Automatic
+			],
+			file <> "-display.m"];
+	]
+saveProveCacheDisplay[ args___] := unexpected[ saveProveCacheDisplay, {args}]
+
+summarizeProverSettings[ pTime_, sTime_] :=
+	Module[{},
+		TabView[{				
+				translate[ "selectedRules"] -> displaySelectedRules[ $selectedRuleSet],
+				translate[ "pStrat"] -> $selectedStrategy /. $registeredStrategies,
+				translate[ "sLimits"] -> Column[{
+    					Labeled[ $selectedSearchDepth, translate[ "sDepth"] <> ":", Left],
+    					Labeled[ $selectedSearchTime, translate[ "sTime"] <> ":", Left]
+    				}],
+				translate[ "pSimp"] -> Column[{
+    					If[ TrueQ[ $eliminateBranches], translate[ "elimBranches"], Sequence[]],
+    					If[ TrueQ[ $eliminateSteps], translate[ "elimSteps"], Sequence[]],
+    					If[ TrueQ[ $eliminateFormulae], translate[ "elimForm"], Sequence[]]
+    				}],
+    			translate[ "pInteractive"] -> Column[{
+    					If[ TrueQ[ $interactiveProofSitSel], translate[ "interactiveProofSitSel"], Sequence[]],
+    					If[ TrueQ[ $interactiveNewProofSitFilter], translate[ "interactiveNewProofSitFilter"], Sequence[]],
+    					If[ TrueQ[ Map[ ruleActive, And[ existsGoalInteractive, forallKBInteractive]]], translate[ "interactiveInstantiate"], Sequence[]]
+    				}],
+    			translate[ "proofCellStatus"] -> Switch[ $proofCellStatus,
+						Automatic, translate[ "auto"],
+						Open, translate[ "open"],
+						Closed, translate[ "closed"]
+					],
+				translate[ "statistics"] -> Column[{
+    					Labeled[ pTime, translate[ "proofFindTime"] <> ":", Left],
+    					Labeled[ sTime, translate[ "proofSimpTime"] <> ":", Left]
+    				}]
+			}, AutoAction -> True, ControlPlacement -> Left]
+	]
+summarizeProverSettings[ args___] := unexpected[ summarizeProverSettings, {args}]
 
 
 (* ::Section:: *)
@@ -1556,7 +1618,7 @@ newOpenEnvCell[args___] :=
 newEnvHeaderCell[ type_String] := Cell[ type, "EnvironmentHeader",
 	CellFrameLabels -> {{None, 
     	Cell[ BoxData[ ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None,
-    		ButtonFunction :> Theorema`Language`Session`Private`removeEnvironment[ ButtonNotebook[]]]]]}, {None, None}}]
+    		ButtonFunction :> removeEnvironment[ ButtonNotebook[]]]]]}, {None, None}}]
 newEnvHeaderCell[args___] :=
     unexpected[newEnvHeaderCell, {args}]
 
@@ -1621,7 +1683,7 @@ showDecl[ args___] := unexpected[ showDecl, {args}]
 displayDecl[ ] :=
 	Row[ {
 		Pane[ $TMAactDecl, {300, 50}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic],
-		Tooltip[ Button[ Style[ "\[LightBulb]", {Medium, Bold}], $TMAactDecl = Theorema`Language`Session`Private`displayGlobalDeclarations[ InputNotebook[]]], translate[ "tcSessTabEnvTabButtonDeclLabel"]]
+		Tooltip[ Button[ Style[ "\[LightBulb]", {Medium, Bold}], $TMAactDecl = displayGlobalDeclarations[ InputNotebook[]]], translate[ "tcSessTabEnvTabButtonDeclLabel"]]
 		}, Spacer[5]]
 displayDecl[ args___] := unexpected[ displayDecl, {args}]
 
@@ -1701,7 +1763,7 @@ sessionInspect[ ] :=
 	Column[{
     	Labeled[ Column[ {Dynamic[ showEnv[]]}, Left, Spacer[2]],
     		translate[ "Formulae"], {{Top, Left}}],
-    	Labeled[ Column[ {showDecl[]}, Left, Spacer[2]],
+    	Labeled[ Column[ {Dynamic[ showDecl[]]}, Left, Spacer[2]],
     		translate[ "Declarations"], {{Top, Left}}]
     }]
 sessionInspect[ args___] := unexpected[ sessionInspect, {args}]

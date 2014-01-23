@@ -98,9 +98,9 @@ proofSearch[ searchDepth_Integer, searchTime:(_Integer|Infinity)] :=
             $TMAproofObject = replaceProofSit[ $TMAproofObject, selPSpos -> newSteps];
             (* and propagate the proof value *)
             $TMAproofObject = propagateProofValues[ $TMAproofObject];
-            (* return value: elapsed time *)
-            SessionTime[] - startTime
-        ]
+        ];
+        (* return value: elapsed time *)
+        SessionTime[] - startTime
     ]
 proofSearch[ args___] := unexpected[ proofSearch, {args}]
 
