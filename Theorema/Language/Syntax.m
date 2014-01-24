@@ -74,20 +74,27 @@ $tmaQuantifiers =
      {"\[CurlyEpsilon]", "Such"},
      {"such", "Such"},
      {"the", "SuchUnique"},
+     {"\[Lambda]", "Lambda"},
      {"max", "MaximumOf"},
      {"min", "MinimumOf"}
     };
 
 $tmaQuantifierSymbols = Transpose[ $tmaQuantifiers][[1]];
-$tmaQuantifierNames = Flatten[ ToExpression[ Map[ {"Theorema`Language`" <> # <> "$TM", "Theorema`Computation`Language`" <> # <> "$TM"}&, Transpose[ $tmaQuantifiers][[2]]]]];
-$tmaQuantifierToName = Dispatch[ Apply[ Rule, $tmaQuantifiers, {1}]];
-$tmaNameToQuantifier = Dispatch[ MapThread[ Rule, {$tmaQuantifierNames, Flatten[ Map[ {#, #}&, $tmaQuantifierSymbols]]}]];
+$tmaQuantifierNames = Flatten[ ToExpression[ 
+	Map[ {"Theorema`Language`" <> # <> "$TM", "Theorema`Computation`Language`" <> # <> "$TM"}&, Transpose[ $tmaQuantifiers][[2]]]]];
+$tmaQuantifierToName = Dispatch[ Join[ Apply[ Rule, $tmaQuantifiers, {1}], 
+	{RowBox[{"\[Exists]",___,"!"}] -> "ExistsUnique"}]];
+$tmaNameToQuantifier = Dispatch[ Join[ MapThread[ Rule, {$tmaQuantifierNames, Flatten[ Map[ {#, #}&, $tmaQuantifierSymbols]]}],
+	{Theorema`Language`ExistsUnique$TM -> RowBox[ {"\[Exists]", "\[NegativeThickSpace]","!"}],
+	Theorema`Computation`Language`ExistsUnique$TM -> RowBox[ {"\[Exists]", "\[NegativeThickSpace]","!"}]}]];
 
 isQuantifierSymbol[ s_String] := MemberQ[ $tmaQuantifierSymbols, s]
+isQuantifierSymbol[ RowBox[{"\[Exists]",___,"!"}]] := True
 isQuantifierSymbol[ _] := False
 isQuantifierSymbol[ args___] := unexpected[ isQuantifierSymbol, {args}]
 
 isQuantifierName[ f_] := MemberQ[ $tmaQuantifierNames, f]
+isQuantifierName[ Theorema`Language`ExistsUnique$TM|Theorema`Computation`Language`ExistsUnique$TM] := True
 isQuantifierName[ args___] := unexpected[ isQuantifierName, {args}]
 
 (* $tmaNonStandardOperators is defined in Expression.m *)
