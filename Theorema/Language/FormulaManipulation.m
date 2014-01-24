@@ -168,8 +168,14 @@ thinnedExpression[ args___] := unexpected[ thinnedExpression, {args}]
 (* freeVariables *)
 
 
+(* Some quantifiers (e.g. "Sum") can be used together with subscripts. *)
+freeVariables[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[x__], cond_, sub_, expr_]] := 
+	Complement[ freeVariables[ {x, cond, sub, expr}], rngVariables[ r]]
 freeVariables[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[x__], cond_, expr_]] := 
 	Complement[ freeVariables[ {x, cond, expr}], rngVariables[ r]]
+(* Some quantifiers (e.g. "Let") don't have a condition. *)
+freeVariables[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[x__], expr_]] := 
+	Complement[ freeVariables[ {x, expr}], rngVariables[ r]]
 freeVariables[ Hold[ l___]] := freeVariables[ {l}]
 freeVariables[ l_List] := Apply[ Union, Map[ freeVariables, l]]
 freeVariables[ f_[x___]] := freeVariables[ {f, x}]
@@ -181,13 +187,17 @@ freeVariables[ args___] := unexpected[ freeVariables, {args}]
 (* ::Subsubsection:: *)
 (* rngVariables *)
 
-rngVariables[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[r___]] := Map[ First, {r}]
+(* It is certainly better not to evaluate anything apart from the range variable here (especially in connection
+	with "Let"). Same with "rngConstants", and maybe also with "extractVar" (?) *)
+SetAttributes[ rngVariables, HoldAll];
+rngVariables[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[r___]] := Apply[ List, Replace[ Hold[r], {_[f_,___]:>f}, {1}]]
 rngVariables[ args___] := unexpected[ rngVariables, {args}]
 
 (* ::Subsubsection:: *)
 (* rngConstants *)
 
-rngConstants[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[r___]] := Map[ First, {r}]
+SetAttributes[ rngConstants, HoldAll];
+rngConstants[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[r___]] := Apply[ List, Replace[ Hold[r], {_[f_,___]:>f}, {1}]]
 rngConstants[ args___] := unexpected[ rngConstants, {args}]
 
 
@@ -209,10 +219,22 @@ extractVar[ args___] := unexpected[ extractVar, {args}]
 Clear[ substituteFree]
 substituteFree[ expr_Hold, {}] := expr
 substituteFree[ Hold[], _] := Hold[]
+(* Some quantifiers (e.g. "Sum") can be used together with subscripts. *)
+substituteFree[ Hold[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[ rng__], cond_, sub_, form_]], rules_List] :=
+	Module[ {qvars = rngVariables[ r], vars},
+		vars = Select[ rules, !MemberQ[ qvars, #[[1]]]&];
+		applyHold[ Hold[q], joinHold[ substituteFree[ Hold[r], vars], joinHold[ substituteFree[ Hold[cond], vars], joinHold[ substituteFree[ Hold[sub], vars], substituteFree[ Hold[form], vars]]]]]
+	]
 substituteFree[ Hold[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[ rng__], cond_, form_]], rules_List] :=
 	Module[ {qvars = rngVariables[ r], vars},
 		vars = Select[ rules, !MemberQ[ qvars, #[[1]]]&];
 		applyHold[ Hold[q], joinHold[ substituteFree[ Hold[r], vars], joinHold[ substituteFree[ Hold[cond], vars], substituteFree[ Hold[form], vars]]]]
+	]
+(* Some quantifiers (e.g. "Let") don't have a condition. *)
+substituteFree[ Hold[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[ rng__], form_]], rules_List] :=
+	Module[ {qvars = rngVariables[ r], vars},
+		vars = Select[ rules, !MemberQ[ qvars, #[[1]]]&];
+		applyHold[ Hold[q], joinHold[ substituteFree[ Hold[r], vars], substituteFree[ Hold[form], vars]]]
 	]
 substituteFree[ Hold[ f_[x___]], rules_List] :=
 	Module[ { sx = Map[ substituteFree[ #, rules]&, Map[ Hold, Hold[x]]]},
@@ -262,6 +284,16 @@ isVariableFree[ expr_, level_:{1}] :=
 	FreeQ[ expr,
 		_Theorema`Language`VAR$|_Theorema`Computation`Language`VAR$, level]
 isVariableFree[ args___] := unexpected[ isVariableFree, {args}]
+
+(* ::Subsubsection:: *)
+(* ground expressions *)
+
+isGround[ expr_, level_:Infinity] := 
+	FreeQ[ expr,
+		_Theorema`Language`VAR$|_Theorema`Computation`Language`VAR$|
+		_Theorema`Language`FIX$|_Theorema`Computation`Language`FIX$|
+		_Theorema`Language`META$|_Theorema`Computation`Language`META$, level]
+isGround[ args___] := unexpected[ isGround, {args}]
 
 
 (* ::Subsubsection:: *)

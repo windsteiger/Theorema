@@ -213,6 +213,12 @@ MakeBoxes[ IffDef$TM[ l_, r_], TheoremaForm] :=
     RowBox[ {MakeBoxes[ l, TheoremaForm],
         TagBox[ RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], Identity, SyntaxForm->"a\[Implies]b"], 
         MakeBoxes[ r, TheoremaForm]}]
+        
+MakeBoxes[ Componentwise$TM[ P_, args___], TheoremaForm] :=
+    RowBox[ {MakeBoxes[ P, TheoremaForm], "@", RowBox[ {"(", RowBox[ Riffle[ Map[ makeTmaBoxes, {args}], ","]], ")"}]}]
+    
+MakeBoxes[ EmptyUpTriangle$TM[ a_, b_], TheoremaForm] :=
+	RowBox[ {MakeBoxes[ a, TheoremaForm], "\[EmptyUpTriangle]", MakeBoxes[ b, TheoremaForm]}]
 
 MakeBoxes[ SEQ0$[ v_], TheoremaForm] := RowBox[ {MakeBoxes[ v, TheoremaForm], "..."}]
 MakeBoxes[ SEQ1$[ v_], TheoremaForm] := RowBox[ {MakeBoxes[ v, TheoremaForm], ".."}]
@@ -252,11 +258,14 @@ makeEllipsisBox[ 1, fmt_] := "\[Ellipsis]"
 makeEllipsisBox[ step_, fmt_] := OverscriptBox[ "\[Ellipsis]", MakeBoxes[ step, fmt]]
 makeEllipsisBox[ args___] := unexpected[ makeEllipsisBox, {args}]
 
-MakeBoxes[ CaseDistinction$TM[ c__], TheoremaForm] :=
+MakeBoxes[ Piecewise$TM[ Tuple$TM[ c__Tuple$TM]], TheoremaForm] :=
     RowBox[ {"\[Piecewise]",
         GridBox[ Map[ formatClause, {c}]]}]
+MakeBoxes[ Piecewise$TM[ Tuple$TM[ c__Tuple$TM], d_], TheoremaForm] :=
+    RowBox[ {"\[Piecewise]",
+        GridBox[ Append[ Map[ formatClause, {c}], {MakeBoxes[ d, TheoremaForm], "\[DoubleLeftArrow]", "otherwise"}]]}]
 
-formatClause[ Clause$TM[ c_, e_]] := {MakeBoxes[ e, TheoremaForm], "\[DoubleLeftArrow]", MakeBoxes[ c, TheoremaForm]}
+formatClause[ Tuple$TM[ e_, c_]] := {MakeBoxes[ e, TheoremaForm], "\[DoubleLeftArrow]", MakeBoxes[ c, TheoremaForm]}
 
 
 (* ::Section:: *)

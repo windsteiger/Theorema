@@ -59,8 +59,13 @@ initGUI[] :=
                 {"CartesianProduct", RowBox[{"A","\[Cross]","B"}], False, True, False},
                 {"Cardinality", RowBox[{"\[LeftBracketingBar]", "A", "\[RightBracketingBar]"}], False, True, False},
                 {"PowerSet", RowBox[{"\[ScriptCapitalP]","[", "A", "]"}], False, True, False},
+                {"AnElement", RowBox[{"\[AE]","[", "A", "]"}], False, True, False},
                 {"MaximumElementSet", RowBox[{"max","[", "A", "]"}], False, True, False},
-                {"MinimumElementSet", RowBox[{"min","[", "A", "]"}], False, True, False}
+                {"MinimumElementSet", RowBox[{"min","[", "A", "]"}], False, True, False},
+                {"MaximumOf", RowBox[{"max",SubscriptBox["A","i"]}], False, True, False},
+                {"MinimumOf", RowBox[{"min",SubscriptBox["A","i"]}], False, True, False},
+                {"UnionOf", RowBox[{"\[Union]",SubscriptBox["A","i"]}], False, True, False},
+        		{"IntersectionOf", RowBox[{"\[Intersection]",SubscriptBox["A","i"]}], False, True, False}
         	},
         	{"Tuples",
         		{"Subscript", SubscriptBox[ "T", "i"], False, True, False},
@@ -104,7 +109,8 @@ initGUI[] :=
         		{"Forall", RowBox[{"\[ForAll]","P"}], False, True, False},
         		{"Exists", RowBox[{"\[Exists]","P"}], False, True, False},
         		{"Equal", RowBox[{"A","=","B"}], True, False, False},
-        		{"Let", UnderscriptBox["let",RowBox[{"A","=","\[Ellipsis]"}]], False, True, False}
+        		{"Let", UnderscriptBox["let",RowBox[{"A","=","\[Ellipsis]"}]], False, True, False},
+        		{"Componentwise", RowBox[{"P", "@", "A"}], False, True, False}
         	},
         	{"Domains",
         		{"isInteger", RowBox[{"isInteger","[","A","]"}], False, True, True},

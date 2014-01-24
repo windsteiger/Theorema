@@ -134,7 +134,7 @@ isRightDelimiter[ s_] :=
 	They do not affect parsing in any way!
 	*)
 $tmaOperators = {
-	{"/@", {Infix}, "Map"}, {"//@", {Infix}, "MapAll"},
+	{"@", {Infix}, "Componentwise"}, {"/@", {Infix}, "Map"}, {"//@", {Infix}, "MapAll"},
 	{"@@", {Infix}, "Apply"}, {";;", {Infix}, "Span"},
 	{"\[Rule]", {Infix}, "Rule"}, {"\[RuleDelayed]", {Infix}, "RuleDelayed"},
 	{"\[UndirectedEdge]", {Infix}, "UndirectedEdge"}, {"\[DirectedEdge]", {Infix}, "DirectedEdge"},
@@ -200,15 +200,15 @@ $tmaOperators = {
 	{"\[Superset]", {Infix}, "Superset"}, {"\[NotSuperset]", {Infix}, "NotSuperset"},
 	{"\[SubsetEqual]", {Infix}, "SubsetEqual"}, {"\[NotSubsetEqual]", {Infix}, "NotSubsetEqual"},
 	{"\[SupersetEqual]", {Infix}, "SupersetEqual"}, {"\[NotSupersetEqual]", {Infix}, "NotSupersetEqual"},
-	{">=", {Infix}, "GreaterEqual"}, {"\[GreaterEqual]", {Infix}, "GreaterEqual"},
+	{"\[GreaterEqual]", {Infix}, "GreaterEqual"}, {">=", {Infix}, "GreaterEqual"},
 	{"\[NotGreaterEqual]", {Infix}, "NotGreaterEqual"}, {"\[GreaterSlantEqual]", {Infix}, "GreaterEqual"},
 	{"\[NotGreaterSlantEqual]", {Infix}, "NotGreaterSlantEqual"}, {"\[GreaterFullEqual]", {Infix}, "GreaterFullEqual"},
 	{"\[NotGreaterFullEqual]", {Infix}, "NotGreaterFullEqual"}, {"\[GreaterTilde]", {Infix}, "GreaterTilde"},
 	{"\[NotGreaterTilde]", {Infix}, "NotGreaterTilde"}, {"\[GreaterGreater]", {Infix}, "GreaterGreater"},
 	{"\[NotGreaterGreater]", {Infix}, "NotGreaterGreater"}, {"\[NestedGreaterGreater]", {Infix}, "NestedGreaterGreater"},
 	{"\[NotNestedGreaterGreater]", {Infix}, "NotNestedGreaterGreater"}, {">", {Infix}, "Greater"},
-	{"\[NotGreater]", {Infix}, "NotGreater"}, {"<=", {Infix}, "LessEqual"},
-	{"\[LessEqual]", {Infix}, "LessEqual"}, {"\[NotLessEqual]", {Infix}, "NotLessEqual"},
+	{"\[NotGreater]", {Infix}, "NotGreater"}, {"\[LessEqual]", {Infix}, "LessEqual"},
+	{"<=", {Infix}, "LessEqual"}, {"\[NotLessEqual]", {Infix}, "NotLessEqual"},
 	{"\[LessSlantEqual]", {Infix}, "LessEqual"}, {"\[NotLessSlantEqual]", {Infix}, "NotLessSlantEqual"},
 	{"\[LessFullEqual]", {Infix}, "LessFullEqual"}, {"\[NotLessFullEqual]", {Infix}, "NotLessFullEqual"},
 	{"\[LessTilde]", {Infix}, "LessTilde"}, {"\[NotLessTilde]", {Infix}, "NotLessTilde"},
@@ -238,8 +238,8 @@ $tmaOperators = {
 	{"\[SquareSubsetEqual]", {Infix}, "SquareSubsetEqual"}, {"\[NotSquareSubsetEqual]", {Infix}, "NotSquareSubsetEqual"},
 	{"=", {Infix}, "Set"}, {":=", {Infix}, "SetDelayed"},
 	{"\[Equal]", {Infix}, "Equal"}, {"==", {Infix}, "Equal"},
-	{"\[LongEqual]", {Infix}, "Equal"}, {"!=", {Infix}, "Unequal"},
-	{"\[NotEqual]", {Infix}, "Unequal"}, {"===", {Infix}, "SameQ"},
+	{"\[LongEqual]", {Infix}, "Equal"}, {"\[NotEqual]", {Infix}, "Unequal"},
+	{"!=", {Infix}, "Unequal"}, {"===", {Infix}, "SameQ"},
 	{"=!=", {Infix}, "UnsameQ"}, {"\[Congruent]", {Infix}, "Congruent"},
 	{"\[NotCongruent]", {Infix}, "NotCongruent"}, {"\[Tilde]", {Infix}, "Tilde"},
 	{"\[NotTilde]", {Infix}, "NotTilde"}, {"\[TildeTilde]", {Infix}, "TildeTilde"},
@@ -257,7 +257,8 @@ $tmaOperators = {
 	{"\[Implies]", {Infix}, "Implies"}, {"\[Therefore]", {Infix}, "Therefore"},
 	{"\[Because]", {Infix}, "Because"}, {"\[RightTee]", {Infix}, "RightTee"},
 	{"\[LeftTee]", {Infix}, "LeftTee"}, {"\[DoubleRightTee]", {Infix}, "DoubleRightTee"},
-	{"\[DoubleLeftTee]", {Infix}, "DoubleLeftTee"}, {"\[SuchThat]", {Infix}, "SuchThat"}};
+	{"\[DoubleLeftTee]", {Infix}, "DoubleLeftTee"}, {"\[SuchThat]", {Infix}, "SuchThat"},
+	{"\[Distributed]", {Infix}, "Distributed"}, {"\[Conditioned]", {Infix}, "Conditioned"}};
 	
 $tmaOperatorSymbols = Map[ First, $tmaOperators];
 (* We must not add contexts (like "Theorema`Knowledge`" etc.) to the operator names, as it is done with quantifiers,
@@ -305,7 +306,7 @@ isAtomicExpression[ args___] := unexpected[ isAtomicExpression, {args}]
 	they could stay in front of the rules loaded in "Computation`". Keep in mind that Expression.m is loaded twice!
 *)
 
-makeSet[ x___] /; isVariableFree[ {x}] := Apply[ ToExpression[ "Set$TM"], Union[ {x}]]
+makeSet[ x___] := Apply[ ToExpression[ "Set$TM"], Union[ {x}]]
 makeTuple[ x___] := ToExpression[ "Tuple$TM"][x]
 
 
@@ -372,16 +373,16 @@ MakeExpression[ RowBox[{UnderscriptBox[ SubscriptBox[ q_?isQuantifierSymbol, dom
 MakeExpression[ RowBox[{UnderscriptBox[ UnderscriptBox[ SubscriptBox[ q_?isQuantifierSymbol, dom_], rng_], cond_], form_}], fmt_] :=
     subscriptedQuantifier[ Replace[ q, $tmaQuantifierToName], rng, cond, dom, form, fmt] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{UnderoverscriptBox[ q:"\[Sum]"|"\[Product]", low:RowBox[{_, "=", _}], high_], form_}], fmt_] :=
+MakeExpression[ RowBox[{UnderoverscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min"|"\[Union]"|"\[Intersection]", low:RowBox[{_, "=", _}], high_], form_}], fmt_] :=
     standardQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[{low, ",", "\[Ellipsis]", ",", high}], "True", form, fmt] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{UnderscriptBox[ UnderoverscriptBox[ q:"\[Sum]"|"\[Product]", low:RowBox[{_, "=", _}], high_], cond_], form_}], fmt_] :=
+MakeExpression[ RowBox[{UnderscriptBox[ UnderoverscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min"|"\[Union]"|"\[Intersection]", low:RowBox[{_, "=", _}], high_], cond_], form_}], fmt_] :=
     standardQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[{low, ",", "\[Ellipsis]", ",", high}], cond, form, fmt] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{UnderoverscriptBox[ SubscriptBox[ q:"\[Sum]"|"\[Product]", dom_], low:RowBox[{_, "=", _}], high_], form_}], fmt_] :=
+MakeExpression[ RowBox[{UnderoverscriptBox[ SubscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min"|"\[Union]"|"\[Intersection]", dom_], low:RowBox[{_, "=", _}], high_], form_}], fmt_] :=
     subscriptedQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[{low, ",", "\[Ellipsis]", ",", high}], "True", dom, form, fmt] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{UnderscriptBox[ UnderoverscriptBox[ SubscriptBox[ q:"\[Sum]"|"\[Product]", dom_], low:RowBox[{_, "=", _}], high_], cond_], form_}], fmt_] :=
+MakeExpression[ RowBox[{UnderscriptBox[ UnderoverscriptBox[ SubscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min"|"\[Union]"|"\[Intersection]", dom_], low:RowBox[{_, "=", _}], high_], cond_], form_}], fmt_] :=
     subscriptedQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[{low, ",", "\[Ellipsis]", ",", high}], cond, dom, form, fmt] /; $parseTheoremaExpressions
    
 MakeExpression[ RowBox[{UnderscriptBox[ "let", rng_], form_}], fmt_] :=
@@ -414,21 +415,26 @@ MakeExpression[ RadicalBox[ a_, b_], fmt_] := MakeExpression[ RowBox[ {"Radical"
 
 MakeExpression[ RowBox[{left_, RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], right_}], fmt_] :=
     MakeExpression[ RowBox[{"IffDef", "[", RowBox[{left, ",", right}], "]"}], fmt] /; $parseTheoremaExpressions
+    
+MakeExpression[ RowBox[{P_, "@", RowBox[ {"(", RowBox[ {args1:PatternSequence[ _, ","]..., arg_}], ")"}]}], fmt_] :=
+    MakeExpression[ RowBox[{"Componentwise", "[", RowBox[{P, ",", args1, arg}], "]"}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+MakeExpression[ RowBox[{P_, "@", right_}], fmt_] :=
+    MakeExpression[ RowBox[{"Componentwise", "[", RowBox[{P, ",", right}], "]"}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 
 MakeExpression[ RowBox[{"\[Piecewise]", GridBox[ c:{{_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", _}..}, ___]}], fmt_] :=
 	With[ {clauses = Riffle[ Map[ row2clause, c], ","]},
-    	MakeExpression[ RowBox[{"CaseDistinction", "[", RowBox[ clauses], "]"}], fmt]
+    	MakeExpression[ RowBox[{"Piecewise", "[", RowBox[ {"Tuple", "[", RowBox[ clauses], "]"}], "]"}], fmt]
 	] /; $parseTheoremaExpressions
 
-row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", "otherwise"}] := RowBox[ {"Clause", "[", RowBox[ {"True", ",", e}], "]"}]
-row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", "\[Placeholder]"}] := RowBox[ {"Clause", "[", RowBox[ {"True", ",", e}], "]"}]
-row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", c_}] := RowBox[ {"Clause", "[", RowBox[ {c, ",", e}], "]"}]
+row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", "otherwise"}] := RowBox[ {"Tuple", "[", RowBox[ {e, ",", "True"}], "]"}]
+row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", "\[Placeholder]"}] := RowBox[ {"Tuple", "[", RowBox[ {e, ",", "True"}], "]"}]
+row2clause[ {e_, "\[DoubleLeftArrow]"|"\[DoubleLongLeftArrow]", c_}] := RowBox[ {"Tuple", "[", RowBox[ {e, ",", c}], "]"}]
 
 (* amaletzk: Use "collectColumn" instead of "First" to treat nested GridBoxes correctly.
 	Reason: If one enters a new row to a GridBox by hitting "Ctrl+Enter", it might be that the new row
 	is in fact not added to the outermost GridBox, but rather a new GridBox is created. Still, it looks as if
 	the row was added to the outermost GridBox, so finding the error would be complicated (for the user).
-	However, I think there is no need to do this also with "CaseDistinction", because there 3 columns are required
+	However, I think there is no need to do this also with "Piecewise", because there 3 columns are required
 	anyway, and adding a new row either REALLY adds a new row to the outermost GridBox, or, if not, it is easy to see
 	that something went wrong. *)
 MakeExpression[ RowBox[ {"\[And]", RowBox[{"\[Piecewise]", GridBox[ c:{{_}..}, ___]}]}], fmt_] :=
@@ -453,10 +459,10 @@ collectColumn[ {x_}] := x
 (* ::Subsubsection:: *)
 (* Indexed functions *)
 
-MakeExpression[ RowBox[ {SubscriptBox[ "max", ord_], "[", arg_, "]"}], fmt_] :=
-	With[ {g = RowBox[ {Unique["a"], ord, Unique["b"]}]},
-		MakeExpression[ RowBox[ {"max", "[", arg, ",", g, "]"}], fmt]
-	]/; $parseTheoremaExpressions
+(* amaletzk: Just leave subscripted functions as they are, such that, e.g., "min_<[A]" is transformed
+	into "Subscript[min, <][A]", because this also works if functions are given without arguments. *)
+(* MakeExpression[ RowBox[ {SubscriptBox[ f:("max"|"min"), ord_], "[", arg_, "]"}], fmt_] :=
+	MakeExpression[ RowBox[ {f, "[", arg, ",", ord, "]"}], fmt] /; $parseTheoremaExpressions *)
 
 	
 (* ::Subsubsection:: *)
@@ -622,7 +628,9 @@ MakeExpression[ RowBox[ {UnderscriptBox[ "-", dom_], r_}], fmt_] :=
     Module[ {},
     	(* Special case: unary minus *)
     	(* We memorize for output, that dom has been introduced as a domain underscript *)
-    	registerDomainOperator[ "-", Minus, Prefix, dom];
+    	(* We need a "Hold" here, because the other operations also get a "Hold", and otherwise
+    		converting expressions back to Theorema syntax does not work properly. *)
+    	registerDomainOperator[ "-", Hold[Minus], Prefix, dom];
         MakeExpression[ RowBox[ {RowBox[ {dom, "[", "Minus", "]"}], "[", r, "]"}], fmt]
     ] /; $parseTheoremaExpressions
 
@@ -642,7 +650,7 @@ MakeExpression[ RowBox[ {l_, UnderscriptBox[ "-", dom_], r_}], fmt_] :=
     Module[ {},
     	(* Special case: subtract *)
     	(* We memorize for output, that dom has been introduced as a domain underscript *)
-    	registerDomainOperator[ "-", Subtract, Infix, dom];
+    	registerDomainOperator[ "-", Hold[Subtract], Infix, dom];
         MakeExpression[ RowBox[ {RowBox[ {dom, "[", "Subtract", "]"}], "[", RowBox[ {l, ",", r}], "]"}], fmt]
     ] /; $parseTheoremaExpressions
 
@@ -650,7 +658,7 @@ MakeExpression[ RowBox[ {l_, UnderscriptBox[ "/", dom_], r_}], fmt_] :=
     Module[ {},
     	(* Special case: divide *)
     	(* We memorize for output, that dom has been introduced as a domain underscript *)
-    	registerDomainOperator[ "/", Divide, Infix, dom];
+    	registerDomainOperator[ "/", Hold[Divide], Infix, dom];
         MakeExpression[ RowBox[ {RowBox[ {dom, "[", "Divide", "]"}], "[", RowBox[ {l, ",", r}], "]"}], fmt]
     ] /; $parseTheoremaExpressions
 
@@ -798,6 +806,9 @@ makeRangeSequence[ RowBox[{x___, y_, ",", RowBox[{v_, "\[Element]", s_}]}]] :=
     Sequence[ makeRangeSequence[ RowBox[{x, RowBox[{y, "\[Element]", s}]}]], ",",
     	makeSingleSetRange[ v, s]]
 
+makeRangeSequence[ RowBox[{p_, RowBox[ {"[", x__, "]"}]}]] :=
+	makeRangeSequence[ RowBox[ {p, "[", x, "]"}]]
+		
 makeRangeSequence[ RowBox[{p_, "[", RowBox[{x__, ",", v_}], "]"}]] :=
 	Sequence[ makeRangeSequence[ RowBox[{p, "[", RowBox[{x}], "]"}]], ",",
 		makeSinglePredRange[ v, p]]

@@ -116,7 +116,7 @@ freshSymbolProg[ Hold[ s_Symbol]] :=
 freshSymbolProg[ args___] := unexpected[ freshSymbolProg, {args}]
 
 SetAttributes[isMathematicalConstant, HoldAll];
-isMathematicalConstant[ Indeterminate|True|False|I|Pi|E|Infinity|DirectedInfinity|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaisher] := True
+isMathematicalConstant[ Indeterminate|True|False|I|Pi|E|Infinity|DirectedInfinity|Complex|Rational|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaisher] := True
 isMathematicalConstant[ _] := False
 
 markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
@@ -826,17 +826,12 @@ renameToStandardContext[ expr_] :=
 			is applied, because otherwise they are transformed into sets.
 			We don't use makeTuple[] here, because otherwise we get problems with contexts. *)
 		(* Do not substitute into a META$, because a META$ has a list of a.b.f. constants at pos. 3 *)
-		stringExpr = ToString[ replaceAllExcept[ FullForm[ expr], {List -> Tuple$TM}, {}, Heads -> {Theorema`Computation`Language`META$}]];
+		stringExpr = ToString[ replaceAllExcept[ FullForm[ Hold[ expr]], {List -> Tuple$TM}, {}, Heads -> {Theorema`Computation`Language`META$}]];
 		
 		stringExpr = StringReplace[ stringExpr, "Theorema`Computation`" -> "Theorema`"];
 		$ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
         (* Set default context when not in an archive *)
-        (* BUGFIX amaletzk: We need to prevent the expression from being evaluated, because
-        	it could contain some "Set", "CompoundExpression", etc. appearing inside Theorema symbols
-        	with attribute "HoldAll" (e.g. "Module$TM"). However, since those symbols only have their
-        	attributes in Computation-context, and the context is replaced by normal context above,
-        	the "HoldAll" gets lost and evaluation may happen. *)
-        ReleaseHold[ freshNames[ ToExpression[ stringExpr, InputForm, Hold]]]
+        ReleaseHold[ freshNames[ ToExpression[ stringExpr]]]
 	]
 renameToStandardContext[ args___] := unexpected[ renameToStandardContext, {args}]
 

@@ -346,6 +346,7 @@ Or$TM[ pre___, a_, mid___, a_, post___] /; buiActive["Or"] := Or$TM[ pre, a, mid
 Or$TM[ a___] /; buiActive["Or"] := Or[ a]
 Implies$TM[ a__] /; buiActive["Implies"] := Implies[ a]
 Iff$TM[ a__] /; buiActive["Iff"] := Equivalent[ a]
+Componentwise$TM[ P_, args___] /; buiActive["Componentwise"] := Apply[ And, Map[ P, Hold[args]]]
 
 (* We replace the free variables one after the other, because some might depend on others, and a
 	single "substitueFree" doesn't work properly then. This could also be good for global abbreviations ... *)
@@ -361,9 +362,11 @@ rangeToIterator[
 rangeToIterator[ _] := $Failed
 rangeToIterator[ args___] := unexpected[ rangeToIterator, {args}]
 
-ClearAll[ Forall$TM, Exists$TM, SequenceOf$TM, SumOf$TM, ProductOf$TM]
+ClearAll[ Forall$TM, Exists$TM, SequenceOf$TM, SumOf$TM, ProductOf$TM,
+	SetOf$TM, TupleOf$TM, MaximumOf$TM, MinimumOf$TM, UnionOf$TM, IntersectionOf$TM]
 Scan[ SetAttributes[ #, HoldRest] &, {Forall$TM, Exists$TM, 
-  SequenceOf$TM, SumOf$TM, ProductOf$TM}]
+  SequenceOf$TM, SumOf$TM, ProductOf$TM, SetOf$TM, TupleOf$TM, MaximumOf$TM, MinimumOf$TM,
+  UnionOf$TM, IntersectionOf$TM}]
 Scan[ SetAttributes[ #, HoldFirst] &, {SETRNG$, STEPRNG$}]
 
 Forall$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["Forall"] := 
@@ -493,7 +496,8 @@ sequenceOfIteration[ iter : {__List}, cond_, form_] :=
 		seq
 	] (*end catch*)
  ]
-sequenceOfIteration[ iter_List, cond_, form_] := $Failed
+sequenceOfIteration[ _List, _, _] := $Failed
+sequenceOfIteration[ $Failed, _, _] := $Failed
 sequenceOfIteration[ args___] := 
  unexpected[ sequenceOfIteration, {args}]
 
@@ -507,6 +511,9 @@ TupleOf$TM[ RNG$[ r__], cond_, form_] :=
 		Apply[ makeTuple, s] /; (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
 	]
   	
+(* We have to split several summations into individual ones,
+	because the various ranges may depend on each other, and this does not work in connection with
+	"sequenceOfIteration". Same with "ProductOf", "MaximumOf", etc. *)
 SumOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["SumOf"] :=
  	Module[ {splitC},
  		splitC = splitAnd[ cond, {r[[1]]}];
@@ -516,7 +523,7 @@ SumOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["SumOf"] :=
 	]
 SumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["SumOf"] :=
 	Module[ {v},
-		(Apply[ Plus$TM, v]) /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Plus$TM, 0]) =!= $Failed
 	]
 SumOf$TM[ RNG$[ r_, s__], cond_, dom_, form_] /; buiActive["SumOf"] :=
  	Module[ {splitC},
@@ -527,19 +534,7 @@ SumOf$TM[ RNG$[ r_, s__], cond_, dom_, form_] /; buiActive["SumOf"] :=
 	]
 SumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, dom_, form_] /; buiActive["SumOf"] :=
 	Module[ {v},
-		(* amaletz: The reason why it's done in that 'complicated' way is the following:
-		   The 0-element might not be defined in "dom", which is no problem, but if it's not
-		   defined and one just folds the function using it as the initial element, it will
-		   always appear as a symbolic expression in the final result. However, if there is at
-		   least 1 value in "v", then the 0-element is not needed at all.
-		   Also, "Apply" cannot be used, because the domain functions can only deal with EXACTLY
-		   2 arguments (in addition to that, we cannot even rely on associativity).
-		*)
-		Switch[ Length[ v],
-			0, Theorema`Computation`Knowledge`Underscript$TM[0, dom],
-			1, First[ v],
-			_, Fold[ dom[Plus$TM], First[ v], Rest[ v]]
-		] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, dom[Plus$TM], Theorema`Computation`Knowledge`Underscript$TM[0, dom]]) =!= $Failed
 	]
 	
 ProductOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["ProductOf"] :=
@@ -551,7 +546,7 @@ ProductOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["ProductOf"] :=
 	]
 ProductOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["ProductOf"] :=
 	Module[ {v},
-		(Apply[ Times$TM, v]) /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Times$TM, 1]) =!= $Failed
 	]
 ProductOf$TM[ RNG$[ r_, s__], cond_, dom_, form_] /; buiActive["ProductOf"] :=
  	Module[ {splitC},
@@ -562,15 +557,40 @@ ProductOf$TM[ RNG$[ r_, s__], cond_, dom_, form_] /; buiActive["ProductOf"] :=
 	]
 ProductOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, dom_, form_] /; buiActive["ProductOf"] :=
 	Module[ {v},
-		(* See comment in function "SumOf$TM" *)
-		Switch[ Length[ v],
-			0, Theorema`Computation`Knowledge`Underscript$TM[1, dom],
-			1, First[ v],
-			_, Fold[ dom[Times$TM], First[ v], Rest[ v]]
-		] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, dom[Times$TM], Theorema`Computation`Knowledge`Underscript$TM[1, dom]]) =!= $Failed
 	]
 	
 SetAttributes[ valueIteration, HoldRest]
+valueIteration[ {x_, iter__}, cond_, term_, op_, def_] :=  
+ Module[ {val = $Null, ci, comp, i},
+ 	(* "$Null" is meant to indicate that "val" does not have a value yet. *)
+	Catch[
+		Do[
+			If[ TrueQ[ cond],
+				ci = True,
+				ci = ReleaseHold[ substituteFree[ Hold[ cond], {x -> i}]]
+			];
+			If[ ci,
+				comp = ReleaseHold[ substituteFree[ Hold[ term], {x -> i}]];
+				If[ val === $Null,
+					val = comp,
+					val = op[ val, comp]
+				],
+				(*else*)
+				Continue[],
+				(*default*)
+				Throw[ $Failed];
+			],
+			{i, iter}
+		]; (*end do*)
+		If[ val === $Null,
+			def,
+			val
+		]
+	] (*end catch*)
+ ]
+valueIteration[ _List, _, _, _, _] := $Failed
+valueIteration[ $Failed, _, _, _, _] := $Failed
 valueIteration[ {x_, iter__}, cond_, term_] :=  
  Module[ {val = {}, ci, comp, i},
 	Catch[
@@ -581,7 +601,7 @@ valueIteration[ {x_, iter__}, cond_, term_] :=
 			];
 			If[ ci,
 				comp = ReleaseHold[ substituteFree[ Hold[ term], {x -> i}]];
-				AppendTo[val, comp],
+				AppendTo[ val, comp],
 				(*else*)
 				Continue[],
 				(*default*)
@@ -592,39 +612,279 @@ valueIteration[ {x_, iter__}, cond_, term_] :=
 		val
 	] (*end catch*)
  ]
-valueIteration[ iter_List, cond_, form_] := $Failed
+valueIteration[ _List, _, _] := $Failed
+valueIteration[ $Failed, _, _] := $Failed
 valueIteration[ args___] := unexpected[ valueIteration, {args}]
 
 
+MaximumOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["MaximumOf"] :=
+ 	Module[ {splitC},
+ 		splitC = splitAnd[ cond, {r[[1]]}];
+ 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 			MaximumOf$TM[ RNG$[r], rc, MaximumOf$TM[ RNG$[s], sc, form]]
+ 		]
+	]
+MaximumOf$TM[ RNG$[ r_], cond_, form_] /; buiActive["MaximumOf"] :=
+	Module[ {v},
+		max$TM[ Apply[ makeSet, v]] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+	]
+MaximumOf$TM[ RNG$[ r_, s__], cond_, ord_, form_] /; buiActive["MaximumOf"] :=
+ 	Module[ {splitC},
+ 		splitC = splitAnd[ cond, {r[[1]]}];
+ 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 			MaximumOf$TM[ RNG$[r], rc, ord, MaximumOf$TM[ RNG$[s], sc, ord, form]]
+ 		]
+	]
+MaximumOf$TM[ RNG$[ r_], cond_, ord_, form_] /; buiActive["MaximumOf"] :=
+	Module[ {v},
+		Subscript$TM[ max$TM, ord][ Apply[ makeSet, v]] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+	]
+	
+MinimumOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["MinimumOf"] :=
+ 	Module[ {splitC},
+ 		splitC = splitAnd[ cond, {r[[1]]}];
+ 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 			MinimumOf$TM[ RNG$[r], rc, MinimumOf$TM[ RNG$[s], sc, form]]
+ 		]
+	]
+MinimumOf$TM[ RNG$[ r_], cond_, form_] /; buiActive["MinimumOf"] :=
+	Module[ {v},
+		min$TM[ Apply[ makeSet, v]] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+	]
+MinimumOf$TM[ RNG$[ r_, s__], cond_, ord_, form_] /; buiActive["MinimumOf"] :=
+ 	Module[ {splitC},
+ 		splitC = splitAnd[ cond, {r[[1]]}];
+ 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 			MinimumOf$TM[ RNG$[r], rc, ord, MinimumOf$TM[ RNG$[s], sc, ord, form]]
+ 		]
+	]
+MinimumOf$TM[ RNG$[ r_], cond_, ord_, form_] /; buiActive["MinimumOf"] :=
+	Module[ {v},
+		Subscript$TM[ min$TM, ord][ Apply[ makeSet, v]] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+	]
+	
+UnionOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["UnionOf"] :=
+ 	Module[ {splitC},
+ 		splitC = splitAnd[ cond, {r[[1]]}];
+ 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 			UnionOf$TM[ RNG$[r], rc, UnionOf$TM[ RNG$[s], sc, form]]
+ 		]
+	]
+UnionOf$TM[ RNG$[ r_], cond_, form_] /; buiActive["UnionOf"] :=
+	Module[ {v},
+		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Union$TM, Set$TM[]]) =!= $Failed
+	]
+UnionOf$TM[ RNG$[ r_, s__], cond_, dom_, form_] /; buiActive["UnionOf"] :=
+ 	Module[ {splitC},
+ 		splitC = splitAnd[ cond, {r[[1]]}];
+ 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 			UnionOf$TM[ RNG$[r], rc, dom, UnionOf$TM[ RNG$[s], sc, dom, form]]
+ 		]
+	]
+UnionOf$TM[ RNG$[ r_], cond_, dom_, form_] /; buiActive["UnionOf"] :=
+	Module[ {v},
+		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Annotated$TM[ Union$TM, SubScript$TM[ dom]], Set$TM[]]) =!= $Failed
+	]
+	
+IntersectionOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["IntersectionOf"] :=
+ 	Module[ {splitC},
+ 		splitC = splitAnd[ cond, {r[[1]]}];
+ 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 			IntersectionOf$TM[ RNG$[r], rc, IntersectionOf$TM[ RNG$[s], sc, form]]
+ 		]
+	]
+IntersectionOf$TM[ RNG$[ r_], cond_, form_] /; buiActive["IntersectionOf"] :=
+	Module[ {v},
+		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Intersection$TM, $Failed]) =!= $Failed
+	]
+IntersectionOf$TM[ RNG$[ r_, s__], cond_, dom_, form_] /; buiActive["IntersectionOf"] :=
+ 	Module[ {splitC},
+ 		splitC = splitAnd[ cond, {r[[1]]}];
+ 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 			IntersectionOf$TM[ RNG$[r], rc, dom, IntersectionOf$TM[ RNG$[s], sc, dom, form]]
+ 		]
+	]
+IntersectionOf$TM[ RNG$[ r_], cond_, dom_, form_] /; buiActive["IntersectionOf"] :=
+	Module[ {v},
+		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Annotated$TM[ Intersection$TM, SubScript$TM[ dom]], $Failed]) =!= $Failed
+	]
+	
 
 (* ::Section:: *)
 (* Sets *)
 
-Set$TM /: Equal$TM[a__Set$TM] /; buiActive["SetEqual"] := SameQ[a]
-Set$TM /: SubsetEqual$TM[a_Set$TM, b_Set$TM] /; buiActive["SubsetEqual"] := Equal$TM[Intersection[a, b],a]
-Set$TM /: Subset$TM[a_Set$TM, b_Set$TM] /; buiActive["Subset"] := And[SubsetEqual$TM[a,b],Not[Equal$TM[a, b]]]
-Set$TM /: SupersetEqual$TM[a_Set$TM, b_Set$TM] /; buiActive["SupersetEqual"] := SubsetEqual$TM[b, a]
-Set$TM /: Superset$TM[a_Set$TM, b_Set$TM] /; buiActive["Superset"] := Subset$TM[b, a]
-Set$TM /: Union$TM[ a__Set$TM] /; buiActive["Union"] := Union[ a] /. List -> Set$TM
-Set$TM /: Intersection$TM[ a__Set$TM] /; buiActive["Intersection"] := Intersection[ a] /. List -> Set$TM
-Set$TM /: Backslash$TM[ a_Set$TM,b_Set$TM] /; buiActive["Difference"] := Complement[a, b] /. List -> Set$TM
-Set$TM /: EmptyUpTriangle$TM[ a_Set$TM,b_Set$TM] /; buiActive["SymmetricDifference"] := Union[Complement[a, b], Complement[b, a]] /. List -> Set$TM
+Set$TM /: Equal$TM[a__Set$TM] /; buiActive["SetEqual"] && SameQ[a] := True
+Set$TM /: Equal$TM[_Set$TM] /; buiActive["SetEqual"] := True
+Set$TM /: Equal$TM[a_Set$TM, b_Set$TM, c__Set$TM] /; buiActive["SetEqual"] :=
+	Equal$TM[ a, b] && Map[ Equal$TM[ a, #]&, And[ c]]
+Set$TM /: Equal$TM[a_Set$TM, b_Set$TM] /; buiActive["SetEqual"] :=
+	Module[ {res},
+		res /; (res = subseteq[ a, b, Equal$TM];
+				If[ res === True,
+					res = subseteq[ b, a, Equal$TM]
+				];
+				MatchQ[ res, True|False])
+	]
+Set$TM /: Annotated$TM[Equal$TM, SubScript$TM[ _]][_Set$TM] /; buiActive["SetEqual"] := True
+Set$TM /: Annotated$TM[Equal$TM, SubScript$TM[ dom_]][a_Set$TM, b_Set$TM, c__Set$TM] /; buiActive["SetEqual"] :=
+	dom[Equal$TM][ a, b] && Map[ dom[Equal$TM][ a, #]&, And[ c]]
+Set$TM /: Annotated$TM[Equal$TM, SubScript$TM[ dom_]][a_Set$TM, b_Set$TM] /; buiActive["SetEqual"] :=
+	Module[ {res},
+		res /; (res = subseteq[ a, b, dom[Equal$TM]];
+				If[ res === True,
+					res = subseteq[ b, a, dom[Equal$TM]]
+				];
+				MatchQ[ res, True|False])
+	]
+Set$TM /: SubsetEqual$TM[a_Set$TM, b_Set$TM] /; buiActive["SubsetEqual"] :=
+	Module[ {res},
+		res /; (res = subseteq[ a, b, Equal$TM]; MatchQ[ res, True|False])
+	]
+Set$TM /: Annotated$TM[SubsetEqual$TM, SubScript$TM[ dom_]][a_Set$TM, b_Set$TM] /; buiActive["SubsetEqual"] :=
+		Module[ {res},
+		res /; (res = subseteq[ a, b, dom[Equal$TM]]; MatchQ[ res, True|False])
+	]
+Set$TM /: Subset$TM[a_Set$TM, b_Set$TM] /; buiActive["Subset"] :=
+	Module[ {res},
+		res /; (res = subseteq[ a, b, Equal$TM];
+				If[ res === True,
+					res = !subseteq[ b, a, Equal$TM]
+				];
+				MatchQ[ res, True|False])
+	]
+Set$TM /: Annotated$TM[Subset$TM, SubScript$TM[ dom_]][a_Set$TM, b_Set$TM] /; buiActive["Subset"] :=
+	Module[ {res},
+		res /; (res = subseteq[ a, b, dom[Equal$TM]];
+				If[ res === True,
+					res = !subseteq[ b, a, dom[Equal$TM]]
+				];
+				MatchQ[ res, True|False])
+	]
+Set$TM /: SupersetEqual$TM[a_Set$TM, b_Set$TM] /; buiActive["SupersetEqual"] :=
+	Module[ {res},
+		res /; (res = subseteq[ b, a, Equal$TM]; MatchQ[ res, True|False])
+	]
+Set$TM /: Annotated$TM[SupersetEqual$TM, SubScript$TM[ dom_]][a_Set$TM, b_Set$TM] /; buiActive["SupersetEqual"] :=
+	Module[ {res},
+		res /; (res = subseteq[ b, a, dom[Equal$TM]]; MatchQ[ res, True|False])
+	]
+Set$TM /: Superset$TM[a_Set$TM, b_Set$TM] /; buiActive["Superset"] :=
+	Module[ {res},
+		res /; (res = subseteq[ b, a, Equal$TM];
+				If[ res === True,
+					res = !subseteq[ a, b, Equal$TM]
+				];
+				MatchQ[ res, True|False])
+	]
+Set$TM /: Annotated$TM[Superset$TM, SubScript$TM[ dom_]][a_Set$TM, b_Set$TM] /; buiActive["Superset"] :=
+	Module[ {res},
+		res /; (res = subseteq[ b, a, dom[Equal$TM]];
+				If[ res === True,
+					res = !subseteq[ a, b, dom[Equal$TM]]
+				];
+				MatchQ[ res, True|False])
+	]
+
+(* "Union" can be implemented in this nice way (in contrast to "Intersection", "Complement", ...),
+	because in any case it does not harm to put more elements into the resulting set than actually needed
+	(some might be equal).
+	Also note that it is possible to form the union over 0 sets, whereas the intersection of 0 sets is not defined. *)
+Set$TM /: Union$TM[ a___Set$TM] /; buiActive["Union"] := Union[ a, SameTest -> (TrueQ[ Equal$TM[ #1, #2]]&)]
+Set$TM /: Annotated$TM[ Union$TM, SubScript$TM[ dom_]][ a___Set$TM] /; buiActive["Union"] := Union[ a, SameTest -> (TrueQ[ dom[Equal$TM][ #1, #2]]&)]
+Set$TM /: Intersection$TM[ a_Set$TM, b___Set$TM] /; buiActive["Intersection"] :=
+	Module[ {res = Set$TM[]},
+		res /; (Scan[ If[ ElementOfAll[#, {b}, Equal$TM], AppendTo[res, #], Null, res = False; Return[]] &, a]; res =!= False)
+	]
+Set$TM /: Annotated$TM[ Intersection$TM, SubScript$TM[ dom_]][ a_Set$TM, b___Set$TM] /; buiActive["Intersection"] :=
+	Module[ {res = Set$TM[]},
+		res /; (Scan[ If[ ElementOfAll[#, {b}, dom[Equal$TM]], AppendTo[res, #], Null, res = False; Return[]] &, a]; res =!= False)
+	]
+Set$TM /: Backslash$TM[ a_Set$TM, b_Set$TM] /; buiActive["Difference"] :=
+	Module[ {res = Set$TM[]},
+		res /; (Scan[ If[ ElementOf[#, b, Equal$TM], Null, AppendTo[res, #], res = False; Return[]] &, a]; res =!= False)
+	]
+Set$TM /: Annotated$TM[ Backslash$TM, SubScript$TM[ dom_]][ a_Set$TM, b_Set$TM] /; buiActive["Difference"] :=
+	Module[ {res = Set$TM[]},
+		res /; (Scan[ If[ ElementOf[#, b, dom[Equal$TM]], Null, AppendTo[res, #], res = False; Return[]] &, a]; res =!= False)
+	]
+Set$TM /: EmptyUpTriangle$TM[ a_Set$TM, b_Set$TM] /; buiActive["SymmetricDifference"] :=
+	Module[ {res = Set$TM[]},
+		res /;
+			(Scan[ If[ ElementOf[#, b, Equal$TM], Null, AppendTo[res, #], res = False; Return[]] &, a];
+			If[ res === False,
+				False,
+				Scan[ If[ ElementOf[#, a, Equal$TM], Null, AppendTo[res, #], res = False; Return[]] &, b];
+				res =!= False
+			])
+	]
+Set$TM /: Annotated$TM[ EmptyUpTriangle$TM, SubScript$TM[ dom_]][ a_Set$TM, b_Set$TM] /; buiActive["SymmetricDifference"] :=
+	Module[ {res = Set$TM[]},
+		res /;
+			(Scan[ If[ ElementOf[#, b, dom[Equal$TM]], Null, AppendTo[res, #], res = False; Return[]] &, a];
+			If[ res === False,
+				False,
+				Scan[ If[ ElementOf[#, a, dom[Equal$TM]], Null, AppendTo[res, #], res = False; Return[]] &, b];
+				res =!= False
+			])
+	]
 Set$TM /: Cross$TM[ a__Set$TM] /; buiActive["CartesianProduct"] := Apply[Set$TM, Replace[Tuples[{a}],List[x__]:> Tuple$TM[x] ,{1}]]
-Set$TM /: Element$TM[ p_,a_Set$TM] /; buiActive["IsElement"] && MemberQ[ a, p] := True
-Set$TM /: Element$TM[ p_,a_Set$TM] /; buiActive["IsElement"] && isVariableFree[a] := False
+Set$TM /: Element$TM[ p_, a_Set$TM] /; buiActive["IsElement"] :=
+	Module[ {res},
+		res /; (res = ElementOf[ p, a, Equal$TM]; MatchQ[ res, True|False])
+	]
+Set$TM /: Annotated$TM[ Element$TM, SubScript$TM[dom_]][ p_, a_Set$TM] /; buiActive["IsElement"] :=
+	Module[ {res},
+		res /; (res = ElementOf[ p, a, dom[Equal$TM]]; MatchQ[ res, True|False])
+	]
 Set$TM /: \[ScriptCapitalP]$TM[ a_Set$TM] /; buiActive["PowerSet"] := Subsets[ a] /. List -> Set$TM
-Set$TM /: BracketingBar$TM[ a_Set$TM] /; buiActive["Cardinality"] && isSequenceFree[a] := Length[ a]
-Set$TM /: max$TM[ Set$TM[ e___]] /; buiActive["MaximumElementSet"] :=
+Set$TM /: BracketingBar$TM[ a_Set$TM?isSequenceFree] /; buiActive["Cardinality"] && pairwiseDistinct[ a, Equal$TM] :=
+	Length[ a]
+Set$TM /: max$TM[ Set$TM[ e__]] /; buiActive["MaximumElementSet"] :=
 	Module[ {s},
 		(s /. Max -> max$TM /. {max$TM[x_Set$TM] :> max$TM[x], max$TM[x___] :> max$TM[Set$TM[x]]}) /; (s = Max[ e]; Apply[ Hold, {s}] =!= Hold[ Max[ e]])
 	]
-Set$TM /: min$TM[ Set$TM[ e___]] /; buiActive["MinimumElementSet"] :=
+Set$TM /: Subscript$TM[ max$TM, ord_][ Set$TM[ e__]] /; buiActive["MaximumElementSet"] :=
+	Module[ {res},
+		First[ res] /; (res = max[ {e}, ord]; Length[ res] === 1)
+	]
+Set$TM /: min$TM[ Set$TM[ e__]] /; buiActive["MinimumElementSet"] :=
 	Module[ {s},
 		(s /. Min -> min$TM /. {min$TM[x_Set$TM] :> min$TM[x], min$TM[x___] :> min$TM[Set$TM[x]]}) /; (s = Min[ e]; Apply[ Hold, {s}] =!= Hold[ Min[ e]])
 	]
+Set$TM /: Subscript$TM[ min$TM, ord_][ Set$TM[ e__]] /; buiActive["MinimumElementSet"] :=
+	Module[ {res},
+		First[ res] /; (res = min[ {e}, ord]; Length[ res] === 1)
+	]
+Set$TM /: \[AE]$TM[ Set$TM[ a_, ___]] /; buiActive["AnElement"] := a
 	
 
+(* amaletzk: The following implementation of "max" and "min" has quadratic complexity in the length of the
+	input. One could, however, also compare only successive elements, but this method would only give
+	the right result in case of a linear ordering, not in case of an arbitrary partial ordering! *)
+max[ l:{___, a_, ___}, ord_] /; greatest[ a, l, ord] := {a}
+max[ _List, _] := {}
 
+greatest[ _, {}, _] := True
+greatest[ a_, {b_, rest___}, ord_] := TrueQ[ ord[ b, a] || a == b] && greatest[ a, {rest}, ord]
+
+min[ l:{___, a_, ___}, ord_] /; smallest[ a, l, ord] := {a}
+min[ _List, _] := {}
+
+smallest[ _, {}, _] := True
+smallest[ a_, {b_, rest___}, ord_] := TrueQ[ ord[ a, b] || a == b] && smallest[ a, {rest}, ord]
+
+ElementOf[ p_, a_, test_] := Apply[ Or, Map[ (test[ p, #])&, Apply[ Hold, a]]]
+ElementOfAll[ p_, {a_, rest___}, test_] := ElementOf[ p, a, test] && ElementOfAll[ p, {rest}, test]
+ElementOfAll[ _, {}, _] := True
+
+pairwiseDistinct[ _[ f_, rest___], test_] := ElementOf[ f, {rest}, test] === False && pairwiseDistinct[ {rest}, test]
+pairwiseDistinct[ _[], _] := True
+
+subseteq[ a_, b_, test_] :=
+	Module[ {res = True},
+		Scan[ If[ ElementOf[#, b, test], Null, res = False; Return[], res = Null] &, a];
+		res
+	]
 
 
 (* ::Section:: *)
@@ -645,14 +905,14 @@ IntegerQuotientRingPM$TM[ 0] /; buiActive["IntegerQuotientRingPM"] := IntegerInt
 (* equality *)
 
 Set$TM /: Equal$TM[ a:(h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ al_?isRealOrInf, ar_?isRealOrInf, alc:(True|False), arc:(True|False)],
-		b:Set$TM[ e___?isNumericQuantity]] :=
+		b:Set$TM[ e___?isGround]] :=
 	Module[ {rs},
 		SameQ[ rs, Length[ b], Length[ Select[ b, isInInterval[ #, a]&]]] /; buiActive["SetEqual"] && buiActive[StringDrop[SymbolName[h], -3]] && ((rs = intervalSize[h, al, ar, alc, arc]) =!= $Failed)
 	]
 Set$TM /: Equal$TM[ a_Set$TM, b:(_IntegerInterval$TM|_RationalInterval$TM|_RealInterval$TM)] /; buiActive["SetEqual"] := Equal$TM[ b, a]
 Set$TM /: Equal$TM[ _Set$TM, b:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive["SetEqual"] && buiActive[StringDrop[SymbolName[b], -3]] := False
 Set$TM /: Equal$TM[ b:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM), _Set$TM] /; buiActive["SetEqual"] && buiActive[StringDrop[SymbolName[b], -3]] := False
-(* Set$TM /: Equal$TM[ (h:(IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ m_?isModulus], a:Set$TM[ e___?isNumericQuantity]] /; buiActive["SetEqual"] && buiActive[StringDrop[SymbolName[h], -3]] :=
+(* Set$TM /: Equal$TM[ (h:(IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ m_?isModulus], a:Set$TM[ e___?isGround]] /; buiActive["SetEqual"] && buiActive[StringDrop[SymbolName[h], -3]] :=
 	Length[ a] == m && Apply[ And, Map[ (isInteger[ #] && IQRLower[ h, m] <= # <= IQRUpper[ h, m])&, Hold[ e]]]
 Set$TM /: Equal$TM[ a_Set$TM, b:(_IntegerQuotientRing$TM|_IntegerQuotientRingPM$TM)] /; buiActive["SetEqual"] := Equal$TM[ b, a] *)
 
@@ -740,13 +1000,13 @@ RealInterval$TM /: Equal$TM[ RealInterval$TM[ al_?isRealOrInf, ar_?isRealOrInf, 
 (* intersection *)
 
 Set$TM /: Intersection$TM[ a:(h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ _?isRealOrInf, _?isRealOrInf, True|False, True|False],
-		b:Set$TM[ ___?isNumericQuantity]] /; buiActive["Intersection"] && buiActive[StringDrop[SymbolName[h],-3]] :=
+		b:Set$TM[ ___?isGround]] /; buiActive["Intersection"] && buiActive[StringDrop[SymbolName[h],-3]] :=
 	Select[ b, isInInterval[ #, a]&]
 Set$TM /: Intersection$TM[ a_Set$TM, b:(_IntegerInterval$TM|_RationalInterval$TM|_RealInterval$TM)] /; buiActive["Intersection"] := Intersection$TM[ b, a]
-Set$TM /: Intersection$TM[ \[DoubleStruckCapitalC]$TM, b:Set$TM[ ___?isNumericQuantity]] /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]"] :=
+Set$TM /: Intersection$TM[ \[DoubleStruckCapitalC]$TM, b:Set$TM[ ___?isGround]] /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]"] :=
 	Select[ b, isComplex]
 Set$TM /: Intersection$TM[ b_Set$TM, \[DoubleStruckCapitalC]$TM] /; buiActive["Intersection"] := Intersection$TM[ \[DoubleStruckCapitalC]$TM, b]
-Set$TM /: Intersection$TM[ \[DoubleStruckCapitalC]P$TM, b:Set$TM[ ___?isNumericQuantity]] /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]"] :=
+Set$TM /: Intersection$TM[ \[DoubleStruckCapitalC]P$TM, b:Set$TM[ ___?isGround]] /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]"] :=
 	Select[ b, isComplex]
 Set$TM /: Intersection$TM[ b_Set$TM, \[DoubleStruckCapitalC]P$TM] /; buiActive["Intersection"] := Intersection$TM[ \[DoubleStruckCapitalC]P$TM, b]
 
@@ -862,10 +1122,6 @@ isRealOrInf[ _Integer|_Rational|_Real] := True
 isRealOrInf[ DirectedInfinity[1|-1]] := True
 isRealOrInf[ Pi|E|EulerGamma|GoldenRatio|Degree|Catalan|Khinchin|Glaisher] := True
 isRealOrInf[ _] := False
-(* isNumericQuantity yields True whenever its argument is either a number (real or complex) or infinity (real or complex) *)
-isNumericQuantity[ x_?isRealOrInf] := True
-isNumericQuantity[ _Complex|I|_DirectedInfinity] := True
-isNumericQuantity[ _] := False
 
 isModulus[ m_] := TrueQ[ isInteger[ m] && Positive[ m]]
 
@@ -912,43 +1168,76 @@ intersectIntervals[ _[ al_, ar_, alc_, arc_], _[ bl_, br_, blc_, brc_]] :=
 (* Tuples *)
 
 
-Tuple$TM /: Subscript$TM[ a_Tuple$TM, Rule$TM[ p_, q_]] /; buiActive["Insert"] && isSequenceFree[a] := Insert[ a, p, q /. Tuple$TM -> List]
+Tuple$TM /: Subscript$TM[ a_Tuple$TM?isSequenceFree, Rule$TM[ p_, q_]] /; buiActive["Insert"] := Insert[ a, p, q /. Tuple$TM -> List]
 
 (* Delete elements at one or more positions *)
-Tuple$TM /: Subscript$TM[ a_Tuple$TM, LeftArrow$TM[ b_]] /; buiActive["DeleteAt"] && isSequenceFree[a] := Delete[ a, b //. Tuple$TM -> List]
+Tuple$TM /: Subscript$TM[ a_Tuple$TM?isSequenceFree, LeftArrow$TM[ b_]] /; buiActive["DeleteAt"] := Delete[ a, b //. Tuple$TM -> List]
 
 (* Delete elements of a certain shape. Multiple deletions are not possible, because it would need
 	special syntax how to specify multiple shapes. Tuples cannot be used because for this *)
-Tuple$TM /: Subscript$TM[a_Tuple$TM, d:(LeftArrowBar$TM[_]..)] /; buiActive["Delete"] := Fold[ DeleteCases[ #1, #2[[1]]]&, a, {d}] 
+Tuple$TM /: Subscript$TM[a_Tuple$TM?isGround, d:(LeftArrowBar$TM[_]..)] /; buiActive["Delete"] := Fold[ DeleteCases[ #1, #2[[1]]]&, a, {d}] 
 
 Tuple$TM /: Equal$TM[a__Tuple$TM] /; buiActive["TupleEqual"] && SameQ[a ] := True
-Tuple$TM /: Equal$TM[a__Tuple$TM] /; buiActive["TupleEqual"] && isVariableFree[{a},{2}] := False
+Tuple$TM /: Equal$TM[a__Tuple$TM?isSequenceFree] /; buiActive["TupleEqual"] :=
+	Module[ {res},
+		res /; (res = If[ Apply[ SameQ, Map[ Length, Hold[ a]]],
+						Map[ Replace[#, {x__} :> Equal$TM[ x]] &, Apply[ And, Transpose[
+							Map[ Replace[ #, Tuple$TM[ x__] :> {x}]&, {a}]]]
+							],
+						False
+					];
+				MatchQ[ res, True|False])
+	]
+Tuple$TM /: Annotated$TM[Equal$TM, SubScript$TM[ dom_]][a__Tuple$TM?isSequenceFree] /; buiActive["TupleEqual"] :=
+	Module[ {res},
+		res /; (res = If[ Apply[ SameQ, Map[ Length, Hold[ a]]],
+						Map[ Replace[#, {x__} :> dom[Equal$TM][ x]] &, Apply[ And, Transpose[
+							Map[ Replace[ #, Tuple$TM[ x__] :> {x}]&, {a}]]]
+							],
+						False
+					];
+				MatchQ[ res, True|False])
+	]
 
-Tuple$TM /: Cup$TM[a_Tuple$TM,p_] /; buiActive["Append"] := Append[ a,p]
-Tuple$TM /: Cap$TM[p_,a_Tuple$TM] /; buiActive["Prepend"] := Prepend[ a,p]
+Tuple$TM /: Cup$TM[a_Tuple$TM, p_] /; buiActive["Append"] := Append[ a, p]
+Tuple$TM /: Cap$TM[p_, a_Tuple$TM] /; buiActive["Prepend"] := Prepend[ a, p]
 Tuple$TM /: CupCap$TM[a__Tuple$TM] /; buiActive["Join"] := Join[ a]
 
-Tuple$TM /: Element$TM[p_,a_Tuple$TM] /; buiActive["IsElement"] && MemberQ[a,p] := True
-Tuple$TM /: Element$TM[p_,a_Tuple$TM] /; buiActive["IsElement"] && isVariableFree[a] := False
+Tuple$TM /: Element$TM[ p_, a_Tuple$TM] /; buiActive["IsElement"] :=
+	Module[ {res},
+		res /; (res = ElementOf[ p, a, Equal$TM]; MatchQ[ res, True|False])
+	]
+Tuple$TM /: Annotated$TM[ Element$TM, SubScript$TM[ dom_]][ p_, a_Tuple$TM] /; buiActive["IsElement"] :=
+	Module[ {res},
+		res /; (res = ElementOf[ p, a, dom[Equal$TM]]; MatchQ[ res, True|False])
+	]
 
-Tuple$TM /: max$TM[ Tuple$TM[ e___]] /; buiActive["Max"] :=
+Tuple$TM /: max$TM[ Tuple$TM[ e__]] /; buiActive["Max"] :=
 	Module[ {s},
 		(s /. Max -> max$TM /. {max$TM[x_Tuple$TM] :> max$TM[x], max$TM[x___] :> max$TM[Tuple$TM[x]]}) /; (s = Max[ e]; Apply[ Hold, {s}] =!= Hold[ Max[ e]])
 	]
-Tuple$TM /: min$TM[ Tuple$TM[ e___]] /; buiActive["Min"] :=
+Tuple$TM /: Subscript$TM[ max$TM, ord_][ Tuple$TM[ e__]] /; buiActive["Max"] :=
+	Module[ {res},
+		First[ res] /; (res = max[ {e}, ord]; Length[ res] === 1)
+	]
+Tuple$TM /: min$TM[ Tuple$TM[ e__]] /; buiActive["Min"] :=
 	Module[ {s},
 		(s /. Min -> min$TM /. {min$TM[x_Tuple$TM] :> min$TM[x], min$TM[x___] :> min$TM[Tuple$TM[x]]}) /; (s = Min[ e]; Apply[ Hold, {s}] =!= Hold[ Min[ e]])
 	]
+Tuple$TM /: Subscript$TM[ min$TM, ord_][ Tuple$TM[ e__]] /; buiActive["Min"] :=
+	Module[ {res},
+		First[ res] /; (res = min[ {e}, ord]; Length[ res] === 1)
+	]
 
-Tuple$TM /: BracketingBar$TM[ a_Tuple$TM] /; buiActive["Length"] && isSequenceFree[a] := Length[ a]
+Tuple$TM /: BracketingBar$TM[ a_Tuple$TM?isSequenceFree] /; buiActive["Length"] := Length[ a]
 
-Tuple$TM /: Subscript$TM[ a_Tuple$TM, p:LeftArrow$TM[_, _]..] /; buiActive["ReplacePart"] && isSequenceFree[a] :=
+Tuple$TM /: Subscript$TM[ a_Tuple$TM?isSequenceFree, p:LeftArrow$TM[_, _]..] /; buiActive["ReplacePart"] :=
 	ReplacePart[ a, MapAt[# /. {Tuple$TM -> List}&, {p} /. LeftArrow$TM -> Rule, Table[ {i, 1}, {i, Length[{p}]}]]]
 
 Tuple$TM /: Subscript$TM[ a_Tuple$TM, s:LeftArrowBar$TM[_, _]..] /; buiActive["Replace"] := Fold[ ReplaceAll, a, {s} /. LeftArrowBar$TM -> Rule]
 
 Tuple$TM /: Subscript$TM[ a_Tuple$TM, p__Integer] /; buiActive["Subscript"] := Subscript$TM[ a, Tuple$TM[ p]]
-Tuple$TM /: Subscript$TM[ a_Tuple$TM, p_?isPositionSpec] /; buiActive["Subscript"] && isSequenceFree[a] := Extract[ a, p /. Tuple$TM -> List] /. List -> Tuple$TM
+Tuple$TM /: Subscript$TM[ a_Tuple$TM?isSequenceFree, p_?isPositionSpec] /; buiActive["Subscript"] := Extract[ a, p /. Tuple$TM -> List] /. List -> Tuple$TM
 
 isPositionSpec[ _Integer] := True
 isPositionSpec[ Tuple$TM[ p__]] := Apply[ And, Map[ isPositionSpec, {p}]]
@@ -970,54 +1259,56 @@ isTuple$TM[ a_] /; buiActive["isTuple"] := isTuple[ a]
 
 
 isInteger[ _Integer] := True
-isInteger[ True|False|I|Indeterminate|DirectedInfinity[_]|Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] := False
-isInteger[ _Rational|_Real|_Complex] := False
+isInteger[ _Rational|_Real|_Complex|_DirectedInfinity] := False
 isInteger[ _Set$TM|_Tuple$TM] := False
 isInteger[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
-isInteger[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
+(* The case where 'a' is '\[DoubleStruckCapitalC]$TM' or '\[DoubleStruckCapitalC]P$TM' does not have to be
+	treated separately *)
+(* isInteger[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False *)
+isInteger[ a_?AtomQ] /; isGround[ a] := False
 
 isRational[ _Integer|_Rational] := True
-(* it is not known whether Catalan is rational, therefore we leave "isRational[Catalan]" unevaluated *)
-isRational[ True|False|I|Indeterminate|DirectedInfinity[_]|Pi|Degree|GoldenRatio|E|EulerGamma|Khinchin|Glaisher] := False
-isRational[ _Real|_Complex] := False
+isRational[ _Real|_Complex|_DirectedInfinity] := False
 isRational[ _Set$TM|_Tuple$TM] := False
 isRational[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
-isRational[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
+(* isRational[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False *)
+(* it is not known whether Catalan is rational, therefore we leave "isRational[Catalan]" unevaluated *)
+isRational[ a:Except[Catalan]] /; AtomQ[ a] && isGround[ a] := False
 
 isReal[ _Integer|_Rational|_Real] := True
-isReal[ True|False|I|Indeterminate|DirectedInfinity[_]] := False
 isReal[ Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] := True
-isReal[ _Complex] := False
+isReal[ _Complex|_DirectedInfinity] := False
 isReal[ _Set$TM|_Tuple$TM] := False
 isReal[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
-isReal[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
+(* isReal[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False *)
+isReal[ a_?AtomQ] /; isGround[ a] := False
 
 isComplex[ _Integer|_Rational|_Real|_Complex] := True
-isComplex[ True|False|Indeterminate|DirectedInfinity[_]] := False
 isComplex[ I|Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] := True
-isComplex[ _Set$TM|_Tuple$TM] := False
+isComplex[ _Set$TM|_Tuple$TM|_DirectedInfinity] := False
 isComplex[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
-isComplex[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
+(* isComplex[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False *)
+isComplex[ a_?AtomQ] /; isGround[ a] := False
 
-isComplexP[ True|False|DirectedInfinity[_]|I|Indeterminate|Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] := False
 isComplexP[ Tuple$TM[ a_, b_]] := isReal[ a] && isReal[ b] && a >= 0
-isComplexP[ _Integer|_Rational|_Real|_Complex|_Set$TM|_Tuple$TM] := False
+isComplexP[ _Integer|_Rational|_Real|_Complex|_Set$TM|_Tuple$TM|_DirectedInfinity] := False
 isComplexP[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
-isComplexP[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
+(* isComplexP[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False *)
+isComplexP[ a_?AtomQ] /; isGround[ a] := False
 
 isSet[ _Set$TM] := True
-isSet[ True|False|I|Indeterminate|DirectedInfinity[_]|Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] := False
-isSet[ _Integer|_Rational|_Real|_Complex] := False
+isSet[ _Integer|_Rational|_Real|_Complex|_DirectedInfinity] := False
 isSet[ _Tuple$TM] := False
 isSet[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := True
-isSet[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := True
+(* isSet[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := True *)
+isSet[ a_?AtomQ] /; isGround[ a] := False
 
 isTuple[ _Tuple$TM] := True
-isTuple[ True|False|I|Indeterminate|DirectedInfinity[_]|Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] := False
-isTuple[ _Integer|_Rational|_Real|_Complex] := False
+isTuple[ _Integer|_Rational|_Real|_Complex|_DirectedInfinity] := False
 isTuple[ _Set$TM] := False
 isTuple[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
-isTuple[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
+(* isTuple[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False *)
+isTuple[ a_?AtomQ] /; isGround[ a] := False
 
 
 (* ::Section:: *)
@@ -1037,10 +1328,23 @@ Module$TM[ l_[v___], body_] /; buiActive["Module"] := Apply[ Module, Hold[ {v}, 
 SetAttributes[ Do$TM, HoldAll]
 Do$TM[ body_, l_[v___]] /; buiActive["Do"] := Apply[ Do, Hold[ body, {v}]]
 
-SetAttributes[ CaseDistinction$TM, HoldAll]
-CaseDistinction$TM[ c:Clause$TM[ _, _]..] /; buiActive["CaseDistinction"] :=
-	Apply[Piecewise, Hold[{c}] /. Clause$TM[cond_, expr_] -> {expr, cond}]
-
+SetAttributes[ Piecewise$TM, HoldAll]
+Piecewise$TM[ Tuple$TM[ clauses___Tuple$TM, Tuple$TM[ e_, True]]] /; buiActive["CaseDistinction"] :=
+	Piecewise$TM[ Tuple$TM[ clauses], e]
+Piecewise$TM[ clauses:Tuple$TM[ __Tuple$TM]] /; buiActive["CaseDistinction"] :=
+	Piecewise$TM[ clauses, 0]
+Piecewise$TM[ Tuple$TM[ clauses___Tuple$TM], default_] /; buiActive["CaseDistinction"] :=
+	Module[ {r, s},
+		If[ MatchQ[ r, _Piecewise],
+			ReplacePart[ Apply[ Piecewise$TM, r], {{1, 0} :> Tuple$TM, {1, _, 0} :> Tuple$TM}],
+			r
+		] /; (
+				s = ReplacePart[ Hold[ {clauses}, default], {1, _, 0} :> List];
+				r = Apply[ Piecewise, s];
+				!MatchQ[ r, _Piecewise] || Apply[ Hold, r] =!= s
+			)
+	]
+	
 
 
 (* We assume that all lists not treated by the above constructs should in fact be sets *)
