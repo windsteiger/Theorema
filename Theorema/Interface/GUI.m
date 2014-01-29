@@ -160,9 +160,9 @@ initGUI[] :=
 		$selectedSearchTime = 360;
 		$maxSearchTime = 1000;
 		initBuiltins[ {"prove", "compute", "solve"}];
-		resetDefaultRules[];
 		$selectedRuleSet = Hold[ basicTheoremaLanguageRules];
 		$selectedStrategy = applyOnceAndLevelSaturation;
+		Scan[ setRulesDefaults[ #[[1]]]&, $registeredRuleSets];
 		$CtrlActive = 0;
 		$ShiftActive = 0;
 		$TMAactDecl = translate[ "None"];
@@ -184,10 +184,9 @@ initBuiltins[ l_List] :=
     ]
 initBuiltins[ args___] := unexpected[ initBuiltins, {args}]
 
-resetDefaultRules[] :=
-	Module[ {rs, list},
-		rs = basicTheoremaLanguageRules;
-		list = Cases[rs, {r_Symbol, active_, text_, p_Integer, ___}, Infinity];
+setRulesDefaults[ Hold[ rs_]] :=
+	Module[ {list},
+		list = Cases[ rs, {_Symbol, _, _, _Integer, ___}, Infinity];
 		Scan[
 			ruleActive[ #[[1]]] = #[[2]];
     		ruleTextActive[ #[[1]]] = #[[3]];
@@ -1163,7 +1162,7 @@ selectProver[ ] :=
     		
     		Labeled[ Column[{
 				Row[{	
-				Button[ translate[ "RestoreDefaults"], resetDefaultRules[]],
+				Button[ translate[ "RestoreDefaults"], setRulesDefaults[ $selectedRuleSet]],
 				Button[ translate[ "ShowAll"], $ruleFilterKW = ""]},
 				Spacer[2]],
 				With[ {label = Row[ {translate[ "FilteredBy"], InputField[ $ruleFilterKW, String]}]},
