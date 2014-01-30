@@ -371,8 +371,9 @@ Scan[ SetAttributes[ #, HoldFirst] &, {SETRNG$, STEPRNG$}]
 
 Forall$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["Forall"] := 
  	Module[ {splitC},
-  		splitC = splitAnd[ cond, {r[[1]]}];
-  		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 		(* The condition MUST be kept unevaluated! Same in all other quantifiers. *)
+ 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
+ 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
    			Forall$TM[ RNG$[r], rc, Forall$TM[ RNG$[s], sc, form]]
    		]
   	]
@@ -420,8 +421,8 @@ forallIteration[ {x_, iter__}, cond_, form_] :=
     
 Exists$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["Exists"] := 
  	Module[ {splitC},
-  		splitC = splitAnd[ cond, {r[[1]]}];
-  		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
+ 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
    			Exists$TM[ RNG$[r], rc, Exists$TM[ RNG$[s], sc, form]]
    		]
   	]
@@ -478,7 +479,7 @@ sequenceOfIteration[ iter : {__List}, cond_, form_] :=
 	Catch[
 		With[ {locIter = Apply[ Sequence, MapThread[ ReplacePart[ #1, 1 -> #2] &, {iter, tmpVar}]], 
      		   locSubs = Thread[ Rule[ iVar, tmpVar]]},
-			Do[ If[ TrueQ[ cond],
+			Do[ If[ Hold[ cond] === Hold[ True], (* cond must be kept unevaluated! *)
 					ci = True,
 					ci = ReleaseHold[ substituteFree[ Hold[ cond], locSubs]]
 				];
@@ -516,8 +517,8 @@ TupleOf$TM[ RNG$[ r__], cond_, form_] :=
 	"sequenceOfIteration". Same with "ProductOf", "MaximumOf", etc. *)
 SumOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["SumOf"] :=
  	Module[ {splitC},
- 		splitC = splitAnd[ cond, {r[[1]]}];
- 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
+ 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
  			SumOf$TM[ RNG$[r], rc, SumOf$TM[ RNG$[s], sc, form]]
  		]
 	]
@@ -527,8 +528,8 @@ SumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["SumOf"] :
 	]
 SumOf$TM[ RNG$[ r_, s__], cond_, dom_, form_] /; buiActive["SumOf"] :=
  	Module[ {splitC},
- 		splitC = splitAnd[ cond, {r[[1]]}];
- 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
+ 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
  			SumOf$TM[ RNG$[r], rc, dom, SumOf$TM[ RNG$[s], sc, dom, form]]
  		]
 	]
@@ -539,8 +540,8 @@ SumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, dom_, form_] /; buiActive["Sum
 	
 ProductOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["ProductOf"] :=
  	Module[ {splitC},
- 		splitC = splitAnd[ cond, {r[[1]]}];
- 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
+ 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
  			ProductOf$TM[ RNG$[r], rc, ProductOf$TM[ RNG$[s], sc, form]]
  		]
 	]
@@ -550,8 +551,8 @@ ProductOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["Produ
 	]
 ProductOf$TM[ RNG$[ r_, s__], cond_, dom_, form_] /; buiActive["ProductOf"] :=
  	Module[ {splitC},
- 		splitC = splitAnd[ cond, {r[[1]]}];
- 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
+ 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
  			ProductOf$TM[ RNG$[r], rc, dom, ProductOf$TM[ RNG$[s], sc, dom, form]]
  		]
 	]
@@ -566,7 +567,7 @@ valueIteration[ {x_, iter__}, cond_, term_, op_, def_] :=
  	(* "$Null" is meant to indicate that "val" does not have a value yet. *)
 	Catch[
 		Do[
-			If[ TrueQ[ cond],
+			If[ Hold[ cond] === Hold[ True], (* cond must be kept unevaluated! *)
 				ci = True,
 				ci = ReleaseHold[ substituteFree[ Hold[ cond], {x -> i}]]
 			];
@@ -619,8 +620,8 @@ valueIteration[ args___] := unexpected[ valueIteration, {args}]
 
 MaximumOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["MaximumOf"] :=
  	Module[ {splitC},
- 		splitC = splitAnd[ cond, {r[[1]]}];
- 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
+ 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
  			MaximumOf$TM[ RNG$[r], rc, MaximumOf$TM[ RNG$[s], sc, form]]
  		]
 	]
@@ -630,8 +631,8 @@ MaximumOf$TM[ RNG$[ r_], cond_, form_] /; buiActive["MaximumOf"] :=
 	]
 MaximumOf$TM[ RNG$[ r_, s__], cond_, ord_, form_] /; buiActive["MaximumOf"] :=
  	Module[ {splitC},
- 		splitC = splitAnd[ cond, {r[[1]]}];
- 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
+ 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
  			MaximumOf$TM[ RNG$[r], rc, ord, MaximumOf$TM[ RNG$[s], sc, ord, form]]
  		]
 	]
@@ -642,8 +643,8 @@ MaximumOf$TM[ RNG$[ r_], cond_, ord_, form_] /; buiActive["MaximumOf"] :=
 	
 MinimumOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["MinimumOf"] :=
  	Module[ {splitC},
- 		splitC = splitAnd[ cond, {r[[1]]}];
- 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
+ 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
  			MinimumOf$TM[ RNG$[r], rc, MinimumOf$TM[ RNG$[s], sc, form]]
  		]
 	]
@@ -653,8 +654,8 @@ MinimumOf$TM[ RNG$[ r_], cond_, form_] /; buiActive["MinimumOf"] :=
 	]
 MinimumOf$TM[ RNG$[ r_, s__], cond_, ord_, form_] /; buiActive["MinimumOf"] :=
  	Module[ {splitC},
- 		splitC = splitAnd[ cond, {r[[1]]}];
- 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
+ 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
  			MinimumOf$TM[ RNG$[r], rc, ord, MinimumOf$TM[ RNG$[s], sc, ord, form]]
  		]
 	]
@@ -665,8 +666,8 @@ MinimumOf$TM[ RNG$[ r_], cond_, ord_, form_] /; buiActive["MinimumOf"] :=
 	
 UnionOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["UnionOf"] :=
  	Module[ {splitC},
- 		splitC = splitAnd[ cond, {r[[1]]}];
- 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
+ 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
  			UnionOf$TM[ RNG$[r], rc, UnionOf$TM[ RNG$[s], sc, form]]
  		]
 	]
@@ -676,8 +677,8 @@ UnionOf$TM[ RNG$[ r_], cond_, form_] /; buiActive["UnionOf"] :=
 	]
 UnionOf$TM[ RNG$[ r_, s__], cond_, dom_, form_] /; buiActive["UnionOf"] :=
  	Module[ {splitC},
- 		splitC = splitAnd[ cond, {r[[1]]}];
- 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
+ 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
  			UnionOf$TM[ RNG$[r], rc, dom, UnionOf$TM[ RNG$[s], sc, dom, form]]
  		]
 	]
@@ -688,8 +689,8 @@ UnionOf$TM[ RNG$[ r_], cond_, dom_, form_] /; buiActive["UnionOf"] :=
 	
 IntersectionOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["IntersectionOf"] :=
  	Module[ {splitC},
- 		splitC = splitAnd[ cond, {r[[1]]}];
- 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
+ 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
  			IntersectionOf$TM[ RNG$[r], rc, IntersectionOf$TM[ RNG$[s], sc, form]]
  		]
 	]
@@ -699,8 +700,8 @@ IntersectionOf$TM[ RNG$[ r_], cond_, form_] /; buiActive["IntersectionOf"] :=
 	]
 IntersectionOf$TM[ RNG$[ r_, s__], cond_, dom_, form_] /; buiActive["IntersectionOf"] :=
  	Module[ {splitC},
- 		splitC = splitAnd[ cond, {r[[1]]}];
- 		With[ {rc = splitC[[1]], sc = splitC[[2]]},
+ 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
+ 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
  			IntersectionOf$TM[ RNG$[r], rc, dom, IntersectionOf$TM[ RNG$[s], sc, dom, form]]
  		]
 	]
