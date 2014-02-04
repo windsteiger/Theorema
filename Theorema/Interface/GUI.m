@@ -148,6 +148,7 @@ initGUI[] :=
         $tcAllDeclOpener = True;
 		$kbStruct = {};
 		$ruleFilterKW = "";
+		$kbFilterKW = "";
 		$initLabel = "???";
 		$labelSeparator = ",";
 		$cellTagKeySeparator = ":";
@@ -228,15 +229,15 @@ openTheoremaCommander[ ] /; $Notebooks :=
         		{
         			(* session *){sessionCompose[], sessionInspect[], sessionArchive[]},
         			(* prove *)  {Dynamic[ Refresh[ displaySelectedGoal[], UpdateInterval -> 2]],
-        				Dynamic[ Refresh[ displayKBBrowser["prove"], TrackedSymbols :> {$kbStruct}]],
+        				Dynamic[ Refresh[ displayKBBrowser["prove"], TrackedSymbols :> {$kbFilterKW, $tcKBBrowseSelection, $kbStruct}]],
         				Dynamic[ Refresh[ displayBuiltinBrowser["prove"], TrackedSymbols :> {buiActProve}]],
         				Dynamic[ Refresh[ selectProver[], TrackedSymbols :> {$selectedRuleSet, $selectedStrategy, $ruleFilterKW}]],
         				Dynamic[ Refresh[ submitProveTask[ ], TrackedSymbols :> {$selectedProofGoal, $selectedProofKB, $selectedSearchDepth, $selectedSearchTime}]],
         				Dynamic[ Refresh[ proofNavigation[ $TMAproofTree], TrackedSymbols :> {$TMAproofTree, $TMAproofSearchRunning, $TMAproofNotebook, ruleTextActive, $proofTreeScale, $selectedProofStep}]]},
         			(* compute *){compSetup[],
-        				Dynamic[ Refresh[ displayKBBrowser["compute"], TrackedSymbols :> {$kbStruct}]],
+        				Dynamic[ Refresh[ displayKBBrowser["compute"], TrackedSymbols :> {$kbFilterKW, $tcKBBrowseSelection, $kbStruct}]],
         				Dynamic[ Refresh[ displayBuiltinBrowser["compute"], TrackedSymbols :> {buiActComputation}]]},
-        			(* solve *)  {Dynamic[Refresh[displayKBBrowser["solve"], TrackedSymbols :> {$kbStruct}]],
+        			(* solve *)  {Dynamic[Refresh[displayKBBrowser["solve"], TrackedSymbols :> {$kbFilterKW, $tcKBBrowseSelection, $kbStruct}]],
         				Dynamic[ Refresh[ displayBuiltinBrowser["solve"], TrackedSymbols :> {buiActSolve}]]},
         			(* prefs *)  {setPreferences[ ]}
         		}
@@ -679,13 +680,13 @@ Clear[ structView];
    parameter 'task' decides whether the view is generated for the prove tab or the compute tab *)
    
 (* group with header and content *)   
-structView[ file_, {head:Cell[ sec_, style:"Title"|"Section"|"Subsection"|"Subsubsection"|"Subsubsubsection"|"EnvironmentHeader", opts___], rest___}, tags_, task_] :=
+structView[ file_, {head:Cell[ sec_, style:"Title"|"Section"|"Subsection"|"Subsubsection"|"Subsubsubsection"|"EnvironmentHeader", opts___], rest___}, tags_, headers_List, task_] :=
     Module[ {content, views, compTags, structControl},
     	(* process content componentwise
     	   during recursion, we collect all cell tags from cells contained in that group 
     	   Transpose -> pos 1 contains the list of subviews
     	   pos 2 contains the list of tags in subgroups *)
-    	content = DeleteCases[ Map[ structView[ file, #, tags, task] &, {rest}], {}];
+    	content = DeleteCases[ Map[ structView[ file, #, tags, Append[ headers, sec], task] &, {rest}], {}];
     	If[ content === {},
     		(* If content is empty then ignore entire unit *)
     		{},
@@ -706,13 +707,13 @@ structView[ file_, {head:Cell[ sec_, style:"Title"|"Section"|"Subsection"|"Subsu
     ]
     
 (* list processed componentwise *) 
-structView[ file_, item_List, tags_, task_] :=
+structView[ file_, item_List, tags_, headers_List, task_] :=
     Module[ {content, views, compTags},
      	(* process content componentwise
     	   during recursion, we collect all cell tags from cells contained in that group 
     	   Transpose -> pos 1 contains the list of subviews
     	   pos 2 contains the list of tags in subgroups *)
-    	content = DeleteCases[ Map[ structView[ file, #, tags, task] &, item], {}];
+    	content = DeleteCases[ Map[ structView[ file, #, tags, headers, task] &, item], {}];
     	If[ content === {},
     		{},
     		(* else *)
@@ -724,9 +725,13 @@ structView[ file_, item_List, tags_, task_] :=
     ]
 
 (* input cell with cell tags *)
-structView[ file_, Cell[ content_, "FormalTextInputFormula", a___, CellTags -> cellTags_, b___], tags_, task_] :=
+structView[ file_, Cell[ content_, "FormalTextInputFormula", a___, CellTags -> cellTags_, b___], tags_, headers_List, task_] :=
     Module[ { isEval, formPos, cleanCellTags, keyTags, formulaLabel, idLabel, nbAvail},
         cleanCellTags = getCleanCellTags[ cellTags];
+        (* If keyword does not match, return {} -> ignore *)
+        If[ StringLength[ $kbFilterKW] > 2 && testNoMatch[ Apply[ StringJoin, Riffle[ Join[ headers, cleanCellTags], ":"]], "*" <> $kbFilterKW <> "*"],
+        	Return[ {}]
+        ];
         (* keyTags are those cell tags that are used to uniquely identify the formula in the KB *)
         keyTags = getKeyTags[ cellTags];
         (* check whether cell has been evaluated -> formula is in KB? *)
@@ -786,7 +791,7 @@ structView[ file_, Cell[ content_, "FormalTextInputFormula", a___, CellTags -> c
     ]
 
 (* input cell without cell tags -> ignore *)
-structView[ file_, Cell[ content_, "FormalTextInputFormula", ___], tags_, task_] := {}
+structView[ file_, Cell[ content_, "FormalTextInputFormula", ___], tags_, headers_List, task_] := {}
 
 structView[ args___] :=
     unexpected[ structView, {args}]
@@ -835,7 +840,7 @@ textDataToString[ args___] := unexpected[ textDataToString, {args}]
    filename is the full filename of the notebook and
    struct is the nested cell structure containing the cells at those positions obtained by extractKBStruct *)
 updateKBBrowser[] :=
-    Module[ {file=CurrentValue["NotebookFullFileName"], pos, new},
+    Module[ {file = CurrentValue[ "NotebookFullFileName"], pos, new},
         pos = Position[ $kbStruct, file -> _];
         (* We don't extract the entire cells, we throw away all options except CellTags and CellID in order to not blow up $kbStruct too much *)
         new = file -> With[ {nb = NotebookGet[EvaluationNotebook[]]},
@@ -846,7 +851,9 @@ updateKBBrowser[] :=
         If[ pos === {},
             AppendTo[ $kbStruct, new],
             $kbStruct[[pos[[1,1]]]] = new
-        ]
+        ];
+        (* set $tcKBBrowseSelection such that the tab corresponding ot this notebook will be displayed in the knowledge browser *)
+        Scan[ ($tcKBBrowseSelection[ #] = file)&, {"prove", "compute", "solve"}]
     ]
 updateKBBrowser[args___] :=
     unexpected[updateKBBrowser, {args}]
@@ -858,22 +865,49 @@ updateKBBrowser[args___] :=
 
    
 displayKBBrowser[ task_String] :=
-    Module[ {},
-        If[ $kbStruct === {},
-            emptyPane[translate["noKnowl"]],
+    Module[ {cells, view, allNB},
+        If[ $kbStruct === {} || !ValueQ[ $tcKBBrowseSelection[ task]],
+            emptyPane[ translate[ "noKnowl"]],
             (* generate tabs for each notebook,
                tab label contains a short form of the filename, tab contains a Pane containing the structured view *)
-            Dynamic[
+            allNB = Map[ First, $kbStruct];
+            cells = Replace[ $tcKBBrowseSelection[ task], $kbStruct];
+            Assert[ ListQ[ cells]];
+            view = structView[ $tcKBBrowseSelection[ task], cells, {}, {}, task];
+            If[ view === {},
+            	view = translate[ "noKnowl"],
+            	(* else *)
+            	view = view[[1]]
+            ];
             Column[{
             	Button[ translate[ "OKnext"], $tcActionView++],
-                Row[ Map[ Button[ Tooltip[ FileBaseName[ #], #], $tcKBBrowseSelection[ task] = #, 
-					Background -> If[ $tcKBBrowseSelection[ task] === #, TMAcolor[0], TMAcolor[5]], FrameMargins -> 2, ImageMargins -> 0]&, Map[ First, $kbStruct]]],
-				PaneSelector[ Map[ #[[1]] -> 
-                     		Pane[ structView[ #[[1]], #[[2]], {}, task][[1]], ImageSizeAction -> "Scrollable", Scrollbars -> Automatic] &, 
-                   			$kbStruct], Dynamic[ $tcKBBrowseSelection[ task]], ImageSize -> {350, Automatic}],
+            	Row[{
+            		With[ {label = Row[ {translate[ "FilteredBy"], InputField[ $kbFilterKW, String]}]},
+						Button[ label,
+							CreateDialog[{
+								Row[ {translate[ "Keyword"], InputField[ Dynamic[ $kbFilterKW], String, ContinuousAction -> True]}],
+								DefaultButton[ DialogReturn[]]},
+								WindowTitle-> translate[ "FilterKBWindow"]
+							],
+							Appearance -> "Frameless"
+						]
+					], 
+					Button[ translate[ "ShowAll"], $kbFilterKW = ""]}, 
+					Spacer[2]
+				],
+				If[ Apply[ Plus, Map[ StringLength[ FileBaseName[ #]]&, allNB]] > 50,
+					(* button labels sum up to more than 50 chars long -> buttons become too wide -> provide a menu *)
+					PopupMenu[ Dynamic[ $tcKBBrowseSelection[ task]], Map[ First[#] -> Tooltip[ FileBaseName[ First[#]], First[#]]&, $kbStruct]],
+					(* else: select with buttons ala TabView *)
+					Row[ Map[ Button[ Tooltip[ FileBaseName[ #], #], $tcKBBrowseSelection[ task] = #, 
+						Background -> If[ $tcKBBrowseSelection[ task] === #, TMAcolor[0], TMAcolor[5]], 
+						FrameMargins -> 2, ImageMargins -> 0, ImageSize -> Automatic]&, Map[ First, $kbStruct]]]
+				],
+				Pane[ view, ImageSize -> {350, Automatic}]
+				(*PaneSelector[ Map[ #[[1]] -> structView[ #[[1]], #[[2]], {}, {}, task][[1]]&, 
+                   			$kbStruct], Dynamic[ $tcKBBrowseSelection[ task]], ImageSize -> {350, Automatic}]*),
                 Button[ translate[ "OKnext"], $tcActionView++]
             }]
-            ]
         ]
     ]
 displayKBBrowser[args___] :=
@@ -882,7 +916,7 @@ displayKBBrowser[args___] :=
 (*
 TabView[
                   		Map[Tooltip[Style[FileBaseName[#[[1]]], "NotebookName"], #[[1]]] -> 
-                     		Pane[structView[#[[1]], #[[2]], {}, task][[1]], ImageSizeAction -> "Scrollable", Scrollbars -> Automatic] &, 
+                     		Pane[structView[#[[1]], #[[2]], {}, {}, task][[1]], ImageSizeAction -> "Scrollable", Scrollbars -> Automatic] &, 
                    			$kbStruct], 
                   		Appearance -> {"Limited", 10}, FrameMargins->None]
                   		*)
@@ -1054,8 +1088,8 @@ structViewRules[ Hold[ rs_]] :=
 		]
 	]
 
-testNoMatch[s_String,p_String]:=Not[StringMatchQ[ s,p]]
-testNoMatch[s_,p_]:=True
+testNoMatch[ s_String, p_String] := Not[ StringMatchQ[ s, p, IgnoreCase -> True]]
+testNoMatch[ s_, p_] := True
 
 displaySelectedRules[ Hold[ rs_]] := 
 	Module[ {actRules},

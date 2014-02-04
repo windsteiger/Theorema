@@ -139,6 +139,7 @@ With[ {lang = "English"},
 	translate["OK", lang] = "OK";
 	translate["Filter", lang] = "Filter";
 	translate["FilterRulesWindow"] = "Filter by keyword";
+	translate["FilterKBWindow"] = "Filter by keyword";
 	translate["Keyword"] = "Keyword: ";
 	translate["RestoreDefaults"] = "Restore defaults";
 	translate["ShowAll"] = "Show all";
