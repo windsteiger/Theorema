@@ -2513,12 +2513,12 @@ autoParenthesis[ c_String] := TagBox[ c, "AutoParentheses"]
 autoParenthesis[ args___] := unexpected[ autoParenthesis, {args}]
 
 allFormulae = {
-			   {"Arithmetic", {}},
 			   {"Logic", {{{"AND2", 1}, {"OR2", 1}, {"NOT", 1}, {"IMPL2", 1}}, 
 			   	{{"EQUIV2", 1}, {"EQ", 1}, {"EQUIVDEF", 1}, {"EQDEF", 1}}, 
 			   	{{"AND3", 1}, {"OR3", 1}, {"EQUIV3", 1}, {"CASEDIST", 1}}, 
 			   	{{"FORALL1", 1}, {"EXISTS1", 1}, {"FORALL2", 1}, {"EXISTS2", 1}}, 
 			   	{{"LET", 1}}}},
+			   {"Arithmetic", {}},
 			   {"Sets", {}},
 			   {"Tuples", {{{"APPEND", 1}, {"PREPEND", 1}, {"JOIN", 1}, {"ELEMTUP", 1}}}},
 			   {"Operators", {{{"SUBOP", 1}, {"SUPEROP", 1}, {"SUBSUPEROP", 1}}, 
