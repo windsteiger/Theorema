@@ -143,7 +143,7 @@ initGUI[] :=
         $tcActionView = 1;
         (* Init status of opener views *)
         Scan[ ToExpression, Map[ "$builtinStructState$" <> # <> "=True"&, Map[ First, $tmaBuiltins]]];
-        Scan[ ToExpression, Map[ "$tcSessMathOpener$" <> # <> "=True"&, Map[ First, allFormulae]]];
+        (*Scan[ ToExpression, Map[ "$tcSessMathOpener$" <> # <> "=True"&, Map[ First, allFormulae]]];*)
         $tcAllFormulaeOpener = True;
         $tcAllDeclOpener = True;
 		$kbStruct = {};
@@ -262,7 +262,7 @@ closeTheoremaCommander[ args___] := unexpected[ closeTheoremaCommander, {args}]
 activitiesView[ activitiesLab:{__String}, actionLabs:{{___String}..}, views:{{__}..}] :=
         Dynamic[
         Grid[{{
-        	Button[ Style[ "\:2328", Large, FontColor -> TMAcolor[0]], 
+        	Button[ Style[ "\:2328", Large, FontColor -> TMAcolor[0]], virtualKeyboard[],
         		Background -> TMAcolor[1], Appearance -> Frameless, FrameMargins -> 0, ContentPadding -> False], 
         	Row[ MapIndexed[
                 Button[ Mouseover[ Style[ #1, "TabLabel2"], Style[ #1, "TabLabel2Over"]], $tcActionView = #2[[1]],
@@ -863,21 +863,29 @@ displayKBBrowser[ task_String] :=
             emptyPane[translate["noKnowl"]],
             (* generate tabs for each notebook,
                tab label contains a short form of the filename, tab contains a Pane containing the structured view *)
+            Dynamic[
             Column[{
             	Button[ translate[ "OKnext"], $tcActionView++],
-                TabView[
-                  		Map[Tooltip[Style[FileBaseName[#[[1]]], "NotebookName"], #[[1]]] -> 
-                     		Pane[structView[#[[1]], #[[2]], {}, task][[1]], ImageSizeAction -> "Scrollable", Scrollbars -> Automatic] &, 
-                   			$kbStruct], 
-                  		Appearance -> {"Limited", 10}, FrameMargins->None],
+                Row[ Map[ Button[ Tooltip[ FileBaseName[ #], #], $tcKBBrowseSelection[ task] = #, 
+					Background -> If[ $tcKBBrowseSelection[ task] === #, TMAcolor[0], TMAcolor[5]], FrameMargins -> 2, ImageMargins -> 0]&, Map[ First, $kbStruct]]],
+				PaneSelector[ Map[ #[[1]] -> 
+                     		Pane[ structView[ #[[1]], #[[2]], {}, task][[1]], ImageSizeAction -> "Scrollable", Scrollbars -> Automatic] &, 
+                   			$kbStruct], Dynamic[ $tcKBBrowseSelection[ task]], ImageSize -> {350, Automatic}],
                 Button[ translate[ "OKnext"], $tcActionView++]
             }]
+            ]
         ]
     ]
 displayKBBrowser[args___] :=
     unexpected[displayKBBrowser, {args}]
 
-
+(*
+TabView[
+                  		Map[Tooltip[Style[FileBaseName[#[[1]]], "NotebookName"], #[[1]]] -> 
+                     		Pane[structView[#[[1]], #[[2]], {}, task][[1]], ImageSizeAction -> "Scrollable", Scrollbars -> Automatic] &, 
+                   			$kbStruct], 
+                  		Appearance -> {"Limited", 10}, FrameMargins->None]
+                  		*)
 
 (* ::Subsubsection:: *)
 (* structViewBuiltin *)
@@ -1756,7 +1764,7 @@ sessionCompose[] :=
     		translate[ "Notebooks"], {{Top, Left}}],
     	Labeled[ Grid[ Partition[ Map[ makeEnvButton, allEnvironments], 4]],
     		translate[ "Environments"], {{Top, Left}}],
-    	Labeled[ Column[ {makeFormButton[], Dynamic[ Refresh[ langButtons[], TrackedSymbols :> {$buttonNat}]]}, Left, Spacer[2]],
+    	Labeled[ Column[ {makeFormButton[], Dynamic[ Refresh[ langButtons[], TrackedSymbols :> {$buttonNat, $tcLangButtonSelection}]]}, Left, Spacer[2]],
     		translate[ "Formulae"], {{Top, Left}}],
     	Labeled[ Column[ {makeNewDeclButton[], makeDeclButtons[]}, Left, Spacer[2]],
     		translate[ "Declarations"], {{Top, Left}}]
@@ -1916,7 +1924,8 @@ makeColoredStylesheet[ type_String, color_:$TheoremaColorScheme] :=
 			Visible -> False];
 		styles = NotebookGet[ tmp];
 		NotebookClose[ tmp];
-		alias = Map[ langButtonData[ #][[4]] -> RowBox[ {autoParenthesis[ "("], langButtonData[ #][[2]], autoParenthesis[ ")"]}]&, Flatten[ Transpose[ allFormulae][[2]]]];
+		alias = Map[ langButtonData[ #][[4]] -> RowBox[ {autoParenthesis[ "("], langButtonData[ #][[2]], autoParenthesis[ ")"]}]&, 
+			Cases[ Flatten[ Transpose[ allFormulae][[2]]], _String]];
 		alias = Join[ alias, {"(" -> autoParenthesis[ "("], ")" -> autoParenthesis[ ")"]}];
 		styles /. Table[Apply[CMYKColor, IntegerDigits[i, 2, 4]] -> TMAcolor[i, color], {i, 0, 15}] /. (InputAliases -> {}) -> (InputAliases -> alias)
 	]
@@ -2310,18 +2319,154 @@ langButtonData["OVERSUBOP"] :=
 		translate["2ANNOPTooltip"],
 		"osop"
 	}
+
+langButtonData["APPEND"] := 
+	{
+		If[ TrueQ[ $buttonNat], 
+			translate["APPEND"], 
+			"\:293a"],
+		RowBox[ {"\[SelectionPlaceholder]", TagBox[ "\:293a", Identity, SyntaxForm -> "a*b"], "\[Placeholder]"}],
+		MessageName[ appendElem$TM, "usage"],
+		"app"
+	}
+	
+langButtonData["PREPEND"] := 
+	{
+		If[ TrueQ[ $buttonNat], 
+			translate["PREPEND"], 
+			"\:293b"],
+		RowBox[ {"\[SelectionPlaceholder]", TagBox[ "\:293b", Identity, SyntaxForm -> "a*b"], "\[Placeholder]"}],
+		MessageName[ prependElem$TM, "usage"],
+		"prep"
+	}
+	
+langButtonData["JOIN"] := 
+	{
+		If[ TrueQ[ $buttonNat], 
+			translate["JOIN"], 
+			"\:2a1d"],
+		RowBox[ {"\[SelectionPlaceholder]", TagBox[ "\:2a1d", Identity, SyntaxForm -> "a*b"], "\[Placeholder]"}],
+		MessageName[ joinTuples$TM, "usage"],
+		"join"
+	}
+	
+langButtonData["ELEMTUP"] := 
+	{
+		If[ TrueQ[ $buttonNat], 
+			translate["ELEMTUP"], 
+			"\:22ff"],
+		RowBox[ {"\[SelectionPlaceholder]", TagBox[ "\:22ff", Identity, SyntaxForm -> "a+b"], "\[Placeholder]"}],
+		MessageName[ elemTuple$TM, "usage"],
+		"elemT"
+	}
+
+langButtonData["[]"] := 
+	{
+		If[ TrueQ[ $buttonNat], 
+			translate["[]"], 
+			"[ ]"],
+		RowBox[ {TagBox[ "\:e114", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:e115", Identity, SyntaxForm -> ")"]}],
+		MessageName[ squareBracketted$TM, "usage"],
+		"[]"
+	}
+
+langButtonData["[[]]"] := 
+	{
+		If[ TrueQ[ $buttonNat], 
+			translate["[[]]"], 
+			"[[ ]]"],
+		RowBox[ {TagBox[ "\:27e6", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:27e7", Identity, SyntaxForm -> ")"]}],
+		MessageName[ doubleSquareBracketted$TM, "usage"],
+		"[[]]"
+	}
+
+langButtonData["<>"] := 
+	{
+		If[ TrueQ[ $buttonNat], 
+			translate["<>"], 
+			"\[LeftAngleBracket] \[RightAngleBracket]"],
+		RowBox[ {TagBox[ "\:27e8", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:27e9", Identity, SyntaxForm -> ")"]}],
+		MessageName[ angleBracketted$TM, "usage"],
+		"<>"
+	}
+	
+langButtonData["<<>>"] := 
+	{
+		If[ TrueQ[ $buttonNat], 
+			translate["<<>>"], 
+			"\[LeftAngleBracket]\[LeftAngleBracket] \[RightAngleBracket]\[RightAngleBracket]"],
+		RowBox[ {TagBox[ "\:27ea", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:27eb", Identity, SyntaxForm -> ")"]}],
+		MessageName[ doubleAngleBracketted$TM, "usage"],
+		"<<>>"
+	}
+	
+langButtonData["{}"] := 
+	{
+		If[ TrueQ[ $buttonNat], 
+			translate["{}"], 
+			"{ }"],
+		RowBox[ {TagBox[ "\:e117", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:e118", Identity, SyntaxForm -> ")"]}],
+		MessageName[ braced$TM, "usage"],
+		"{}"
+	}
+	
+langButtonData["{{}}"] := 
+	{
+		If[ TrueQ[ $buttonNat], 
+			translate["{{}}"], 
+			"{{ }}"],
+		RowBox[ {TagBox[ "\:2983", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:2984", Identity, SyntaxForm -> ")"]}],
+		MessageName[ doubleBraced$TM, "usage"],
+		"{{}}"
+	}
+	
+langButtonData["()"] := 
+	{
+		If[ TrueQ[ $buttonNat], 
+			translate["()"], 
+			"( )"],
+		RowBox[ {TagBox[ "\:fd3e", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:fd3f", Identity, SyntaxForm -> ")"]}],
+		MessageName[ parenthesized$TM, "usage"],
+		"()"
+	}
+	
+langButtonData["(())"] := 
+	{
+		If[ TrueQ[ $buttonNat], 
+			translate["(())"], 
+			"(( ))"],
+		RowBox[ {TagBox[ "\:2e28", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:2e29", Identity, SyntaxForm -> ")"]}],
+		MessageName[ doubleParenthesized$TM, "usage"],
+		"(())"
+	}
 	
 langButtonData[args___] :=
     unexpected[langButtonData, {args}]
 
-makeLangButton[ bname_String] :=
-    With[ { bd = langButtonData[bname]},
-			Tooltip[ Button[ bd[[1]],
+(*
+	We distinguish several types of buttons:
+	Type 1: adds AutoParentheses
+	Type 2: no AutoParentheses
+*)
+makeLangButton[ {bname_String, 1}] :=
+    With[ { bd = langButtonData[ bname]},
+    	With[ {lab = bd[[1]], paste = bd[[2]], help = bd[[3]], key = bd[[4]]},
+			Tooltip[ Button[ lab,
 				If[ CurrentValue[ "ShiftKey"],
-					FrontEndExecute[{NotebookApply[ InputNotebook[], bd[[2]], Placeholder]}],
-					FrontEndExecute[{NotebookApply[ InputNotebook[], RowBox[ {autoParenthesis[ "("], bd[[2]], autoParenthesis[ ")"]}], Placeholder]}]
+					FrontEndExecute[{NotebookApply[ InputNotebook[], paste, Placeholder]}],
+					FrontEndExecute[{NotebookApply[ InputNotebook[], RowBox[ {autoParenthesis[ "("], paste, autoParenthesis[ ")"]}], Placeholder]}]
 				], Appearance -> "DialogBox", Alignment -> {Left, Top}, ImageSize -> All],
-				translate[ "Press shift to omit parentheses\nKeyboard shortcut:"]<>" \[EscapeKey]"<>bd[[4]]<>"\[EscapeKey]", TooltipDelay -> 0.5]
+				help <> translate[ "tooltipButtonParen"]<>" \[EscapeKey]"<> key <>"\[EscapeKey]", TooltipDelay -> 0.5]
+    	]
+    ]
+makeLangButton[ {bname_String, 2}] :=
+    With[ { bd = langButtonData[ bname]},
+    	With[ {lab = bd[[1]], paste = bd[[2]], help = bd[[3]], key = bd[[4]]},
+			Tooltip[ Button[ lab,
+				FrontEndExecute[{NotebookApply[ InputNotebook[], paste, Placeholder]}], 
+				Appearance -> "DialogBox", Alignment -> {Left, Top}, ImageSize -> All],
+				help <> translate[ "tooltipButtonNoParen"]<>" \[EscapeKey]"<> key <>"\[EscapeKey]", TooltipDelay -> 0.5]
+    	]
     ]
 makeLangButton[args___] :=
     unexpected[makeLangButton, {args}]
@@ -2333,26 +2478,47 @@ makeLangButton[args___] :=
 autoParenthesis[ c_String] := TagBox[ c, "AutoParentheses"]
 autoParenthesis[ args___] := unexpected[ autoParenthesis, {args}]
 
-allFormulae = {{"Sets", {}},
+allFormulae = {
 			   {"Arithmetic", {}},
-			   {"Logic", {"AND2", "OR2", "NOT", "IMPL2", "EQUIV2", "EQ", "EQUIVDEF", "EQDEF", "FORALL1", "EXISTS1", "FORALL2", "EXISTS2", "AND3", "OR3", "EQUIV3", "CASEDIST", "LET"}},
-			   {"Operators", {"SUBOP", "SUPEROP", "SUBSUPEROP", "OVEROP", "UNDEROVEROP", "OVERSUBOP", "SINGLEOP"}}
+			   {"Logic", {{{"AND2", 1}, {"OR2", 1}, {"NOT", 1}, {"IMPL2", 1}}, 
+			   	{{"EQUIV2", 1}, {"EQ", 1}, {"EQUIVDEF", 1}, {"EQDEF", 1}}, 
+			   	{{"AND3", 1}, {"OR3", 1}, {"EQUIV3", 1}, {"CASEDIST", 1}}, 
+			   	{{"FORALL1", 1}, {"EXISTS1", 1}, {"FORALL2", 1}, {"EXISTS2", 1}}, 
+			   	{{"LET", 1}}}},
+			   {"Sets", {}},
+			   {"Tuples", {{{"APPEND", 1}, {"PREPEND", 1}, {"JOIN", 1}, {"ELEMTUP", 1}}}},
+			   {"Operators", {{{"SUBOP", 1}, {"SUPEROP", 1}, {"SUBSUPEROP", 1}}, 
+			   	{{"OVEROP", 1}, {"UNDEROVEROP", 1}, {"OVERSUBOP", 1}}, 
+			   	{{"SINGLEOP", 1}}}},
+			   {"Bracketted", {{{"[]", 2}, {"()", 2}, {"<>", 2}, {"{}", 2}}, 
+			   	{{"[[]]", 2}, {"(())", 2}, {"<<>>", 2}, {"{{}}", 2}}}}
 };
 
 makeButtonCategory[ {category_String, buttons_List}, cols_Integer:2] :=
-	OpenerView[{
+	category -> Column[ Map[ Row[ Map[ makeLangButton, #], Spacer[2]]&, buttons]
+	]
+	(*OpenerView[{
 		Style[ translate[ category], "LabeledLabel"],
 		Grid[ partitionFill[ Map[ makeLangButton, buttons], cols], Alignment -> {Left, Top}]},
 		(* I have no idea why I need the explicit context here, in similar situations for other dynamic object it works without ... *)
 		ToExpression["Dynamic[ Theorema`Interface`GUI`Private`$tcSessMathOpener$"<>category<>"]"]
 		]
+		*)
 
 makeButtonCategory[ args___] := unexpected[ makeButtonCategory, {args}]
 
 langButtons[] :=
     Pane[
-    	Column[ Map[ makeButtonCategory, allFormulae]],
+    	TabView[ Map[ makeButtonCategory, allFormulae]],
     	{350, 275}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
+langButtons[] :=
+	Module[ {display = Map[ makeButtonCategory, allFormulae]},
+		Column[ {
+			Row[ Map[ Button[ #, $tcLangButtonSelection = #, 
+				Background -> If[ $tcLangButtonSelection === #, TMAcolor[0], TMAcolor[5]], FrameMargins -> 2, ImageMargins -> 0]&, Map[ First, display]]],
+    		PaneSelector[ display, Dynamic[ $tcLangButtonSelection], ImageSize -> {350, Automatic}]
+		}]
+	]
 
 langButtons[args___] :=
     unexpected[langButtons, {args}]

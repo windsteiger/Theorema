@@ -591,6 +591,29 @@ MakeExpression[ RowBox[ {l_,"\[LeftArrowBar]"}], fmt_] := MakeExpression[ RowBox
 MakeExpression[ RowBox[{left_,"\[EmptyUpTriangle]", right_}], fmt_] :=
     MakeExpression[ RowBox[{"EmptyUpTriangle", "[", RowBox[{left, ",", right}], "]"}], fmt] /; $parseTheoremaExpressions
 
+(* Use unicode characters for certain operations *)
+MakeExpression[ RowBox[ {l_, TagBox[ "\:293a", ___], r_}], fmt_] := MakeExpression[ RowBox[ {"appendElem", "[", RowBox[{ l, ",", r}], "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {l_, TagBox[ "\:293b", ___], r_}], fmt_] := MakeExpression[ RowBox[ {"prependElem", "[", RowBox[{ r, ",", l}], "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {l_, TagBox[ "\:2a1d", ___], r_}], fmt_] := MakeExpression[ RowBox[ {"joinTuples", "[", RowBox[{ l, ",", r}], "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {l_, TagBox[ "\:22ff", ___], r_}], fmt_] := MakeExpression[ RowBox[ {"elemTuple", "[", RowBox[{ l, ",", r}], "]"}], fmt] /; $parseTheoremaExpressions
+
+(* Bracketted expressions *)
+MakeExpression[ RowBox[ {TagBox[ "\:e114", ___], expr_, TagBox[ "\:e115", ___]}], fmt_] := 
+	MakeExpression[ RowBox[ {"squareBracketted", "[", expr, "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {TagBox[ "\:27e6", ___], expr_, TagBox[ "\:27e7", ___]}], fmt_] := 
+	MakeExpression[ RowBox[ {"doubleSquareBracketted", "[", expr, "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {TagBox[ "\:27e8", ___], expr_, TagBox[ "\:27e9", ___]}], fmt_] := 
+	MakeExpression[ RowBox[ {"angleBracketted", "[", expr, "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {TagBox[ "\:27ea", ___], expr_, TagBox[ "\:27eb", ___]}], fmt_] := 
+	MakeExpression[ RowBox[ {"doubleAngleBracketted", "[", expr, "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {TagBox[ "\:e117", ___], expr_, TagBox[ "\:e118", ___]}], fmt_] := 
+	MakeExpression[ RowBox[ {"braced", "[", expr, "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {TagBox[ "\:2983", ___], expr_, TagBox[ "\:2984", ___]}], fmt_] := 
+	MakeExpression[ RowBox[ {"doubleBraced", "[", expr, "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {TagBox[ "\:fd3e", ___], expr_, TagBox[ "\:fd3f", ___]}], fmt_] := 
+	MakeExpression[ RowBox[ {"parenthesized", "[", expr, "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {TagBox[ "\:2e28", ___], expr_, TagBox[ "\:2e29", ___]}], fmt_] := 
+	MakeExpression[ RowBox[ {"doubleParenthesized", "[", expr, "]"}], fmt] /; $parseTheoremaExpressions
 
 (* ::Subsection:: *)
 (* operator underscript -> domain *)
