@@ -722,7 +722,7 @@ instantiateForall[ args___] := unexpected[ instantiateForall, {args}]
 
 compatibleRange[ {SIMPRNG$[ _], _}] := True
 compatibleRange[ {STEPRNG$[ _, l1_Integer, u1_Integer, s_], STEPRNG$[ _, l2_Integer, u2_Integer, s_]}] /; l1 <= l2 && u1 >= u2 := True
-compatibleRange[ {SETRNG$[ _, s_Set$TM], SETRNG$[ _, s_Set$TM]}] := True
+compatibleRange[ {SETRNG$[ _, s_], SETRNG$[ _, s_]}] := True
 compatibleRange[ {_, _}] := False
 compatibleRange[ args___] := unexpected[ compatibleRange, {args}]
 
@@ -739,7 +739,7 @@ terminationRules = {"Termination Rules",
 
 connectiveRules = {"Connectives Rules", 
 	{notGoal, True, True, 30},
-	{andGoal, True, True, 5},
+	{andGoal, True, True, 6},
 	{andKB, True, False, 5},
 	{orGoal, True, True, 5},
 	{orKB, True, True, 19},
