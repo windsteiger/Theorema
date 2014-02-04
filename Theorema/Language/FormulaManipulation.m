@@ -32,6 +32,50 @@ Begin["`Private`"]
 	splitAnd[ expr_, v_List] splits a conjunction expr into 1. a conjunction of subexpr with free variables v and 2. the rest 
 	splitAnd[ expr_, v_List, False] splits a conjunction expr into 1. a conjunction of subexpr containing the free variables in v and 2. the rest 
 *)
+splitAnd[ expr:Hold[(h:Theorema`Language`And$TM|Theorema`Computation`Language`And$TM|And)[ __]], v_List, sub_:True] :=
+	Module[ {depSingle = Hold[], depMulti = Hold[], p, l, e = simplifiedAnd[ expr], fi, i},
+		Switch[ e,
+			Hold[ (Theorema`Language`And$TM|Theorema`Computation`Language`And$TM|And)[ __]],
+			e = Map[ Hold, FlattenAt[ e, {1}]];
+			l = Length[ e];
+			Do[
+				p = e[[i]];
+				fi = freeVariables[ p];
+				If[ (sub && fi === v) || (!sub && Intersection[ v, fi] =!= {}), 
+					AppendTo[ depSingle, p],
+					AppendTo[ depMulti, p]
+				],
+				{i, l}
+			];
+			depSingle = Switch[ Length[ depSingle],
+				0,
+				Hold[True],
+				1,
+				First[ depSingle],
+				_,
+				Replace[ Flatten[ depSingle, 1], Hold[ a__] :> Hold[ h[ a]]]
+			];
+			depMulti = Switch[ Length[ depMulti],
+				0,
+				Hold[True],
+				1,
+				First[ depMulti],
+				_,
+				Replace[ Flatten[ depMulti, 1], Hold[ a__] :> Hold[ h[ a]]]
+			];
+			{depSingle, depMulti},
+			
+			Hold[ _],
+			fi = freeVariables[ e];
+			If[ (sub && fi === v) || (!sub && Intersection[ v, fi] =!= {}), 
+				{e, True},
+				{True, e}
+			],
+			
+			_,
+			{$Failed, $Failed}
+		]
+	]
 splitAnd[ expr:(h:Theorema`Language`And$TM|Theorema`Computation`Language`And$TM|And)[ __], v_List, sub_:True] :=
 	Module[ {depSingle = {}, depMulti = {}, p, l, e = simplifiedAnd[ expr], fi, i},
 		l = Length[ e];
@@ -81,41 +125,46 @@ makeDisjunction[ args___] := unexpected[ makeDisjunction, {args}]
 (* ::Subsubsection:: *)
 (* simplifiedAnd *)
 
-simplifiedAnd[ True] := True
-simplifiedAnd[ (Theorema`Language`And$TM|Theorema`Computation`Language`And$TM)[ True...]] := True
-simplifiedAnd[ (Theorema`Language`And$TM|Theorema`Computation`Language`And$TM)[ ___, False, ___]] := False
-
-simplifiedAnd[ expr:(h:Theorema`Language`And$TM|Theorema`Computation`Language`And$TM)[__]] :=  
-	Module[ {simp = DeleteCases[ Flatten[ expr //. h[a_] -> a], True]},
-		If[ Length[ simp] === 0,
-			True,
-			(* else *)
+simplifiedAnd[ expr:Hold[True|False]] := expr
+simplifiedAnd[ Hold[ h_[ True...]]] := Hold[True]
+simplifiedAnd[ Hold[ h_[ ___, False, ___]]] := Hold[False]
+simplifiedAnd[ expr_Hold] :=  
+	Module[ {simp = expr //. {(h:(Theorema`Language`And$TM|Theorema`Computation`Language`And$TM))[pre___, True, post___] :> h[pre, post],
+								(h:(Theorema`Language`And$TM|Theorema`Computation`Language`And$TM))[pre___, (Theorema`Language`And$TM|Theorema`Computation`Language`And$TM)[ mid___], post___] :> h[pre, mid, post],
+								(Theorema`Language`And$TM|Theorema`Computation`Language`And$TM)[a_] :> a}},
+		If[ MatchQ[ simp, Hold[(Theorema`Language`And$TM|Theorema`Computation`Language`And$TM)[]]],
+			Hold[True],
 			simp
 		]
 	]
-simplifiedAnd[ expr_] := expr
+simplifiedAnd[ expr:Except[_Hold]] := ReleaseHold[ simplifiedAnd[ Hold[ expr]]]
 simplifiedAnd[ args___] := unexpected[ simplifiedAnd, {args}]
 
 (* ::Subsubsection:: *)
 (* simplifiedOr *)
 
-simplifiedOr[ h_[ False...]] := False
-simplifiedOr[ h_[ ___, True, ___]] := True
-
-simplifiedOr[ expr:(h:Theorema`Language`Or$TM|Theorema`Computation`Language`Or$TM)[__]] :=  
-	Module[ {simp = DeleteCases[ Flatten[ expr //. h[a_] -> a], False]},
-		If[ Length[ simp] === 0,
-			False,
-			(* else *)
+simplifiedOr[ expr:Hold[True|False]] := expr
+simplifiedOr[ Hold[ h_[ False...]]] := Hold[False]
+simplifiedOr[ Hold[ h_[ ___, True, ___]]] := Hold[True]
+simplifiedOr[ expr_Hold] :=  
+	Module[ {simp = expr //. {(h:(Theorema`Language`Or$TM|Theorema`Computation`Language`Or$TM))[pre___, False, post___] :> h[pre, post],
+								(h:(Theorema`Language`Or$TM|Theorema`Computation`Language`Or$TMM))[pre___, (Theorema`Language`Or$TM|Theorema`Computation`Language`Or$TM)[ mid___], post___] :> h[pre, mid, post],
+								(Theorema`Language`Or$TM|Theorema`Computation`Language`Or$TMM)[a_] :> a}},
+		If[ MatchQ[ simp, Hold[(Theorema`Language`Or$TM|Theorema`Computation`Language`Or$TM)[]]],
+			Hold[False],
 			simp
 		]
 	]
-simplifiedOr[ expr_] := expr
+simplifiedOr[ expr:Except[_Hold]] := ReleaseHold[ simplifiedOr[ Hold[ expr]]]
 simplifiedOr[ args___] := unexpected[ simplifiedOr, {args}]
 
 
 (* ::Subsubsection:: *)
 (* simplifiedImplies *)
+
+(* amaletzk: None of the following 'simplified...' gets a 'Hold'-definition, because all of them are only
+	defined for symbols in "Theorema`Language`" context, and not for "Theorema`Computation`Language`".
+	If this changes, then they should also get 'Hold'-definitions. *)
 
 simplifiedImplies[ Theorema`Language`Implies$TM[ True, A_]] := A
 simplifiedImplies[ Theorema`Language`Implies$TM[ False, _]] := True
@@ -169,46 +218,47 @@ thinnedExpression[ args___] := unexpected[ thinnedExpression, {args}]
 
 
 (* Some quantifiers (e.g. "Sum") can be used together with subscripts. *)
-freeVariables[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[x__], cond_, sub_, expr_]] := 
-	Complement[ freeVariables[ {x, cond, sub, expr}], rngVariables[ r]]
-freeVariables[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[x__], cond_, expr_]] := 
-	Complement[ freeVariables[ {x, cond, expr}], rngVariables[ r]]
+freeVariables[ Hold[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[x__], cond_, sub_, expr_]]] := 
+	Complement[ freeVariables[ {Hold[ x], Hold[ cond], Hold[ sub], Hold[ expr]}], rngVariables[ Hold[ r]]]
+freeVariables[ Hold[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[x__], cond_, expr_]]] := 
+	Complement[ freeVariables[ {Hold[ x], Hold[ cond], Hold[ expr]}], rngVariables[ Hold[ r]]]
 (* Some quantifiers (e.g. "Let") don't have a condition. *)
-freeVariables[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[x__], expr_]] := 
-	Complement[ freeVariables[ {x, expr}], rngVariables[ r]]
-freeVariables[ Hold[ l___]] := freeVariables[ {l}]
+freeVariables[ Hold[q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[x__], expr_]]] := 
+	Complement[ freeVariables[ {Hold[ x], Hold[ expr]}], rngVariables[ Hold[ r]]]
+freeVariables[ Hold[ v:(Theorema`Language`VAR$|Theorema`Computation`Language`VAR$)[_]]] := {v}
+freeVariables[ Hold[ f_[x___]]] := Union[ freeVariables[ Hold[ f]], freeVariables[ Hold[ x]]]
+freeVariables[ Hold[ _]|Hold[ ]] := {}
+freeVariables[ l:Hold[ _, __]] := freeVariables[ Apply[ Union, Map[ freeVariables, Map[ Hold, l]]]]
 freeVariables[ l_List] := Apply[ Union, Map[ freeVariables, l]]
-freeVariables[ f_[x___]] := freeVariables[ {f, x}]
-freeVariables[ v:(Theorema`Language`VAR$|Theorema`Computation`Language`VAR$)[_]] := {v}
-freeVariables[ c_] := {}
+freeVariables[ expr:Except[ _Hold]] := freeVariables[ Hold[ expr]]
 freeVariables[ args___] := unexpected[ freeVariables, {args}]
 
 
 (* ::Subsubsection:: *)
 (* rngVariables *)
 
-(* It is certainly better not to evaluate anything apart from the range variable here (especially in connection
-	with "Let"). Same with "rngConstants", and maybe also with "extractVar" (?) *)
-SetAttributes[ rngVariables, HoldAll];
-rngVariables[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[r___]] := Apply[ List, Replace[ Hold[r], {_[f_,___]:>f}, {1}]]
+rngVariables[ Hold[(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[r___]]] := Apply[ List, Hold[ r][[All, 1]]]
+rngVariables[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[r___]] := Map[ First, {r}]
 rngVariables[ args___] := unexpected[ rngVariables, {args}]
 
 (* ::Subsubsection:: *)
 (* rngConstants *)
 
-SetAttributes[ rngConstants, HoldAll];
-rngConstants[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[r___]] := Apply[ List, Replace[ Hold[r], {_[f_,___]:>f}, {1}]]
+rngConstants[ Hold[(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[r___]]] := Apply[ List, Hold[ r][[All, 1]]]
+rngConstants[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[r___]] := Map[ First, {r}]
 rngConstants[ args___] := unexpected[ rngConstants, {args}]
 
 
 (* ::Subsubsection:: *)
 (* specifiedVariables *)
 
+specifiedVariables[ Hold[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[r___]]] := Map[ extractVar, Apply[ List, Map[ Hold, Hold[ r]]]]
 specifiedVariables[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[r___]] := Map[ extractVar, {r}]
 specifiedVariables[ args___] := unexpected[ specifiedVariables, {args}]
 
-extractVar[ r_[ (Theorema`Language`VAR$|Theorema`Computation`Language`VAR$)[ v_], ___]] := v
-extractVar[ r_[ v_, ___]] := v
+extractVar[ Hold[ _[ (Theorema`Language`VAR$|Theorema`Computation`Language`VAR$)[ v_], ___]]] := v
+extractVar[ Hold[ _[ v_, ___]]] := v
+extractVar[ expr:Except[_Hold]] := extractVar[ Hold[ expr]]
 extractVar[ args___] := unexpected[ extractVar, {args}]
 
 
@@ -221,18 +271,18 @@ substituteFree[ expr_Hold, {}] := expr
 substituteFree[ Hold[], _] := Hold[]
 (* Some quantifiers (e.g. "Sum") can be used together with subscripts. *)
 substituteFree[ Hold[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[ rng__], cond_, sub_, form_]], rules_List] :=
-	Module[ {qvars = rngVariables[ r], vars},
+	Module[ {qvars = rngVariables[ Hold[ r]], vars},
 		vars = Select[ rules, !MemberQ[ qvars, #[[1]]]&];
 		applyHold[ Hold[q], joinHold[ substituteFree[ Hold[r], vars], joinHold[ substituteFree[ Hold[cond], vars], joinHold[ substituteFree[ Hold[sub], vars], substituteFree[ Hold[form], vars]]]]]
 	]
 substituteFree[ Hold[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[ rng__], cond_, form_]], rules_List] :=
-	Module[ {qvars = rngVariables[ r], vars},
+	Module[ {qvars = rngVariables[ Hold[ r]], vars},
 		vars = Select[ rules, !MemberQ[ qvars, #[[1]]]&];
 		applyHold[ Hold[q], joinHold[ substituteFree[ Hold[r], vars], joinHold[ substituteFree[ Hold[cond], vars], substituteFree[ Hold[form], vars]]]]
 	]
 (* Some quantifiers (e.g. "Let") don't have a condition. *)
 substituteFree[ Hold[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[ rng__], form_]], rules_List] :=
-	Module[ {qvars = rngVariables[ r], vars},
+	Module[ {qvars = rngVariables[ Hold[ r]], vars},
 		vars = Select[ rules, !MemberQ[ qvars, #[[1]]]&];
 		applyHold[ Hold[q], joinHold[ substituteFree[ Hold[r], vars], substituteFree[ Hold[form], vars]]]
 	]

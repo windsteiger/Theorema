@@ -141,7 +141,7 @@ markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
 
 markVariables[ Hold[ Theorema`Computation`Language`QU$[ r_Theorema`Computation`Language`RNG$, expr_]]] :=
     Module[ {s, seq, vars},
-    	vars = specifiedVariables[ r];
+    	vars = specifiedVariables[ Hold[ r]];
         seq = Cases[vars, (Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$)[ _]];
         vars = Complement[ vars, seq];
         s = Join[Map[ (h:(Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$))[sym_Symbol] /; SymbolName[ sym] === SymbolName[ #] -> Theorema`Computation`Language`VAR$[h[ #]]&, seq[[All, 1]]],
