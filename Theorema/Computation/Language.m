@@ -1330,21 +1330,24 @@ SetAttributes[ Do$TM, HoldAll]
 Do$TM[ body_, l_[v___]] /; buiActive["Do"] := Apply[ Do, Hold[ body, {v}]]
 
 SetAttributes[ Piecewise$TM, HoldAll]
-Piecewise$TM[ Tuple$TM[ clauses___Tuple$TM, Tuple$TM[ e_, True]]] /; buiActive["CaseDistinction"] :=
-	Piecewise$TM[ Tuple$TM[ clauses], e]
-Piecewise$TM[ clauses:Tuple$TM[ __Tuple$TM]] /; buiActive["CaseDistinction"] :=
-	Piecewise$TM[ clauses, 0]
-Piecewise$TM[ Tuple$TM[ clauses___Tuple$TM], default_] /; buiActive["CaseDistinction"] :=
-	Module[ {r, s},
-		If[ MatchQ[ r, _Piecewise],
-			ReplacePart[ Apply[ Piecewise$TM, r], {{1, 0} :> Tuple$TM, {1, _, 0} :> Tuple$TM}],
-			r
-		] /; (
-				s = ReplacePart[ Hold[ {clauses}, default], {1, _, 0} :> List];
-				r = Apply[ Piecewise, s];
-				!MatchQ[ r, _Piecewise] || Apply[ Hold, r] =!= s
-			)
+Piecewise$TM[ Tuple$TM[ Tuple$TM[ expr_, True], ___Tuple$TM]] := expr
+Piecewise$TM[ Tuple$TM[ clauses__Tuple$TM]] :=
+	Module[ {res},
+		Replace[ res, {Hold[ c___]:>Piecewise$TM[ Tuple$TM[ c]]}] /; (res = pw[ Hold[ clauses], Hold[]]; res =!= Hold[ clauses])	
 	]
+	
+pw[ Hold[ Tuple$TM[ expr_, cond_], clauses___Tuple$TM], unknown:Hold[ u___]] :=
+	Module[ {c = cond},
+		If[ c,
+			(*True*)
+			Hold[ u, Tuple$TM[ expr, True]],
+			(*False*)
+			pw[ Hold[ clauses], unknown],
+			(*unknown*)
+			pw[ Hold[ clauses], ReplacePart[ Hold[ u, Tuple$TM[ expr, Null]], {-1, 2} -> c]]
+		]	
+	]
+pw[ Hold[], unknown_Hold] := unknown
 	
 
 
