@@ -215,10 +215,30 @@ MakeBoxes[ IffDef$TM[ l_, r_], TheoremaForm] :=
         MakeBoxes[ r, TheoremaForm]}]
         
 MakeBoxes[ Componentwise$TM[ P_, args___], TheoremaForm] :=
-    RowBox[ {MakeBoxes[ P, TheoremaForm], "@", RowBox[ {"(", RowBox[ Riffle[ Map[ makeTmaBoxes, {args}], ","]], ")"}]}]
+    RowBox[ {MakeBoxes[ P, TheoremaForm], "@", RowBox[ {"(", RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ args]]], ","]], ")"}]}]
     
 MakeBoxes[ EmptyUpTriangle$TM[ a_, b_], TheoremaForm] :=
 	RowBox[ {MakeBoxes[ a, TheoremaForm], "\[EmptyUpTriangle]", MakeBoxes[ b, TheoremaForm]}]
+	
+MakeBoxes[ Insert$TM[ a_, b_, c_], TheoremaForm] :=
+	SubscriptBox[ MakeBoxes[ a, TheoremaForm], RowBox[ {MakeBoxes[ b, TheoremaForm], "\[RightArrow]", MakeBoxes[ c, TheoremaForm]}]]
+
+MakeBoxes[ DeleteAt$TM[ a_, b_], TheoremaForm] :=
+	SubscriptBox[ MakeBoxes[ a, TheoremaForm], RowBox[ {MakeBoxes[ b, TheoremaForm], "\[LeftArrow]"}]]
+	
+MakeBoxes[ Delete$TM[ a_, b__], TheoremaForm] :=
+	SubscriptBox[ MakeBoxes[ a, TheoremaForm], RowBox[ Riffle[ Map[ RowBox[ {#, "\[LeftArrowBar]"}]&, Apply[ List, Map[ makeTmaBoxes, HoldComplete[ b]]]], ","]]]
+	(* We have to use two Map operations, because we need the "Hold"-attribute of "makeTmaBoxes" *)
+	
+MakeBoxes[ Replace$TM[ a_, p:Tuple$TM[ _, _]..], TheoremaForm] :=
+	SubscriptBox[ MakeBoxes[ a, TheoremaForm], RowBox[ Riffle[ Apply[ List, Map[ makeReplaceBoxes, HoldComplete[ p]]], ","]]]
+SetAttributes[ makeReplaceBoxes, HoldAllComplete];
+makeReplaceBoxes[ Tuple$TM[ l_, r_]] := RowBox[ {MakeBoxes[ l, TheoremaForm], "\[LeftArrowBar]", MakeBoxes[ r, TheoremaForm]}]
+
+MakeBoxes[ ReplacePart$TM[ a_, p:Tuple$TM[ _, _]..], TheoremaForm] :=
+	SubscriptBox[ MakeBoxes[ a, TheoremaForm], RowBox[ Riffle[ Apply[ List, Map[ makeReplacePartBoxes, HoldComplete[ p]]], ","]]]
+SetAttributes[ makeReplacePartBoxes, HoldAllComplete];
+makeReplacePartBoxes[ Tuple$TM[ l_, r_]] := RowBox[ {MakeBoxes[ l, TheoremaForm], "\[LeftArrow]", MakeBoxes[ r, TheoremaForm]}]
 
 MakeBoxes[ SEQ0$[ v_], TheoremaForm] := RowBox[ {MakeBoxes[ v, TheoremaForm], "..."}]
 MakeBoxes[ SEQ1$[ v_], TheoremaForm] := RowBox[ {MakeBoxes[ v, TheoremaForm], ".."}]

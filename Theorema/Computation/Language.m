@@ -1169,14 +1169,14 @@ intersectIntervals[ _[ al_, ar_, alc_, arc_], _[ bl_, br_, blc_, brc_]] :=
 (* Tuples *)
 
 
-Tuple$TM /: Subscript$TM[ a_Tuple$TM?isSequenceFree, Rule$TM[ p_, q_]] /; buiActive["Insert"] := Insert[ a, p, q /. Tuple$TM -> List]
+Tuple$TM /: Insert$TM[ a_Tuple$TM?isSequenceFree, p_, q_] /; buiActive["Insert"] := Insert[ a, p, q /. Tuple$TM -> List]
 
 (* Delete elements at one or more positions *)
-Tuple$TM /: Subscript$TM[ a_Tuple$TM?isSequenceFree, LeftArrow$TM[ b_]] /; buiActive["DeleteAt"] := Delete[ a, b //. Tuple$TM -> List]
+Tuple$TM /: DeleteAt$TM[ a_Tuple$TM?isSequenceFree, b_] /; buiActive["DeleteAt"] := Delete[ a, b //. Tuple$TM -> List]
 
 (* Delete elements of a certain shape. Multiple deletions are not possible, because it would need
 	special syntax how to specify multiple shapes. Tuples cannot be used because for this *)
-Tuple$TM /: Subscript$TM[a_Tuple$TM?isGround, d:(LeftArrowBar$TM[_]..)] /; buiActive["Delete"] := Fold[ DeleteCases[ #1, #2[[1]]]&, a, {d}] 
+Tuple$TM /: Delete$TM[a_Tuple$TM?isGround, d__?isGround] /; buiActive["Delete"] := Fold[ DeleteCases[ #1, #2]&, a, {d}] 
 
 Tuple$TM /: Equal$TM[a__Tuple$TM] /; buiActive["TupleEqual"] && SameQ[a ] := True
 Tuple$TM /: Equal$TM[a__Tuple$TM?isSequenceFree] /; buiActive["TupleEqual"] :=
@@ -1200,15 +1200,15 @@ Tuple$TM /: Annotated$TM[Equal$TM, SubScript$TM[ dom_]][a__Tuple$TM?isSequenceFr
 				MatchQ[ res, True|False])
 	]
 
-Tuple$TM /: Cup$TM[a_Tuple$TM, p_] /; buiActive["Append"] := Append[ a, p]
-Tuple$TM /: Cap$TM[p_, a_Tuple$TM] /; buiActive["Prepend"] := Prepend[ a, p]
-Tuple$TM /: CupCap$TM[a__Tuple$TM] /; buiActive["Join"] := Join[ a]
+Tuple$TM /: appendElem$TM[a_Tuple$TM, p_] /; buiActive["appendElem"] := Append[ a, p]
+Tuple$TM /: prependElem$TM[a_Tuple$TM, p_] /; buiActive["prependElem"] := Prepend[ a, p]
+Tuple$TM /: joinTuples$TM[a__Tuple$TM] /; buiActive["joinTuples"] := Join[ a]
 
-Tuple$TM /: Element$TM[ p_, a_Tuple$TM] /; buiActive["IsElement"] :=
+Tuple$TM /: elemTuple$TM[ p_, a_Tuple$TM] /; buiActive["elemTuple"] :=
 	Module[ {res},
 		res /; (res = ElementOf[ p, a, Equal$TM]; MatchQ[ res, True|False])
 	]
-Tuple$TM /: Annotated$TM[ Element$TM, SubScript$TM[ dom_]][ p_, a_Tuple$TM] /; buiActive["IsElement"] :=
+Tuple$TM /: Annotated$TM[ elemTuple$TM, SubScript$TM[ dom_]][ p_, a_Tuple$TM] /; buiActive["elemTuple"] :=
 	Module[ {res},
 		res /; (res = ElementOf[ p, a, dom[Equal$TM]]; MatchQ[ res, True|False])
 	]
@@ -1232,10 +1232,11 @@ Tuple$TM /: Subscript$TM[ min$TM, ord_][ Tuple$TM[ e__]] /; buiActive["Min"] :=
 
 Tuple$TM /: BracketingBar$TM[ a_Tuple$TM?isSequenceFree] /; buiActive["Length"] := Length[ a]
 
-Tuple$TM /: Subscript$TM[ a_Tuple$TM?isSequenceFree, p:LeftArrow$TM[_, _]..] /; buiActive["ReplacePart"] :=
-	ReplacePart[ a, MapAt[# /. {Tuple$TM -> List}&, {p} /. LeftArrow$TM -> Rule, Table[ {i, 1}, {i, Length[{p}]}]]]
+Tuple$TM /: ReplacePart$TM[ a_Tuple$TM?isSequenceFree, p:Tuple$TM[_, _]..] /; buiActive["ReplacePart"] :=
+	ReplacePart[ a, MapAt[# /. {Tuple$TM -> List}&, Replace[ {p}, Tuple$TM[ l_, r_] :> Rule[ l, r], {1}], Table[ {i, 1}, {i, Length[{p}]}]]]
 
-Tuple$TM /: Subscript$TM[ a_Tuple$TM, s:LeftArrowBar$TM[_, _]..] /; buiActive["Replace"] := Fold[ ReplaceAll, a, {s} /. LeftArrowBar$TM -> Rule]
+Tuple$TM /: Replace$TM[ a_Tuple$TM?isGround, s:Tuple$TM[_?isGround, _]..] /; buiActive["Replace"] :=
+	Fold[ ReplaceAll, a, Replace[ {s}, Tuple$TM[ l_, r_] :> Rule[ l, r], {1}]]
 
 Tuple$TM /: Subscript$TM[ a_Tuple$TM, p__Integer] /; buiActive["Subscript"] := Subscript$TM[ a, Tuple$TM[ p]]
 Tuple$TM /: Subscript$TM[ a_Tuple$TM?isSequenceFree, p_?isPositionSpec] /; buiActive["Subscript"] := Extract[ a, p /. Tuple$TM -> List] /. List -> Tuple$TM
@@ -1263,16 +1264,14 @@ isInteger[ _Integer] := True
 isInteger[ _Rational|_Real|_Complex|_DirectedInfinity] := False
 isInteger[ _Set$TM|_Tuple$TM] := False
 isInteger[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
-(* The case where 'a' is '\[DoubleStruckCapitalC]$TM' or '\[DoubleStruckCapitalC]P$TM' does not have to be
-	treated separately *)
-(* isInteger[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False *)
-isInteger[ a_?AtomQ] /; isGround[ a] := False
+isInteger[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
+(* isInteger[ built-in symbolic constant ] := False ... same also for isRational, isReal, etc., but don't simply enumerate all symbolic constants! *)
 
 isRational[ _Integer|_Rational] := True
 isRational[ _Real|_Complex|_DirectedInfinity] := False
 isRational[ _Set$TM|_Tuple$TM] := False
 isRational[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
-(* isRational[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False *)
+isRational[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
 (* it is not known whether Catalan is rational, therefore we leave "isRational[Catalan]" unevaluated *)
 isRational[ a:Except[Catalan]] /; AtomQ[ a] && isGround[ a] := False
 
