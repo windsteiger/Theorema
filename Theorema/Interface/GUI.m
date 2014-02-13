@@ -110,7 +110,9 @@ initGUI[] :=
         		{"Exists", RowBox[{"\[Exists]","P"}], False, True, False},
         		{"Equal", RowBox[{"A","=","B"}], True, False, False},
         		{"Let", UnderscriptBox["let",RowBox[{"A","=","\[Ellipsis]"}]], False, True, False},
-        		{"Componentwise", RowBox[{"P", "@", "A"}], False, True, False}
+        		{"Componentwise", RowBox[{"P", "@", "A"}], False, True, False},
+        		{"Such", RowBox[{UnderscriptBox["\[CurlyEpsilon]","x"],"P"}], False, True, False},
+        		{"SuchUnique", RowBox[{UnderscriptBox["the","x"],"P"}], False, True, False}
         	},
         	{"Domains",
         		{"isInteger", RowBox[{"isInteger","[","A","]"}], False, True, True},

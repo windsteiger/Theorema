@@ -76,6 +76,13 @@ splitAnd[ expr:Hold[(h:Theorema`Language`And$TM|Theorema`Computation`Language`An
 			{$Failed, $Failed}
 		]
 	]
+splitAnd[ expr_Hold, v_List, sub_:True] :=
+    Module[ {fi = freeVariables[ expr]},
+        If[ (sub && fi === v) || (!sub && Intersection[ v, fi] =!= {}),
+            { expr, Hold[ True]},
+            { Hold[ True], expr}
+        ]
+    ]
 splitAnd[ expr:(h:Theorema`Language`And$TM|Theorema`Computation`Language`And$TM|And)[ __], v_List, sub_:True] :=
 	Module[ {depSingle = {}, depMulti = {}, p, l, e = simplifiedAnd[ expr], fi, i},
 		l = Length[ e];

@@ -392,10 +392,10 @@ rangeToIterator[ _] := $Failed
 rangeToIterator[ args___] := unexpected[ rangeToIterator, {args}]
 
 ClearAll[ Forall$TM, Exists$TM, SequenceOf$TM, SumOf$TM, ProductOf$TM,
-	SetOf$TM, TupleOf$TM, MaximumOf$TM, MinimumOf$TM, UnionOf$TM, IntersectionOf$TM]
+	SetOf$TM, TupleOf$TM, MaximumOf$TM, MinimumOf$TM, UnionOf$TM, IntersectionOf$TM, Such$TM, SuchUnique$TM]
 Scan[ SetAttributes[ #, HoldRest] &, {Forall$TM, Exists$TM, 
   SequenceOf$TM, SumOf$TM, ProductOf$TM, SetOf$TM, TupleOf$TM, MaximumOf$TM, MinimumOf$TM,
-  UnionOf$TM, IntersectionOf$TM}]
+  UnionOf$TM, IntersectionOf$TM, Such$TM, SuchUnique$TM}]
 Scan[ SetAttributes[ #, HoldFirst] &, {SETRNG$, STEPRNG$}]
 
 Forall$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["Forall"] := 
@@ -423,7 +423,7 @@ forallIteration[ {x_, iter__}, cond_, form_] :=
  Module[ {uneval = {}, ci, sub},
 	Catch[
 		Do[
-			If[ TrueQ[ cond],
+			If[ Hold[ cond] === Hold[ True],
 				ci = True,
 				(*else*)
             	ci = ReleaseHold[ substituteFree[ Hold[ cond], {x -> i}]]
@@ -468,7 +468,7 @@ existsIteration[ {x_, iter__}, cond_, form_] :=
  Module[ {uneval = {}, ci, sub},
 	Catch[
 		Do[
-			If[ TrueQ[ cond],
+			If[ Hold[ cond] === Hold[ True],
 				ci = True,
 				ci = ReleaseHold[ substituteFree[ Hold[ cond], {x -> i}]]
 			];
@@ -737,6 +737,139 @@ IntersectionOf$TM[ RNG$[ r_, s__], cond_, dom_, form_] /; buiActive["Intersectio
 IntersectionOf$TM[ RNG$[ r_], cond_, dom_, form_] /; buiActive["IntersectionOf"] :=
 	Module[ {v},
 		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Annotated$TM[ Intersection$TM, SubScript$TM[ dom]], $Failed]) =!= $Failed
+	]
+	
+(* ::Subsection:: *)
+(* the, such *)
+
+rngCondToIterator[ RNG$[ r_], cond_Hold ] := {{rangeToIterator[ r], cond}}
+rngCondToIterator[ RNG$[ r_, s__], cond_Hold ] :=
+	Module[ {splitC},
+		splitC = splitAnd[ cond, {Hold[ r][[1, 1]]}];
+		Append[ rngCondToIterator[ RNG$[ s], Last[ splitC]], {rangeToIterator[ r], First[ splitC]}]
+	]
+
+suchIterationF[ form_Hold, {{x_, iter__}, cond_Hold}] :=
+ Module[ {ci, sub, i},
+	Catch[
+		Do[
+			If[ cond === Hold[ True],
+				ci = True,
+				(*else*)
+            	ci = ReleaseHold[ substituteFree[ cond, {x -> i}]]
+			];
+			If[ ci,
+				sub = ReleaseHold[ substituteFree[ form, {x -> i}]];
+				If[ sub, Throw[ {i}]]
+			],
+			{ i, iter}
+		]; (*end do*)
+		$Failed
+	] (*end catch*)
+ ]
+suchIterationT[ term_Hold, {{x_, iter__}, cond_Hold}] :=
+ Module[ {ci, sub, i},
+	Catch[
+		Do[
+			If[ cond === Hold[ True],
+				ci = True,
+				(*else*)
+            	ci = ReleaseHold[ substituteFree[ cond, {x -> i}]]
+			];
+			If[ ci,
+				sub = ReleaseHold[ substituteFree[ term, {x -> i}]];
+				If[ MatchQ[ sub, {___}], Throw[ Prepend[ sub, i]]]
+			],
+			{ i, iter}
+		]; (*end do*)
+		$Failed
+	] (*end catch*)
+ ]
+ 
+Such$TM[ r:RNG$[ _, __], cond_, form_] /; buiActive["Such"] :=
+ 	Module[ {rcList, res},
+ 		Apply[ Tuple$TM, res] /; (
+ 			rcList = rngCondToIterator[ r, Hold[ cond]];
+ 			With[ {r1 = First[ rcList]},
+ 				res = ReleaseHold[ Fold[ Hold[ suchIterationT[ #1, #2]]&, Hold[ suchIterationF[ Hold[ form], r1]], Rest[ rcList]]]
+ 			];
+ 			res =!= $Failed
+ 			)
+	]
+Such$TM[ RNG$[ r_], cond_, form_] /; buiActive["Such"] :=
+	Module[ {res},
+		(* "suchIterationF" always returns a 1-element list, unless it returns $Failed *)
+		First[ res] /; (res = suchIterationF[ Hold[ form], {rangeToIterator[ r], Hold[ cond]}]) =!= $Failed
+	]
+	
+	
+theIterationF[ form_Hold, {{x_, iter__}, cond_Hold}] :=
+ Module[ {ci, sub, i, out = $Failed},
+	Catch[
+		Do[
+			If[ cond === Hold[ True],
+				ci = True,
+				(*else*)
+            	ci = ReleaseHold[ substituteFree[ cond, {x -> i}]]
+			];
+			If[ ci,
+				sub = ReleaseHold[ substituteFree[ form, {x -> i}]];
+				If[ sub,
+					If[ out === $Failed,
+						out = {i},
+						Throw[ $Failed]
+					],
+					Continue[],
+					Throw[ $Failed]
+				],
+				Continue[],
+				Throw[ $Failed]
+			],
+			{ i, iter}
+		]; (*end do*)
+		out
+	] (*end catch*)
+ ]
+theIterationT[ term_Hold, {{x_, iter__}, cond_Hold}] :=
+ Module[ {ci, sub, i, out = $Failed},
+	Catch[
+		Do[
+			If[ cond === Hold[ True],
+				ci = True,
+				(*else*)
+            	ci = ReleaseHold[ substituteFree[ cond, {x -> i}]]
+			];
+			If[ ci,
+				sub = ReleaseHold[ substituteFree[ term, {x -> i}]];
+				If[ MatchQ[ sub, {___}],
+					If[ out === $Failed,
+						out = Prepend[ sub, i],
+						Throw[ $Failed]
+					]
+				],
+				Continue[],
+				Throw[ $Failed]
+			],
+			{ i, iter}
+		]; (*end do*)
+		out
+	] (*end catch*)
+ ]
+ 
+SuchUnique$TM[ r:RNG$[ _, __], cond_, form_] /; buiActive["SuchUnique"] :=
+ 	Module[ {rcList, res},
+ 		Apply[ Tuple$TM, res] /; (
+ 			rcList = rngCondToIterator[ r, Hold[ cond]];
+ 			With[ {r1 = First[ rcList]},
+ 				res = ReleaseHold[ Fold[ Hold[ theIterationT[ #1, #2]]&, Hold[ theIterationF[ Hold[ form], r1]], Rest[ rcList]]]
+ 			];
+ 			res =!= $Failed
+ 			)
+	]
+SuchUnique$TM[ RNG$[ r_], cond_, form_] /; buiActive["SuchUnique"] :=
+	Module[ {res},
+		(* "theIterationF" always returns a 1-element list, unless it returns $Failed *)
+		First[ res] /; (res = theIterationF[ Hold[ form], {rangeToIterator[ r], Hold[ cond]}]) =!= $Failed
 	]
 	
 
