@@ -57,6 +57,15 @@ setComputationContext[ args___] := unexpected[ setComputationContext, {args}]
 (* ::Section:: *)
 (* Arithmetic *)
 
+tmaAtomQ[ VAR$[ _]] := True
+tmaAtomQ[ FIX$[ _, _Integer]] := True
+tmaAtomQ[ META$[ _, _Integer, _List]] := True
+tmaAtomQ[ _DirectedInfinity] := True
+tmaAtomQ[ a_] := AtomQ[ a]
+
+mathematicalConstantQ[ True|False|Infinity|Indeterminate|I|Pi|E|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaisher] := True
+mathematicalConstantQ[ _] := False
+
 (* "buiActiveArithmetic" extends "buiActive" such that the activation of "Subtract" and "Divide" can also
 	be determined in one stroke. *)
 buiActiveArithmetic["Subtract"] := buiActive["Plus"] && buiActive["Minus"]
@@ -67,7 +76,28 @@ buiActiveArithmetic[s_String] := buiActive[s]
 buiActivePower[-1] := buiActive["MultInverse"] || buiActive["Power"]
 buiActivePower[_] := buiActive["Power"]
 
-   
+Equal$TM[ a_, a_] /; buiActive["Equal"] := True
+Set$TM /: Equal$TM[ _Integer|_Rational|_Real|_Complex|_DirectedInfinity, _Set$TM] /; buiActive["Equal"] || buiActive["SetEqual"] := False
+Tuple$TM /: Equal$TM[ _Integer|_Rational|_Real|_Complex|_DirectedInfinity, _Tuple$TM] /; buiActive["Equal"] || buiActive["TupleEqual"] := False
+Equal$TM[ _?mathematicalConstantQ, _Integer|_Rational|_Real|_Complex|_DirectedInfinity] /; buiActive["Equal"] := False
+Set$TM /: Equal$TM[ _?mathematicalConstantQ, _Set$TM] /; buiActive["Equal"] || buiActive["SetEqual"] := False
+Tuple$TM /: Equal$TM[ _?mathematicalConstantQ, _Tuple$TM] /; buiActive["Equal"] || buiActive["TupleEqual"] := False
+Equal$TM[ _Integer|_Rational|_Real|_Complex|_DirectedInfinity, (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] && (buiActive["Equal"] || buiActive["SetEqual"]) := False
+Equal$TM[ _?mathematicalConstantQ, (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] && (buiActive["Equal"] || buiActive["SetEqual"]) := False
+Equal$TM[ _Integer|_Rational|_Real|_Complex|_DirectedInfinity, h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] && (buiActive["Equal"] || buiActive["SetEqual"]) := False
+Equal$TM[ _?mathematicalConstantQ, h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] && (buiActive["Equal"] || buiActive["SetEqual"]) := False
+Set$TM /: Equal$TM[ _Set$TM, _Integer|_Rational|_Real|_Complex|_DirectedInfinity] /; buiActive["Equal"] || buiActive["SetEqual"] := False
+Tuple$TM /: Equal$TM[ _Tuple$TM, _Integer|_Rational|_Real|_Complex|_DirectedInfinity] /; buiActive["Equal"] || buiActive["TupleEqual"] := False
+Equal$TM[ _Integer|_Rational|_Real|_Complex|_DirectedInfinity, _?mathematicalConstantQ] /; buiActive["Equal"] := False
+Set$TM /: Equal$TM[ _Set$TM, _?mathematicalConstantQ] /; buiActive["Equal"] || buiActive["SetEqual"] := False
+Tuple$TM /: Equal$TM[ _Tuple$TM, _?mathematicalConstantQ] /; buiActive["Equal"] || buiActive["TupleEqual"] := False
+Equal$TM[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___], _Integer|_Rational|_Real|_Complex|_DirectedInfinity] /; buiActive[StringDrop[SymbolName[h],-3]] && (buiActive["Equal"] || buiActive["SetEqual"]) := False
+Equal$TM[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___], _?mathematicalConstantQ] /; buiActive[StringDrop[SymbolName[h],-3]] && (buiActive["Equal"] || buiActive["SetEqual"]) := False
+Equal$TM[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM), _Integer|_Rational|_Real|_Complex|_DirectedInfinity] /; buiActive[StringDrop[SymbolName[h],-3]] && (buiActive["Equal"] || buiActive["SetEqual"]) := False
+Equal$TM[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM), _?mathematicalConstantQ] /; buiActive[StringDrop[SymbolName[h],-3]] && (buiActive["Equal"] || buiActive["SetEqual"]) := False
+Equal$TM[ a_?mathematicalConstantQ, b_?mathematicalConstantQ] /; buiActive["Equal"] := SameQ[ a, b]
+Equal$TM[ a_?tmaAtomQ, b_?tmaAtomQ] /; buiActive["Equal"] := a == b
+
 Plus$TM[ a___] /; buiActive["Plus"] := Plus[ a]
 Minus$TM[ a_] /; buiActive["Minus"] := Minus[ a]
 Subtract$TM[ a_, b_] /; buiActiveArithmetic["Subtract"] := Subtract[ a, b] (* "Subtract" requires exactly 2 arguments. *)
@@ -76,7 +106,6 @@ Divide$TM[ a_, b_] /; buiActiveArithmetic["Divide"] := Divide[ a, b] (* "Divide"
 Power$TM[ a_, b_] /; buiActivePower[ b] := Power[ a, b]
 Radical$TM[ a_, b_] /; buiActive["Radical"] := Power[ a, 1/b]
 Factorial$TM[ a_] /; buiActive["Factorial"] := a!
-Equal$TM[ a_, b_] /; buiActive["Equal"] := a == b
 Less$TM[ a__] /; buiActive["Less"] := Less[ a]
 LessEqual$TM[ a__] /; buiActive["LessEqual"] := LessEqual[ a]
 Greater$TM[ a__] /; buiActive["Greater"] := Greater[ a]
@@ -714,7 +743,9 @@ IntersectionOf$TM[ RNG$[ r_], cond_, dom_, form_] /; buiActive["IntersectionOf"]
 (* ::Section:: *)
 (* Sets *)
 
-Set$TM /: Equal$TM[a__Set$TM] /; buiActive["SetEqual"] && SameQ[a] := True
+Set$TM /: Equal$TM[ _Set$TM, _Tuple$TM] /; buiActive["SetEqual"] || buiActive["TupleEqual"] := False
+
+Set$TM /: Equal$TM[(a_Set$TM)..] /; buiActive["SetEqual"] := True
 Set$TM /: Equal$TM[_Set$TM] /; buiActive["SetEqual"] := True
 Set$TM /: Equal$TM[a_Set$TM, b_Set$TM, c__Set$TM] /; buiActive["SetEqual"] :=
 	Equal$TM[ a, b] && Map[ Equal$TM[ a, #]&, And[ c]]
@@ -904,6 +935,11 @@ IntegerQuotientRingPM$TM[ 0] /; buiActive["IntegerQuotientRingPM"] := IntegerInt
 
 (* ::Subsection:: *)
 (* equality *)
+
+Tuple$TM /: Equal$TM[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___], _Tuple$TM] /; (buiActive["SetEqual"] || buiActive["TupleEqual"]) && buiActive[StringDrop[SymbolName[h], -3]] := False
+Tuple$TM /: Equal$TM[ _Tuple$TM, (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; (buiActive["SetEqual"] || buiActive["TupleEqual"]) && buiActive[StringDrop[SymbolName[h], -3]] := False
+Tuple$TM /: Equal$TM[ _Tuple$TM, b:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; (buiActive["SetEqual"] || buiActive["TupleEqual"]) && buiActive[StringDrop[SymbolName[b], -3]] := False
+Tuple$TM /: Equal$TM[ b:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM), _Tuple$TM] /; (buiActive["SetEqual"] || buiActive["TupleEqual"]) && buiActive[StringDrop[SymbolName[b], -3]] := False
 
 Set$TM /: Equal$TM[ a:(h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ al_?isRealOrInf, ar_?isRealOrInf, alc:(True|False), arc:(True|False)],
 		b:Set$TM[ e___?isGround]] :=
@@ -1178,6 +1214,8 @@ Tuple$TM /: DeleteAt$TM[ a_Tuple$TM?isSequenceFree, b_] /; buiActive["DeleteAt"]
 	special syntax how to specify multiple shapes. Tuples cannot be used because for this *)
 Tuple$TM /: Delete$TM[a_Tuple$TM?isGround, d__?isGround] /; buiActive["Delete"] := Fold[ DeleteCases[ #1, #2]&, a, {d}] 
 
+Tuple$TM /: Equal$TM[ _Tuple$TM, _Set$TM] /; buiActive["SetEqual"] || buiActive["TupleEqual"] := False
+
 Tuple$TM /: Equal$TM[a__Tuple$TM] /; buiActive["TupleEqual"] && SameQ[a ] := True
 Tuple$TM /: Equal$TM[a__Tuple$TM?isSequenceFree] /; buiActive["TupleEqual"] :=
 	Module[ {res},
@@ -1265,7 +1303,7 @@ isInteger[ _Rational|_Real|_Complex|_DirectedInfinity] := False
 isInteger[ _Set$TM|_Tuple$TM] := False
 isInteger[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
 isInteger[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
-(* isInteger[ built-in symbolic constant ] := False ... same also for isRational, isReal, etc., but don't simply enumerate all symbolic constants! *)
+isInteger[ Indeterminate|True|False|I|Pi|E|Infinity|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaisher] := False
 
 isRational[ _Integer|_Rational] := True
 isRational[ _Real|_Complex|_DirectedInfinity] := False
@@ -1273,42 +1311,42 @@ isRational[ _Set$TM|_Tuple$TM] := False
 isRational[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
 isRational[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
 (* it is not known whether Catalan is rational, therefore we leave "isRational[Catalan]" unevaluated *)
-isRational[ a:Except[Catalan]] /; AtomQ[ a] && isGround[ a] := False
+isRational[ Indeterminate|True|False|I|Pi|E|Infinity|Degree|EulerGamma|GoldenRatio|Khinchin|Glaisher] := False
 
 isReal[ _Integer|_Rational|_Real] := True
 isReal[ Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] := True
 isReal[ _Complex|_DirectedInfinity] := False
 isReal[ _Set$TM|_Tuple$TM] := False
 isReal[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
-(* isReal[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False *)
-isReal[ a_?AtomQ] /; isGround[ a] := False
+isReal[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
+isReal[ Indeterminate|True|False|I|Infinity] := False
 
 isComplex[ _Integer|_Rational|_Real|_Complex] := True
 isComplex[ I|Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] := True
 isComplex[ _Set$TM|_Tuple$TM|_DirectedInfinity] := False
 isComplex[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
-(* isComplex[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False *)
-isComplex[ a_?AtomQ] /; isGround[ a] := False
+isComplex[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
+isComplex[ Indeterminate|True|False|Infinity] := False
 
 isComplexP[ Tuple$TM[ a_, b_]] := isReal[ a] && isReal[ b] && a >= 0
 isComplexP[ _Integer|_Rational|_Real|_Complex|_Set$TM|_Tuple$TM|_DirectedInfinity] := False
 isComplexP[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
-(* isComplexP[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False *)
-isComplexP[ a_?AtomQ] /; isGround[ a] := False
+isComplexP[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
+isComplexP[ Indeterminate|True|False|I|Pi|E|Infinity|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaisher] := False
 
 isSet[ _Set$TM] := True
 isSet[ _Integer|_Rational|_Real|_Complex|_DirectedInfinity] := False
 isSet[ _Tuple$TM] := False
 isSet[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := True
-(* isSet[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := True *)
-isSet[ a_?AtomQ] /; isGround[ a] := False
+isSet[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := True
+isSet[ Indeterminate|True|False|I|Pi|E|Infinity|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaisher] := False
 
 isTuple[ _Tuple$TM] := True
 isTuple[ _Integer|_Rational|_Real|_Complex|_DirectedInfinity] := False
 isTuple[ _Set$TM] := False
 isTuple[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
-(* isTuple[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False *)
-isTuple[ a_?AtomQ] /; isGround[ a] := False
+isTuple[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
+isTuple[ Indeterminate|True|False|I|Pi|E|Infinity|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaisher] := False
 
 
 (* ::Section:: *)

@@ -408,6 +408,9 @@ MakeExpression[ RowBox[{UnderscriptBox[ "let", rng_], form_}], fmt_] :=
 
 (* we do not want that a-b is automatically converted to a+(-b), this should only be under built-in subtract. *)
 
+MakeExpression[ RowBox[ {"-", "\[Infinity]"|"Infinity", c___}], fmt_] :=
+	MakeExpression[ RowBox[ {RowBox[ {"DirectedInfinity", "[", "-1", "]"}], c}], fmt] /;
+		$parseTheoremaExpressions	(* "-Infinity" should not be converted into "Minus[DirectedInfinity[1]]" *)
 MakeExpression[ RowBox[ {"-", a_, c___}], fmt_] :=
 	MakeExpression[ RowBox[ {RowBox[ {"Minus", "[", a, "]"}], c}], fmt] /;
 		($parseTheoremaExpressions &&
