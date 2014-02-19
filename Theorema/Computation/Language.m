@@ -1286,7 +1286,10 @@ Set$TM /: max$TM[ Set$TM[ e__]] /; buiActive["MaximumElementSet"] :=
 	]
 Set$TM /: Subscript$TM[ max$TM, ord_][ Set$TM[ e__]] /; buiActive["MaximumElementSet"] :=
 	Module[ {res},
-		First[ res] /; (res = max[ {e}, ord]; Length[ res] === 1)
+		If[ Length[ res] === 1,
+			First[ res],
+			Subscript$TM[ max$TM, ord][ Apply[ Set$TM, res]]
+		] /; (res = max[ {e}, ord]; Length[ res] < Length[ Hold[ e]])
 	]
 Set$TM /: min$TM[ Set$TM[ e__]] /; buiActive["MinimumElementSet"] :=
 	Module[ {s},
@@ -1294,25 +1297,51 @@ Set$TM /: min$TM[ Set$TM[ e__]] /; buiActive["MinimumElementSet"] :=
 	]
 Set$TM /: Subscript$TM[ min$TM, ord_][ Set$TM[ e__]] /; buiActive["MinimumElementSet"] :=
 	Module[ {res},
-		First[ res] /; (res = min[ {e}, ord]; Length[ res] === 1)
+		If[ Length[ res] === 1,
+			First[ res],
+			Subscript$TM[ min$TM, ord][ Apply[ Set$TM, res]]
+		] /; (res = min[ {e}, ord]; Length[ res] < Length[ Hold[ e]])
 	]
 Set$TM /: \[AE]$TM[ Set$TM[ a_, ___]] /; buiActive["AnElement"] := a
 	
 
-(* amaletzk: The following implementation of "max" and "min" has quadratic complexity in the length of the
+(* The following implementation of "max" and "min" has quadratic complexity in the length of the
 	input. One could, however, also compare only successive elements, but this method would only give
-	the right result in case of a linear ordering, not in case of an arbitrary partial ordering! *)
-max[ l:{___, a_, ___}, ord_] /; greatest[ a, l, ord] := {a}
-max[ _List, _] := {}
+	the right result in case of a linear ordering, not in case of an arbitrary partial ordering!
+	Still, it is assumed that the given relation is at least transitive; If this is not the case, wrong
+	results might be returned. *)
+	
+max[ {a_, b___}, ord_] := max[ {a}, {b}, ord]
+max[ l_List, {a_, b___}, ord_] :=
+	max[ updateMaxList[ l, a, ord, {}, True], {b}, ord]
+max[ l_List, {}, _] := l
 
-greatest[ _, {}, _] := True
-greatest[ a_, {b_, rest___}, ord_] := TrueQ[ ord[ b, a] || a == b] && greatest[ a, {rest}, ord]
+updateMaxList[ {f_, r___}, a_, ord_, new:{n___}, add_] :=
+	If[ TrueQ[ a == f || ord[ f, a]],
+		updateMaxList[ {r}, a, ord, new, add],	(* f must be removed *)
+		If[ TrueQ[ ord[ a, f]],
+			updateMaxList[ {r}, a, ord, {n, f}, False],	(* f must be kept, a must not be added *)
+			updateMaxList[ {r}, a, ord, {n, f}, add]	(* f must be kept *)
+		]
+	]
+updateMaxList[ {}, _, _, l_List, False] := l
+updateMaxList[ {}, a_, _, {n___}, True] := {n, a}
 
-min[ l:{___, a_, ___}, ord_] /; smallest[ a, l, ord] := {a}
-min[ _List, _] := {}
+min[ {a_, b___}, ord_] := min[ {a}, {b}, ord]
+min[ l_List, {a_, b___}, ord_] :=
+	min[ updateMinList[ l, a, ord, {}, True], {b}, ord]
+min[ l_List, {}, _] := l
 
-smallest[ _, {}, _] := True
-smallest[ a_, {b_, rest___}, ord_] := TrueQ[ ord[ a, b] || a == b] && smallest[ a, {rest}, ord]
+updateMinList[ {f_, r___}, a_, ord_, new:{n___}, add_] :=
+	If[ TrueQ[ a == f || ord[ a, f]],
+		updateMinList[ {r}, a, ord, new, add],	(* f must be removed *)
+		If[ TrueQ[ ord[ f, a]],
+			updateMinList[ {r}, a, ord, {n, f}, False],	(* f must be kept, a must not be added *)
+			updateMinList[ {r}, a, ord, {n, f}, add]	(* f must be kept *)
+		]
+	]
+updateMinList[ {}, _, _, l_List, False] := l
+updateMinList[ {}, a_, _, {n___}, True] := {n, a}
 
 ElementOf[ p_, a_, test_] := Apply[ Or, Map[ (test[ p, #])&, Apply[ Hold, a]]]
 ElementOfAll[ p_, {a_, rest___}, test_] := ElementOf[ p, a, test] && ElementOfAll[ p, {rest}, test]
@@ -1666,7 +1695,10 @@ Tuple$TM /: max$TM[ Tuple$TM[ e__]] /; buiActive["Max"] :=
 	]
 Tuple$TM /: Subscript$TM[ max$TM, ord_][ Tuple$TM[ e__]] /; buiActive["Max"] :=
 	Module[ {res},
-		First[ res] /; (res = max[ {e}, ord]; Length[ res] === 1)
+		If[ Length[ res] === 1,
+			First[ res],
+			Subscript$TM[ max$TM, ord][ Apply[ Tuple$TM, res]]
+		] /; (res = max[ {e}, ord]; Length[ res] < Length[ Hold[ e]])
 	]
 Tuple$TM /: min$TM[ Tuple$TM[ e__]] /; buiActive["Min"] :=
 	Module[ {s},
@@ -1674,7 +1706,10 @@ Tuple$TM /: min$TM[ Tuple$TM[ e__]] /; buiActive["Min"] :=
 	]
 Tuple$TM /: Subscript$TM[ min$TM, ord_][ Tuple$TM[ e__]] /; buiActive["Min"] :=
 	Module[ {res},
-		First[ res] /; (res = min[ {e}, ord]; Length[ res] === 1)
+		If[ Length[ res] === 1,
+			First[ res],
+			Subscript$TM[ min$TM, ord][ Apply[ Tuple$TM, res]]
+		] /; (res = min[ {e}, ord]; Length[ res] < Length[ Hold[ e]])
 	]
 
 Tuple$TM /: BracketingBar$TM[ a_Tuple$TM?isSequenceFree] /; buiActive["Length"] := Length[ a]
