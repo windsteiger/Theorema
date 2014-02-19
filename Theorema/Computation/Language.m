@@ -392,10 +392,11 @@ rangeToIterator[ _] := $Failed
 rangeToIterator[ args___] := unexpected[ rangeToIterator, {args}]
 
 ClearAll[ Forall$TM, Exists$TM, SequenceOf$TM, SumOf$TM, ProductOf$TM,
-	SetOf$TM, TupleOf$TM, MaximumOf$TM, MinimumOf$TM, UnionOf$TM, IntersectionOf$TM, Such$TM, SuchUnique$TM]
+	SetOf$TM, TupleOf$TM, MaximumOf$TM, MinimumOf$TM, UnionOf$TM, IntersectionOf$TM, Such$TM, SuchUnique$TM,
+	ArgMin$TM, ArgMax$TM, TheArgMin$TM, TheArgMax$TM]
 Scan[ SetAttributes[ #, HoldRest] &, {Forall$TM, Exists$TM, 
   SequenceOf$TM, SumOf$TM, ProductOf$TM, SetOf$TM, TupleOf$TM, MaximumOf$TM, MinimumOf$TM,
-  UnionOf$TM, IntersectionOf$TM, Such$TM, SuchUnique$TM}]
+  UnionOf$TM, IntersectionOf$TM, Such$TM, SuchUnique$TM, ArgMin$TM, ArgMax$TM, TheArgMin$TM, TheArgMax$TM}]
 Scan[ SetAttributes[ #, HoldFirst] &, {SETRNG$, STEPRNG$}]
 
 Forall$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["Forall"] := 
@@ -742,13 +743,37 @@ IntersectionOf$TM[ RNG$[ r_], cond_, dom_, form_] /; buiActive["IntersectionOf"]
 (* ::Subsection:: *)
 (* the, such *)
 
-rngCondToIterator[ RNG$[ r_], cond_Hold ] := {{rangeToIterator[ r], cond}}
+(* "rngCondToIterator" converts several ranges into iterators, where for each iterator only the part of the condition
+	'cond' is considered which really matters ("splitAnd"). It returns a list of pairs, where each pair consists of
+	- an iterator and
+	- the corresponding condition
+	If at least one range cannot be converted into a valid iterator (i.e. a list with at least 2 elements),
+	$Failed is returned.
+*)
+rngCondToIterator[ RNG$[ r_], cond_Hold ] :=
+	Module[ {it},
+		it = rangeToIterator[ r];
+		If[ MatchQ[ it, {_, __}],
+			{{rangeToIterator[ r], cond}},
+			$Failed
+		]
+	]
 rngCondToIterator[ RNG$[ r_, s__], cond_Hold ] :=
-	Module[ {splitC},
-		splitC = splitAnd[ cond, {Hold[ r][[1, 1]]}];
-		Append[ rngCondToIterator[ RNG$[ s], Last[ splitC]], {rangeToIterator[ r], First[ splitC]}]
+	Module[ {splitC, it, l},
+		it = rangeToIterator[ r];
+		If[ MatchQ[ it, {_, __}],
+			splitC = splitAnd[ cond, {Hold[ r][[1, 1]]}];
+			l = rngCondToIterator[ RNG$[ s], Last[ splitC]];
+			If[ l === $Failed,
+				$Failed,
+				Append[ l, {it, First[ splitC]}]
+			],
+			$Failed
+		]
 	]
 
+(* "suchIterationF" returns '{i}', where 'i' is such that 'form' gives True.
+	If no such 'i' exists, $Failed is returned. *)
 suchIterationF[ form_Hold, {{x_, iter__}, cond_Hold}] :=
  Module[ {ci, sub, i},
 	Catch[
@@ -767,6 +792,12 @@ suchIterationF[ form_Hold, {{x_, iter__}, cond_Hold}] :=
 		$Failed
 	] (*end catch*)
  ]
+suchIterationF[ _, {_List, _}] := $Failed
+suchIterationF[ _, {$Failed, _}] := $Failed
+suchIterationF[ args___] := 
+ unexpected[ suchIterationF, {args}]
+(* "suchIterationT" returns 'Prepend[term, i]', where 'i' is such that 'term' evaluates to a list.
+	If no such 'i' exists, $Failed is returned. *)
 suchIterationT[ term_Hold, {{x_, iter__}, cond_Hold}] :=
  Module[ {ci, sub, i},
 	Catch[
@@ -785,15 +816,22 @@ suchIterationT[ term_Hold, {{x_, iter__}, cond_Hold}] :=
 		$Failed
 	] (*end catch*)
  ]
+suchIterationT[ _, {_List, _}] := $Failed
+suchIterationT[ _, {$Failed, _}] := $Failed
+suchIterationT[ args___] := 
+ unexpected[ suchIterationT, {args}]
  
 Such$TM[ r:RNG$[ _, __], cond_, form_] /; buiActive["Such"] :=
  	Module[ {rcList, res},
  		Apply[ Tuple$TM, res] /; (
  			rcList = rngCondToIterator[ r, Hold[ cond]];
- 			With[ {r1 = First[ rcList]},
- 				res = ReleaseHold[ Fold[ Hold[ suchIterationT[ #1, #2]]&, Hold[ suchIterationF[ Hold[ form], r1]], Rest[ rcList]]]
- 			];
- 			res =!= $Failed
+ 			If[ rcList === $Failed,
+ 				False,
+	 			With[ {r1 = First[ rcList]},
+	 				res = ReleaseHold[ Fold[ Hold[ suchIterationT[ #1, #2]]&, Hold[ suchIterationF[ Hold[ form], r1]], Rest[ rcList]]]
+	 			];
+	 			res =!= $Failed
+ 			]
  			)
 	]
 Such$TM[ RNG$[ r_], cond_, form_] /; buiActive["Such"] :=
@@ -830,6 +868,10 @@ theIterationF[ form_Hold, {{x_, iter__}, cond_Hold}] :=
 		out
 	] (*end catch*)
  ]
+theIterationF[ _, {_List, _}] := $Failed
+theIterationF[ _, {$Failed, _}] := $Failed
+theIterationF[ args___] := 
+ unexpected[ theIterationF, {args}]
 theIterationT[ term_Hold, {{x_, iter__}, cond_Hold}] :=
  Module[ {ci, sub, i, out = $Failed},
 	Catch[
@@ -855,21 +897,255 @@ theIterationT[ term_Hold, {{x_, iter__}, cond_Hold}] :=
 		out
 	] (*end catch*)
  ]
+theIterationT[ _, {_List, _}] := $Failed
+theIterationT[ _, {$Failed, _}] := $Failed
+theIterationT[ args___] := 
+ unexpected[ theIterationT, {args}]
  
 SuchUnique$TM[ r:RNG$[ _, __], cond_, form_] /; buiActive["SuchUnique"] :=
  	Module[ {rcList, res},
  		Apply[ Tuple$TM, res] /; (
  			rcList = rngCondToIterator[ r, Hold[ cond]];
- 			With[ {r1 = First[ rcList]},
- 				res = ReleaseHold[ Fold[ Hold[ theIterationT[ #1, #2]]&, Hold[ theIterationF[ Hold[ form], r1]], Rest[ rcList]]]
- 			];
- 			res =!= $Failed
+ 			If[ rcList === $Failed,
+ 				False,
+	 			With[ {r1 = First[ rcList]},
+	 				res = ReleaseHold[ Fold[ Hold[ theIterationT[ #1, #2]]&, Hold[ theIterationF[ Hold[ form], r1]], Rest[ rcList]]]
+	 			];
+	 			res =!= $Failed
+ 			]
  			)
 	]
 SuchUnique$TM[ RNG$[ r_], cond_, form_] /; buiActive["SuchUnique"] :=
 	Module[ {res},
 		(* "theIterationF" always returns a 1-element list, unless it returns $Failed *)
 		First[ res] /; (res = theIterationF[ Hold[ form], {rangeToIterator[ r], Hold[ cond]}]) =!= $Failed
+	]
+	
+	
+(* ::Subsection:: *)
+(* argmin, argmax, theargmin, theargmax *)
+
+(* "iteratorValueIteration" returns the list of all '{i, v}',
+	where 'i' iterates over the whole range and 'v' is the value of 'term' at 'i'. *)
+iteratorValueIteration[ term_Hold, {{x_, iter__}, cond_Hold}] :=
+ Module[ {ci, i, out = {}},
+	Catch[
+		Do[
+			If[ cond === Hold[ True],
+				ci = True,
+				(*else*)
+            	ci = ReleaseHold[ substituteFree[ cond, {x -> i}]]
+			];
+			If[ ci,
+				AppendTo[ out, {i, ReleaseHold[ substituteFree[ term, {x -> i}]]}],
+				Continue[],
+				Throw[ $Failed]
+			],
+			{ i, iter}
+		]; (*end do*)
+		out
+	] (*end catch*)
+ ]
+iteratorValueIteration[ args___] := 
+ unexpected[ iteratorValueIteration, {args}]
+ 
+(* "findFirstPath" takes some object 'x' and a list as returned by "iteratorValueIteration"
+	and returns the list of iterators leading to the first occurrence of 'x' as value.
+	If not such iterators exist, $Failed is returned. *)
+findFirstPath[x_, {a_, x_}] := {a}
+findFirstPath[x_, {a_, l_List}] :=
+	Module[{tmp},
+		Catch[
+			Scan[
+				(tmp = findFirstPath[x, #];
+				If[tmp =!= $Failed, Throw[Prepend[tmp, a]]]) &,
+				l
+	     	];
+			$Failed
+		]
+	]
+findFirstPath[x_, l_List] :=
+	Module[{tmp},
+		Catch[
+			Scan[
+				(tmp = findFirstPath[x, #];
+				If[tmp =!= $Failed, Throw[tmp]]) &,
+				l
+			];
+			$Failed
+		]
+	]
+findFirstPath[___] := $Failed;
+ 
+ArgMin$TM[ r:RNG$[ __], cond_, term_] /; buiActive["ArgMin"] :=
+	Module[ {res, rcList, m},
+		(
+		If[ Length[ res] === 1,
+			First[ res],
+			Apply[ Tuple$TM, res]
+		]
+		) /; (
+			rcList = rngCondToIterator[ r, Hold[ cond]];
+			If[ rcList === $Failed,
+				False,
+	 			res = ReleaseHold[ Fold[ Hold[ iteratorValueIteration[ #1, #2]]&, Hold[ term], rcList]];
+	 			(* The "Cases[...]" extracts all values and drops all iterators *)
+	 			m = Min[ Cases[ res, {___, x:Except[ _List]} :> x, 2 * Length[ r]]];
+	 			res = findFirstPath[ m, res];
+	 			res =!= $Failed
+			]
+ 			)
+	]
+ArgMin$TM[ r_RNG$, cond_, ord_, term_] /; buiActive["ArgMin"] :=
+	Module[ {res, rcList, m},
+		(
+		If[ Length[ res] === 1,
+			First[ res],
+			Apply[ Tuple$TM, res]
+		]
+		) /; (
+			rcList = rngCondToIterator[ r, Hold[ cond]];
+			If[ rcList === $Failed,
+				False,
+	 			res = ReleaseHold[ Fold[ Hold[ iteratorValueIteration[ #1, #2]]&, Hold[ term], rcList]];
+	 			m = min[ Cases[ res, {___, x:Except[ _List]} :> x, 2 * Length[ r]], ord];
+	 			If[ MatchQ[ m, {_}],
+	 				res = findFirstPath[ First[ m], res];
+	 				res =!= $Failed,
+	 				False
+	 			]
+			]
+ 			)
+	]
+	
+ArgMax$TM[ r:RNG$[ __], cond_, term_] /; buiActive["ArgMax"] :=
+	Module[ {res, rcList, m},
+		(
+		If[ Length[ res] === 1,
+			First[ res],
+			Apply[ Tuple$TM, res]
+		]
+		) /; (
+			rcList = rngCondToIterator[ r, Hold[ cond]];
+			If[ rcList === $Failed,
+				False,
+	 			res = ReleaseHold[ Fold[ Hold[ iteratorValueIteration[ #1, #2]]&, Hold[ term], rcList]];
+	 			m = Max[ Cases[ res, {___, x:Except[ _List]} :> x, 2 * Length[ r]]];
+	 			res = findFirstPath[ m, res];
+	 			res =!= $Failed
+			]
+ 			)
+	]
+ArgMax$TM[ r_RNG$, cond_, ord_, term_] /; buiActive["ArgMax"] :=
+	Module[ {res, rcList, m},
+		(
+		If[ Length[ res] === 1,
+			First[ res],
+			Apply[ Tuple$TM, res]
+		]
+		) /; (
+			rcList = rngCondToIterator[ r, Hold[ cond]];
+			If[ rcList === $Failed,
+				False,
+	 			res = ReleaseHold[ Fold[ Hold[ iteratorValueIteration[ #1, #2]]&, Hold[ term], rcList]];
+	 			m = max[ Cases[ res, {___, x:Except[ _List]} :> x, 2 * Length[ r]], ord];
+	 			If[ MatchQ[ m, {_}],
+	 				res = findFirstPath[ First[ m], res];
+	 				res =!= $Failed,
+	 				False
+	 			]
+			]
+ 			)
+	]
+	
+TheArgMin$TM[ r:RNG$[ __], cond_, term_] /; buiActive["TheArgMin"] :=
+	Module[ {res, rcList, m, v},
+		(
+		If[ Length[ res] === 1,
+			First[ res],
+			Apply[ Tuple$TM, res]
+		]
+		) /; (
+			rcList = rngCondToIterator[ r, Hold[ cond]];
+			If[ rcList === $Failed,
+				False,
+	 			res = ReleaseHold[ Fold[ Hold[ iteratorValueIteration[ #1, #2]]&, Hold[ term], rcList]];
+	 			v = Cases[ res, {___, x:Except[ _List]} :> x, 2 * Length[ r]];
+	 			m = Min[ v];
+	 			If[ Count[ v, m] === 1,
+	 				res = findFirstPath[ m, res];
+	 				res =!= $Failed,
+	 				False
+	 			]
+			]
+ 			)
+	]
+TheArgMin$TM[ r:RNG$[ __], cond_, ord_, term_] /; buiActive["TheArgMin"] :=
+	Module[ {res, rcList, m, v},
+		(
+		If[ Length[ res] === 1,
+			First[ res],
+			Apply[ Tuple$TM, res]
+		]
+		) /; (
+			rcList = rngCondToIterator[ r, Hold[ cond]];
+			If[ rcList === $Failed,
+				False,
+	 			res = ReleaseHold[ Fold[ Hold[ iteratorValueIteration[ #1, #2]]&, Hold[ term], rcList]];
+	 			v = Cases[ res, {___, x:Except[ _List]} :> x, 2 * Length[ r]];
+	 			m = min[ v, ord];
+	 			If[ MatchQ[ m, {_}] && Count[ v, First[ m]] === 1,
+	 				res = findFirstPath[ First[ m], res];
+	 				res =!= $Failed,
+	 				False
+	 			]
+			]
+ 			)
+	]
+	
+TheArgMax$TM[ r:RNG$[ __], cond_, term_] /; buiActive["TheArgMax"] :=
+	Module[ {res, rcList, m, v},
+		(
+		If[ Length[ res] === 1,
+			First[ res],
+			Apply[ Tuple$TM, res]
+		]
+		) /; (
+			rcList = rngCondToIterator[ r, Hold[ cond]];
+			If[ rcList === $Failed,
+				False,
+	 			res = ReleaseHold[ Fold[ Hold[ iteratorValueIteration[ #1, #2]]&, Hold[ term], rcList]];
+	 			v = Cases[ res, {___, x:Except[ _List]} :> x, 2 * Length[ r]];
+	 			m = Max[ v];
+	 			If[ Count[ v, m] === 1,
+	 				res = findFirstPath[ m, res];
+	 				res =!= $Failed,
+	 				False
+	 			]
+			]
+ 			)
+	]
+TheArgMax$TM[ r:RNG$[ __], cond_, ord_, term_] /; buiActive["TheArgMax"] :=
+	Module[ {res, rcList, m, v},
+		(
+		If[ Length[ res] === 1,
+			First[ res],
+			Apply[ Tuple$TM, res]
+		]
+		) /; (
+			rcList = rngCondToIterator[ r, Hold[ cond]];
+			If[ rcList === $Failed,
+				False,
+	 			res = ReleaseHold[ Fold[ Hold[ iteratorValueIteration[ #1, #2]]&, Hold[ term], rcList]];
+	 			v = Cases[ res, {___, x:Except[ _List]} :> x, 2 * Length[ r]];
+	 			m = max[ v, ord];
+	 			If[ MatchQ[ m, {_}] && Count[ v, First[ m]] === 1,
+	 				res = findFirstPath[ First[ m], res];
+	 				res =!= $Failed,
+	 				False
+	 			]
+			]
+ 			)
 	]
 	
 
@@ -1338,10 +1614,10 @@ intersectIntervals[ _[ al_, ar_, alc_, arc_], _[ bl_, br_, blc_, brc_]] :=
 (* Tuples *)
 
 
-Tuple$TM /: Insert$TM[ a_Tuple$TM?isSequenceFree, p_, q_] /; buiActive["Insert"] := Insert[ a, p, q /. Tuple$TM -> List]
+Tuple$TM /: Insert$TM[ a_Tuple$TM?isSequenceFree, p_, q_?isPositionSpec] /; buiActive["Insert"] := Insert[ a, p, q /. Tuple$TM -> List]
 
 (* Delete elements at one or more positions *)
-Tuple$TM /: DeleteAt$TM[ a_Tuple$TM?isSequenceFree, b_] /; buiActive["DeleteAt"] := Delete[ a, b //. Tuple$TM -> List]
+Tuple$TM /: DeleteAt$TM[ a_Tuple$TM?isSequenceFree, b_?isPositionSpec] /; buiActive["DeleteAt"] := Delete[ a, b //. Tuple$TM -> List]
 
 (* Delete elements of a certain shape. Multiple deletions are not possible, because it would need
 	special syntax how to specify multiple shapes. Tuples cannot be used because for this *)
@@ -1403,7 +1679,7 @@ Tuple$TM /: Subscript$TM[ min$TM, ord_][ Tuple$TM[ e__]] /; buiActive["Min"] :=
 
 Tuple$TM /: BracketingBar$TM[ a_Tuple$TM?isSequenceFree] /; buiActive["Length"] := Length[ a]
 
-Tuple$TM /: ReplacePart$TM[ a_Tuple$TM?isSequenceFree, p:Tuple$TM[_, _]..] /; buiActive["ReplacePart"] :=
+Tuple$TM /: ReplacePart$TM[ a_Tuple$TM?isSequenceFree, p:Tuple$TM[_?isPositionSpec, _]..] /; buiActive["ReplacePart"] :=
 	ReplacePart[ a, MapAt[# /. {Tuple$TM -> List}&, Replace[ {p}, Tuple$TM[ l_, r_] :> Rule[ l, r], {1}], Table[ {i, 1}, {i, Length[{p}]}]]]
 
 Tuple$TM /: Replace$TM[ a_Tuple$TM?isGround, s:Tuple$TM[_?isGround, _]..] /; buiActive["Replace"] :=
@@ -1412,6 +1688,7 @@ Tuple$TM /: Replace$TM[ a_Tuple$TM?isGround, s:Tuple$TM[_?isGround, _]..] /; bui
 Tuple$TM /: Subscript$TM[ a_Tuple$TM, p__Integer] /; buiActive["Subscript"] := Subscript$TM[ a, Tuple$TM[ p]]
 Tuple$TM /: Subscript$TM[ a_Tuple$TM?isSequenceFree, p_?isPositionSpec] /; buiActive["Subscript"] := Extract[ a, p /. Tuple$TM -> List] /. List -> Tuple$TM
 
+isPositionSpec[ 0] := False	(* The head of an expression must not be accessible *)
 isPositionSpec[ _Integer] := True
 isPositionSpec[ Tuple$TM[ p__]] := Apply[ And, Map[ isPositionSpec, {p}]]
 isPositionSpec[ _] := False

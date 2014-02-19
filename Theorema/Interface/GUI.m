@@ -60,12 +60,16 @@ initGUI[] :=
                 {"Cardinality", RowBox[{"\[LeftBracketingBar]", "A", "\[RightBracketingBar]"}], False, True, False},
                 {"PowerSet", RowBox[{"\[ScriptCapitalP]","[", "A", "]"}], False, True, False},
                 {"AnElement", RowBox[{"\[AE]","[", "A", "]"}], False, True, False},
+                {"UnionOf", RowBox[{"\[Union]",SubscriptBox["A","i"]}], False, True, False},
+        		{"IntersectionOf", RowBox[{"\[Intersection]",SubscriptBox["A","i"]}], False, True, False},
                 {"MaximumElementSet", RowBox[{"max","[", "A", "]"}], False, True, False},
                 {"MinimumElementSet", RowBox[{"min","[", "A", "]"}], False, True, False},
                 {"MaximumOf", RowBox[{"max",SubscriptBox["A","i"]}], False, True, False},
                 {"MinimumOf", RowBox[{"min",SubscriptBox["A","i"]}], False, True, False},
-                {"UnionOf", RowBox[{"\[Union]",SubscriptBox["A","i"]}], False, True, False},
-        		{"IntersectionOf", RowBox[{"\[Intersection]",SubscriptBox["A","i"]}], False, True, False}
+                {"ArgMax", RowBox[{"argmax",SubscriptBox["A","i"]}], False, True, False},
+                {"ArgMin", RowBox[{"argmin",SubscriptBox["A","i"]}], False, True, False},
+                {"TheArgMax", RowBox[{"theargmax",SubscriptBox["A","i"]}], False, True, False},
+                {"TheArgMin", RowBox[{"theargmin",SubscriptBox["A","i"]}], False, True, False}
         	},
         	{"Tuples",
         		{"Subscript", SubscriptBox[ "T", "i"], False, True, False},
