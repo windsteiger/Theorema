@@ -193,12 +193,13 @@ replaceProofSit[ po_PRFOBJ$, pos_ -> p_PRFSIT$] :=
 	]
 	
 replaceProofSit[ po_PRFOBJ$, pos_ -> new:node_[___]] :=
-	Module[{parentID = id@Extract[ po, pos], sub},
+	Module[{parentID = id@Extract[ po, pos], sub, selpos},
 		sub = poToTree[ new];
 		$TMAproofTree = Join[ $TMAproofTree /. {parentID, pending, PRFSIT$, None} -> {id@new, proofValue@new, node, name@new}, sub];
 		$lastVisitedNode = id@new;
-		If[ TrueQ[$interactiveProofSitSel],
-			$selectedProofStep = id[ Extract[ new, First[ Position[ new, _PRFSIT$, Infinity, 1]]]];
+		(* 'new' might be free of PRFSIT$ *)
+		If[ TrueQ[$interactiveProofSitSel] && (selpos = Position[ new, _PRFSIT$, Infinity, 1]) =!= {},
+			$selectedProofStep = id[ Extract[ new, First[ selpos]]];
 		];
 		ReplacePart[ po, pos -> new]
 	]

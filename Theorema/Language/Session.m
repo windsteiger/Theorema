@@ -65,10 +65,14 @@ freshSymbol[ Hold[ s_Symbol]] :=
             _?isMathematicalConstant, s,
             (* processing the number domain symbols by MakeExpression does not work, I think MakeExpression is only
                applied to boxes and not to individual symbols. We convert them to respective ranges here. *)
-            ToExpression["\[DoubleStruckCapitalN]"], ToExpression[ "IntegerInterval$TM[ 1, Infinity, True, False]"],
-            ToExpression["\[DoubleStruckCapitalZ]"], ToExpression[ "IntegerInterval$TM[ -Infinity, Infinity, False, False]"],
-            ToExpression["\[DoubleStruckCapitalQ]"], ToExpression[ "RationalInterval$TM[ -Infinity, Infinity, False, False]"],
-            ToExpression["\[DoubleStruckCapitalR]"], ToExpression[ "RealInterval$TM[ -Infinity, Infinity, False, False]"],
+            Theorema`Computation`Knowledge`\[DoubleStruckCapitalN]|Theorema`Knowledge`\[DoubleStruckCapitalN],
+            	ToExpression[ "IntegerInterval$TM[ 1, Infinity, True, False]"],
+            Theorema`Computation`Knowledge`\[DoubleStruckCapitalZ]|Theorema`Knowledge`\[DoubleStruckCapitalZ],
+            	ToExpression[ "IntegerInterval$TM[ -Infinity, Infinity, False, False]"],
+            Theorema`Computation`Knowledge`\[DoubleStruckCapitalQ]|Theorema`Knowledge`\[DoubleStruckCapitalQ],
+            	ToExpression[ "RationalInterval$TM[ -Infinity, Infinity, False, False]"],
+            Theorema`Computation`Knowledge`\[DoubleStruckCapitalR]|Theorema`Knowledge`\[DoubleStruckCapitalR],
+            	ToExpression[ "RealInterval$TM[ -Infinity, Infinity, False, False]"],
             DoubleLongRightArrow|DoubleRightArrow, ToExpression[ "Implies$TM"],
             DoubleLongLeftRightArrow|DoubleLeftRightArrow|Equivalent, ToExpression[ "Iff$TM"],
         	SetDelayed, ToExpression[ "EqualDef$TM"], 
@@ -827,7 +831,6 @@ renameToStandardContext[ expr_] :=
 			We don't use makeTuple[] here, because otherwise we get problems with contexts. *)
 		(* Do not substitute into a META$, because a META$ has a list of a.b.f. constants at pos. 3 *)
 		stringExpr = ToString[ replaceAllExcept[ FullForm[ Hold[ expr]], {List -> Tuple$TM}, {}, Heads -> {Theorema`Computation`Language`META$}]];
-		
 		stringExpr = StringReplace[ stringExpr, "Theorema`Computation`" -> "Theorema`"];
 		$ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
         (* Set default context when not in an archive *)
@@ -845,7 +848,8 @@ computeInProof[ expr_] :=
 		setComputationContext[ "none"];
 		(* simp does not evaluate further *)
 		With[ {res = simp},
-			ToExpression[ StringReplace[ ToString[ renameToStandardContext[ res]], "Theorema`Computation`" -> "Theorema`"]]
+			(* We need FullForm here, for the same reason as in "renameToStandardContext" *)
+			ToExpression[ StringReplace[ ToString[ FullForm[ renameToStandardContext[ res]]], "Theorema`Computation`" -> "Theorema`"]]
 		]
 	]
 computeInProof[ args___] := unexpected[ computeInProof, {args}]
