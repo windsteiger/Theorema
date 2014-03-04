@@ -57,6 +57,15 @@ setComputationContext[ args___] := unexpected[ setComputationContext, {args}]
 (* ::Section:: *)
 (* Arithmetic *)
 
+tmaAtomQ[ VAR$[ _]] := True
+tmaAtomQ[ FIX$[ _, _Integer]] := True
+tmaAtomQ[ META$[ _, _Integer, _List]] := True
+tmaAtomQ[ _DirectedInfinity] := True
+tmaAtomQ[ a_] := AtomQ[ a]
+
+mathematicalConstantQ[ True|False|Infinity|Indeterminate|I|Pi|E|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaisher] := True
+mathematicalConstantQ[ _] := False
+
 (* "buiActiveArithmetic" extends "buiActive" such that the activation of "Subtract" and "Divide" can also
 	be determined in one stroke. *)
 buiActiveArithmetic["Subtract"] := buiActive["Plus"] && buiActive["Minus"]
@@ -67,7 +76,28 @@ buiActiveArithmetic[s_String] := buiActive[s]
 buiActivePower[-1] := buiActive["MultInverse"] || buiActive["Power"]
 buiActivePower[_] := buiActive["Power"]
 
-   
+Equal$TM[ a_, a_] /; buiActive["Equal"] := True
+Set$TM /: Equal$TM[ _Integer|_Rational|_Real|_Complex|_DirectedInfinity, _Set$TM] /; buiActive["Equal"] || buiActive["SetEqual"] := False
+Tuple$TM /: Equal$TM[ _Integer|_Rational|_Real|_Complex|_DirectedInfinity, _Tuple$TM] /; buiActive["Equal"] || buiActive["TupleEqual"] := False
+Equal$TM[ _?mathematicalConstantQ, _Integer|_Rational|_Real|_Complex|_DirectedInfinity] /; buiActive["Equal"] := False
+Set$TM /: Equal$TM[ _?mathematicalConstantQ, _Set$TM] /; buiActive["Equal"] || buiActive["SetEqual"] := False
+Tuple$TM /: Equal$TM[ _?mathematicalConstantQ, _Tuple$TM] /; buiActive["Equal"] || buiActive["TupleEqual"] := False
+Equal$TM[ _Integer|_Rational|_Real|_Complex|_DirectedInfinity, (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] && (buiActive["Equal"] || buiActive["SetEqual"]) := False
+Equal$TM[ _?mathematicalConstantQ, (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] && (buiActive["Equal"] || buiActive["SetEqual"]) := False
+Equal$TM[ _Integer|_Rational|_Real|_Complex|_DirectedInfinity, h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] && (buiActive["Equal"] || buiActive["SetEqual"]) := False
+Equal$TM[ _?mathematicalConstantQ, h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] && (buiActive["Equal"] || buiActive["SetEqual"]) := False
+Set$TM /: Equal$TM[ _Set$TM, _Integer|_Rational|_Real|_Complex|_DirectedInfinity] /; buiActive["Equal"] || buiActive["SetEqual"] := False
+Tuple$TM /: Equal$TM[ _Tuple$TM, _Integer|_Rational|_Real|_Complex|_DirectedInfinity] /; buiActive["Equal"] || buiActive["TupleEqual"] := False
+Equal$TM[ _Integer|_Rational|_Real|_Complex|_DirectedInfinity, _?mathematicalConstantQ] /; buiActive["Equal"] := False
+Set$TM /: Equal$TM[ _Set$TM, _?mathematicalConstantQ] /; buiActive["Equal"] || buiActive["SetEqual"] := False
+Tuple$TM /: Equal$TM[ _Tuple$TM, _?mathematicalConstantQ] /; buiActive["Equal"] || buiActive["TupleEqual"] := False
+Equal$TM[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___], _Integer|_Rational|_Real|_Complex|_DirectedInfinity] /; buiActive[StringDrop[SymbolName[h],-3]] && (buiActive["Equal"] || buiActive["SetEqual"]) := False
+Equal$TM[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___], _?mathematicalConstantQ] /; buiActive[StringDrop[SymbolName[h],-3]] && (buiActive["Equal"] || buiActive["SetEqual"]) := False
+Equal$TM[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM), _Integer|_Rational|_Real|_Complex|_DirectedInfinity] /; buiActive[StringDrop[SymbolName[h],-3]] && (buiActive["Equal"] || buiActive["SetEqual"]) := False
+Equal$TM[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM), _?mathematicalConstantQ] /; buiActive[StringDrop[SymbolName[h],-3]] && (buiActive["Equal"] || buiActive["SetEqual"]) := False
+Equal$TM[ a_?mathematicalConstantQ, b_?mathematicalConstantQ] /; buiActive["Equal"] := SameQ[ a, b]
+Equal$TM[ a_?tmaAtomQ, b_?tmaAtomQ] /; buiActive["Equal"] := a == b
+
 Plus$TM[ a___] /; buiActive["Plus"] := Plus[ a]
 Minus$TM[ a_] /; buiActive["Minus"] := Minus[ a]
 Subtract$TM[ a_, b_] /; buiActiveArithmetic["Subtract"] := Subtract[ a, b] (* "Subtract" requires exactly 2 arguments. *)
@@ -76,7 +106,6 @@ Divide$TM[ a_, b_] /; buiActiveArithmetic["Divide"] := Divide[ a, b] (* "Divide"
 Power$TM[ a_, b_] /; buiActivePower[ b] := Power[ a, b]
 Radical$TM[ a_, b_] /; buiActive["Radical"] := Power[ a, 1/b]
 Factorial$TM[ a_] /; buiActive["Factorial"] := a!
-Equal$TM[ a_, b_] /; buiActive["Equal"] := a == b
 Less$TM[ a__] /; buiActive["Less"] := Less[ a]
 LessEqual$TM[ a__] /; buiActive["LessEqual"] := LessEqual[ a]
 Greater$TM[ a__] /; buiActive["Greater"] := Greater[ a]
@@ -363,10 +392,11 @@ rangeToIterator[ _] := $Failed
 rangeToIterator[ args___] := unexpected[ rangeToIterator, {args}]
 
 ClearAll[ Forall$TM, Exists$TM, SequenceOf$TM, SumOf$TM, ProductOf$TM,
-	SetOf$TM, TupleOf$TM, MaximumOf$TM, MinimumOf$TM, UnionOf$TM, IntersectionOf$TM]
+	SetOf$TM, TupleOf$TM, MaximumOf$TM, MinimumOf$TM, UnionOf$TM, IntersectionOf$TM, Such$TM, SuchUnique$TM,
+	ArgMin$TM, ArgMax$TM, TheArgMin$TM, TheArgMax$TM]
 Scan[ SetAttributes[ #, HoldRest] &, {Forall$TM, Exists$TM, 
   SequenceOf$TM, SumOf$TM, ProductOf$TM, SetOf$TM, TupleOf$TM, MaximumOf$TM, MinimumOf$TM,
-  UnionOf$TM, IntersectionOf$TM}]
+  UnionOf$TM, IntersectionOf$TM, Such$TM, SuchUnique$TM, ArgMin$TM, ArgMax$TM, TheArgMin$TM, TheArgMax$TM}]
 Scan[ SetAttributes[ #, HoldFirst] &, {SETRNG$, STEPRNG$}]
 
 Forall$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["Forall"] := 
@@ -394,7 +424,7 @@ forallIteration[ {x_, iter__}, cond_, form_] :=
  Module[ {uneval = {}, ci, sub},
 	Catch[
 		Do[
-			If[ TrueQ[ cond],
+			If[ Hold[ cond] === Hold[ True],
 				ci = True,
 				(*else*)
             	ci = ReleaseHold[ substituteFree[ Hold[ cond], {x -> i}]]
@@ -439,7 +469,7 @@ existsIteration[ {x_, iter__}, cond_, form_] :=
  Module[ {uneval = {}, ci, sub},
 	Catch[
 		Do[
-			If[ TrueQ[ cond],
+			If[ Hold[ cond] === Hold[ True],
 				ci = True,
 				ci = ReleaseHold[ substituteFree[ Hold[ cond], {x -> i}]]
 			];
@@ -710,11 +740,421 @@ IntersectionOf$TM[ RNG$[ r_], cond_, dom_, form_] /; buiActive["IntersectionOf"]
 		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Annotated$TM[ Intersection$TM, SubScript$TM[ dom]], $Failed]) =!= $Failed
 	]
 	
+(* ::Subsection:: *)
+(* the, such *)
+
+(* "rngCondToIterator" converts several ranges into iterators, where for each iterator only the part of the condition
+	'cond' is considered which really matters ("splitAnd"). It returns a list of pairs, where each pair consists of
+	- an iterator and
+	- the corresponding condition
+	If at least one range cannot be converted into a valid iterator (i.e. a list with at least 2 elements),
+	$Failed is returned.
+*)
+rngCondToIterator[ RNG$[ r_], cond_Hold ] :=
+	Module[ {it},
+		it = rangeToIterator[ r];
+		If[ MatchQ[ it, {_, __}],
+			{{rangeToIterator[ r], cond}},
+			$Failed
+		]
+	]
+rngCondToIterator[ RNG$[ r_, s__], cond_Hold ] :=
+	Module[ {splitC, it, l},
+		it = rangeToIterator[ r];
+		If[ MatchQ[ it, {_, __}],
+			splitC = splitAnd[ cond, {Hold[ r][[1, 1]]}];
+			l = rngCondToIterator[ RNG$[ s], Last[ splitC]];
+			If[ l === $Failed,
+				$Failed,
+				Append[ l, {it, First[ splitC]}]
+			],
+			$Failed
+		]
+	]
+
+(* "suchIterationF" returns '{i}', where 'i' is such that 'form' gives True.
+	If no such 'i' exists, $Failed is returned. *)
+suchIterationF[ form_Hold, {{x_, iter__}, cond_Hold}] :=
+ Module[ {ci, sub, i},
+	Catch[
+		Do[
+			If[ cond === Hold[ True],
+				ci = True,
+				(*else*)
+            	ci = ReleaseHold[ substituteFree[ cond, {x -> i}]]
+			];
+			If[ ci,
+				sub = ReleaseHold[ substituteFree[ form, {x -> i}]];
+				If[ sub, Throw[ {i}]]
+			],
+			{ i, iter}
+		]; (*end do*)
+		$Failed
+	] (*end catch*)
+ ]
+suchIterationF[ _, {_List, _}] := $Failed
+suchIterationF[ _, {$Failed, _}] := $Failed
+suchIterationF[ args___] := 
+ unexpected[ suchIterationF, {args}]
+(* "suchIterationT" returns 'Prepend[term, i]', where 'i' is such that 'term' evaluates to a list.
+	If no such 'i' exists, $Failed is returned. *)
+suchIterationT[ term_Hold, {{x_, iter__}, cond_Hold}] :=
+ Module[ {ci, sub, i},
+	Catch[
+		Do[
+			If[ cond === Hold[ True],
+				ci = True,
+				(*else*)
+            	ci = ReleaseHold[ substituteFree[ cond, {x -> i}]]
+			];
+			If[ ci,
+				sub = ReleaseHold[ substituteFree[ term, {x -> i}]];
+				If[ MatchQ[ sub, {___}], Throw[ Prepend[ sub, i]]]
+			],
+			{ i, iter}
+		]; (*end do*)
+		$Failed
+	] (*end catch*)
+ ]
+suchIterationT[ _, {_List, _}] := $Failed
+suchIterationT[ _, {$Failed, _}] := $Failed
+suchIterationT[ args___] := 
+ unexpected[ suchIterationT, {args}]
+ 
+Such$TM[ r:RNG$[ _, __], cond_, form_] /; buiActive["Such"] :=
+ 	Module[ {rcList, res},
+ 		Apply[ Tuple$TM, res] /; (
+ 			rcList = rngCondToIterator[ r, Hold[ cond]];
+ 			If[ rcList === $Failed,
+ 				False,
+	 			With[ {r1 = First[ rcList]},
+	 				res = ReleaseHold[ Fold[ Hold[ suchIterationT[ #1, #2]]&, Hold[ suchIterationF[ Hold[ form], r1]], Rest[ rcList]]]
+	 			];
+	 			res =!= $Failed
+ 			]
+ 			)
+	]
+Such$TM[ RNG$[ r_], cond_, form_] /; buiActive["Such"] :=
+	Module[ {res},
+		(* "suchIterationF" always returns a 1-element list, unless it returns $Failed *)
+		First[ res] /; (res = suchIterationF[ Hold[ form], {rangeToIterator[ r], Hold[ cond]}]) =!= $Failed
+	]
+	
+	
+theIterationF[ form_Hold, {{x_, iter__}, cond_Hold}] :=
+ Module[ {ci, sub, i, out = $Failed},
+	Catch[
+		Do[
+			If[ cond === Hold[ True],
+				ci = True,
+				(*else*)
+            	ci = ReleaseHold[ substituteFree[ cond, {x -> i}]]
+			];
+			If[ ci,
+				sub = ReleaseHold[ substituteFree[ form, {x -> i}]];
+				If[ sub,
+					If[ out === $Failed,
+						out = {i},
+						Throw[ $Failed]
+					],
+					Continue[],
+					Throw[ $Failed]
+				],
+				Continue[],
+				Throw[ $Failed]
+			],
+			{ i, iter}
+		]; (*end do*)
+		out
+	] (*end catch*)
+ ]
+theIterationF[ _, {_List, _}] := $Failed
+theIterationF[ _, {$Failed, _}] := $Failed
+theIterationF[ args___] := 
+ unexpected[ theIterationF, {args}]
+theIterationT[ term_Hold, {{x_, iter__}, cond_Hold}] :=
+ Module[ {ci, sub, i, out = $Failed},
+	Catch[
+		Do[
+			If[ cond === Hold[ True],
+				ci = True,
+				(*else*)
+            	ci = ReleaseHold[ substituteFree[ cond, {x -> i}]]
+			];
+			If[ ci,
+				sub = ReleaseHold[ substituteFree[ term, {x -> i}]];
+				If[ MatchQ[ sub, {___}],
+					If[ out === $Failed,
+						out = Prepend[ sub, i],
+						Throw[ $Failed]
+					]
+				],
+				Continue[],
+				Throw[ $Failed]
+			],
+			{ i, iter}
+		]; (*end do*)
+		out
+	] (*end catch*)
+ ]
+theIterationT[ _, {_List, _}] := $Failed
+theIterationT[ _, {$Failed, _}] := $Failed
+theIterationT[ args___] := 
+ unexpected[ theIterationT, {args}]
+ 
+SuchUnique$TM[ r:RNG$[ _, __], cond_, form_] /; buiActive["SuchUnique"] :=
+ 	Module[ {rcList, res},
+ 		Apply[ Tuple$TM, res] /; (
+ 			rcList = rngCondToIterator[ r, Hold[ cond]];
+ 			If[ rcList === $Failed,
+ 				False,
+	 			With[ {r1 = First[ rcList]},
+	 				res = ReleaseHold[ Fold[ Hold[ theIterationT[ #1, #2]]&, Hold[ theIterationF[ Hold[ form], r1]], Rest[ rcList]]]
+	 			];
+	 			res =!= $Failed
+ 			]
+ 			)
+	]
+SuchUnique$TM[ RNG$[ r_], cond_, form_] /; buiActive["SuchUnique"] :=
+	Module[ {res},
+		(* "theIterationF" always returns a 1-element list, unless it returns $Failed *)
+		First[ res] /; (res = theIterationF[ Hold[ form], {rangeToIterator[ r], Hold[ cond]}]) =!= $Failed
+	]
+	
+	
+(* ::Subsection:: *)
+(* argmin, argmax, theargmin, theargmax *)
+
+(* "iteratorValueIteration" returns the list of all '{i, v}',
+	where 'i' iterates over the whole range and 'v' is the value of 'term' at 'i'. *)
+iteratorValueIteration[ term_Hold, {{x_, iter__}, cond_Hold}] :=
+ Module[ {ci, i, out = {}},
+	Catch[
+		Do[
+			If[ cond === Hold[ True],
+				ci = True,
+				(*else*)
+            	ci = ReleaseHold[ substituteFree[ cond, {x -> i}]]
+			];
+			If[ ci,
+				AppendTo[ out, {i, ReleaseHold[ substituteFree[ term, {x -> i}]]}],
+				Continue[],
+				Throw[ $Failed]
+			],
+			{ i, iter}
+		]; (*end do*)
+		out
+	] (*end catch*)
+ ]
+iteratorValueIteration[ args___] := 
+ unexpected[ iteratorValueIteration, {args}]
+ 
+(* "findFirstPath" takes some object 'x' and a list as returned by "iteratorValueIteration"
+	and returns the list of iterators leading to the first occurrence of 'x' as value.
+	If not such iterators exist, $Failed is returned. *)
+findFirstPath[x_, {a_, x_}] := {a}
+findFirstPath[x_, {a_, l_List}] :=
+	Module[{tmp},
+		Catch[
+			Scan[
+				(tmp = findFirstPath[x, #];
+				If[tmp =!= $Failed, Throw[Prepend[tmp, a]]]) &,
+				l
+	     	];
+			$Failed
+		]
+	]
+findFirstPath[x_, l_List] :=
+	Module[{tmp},
+		Catch[
+			Scan[
+				(tmp = findFirstPath[x, #];
+				If[tmp =!= $Failed, Throw[tmp]]) &,
+				l
+			];
+			$Failed
+		]
+	]
+findFirstPath[___] := $Failed;
+ 
+ArgMin$TM[ r:RNG$[ __], cond_, term_] /; buiActive["ArgMin"] :=
+	Module[ {res, rcList, m},
+		(
+		If[ Length[ res] === 1,
+			First[ res],
+			Apply[ Tuple$TM, res]
+		]
+		) /; (
+			rcList = rngCondToIterator[ r, Hold[ cond]];
+			If[ rcList === $Failed,
+				False,
+	 			res = ReleaseHold[ Fold[ Hold[ iteratorValueIteration[ #1, #2]]&, Hold[ term], rcList]];
+	 			(* The "Cases[...]" extracts all values and drops all iterators *)
+	 			m = Min[ Cases[ res, {___, x:Except[ _List]} :> x, 2 * Length[ r]]];
+	 			res = findFirstPath[ m, res];
+	 			res =!= $Failed
+			]
+ 			)
+	]
+ArgMin$TM[ r_RNG$, cond_, ord_, term_] /; buiActive["ArgMin"] :=
+	Module[ {res, rcList, m},
+		(
+		If[ Length[ res] === 1,
+			First[ res],
+			Apply[ Tuple$TM, res]
+		]
+		) /; (
+			rcList = rngCondToIterator[ r, Hold[ cond]];
+			If[ rcList === $Failed,
+				False,
+	 			res = ReleaseHold[ Fold[ Hold[ iteratorValueIteration[ #1, #2]]&, Hold[ term], rcList]];
+	 			m = min[ Cases[ res, {___, x:Except[ _List]} :> x, 2 * Length[ r]], ord];
+	 			If[ MatchQ[ m, {_}],
+	 				res = findFirstPath[ First[ m], res];
+	 				res =!= $Failed,
+	 				False
+	 			]
+			]
+ 			)
+	]
+	
+ArgMax$TM[ r:RNG$[ __], cond_, term_] /; buiActive["ArgMax"] :=
+	Module[ {res, rcList, m},
+		(
+		If[ Length[ res] === 1,
+			First[ res],
+			Apply[ Tuple$TM, res]
+		]
+		) /; (
+			rcList = rngCondToIterator[ r, Hold[ cond]];
+			If[ rcList === $Failed,
+				False,
+	 			res = ReleaseHold[ Fold[ Hold[ iteratorValueIteration[ #1, #2]]&, Hold[ term], rcList]];
+	 			m = Max[ Cases[ res, {___, x:Except[ _List]} :> x, 2 * Length[ r]]];
+	 			res = findFirstPath[ m, res];
+	 			res =!= $Failed
+			]
+ 			)
+	]
+ArgMax$TM[ r_RNG$, cond_, ord_, term_] /; buiActive["ArgMax"] :=
+	Module[ {res, rcList, m},
+		(
+		If[ Length[ res] === 1,
+			First[ res],
+			Apply[ Tuple$TM, res]
+		]
+		) /; (
+			rcList = rngCondToIterator[ r, Hold[ cond]];
+			If[ rcList === $Failed,
+				False,
+	 			res = ReleaseHold[ Fold[ Hold[ iteratorValueIteration[ #1, #2]]&, Hold[ term], rcList]];
+	 			m = max[ Cases[ res, {___, x:Except[ _List]} :> x, 2 * Length[ r]], ord];
+	 			If[ MatchQ[ m, {_}],
+	 				res = findFirstPath[ First[ m], res];
+	 				res =!= $Failed,
+	 				False
+	 			]
+			]
+ 			)
+	]
+	
+TheArgMin$TM[ r:RNG$[ __], cond_, term_] /; buiActive["TheArgMin"] :=
+	Module[ {res, rcList, m, v},
+		(
+		If[ Length[ res] === 1,
+			First[ res],
+			Apply[ Tuple$TM, res]
+		]
+		) /; (
+			rcList = rngCondToIterator[ r, Hold[ cond]];
+			If[ rcList === $Failed,
+				False,
+	 			res = ReleaseHold[ Fold[ Hold[ iteratorValueIteration[ #1, #2]]&, Hold[ term], rcList]];
+	 			v = Cases[ res, {___, x:Except[ _List]} :> x, 2 * Length[ r]];
+	 			m = Min[ v];
+	 			If[ Count[ v, m] === 1,
+	 				res = findFirstPath[ m, res];
+	 				res =!= $Failed,
+	 				False
+	 			]
+			]
+ 			)
+	]
+TheArgMin$TM[ r:RNG$[ __], cond_, ord_, term_] /; buiActive["TheArgMin"] :=
+	Module[ {res, rcList, m, v},
+		(
+		If[ Length[ res] === 1,
+			First[ res],
+			Apply[ Tuple$TM, res]
+		]
+		) /; (
+			rcList = rngCondToIterator[ r, Hold[ cond]];
+			If[ rcList === $Failed,
+				False,
+	 			res = ReleaseHold[ Fold[ Hold[ iteratorValueIteration[ #1, #2]]&, Hold[ term], rcList]];
+	 			v = Cases[ res, {___, x:Except[ _List]} :> x, 2 * Length[ r]];
+	 			m = min[ v, ord];
+	 			If[ MatchQ[ m, {_}] && Count[ v, First[ m]] === 1,
+	 				res = findFirstPath[ First[ m], res];
+	 				res =!= $Failed,
+	 				False
+	 			]
+			]
+ 			)
+	]
+	
+TheArgMax$TM[ r:RNG$[ __], cond_, term_] /; buiActive["TheArgMax"] :=
+	Module[ {res, rcList, m, v},
+		(
+		If[ Length[ res] === 1,
+			First[ res],
+			Apply[ Tuple$TM, res]
+		]
+		) /; (
+			rcList = rngCondToIterator[ r, Hold[ cond]];
+			If[ rcList === $Failed,
+				False,
+	 			res = ReleaseHold[ Fold[ Hold[ iteratorValueIteration[ #1, #2]]&, Hold[ term], rcList]];
+	 			v = Cases[ res, {___, x:Except[ _List]} :> x, 2 * Length[ r]];
+	 			m = Max[ v];
+	 			If[ Count[ v, m] === 1,
+	 				res = findFirstPath[ m, res];
+	 				res =!= $Failed,
+	 				False
+	 			]
+			]
+ 			)
+	]
+TheArgMax$TM[ r:RNG$[ __], cond_, ord_, term_] /; buiActive["TheArgMax"] :=
+	Module[ {res, rcList, m, v},
+		(
+		If[ Length[ res] === 1,
+			First[ res],
+			Apply[ Tuple$TM, res]
+		]
+		) /; (
+			rcList = rngCondToIterator[ r, Hold[ cond]];
+			If[ rcList === $Failed,
+				False,
+	 			res = ReleaseHold[ Fold[ Hold[ iteratorValueIteration[ #1, #2]]&, Hold[ term], rcList]];
+	 			v = Cases[ res, {___, x:Except[ _List]} :> x, 2 * Length[ r]];
+	 			m = max[ v, ord];
+	 			If[ MatchQ[ m, {_}] && Count[ v, First[ m]] === 1,
+	 				res = findFirstPath[ First[ m], res];
+	 				res =!= $Failed,
+	 				False
+	 			]
+			]
+ 			)
+	]
+	
 
 (* ::Section:: *)
 (* Sets *)
 
-Set$TM /: Equal$TM[a__Set$TM] /; buiActive["SetEqual"] && SameQ[a] := True
+Set$TM /: Equal$TM[ _Set$TM, _Tuple$TM] /; buiActive["SetEqual"] || buiActive["TupleEqual"] := False
+
+Set$TM /: Equal$TM[(a_Set$TM)..] /; buiActive["SetEqual"] := True
 Set$TM /: Equal$TM[_Set$TM] /; buiActive["SetEqual"] := True
 Set$TM /: Equal$TM[a_Set$TM, b_Set$TM, c__Set$TM] /; buiActive["SetEqual"] :=
 	Equal$TM[ a, b] && Map[ Equal$TM[ a, #]&, And[ c]]
@@ -846,7 +1286,10 @@ Set$TM /: max$TM[ Set$TM[ e__]] /; buiActive["MaximumElementSet"] :=
 	]
 Set$TM /: Subscript$TM[ max$TM, ord_][ Set$TM[ e__]] /; buiActive["MaximumElementSet"] :=
 	Module[ {res},
-		First[ res] /; (res = max[ {e}, ord]; Length[ res] === 1)
+		If[ Length[ res] === 1,
+			First[ res],
+			Subscript$TM[ max$TM, ord][ Apply[ Set$TM, res]]
+		] /; (res = max[ {e}, ord]; Length[ res] < Length[ Hold[ e]])
 	]
 Set$TM /: min$TM[ Set$TM[ e__]] /; buiActive["MinimumElementSet"] :=
 	Module[ {s},
@@ -854,25 +1297,51 @@ Set$TM /: min$TM[ Set$TM[ e__]] /; buiActive["MinimumElementSet"] :=
 	]
 Set$TM /: Subscript$TM[ min$TM, ord_][ Set$TM[ e__]] /; buiActive["MinimumElementSet"] :=
 	Module[ {res},
-		First[ res] /; (res = min[ {e}, ord]; Length[ res] === 1)
+		If[ Length[ res] === 1,
+			First[ res],
+			Subscript$TM[ min$TM, ord][ Apply[ Set$TM, res]]
+		] /; (res = min[ {e}, ord]; Length[ res] < Length[ Hold[ e]])
 	]
 Set$TM /: \[AE]$TM[ Set$TM[ a_, ___]] /; buiActive["AnElement"] := a
 	
 
-(* amaletzk: The following implementation of "max" and "min" has quadratic complexity in the length of the
+(* The following implementation of "max" and "min" has quadratic complexity in the length of the
 	input. One could, however, also compare only successive elements, but this method would only give
-	the right result in case of a linear ordering, not in case of an arbitrary partial ordering! *)
-max[ l:{___, a_, ___}, ord_] /; greatest[ a, l, ord] := {a}
-max[ _List, _] := {}
+	the right result in case of a linear ordering, not in case of an arbitrary partial ordering!
+	Still, it is assumed that the given relation is at least transitive; If this is not the case, wrong
+	results might be returned. *)
+	
+max[ {a_, b___}, ord_] := max[ {a}, {b}, ord]
+max[ l_List, {a_, b___}, ord_] :=
+	max[ updateMaxList[ l, a, ord, {}, True], {b}, ord]
+max[ l_List, {}, _] := l
 
-greatest[ _, {}, _] := True
-greatest[ a_, {b_, rest___}, ord_] := TrueQ[ ord[ b, a] || a == b] && greatest[ a, {rest}, ord]
+updateMaxList[ {f_, r___}, a_, ord_, new:{n___}, add_] :=
+	If[ TrueQ[ a == f || ord[ f, a]],
+		updateMaxList[ {r}, a, ord, new, add],	(* f must be removed *)
+		If[ TrueQ[ ord[ a, f]],
+			updateMaxList[ {r}, a, ord, {n, f}, False],	(* f must be kept, a must not be added *)
+			updateMaxList[ {r}, a, ord, {n, f}, add]	(* f must be kept *)
+		]
+	]
+updateMaxList[ {}, _, _, l_List, False] := l
+updateMaxList[ {}, a_, _, {n___}, True] := {n, a}
 
-min[ l:{___, a_, ___}, ord_] /; smallest[ a, l, ord] := {a}
-min[ _List, _] := {}
+min[ {a_, b___}, ord_] := min[ {a}, {b}, ord]
+min[ l_List, {a_, b___}, ord_] :=
+	min[ updateMinList[ l, a, ord, {}, True], {b}, ord]
+min[ l_List, {}, _] := l
 
-smallest[ _, {}, _] := True
-smallest[ a_, {b_, rest___}, ord_] := TrueQ[ ord[ a, b] || a == b] && smallest[ a, {rest}, ord]
+updateMinList[ {f_, r___}, a_, ord_, new:{n___}, add_] :=
+	If[ TrueQ[ a == f || ord[ a, f]],
+		updateMinList[ {r}, a, ord, new, add],	(* f must be removed *)
+		If[ TrueQ[ ord[ f, a]],
+			updateMinList[ {r}, a, ord, {n, f}, False],	(* f must be kept, a must not be added *)
+			updateMinList[ {r}, a, ord, {n, f}, add]	(* f must be kept *)
+		]
+	]
+updateMinList[ {}, _, _, l_List, False] := l
+updateMinList[ {}, a_, _, {n___}, True] := {n, a}
 
 ElementOf[ p_, a_, test_] := Apply[ Or, Map[ (test[ p, #])&, Apply[ Hold, a]]]
 ElementOfAll[ p_, {a_, rest___}, test_] := ElementOf[ p, a, test] && ElementOfAll[ p, {rest}, test]
@@ -904,6 +1373,11 @@ IntegerQuotientRingPM$TM[ 0] /; buiActive["IntegerQuotientRingPM"] := IntegerInt
 
 (* ::Subsection:: *)
 (* equality *)
+
+Tuple$TM /: Equal$TM[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___], _Tuple$TM] /; (buiActive["SetEqual"] || buiActive["TupleEqual"]) && buiActive[StringDrop[SymbolName[h], -3]] := False
+Tuple$TM /: Equal$TM[ _Tuple$TM, (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; (buiActive["SetEqual"] || buiActive["TupleEqual"]) && buiActive[StringDrop[SymbolName[h], -3]] := False
+Tuple$TM /: Equal$TM[ _Tuple$TM, b:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; (buiActive["SetEqual"] || buiActive["TupleEqual"]) && buiActive[StringDrop[SymbolName[b], -3]] := False
+Tuple$TM /: Equal$TM[ b:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM), _Tuple$TM] /; (buiActive["SetEqual"] || buiActive["TupleEqual"]) && buiActive[StringDrop[SymbolName[b], -3]] := False
 
 Set$TM /: Equal$TM[ a:(h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ al_?isRealOrInf, ar_?isRealOrInf, alc:(True|False), arc:(True|False)],
 		b:Set$TM[ e___?isGround]] :=
@@ -1169,14 +1643,16 @@ intersectIntervals[ _[ al_, ar_, alc_, arc_], _[ bl_, br_, blc_, brc_]] :=
 (* Tuples *)
 
 
-Tuple$TM /: Subscript$TM[ a_Tuple$TM?isSequenceFree, Rule$TM[ p_, q_]] /; buiActive["Insert"] := Insert[ a, p, q /. Tuple$TM -> List]
+Tuple$TM /: Insert$TM[ a_Tuple$TM?isSequenceFree, p_, q_?isPositionSpec] /; buiActive["Insert"] := Insert[ a, p, q /. Tuple$TM -> List]
 
 (* Delete elements at one or more positions *)
-Tuple$TM /: Subscript$TM[ a_Tuple$TM?isSequenceFree, LeftArrow$TM[ b_]] /; buiActive["DeleteAt"] := Delete[ a, b //. Tuple$TM -> List]
+Tuple$TM /: DeleteAt$TM[ a_Tuple$TM?isSequenceFree, b_?isPositionSpec] /; buiActive["DeleteAt"] := Delete[ a, b //. Tuple$TM -> List]
 
 (* Delete elements of a certain shape. Multiple deletions are not possible, because it would need
 	special syntax how to specify multiple shapes. Tuples cannot be used because for this *)
-Tuple$TM /: Subscript$TM[a_Tuple$TM?isGround, d:(LeftArrowBar$TM[_]..)] /; buiActive["Delete"] := Fold[ DeleteCases[ #1, #2[[1]]]&, a, {d}] 
+Tuple$TM /: Delete$TM[a_Tuple$TM?isGround, d__?isGround] /; buiActive["Delete"] := Fold[ DeleteCases[ #1, #2]&, a, {d}] 
+
+Tuple$TM /: Equal$TM[ _Tuple$TM, _Set$TM] /; buiActive["SetEqual"] || buiActive["TupleEqual"] := False
 
 Tuple$TM /: Equal$TM[a__Tuple$TM] /; buiActive["TupleEqual"] && SameQ[a ] := True
 Tuple$TM /: Equal$TM[a__Tuple$TM?isSequenceFree] /; buiActive["TupleEqual"] :=
@@ -1200,15 +1676,15 @@ Tuple$TM /: Annotated$TM[Equal$TM, SubScript$TM[ dom_]][a__Tuple$TM?isSequenceFr
 				MatchQ[ res, True|False])
 	]
 
-Tuple$TM /: Cup$TM[a_Tuple$TM, p_] /; buiActive["Append"] := Append[ a, p]
-Tuple$TM /: Cap$TM[p_, a_Tuple$TM] /; buiActive["Prepend"] := Prepend[ a, p]
-Tuple$TM /: CupCap$TM[a__Tuple$TM] /; buiActive["Join"] := Join[ a]
+Tuple$TM /: appendElem$TM[a_Tuple$TM, p_] /; buiActive["appendElem"] := Append[ a, p]
+Tuple$TM /: prependElem$TM[a_Tuple$TM, p_] /; buiActive["prependElem"] := Prepend[ a, p]
+Tuple$TM /: joinTuples$TM[a__Tuple$TM] /; buiActive["joinTuples"] := Join[ a]
 
-Tuple$TM /: Element$TM[ p_, a_Tuple$TM] /; buiActive["IsElement"] :=
+Tuple$TM /: elemTuple$TM[ p_, a_Tuple$TM] /; buiActive["elemTuple"] :=
 	Module[ {res},
 		res /; (res = ElementOf[ p, a, Equal$TM]; MatchQ[ res, True|False])
 	]
-Tuple$TM /: Annotated$TM[ Element$TM, SubScript$TM[ dom_]][ p_, a_Tuple$TM] /; buiActive["IsElement"] :=
+Tuple$TM /: Annotated$TM[ elemTuple$TM, SubScript$TM[ dom_]][ p_, a_Tuple$TM] /; buiActive["elemTuple"] :=
 	Module[ {res},
 		res /; (res = ElementOf[ p, a, dom[Equal$TM]]; MatchQ[ res, True|False])
 	]
@@ -1219,7 +1695,10 @@ Tuple$TM /: max$TM[ Tuple$TM[ e__]] /; buiActive["Max"] :=
 	]
 Tuple$TM /: Subscript$TM[ max$TM, ord_][ Tuple$TM[ e__]] /; buiActive["Max"] :=
 	Module[ {res},
-		First[ res] /; (res = max[ {e}, ord]; Length[ res] === 1)
+		If[ Length[ res] === 1,
+			First[ res],
+			Subscript$TM[ max$TM, ord][ Apply[ Tuple$TM, res]]
+		] /; (res = max[ {e}, ord]; Length[ res] < Length[ Hold[ e]])
 	]
 Tuple$TM /: min$TM[ Tuple$TM[ e__]] /; buiActive["Min"] :=
 	Module[ {s},
@@ -1227,19 +1706,24 @@ Tuple$TM /: min$TM[ Tuple$TM[ e__]] /; buiActive["Min"] :=
 	]
 Tuple$TM /: Subscript$TM[ min$TM, ord_][ Tuple$TM[ e__]] /; buiActive["Min"] :=
 	Module[ {res},
-		First[ res] /; (res = min[ {e}, ord]; Length[ res] === 1)
+		If[ Length[ res] === 1,
+			First[ res],
+			Subscript$TM[ min$TM, ord][ Apply[ Tuple$TM, res]]
+		] /; (res = min[ {e}, ord]; Length[ res] < Length[ Hold[ e]])
 	]
 
 Tuple$TM /: BracketingBar$TM[ a_Tuple$TM?isSequenceFree] /; buiActive["Length"] := Length[ a]
 
-Tuple$TM /: Subscript$TM[ a_Tuple$TM?isSequenceFree, p:LeftArrow$TM[_, _]..] /; buiActive["ReplacePart"] :=
-	ReplacePart[ a, MapAt[# /. {Tuple$TM -> List}&, {p} /. LeftArrow$TM -> Rule, Table[ {i, 1}, {i, Length[{p}]}]]]
+Tuple$TM /: ReplacePart$TM[ a_Tuple$TM?isSequenceFree, p:Tuple$TM[_?isPositionSpec, _]..] /; buiActive["ReplacePart"] :=
+	ReplacePart[ a, MapAt[# /. {Tuple$TM -> List}&, Replace[ {p}, Tuple$TM[ l_, r_] :> Rule[ l, r], {1}], Table[ {i, 1}, {i, Length[{p}]}]]]
 
-Tuple$TM /: Subscript$TM[ a_Tuple$TM, s:LeftArrowBar$TM[_, _]..] /; buiActive["Replace"] := Fold[ ReplaceAll, a, {s} /. LeftArrowBar$TM -> Rule]
+Tuple$TM /: Replace$TM[ a_Tuple$TM?isGround, s:Tuple$TM[_?isGround, _]..] /; buiActive["Replace"] :=
+	Fold[ ReplaceAll, a, Replace[ {s}, Tuple$TM[ l_, r_] :> Rule[ l, r], {1}]]
 
 Tuple$TM /: Subscript$TM[ a_Tuple$TM, p__Integer] /; buiActive["Subscript"] := Subscript$TM[ a, Tuple$TM[ p]]
 Tuple$TM /: Subscript$TM[ a_Tuple$TM?isSequenceFree, p_?isPositionSpec] /; buiActive["Subscript"] := Extract[ a, p /. Tuple$TM -> List] /. List -> Tuple$TM
 
+isPositionSpec[ 0] := False	(* The head of an expression must not be accessible *)
 isPositionSpec[ _Integer] := True
 isPositionSpec[ Tuple$TM[ p__]] := Apply[ And, Map[ isPositionSpec, {p}]]
 isPositionSpec[ _] := False
@@ -1263,53 +1747,51 @@ isInteger[ _Integer] := True
 isInteger[ _Rational|_Real|_Complex|_DirectedInfinity] := False
 isInteger[ _Set$TM|_Tuple$TM] := False
 isInteger[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
-(* The case where 'a' is '\[DoubleStruckCapitalC]$TM' or '\[DoubleStruckCapitalC]P$TM' does not have to be
-	treated separately *)
-(* isInteger[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False *)
-isInteger[ a_?AtomQ] /; isGround[ a] := False
+isInteger[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
+isInteger[ Indeterminate|True|False|I|Pi|E|Infinity|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaisher] := False
 
 isRational[ _Integer|_Rational] := True
 isRational[ _Real|_Complex|_DirectedInfinity] := False
 isRational[ _Set$TM|_Tuple$TM] := False
 isRational[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
-(* isRational[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False *)
+isRational[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
 (* it is not known whether Catalan is rational, therefore we leave "isRational[Catalan]" unevaluated *)
-isRational[ a:Except[Catalan]] /; AtomQ[ a] && isGround[ a] := False
+isRational[ Indeterminate|True|False|I|Pi|E|Infinity|Degree|EulerGamma|GoldenRatio|Khinchin|Glaisher] := False
 
 isReal[ _Integer|_Rational|_Real] := True
 isReal[ Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] := True
 isReal[ _Complex|_DirectedInfinity] := False
 isReal[ _Set$TM|_Tuple$TM] := False
 isReal[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
-(* isReal[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False *)
-isReal[ a_?AtomQ] /; isGround[ a] := False
+isReal[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
+isReal[ Indeterminate|True|False|I|Infinity] := False
 
 isComplex[ _Integer|_Rational|_Real|_Complex] := True
 isComplex[ I|Pi|Degree|GoldenRatio|E|EulerGamma|Catalan|Khinchin|Glaisher] := True
 isComplex[ _Set$TM|_Tuple$TM|_DirectedInfinity] := False
 isComplex[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
-(* isComplex[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False *)
-isComplex[ a_?AtomQ] /; isGround[ a] := False
+isComplex[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
+isComplex[ Indeterminate|True|False|Infinity] := False
 
 isComplexP[ Tuple$TM[ a_, b_]] := isReal[ a] && isReal[ b] && a >= 0
 isComplexP[ _Integer|_Rational|_Real|_Complex|_Set$TM|_Tuple$TM|_DirectedInfinity] := False
 isComplexP[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
-(* isComplexP[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False *)
-isComplexP[ a_?AtomQ] /; isGround[ a] := False
+isComplexP[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
+isComplexP[ Indeterminate|True|False|I|Pi|E|Infinity|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaisher] := False
 
 isSet[ _Set$TM] := True
 isSet[ _Integer|_Rational|_Real|_Complex|_DirectedInfinity] := False
 isSet[ _Tuple$TM] := False
 isSet[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := True
-(* isSet[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := True *)
-isSet[ a_?AtomQ] /; isGround[ a] := False
+isSet[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := True
+isSet[ Indeterminate|True|False|I|Pi|E|Infinity|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaisher] := False
 
 isTuple[ _Tuple$TM] := True
 isTuple[ _Integer|_Rational|_Real|_Complex|_DirectedInfinity] := False
 isTuple[ _Set$TM] := False
 isTuple[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
-(* isTuple[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False *)
-isTuple[ a_?AtomQ] /; isGround[ a] := False
+isTuple[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
+isTuple[ Indeterminate|True|False|I|Pi|E|Infinity|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaisher] := False
 
 
 (* ::Section:: *)
@@ -1330,21 +1812,24 @@ SetAttributes[ Do$TM, HoldAll]
 Do$TM[ body_, l_[v___]] /; buiActive["Do"] := Apply[ Do, Hold[ body, {v}]]
 
 SetAttributes[ Piecewise$TM, HoldAll]
-Piecewise$TM[ Tuple$TM[ clauses___Tuple$TM, Tuple$TM[ e_, True]]] /; buiActive["CaseDistinction"] :=
-	Piecewise$TM[ Tuple$TM[ clauses], e]
-Piecewise$TM[ clauses:Tuple$TM[ __Tuple$TM]] /; buiActive["CaseDistinction"] :=
-	Piecewise$TM[ clauses, 0]
-Piecewise$TM[ Tuple$TM[ clauses___Tuple$TM], default_] /; buiActive["CaseDistinction"] :=
-	Module[ {r, s},
-		If[ MatchQ[ r, _Piecewise],
-			ReplacePart[ Apply[ Piecewise$TM, r], {{1, 0} :> Tuple$TM, {1, _, 0} :> Tuple$TM}],
-			r
-		] /; (
-				s = ReplacePart[ Hold[ {clauses}, default], {1, _, 0} :> List];
-				r = Apply[ Piecewise, s];
-				!MatchQ[ r, _Piecewise] || Apply[ Hold, r] =!= s
-			)
+Piecewise$TM[ Tuple$TM[ Tuple$TM[ expr_, True], ___Tuple$TM]] := expr
+Piecewise$TM[ Tuple$TM[ clauses__Tuple$TM]] :=
+	Module[ {res},
+		Replace[ res, {Hold[ c___]:>Piecewise$TM[ Tuple$TM[ c]]}] /; (res = pw[ Hold[ clauses], Hold[]]; res =!= Hold[ clauses])	
 	]
+	
+pw[ Hold[ Tuple$TM[ expr_, cond_], clauses___Tuple$TM], unknown:Hold[ u___]] :=
+	Module[ {c = cond},
+		If[ c,
+			(*True*)
+			Hold[ u, Tuple$TM[ expr, True]],
+			(*False*)
+			pw[ Hold[ clauses], unknown],
+			(*unknown*)
+			pw[ Hold[ clauses], ReplacePart[ Hold[ u, Tuple$TM[ expr, Null]], {-1, 2} -> c]]
+		]	
+	]
+pw[ Hold[], unknown_Hold] := unknown
 	
 
 

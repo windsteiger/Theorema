@@ -76,7 +76,11 @@ $tmaQuantifiers =
      {"the", "SuchUnique"},
      {"\[Lambda]", "Lambda"},
      {"max", "MaximumOf"},
-     {"min", "MinimumOf"}
+     {"min", "MinimumOf"},
+     {"argmax", "ArgMax"},
+     {"argmin", "ArgMin"},
+     {"theargmax", "TheArgMax"},
+     {"theargmin", "TheArgMin"}
     };
 
 $tmaQuantifierSymbols = Transpose[ $tmaQuantifiers][[1]];
@@ -265,7 +269,9 @@ $tmaOperators = {
 	{"\[Because]", {Infix}, "Because"}, {"\[RightTee]", {Infix}, "RightTee"},
 	{"\[LeftTee]", {Infix}, "LeftTee"}, {"\[DoubleRightTee]", {Infix}, "DoubleRightTee"},
 	{"\[DoubleLeftTee]", {Infix}, "DoubleLeftTee"}, {"\[SuchThat]", {Infix}, "SuchThat"},
-	{"\[Distributed]", {Infix}, "Distributed"}, {"\[Conditioned]", {Infix}, "Conditioned"}};
+	{"\[Distributed]", {Infix}, "Distributed"}, {"\[Conditioned]", {Infix}, "Conditioned"},
+	{"\:22ff", {Infix}, "elemTuple"}, {"\:2a1d", {Infix}, "joinTuples"},
+	{"\:293a", {Infix}, "appendElem"}, {"\:293b", {Infix}, "prependElem"}};
 	
 $tmaOperatorSymbols = Map[ First, $tmaOperators];
 (* We must not add contexts (like "Theorema`Knowledge`" etc.) to the operator names, as it is done with quantifiers,
@@ -380,16 +386,16 @@ MakeExpression[ RowBox[{UnderscriptBox[ SubscriptBox[ q_?isQuantifierSymbol, dom
 MakeExpression[ RowBox[{UnderscriptBox[ UnderscriptBox[ SubscriptBox[ q_?isQuantifierSymbol, dom_], rng_], cond_], form_}], fmt_] :=
     subscriptedQuantifier[ Replace[ q, $tmaQuantifierToName], rng, cond, dom, form, fmt] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{UnderoverscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min"|"\[Union]"|"\[Intersection]", low:RowBox[{_, "=", _}], high_], form_}], fmt_] :=
+MakeExpression[ RowBox[{UnderoverscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min"|"argmin"|"argmax"|"theargmin"|"theargmax"|"\[Union]"|"\[Intersection]", low:RowBox[{_, "=", _}], high_], form_}], fmt_] :=
     standardQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[{low, ",", "\[Ellipsis]", ",", high}], "True", form, fmt] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{UnderscriptBox[ UnderoverscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min"|"\[Union]"|"\[Intersection]", low:RowBox[{_, "=", _}], high_], cond_], form_}], fmt_] :=
+MakeExpression[ RowBox[{UnderscriptBox[ UnderoverscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min"|"argmin"|"argmax"|"theargmin"|"theargmax"|"\[Union]"|"\[Intersection]", low:RowBox[{_, "=", _}], high_], cond_], form_}], fmt_] :=
     standardQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[{low, ",", "\[Ellipsis]", ",", high}], cond, form, fmt] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{UnderoverscriptBox[ SubscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min"|"\[Union]"|"\[Intersection]", dom_], low:RowBox[{_, "=", _}], high_], form_}], fmt_] :=
+MakeExpression[ RowBox[{UnderoverscriptBox[ SubscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min"|"argmin"|"argmax"|"theargmin"|"theargmax"|"\[Union]"|"\[Intersection]", dom_], low:RowBox[{_, "=", _}], high_], form_}], fmt_] :=
     subscriptedQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[{low, ",", "\[Ellipsis]", ",", high}], "True", dom, form, fmt] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{UnderscriptBox[ UnderoverscriptBox[ SubscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min"|"\[Union]"|"\[Intersection]", dom_], low:RowBox[{_, "=", _}], high_], cond_], form_}], fmt_] :=
+MakeExpression[ RowBox[{UnderscriptBox[ UnderoverscriptBox[ SubscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min"|"argmin"|"argmax"|"theargmin"|"theargmax"|"\[Union]"|"\[Intersection]", dom_], low:RowBox[{_, "=", _}], high_], cond_], form_}], fmt_] :=
     subscriptedQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[{low, ",", "\[Ellipsis]", ",", high}], cond, dom, form, fmt] /; $parseTheoremaExpressions
    
 MakeExpression[ RowBox[{UnderscriptBox[ "let", rng_], form_}], fmt_] :=
@@ -406,6 +412,9 @@ MakeExpression[ RowBox[{UnderscriptBox[ "let", rng_], form_}], fmt_] :=
 
 (* we do not want that a-b is automatically converted to a+(-b), this should only be under built-in subtract. *)
 
+MakeExpression[ RowBox[ {"-", "\[Infinity]"|"Infinity", c___}], fmt_] :=
+	MakeExpression[ RowBox[ {RowBox[ {"DirectedInfinity", "[", "-1", "]"}], c}], fmt] /;
+		$parseTheoremaExpressions	(* "-Infinity" should not be converted into "Minus[DirectedInfinity[1]]" *)
 MakeExpression[ RowBox[ {"-", a_, c___}], fmt_] :=
 	MakeExpression[ RowBox[ {RowBox[ {"Minus", "[", a, "]"}], c}], fmt] /;
 		($parseTheoremaExpressions &&
@@ -585,19 +594,43 @@ MakeExpression[ SubscriptBox[ "\[DoubleStruckCapitalC]", "P"], fmt_] :=
 (* Tuple notations *)
 
 
-MakeExpression[ RowBox[ {l_,"\[LeftArrow]"}], fmt_] := MakeExpression[ RowBox[{"LeftArrow", "[", l, "]"}], fmt] /; $parseTheoremaExpressions
-MakeExpression[ RowBox[ {l_,"\[LeftArrowBar]"}], fmt_] := MakeExpression[ RowBox[{"LeftArrowBar", "[", l, "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ SubscriptBox[ t_, RowBox[ {l_, "\[RightArrow]"|"\[Rule]", r_}]], fmt_] :=
+	MakeExpression[ RowBox[ {"Insert", "[", RowBox[ {t, ",", l, ",", r}], "]"}], fmt] /; $parseTheoremaExpressions
+
+MakeExpression[ SubscriptBox[ t_, RowBox[ {l_, "\[LeftArrow]"}]], fmt_] :=
+	MakeExpression[ RowBox[ {"DeleteAt", "[", RowBox[ {t, ",", l}], "]"}], fmt] /; $parseTheoremaExpressions
+
+MakeExpression[ SubscriptBox[ t_, RowBox[ {l_, "\[LeftArrowBar]"}]], fmt_] :=
+	MakeExpression[ RowBox[ {"Delete", "[", RowBox[ {t, ",", l}], "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ SubscriptBox[ t_, RowBox[ {RowBox[ {l1_, "\[LeftArrowBar]"}], l2:(PatternSequence[ ",", RowBox[ {_,"\[LeftArrowBar]"}]]...)}]], fmt_] :=
+	MakeExpression[ RowBox[ {"Delete", "[", RowBox[ Join[ {t, ",", l1}, Replace[ {l2}, RowBox[ {x_, _}] :> x, {1}]]], "]"}], fmt] /; $parseTheoremaExpressions
+
+MakeExpression[ SubscriptBox[ t_, RowBox[ {l_, "\[LeftArrow]", r_}]], fmt_] :=
+	MakeExpression[ RowBox[ {"ReplacePart", "[", RowBox[ {t, ",", RowBox[ {"Tuple", "[", RowBox[ {l, ",", r}], "]"}]}], "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ SubscriptBox[ t_, RowBox[ {RowBox[ {l1_, "\[LeftArrow]", r1_}], l2:(PatternSequence[ ",", RowBox[ {_, "\[LeftArrow]", _}]]...)}]], fmt_] :=
+	MakeExpression[ RowBox[ {"ReplacePart", "[", RowBox[ Join[ {t, ",", RowBox[ {"Tuple", "[", RowBox[ {l1, ",", r1}], "]"}]},
+		Replace[ {l2}, RowBox[ {x_, _, y_}] :> RowBox[ {"Tuple", "[", RowBox[ {x, ",", y}], "]"}], {1}]]], "]"}], fmt] /; $parseTheoremaExpressions
+					
+MakeExpression[ SubscriptBox[ t_, RowBox[ {l_, "\[LeftArrowBar]", r_}]], fmt_] :=
+	MakeExpression[ RowBox[ {"Replace", "[", RowBox[ {t, ",", RowBox[ {"Tuple", "[", RowBox[ {l, ",", r}], "]"}]}], "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ SubscriptBox[ t_, RowBox[ {RowBox[ {l1_, "\[LeftArrowBar]", r1_}], l2:(PatternSequence[ ",", RowBox[ {_, "\[LeftArrowBar]", _}]]...)}]], fmt_] :=
+	MakeExpression[ RowBox[ {"Replace", "[", RowBox[ Join[ {t, ",", RowBox[ {"Tuple", "[", RowBox[ {l1, ",", r1}], "]"}]},
+		Replace[ {l2}, RowBox[ {x_, _, y_}] :> RowBox[ {"Tuple", "[", RowBox[ {x, ",", y}], "]"}], {1}]]], "]"}], fmt] /; $parseTheoremaExpressions
 
 MakeExpression[ RowBox[{left_,"\[EmptyUpTriangle]", right_}], fmt_] :=
     MakeExpression[ RowBox[{"EmptyUpTriangle", "[", RowBox[{left, ",", right}], "]"}], fmt] /; $parseTheoremaExpressions
 
 (* Use unicode characters for certain operations *)
-MakeExpression[ RowBox[ {l_, TagBox[ "\:293a", ___], r_}], fmt_] := MakeExpression[ RowBox[ {"appendElem", "[", RowBox[{ l, ",", r}], "]"}], fmt] /; $parseTheoremaExpressions
-MakeExpression[ RowBox[ {l_, TagBox[ "\:293b", ___], r_}], fmt_] := MakeExpression[ RowBox[ {"prependElem", "[", RowBox[{ r, ",", l}], "]"}], fmt] /; $parseTheoremaExpressions
-MakeExpression[ RowBox[ {l_, TagBox[ "\:2a1d", ___], r_}], fmt_] := MakeExpression[ RowBox[ {"joinTuples", "[", RowBox[{ l, ",", r}], "]"}], fmt] /; $parseTheoremaExpressions
-MakeExpression[ RowBox[ {l_, TagBox[ "\:22ff", ___], r_}], fmt_] := MakeExpression[ RowBox[ {"elemTuple", "[", RowBox[{ l, ",", r}], "]"}], fmt] /; $parseTheoremaExpressions
+(* amaletzk: Operator symbols do not have to be put inside TagBoxes here, because at the beginning of this file
+	there are some rules that automatically remove all TagBoxes from symbols that occur at operator positions. *)
+MakeExpression[ RowBox[ {l_, "\:293a", r_}], fmt_] := MakeExpression[ RowBox[ {"appendElem", "[", RowBox[{ l, ",", r}], "]"}], fmt] /; $parseTheoremaExpressions
+(* The order of arguments must be exactly as in input, for otherwise we get incorrect output *)
+MakeExpression[ RowBox[ {l_, "\:293b", r_}], fmt_] := MakeExpression[ RowBox[ {"prependElem", "[", RowBox[{ l, ",", r}], "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {l_, "\:2a1d", r_}], fmt_] := MakeExpression[ RowBox[ {"joinTuples", "[", RowBox[{ l, ",", r}], "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {l_, "\:22ff", r_}], fmt_] := MakeExpression[ RowBox[ {"elemTuple", "[", RowBox[{ l, ",", r}], "]"}], fmt] /; $parseTheoremaExpressions
 
 (* Bracketted expressions *)
+(* amaletzk: Bracketting symbols do not occur at operator positions, therefore TagBoxes have to be used here. *)
 MakeExpression[ RowBox[ {TagBox[ "\:e114", ___], expr_, TagBox[ "\:e115", ___]}], fmt_] := 
 	MakeExpression[ RowBox[ {"squareBracketted", "[", expr, "]"}], fmt] /; $parseTheoremaExpressions
 MakeExpression[ RowBox[ {TagBox[ "\:27e6", ___], expr_, TagBox[ "\:27e7", ___]}], fmt_] := 
