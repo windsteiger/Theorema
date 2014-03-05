@@ -374,7 +374,12 @@ And$TM[ a___] /; buiActive["And"] := And[ a]
 Or$TM[ pre___, a_, mid___, a_, post___] /; buiActive["Or"] := Or$TM[ pre, a, mid, post]
 Or$TM[ a___] /; buiActive["Or"] := Or[ a]
 Implies$TM[ a__] /; buiActive["Implies"] := Implies[ a]
-Iff$TM[ a__] /; buiActive["Iff"] := Equivalent[ a]
+Iff$TM[ _] /; buiActive["Iff"] := True
+Iff$TM[ PatternSequence[___, True, ___, False, ___]|PatternSequence[___, False, ___, True, ___]] /; buiActive["Iff"] := False
+Iff$TM[ a__] /; buiActive["Iff"] :=
+	Module[ {res},
+		Apply[ Iff$TM, res] /; (res = DeleteDuplicates[ Hold[ a]]) =!= Hold[ a]
+	]
 Componentwise$TM[ P_, args___] /; buiActive["Componentwise"] := Apply[ And, Map[ P, Hold[args]]]
 
 (* We replace the free variables one after the other, because some might depend on others, and a
