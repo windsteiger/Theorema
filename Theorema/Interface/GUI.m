@@ -235,7 +235,7 @@ openTheoremaCommander[ ] /; $Notebooks :=
         		{
         			(* session *){sessionCompose[], sessionInspect[], sessionArchive[]},
         			(* prove *)  {Dynamic[ Refresh[ displaySelectedGoal[], UpdateInterval -> 2]],
-        				Dynamic[ Refresh[ displayKBBrowser["prove"], TrackedSymbols :> {$kbFilterKW, $tcKBBrowseSelection, $kbStruct}]],
+        				Dynamic[ Refresh[ displayKBBrowser["prove"], TrackedSymbols :> {$kbFilterKW, $tcKBBrowseSelection, $kbStruct, kbSelectProve}]],
         				Dynamic[ Refresh[ displayBuiltinBrowser["prove"], TrackedSymbols :> {buiActProve}]],
         				Dynamic[ Refresh[ selectProver[], TrackedSymbols :> {$selectedRuleSet, $selectedStrategy, $ruleFilterKW}]],
         				Dynamic[ Refresh[ submitProveTask[ ], TrackedSymbols :> {$selectedProofGoal, $selectedProofKB, $selectedSearchDepth, $selectedSearchTime}]],
@@ -517,12 +517,11 @@ displayLabeledFormula[ FML$[ key_, form_, lab_, ___]] :=
 	]
 displayLabeledFormula[ args___] := unexpected[ displayLabeledFormula, {args}]
 
-displaySelectedKB[ ] :=
+displaySelectedKB[ kb_List] :=
 	Module[ {},
-    	$selectedProofKB = Select[ $tmaEnv, kbSelectProve[#[[1]]]&];
-        If[ $selectedProofKB === {},
+        If[ kb === {},
             translate["noKB"],
-            displayLabeledFormulaListGrid[ $selectedProofKB]
+            displayLabeledFormulaListGrid[ kb]
         ]
     ]
 displaySelectedKB[ args___] := unexpected[ displaySelectedKB, {args}]
@@ -884,6 +883,9 @@ displayKBBrowser[ task_String] :=
             	view = translate[ "noKnowl"],
             	(* else *)
             	view = view[[1]]
+            ];
+            If[ task === "prove",
+                $selectedProofKB = Select[ $tmaEnv, kbSelectProve[#[[1]]]&];
             ];
             Column[{
             	Button[ translate[ "OKnext"], $tcActionView++],
@@ -1283,7 +1285,7 @@ submitProveTask[ ] :=
 				Method -> "Queued", Active -> ($selectedProofGoal =!= {})],
 			Column[{
 				Labeled[ displaySelectedGoal[ $selectedProofGoal], translate["selGoal"], {{Top, Left}}],
-				Labeled[ displaySelectedKB[], translate["selKB"], {{Top, Left}}],
+				Labeled[ displaySelectedKB[ $selectedProofKB], translate["selKB"], {{Top, Left}}],
 				Labeled[ summarizeBuiltins[ "prove"], translate["selBui"], {{Top, Left}}]
 			}],
 			
