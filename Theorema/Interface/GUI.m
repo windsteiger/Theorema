@@ -1336,7 +1336,7 @@ execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, str
 	Module[{po, pv, pt, st},
 		{pv, po, pt} = callProver[ rules, strategy, goal, kb, searchDepth, searchTime];
 		{po, st} = simplifyProof[ po, simplification];
-		printProveInfo[ pv, pt, st];
+		printProveInfo[ Map[ {key[#], label[#]}&, kb], pv, pt, st];
 	]
 execProveCall[ args___] := unexpected[ execProveCall, {args}]
 
@@ -1373,23 +1373,7 @@ proofNavigation[ args___] := unexpected[ proofNavigation, {args}]
 
 (* this function is called during a computation (see processComputation[])
    effect: print a cell containg information about the environment settings for that computation *)
-(*printComputationInfo[] :=
-    Module[ {kbAct, bui, buiAct},
-        kbAct = Cases[ $tmaEnv, FML$[ k_, _, l_, ___] /; kbSelectCompute[k] -> l];
-        bui = Cases[ DownValues[ buiActComputation],
-        	HoldPattern[ Verbatim[HoldPattern][ buiActComputation[ op_String]] :> v_] -> {op, v}];
-        buiAct = Cases[ bui, { op_, True} -> op];
-        CellPrint[ Cell[ ToBoxes[ OpenerView[ {"", 
-            Column[ {OpenerView[ {Style[ translate[ "KBcomp"], "CIContent"], Style[ kbAct, "CIContent"]}],
-                OpenerView[ {Style[ translate[ "BuiComp"], "CIContent"], Style[ buiAct, "CIContent"]}],
-                With[ {kb = Cases[ DownValues[ kbSelectCompute],
-                	HoldPattern[ Verbatim[HoldPattern][ kbSelectCompute[ k_List]] :> v_] -> {k, v}],
-                    allBui = bui},
-                    Button[ translate["RestoreEnv"], setCompEnv[ kb, allBui], ImageSize -> Automatic]
-                ]}
-            ]}, False]], "ComputationInfo"]];
-    ]
-*)    
+  
 printComputationInfo[ cellID_Integer] := 
 	Module[ {nbDir, file},
 		nbDir = createPerNotebookDirectory[ CurrentValue[ "NotebookFullFileName"]];
@@ -1399,8 +1383,10 @@ printComputationInfo[ cellID_Integer] :=
 		file = FileNameJoin[ {nbDir, "c" <> ToString[ cellID]}];
 		saveComputationCacheDisplay[ cellID, file];
 		With[ {fn = file <> "-display.m"},
-			CellPrint[ Cell[ "", "ComputationInfo"]];
-			CellPrint[ Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ Get[ fn], None]]]], "ComputationInfoBody"]]
+			CellPrint[ Cell[ "", "ComputationInfo",
+				CellFrameLabels -> {{None, Cell[ BoxData[ ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeGroup[ ButtonNotebook[]]]]]},
+					 {None, None}}]];
+			CellPrint[ Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ Get[ fn] /. FORM -> displayFormulaFromKey, TrackedSymbols :> {$tmaEnv}]]]], "ComputationInfoBody"]]
 		];
 	]
 printComputationInfo[args___] := unexcpected[ printComputationInfo, {args}]
@@ -1412,30 +1398,12 @@ setCompEnv[ file_String] :=
 	]
 setCompEnv[ args___] := unexpected[ setCompEnv, {args}]
 
-(*
-displayComputationCache[ cellID_Integer, dir_String, tab_Integer] :=
-	Block[ {kbSelectCompute, buiActComputation},
-		Get[ "c" <> ToString[ cellID] <> "`", Path -> {dir}];
-		Switch[ tab,
-			1, (* display kb *)
-			Map[ displayFormulaFromKey, Cases[ DownValues[ kbSelectCompute],
-        		HoldPattern[ Verbatim[HoldPattern][ kbSelectCompute[ k_List]] :> True] -> k]],
-			2, (* display builtin *)
-			summarizeBuiltins[ "compute"],
-			_, (* undefined *)
-			"???"
-		]
-	]
-displayComputationCache[ cellID_Integer, dir_String, tab_] := displayComputationCache[ cellID, dir, 1]
-displayComputationCache[ args___] := unexpected[ displayComputationCache, {args}]
-*)
 saveComputationCacheDisplay[ cellID_Integer, file_String] :=
-	With[ {fn = file <> ".m"},
+	With[ {fn = file <> ".m", kbKeysLabels = Map[ {key[#], label[#]}&, Select[ $tmaEnv, kbSelectCompute[ key[ #]]&]]},
 		Put[ Definition[ buiActComputation], Definition[ kbSelectCompute], fn];
 		Put[ 
 			TabView[ {
-				translate["tcComputeTabKBTabLabel"] -> Map[ displayFormulaFromKey, Cases[ DownValues[ kbSelectCompute],
-        			HoldPattern[ Verbatim[HoldPattern][ kbSelectCompute[ k_List]] :> True] -> k]],
+				translate["tcComputeTabKBTabLabel"] -> Pane[ Row[ Map[ FORM, kbKeysLabels], ", "], 500],
         		translate["tcComputeTabBuiltinTabLabel"] -> summarizeBuiltins[ "compute"],
         		translate["RestoreEnv"] -> Row[ {translate["RestoreEnvLong"], Button[ translate[ "OK"], setCompEnv[ fn]]}, Spacer[5]]
 				},
@@ -1446,20 +1414,23 @@ saveComputationCacheDisplay[ cellID_Integer, file_String] :=
 	
 saveComputationCacheDisplay[ args___] := unexpected[ saveComputationCacheDisplay, {args}]
 
-displayFormulaFromKey[ k_List] :=
+displayFormulaFromKey[ {k_List, l_String}] :=
 	Module[ {form},
 		form = Select[ $tmaEnv, key[ #] === k&];
 		If[ form === {},
-			Button[ "???", evalFormulaFromKey[ k], Appearance -> None],
+			Button[ Tooltip[ Style[ "?" <> l <> "?", "TabView"], translate[ "notEval"]], evalFormulaFromKey[ k], Appearance -> None],
 			form = form[[1]];
-			Tooltip[ label@form, theoremaDisplay[ formula@form]]
+			Tooltip[ l, theoremaDisplay[ formula@form]]
 		]
 	]
 displayFormulaFromKey[ args___] := unexpected[ displayFormulaFromKey, {args}]
 
 evalFormulaFromKey[ k_List] :=
-	With[ { file = Part[ StringSplit[ k[[2]], ":"], 2]},
-        NotebookLocate[ {file, k[[1]]}];
+	Module[ { file = Part[ StringSplit[ k[[2]], ":"], 2], nb},
+		nb = NotebookOpen[ file];
+		NotebookFind[ nb, "GlobalDeclaration", All, CellStyle];
+		FrontEndTokenExecute[ "EvaluateCells"];
+        NotebookFind[ nb, k[[1]], All, CellTags];
         FrontEndTokenExecute[ "EvaluateCells"];
        ]
 evalFormulaFromKey[ args___] := unexpected[ evalFormulaFromKey, {args}]
@@ -1467,51 +1438,15 @@ evalFormulaFromKey[ args___] := unexpected[ evalFormulaFromKey, {args}]
 (* ::Subsubsection:: *)
 (* printProofInfo *)
 
-(*
-printProveInfo[ goal_, kb_, rules_, strategy_, {pVal_, proofObj_}, {pTime_, sTime_}, searchDepth_] :=
-    Module[ {kbAct, bui, buiAct},
-    	(* pTime (prove time) and sTime (simplification time) currently unused, should be displayed somewhere *)
-        kbAct = Map[ makeLabel[ label[#]]&, kb];
-        bui = Cases[ DownValues[ buiActProve],
-        	HoldPattern[ Verbatim[HoldPattern][ buiActProve[ op_String]] :> v_] -> {op, v}];
-        buiAct = Cases[ bui, { op_, True} -> op];
-        If[ NotebookFind[ $proofInitNotebook, makeProofIDTag[ goal], All, CellTags] === $Failed,
-			NotebookFind[ $proofInitNotebook, goal[[1,1]], All, CellTags];
-			NotebookFind[ $proofInitNotebook, "CloseEnvironment", Next, CellStyle];
-			SelectionMove[ $proofInitNotebook, After, CellGroup],
-			SelectionMove[ $proofInitNotebook, All, CellGroup]
-		];
-		SetSelectedNotebook[ $proofInitNotebook];
-        NotebookWrite[ $proofInitNotebook, Cell[ TextData[ {translate[ "Proof of"]<>" ", formulaReference[ goal], ": ", 
-        	Cell[ BoxData[ ToBoxes[ proofStatusIndicator[ pVal]]]]}],
-        	"OpenProof", CellTags -> makeProofIDTag[ goal]]];
-        (* Use Method -> "Queued" so that no time limit for proof display applies *)
-        NotebookWrite[ $proofInitNotebook, Cell[ BoxData[ ToBoxes[
-        	Button[ translate["ShowProof"], displayProof[ proofObj], ImageSize -> Automatic, Method -> "Queued"]]], "ProofDisplay"]];
-        NotebookWrite[ $proofInitNotebook, Cell[ ToBoxes[
-        	OpenerView[ {Spacer[10], 
-            Column[ {OpenerView[ {Style[ translate[ "GoalProve"], "PIContent"], Style[ makeLabel[ label@goal], "PIContent"]}],
-            	OpenerView[ {Style[ translate[ "KBprove"], "PIContent"], Style[ kbAct, "PIContent"]}],
-                OpenerView[ {Style[ translate[ "BuiProve"], "PIContent"], Style[ buiAct, "PIContent"]}],
-                OpenerView[ {Style[ translate[ "selProver"], "PIContent"], Style[ {rules, strategy}, "PIContent"]}],
-                With[ {allKB = Cases[ DownValues[ kbSelectProve],
-                	HoldPattern[ Verbatim[HoldPattern][ kbSelectProve[ k_List]] :> v_] -> {k, v}],
-                    allBui = bui, allRules = Cases[ DownValues[ ruleActive],
-                	HoldPattern[ Verbatim[HoldPattern][ ruleActive[ r_Symbol]] :> v_] -> {r, v}]},
-                    Button[ translate["RestoreEnv"], setProveEnv[ goal, allKB, allBui, rules, strategy, allRules, searchDepth], ImageSize -> Automatic]
-                ]}
-            ]}, False]], "ProofInfo"]];
-        NotebookWrite[ $proofInitNotebook, Cell[ "\[EmptySquare]", "CloseProof"]];
-    ]
-*)
-printProveInfo[ pVal_, pTime_, sTime_] := 
+
+printProveInfo[ kbKeysLabels_, pVal_, pTime_, sTime_] := 
 	Module[ {nbDir, cellID = getCellIDFromKey[ key@$selectedProofGoal], file},
 		nbDir = createPerNotebookDirectory[ CurrentValue[ $proofInitNotebook, "NotebookFullFileName"]];
 		(* Generate cache only in plain .m format, since this allows sharing notebooks with users on different platforms.
 			Also, loading a .m-file allows dynamic objects to react to new settings, whereas loading a .mx-file has no effect on dynamics.
 			I assume the speed gain from using mx is neglectable *)
 		file = FileNameJoin[ {nbDir, "p" <> cellID}];
-		saveProveCacheDisplay[ pTime, sTime, file];
+		saveProveCacheDisplay[ kbKeysLabels, pTime, sTime, file];
         If[ NotebookFind[ $proofInitNotebook, makeProofIDTag[ $selectedProofGoal], All, CellTags] === $Failed,
 			NotebookFind[ $proofInitNotebook, id@$selectedProofGoal, All, CellTags];
 			NotebookFind[ $proofInitNotebook, "CloseEnvironment", Next, CellStyle];
@@ -1522,11 +1457,12 @@ printProveInfo[ pVal_, pTime_, sTime_] :=
 		With[ {fnpo = file <> "-po.m", fnd = file <> "-display.m"},
         	NotebookWrite[ $proofInitNotebook, Cell[ TextData[ {Cell[ BoxData[ ToBoxes[ proofStatusIndicator[ pVal]]]], " " <> translate[ "Proof of"] <> " ",
         		formulaReference[ $selectedProofGoal], ":   ",
-				Cell[ BoxData[ ToBoxes[ Button[ translate["ShowProof"], displayProof[ Get[ fnpo]], ImageSize -> Automatic, Appearance -> None, Method -> "Queued"]]]]}],
+				Cell[ BoxData[ ToBoxes[ Button[ Style[ translate["ShowProof"], FontVariations -> {"Underline" -> True}], 
+					displayProof[ Get[ fnpo]], ImageSize -> Automatic, Appearance -> None, Method -> "Queued"]]]]}],
         		"ProofInfo",
         		CellTags -> makeProofIDTag[ $selectedProofGoal],
         		CellFrameLabels -> {{None, Cell[ BoxData[ ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeGroup[ ButtonNotebook[]]]]]}, {None, None}}]];
-			NotebookWrite[ $proofInitNotebook, Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ Get[ fnd], None]]]], "ProofInfoBody"]]
+			NotebookWrite[ $proofInitNotebook, Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ Get[ fnd] /. FORM -> displayFormulaFromKey, TrackedSymbols :> {$tmaEnv}]]]], "ProofInfoBody"]]
 		]
 	]
 
@@ -1540,23 +1476,6 @@ removeGroup[ nb_NotebookObject] :=
 	]
 removeGroup[][ args___] := unexpected[ removeGroup[], {args}]
 
-(*
-setProveEnv[ goal_, kb_List, bui_List, ruleSet_, strategy_, allRules_List, searchDepth_] :=
-	Module[{},
-		$selectedProofGoal = goal;
-		NotebookLocate[ goal[[1,1]]];
-		Clear[kbSelectProve];
-		kbSelectProve[_] := False;
-		Scan[(kbSelectProve[#[[1]]] = #[[2]])&, kb];
-		Clear[ruleActive];
-		ruleActive[_] := True;
-		Scan[(ruleActive[#[[1]]] = #[[2]])&, allRules];
-		Scan[(buiActProve[#[[1]]] = #[[2]])&, bui];
-		$selectedRuleSet = ruleSet;
-		$selectedStrategy = strategy;
-		$selectedSearchDepth = searchDepth;
-	]
-	*)
 setProveEnv[ file_String] :=
 	Module[ {},
 		Clear[ kbSelectProve, ruleActive];
@@ -1567,14 +1486,13 @@ setProveEnv[ args___] := unexpected[ setProveEnv, {args}]
 makeProofIDTag[ FML$[ id_, _, __]] := Apply[ StringJoin, Riffle[ Prepend[ id, "Proof"], "|"]]
 makeProofIDTag[ args___] := unexpected[ makeProofIDTag, {args}]
 
-saveProveCacheDisplay[ pTime_, sTime_, file_String] :=
+saveProveCacheDisplay[ kbKeysLabels_, pTime_, sTime_, file_String] :=
 	With[ {fn = file <> ".m"},
 		Put[ Definition[ $TMAproofTree], Definition[ $TMAproofObject], file <> "-po.m"];
 		Apply[ Put[ ##, fn]&, Map[ Definition, $allProveSettings]];
 		Put[ 
 			TabView[ {
-				translate["tcProveTabKBTabLabel"] -> Map[ displayFormulaFromKey, Cases[ DownValues[ kbSelectProve],
-        			HoldPattern[ Verbatim[HoldPattern][ kbSelectProve[ k_List]] :> True] -> k]],
+				translate["tcProveTabKBTabLabel"] -> Pane[ Row[ Map[ FORM, kbKeysLabels], ", "], 500],
         		translate["tcProveTabBuiltinTabLabel"] -> summarizeBuiltins[ "prove"],
         		translate["tcProveTabProverTabLabel"] -> summarizeProverSettings[ pTime, sTime],
         		translate["RestoreEnv"] -> Row[ {translate["RestoreEnvLong"], Button[ translate[ "OK"], setProveEnv[ fn]]}, Spacer[5]]

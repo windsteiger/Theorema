@@ -171,6 +171,7 @@ With[ {lang = "English"},
 	translate["instantiate later", lang] = "Instantiate later";
 	translate["instVar", lang] = "Variables to be instantiated";
 	translate["availConst", lang] = "Available constants";
+	translate["notEval", lang] = "Formula currently not evaluated. Click to eval.";
 
 	translate["Virtual Keyboard", lang] = "Virtual Keyboard";
 	    
