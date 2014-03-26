@@ -299,10 +299,18 @@ getTmaOperatorForms[ op_Symbol] := First[ Cases[ $tmaOperators, {_, forms_, Stri
 (* ::Section:: *)
 (* Expression categories *)
 
-isQuantifierFormula[ e_] := MatchQ[ e, _Forall$TM|_Exists$TM]
+isQuantifierFormula[ e_] := MatchQ[ e, 
+	_Theorema`Language`Forall$TM|_Theorema`Computation`Language`Forall$TM|
+	_Theorema`Language`Exists$TM|_Theorema`Computation`Language`Exists$TM]
 isQuantifierFormula[ args___] := unexpected[ isQuantifierFormula, {args}]
 
-isConnectiveFormula[ e_] := MatchQ[ e, _Not$TM|_And$TM|_Or$TM|_Implies$TM|_Iff$TM|_IffDef$TM]
+isConnectiveFormula[ e_] := MatchQ[ e, 
+	_Theorema`Language`Not$TM|_Theorema`Computation`Language`Not$TM|
+	_Theorema`Language`And$TM|_Theorema`Computation`Language`And$TM|
+	_Theorema`Language`Or$TM|_Theorema`Computation`Language`Or$TM|
+	_Theorema`Language`Implies$TM|_Theorema`Computation`Language`Implies$TM|
+	_Theorema`Language`Iff$TM|_Theorema`Computation`Language`Iff$TM|
+	_Theorema`Language`IffDef$TM|_Theorema`Computation`Language`IffDef$TM]
 isConnectiveFormula[ args___] := unexpected[ isConnectiveFormula, {args}]
 
 isAtomicExpression[ e_] := !isQuantifierFormula[ e] && !isConnectiveFormula[ e]

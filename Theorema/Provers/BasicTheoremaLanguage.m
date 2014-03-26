@@ -387,19 +387,20 @@ inferenceRule[ knowledgeRewriting] =
 this:PRFSIT$[ g_FML$, k_List, id_, rest___?OptionQ] :> performProofStep[
 	Module[ {rules, lastKBRewriting, rewritable, lastKjRewriting, usedSubsts, conds, newForms, newKB = {}, usedForRW = {}, j, i, thisKBRewriting = {}, pos},
 		If[ kbRules@this === {},
-			Catch[ $Failed]
+			Throw[ $Failed]
 		];
 		lastKBRewriting = getOptionalComponent[ this, "KBRewriting"];
 		rewritable = Cases[ k, FML$[ _, _?isAtomicExpression, __]];
 		(* try to rewrite each atomic formula individually *)
 		Do[
-			AppendTo[ thisKBRewriting, {key@rewritable[[j]], Map[ First, kbRules@this]}];
+			AppendTo[ thisKBRewriting, {key@rewritable[[j]], Union[ Map[ First, kbRules@this]]}];
 			lastKjRewriting = Cases[ lastKBRewriting, {key@rewritable[[j]], rkj_} -> rkj];
 			If[ lastKjRewriting === {},
 				(* if kj has not been rewritten yet, use all rewrite rules *)
 				rules = kbRules@this,
 				(* else: use only new ones *)
-				rules = DeleteCases[ kbRules@this, {Apply[ Alternatives, lastKjRewriting], _}];
+				(* lastKjRewriting must have length 1, we can safely access just the one element *)
+				rules = DeleteCases[ kbRules@this, {Apply[ Alternatives, lastKjRewriting[[1]]], _}];
 				If[ rules === {},
 					Continue[];
 				]
@@ -421,14 +422,20 @@ this:PRFSIT$[ g_FML$, k_List, id_, rest___?OptionQ] :> performProofStep[
 			], 
 			{j, Length[ rewritable]}
 		];
-		makeANDNODE[ makePRFINFO[ name -> knowledgeRewriting, used -> usedForRW, generated -> newKB], 
-			toBeProved[ goal -> g, kb -> joinKB[ Flatten[ newKB], k], "KBRewriting" -> thisKBRewriting, rest]]
+		If[ ValueQ[ newForms],
+			(* this means that at least one formula has been tried to rewrite with new formulas. We document this in the proof object *)
+			makeANDNODE[ makePRFINFO[ name -> knowledgeRewriting, used -> usedForRW, generated -> newKB], 
+				toBeProved[ goal -> g, kb -> joinKB[ Flatten[ newKB], k], "KBRewriting" -> thisKBRewriting, rest]],
+			(* this means we exited the outer loop always through the Continue[], i.e. there were no new rewrite rules available ->
+				the rule should not apply *)
+			$Failed
+		]
 	]
 ]
 
 posInKB[ kb_List, forms_List] := Map[ Position[ kb, #, {1}]&, forms]
 posInKB[ args___] := unexpected[ posInKB, {args}]
-
+	
 (* ::Section:: *)
 (* substitution *)
 
