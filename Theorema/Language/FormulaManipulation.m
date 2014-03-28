@@ -598,11 +598,11 @@ makeRules[ {form:Theorema`Language`Equal$TM[ l_, r_], c_List, var_List}, ref_] :
 	Thus, there is no benefit in generating both 1) and 2), we just use 1).
 *)
 makeRules[ {form:Theorema`Language`And$TM[ f__], c:{c1_, cr___}, var_List}, ref_] := 
-	{Append[ 
+	{Join[ (* We cannot use "Append" here, because the second argument originating from "makeSingleRule" could be "Sequence[]" *)
 		Map[ makeSingleRule[ 
 				{simplifiedNot[ Theorema`Language`Not$TM[ #]], makeDisjunction[ Map[ simplifiedNot[ Theorema`Language`Not$TM[ #]]&, c], Theorema`Language`Or$TM], {}, var}, 
 				ref]&, {f}],
-		makeSingleRule[ {c1, form, {cr}, var}, ref]
+		{makeSingleRule[ {c1, form, {cr}, var}, ref]}
 	], 
 	Map[ makeSingleRule[ {#, makeConjunction[ c, Theorema`Language`And$TM], {}, var}, ref, "backward"]&, {f}],
 	{}}
