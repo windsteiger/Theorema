@@ -328,7 +328,7 @@ ps:PRFSIT$[ g_, k:{pre___, e:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], post__
 	Otherwise generate one new goal or an alternative of several new goals.
 *)
 inferenceRule[ goalRewriting] = 
-this:PRFSIT$[ g:FML$[ _, _?isAtomicExpression, __], k_List, id_, rest___?OptionQ] :> performProofStep[
+this:PRFSIT$[ g:FML$[ _, _?isLiteralExpression, __], k_List, id_, rest___?OptionQ] :> performProofStep[
 	Module[ {lastGoalRewriting, rules, usedSubsts, conds, newForms, newG, j, newNodes = {}},
 		lastGoalRewriting = getOptionalComponent[ this, "goalRewriting"];
 		If[
@@ -390,7 +390,7 @@ this:PRFSIT$[ g_FML$, k_List, id_, rest___?OptionQ] :> performProofStep[
 			Throw[ $Failed]
 		];
 		lastKBRewriting = getOptionalComponent[ this, "KBRewriting"];
-		rewritable = Cases[ k, FML$[ _, _?isAtomicExpression, __]];
+		rewritable = Cases[ k, FML$[ _, _?isLiteralExpression, __]];
 		(* try to rewrite each atomic formula individually *)
 		Do[
 			AppendTo[ thisKBRewriting, {key@rewritable[[j]], Union[ Map[ First, kbRules@this]]}];

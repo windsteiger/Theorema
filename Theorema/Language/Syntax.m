@@ -316,6 +316,10 @@ isConnectiveFormula[ args___] := unexpected[ isConnectiveFormula, {args}]
 isAtomicExpression[ e_] := !isQuantifierFormula[ e] && !isConnectiveFormula[ e]
 isAtomicExpression[ args___] := unexpected[ isAtomicExpression, {args}]
 
+isLiteralExpression[ Theorema`Language`Not$TM[ e_]|Theorema`Computation`Language`Not$TM[ e_]] := isAtomicExpression[ e]
+isLiteralExpression[ e_] := isAtomicExpression[ e]
+isLiteralExpression[ args___] := unexpected[ isLiteralExpression, {args}]
+
 
 (* ::Section:: *)
 (* Set and tuple constructor *)
