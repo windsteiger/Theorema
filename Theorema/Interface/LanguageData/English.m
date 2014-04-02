@@ -223,4 +223,8 @@ With[ {lang = "English"},
     translate["showProofProgress", lang] = "Show the proof progress so far";
     translate["hideProofProgress", lang] = "Hide the proof by clicking here. Do not close the proof window, since it cannot be re-opened then.";
 
+(* Theorema`Computation`Language` *)
+	translate["predArgN", lang] = "Predicate \"`1`\" applied on `2` arguments; At most `3` arguments are expected.";
+	translate["connArgM", lang] = "Connective \"`1`\" applied on `2` arguments; Exactly `3` arguments are expected.";
+
 ]
