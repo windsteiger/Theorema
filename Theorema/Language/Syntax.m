@@ -558,7 +558,6 @@ makeMaxBox[ a_, b_] :=
 			RowBox[ {"max", "[", RowBox[ {"{", RowBox[ {a, ",", b}], "}"}], "]"}]
 		]
 	]
-makeMaxBox[ a_, b_] := RowBox[ {"max", "[", RowBox[ {"{", RowBox[ {a, ",", b}], "}"}], "]"}]
 
 (* ::Subsubsubsection:: *)
 (* \[DoubleStruckCapitalZ], \[DoubleStruckCapitalQ], \[DoubleStruckCapitalR] *)
