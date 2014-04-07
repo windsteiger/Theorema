@@ -1610,13 +1610,13 @@ newCloseEnvCell[args___] :=
 
 makeNbNewButton[] :=
 	Button[ translate[ "New"],
-		createNbRememberLocation[ ],
+		createNbRememberLocation[ Magnification -> CurrentValue[ First[ getTheoremaCommander[]], Magnification]],
 		Alignment -> {Left, Top}, Method -> "Queued"]
 makeNbNewButton[ args___] := unexpected[ makeNbNewButton, {args}]
 
 makeNbOpenButton[ ] :=
 	Button[ translate["Open"],
-		openNbRememberLocation[ ],
+		openNbRememberLocation[ Magnification -> CurrentValue[ First[ getTheoremaCommander[]], Magnification]],
 		Method -> "Queued"
 	]
 makeNbOpenButton[ args___] := unexpected[ makeNbOpenButton, {args}]

@@ -854,7 +854,7 @@ computeInProof[ args___] := unexpected[ computeInProof, {args}]
 (* ::Section:: *)
 (* Notebook operations *)
 
-createNbRememberLocation[ ] :=
+createNbRememberLocation[ opts___?OptionQ] :=
 	Module[{file, dir, fpMode},
 		If[ ValueQ[ $dirLastOpened],
 			dir = $dirLastOpened,
@@ -870,7 +870,7 @@ createNbRememberLocation[ ] :=
 			fpMode = Replace[ Global`FileChangeProtection, Options[ $FrontEnd, Global`FileChangeProtection]];
 			SetOptions[ $FrontEnd, Global`FileChangeProtection -> None];
 			NotebookSave[
-				NotebookCreate[ StyleDefinitions -> makeColoredStylesheet[ "Notebook"]],
+				NotebookCreate[ opts, StyleDefinitions -> makeColoredStylesheet[ "Notebook"]],
 				file
 			];
 			SetOptions[ $FrontEnd, Global`FileChangeProtection -> fpMode];
@@ -894,7 +894,7 @@ trustNotebookDirectory[ dir_String] :=
 	]
 trustNotebookDirectory[ args___] := unexpected[ trustNotebookDirectory, {args}]
 
-openNbRememberLocation[ ] :=
+openNbRememberLocation[ opts___?OptionQ] :=
 	Module[{file, dir},
 		If[ ValueQ[ $dirLastOpened],
 			dir = $dirLastOpened,
@@ -904,7 +904,7 @@ openNbRememberLocation[ ] :=
 		If[ StringQ[ file] && FileExistsQ[ file],
 			$dirLastOpened = DirectoryName[ file];
 			trustNotebookDirectory[ $dirLastOpened];
-			NotebookOpen[ file, StyleDefinitions -> makeColoredStylesheet[ "Notebook"]]
+			NotebookOpen[ file, opts, StyleDefinitions -> makeColoredStylesheet[ "Notebook"]]
 		]
 	]
 openNbRememberLocation[ args___] := unexpected[ openNbRememberLocation, {args}]
