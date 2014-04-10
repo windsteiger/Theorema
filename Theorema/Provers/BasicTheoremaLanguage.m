@@ -393,15 +393,17 @@ this:PRFSIT$[ g_FML$, k_List, id_, rest___?OptionQ] :> performProofStep[
 		rewritable = Cases[ k, FML$[ _, _?isLiteralExpression, __]];
 		(* try to rewrite each atomic formula individually *)
 		Do[
-			AppendTo[ thisKBRewriting, {key@rewritable[[j]], Union[ Map[ First, kbRules@this]]}];
 			lastKjRewriting = Cases[ lastKBRewriting, {key@rewritable[[j]], rkj_} -> rkj];
 			If[ lastKjRewriting === {},
 				(* if kj has not been rewritten yet, use all rewrite rules *)
 				rules = kbRules@this,
 				(* else: use only new ones *)
 				(* lastKjRewriting must have length 1, we can safely access just the one element *)
-				rules = DeleteCases[ kbRules@this, {Apply[ Alternatives, lastKjRewriting[[1]]], _}];
+				lastKjRewriting = lastKjRewriting[[1]];
+				rules = DeleteCases[ kbRules@this, {Apply[ Alternatives, lastKjRewriting], _}];
 				If[ rules === {},
+					(* In this case, no new rules are there compared to those that applied already *)
+					AppendTo[ thisKBRewriting, {key@rewritable[[j]], lastKjRewriting}];
 					Continue[];
 				]
 			];
@@ -417,9 +419,13 @@ this:PRFSIT$[ g_FML$, k_List, id_, rest___?OptionQ] :> performProofStep[
 					(* pos contains a list of positions of plain formulas in the list of plain formulas. 
 					   When we extract exactly these positions from the whole KB we get the whole formula datastructures *)
 					AppendTo[ usedForRW, Prepend[ Join[ usedSubsts[[i]], Extract[ k, Flatten[ pos, 1]]], rewritable[[j]]]];
+					lastKjRewriting = Join[ lastKjRewriting, Map[ key, usedSubsts[[i]]]];
 				],
 				{i, Length[ newForms]}
-			], 
+			];
+			(* thisKBRewriting contains for each rewritable formula a list of keys of formulas that have actually been used for rewriting.
+				In the next run, we do not use these rules again. *)
+			AppendTo[ thisKBRewriting, {key@rewritable[[j]], Union[ lastKjRewriting]}], 
 			{j, Length[ rewritable]}
 		];
 		If[ ValueQ[ newForms],

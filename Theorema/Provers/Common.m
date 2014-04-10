@@ -358,8 +358,11 @@ makePRFSIT[ data___?OptionQ] :=
 	Module[{g, k, i, r, a, p, s, kr, gr, sr, dr},
 		{g, k, i, r, a, p, s, kr, gr, sr, dr} = 
 			{goal, kb, id, rules, ruleActivity, rulePriority, strategy, kbRules, goalRules, substRules, defRules} /. {data} /. Options[ makePRFSIT];
-		Assert[ ListQ[ $rewriteRules]];
-		{kr, gr, sr, dr} = MapThread[ Join, Append[ $rewriteRules, {kr, gr, sr, dr}]];
+		If[ TrueQ[ $autoGenerateRules],
+			(* We consider $rewriteRules only if automatic generation of rewrite rules is activated. *)
+			Assert[ MatchQ[ $rewriteRules, _List (*{_List, _List, _List, _List}*)]];
+			{kr, gr, sr, dr} = MapThread[ Join, Append[ $rewriteRules, {kr, gr, sr, dr}]]
+		];
 		PRFSIT$[ g, k, i, rules -> r, ruleActivity -> a, rulePriority -> p, strategy -> s,
 			kbRules -> kr, goalRules -> gr, substRules -> sr, defRules -> dr,
 			optComponents[ data]]
