@@ -480,7 +480,6 @@ $symBlockMap = {
 (* displaySelectedGoal *)
 
 
-   
 displaySelectedGoal[ ] :=
     Module[ { sel, goal},
     	$proofInitNotebook = InputNotebook[];
@@ -490,7 +489,7 @@ displaySelectedGoal[ ] :=
             translate["noGoal"],
             With[ {selGoal = goal[[1]]},
             	Column[ {
-            		Button[ translate[ "OKnext"], $selectedProofGoal = selGoal; $tcActionView++],
+            		Button[ translate[ "OKnext"], $selectedProofGoal = selGoal; $tcActionView++;],
             		Grid[ {displayLabeledFormula[ selGoal]}]
             		}]
             ]
@@ -1066,7 +1065,7 @@ Clear[displaySelectedRules];
 
 structViewRules[ {category_String},___] := Sequence[];
 
-(*Responsible for groupe name of rules *)
+(*Responsible for group name of rules *)
 structViewRules[ {category_String, r__}, tags_, open_:False] :=
     Module[ {sub, compTags, structControl},
 		sub = Map[ structViewRules[ #, tags] &, {r}];
@@ -1261,12 +1260,44 @@ selectProver[ ] :=
     		{Checkbox[ Dynamic[ allTrue[ {existsGoalInteractive, forallKBInteractive}, ruleActive], setAll[ {existsGoalInteractive, forallKBInteractive}, ruleActive, #] &]], translate[ "interactiveInstantiate"]}
     		}, Alignment -> {Left}], 
     		translate[ "pInteractive"], {{Top, Left}}],
-    	Labeled[ RadioButtonBar[ 
-    		Dynamic[ $proofCellStatus], {Automatic -> translate[ "auto"], Open -> translate[ "open"], Closed -> translate[ "closed"]}], 
-    		translate[ "proofCellStatus"], {{Top, Left}}],
+    	Module[ {po},
+    		po = {Labeled[ RadioButtonBar[ 
+    				Dynamic[ $proofCellStatus], {Automatic -> translate[ "auto"], Open -> translate[ "open"], Closed -> translate[ "closed"]}], 
+    				translate[ "proofCellStatus"], Left]};
+    		$numExistProofs = findNumExistingProofs[ $proofInitNotebook, $selectedProofGoal];
+    		$replExistProof = $numExistProofs + 1;
+    		If[ $numExistProofs > 0,
+    			PrependTo[ po,
+    				Labeled[ PopupMenu[ Dynamic[ $replExistProof], Prepend[ Table[ i -> "#"<>ToString[i], {i, $numExistProofs}], $numExistProofs+1 -> translate[ "None"]],
+    					BaselinePosition -> Baseline, ImageSize -> {50, 20}], 
+    				translate[ "replaceExistProof"], Left]
+    			]
+    		];
+    		Labeled[ Row[ {Spacer[20], Column[ po]}], translate[ "proofOutput"], {{Top, Left}}]
+    	],
     	Button[ translate[ "OKnext"], $tcActionView++]	
     	}]
 selectProver[ args___] := unexpected[ selectRuleSet, {args}]
+
+findNumExistingProofs[ nb_NotebookObject, goal_FML$] :=
+	Module[{sel},
+		(* Find all cells with the proofIdTag *)
+		sel = NotebookFind[ $proofInitNotebook, makeProofIDTag[ goal], All, CellTags];
+		If[ sel === $Failed,
+			(* if none occur -> 0 *)
+			0,
+			sel = NotebookRead[ $proofInitNotebook];
+			(* read selection *)
+			If[ ListQ[ sel],
+				(* multiple cells selected -> number of cells = number of proofs *)
+				Length[ sel],
+				(* single cell -> 1*)
+				1
+			]
+		]
+	]
+findNumExistingProofs[ nb_, g_] := 0
+findNumExistingProofs[ args___] := unexpected[ findNumExistingProofs, {args}]
 
 submitProveTask[ ] := 
 	Module[ {},
@@ -1281,7 +1312,7 @@ submitProveTask[ ] :=
 						Infinity,
 						$selectedSearchTime
 					],
-					{$eliminateBranches, $eliminateSteps, $eliminateFormulae}], 
+					{$eliminateBranches, $eliminateSteps, $eliminateFormulae}, $replExistProof], 
 				Method -> "Queued", Active -> ($selectedProofGoal =!= {})],
 			Column[{
 				Labeled[ displaySelectedGoal[ $selectedProofGoal], translate["selGoal"], {{Top, Left}}],
@@ -1300,21 +1331,24 @@ submitProveTask[ ] :=
     					If[ TrueQ[ $eliminateSteps], translate[ "elimSteps"], Sequence[]],
     					If[ TrueQ[ $eliminateFormulae], translate[ "elimForm"], Sequence[]]
     				}],
-    				translate[ "pSimp"]<>":", Left],
+    				translate[ "pSimp"]<>":", {{Left, Top}}],
 				Labeled[
 					Column[{
     					If[ TrueQ[ $interactiveProofSitSel], translate[ "interactiveProofSitSel"], Sequence[]],
     					If[ TrueQ[ $interactiveNewProofSitFilter], translate[ "interactiveNewProofSitFilter"], Sequence[]],
     					If[ TrueQ[ Map[ ruleActive, And[ existsGoalInteractive, forallKBInteractive]]], translate[ "interactiveInstantiate"], Sequence[]]
     				}],
-    				translate[ "pInteractive"]<>":", Left],
+    				translate[ "pInteractive"]<>":", {{Left, Top}}],
 				Labeled[ 
-					Switch[ $proofCellStatus,
-						Automatic, translate[ "auto"],
-						Open, translate[ "open"],
-						Closed, translate[ "closed"]
-					],
-    			translate[ "proofCellStatus"]<>":", Left]
+					Column[{
+						translate[ "replaceExistProof"] <> ": " <> If[ $replExistProof > $numExistProofs, translate[ "None"], ToString[ $replExistProof]],
+						translate[ "proofCellStatus"] <> ": " <>
+							Switch[ $proofCellStatus,
+								Automatic, translate[ "auto"],
+								Open, translate[ "open"],
+								Closed, translate[ "closed"]
+							]}],
+    				translate[ "proofOutput"]<>":", {{Left, Top}}]
 			}]			
 			,
 			(* Method -> "Queued" so that no time limit is set for proof to complete *)
@@ -1328,17 +1362,20 @@ submitProveTask[ ] :=
 						Infinity,
 						$selectedSearchTime
 					],
-					{$eliminateBranches, $eliminateSteps, $eliminateFormulae}], 
+					{$eliminateBranches, $eliminateSteps, $eliminateFormulae}, $replExistProof], 
 				Method -> "Queued", Active -> ($selectedProofGoal =!= {})]
 		}]
 	]
 submitProveTask[ args___] := unexpected[ submitProveTask, {args}]
 
-execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, strategy_, searchDepth_, searchTime_, simplification_List] :=
+execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, strategy_, searchDepth_, searchTime_, simplification_List, repl_Integer] :=
 	Module[{po, pv, pt, st},
 		{pv, po, pt} = callProver[ rules, strategy, goal, kb, searchDepth, searchTime];
+		(* At this point po is equal to the global $TMAproofObject and $TMAproofTree is the corresponding tree *)
 		{po, st} = simplifyProof[ po, simplification];
-		printProveInfo[ Map[ {key[#], label[#]}&, kb], pv, pt, st];
+		(* po is the simplified proof object and $TMAproofTree is the corresponding simplified tree, but $TMAproofObject is still the unsimplified object *)
+		$TMAproofObject = po;
+		printProveInfo[ Map[ {key[#], label[#]}&, kb], pv, pt, st, repl];
 	]
 execProveCall[ args___] := unexpected[ execProveCall, {args}]
 
@@ -1386,7 +1423,7 @@ printComputationInfo[ cellID_Integer] :=
 		saveComputationCacheDisplay[ cellID, file];
 		With[ {fn = file <> "-display.m"},
 			CellPrint[ Cell[ "", "ComputationInfo",
-				CellFrameLabels -> {{None, Cell[ BoxData[ ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeGroup[ ButtonNotebook[]]]]]},
+				CellFrameLabels -> {{None, Cell[ BoxData[ ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeGroup[ ButtonNotebook[], file]]]]},
 					 {None, None}}]];
 			CellPrint[ Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ Get[ fn] /. FORM -> displayFormulaFromKey, TrackedSymbols :> {$tmaEnv}]]]], "ComputationInfoBody"]]
 		];
@@ -1441,37 +1478,47 @@ evalFormulaFromKey[ args___] := unexpected[ evalFormulaFromKey, {args}]
 (* printProofInfo *)
 
 
-printProveInfo[ kbKeysLabels_, pVal_, pTime_, sTime_] := 
+printProveInfo[ kbKeysLabels_, pVal_, pTime_, sTime_, subsP_] := 
 	Module[ {nbDir, cellID = getCellIDFromKey[ key@$selectedProofGoal], file},
 		nbDir = createPerNotebookDirectory[ CurrentValue[ $proofInitNotebook, "NotebookFullFileName"]];
 		(* Generate cache only in plain .m format, since this allows sharing notebooks with users on different platforms.
 			Also, loading a .m-file allows dynamic objects to react to new settings, whereas loading a .mx-file has no effect on dynamics.
 			I assume the speed gain from using mx is neglectable *)
-		file = FileNameJoin[ {nbDir, "p" <> cellID}];
+		file = FileNameJoin[ {nbDir, "p" <> cellID <> "-" <> ToString[ subsP]}];
 		saveProveCacheDisplay[ kbKeysLabels, pTime, sTime, file];
-        If[ NotebookFind[ $proofInitNotebook, makeProofIDTag[ $selectedProofGoal], All, CellTags] === $Failed,
-			NotebookFind[ $proofInitNotebook, id@$selectedProofGoal, All, CellTags];
-			NotebookFind[ $proofInitNotebook, "CloseEnvironment", Next, CellStyle];
-			SelectionMove[ $proofInitNotebook, After, CellGroup],
+        If[ NotebookFind[ $proofInitNotebook, makeProofIDTag[ $selectedProofGoal] <> "-" <> ToString[ subsP], All, CellTags] === $Failed,
+        	(* no replacement of existing proof -> new proof *)
+        	If[ NotebookFind[ $proofInitNotebook, makeProofIDTag[ $selectedProofGoal] <> "-" <> ToString[ subsP-1], All, CellTags] === $Failed,
+        		(* there are no proofs for this goal -> put after env *)
+				NotebookFind[ $proofInitNotebook, id@$selectedProofGoal, All, CellTags];
+				NotebookFind[ $proofInitNotebook, "CloseEnvironment", Next, CellStyle];
+				SelectionMove[ $proofInitNotebook, After, CellGroup],
+				(* there are already proofs for this goal *)
+				SelectionMove[ $proofInitNotebook, All, CellGroup];
+				SelectionMove[ $proofInitNotebook, After, CellGroup]
+        	],
+        	(* replace existing -> select group to overwrite *)
 			SelectionMove[ $proofInitNotebook, All, CellGroup]
 		];
 		SetSelectedNotebook[ $proofInitNotebook];
 		With[ {fnpo = file <> "-po.m", fnd = file <> "-display.m"},
         	NotebookWrite[ $proofInitNotebook, Cell[ TextData[ {Cell[ BoxData[ ToBoxes[ proofStatusIndicator[ pVal]]]], " " <> translate[ "Proof of"] <> " ",
-        		formulaReference[ $selectedProofGoal], ":   ",
+        		formulaReference[ $selectedProofGoal], " #" <> ToString[ $replExistProof] <> ":   ",
 				Cell[ BoxData[ ToBoxes[ Button[ Style[ translate["ShowProof"], FontVariations -> {"Underline" -> True}], 
-					displayProof[ Get[ fnpo]], ImageSize -> Automatic, Appearance -> None, Method -> "Queued"]]]]}],
+					displayProof[ fnpo], ImageSize -> Automatic, Appearance -> None, Method -> "Queued"]]]]}],
         		"ProofInfo",
-        		CellTags -> makeProofIDTag[ $selectedProofGoal],
-        		CellFrameLabels -> {{None, Cell[ BoxData[ ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeGroup[ ButtonNotebook[]]]]]}, {None, None}}]];
+        		CellTags -> With[ {pTag = makeProofIDTag[ $selectedProofGoal]}, {pTag, pTag <> "-" <> ToString[ subsP]}],
+        		CellFrameLabels -> {{None, Cell[ BoxData[ ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, 
+        			With[ {f = file}, ButtonFunction :> removeGroup[ ButtonNotebook[], f]]]]]}, {None, None}}]];
 			NotebookWrite[ $proofInitNotebook, Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ Get[ fnd] /. FORM -> displayFormulaFromKey, TrackedSymbols :> {$tmaEnv}]]]], "ProofInfoBody"]]
 		]
 	]
 
 printProveInfo[args___] := unexcpected[ printProveInfo, {args}]
 
-removeGroup[ nb_NotebookObject] :=
+removeGroup[ nb_NotebookObject, file_String] :=
 	Module[{},
+		DeleteFile[ FileNames[ file <> "*.m"]];
 		SelectionMove[ nb, All, ButtonCell];
 		SelectionMove[ nb, All, CellGroup];
 		NotebookDelete[ nb];
@@ -1485,12 +1532,12 @@ setProveEnv[ file_String] :=
 	]
 setProveEnv[ args___] := unexpected[ setProveEnv, {args}]
 
-makeProofIDTag[ FML$[ id_, _, __]] := Apply[ StringJoin, Riffle[ Prepend[ id, "Proof"], "|"]]
+makeProofIDTag[ f_FML$] := "Proof|" <> id@f
 makeProofIDTag[ args___] := unexpected[ makeProofIDTag, {args}]
 
 saveProveCacheDisplay[ kbKeysLabels_, pTime_, sTime_, file_String] :=
 	With[ {fn = file <> ".m"},
-		Put[ Definition[ $TMAproofTree], Definition[ $TMAproofObject], file <> "-po.m"];
+		Put[ $TMAproofObject, file <> "-po.m"];
 		Apply[ Put[ ##, fn]&, Map[ Definition, $allProveSettings]];
 		Put[ 
 			TabView[ {

@@ -359,8 +359,9 @@ makePRFSIT[ data___?OptionQ] :=
 		{g, k, i, r, a, p, s, kr, gr, sr, dr} = 
 			{goal, kb, id, rules, ruleActivity, rulePriority, strategy, kbRules, goalRules, substRules, defRules} /. {data} /. Options[ makePRFSIT];
 		If[ TrueQ[ $autoGenerateRules],
-			(* We consider $rewriteRules only if automatic generation of rewrite rules is activated. *)
-			Assert[ MatchQ[ $rewriteRules, _List (*{_List, _List, _List, _List}*)]];
+			(* We consider $rewriteRules only if automatic generation of rewrite rules is activated. 
+				Otherwise $rewriteRules would be {} and the Join operation below would be void, thus we save this useless computation. *)
+			Assert[ MatchQ[ $rewriteRules, _List]];
 			{kr, gr, sr, dr} = MapThread[ Join, Append[ $rewriteRules, {kr, gr, sr, dr}]]
 		];
 		PRFSIT$[ g, k, i, rules -> r, ruleActivity -> a, rulePriority -> p, strategy -> s,
@@ -763,16 +764,17 @@ makeInitialProofTree[ args___] := unexpected[ makeInitialProofTree, {args}]
 (* ::Subsubsection:: *)
 (* displayProof *)
 
-displayProof[ p_PRFOBJ$] :=
-	Module[ {cells, tree = poToTree[ p]},
+displayProof[ file_String] :=
+	Module[ {p = Get[ file], cells, tree},
 		cells = proofObjectToCell[ p];
+		tree = poToTree[ p];
 		$TMAproofObject = p;
-		$TMAproofNotebook = tmaNotebookPut[ Notebook[ cells], "Proof"];
 		$TMAproofTree = tree; 
+		$TMAproofNotebook = tmaNotebookPut[ Notebook[ cells], "Proof"];
 		$selectedProofStep = "OriginalPS";
-		With[ {nb = $TMAproofNotebook, tr = tree},
-			SetOptions[ $TMAproofNotebook, NotebookEventActions -> {"MouseClicked" :> ($TMAproofNotebook = nb; $TMAproofTree = tr;),
-				"WindowClose" :> ($TMAproofTree = {};), PassEventsDown -> True}]
+		With[ {nb = $TMAproofNotebook, tr = tree, po = p},
+			SetOptions[ $TMAproofNotebook, NotebookEventActions -> {{"KeyDown", "r"} :> ($TMAproofNotebook = nb; $TMAproofObject = po; $TMAproofTree = tr;),
+				"WindowClose" :> ($TMAproofTree = {};), PassEventsDown -> False}]
 		]
 	]
 displayProof[ args___] := unexpected[ displayProof, {args}]
