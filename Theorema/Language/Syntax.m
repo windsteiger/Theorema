@@ -295,35 +295,8 @@ isTmaOperatorBox[ _] := False
 
 getTmaOperatorForms[ op_Symbol] := First[ Cases[ $tmaOperators, {_, forms_, StringDrop[ SymbolName[ op], -3]} -> forms]]
 
-
-(* ::Section:: *)
-(* Expression categories *)
-
-isQuantifierFormula[ e_] := MatchQ[ e, 
-	_Theorema`Language`Forall$TM|_Theorema`Computation`Language`Forall$TM|
-	_Theorema`Language`Exists$TM|_Theorema`Computation`Language`Exists$TM]
-isQuantifierFormula[ args___] := unexpected[ isQuantifierFormula, {args}]
-
-isConnectiveFormula[ e_] := MatchQ[ e, 
-	_Theorema`Language`Not$TM|_Theorema`Computation`Language`Not$TM|
-	_Theorema`Language`And$TM|_Theorema`Computation`Language`And$TM|
-	_Theorema`Language`Or$TM|_Theorema`Computation`Language`Or$TM|
-	_Theorema`Language`Implies$TM|_Theorema`Computation`Language`Implies$TM|
-	_Theorema`Language`Iff$TM|_Theorema`Computation`Language`Iff$TM|
-	_Theorema`Language`IffDef$TM|_Theorema`Computation`Language`IffDef$TM]
-isConnectiveFormula[ args___] := unexpected[ isConnectiveFormula, {args}]
-
-isAtomicExpression[ e_] := !isQuantifierFormula[ e] && !isConnectiveFormula[ e]
-isAtomicExpression[ args___] := unexpected[ isAtomicExpression, {args}]
-
-isLiteralExpression[ Theorema`Language`Not$TM[ e_]|Theorema`Computation`Language`Not$TM[ e_]] := isAtomicExpression[ e]
-isLiteralExpression[ e_] := isAtomicExpression[ e]
-isLiteralExpression[ args___] := unexpected[ isLiteralExpression, {args}]
-
-
 (* ::Section:: *)
 (* Set and tuple constructor *)
-
 
 (*
 	Expression specific parts -> Expression.m
@@ -333,8 +306,6 @@ isLiteralExpression[ args___] := unexpected[ isLiteralExpression, {args}]
 
 makeSet[ x___] := Apply[ ToExpression[ "Set$TM"], Union[ {x}]]
 makeTuple[ x___] := ToExpression[ "Tuple$TM"][x]
-
-
 
 (* ::Section:: *)
 (* MakeExpression *)

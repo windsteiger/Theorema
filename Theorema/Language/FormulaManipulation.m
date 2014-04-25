@@ -304,6 +304,40 @@ substituteFree[ expr_, rule_?OptionQ] := substituteFree[ expr, {rule}]
 substituteFree[ expr_, rules_List] := ReleaseHold[ substituteFree[ Hold[ expr], rules]]
 substituteFree[ args___] := unexpected[ substituteFree, {args}]
 
+(* ::Section:: *)
+(* Expression categories *)
+
+isQuantifierFormula[ e_] := MatchQ[ e, 
+	_Theorema`Language`Forall$TM|_Theorema`Computation`Language`Forall$TM|
+	_Theorema`Language`Exists$TM|_Theorema`Computation`Language`Exists$TM]
+isQuantifierFormula[ args___] := unexpected[ isQuantifierFormula, {args}]
+
+isConnectiveFormula[ e_] := MatchQ[ e, 
+	_Theorema`Language`Not$TM|_Theorema`Computation`Language`Not$TM|
+	_Theorema`Language`And$TM|_Theorema`Computation`Language`And$TM|
+	_Theorema`Language`Or$TM|_Theorema`Computation`Language`Or$TM|
+	_Theorema`Language`Implies$TM|_Theorema`Computation`Language`Implies$TM|
+	_Theorema`Language`Iff$TM|_Theorema`Computation`Language`Iff$TM|
+	_Theorema`Language`IffDef$TM|_Theorema`Computation`Language`IffDef$TM]
+isConnectiveFormula[ args___] := unexpected[ isConnectiveFormula, {args}]
+
+isAtomicExpression[ e_] := !isQuantifierFormula[ e] && !isConnectiveFormula[ e]
+isAtomicExpression[ args___] := unexpected[ isAtomicExpression, {args}]
+
+isLiteralExpression[ Theorema`Language`Not$TM[ e_]|Theorema`Computation`Language`Not$TM[ e_]] := isAtomicExpression[ e]
+isLiteralExpression[ e_] := isAtomicExpression[ e]
+isLiteralExpression[ args___] := unexpected[ isLiteralExpression, {args}]
+
+isAtomicTerm[ _?isNonNumberAtomicTerm] := True
+isAtomicTerm[ _?NumberQ] := True
+isAtomicTerm[ _] := False
+isAtomicTerm[ args___] := unexpected[ isAtomicTerm, {args}]
+
+isNonNumberAtomicTerm[ _Theorema`Language`VAR$|_Theorema`Language`FIX$|_Symbol] := True
+isNonNumberAtomicTerm[ _] := False
+isNonNumberAtomicTerm[ args___] := unexpected[ isNonNumberAtomicTerm, {args}]
+
+
 (* ::Subsubsection:: *)
 (* isQuantifierFree *)
 
@@ -588,7 +622,7 @@ makeRules[ {form:Theorema`Language`Equal$TM[ l_, r_], c_List, var_List}, ref_] :
         	(* in this case, forward is also empty, we need not do anything *)
             backward = {makeSingleRule[ {form, makeConjunction[ c, Theorema`Language`And$TM], {}, var}, ref, "backward"]}
         ];
-        {forward, backward, {makeSingleRule[ {l, r, c, var}, ref], makeSingleRule[ {r, l, c, var}, ref]}}
+        {forward, backward, {If[ isNonNumberAtomicTerm[ r], makeSingleRule[ {r, l, c, var}, ref], makeSingleRule[ {l, r, c, var}, ref]]}}
     ]
 (* We do not introduce backward rules for the negated implications *)
 (*
