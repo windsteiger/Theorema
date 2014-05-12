@@ -57,117 +57,186 @@ setComputationContext[ args___] := unexpected[ setComputationContext, {args}]
 (* ::Section:: *)
 (* Logical Abbreviations *)
 
-Unequal$TM[ _] := True
-Unequal$TM[ a_, b_] := Not$TM[ Equal$TM[ a, b]]
-Unequal$TM[ a_, b_, c__] := Apply[ And$TM, Map[ Not$TM, ReplacePart[ Apply[ Hold, Subsets[ Hold[ a, b, c], {2}]], {_, 0} -> Equal$TM]]]
+buiActiveRelation["Unequal"] := buiActive["Equal"]
+buiActiveRelation["NotLess"] := buiActive["Less"]
+buiActiveRelation["NotLessEqual"] := buiActive["LessEqual"]
+buiActiveRelation["NotGreater"] := buiActive["Greater"]
+buiActiveRelation["NotGreaterEqual"] := buiActive["GreaterEqual"]
+buiActiveRelation["NotSubset"] := buiActive["Subset"]
+buiActiveRelation["NotSubsetEqual"] := buiActive["SubsetEqual"]
+buiActiveRelation["NotSuperset"] := buiActive["Superset"]
+buiActiveRelation["NotSupersetEqual"] := buiActive["SupersetEqual"]
+buiActiveRelation["Element"|"NotElement"|"ReverseElement"|"NotReverseElement"] := buiActive["IsElement"]
+buiActiveRelation[ a:("Equal"|"Less"|"LessEqual"|"Greater"|"GreaterEqual"|"Subset"|"SubsetEqual"|"Superset"|"SupersetEqual")] := buiActive[a]
+buiActiveRelation[ _String] := False
+
+Unequal$TM[ _] /; buiActiveRelation["Unequal"] := True
+Unequal$TM[ a_, b_] /; buiActiveRelation["Unequal"] := Not$TM[ Equal$TM[ a, b]]
+Unequal$TM[ a_, b_, c__] /; buiActiveRelation["Unequal"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Equal$TM[ #1, #2]]&]]
+Annotated$TM[ Unequal$TM, SubScript$TM[_]][ _] /; buiActiveRelation["Unequal"] := True
+Annotated$TM[ Unequal$TM, s:(SubScript$TM[_])][ a_, b_] /; buiActiveRelation["Unequal"] := Not$TM[ Annotated$TM[ Equal$TM, s][ a, b]]
+Annotated$TM[ Unequal$TM, s:(SubScript$TM[_])][ a_, b_, c__] /; buiActiveRelation["Unequal"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Annotated$TM[ Equal$TM, s][ #1, #2]]&]]
+(* Maybe it's better to leave domain operations untouched ... *)
+(*
 DomainOperation$TM[ _, Unequal$TM][ _] := True
 DomainOperation$TM[ dom_, Unequal$TM][ a_, b_] := Not$TM[ DomainOperation$TM[ dom, Equal$TM][ a, b]]
 DomainOperation$TM[ dom_, Unequal$TM][ a_, b_, c__] := Apply[ And$TM, Map[ Not$TM, ReplacePart[ Apply[ Hold, Subsets[ Hold[ a, b, c], {2}]], {_, 0} -> DomainOperation$TM[ dom, Equal$TM]]]]
+*)
 
-NotLess$TM[ _] := True
-NotLess$TM[ a_, b_] := Not$TM[ Less$TM[ a, b]]
-NotLess$TM[ a_, b_, c__] := (notification[ translate["predArgN"], "NotLess", Length[ {a, b, c}], 2]; NotLess[ a, b, c])
+NotLess$TM[ _] /; buiActiveRelation["NotLess"] := True
+NotLess$TM[ a_, b_] /; buiActiveRelation["NotLess"] := Not$TM[ Less$TM[ a, b]]
+NotLess$TM[ a_, b_, c__] /; buiActiveRelation["NotLess"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Less$TM[ #1, #2]]&]]
+(*
 DomainOperation$TM[ _, NotLess$TM][ _] := True
 DomainOperation$TM[ dom_, NotLess$TM][ a_, b_] := Not$TM[ DomainOperation$TM[ dom, Less$TM][ a, b]]
+*)
 
-NotLessEqual$TM[ _] := True
-NotLessEqual$TM[ a_, b_] := Not$TM[ LessEqual$TM[ a, b]]
-NotLessEqual$TM[ a_, b_, c__] := (notification[ translate["predArgN"], "NotLessEqual", Length[ {a, b, c}], 2]; NotLessEqual[ a, b, c])
+NotLessEqual$TM[ _] /; buiActiveRelation["NotLessEqual"] := True
+NotLessEqual$TM[ a_, b_] /; buiActiveRelation["NotLessEqual"] := Not$TM[ LessEqual$TM[ a, b]]
+NotLessEqual$TM[ a_, b_, c__] /; buiActiveRelation["NotLessEqual"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ LessEqual$TM[ #1, #2]]&]]
+(*
 DomainOperation$TM[ _, NotLessEqual$TM][ _] := True
 DomainOperation$TM[ dom_, NotLessEqual$TM][ a_, b_] := Not$TM[ DomainOperation$TM[ dom, LessEqual$TM][ a, b]]
+*)
 
-NotGreater$TM[ _] := True
-NotGreater$TM[ a_, b_] := Not$TM[ Greater$TM[ a, b]]
-NotGreater$TM[ a_, b_, c__] := (notification[ translate["predArgN"], "NotGreater", Length[ {a, b, c}], 2]; NotGreater[ a, b, c])
+NotGreater$TM[ _] /; buiActiveRelation["NotGreater"] := True
+NotGreater$TM[ a_, b_] /; buiActiveRelation["NotGreater"] := Not$TM[ Greater$TM[ a, b]]
+NotGreater$TM[ a_, b_, c__] /; buiActiveRelation["NotGreater"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Greater$TM[ #1, #2]]&]]
+(*
 DomainOperation$TM[ _, NotGreater$TM][ _] := True
 DomainOperation$TM[ dom_, NotGreater$TM][ a_, b_] := Not$TM[ DomainOperation$TM[ dom, Greater$TM][ a, b]]
+*)
 
-NotGreaterEqual$TM[ _] := True
-NotGreaterEqual$TM[ a_, b_] := Not$TM[ GreaterEqual$TM[ a, b]]
-NotGreaterEqual$TM[ a_, b_, c__] := (notification[ translate["predArgN"], "NotGreaterEqual", Length[ {a, b, c}], 2]; NotGreaterEqual[ a, b, c])
+NotGreaterEqual$TM[ _] /; buiActiveRelation["NotGreaterEqual"] := True
+NotGreaterEqual$TM[ a_, b_] /; buiActiveRelation["NotGreaterEqual"] := Not$TM[ GreaterEqual$TM[ a, b]]
+NotGreaterEqual$TM[ a_, b_, c__] /; buiActiveRelation["NotGreaterEqual"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ GreaterEqual$TM[ #1, #2]]&]]
+(*
 DomainOperation$TM[ _, NotGreaterEqual$TM][ _] := True
 DomainOperation$TM[ dom_, NotGreaterEqual$TM][ a_, b_] := Not$TM[ DomainOperation$TM[ dom, GreaterEqual$TM][ a, b]]
+*)
 
-NotSubset$TM[ _] := True
-NotSubset$TM[ a_, b_] := Not$TM[ Subset$TM[ a, b]]
-NotSubset$TM[ a_, b_, c__] := (notification[ translate["predArgN"], "NotSubset", Length[ {a, b, c}], 2]; NotSubset[ a, b, c])
+NotSubset$TM[ _] /; buiActiveRelation["NotSubset"] := True
+NotSubset$TM[ a_, b_] /; buiActiveRelation["NotSubset"] := Not$TM[ Subset$TM[ a, b]]
+NotSubset$TM[ a_, b_, c__] /; buiActiveRelation["NotSubset"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Subset$TM[ #1, #2]]&]]
+Annotated$TM[ NotSubset$TM, SubScript$TM[_]][ _] /; buiActiveRelation["NotSubset"] := True
+Annotated$TM[ NotSubset$TM, s:(SubScript$TM[_])][ a_, b_] /; buiActiveRelation["NotSubset"] := Not$TM[ Annotated$TM[ Subset$TM, s][ a, b]]
+Annotated$TM[ NotSubset$TM, s:(SubScript$TM[_])][ a_, b_, c__] /; buiActiveRelation["NotSubset"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Annotated$TM[ Subset$TM, s][ #1, #2]]&]]
+(*
 DomainOperation$TM[ _, NotSubset$TM][ _] := True
 DomainOperation$TM[ dom_, NotSubset$TM][ a_, b_] := Not$TM[ DomainOperation$TM[ dom, Subset$TM][ a, b]]
-Annotated$TM[ NotSubset$TM, SubScript$TM[_]][ _] := True
-Annotated$TM[ NotSubset$TM, s:(SubScript$TM[_])][ a_, b_] := Not$TM[ Annotated$TM[ Subset$TM, s][ a, b]]
+*)
 
-NotSubsetEqual$TM[ _] := True
-NotSubsetEqual$TM[ a_, b_] := Not$TM[ SubsetEqual$TM[ a, b]]
-NotSubsetEqual$TM[ a_, b_, c__] := (notification[ translate["predArgN"], "NotSubsetEqual", Length[ {a, b, c}], 2]; NotSubsetEqual[ a, b, c])
+NotSubsetEqual$TM[ _] /; buiActiveRelation["NotSubsetEqual"] := True
+NotSubsetEqual$TM[ a_, b_] /; buiActiveRelation["NotSubsetEqual"] := Not$TM[ SubsetEqual$TM[ a, b]]
+NotSubsetEqual$TM[ a_, b_, c__] /; buiActiveRelation["NotSubsetEqual"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ SubsetEqual$TM[ #1, #2]]&]]
+Annotated$TM[ NotSubsetEqual$TM, SubScript$TM[_]][ _] /; buiActiveRelation["NotSubsetEqual"] := True
+Annotated$TM[ NotSubsetEqual$TM, s:(SubScript$TM[_])][ a_, b_] /; buiActiveRelation["NotSubsetEqual"] := Not$TM[ Annotated$TM[ SubsetEqual$TM, s][ a, b]]
+Annotated$TM[ NotSubsetEqual$TM, s:(SubScript$TM[_])][ a_, b_, c__] /; buiActiveRelation["NotSubsetEqual"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Annotated$TM[ SubsetEqual$TM, s][ #1, #2]]&]]
+(*
 DomainOperation$TM[ _, NotSubsetEqual$TM][ _] := True
 DomainOperation$TM[ dom_, NotSubsetEqual$TM][ a_, b_] := Not$TM[ DomainOperation$TM[ dom, SubsetEqual$TM][ a, b]]
-Annotated$TM[ NotSubsetEqual$TM, SubScript$TM[_]][ _] := True
-Annotated$TM[ NotSubsetEqual$TM, s:(SubScript$TM[_])][ a_, b_] := Not$TM[ Annotated$TM[ SubsetEqual$TM, s][ a, b]]
+*)
 
-NotSuperset$TM[ _] := True
-NotSuperset$TM[ a_, b_] := Not$TM[ Superset$TM[ a, b]]
-NotSuperset$TM[ a_, b_, c__] := (notification[ translate["predArgN"], "NotSuperset", Length[ {a, b, c}], 2]; NotSuperset[ a, b, c])
+NotSuperset$TM[ _] /; buiActiveRelation["NotSuperset"] := True
+NotSuperset$TM[ a_, b_] /; buiActiveRelation["NotSuperset"] := Not$TM[ Superset$TM[ a, b]]
+NotSuperset$TM[ a_, b_, c__] /; buiActiveRelation["NotSuperset"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Superset$TM[ #1, #2]]&]]
+Annotated$TM[ NotSuperset$TM, SubScript$TM[_]][ _] /; buiActiveRelation["NotSuperset"] := True
+Annotated$TM[ NotSuperset$TM, s:(SubScript$TM[_])][ a_, b_] /; buiActiveRelation["NotSuperset"] := Not$TM[ Annotated$TM[ Superset$TM, s][ a, b]]
+Annotated$TM[ NotSuperset$TM, s:(SubScript$TM[_])][ a_, b_, c__] /; buiActiveRelation["NotSuperset"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Annotated$TM[ Superset$TM, s][ #1, #2]]&]]
+(*
 DomainOperation$TM[ _, NotSuperset$TM][ _] := True
 DomainOperation$TM[ dom_, NotSuperset$TM][ a_, b_] := Not$TM[ DomainOperation$TM[ dom, Superset$TM][ a, b]]
-Annotated$TM[ NotSuperset$TM, SubScript$TM[_]][ _] := True
-Annotated$TM[ NotSuperset$TM, s:(SubScript$TM[_])][ a_, b_] := Not$TM[ Annotated$TM[ Superset$TM, s][ a, b]]
+*)
 
-NotSupersetEqual$TM[ _] := True
-NotSupersetEqual$TM[ a_, b_] := Not$TM[ Superset$TM[ a, b]]
-NotSupersetEqual$TM[ a_, b_, c__] := (notification[ translate["predArgN"], "NotSupersetEqual", Length[ {a, b, c}], 2]; NotSupersetEqual[ a, b, c])
+NotSupersetEqual$TM[ _] /; buiActiveRelation["NotSupersetEqual"] := True
+NotSupersetEqual$TM[ a_, b_] /; buiActiveRelation["NotSupersetEqual"] := Not$TM[ Superset$TM[ a, b]]
+NotSupersetEqual$TM[ a_, b_, c__] /; buiActiveRelation["NotSupersetEqual"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ SupersetEqual$TM[ #1, #2]]&]]
+Annotated$TM[ NotSupersetEqual$TM, SubScript$TM[_]][ _] /; buiActiveRelation["NotSupersetEqual"] := True
+Annotated$TM[ NotSupersetEqual$TM, s:(SubScript$TM[_])][ a_, b_] /; buiActiveRelation["NotSupersetEqual"] := Not$TM[ Annotated$TM[ SupersetEqual$TM, s][ a, b]]
+Annotated$TM[ NotSupersetEqual$TM, s:(SubScript$TM[_])][ a_, b_, c__] /; buiActiveRelation["NotSupersetEqual"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Annotated$TM[ SupersetEqual$TM, s][ #1, #2]]&]]
+(*
 DomainOperation$TM[ _, NotSupersetEqual$TM][ _] := True
 DomainOperation$TM[ dom_, NotSupersetEqual$TM][ a_, b_] := Not$TM[ DomainOperation$TM[ dom, SupersetEqual$TM][ a, b]]
-Annotated$TM[ NotSupersetEqual$TM, SubScript$TM[_]][ _] := True
-Annotated$TM[ NotSupersetEqual$TM, s:(SubScript$TM[_])][ a_, b_] := Not$TM[ Annotated$TM[ SupersetEqual$TM, s][ a, b]]
+*)
 
+(*
 DomainOperation$TM[ dom_, op:(NotLess$TM|NotLessEqual$TM|NotGreater$TM|NotGreaterEqual$TM|NotSubset$TM|NotSubsetEqual$TM|NotSuperset$TM|NotSupersetEqual$TM)][ a_, b_, c__] :=
 	Module[ {name = StringDrop[ SymbolName[ op], -3]},
 		(notification[ translate["predArgN"], name, Length[ {a, b, c}], 2];
 		DomainOperation$TM[ dom, ToExpression[ name]][ a, b, c])
 	]
-Annotated$TM[ op:(NotSubset$TM|NotSubsetEqual$TM|NotSuperset$TM|NotSupersetEqual$TM), s:(SubScript[_])][ a_, b_, c__] :=
-	Module[ {name = StringDrop[ SymbolName[ op], -3]},
-		(notification[ translate["predArgN"], name, Length[ {a, b, c}], 2];
-		Annotated$TM[ ToExpression[ name], s][ a, b, c])
-	]
+*)
 	
-ReverseElement$TM[ a_, b_] := Element$TM[ b, a]
+ReverseElement$TM[ a_, b_] /; buiActiveRelation["ReverseElement"] := Element$TM[ b, a]
+ReverseElement$TM[ a_, b_, c__] /; buiActiveRelation["ReverseElement"] := chainToConjunction[ Riffle[ {a, b, c}, Element$TM[ #2, #1]&]]
+Annotated$TM[ ReverseElement$TM, s:(SubScript$TM[_])][ a_, b_] /; buiActiveRelation["ReverseElement"] := Annotated$TM[ Element$TM, s][ b, a]
+Annotated$TM[ ReverseElement$TM, s:(SubScript$TM[_])][ a_, b_, c__] /; buiActiveRelation["ReverseElement"] := chainToConjunction[ Riffle[ {a, b, c}, Annotated$TM[ Element$TM, s][ #2, #1]&]]
+(*
 DomainOperation$TM[ dom_, ReverseElement$TM][ a_, b_] := DomainOperation$TM[ dom, Element$TM][ b, a]
-Annotated$TM[ ReverseElement$TM, s:(SubScript$TM[_])][ a_, b_] := Annotated$TM[ Element$TM, s][ b, a]
+*)
 	
-NotElement$TM[ a_, b_] := Not$TM[ Element$TM[ a, b]]
-DomainOperation$TM[ dom_, NotElement$TM][ a_] := Not$TM[ DomainOperation$TM[ dom, Element$TM][ a]]
+NotElement$TM[ a_, b_] /; buiActiveRelation["NotElement"] := Not$TM[ Element$TM[ a, b]]
+NotElement$TM[ a_, b_, c__] /; buiActiveRelation["NotElement"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Element$TM[ #1, #2]]&]]
+(* Special case: Unary domain decision predicate *)
+DomainOperation$TM[ dom_, NotElement$TM][ a_] /; buiActiveRelation["NotElement"] := Not$TM[ DomainOperation$TM[ dom, Element$TM][ a]]
+Annotated$TM[ NotElement$TM, s:(SubScript$TM[_])][ a_, b_] /; buiActiveRelation["NotElement"] := Not$TM[ Annotated$TM[ Element$TM, s][ a, b]]
+Annotated$TM[ NotElement$TM, s:(SubScript$TM[_])][ a_, b_, c__] /; buiActiveRelation["NotElement"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Annotated$TM[ Element$TM, s][ #1, #2]]&]]
+(*
 DomainOperation$TM[ dom_, NotElement$TM][ a_, b_] := Not$TM[ DomainOperation$TM[ dom, Element$TM][ a, b]]
-Annotated$TM[ NotElement$TM, s:(SubScript$TM[_])][ a_, b_] := Not$TM[ Annotated$TM[ Element$TM, s][ a, b]]
+*)
 
-NotReverseElement$TM[ a_, b_] := Not$TM[ Element$TM[ b, a]]
+NotReverseElement$TM[ a_, b_] /; buiActiveRelation["NotReverseElement"] := Not$TM[ Element$TM[ b, a]]
+NotReverseElement$TM[ a_, b_, c__] /; buiActiveRelation["NotReverseElement"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Element$TM[ #2, #1]]&]]
+Annotated$TM[ NotReverseElement$TM, s:(SubScript$TM[_])][ a_, b_] /; buiActiveRelation["NotReverseElement"] := Not$TM[ Annotated$TM[ Element$TM, s][ b, a]]
+Annotated$TM[ NotReverseElement$TM, s:(SubScript$TM[_])][ a_, b_, c__] /; buiActiveRelation["NotReverseElement"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Annotated$TM[ Element$TM, s][ #2, #1]]&]]
+(*
 DomainOperation$TM[ dom_, NotReverseElement$TM][ a_, b_] := Not$TM[ DomainOperation$TM[ dom, Element$TM][ b, a]]
-Annotated$TM[ NotReverseElement$TM, s:(SubScript$TM[_])][ a_, b_] := Not$TM[ Annotated$TM[ Element$TM, s][ b, a]]
+*)
 
 DoubleLeftArrow$TM[ a_, b_] := Implies$TM[ b, a]
 DoubleLeftArrow$TM[ a___] := (notification[ translate["connArgM"], "DoubleLeftArrow", Length[ {a}], 2]; DoubleLeftArrow[ a])
 
 NotExists$TM[ r_RNG$, cond_, form_] := Not$TM[ Exists$TM[ r, cond, form]]
 
-Equal$TM[ a_, b_, c__] := And$TM[ Equal$TM[ a, b], Apply[ And$TM, Map[ Equal$TM[ a, #]&, Hold[ c]]]]
+Equal$TM[ a_, b_, c__] /; buiActiveRelation["Equal"] := chainToConjunction[ Riffle[ {a, b, c}, Equal$TM]]
+(op:(Annotated$TM[ Equal$TM, SubScript$TM[_]]))[ a_, b_, c__] /; buiActiveRelation["Equal"] := chainToConjunction[ Riffle[ {a, b, c}, op]]
+(*
 (op:(DomainOperation$TM[ _, Equal$TM]))[ a_, b_, c__] :=
 	And$TM[ op[ a, b], Apply[ And$TM, Map[ op[ a, #]&, Hold[ c]]]]
-(op:(Annotated$TM[ Equal$TM, SubScript$TM[_]]))[ a_, b_, c__] :=
-	And$TM[ op[ a, b], Apply[ And$TM, Map[ op[ a, #]&, Hold[ c]]]]
+*)
 
-Less$TM[ a_, b__, c_] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Less$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
-LessEqual$TM[ a_, b__, c_] := Flatten[ Apply[ And$TM, MapThread[ Hold[ LessEqual$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
-Greater$TM[ a_, b__, c_] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Greater$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
-GreaterEqual$TM[ a_, b__, c_] := Flatten[ Apply[ And$TM, MapThread[ Hold[ GreaterEqual$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
-Subset$TM[ a_, b__, c_] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Subset$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
-SubsetEqual$TM[ a_, b__, c_] := Flatten[ Apply[ And$TM, MapThread[ Hold[ SubsetEqual$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
-Superset$TM[ a_, b__, c_] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Superset$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
-SupersetEqual$TM[ a_, b__, c_] := Flatten[ Apply[ And$TM, MapThread[ Hold[ SupersetEqual$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
+Less$TM[ a_, b__, c_] /; buiActiveRelation["Less"] := chainToConjunction[ Riffle[ {a, b, c}, Less$TM]]
+LessEqual$TM[ a_, b__, c_] /; buiActiveRelation["LessEqual"] := chainToConjunction[ Riffle[ {a, b, c}, LessEqual$TM]]
+Greater$TM[ a_, b__, c_] /; buiActiveRelation["Greater"] := chainToConjunction[ Riffle[ {a, b, c}, Greater$TM]]
+GreaterEqual$TM[ a_, b__, c_] /; buiActiveRelation["GreaterEqual"] := chainToConjunction[ Riffle[ {a, b, c}, GreaterEqual$TM]]
+Subset$TM[ a_, b__, c_] /; buiActiveRelation["Subset"] := chainToConjunction[ Riffle[ {a, b, c}, Subset$TM]]
+SubsetEqual$TM[ a_, b__, c_] /; buiActiveRelation["SubsetEqual"] := chainToConjunction[ Riffle[ {a, b, c}, SubsetEqual$TM]]
+Superset$TM[ a_, b__, c_] /; buiActiveRelation["Superset"] := chainToConjunction[ Riffle[ {a, b, c}, Superset$TM]]
+SupersetEqual$TM[ a_, b__, c_] /; buiActiveRelation["SupersetEqual"] := chainToConjunction[ Riffle[ {a, b, c}, SupersetEqual$TM]]
+Element$TM[ a_, b__, c_] /; buiActiveRelation["Element"] := chainToConjunction[ Riffle[ {a, b, c}, Element$TM]]
 	
+(*
 (op:(DomainOperation$TM[ _, Less$TM|LessEqual$TM|Greater$TM|GreaterEqual$TM|Subset$TM|SubsetEqual$TM|Superset$TM|SupersetEqual$TM]))[ a_, b__, c_] :=
 	Flatten[ Apply[ And$TM, MapThread[ Hold[ op[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
-(op:(Annotated$TM[ Subset$TM|SubsetEqual$TM|Superset$TM|SupersetEqual$TM, SubScript$TM[_]]))[ a_, b__, c_] :=
-	Flatten[ Apply[ And$TM, MapThread[ Hold[ op[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
+*)
+(op:(Annotated$TM[ Subset$TM|SubsetEqual$TM|Superset$TM|SupersetEqual$TM|Element$TM, SubScript$TM[_]]))[ a_, b__, c_] :=
+	chainToConjunction[ Riffle[ {a, b, c}, op]]
+	
+OperatorChain$TM[ a1_, op1_, a2_, rest___] :=
+	Module[ {l, opList, opNames},
+		chainToConjunction[ {a1, op1, a2, rest}] /;
+			And[
+				Mod[ l = Length[ {rest}], 2] === 0,
+				opList = Prepend[ Take[ {rest}, {1, -1, 2}], op1];
+				opNames = Apply[ Hold, Map[ Replace[ #, Annotated$TM[ n:(Subset$TM|SubsetEqual$TM|Superset$TM|SupersetEqual$TM|Element$TM|ReverseElement$TM|Equal$TM|NotSubset$TM|NotSubsetEqual$TM|NotSuperset$TM|NotSupersetEqual$TM|NotElement$TM|NotReverseElement$TM|Unequal$TM), SubScript$TM[_]] :> n]&, opList]];
+				Apply[ And, Map[ buiActiveRelation[ Quiet[ Check[ StringDrop[ SymbolName[ #], -3], ""]]]&, opNames]]
+			]
+	]
+	
+chainToConjunction[ l_List] := chainToConjunction[ l, {}]
+chainToConjunction[ {a1_, op1_, a2_, rest___}, {accumulator___}] :=
+	chainToConjunction[ {a2, rest}, {accumulator, op1[ a1, a2]}]
+chainToConjunction[ l_List, {accumulator___}] := And$TM[ accumulator]
 	
 
 (* ::Section:: *)
@@ -2168,7 +2237,7 @@ Tuple$TM /: Annotated$TM[Equal$TM, SubScript$TM[ dom_]][a__Tuple$TM?isSequenceFr
 	]
 
 Tuple$TM /: appendElem$TM[a_Tuple$TM, p_] /; buiActive["appendElem"] := Append[ a, p]
-Tuple$TM /: prependElem$TM[a_Tuple$TM, p_] /; buiActive["prependElem"] := Prepend[ a, p]
+Tuple$TM /: prependElem$TM[p_, a_Tuple$TM] /; buiActive["prependElem"] := Prepend[ a, p]
 Tuple$TM /: joinTuples$TM[a__Tuple$TM] /; buiActive["joinTuples"] := Join[ a]
 
 Tuple$TM /: elemTuple$TM[ p_, a_Tuple$TM] /; buiActive["elemTuple"] :=

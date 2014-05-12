@@ -104,6 +104,7 @@ With[ {lang = "English"},
     MessageName[NotSupersetEqual$TM, "usage", lang] = "";
     MessageName[NotSuperset$TM, "usage", lang] = "";
     MessageName[NotSubset$TM, "usage", lang] = "";
+    MessageName[OperatorChain$TM, "usage", lang] = "";
     MessageName[Cross$TM, "usage", lang] = "";
     MessageName[max$TM, "usage", lang] = "";
     MessageName[min$TM, "usage", lang] = "";

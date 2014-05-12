@@ -82,6 +82,7 @@ freshSymbol[ Hold[ s_Symbol]] :=
         	Vee, ToExpression[ "Or$TM"],
         	List, makeSet,
         	AngleBracket, makeTuple,
+        	Inequality, ToExpression[ "OperatorChain$TM"],
         	_,
         	name = ToString[ Unevaluated[s]];
         	If[ StringTake[ name, -1] === "$" || (StringLength[ name] >= 3 && StringTake[ name, -3] === "$TM"),
@@ -105,6 +106,7 @@ freshSymbolProg[ Hold[ s_Symbol]] :=
             Theorema`Computation`Knowledge`\[DoubleStruckCapitalR]|Theorema`Knowledge`\[DoubleStruckCapitalR],
             	ToExpression[ "RealInterval$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]"],
         	Set, ToExpression[ "Assign$TM"],
+        	Inequality, ToExpression[ "OperatorChain$TM"],
         	_,
         	name = ToString[s];
         	Which[

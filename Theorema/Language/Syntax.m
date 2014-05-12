@@ -311,6 +311,22 @@ isTmaOperatorBox[ _] := False
 getTmaOperatorForms[ op_Symbol] := First[ Cases[ $tmaOperators, {_, forms_, StringDrop[ SymbolName[ op], -3]} -> forms]]
 getTmaOperatorForms[ op_String] := First[ Cases[ $tmaOperators, {_, forms_, op} -> forms]]
 
+(*
+The following two lists contain the names of all built-in Theorema relation symbols, both for numbers and for sets.
+The names have to be exactly as in '$tmaOperatorSymbols'.
+*)
+$tmaArithmeticRelations = {"Equal", "Less", "LessEqual", "Greater", "GreaterEqual",
+	"Unequal", "NotLess", "NotLessEqual", "NotGreater", "NotGreaterEqual"};
+$tmaSetRelations = {"Equal", "Subset", "SubsetEqual", "Superset", "SupersetEqual", "Element", "ReverseElement",
+	"Unequal", "NotSubset", "NotSubsetEqual", "NotSuperset", "NotSupersetEqual", "NotElement", "NotReverseElement"};
+
+isTmaRelationBox[ op_String] :=
+	Module[ {name = Replace[ op, $tmaOperatorToName]},
+		MemberQ[ $tmaArithmeticRelations, name] || MemberQ[ $tmaSetRelations, name]
+	]
+isTmaRelationBox[ SubscriptBox[ op_String, _]] :=
+	MemberQ[ $tmaSetRelations, Replace[ op, $tmaOperatorToName]]
+
 
 (* ::Section:: *)
 (* Expression categories *)
@@ -495,6 +511,29 @@ collectColumn[ {x_}] := x
 	into "Subscript[min, <][A]", because this also works if functions are given without arguments. *)
 (* MakeExpression[ RowBox[ {SubscriptBox[ f:("max"|"min"), ord_], "[", arg_, "]"}], fmt_] :=
 	MakeExpression[ RowBox[ {f, "[", arg, ",", ord, "]"}], fmt] /; $parseTheoremaExpressions *)
+	
+	
+(* ::Subsubsection:: *)
+(* Chains of relations *)
+
+
+MakeExpression[ RowBox[ l:{_, PatternSequence[ _?isTmaRelationBox, _]..}], fmt_] :=
+	Module[ {ops, args},
+		{args, ops} = flattenRelations[ l, {}, {}];
+		If[ Length[ DeleteDuplicates[ ops]] === 1,
+			MakeExpression[ RowBox[ {First[ops], "[", RowBox[ Riffle[ args, ","]], "]"}], fmt],
+			MakeExpression[ RowBox[ {"OperatorChain", "[", RowBox[ Riffle[ Riffle[ args, ops], ","]], "]"}], fmt]
+		]
+	]
+	
+flattenRelations[ {RowBox[ l:{_, PatternSequence[ _?isTmaRelationBox, _]..}], rest__}, args_List, ops_List] :=
+	flattenRelations[ Join[ l, {rest}], args, ops]
+flattenRelations[ {a_, op_, rest__}, {args___}, {ops___}] :=
+	flattenRelations[ {rest}, {args, a}, {ops, op}]
+flattenRelations[ {RowBox[ l:{_, PatternSequence[ _?isTmaRelationBox, _]..}]}, args_List, ops_List] :=
+	flattenRelations[ l, args, ops]
+flattenRelations[ {a_}, {args___}, ops_List] :=
+	{{args, a}, ops}
 
 	
 (* ::Subsubsection:: *)
@@ -714,25 +753,55 @@ MakeExpression[ RowBox[ {UnderscriptBox[ op_, dom_], r_}], fmt_] :=
     ] /; $parseTheoremaExpressions
 
 (* INFIX *)
-MakeExpression[ RowBox[ {l_, UnderscriptBox[ "-", dom_], r_}], fmt_] :=
-    Module[ {},
-        MakeExpression[ RowBox[ {makeDomainOperation[ dom, "Subtract"], "[", RowBox[ {l, ",", r}], "]"}], fmt]
+MakeExpression[ RowBox[ {l_, rest:(PatternSequence[ UnderscriptBox[ "-", dom_], _]..)}], fmt_] :=
+    Module[ {args = Prepend[ Take[ {rest}, {2, -1, 2}], l]},
+        MakeExpression[ RowBox[ {makeDomainOperation[ dom, "Subtract"], "[", RowBox[ Riffle[ args, ","]], "]"}], fmt]
     ] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[ {l_, UnderscriptBox[ "/", dom_], r_}], fmt_] :=
-    Module[ {},
-        MakeExpression[ RowBox[ {makeDomainOperation[ dom, "Divide"], "[", RowBox[ {l, ",", r}], "]"}], fmt]
+MakeExpression[ RowBox[ {l_, rest:(PatternSequence[ UnderscriptBox[ "/", dom_], _]..)}], fmt_] :=
+    Module[ {args = Prepend[ Take[ {rest}, {2, -1, 2}], l]},
+        MakeExpression[ RowBox[ {makeDomainOperation[ dom, "Divide"], "[", RowBox[ Riffle[ args, ","]], "]"}], fmt]
+    ] /; $parseTheoremaExpressions
+    
+(* We have to consider the case where the operator symbol is a built-in relation separately, for otherwise
+	we could get 'OperatorChain' as the head.
+	Example: RowBox[{RowBox[{"a", ">", "b"}], UnderscriptBox["<", "D"], "c"}]
+*)
+MakeExpression[ RowBox[ {l_, rest:(PatternSequence[ UnderscriptBox[ op_?isTmaRelationBox, dom_], _]..)}], fmt_] :=
+    Module[ {args = Prepend[ Take[ {rest}, {2, -1, 2}], l]},
+        MakeExpression[ RowBox[ {makeDomainOperation[ dom, op], "[", RowBox[ Riffle[ args, ","]], "]"}], fmt]
     ] /; $parseTheoremaExpressions
 
 MakeExpression[ RowBox[ {l_, UnderscriptBox[ op_, dom_], r_}], fmt_] :=
     Module[ {expr = MakeExpression[ RowBox[{l, op, r}], fmt]},
     	(* expr is the form that would result without the underscript, say f[l,r] with HoldComplete wrapped around, so expr[[1,0]] gives the desired Head, say "f".  *)
-        With[ {aux = Extract[ expr, {1, 0}, Hold]},
+        With[ {f = Extract[ expr, {1, 0}, Hold]},
         	(* From expr we now fetch the head, i.e. "f", and the box form of the parameters, i.e. box form of "x,y".
         	   We then generate DomainOperation[dom,f][x,y] *)
-            MakeExpression[ RowBox[ {makeDomainOperation[ dom, Apply[ makeTmaBoxes, aux]], "[", RowBox[ {l, ",", r}], "]"}], fmt]
+            MakeExpression[ RowBox[ {makeDomainOperation[ dom, Apply[ makeTmaBoxes, f]], "[", RowBox[ {l, ",", r}], "]"}], fmt]
         ]
     ] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {l_, UnderscriptBox[ op_, dom_], r_, rest:(PatternSequence[ UnderscriptBox[ op_, dom_], _]..)}], fmt_] :=
+    Module[ {args = Join[ {l, r}, Take[ {rest}, {2, -1, 2}]], expr},
+    	expr = MakeExpression[ RowBox[ {l, op, r}], fmt];
+    	(*
+    	expr is the form that would result without the underscript, say f[l,r] with HoldComplete wrapped around, so expr[[1,0]] gives the desired Head, say "f".
+    	It is important that we only consider the first two arguments, for otherwise we could get 'OperatorChain' as the head.
+    	*)
+        With[ {f = Extract[ expr, {1, 0}, Hold]},
+        	(* From expr we now fetch the head, i.e. "f", and the box form of the parameters, i.e. box form of "x,y".
+        	   We then generate DomainOperation[dom,f][x,y] *)
+            MakeExpression[ RowBox[ {makeDomainOperation[ dom, Apply[ makeTmaBoxes, f]], "[", RowBox[ Riffle[ args, ","]], "]"}], fmt]
+        ]
+    ] /; $parseTheoremaExpressions
+    
+(*
+Remark:
+We do not consider the case where different operator symbols appear in a flat RowBox (-> OperatorChain),
+even if the domain is always the same. This is because then, in order to be consistent, one would also have to
+take care of completely arbitrary (flat) chains of operators: domain-underscripted, annotated and plain.
+This, however, is extremely complicated ...
+*)
 
 (* POSTFIX *)
 MakeExpression[ RowBox[ {l_, UnderscriptBox[ op_, dom_]}], fmt_] :=
@@ -1010,15 +1079,41 @@ MakeExpression[ RowBox[ {l_, (h:(UnderoverscriptBox|SubsuperscriptBox))[ op_?isT
 (* ::Subsubsection:: *)
 (* Infix *)
 	
+(* We need the first two rules here to deal with the special case if the operator is a built-in relation,
+	for the same reason as with domain underscripts.
+*)
+MakeExpression[ RowBox[ {l_, rest:(PatternSequence[ (h:(OverscriptBox|SubscriptBox|SuperscriptBox))[ op_?isTmaRelationBox, sc_], _]..)}], fmt_] :=
+	Module[ {args = Prepend[ Take[ {rest}, {2, -1, 2}], l]},
+		MakeExpression[ RowBox[ {makeAnnotation[ h, op, sc], "[", RowBox[ Riffle[ args, ","]], "]"}], fmt]
+	] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {l_, rest:(PatternSequence[ (h:(UnderoverscriptBox|SubsuperscriptBox))[ op_?isTmaRelationBox, sc1_, sc2_], _]..)}], fmt_] :=
+	Module[ {args = Prepend[ Take[ {rest}, {2, -1, 2}], l]},
+		MakeExpression[ RowBox[ {makeAnnotation[ h, op, sc1, sc2], "[", RowBox[ Riffle[ args, ","]], "]"}], fmt]
+	] /; $parseTheoremaExpressions
+	
 MakeExpression[ RowBox[ {l_, (h:(OverscriptBox|SubscriptBox|SuperscriptBox))[ op_?isTmaOperatorBox, sc_], r_}], fmt_] :=
 	Module[ {f, expr = MakeExpression[ RowBox[ {l, op, r}], fmt]},
 		f = Extract[ expr, {1, 0}, makeTmaBoxes];
 		MakeExpression[ RowBox[ {makeAnnotation[ h, f, sc], "[", RowBox[ {l, ",", r}], "]"}], fmt]
 	] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {l_, operator:((h:(OverscriptBox|SubscriptBox|SuperscriptBox))[ op_?isTmaOperatorBox, sc_]), r_, rest:(PatternSequence[ operator_, _]..)}], fmt_] :=
+	Module[ {args = Join[ {l, r}, Take[ {rest}, {2, -1, 2}]], f, expr},
+		expr = MakeExpression[ RowBox[ {l, op, r}], fmt];
+		(* It is important that 'op' is applied on only two arguments, for otherwise we could get 'OperatorChain' as the head. *)
+		f = Extract[ expr, {1, 0}, makeTmaBoxes];
+		MakeExpression[ RowBox[ {makeAnnotation[ h, f, sc], "[", RowBox[ Riffle[ args, ","]], "]"}], fmt]
+	] /; $parseTheoremaExpressions
 MakeExpression[ RowBox[ {l_, (h:(UnderoverscriptBox|SubsuperscriptBox))[ op_?isTmaOperatorBox, sc1_, sc2_], r_}], fmt_] :=
 	Module[ {f, expr = MakeExpression[ RowBox[ {l, op, r}], fmt]},
 		f = Extract[ expr, {1, 0}, makeTmaBoxes];
 		MakeExpression[ RowBox[ {makeAnnotation[ h, f, sc1, sc2], "[", RowBox[ {l, ",", r}], "]"}], fmt]
+	] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {l_, operator:((h:(UnderoverscriptBox|SubsuperscriptBox))[ op_?isTmaOperatorBox, sc1_, sc2_]), r_, rest:(PatternSequence[ operator_, _]..)}], fmt_] :=
+	Module[ {args = Join[ {l, r}, Take[ {rest}, {2, -1, 2}]], f, expr},
+		expr = MakeExpression[ RowBox[ {l, op, r}], fmt];
+		(* It is important that 'op' is applied on only two arguments, for otherwise we could get 'OperatorChain' as the head. *)
+		f = Extract[ expr, {1, 0}, makeTmaBoxes];
+		MakeExpression[ RowBox[ {makeAnnotation[ h, f, sc1, sc2], "[", RowBox[ Riffle[ args, ","]], "]"}], fmt]
 	] /; $parseTheoremaExpressions
 	
 (* ::Subsubsection:: *)
