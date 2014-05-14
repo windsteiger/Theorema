@@ -66,6 +66,7 @@ With[ {lang = "English"},
 	MessageName[rngVariables, "usage", lang] = "";	
 	MessageName[rngConstants, "usage", lang] = "";	
 	MessageName[specifiedVariables, "usage", lang] = "";
+	MessageName[boundVariables, "usage", lang] = "";
 	MessageName[splitAnd, "usage", lang] = "";	
 	MessageName[makeConjunction, "usage", lang] = "";	
 	MessageName[makeDisjunction, "usage", lang] = "";	
@@ -203,5 +204,14 @@ With[ {lang = "English"},
 	MessageName[$generated, "usage", lang] = "is a global variable used to accumulate newly generated rewrite rules corresponding to formulas in the KB.";
 	MessageName[$autoGenerateRules, "usage", lang] = "is a global switch to turn on/off automatic generation of rewrite rules when new formulas go into the KB.";
 	MessageName[performProofStep, "usage", lang] = "performProofStep[ prog_] is a wrapper to be used on the rhs of an inference rule, where prog is the actual program that performs the step.";
+
+(* Theorema`Language`Unification` *)
+	MessageName[unification, "usage", lang] = "";
+	MessageName[maximumUnifiers, "usage", lang] = "";
+	MessageName[maximumWidth, "usage", lang] = "";
+	MessageName[commutative, "usage", lang] = "";
+	MessageName[unifiable, "usage", lang] = "";
+	MessageName[instantiation, "usage", lang] = "";
+	MessageName[matches, "usage", lang] = "";
 
 ]

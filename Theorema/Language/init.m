@@ -15,12 +15,13 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-BeginPackage["Theorema`Language`", {"Theorema`"}]
+BeginPackage[ "Theorema`Language`", {"Theorema`"}]
 
 Map[ Get, FileNames[ "*.m", FileNameJoin[{$TheoremaDirectory, "Theorema", "Language", "LanguageData"}]]];
 
-Get["Theorema`Language`FormulaManipulation`"]
-Get["Theorema`Language`Syntax`"]
-Get["Theorema`Language`Session`"]
+Get[ "Theorema`Language`FormulaManipulation`"]
+Get[ "Theorema`Language`Syntax`"]
+Get[ "Theorema`Language`Session`"]
+Get[ "Theorema`Language`Unification`"]
 
 EndPackage[]

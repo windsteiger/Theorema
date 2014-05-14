@@ -17,14 +17,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-BeginPackage["Theorema`Language`Unification`"]
+BeginPackage[ "Theorema`Language`Unification`"]
 
 Needs[ "Theorema`Common`"]
 Needs[ "Theorema`Language`"]
 
 (* Exported symbols added here with SymbolName::usage *)  
 
-Begin["`Private`"] (* Begin Private Context *) 
+Begin[ "`Private`"] (* Begin Private Context *) 
 
 (* ::Section:: *)
 (* Unification *)
@@ -36,7 +36,7 @@ Begin["`Private`"] (* Begin Private Context *)
     commutative specifies the list of commutative function symbols.  
 *)
 
-Options[unification] = {maximumUnifiers -> 5, maximumWidth -> 7, commutative -> {}}
+Options[ unification] = {maximumUnifiers -> 5, maximumWidth -> 7, commutative -> {}}
 
 (*
    unification[s_, t_, opt___] takes as input two expressions s and t, together with the options opt
@@ -49,37 +49,69 @@ Options[unification] = {maximumUnifiers -> 5, maximumWidth -> 7, commutative -> 
 
 unification[ s_, s_, ___?OptionQ] := {{s}, {{}}}
 unification[ s_, t_, opt___?OptionQ] :=
-    Module[ { maxUnifiers, maxWidth, commutativeSymbols, unifierCounter, widthCounter, commonInstances, unifiers, outputAcc, recLimit, output, 
-    	      sVariant, sBoundVars, tVariant, tBoundVars, renamingSubst, metaVariables }, 
+    Module[ {maxUnifiers, maxWidth, commutativeSymbols, unifierCounter = 0, widthCounter = 0, commonInstances = {}, unifiers = {}, outputAcc, output, 
+    	     sVariant, sBoundVars, tVariant, tBoundVars, renamingSubst = {}, metaVariables }, 
     	{maxUnifiers, maxWidth, commutativeSymbols} = {maximumUnifiers, maximumWidth, commutative} /. {opt} /. Options[unification];
-    	recLimit = $RecursionLimit;
-    	$RecursionLimit = Infinity;
-    	unifierCounter = 0;
-    	widthCounter = 0;
-    	commonInstances = {};
-    	unifiers = {};
-    	outputAcc = {commonInstances, unifiers};
-    	{sVariant, sBoundVars} = alphaRenaming[ s, {}];
-    	{tVariant, tBoundVars} = alphaRenaming[ t, {}];
-    	renamingSubst = {};
-    	output = 
-    	   unificationAux[ {up[{{sVariant, tVariant, widthCounter}}, sBoundVars, tBoundVars, renamingSubst, sVariant, unifiers]}, 
-    	       outputAcc, unifierCounter, maxUnifiers, maxWidth, Append[commutativeSymbols, commutativeWrapper[Unique["c"]]]];
-    	$RecursionLimit = recLimit;
+        outputAcc = {commonInstances, unifiers};
+    	Block[ {$RecursionLimit = Infinity},
+            {sVariant, sBoundVars} = alphaRenaming[ s, {}];
+            {tVariant, tBoundVars} = alphaRenaming[ t, {}];
+            output = 
+               unificationAux[ {up[{{sVariant, tVariant, widthCounter}}, sBoundVars, tBoundVars, renamingSubst, sVariant, unifiers]}, 
+                   outputAcc, unifierCounter, maxUnifiers, maxWidth, Append[ commutativeSymbols, commutativeWrapper[ Unique["c"]]]];
+        ];
     	(* The output might contain mappings for variables introduced at run-time. 
     	   They should be discarded from the final result. Only meta variables and
     	   free variables of s and t are relevant. *)
-    	metaVariables = Cases[{s,t}, META$[_, _], {0, Infinity}];
-    	{output[[1]], restrictSubstitutions[output[[2]], Join[ freeVariables[{s, t}], metaVariables]]}
+    	metaVariables = Cases[ {s,t}, META$[_, _], {0, Infinity}];
+    	{output[[1]], restrictSubstitutions[ output[[2]], Join[ freeVariables[{s, t}], metaVariables]]}
     ]
+unification[ args___] := unexpected[ unification, {args}]
+
+unifiable[ s_, t_, opt___?OptionQ] := unification[ s, t, opt] =!= {$Failed, $Failed}
+unifiable[ args___] := unexpected[ unifiable, {args}]
+
+
+(* ::Section:: *)
+(* matches *)
+
+(* As a quick solution, to have something, we provide "matching" as a special case of unification. A more efficient implementation taking
+	into account the special case will be provided soon. *)
+
+(* instantiation[ s_, t_, opt___?OptionQ] gives a list of substitutions for free variables that transforms s into t. If the result is {}, then s=t. 
+	If the result is $Failed, then t is not an instance of s. *)	
+instantiation[ s_, t_, opt___?OptionQ] :=
+	Module[{inst, subst},
+		{inst, subst} = unification[ s, t, opt];
+		If[ MatchQ[ t, inst /. Map[ var2pattRule, boundVariables[ inst]]],
+			(* replace the bound variables by patterns and match. If successful then return unifying substitution.
+				If no bound variables, then inst /. {} returns inst without effort (no need to implement seperate case.
+				If non-unifiable: $Failed /. ... is cheap and MatchQ will fail *)
+			subst,
+			(* non-unifiable or common instance does not match t *)
+			$Failed
+		]			
+	]
+instantiation[ args___] := unexpected[ instantiation, {args}]
+
+(* Intended result: 
+  for sequence variables: VAR$[ SEQx[ n]] -> VAR$[ SEQx[ n_]]
+  for individual variables: VAR$[ n] -> VAR$[ n_]
+*)
+var2pattRule[ v_VAR$] := v -> Map[ Pattern[ #, Blank[]]&, v, {Depth[v]-1}]
+var2pattRule[ args___] := unexpected[ var2pattRule, {args}]
+
+matches[ s_, t_, opt___?OptionQ] := instantiation[ s, t, opt] =!= $Failed
+matches[ args___] := unexpected[ matches, {args}]
+
 	
 (* ::Section:: *)
 (* Auxiliary function for unification *)	
 
 unificationAux[ {}, output_, _, _, _, _] :=
-    If[ output === {}, {$Failed, $Failed}, output /. {f_[] /; (!MemberQ[{List, Sequence}, f]) -> f}]
-unificationAux[ _, output_, unifierCounter_, maxUnifiers_, _, _]/; unifierCounter >= maxUnifiers :=
-    If[ output === {}, {$Failed, $Failed}, output /. {f_[] /; (! MemberQ[{List, Sequence}, f]) -> f}]
+    If[ output === {{}, {}}, {$Failed, $Failed}, output /. {f_[] /; !MemberQ[ {List, Sequence}, f] -> f}]
+unificationAux[ _, output_, unifierCounter_, maxUnifiers_, _, _] /; unifierCounter >= maxUnifiers :=
+    If[ output === {{}, {}}, {$Failed, $Failed}, output /. {f_[] /; !MemberQ[ {List, Sequence}, f] -> f}]
 unificationAux[ {solved[f_[], unifier_], unifProblems___}, {{mcis___}, {unifiers___}}, unifierCounter_, maxUnifiers_, maxWidth_, commutativeSymbols_] :=
     unificationAux[{unifProblems}, {{mcis, f}, {unifiers, unifier}}, unifierCounter+1, maxUnifiers, maxWidth, commutativeSymbols]
 unificationAux[ {solved[t_, unifier_], unifProblems___}, {{mcis___}, {unifiers___}}, unifierCounter_, maxUnifiers_, maxWidth_, commutativeSymbols_] :=

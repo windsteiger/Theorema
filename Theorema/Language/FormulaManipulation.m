@@ -270,6 +270,14 @@ extractVar[ args___] := unexpected[ extractVar, {args}]
 
 
 (* ::Subsubsection:: *)
+(* boundVariables *)
+
+boundVariables[ expr_] :=
+		Apply[ Union, Map[ rngVariables, Cases[ expr, _Theorema`Language`RNG$|_Theorema`Computation`Language`RNG$, Infinity]]]
+boundVariables[ args___] := unexpected[ boundVariables, {args}]
+
+
+(* ::Subsubsection:: *)
 (* substituteFree *)
 
 
