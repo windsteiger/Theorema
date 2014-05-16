@@ -81,17 +81,20 @@ unifiable[ args___] := unexpected[ unifiable, {args}]
 (* instantiation[ s_, t_, opt___?OptionQ] gives a list of substitutions for free variables that transforms s into t. If the result is {}, then s=t. 
 	If the result is $Failed, then t is not an instance of s. *)	
 instantiation[ s_, t_, opt___?OptionQ] :=
-	Module[{inst, subst},
-		{inst, subst} = unification[ s, t, opt];
-		If[ MatchQ[ t, inst /. Map[ var2pattRule, boundVariables[ inst]]],
-			(* replace the bound variables by patterns and match. If successful then return unifying substitution.
-				If no bound variables, then inst /. {} returns inst without effort (no need to implement seperate case.
-				If non-unifiable: $Failed /. ... is cheap and MatchQ will fail *)
-			subst,
-			(* non-unifiable or common instance does not match t *)
-			$Failed
-		]			
-	]
+	Module[ {inst, unif, i, subst = $Failed},
+        {inst, unif} = unification[ s, t, opt];
+        (* If non-unifiable: $Failed has length 0 and loop will be skipped *)
+        Do[
+            If[ MatchQ[ t, inst[[i]] /. Map[ var2pattRule, boundVariables[ inst]]],
+                (* replace the bound variables by patterns and match. If successful then remember unifying substitution und exit the loop.
+                    If no bound variables, then inst /. {} returns inst without effort (no need to implement seperate case.*)
+                 subst = unif[[i]];
+                Break[]
+            ], 
+        {i, Length[ inst]}
+        ];
+        subst
+    ]		
 instantiation[ args___] := unexpected[ instantiation, {args}]
 
 (* Intended result: 
