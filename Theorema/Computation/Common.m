@@ -63,7 +63,7 @@ condition[fct_, param_] :=
   	]
 
 condition[cond_, fct_, param_] := 
-	Module[{condlist = extr[cond], c}, 
+	Module[{condlist = extr[cond], c, i}, 
 		calculation = InsertInTrace[calculation, {Apply[HoldForm[fct], param]}, insertPosition];
 		AppendTo[insertPosition, 2]; 
   		calculation = InsertInTrace[calculation, {}, insertPosition]; 
@@ -148,7 +148,7 @@ subcompToCell[{inp_, subcomp__, outp_}, level_: 0] :=
   		Cell[CellGroupData[
     		Join[{Cell[BoxData[ToBoxes[inp]], "Subfct", createCellMargin[27 + 27*level]]}, 
      			subcompToCell[#, level + 1] & /@ {subcomp},
-     				{Cell[BoxData[ToBoxes[outp]], "Subfct", CellLabel -> "=", createCellMargin[27 + 27*level]]}
+     				{Cell[BoxData[ToBoxes[outp]], "Subfct_result", createCellMargin[27 + 27*level]]}
      		]
      	]]
      ]
@@ -161,7 +161,7 @@ subcompToCell[{def_, {held_HoldForm, res_}}, level_: 0] :=
      		Cell[TextData["Function has no conditions"], "Text", createCellMargin[27 + 27*level]], 
      		Cell[CellGroupData[
      			{Cell[BoxData[ToBoxes[held]], "Subfct", createCellMargin[27 + 27*level]], 
-        		Cell[BoxData[ToBoxes[res]], "Subfct", CellLabel -> "=", createCellMargin[27 + 27*level]]}
+        		Cell[BoxData[ToBoxes[res]], "Subfct_result", createCellMargin[27 + 27*level]]}
         	]]}
         ]]
 	]
@@ -182,7 +182,7 @@ subcompToCell[{held_HoldForm, res_}, level_: 0] :=
 		Print[level, " just result"]; 
   		Cell[CellGroupData[
   			{Cell[BoxData[ToBoxes[held]], "Subfct", createCellMargin[27 + 27*level]], 
-     		Cell[BoxData[ToBoxes[res]], "Subfct", CellLabel -> "=", createCellMargin[27 + 27*level]]}
+     		Cell[BoxData[ToBoxes[res]], "Subfct_result", createCellMargin[27 + 27*level]]}
      	]]
      ]
 
@@ -194,7 +194,7 @@ subcompToCell[{def_, {"undetermined", n_}, condlist_}, level_: 0] :=
      		Cell[CellGroupData[
      			Join[
      				{Cell[TextData["Function cannot be applied because a condition could not be evaluated to true or false"], "Text", createCellMargin[27 + 27*level]]}, 
-        			condToCell[#, level] & /@ condlist[[1 ;; n - 1]],
+        			condToCell[#, level, Closed] & /@ condlist[[1 ;; n - 1]],
         			{condToCell[condlist[[n]]]}
         		]
         	]]}
@@ -230,7 +230,7 @@ subcompToCell[{def_, {False, n_}, condlist_}, level_: 0] :=
      		Cell[CellGroupData[
        			Join[
        				{Cell[TextData["Function cannot be applied because a condition is not fulfilled"], "Text", createCellMargin[27 + 27*level]]}, 
-        			condToCell[#, level] & /@ condlist[[1 ;; n - 1]], 
+        			condToCell[#, level, Closed] & /@ condlist[[1 ;; n - 1]], 
         			{condToCell[condlist[[n]]]}
         		]
         	]]}
@@ -274,16 +274,16 @@ subcompToCell[{def_, {True, _}, condlist_, res_}, level_: 0] :=
      	]] 
 	]
 
-condToCell[{cond_, True}, level_: 0] := 
+condToCell[{cond_, True}, level_: 0, status_: Open] := 
 	Module[{},
 		Print[cond]; 
 		Cell[CellGroupData[
 			{Cell[BoxData[ToBoxes[cond]], "CondFulfilled", createCellMargin[66 + 27*level], CellDingbat -> StyleBox["\[CheckmarkedBox]", ShowStringCharacters -> False, StripOnInput -> False]], 
-     		Cell[BoxData[ToBoxes[True]], "CondFulfilled", createCellMargin[66 + 27*level]]}
+     		Cell[BoxData[ToBoxes[True]], "CondFulfilled", createCellMargin[66 + 27*level]]},status
      	]]
      ]
 
-condToCell[{cond_, calc__, True}, level_: 0] :=
+condToCell[{cond_, calc__, True}, level_: 0, status_: Open] :=
 	Module[{},
 		Print["Second condlist ", cond]; 
 		Cell[CellGroupData[
@@ -291,7 +291,7 @@ condToCell[{cond_, calc__, True}, level_: 0] :=
     			{Cell[BoxData[ToBoxes[cond]], "CondFulfilled", createCellMargin[66 + 27*level], CellDingbat -> StyleBox["\[CheckmarkedBox]", ShowStringCharacters -> False, StripOnInput -> False]]}, 
      			subcompToCell[#, level + 1] & /@ {calc},
      				{Cell[BoxData[ToBoxes[True]], "CondFulfilled", createCellMargin[66 + 27*level]]}
-     		]
+     		],status
      	]]
      ]
 
