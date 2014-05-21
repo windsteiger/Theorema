@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       145,          7]
-NotebookDataLength[     18496,        628]
-NotebookOptionsPosition[     11921,        467]
-NotebookOutlinePosition[     12605,        492]
-CellTagsIndexPosition[     12562,        489]
+NotebookDataLength[     19850,        664]
+NotebookOptionsPosition[     12999,        496]
+NotebookOutlinePosition[     13683,        521]
+CellTagsIndexPosition[     13640,        518]
 MenuPosition->0
 WindowFrame->Normal*)
 
@@ -299,9 +299,36 @@ Cell[StyleData["Condition", "Printout"],
 
 Cell[CellGroupData[{
 
+Cell[StyleData["Subfct_result"],
+ CellMargins->{{27, Inherited}, {Inherited, Inherited}},
+ StripStyleOnPaste->True,
+ CellFrameLabels->{{"=", Inherited}, {Inherited, Inherited}},
+ DefaultFormatType->DefaultInputFormatType,
+ HyphenationOptions->{"HyphenationCharacter"->"\[Continuation]"},
+ LanguageCategory->"Formula",
+ ScriptLevel->0,
+ SingleLetterItalics->True,
+ FontWeight->"Bold",
+ FontColor->CMYKColor[0, 1, 1, 0],
+ UnderoverscriptBoxOptions->{LimitsPositioning->True}],
+
+Cell[StyleData["Subfct_result", "Presentation"],
+ CellMargins->{{100, Inherited}, {Inherited 1.5, Inherited 1.5}},
+ CellFrameLabels->{{"=", Inherited}, {Inherited, Inherited}},
+ LineSpacing->{1, 5},
+ FontSize->24],
+
+Cell[StyleData["Subfct_result", "Printout"],
+ CellMargins->{{49, Inherited}, {Inherited, Inherited}},
+ CellFrameLabels->{{"=", Inherited}, {Inherited, Inherited}}]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
 Cell[StyleData["Subfct"],
  CellMargins->{{27, Inherited}, {Inherited, Inherited}},
  StripStyleOnPaste->True,
+ CellFrameLabels->{{"?", Inherited}, {Inherited, Inherited}},
  DefaultFormatType->DefaultInputFormatType,
  HyphenationOptions->{"HyphenationCharacter"->"\[Continuation]"},
  LanguageCategory->"Formula",
@@ -313,11 +340,13 @@ Cell[StyleData["Subfct"],
 
 Cell[StyleData["Subfct", "Presentation"],
  CellMargins->{{100, Inherited}, {Inherited 1.5, Inherited 1.5}},
+ CellFrameLabels->{{"?", Inherited}, {Inherited, Inherited}},
  LineSpacing->{1, 5},
  FontSize->24],
 
 Cell[StyleData["Subfct", "Printout"],
- CellMargins->{{49, Inherited}, {Inherited, Inherited}}]
+ CellMargins->{{49, Inherited}, {Inherited, Inherited}},
+ CellFrameLabels->{{"?", Inherited}, {Inherited, Inherited}}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -587,46 +616,53 @@ Cell[7282, 290, 147, 3, 62, 44, 0, "StyleData", "Condition", "Presentation"],
 Cell[7432, 295, 97, 1, 40, 40, 0, "StyleData", "Condition", "Printout"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[7566, 301, 404, 10, 40, 25, 0, "StyleData", "Subfct", "All"],
-Cell[7973, 313, 144, 3, 62, 41, 0, "StyleData", "Subfct", "Presentation"],
-Cell[8120, 318, 94, 1, 40, 37, 0, "StyleData", "Subfct", "Printout"]
-}, Open  ]],
-Cell[CellGroupData[{
-Cell[8251, 324, 410, 10, 40, 35, 0, "StyleData", "CondNotFulfilled", "All"],
-Cell[8664, 336, 154, 3, 62, 51, 0, "StyleData", "CondNotFulfilled", \
+Cell[7566, 301, 473, 11, 40, 32, 0, "StyleData", "Subfct_result", "All"],
+Cell[8042, 314, 213, 4, 62, 48, 0, "StyleData", "Subfct_result", \
 "Presentation"],
-Cell[8821, 341, 101, 1, 40, 44, 0, "StyleData", "CondFulfilled", "Printout"]
+Cell[8258, 320, 163, 2, 40, 44, 0, "StyleData", "Subfct_result", "Printout"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[8959, 347, 407, 10, 40, 32, 0, "StyleData", "CondFulfilled", "All"],
-Cell[9369, 359, 151, 3, 62, 48, 0, "StyleData", "CondFulfilled", \
+Cell[8458, 327, 466, 11, 40, 25, 0, "StyleData", "Subfct", "All"],
+Cell[8927, 340, 206, 4, 62, 41, 0, "StyleData", "Subfct", "Presentation"],
+Cell[9136, 346, 156, 2, 40, 37, 0, "StyleData", "Subfct", "Printout"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[9329, 353, 410, 10, 40, 35, 0, "StyleData", "CondNotFulfilled", "All"],
+Cell[9742, 365, 154, 3, 62, 51, 0, "StyleData", "CondNotFulfilled", \
 "Presentation"],
-Cell[9523, 364, 104, 1, 40, 47, 0, "StyleData", "CondNotFulfilled", "Printout"]
+Cell[9899, 370, 101, 1, 40, 44, 0, "StyleData", "CondFulfilled", "Printout"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[9664, 370, 371, 14, 42, 35, 0, "StyleData", "CalculationInput", "All",
+Cell[10037, 376, 407, 10, 40, 32, 0, "StyleData", "CondFulfilled", "All"],
+Cell[10447, 388, 151, 3, 62, 48, 0, "StyleData", "CondFulfilled", \
+"Presentation"],
+Cell[10601, 393, 104, 1, 40, 47, 0, "StyleData", "CondNotFulfilled", \
+"Printout"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[10742, 399, 371, 14, 42, 35, 0, "StyleData", "CalculationInput", "All",
  StyleMenuListing->None],
-Cell[10038, 386, 66, 1, 45, 51, 0, "StyleData", "CalculationInput", \
+Cell[11116, 415, 66, 1, 45, 51, 0, "StyleData", "CalculationInput", \
 "Presentation"],
-Cell[10107, 389, 47, 0, 42, 47, 0, "StyleData", "CalculationInput", "Printout"]
+Cell[11185, 418, 47, 0, 42, 47, 0, "StyleData", "CalculationInput", "Printout"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[10191, 394, 349, 13, 37, 34, 0, "StyleData", "AssumptionLabel", "All",
+Cell[11269, 423, 349, 13, 37, 34, 0, "StyleData", "AssumptionLabel", "All",
  StyleMenuListing->None],
-Cell[10543, 409, 65, 1, 45, 50, 0, "StyleData", "AssumptionLabel", \
+Cell[11621, 438, 65, 1, 45, 50, 0, "StyleData", "AssumptionLabel", \
 "Presentation"],
-Cell[10611, 412, 46, 0, 40, 46, 0, "StyleData", "AssumptionLabel", "Printout"]
+Cell[11689, 441, 46, 0, 37, 46, 0, "StyleData", "AssumptionLabel", "Printout"]
 }, Open  ]],
-Cell[10672, 415, 236, 7, 40, 37, 0, "StyleData", "ExpressionVariable", "All"],
-Cell[10911, 424, 295, 11, 40, 32, 0, "StyleData", "ExpressionABF", "All"],
+Cell[11750, 444, 236, 7, 40, 37, 0, "StyleData", "ExpressionVariable", "All"],
+Cell[11989, 453, 295, 11, 40, 32, 0, "StyleData", "ExpressionABF", "All"],
 Cell[CellGroupData[{
-Cell[11231, 439, 224, 6, 46, 71, 0, "StyleData", "FormReference", "All"],
-Cell[11458, 447, 63, 1, 64, 48, 0, "StyleData", "FormReference", \
+Cell[12309, 468, 224, 6, 46, 71, 0, "StyleData", "FormReference", "All"],
+Cell[12536, 476, 63, 1, 64, 48, 0, "StyleData", "FormReference", \
 "Presentation"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[11558, 453, 264, 7, 46, 76, 0, "StyleData", "FormReferenceHover", "All"],
-Cell[11825, 462, 68, 1, 64, 53, 0, "StyleData", "FormReferenceHover", \
+Cell[12636, 482, 264, 7, 46, 76, 0, "StyleData", "FormReferenceHover", "All"],
+Cell[12903, 491, 68, 1, 64, 53, 0, "StyleData", "FormReferenceHover", \
 "Presentation"]
 }, Open  ]]
 }, Open  ]]
