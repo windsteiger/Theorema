@@ -698,14 +698,16 @@ sequenceOfIteration[ $Failed, _, _] := $Failed
 sequenceOfIteration[ args___] := 
  unexpected[ sequenceOfIteration, {args}]
 
+(* amaletzk: If we use 'makeSet' and 'makeTuple', then we get problems with contexts in proofs:
+	'Set$TM' and 'Tuple$TM' appear without any context then ... *)
 SetOf$TM[ RNG$[ r__], cond_, form_] :=
 	Module[ {s},
-		Apply[ makeSet, s] /; (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
+		Apply[ Set$TM, s] /; (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
 	]
 
 TupleOf$TM[ RNG$[ r__], cond_, form_] :=
 	Module[ {s},
-		Apply[ makeTuple, s] /; (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
+		Apply[ Tuple$TM, s] /; (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
 	]
   	
 (* We have to split several summations into individual ones,

@@ -300,13 +300,13 @@ getTmaOperatorName[ (Theorema`Language`DomainOperation$TM|Theorema`Computation`L
 getTmaOperatorName[ _] := $Failed
 
 isTmaOperatorSymbol[ op_String] := MemberQ[ $tmaOperatorSymbols, op]
-isTmaOperatorBox[ (OverscriptBox|SubscriptBox)[ op_, __]] := isTmaOperatorBox[ op]
-isTmaOperatorBox[ (UnderscriptBox|SuperscriptBox)[ op_, _]] := isTmaOperatorBox[ op]
-isTmaOperatorBox[ (UnderoverscriptBox|SubsuperscriptBox)[ op_, _, _]] := isTmaOperatorBox[ op]
-(* In the following definition the second alternative ensures that "Plus_0" is also transformed into
-	"Annotated[Plus, SubScript[0]]", not only "+_0". *)
-isTmaOperatorBox[ op_String] := isTmaOperatorSymbol[ op] || MemberQ[ $tmaOperatorNames, op <> "$TM"]
-isTmaOperatorBox[ _] := False
+isTmaOperatorBox[ (OverscriptBox|SubscriptBox)[ op_, __], fullName_:False] := isTmaOperatorBox[ op, fullName]
+isTmaOperatorBox[ (UnderscriptBox|SuperscriptBox)[ op_, _], fullName_:False] := isTmaOperatorBox[ op, fullName]
+isTmaOperatorBox[ (UnderoverscriptBox|SubsuperscriptBox)[ op_, _, _], fullName_:False] := isTmaOperatorBox[ op, fullName]
+(* In the following definition, if 'fullName' is 'True', the second alternative ensures that "Plus_0"
+	is also transformed into "Annotated[Plus, SubScript[0]]", not only "+_0". *)
+isTmaOperatorBox[ op_String, fullName_:False] := isTmaOperatorSymbol[ op] || (fullName && MemberQ[ $tmaOperatorNames, op <> "$TM"])
+isTmaOperatorBox[ ___] := False
 
 getTmaOperatorForms[ op_Symbol] := First[ Cases[ $tmaOperators, {_, forms_, StringDrop[ SymbolName[ op], -3]} -> forms]]
 getTmaOperatorForms[ op_String] := First[ Cases[ $tmaOperators, {_, forms_, op} -> forms]]
@@ -794,14 +794,6 @@ MakeExpression[ RowBox[ {l_, UnderscriptBox[ op_, dom_], r_, rest:(PatternSequen
             MakeExpression[ RowBox[ {makeDomainOperation[ dom, Apply[ makeTmaBoxes, f]], "[", RowBox[ Riffle[ args, ","]], "]"}], fmt]
         ]
     ] /; $parseTheoremaExpressions
-    
-(*
-Remark:
-We do not consider the case where different operator symbols appear in a flat RowBox (-> OperatorChain),
-even if the domain is always the same. This is because then, in order to be consistent, one would also have to
-take care of completely arbitrary (flat) chains of operators: domain-underscripted, annotated and plain.
-This, however, is extremely complicated ...
-*)
 
 (* POSTFIX *)
 MakeExpression[ RowBox[ {l_, UnderscriptBox[ op_, dom_]}], fmt_] :=
@@ -1003,9 +995,9 @@ getSingleRangeVar[ args___] := unexpected[ getSingleRangeVar, {args}]
 
 (* Underscript is treated differently than the others, because it is assumed to be a domain underscript;
 	See Section 'Under-, Over-, Sub-, Superscripts', subsection 'no arguments of domain underscript'. *)
-MakeExpression[ (h:(OverscriptBox|SubscriptBox|SuperscriptBox))[ op_?isTmaOperatorBox, sc_], fmt_] :=
+MakeExpression[ (h:(OverscriptBox|SubscriptBox|SuperscriptBox))[ op_?((isTmaOperatorBox[ #, True])&), sc_], fmt_] :=
 	MakeExpression[ makeAnnotation[ h, op, sc], fmt] /; ($parseTheoremaExpressions || $parseTheoremaGlobals)
-MakeExpression[ (h:(UnderoverscriptBox|SubsuperscriptBox))[ op_?isTmaOperatorBox, sc1_, sc2_], fmt_] :=
+MakeExpression[ (h:(UnderoverscriptBox|SubsuperscriptBox))[ op_?((isTmaOperatorBox[ #, True])&), sc1_, sc2_], fmt_] :=
 	MakeExpression[ makeAnnotation[ h, op, sc1, sc2], fmt] /; ($parseTheoremaExpressions || $parseTheoremaGlobals)
 
 MakeExpression[ RowBox[ {h_, "[", RowBox[ {op_String?isTmaOperatorSymbol}], "]"}], fmt_] :=
@@ -1115,6 +1107,22 @@ MakeExpression[ RowBox[ {l_, operator:((h:(UnderoverscriptBox|SubsuperscriptBox)
 		f = Extract[ expr, {1, 0}, makeTmaBoxes];
 		MakeExpression[ RowBox[ {makeAnnotation[ h, f, sc1, sc2], "[", RowBox[ Riffle[ args, ","]], "]"}], fmt]
 	] /; $parseTheoremaExpressions
+	
+(* ::Subsubsection:: *)
+(* Chains of operators *)
+
+(* The following definition handles chains of operators (at least two operators),
+	where at least one is no plain symbol (i.e. has some sort of annotation and/or domain underscript) *)
+MakeExpression[ RowBox[ l:{_?((!(isLeftDelimiter[ #] || isRightDelimiter[ #]))&),
+						pre:(PatternSequence[ _?isTmaOperatorBox,
+							_?((!(isLeftDelimiter[ #] || isRightDelimiter[ #]))&)]...),
+						op:Except[ _String] /; isTmaOperatorBox[ op],
+						post:(PatternSequence[ _?((!(isLeftDelimiter[ #] || isRightDelimiter[ #]))&),
+							_?isTmaOperatorBox]...),
+						_?((!(isLeftDelimiter[ #] || isRightDelimiter[ #]))&)}], fmt_] :=
+	Module[ {},
+		MakeExpression[ RowBox[ {"OperatorChain", "[", RowBox[ Riffle[ l, ","]], "]"}], fmt]
+	] /; ($parseTheoremaExpressions && Length[ l] > 3)
 	
 (* ::Subsubsection:: *)
 (* No arguments of domain underscript *)

@@ -846,7 +846,7 @@ renameToStandardContext[ args___] := unexpected[ renameToStandardContext, {args}
 computeInProof[ expr_] :=
 	Module[{simp},
 		setComputationContext[ "prove"];
-		simp = ToExpression[ StringReplace[ ToString[ expr], "Theorema`Language`" -> "Theorema`Computation`Language`"]];
+		simp = ToExpression[ StringReplace[ ToString[ FullForm[ expr]], "Theorema`Language`" -> "Theorema`Computation`Language`"]];
 		setComputationContext[ "none"];
 		(* simp does not evaluate further *)
 		With[ {res = simp},
