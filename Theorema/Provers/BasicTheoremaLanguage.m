@@ -29,6 +29,10 @@ Begin["`Private`"]
 (* ::Section:: *)
 (* Termination rules *)
 
+(*
+	Termination rules are NOT applied with ReplaceList but just with Replace (efficiency!)
+	We cannot use the trick with returning $Failed to indicate non-applicability.
+*)
 inferenceRule[ goalInKB] = 
 PRFSIT$[ goal:FML$[ _, g_, __], {___, k:FML$[ _, g_, __], ___}, ___] :> performProofStep[
 	makeTERMINALNODE[ makePRFINFO[ name -> goalInKB, used -> {goal, k}], proved]
@@ -48,6 +52,29 @@ inferenceRule[ trueGoal] =
 PRFSIT$[ goal:FML$[ _, True | Not$TM[ False], __], _List, ___] :> performProofStep[
 	makeTERMINALNODE[ makePRFINFO[ name -> trueGoal, used -> goal], proved]
 ]
+
+inferenceRule[ contradictionUniv1] = 
+(PRFSIT$[ _, {___, c:FML$[ _, Not$TM[ B_?isAtomicExpression], _], ___, u:FML$[ _, Forall$TM[ _, _, A_?isAtomicExpression], _], ___}, _, ___?OptionQ]|
+PRFSIT$[ _, {___, u:FML$[ _, Forall$TM[ _, _, A_?isAtomicExpression], _], ___, c:FML$[ _, Not$TM[ B_?isAtomicExpression], _], ___}, _, ___?OptionQ]|
+PRFSIT$[ _, {___, c:FML$[ _, B_?isAtomicExpression, _], ___, u:FML$[ _, Forall$TM[ _, _, Not$TM[ A_?isAtomicExpression]], _], ___}, _, ___?OptionQ]|
+PRFSIT$[ _, {___, u:FML$[ _, Forall$TM[ _, _, Not$TM[ A_?isAtomicExpression]], _], ___,  c:FML$[ _, B_?isAtomicExpression, _], ___}, _, ___?OptionQ]) :> 
+	Module[ {inst},
+		Block[ {$generated = {}},
+			makeTERMINALNODE[ makePRFINFO[ name -> contradictionUniv1, used -> {u, c}, 
+				"instantiation" -> inst], proved]
+		] /; (inst = instantiation[ A, B]) =!= $Failed
+	]
+
+inferenceRule[ contradictionUniv2] = 
+(PRFSIT$[ _, {___, c:FML$[ _, Forall$TM[ _, _, Not$TM[ B_?isAtomicExpression]], _], ___, u:FML$[ _, Forall$TM[ _, _, A_?isAtomicExpression], _], ___}, _, ___?OptionQ]|
+PRFSIT$[ _, {___, u:FML$[ _, Forall$TM[ _, _, A_?isAtomicExpression], _], ___, c:FML$[ _, Forall$TM[ _, _, Not$TM[ B_?isAtomicExpression]], _], ___}, _, ___?OptionQ]) :> 
+	Module[ {com, inst, pos},
+		Block[ {$generated = {}},
+			makeTERMINALNODE[ makePRFINFO[ name -> contradictionUniv2, used -> {u, c}, 
+				"instantiation" -> Extract[ inst, pos[[1]]]], proved]
+		] /; ({com, inst} = unification[ A, B]) =!= {$Failed, $Failed} && (pos = Position[ com, _?(freeVariables[ #] === {}&), {1}, Heads -> False]) =!= {}
+]
+
 	
 (* ::Section:: *)
 (* Connectives *)
@@ -741,13 +768,20 @@ compatibleRange[ args___] := unexpected[ compatibleRange, {args}]
 
 
 (* ::Section:: *)
+(* unification *)
+
+
+
+(* ::Section:: *)
 (* Rule composition *)
 
 terminationRules = {"Termination Rules",
 	{goalInKB, True, True, 1, "term"},
 	{falseInKB, True, True, 1, "term"},
 	{trueGoal, True, True, 1, "term"},
-	{contradictionKB, True, True, 1, "term"}
+	{contradictionKB, True, True, 1, "term"},
+	{contradictionUniv1, True, True, 2, "term"},
+	{contradictionUniv2, True, True, 2, "term"}
 	};
 
 connectiveRules = {"Connectives Rules", 

@@ -8,6 +8,8 @@ MessageName[ basicTheoremaLanguageRules, "usage", lang] = "Rules for the basic l
 MessageName[ quantifierRules, "usage", lang] = "Rules for quantifiers";
 
 MessageName[ contradictionKB, "usage", lang] = "Knowledge base contains contradicting formulae";
+MessageName[ contradictionUniv1, "usage", lang] = "Knowledge base contains a universally quantified formulae that contradicts some other formula.";
+MessageName[ contradictionUniv2, "usage", lang] = "Knowledge base contains two contradicting universally quantified formulae.";
 MessageName[ falseInKB, "usage", lang] = "Knowledge base contains a formula False";
 MessageName[ goalInKB, "usage", lang] = "Knowledge base contains the proof goal";
 MessageName[ trueGoal, "usage", lang] = "The proof goal is True";
@@ -53,6 +55,14 @@ translate[ "Termination Rules", lang] = "Rules for Proof Termination";
 
 proofStepText[ contradictionKB, lang, {{k_, c_}}, {}, pVal_] := {textCell[ "The proof is finished, because ", formulaReference[ k], 
 	" contradicts ", formulaReference[ c], "."]
+    };
+
+proofStepText[ contradictionUniv1, lang, {{u_, c_}}, {}, ___, "instantiation" -> inst_List, ___, pVal_] := {textCell[ "The proof is finished, because instantiating ", formulaReference[ u], 
+	" by ", inlineTheoremaExpressionSeq[ inst, lang], " contradicts ", formulaReference[ c], "."]
+    };
+
+proofStepText[ contradictionUniv2, lang, {{u_, c_}}, {}, ___, "instantiation" -> inst_List, ___, pVal_] := {textCell[ "The proof is finished, because instantiating ", formulaReference[ u], 
+	" and ", formulaReference[ c], " by ", inlineTheoremaExpressionSeq[ inst, lang], " gives a contradiction."]
     };
 
 proofStepText[ falseInKB, lang, {{k_}}, {}, pVal_] := {textCell[ "The proof is finished, because ", formulaReference[ k], 
