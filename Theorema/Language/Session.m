@@ -785,12 +785,15 @@ processComputation[ x:Theorema`Computation`Language`nE] :=
 	]
 processComputation[x_] := Module[ { procSynt, res},
 	procSynt = markVariables[ freshNames[ Hold[x]]];
+	$TmaComputationObject = {Apply[ HoldForm, procSynt]};
+	$TmaCompInsertPos = {2}; 
 	setComputationContext[ "compute"];
 	res = Check[ Catch[ ReleaseHold[ procSynt]], $Failed];
 	setComputationContext[ "none"];
 	(*NotebookWrite[ EvaluationNotebook[], Cell[ ToBoxes[ res, TheoremaForm], "ComputationResult", CellLabel -> "Out["<>ToString[$Line]<>"]="]];*)
 	(* We force the MakeBoxes[ ..., TheoremaForm] to apply by setting $PrePrint in the CellProlog of a computation cell.
 	   Unsetting $PrePrint in the CellEpilog ensures this behaviour only for Theorema computation *)
+	AppendTo[ $TmaComputationObject, res]; 
 	renameToStandardContext[ res]
 ]
 processComputation[args___] := unexcpected[ processComputation, {args}]

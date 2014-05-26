@@ -41,105 +41,88 @@ test2[x_] /; active[test2] && condition[test2, {x}] := result[x]
 a1[x_] /; active[a1] && condition[x > 0 && asdf[x] > 0, a1, {x}] := result[x^2]
  *)
 
-SetAttributes[extr, HoldAll]
-SetAttributes[condition, HoldAll]
-SetAttributes[result, HoldAll]
-SetAttributes[compute, HoldAll]
+SetAttributes[ trackCondition, HoldAll]
+SetAttributes[ trackResult, HoldAll]
 
-
-extr[x_] := {HoldForm[x]}
-extr[And[x_, y__]] := ReleaseHold[Flatten[{HoldForm[HoldForm[x]], Map[HoldForm, HoldForm[y]]}]]
-
-active[f_] :=
-	Module[{}, 
-		If[ToString[Definition[f]] != "Null", Return[True], Return[False]]
-	] (* just checks if function is defined *)
-
-condition[fct_, param_] :=
+trackCondition[ {}, fct_, param_] :=
 	Module[{},
-		calculation = InsertInTrace[calculation, {Apply[HoldForm[fct], param]}, insertPosition];
-  		AppendTo[insertPosition, 2];
+		insertInTrace[$TmaComputationObject, {Apply[HoldForm[fct], param]}, $TmaCompInsertPos];
+  		AppendTo[$TmaCompInsertPos, 2];
   		True
   	]
 
-condition[cond_, fct_, param_] := 
-	Module[{condlist = extr[cond], c, i}, 
-		calculation = InsertInTrace[calculation, {Apply[HoldForm[fct], param]}, insertPosition];
-		AppendTo[insertPosition, 2]; 
-  		calculation = InsertInTrace[calculation, {}, insertPosition]; 
-  		AppendTo[insertPosition, 1];
-  		For[i = 1, i <= Length[condlist], i++,
-   			calculation = InsertInTrace[calculation, {}, insertPosition]; 
-   			AppendTo[insertPosition, 1];
-   			c = provecond[condlist[[i]]];
-   			insertPosition = Most[insertPosition];
+trackCondition[ {x__}, fct_, param_] := 
+	Module[{c, i, cond}, 
+		cond = Hold[ x];
+		insertInTrace[$TmaComputationObject, {Apply[HoldForm[fct], param]}, $TmaCompInsertPos];
+		AppendTo[$TmaCompInsertPos, 2]; 
+  		insertInTrace[$TmaComputationObject, {}, $TmaCompInsertPos]; 
+  		AppendTo[$TmaCompInsertPos, 1];
+  		For[i = 1, i <= Length[cond], i++,
+   			insertInTrace[$TmaComputationObject, {}, $TmaCompInsertPos]; 
+   			AppendTo[$TmaCompInsertPos, 1];
+   			c = cond[[i]];
+   			$TmaCompInsertPos = Most[$TmaCompInsertPos];
    			If[c === False,(* the current condition is not fulfilled *)
-    			calculation = InsertInTrace[calculation, condlist[[i]], Append[insertPosition, 1]];
-    			calculation = InsertInTrace[calculation, False, Append[insertPosition, Length[Extract[calculation, insertPosition]] + 1]];
-    			insertPosition = Most[insertPosition]; 
-    			calculation = InsertInTrace[calculation, {False, i}, insertPosition]; 
-    			insertPosition = Most[insertPosition]; 
-    			insertPosition[[Length[insertPosition]]] = insertPosition[[Length[insertPosition]]] + 1;
+    			insertInTrace[$TmaComputationObject, Extract[ cond, {i}, HoldForm], Append[$TmaCompInsertPos, 1]];
+    			insertInTrace[$TmaComputationObject, False, Append[$TmaCompInsertPos, Length[Extract[$TmaComputationObject, $TmaCompInsertPos]] + 1]];
+    			$TmaCompInsertPos = Most[$TmaCompInsertPos]; 
+    			insertInTrace[$TmaComputationObject, {False, i}, $TmaCompInsertPos]; 
+    			$TmaCompInsertPos = Most[$TmaCompInsertPos]; 
+    			$TmaCompInsertPos[[Length[$TmaCompInsertPos]]] = $TmaCompInsertPos[[Length[$TmaCompInsertPos]]] + 1;
     			Return[False]
     		];
    			If[Not[TrueQ[c]],(* the current condition couldn't be checked if it is true or false *)
-    			calculation = InsertInTrace[calculation, condlist[[i]], Append[insertPosition, 1]];
-    			calculation = InsertInTrace[calculation, "undetermined", Append[insertPosition, Length[Extract[calculation, insertPosition]] + 1]];
-    			insertPosition = Most[insertPosition]; 
-    			calculation = InsertInTrace[calculation, {"undetermined", i}, insertPosition]; 
-    			insertPosition = Most[insertPosition]; 
-    			insertPosition[[Length[insertPosition]]] = insertPosition[[Length[insertPosition]]] + 1;
+    			insertInTrace[$TmaComputationObject, Extract[ cond, {i}, HoldForm], Append[$TmaCompInsertPos, 1]];
+    			insertInTrace[$TmaComputationObject, "undetermined", Append[$TmaCompInsertPos, Length[Extract[$TmaComputationObject, $TmaCompInsertPos]] + 1]];
+    			$TmaCompInsertPos = Most[$TmaCompInsertPos]; 
+    			insertInTrace[$TmaComputationObject, {"undetermined", i}, $TmaCompInsertPos]; 
+    			$TmaCompInsertPos = Most[$TmaCompInsertPos]; 
+    			$TmaCompInsertPos[[Length[$TmaCompInsertPos]]] = $TmaCompInsertPos[[Length[$TmaCompInsertPos]]] + 1;
     			Return[False]
     		];
    			(* the current condition is fulfilled *)
-   			calculation = InsertInTrace[calculation, condlist[[i]], Append[insertPosition, 1]];
-   			calculation = InsertInTrace[calculation, True, Append[insertPosition, Length[Extract[calculation, insertPosition]] + 1]];
-   			insertPosition[[Length[insertPosition]]] = i + 1;
+   			insertInTrace[$TmaComputationObject, Extract[ cond, {i}, HoldForm], Append[$TmaCompInsertPos, 1]];
+   			insertInTrace[$TmaComputationObject, True, Append[$TmaCompInsertPos, Length[Extract[$TmaComputationObject, $TmaCompInsertPos]] + 1]];
+   			$TmaCompInsertPos[[Length[$TmaCompInsertPos]]] = i + 1;
    		];
-  		insertPosition = Most[insertPosition]; 
-  		calculation = InsertInTrace[calculation, {True, 0}, insertPosition];
-   		insertPosition[[Length[insertPosition]]] = insertPosition[[Length[insertPosition]]] + 2;
+  		$TmaCompInsertPos = Most[$TmaCompInsertPos]; 
+  		insertInTrace[$TmaComputationObject, {True, 0}, $TmaCompInsertPos];
+   		$TmaCompInsertPos[[Length[$TmaCompInsertPos]]] = $TmaCompInsertPos[[Length[$TmaCompInsertPos]]] + 2;
    		Return[True]
    	]
+trackCondition[ args___] := unexpected[ trackCondition, {args}]
 
 provecond[cond_] := 
  	Module[{}, 
   		Return[ReleaseHold[cond]](*check condition with theorema proofer *)
   	]
 
-InsertInTrace[calc_, toInsert_, pos_] := 
+SetAttributes[ insertInTrace, HoldFirst];
+insertInTrace[ calc_, toInsert_, pos_] := 
  	Module[{},
- 		Insert[calculation, toInsert, pos]
+ 		calc = Insert[ calc, toInsert, pos]
  	]
 
-result[body_] := 
+trackResult[body_] := 
  	Module[{v}, 
- 		calculation = InsertInTrace[calculation, {HoldForm[body]}, insertPosition]; 
-  		insertPosition = AppendTo[insertPosition, 2]; v = body; 
-  		calculation = InsertInTrace[calculation, v, insertPosition]; 
-  		insertPosition = Most[Most[insertPosition]]; 
-  		insertPosition[[Length[insertPosition]]] = insertPosition[[Length[insertPosition]]] + 1;
+ 		insertInTrace[$TmaComputationObject, {HoldForm[body]}, $TmaCompInsertPos]; 
+  		$TmaCompInsertPos = AppendTo[$TmaCompInsertPos, 2]; v = body; 
+  		insertInTrace[$TmaComputationObject, v, $TmaCompInsertPos]; 
+  		$TmaCompInsertPos = Most[Most[$TmaCompInsertPos]]; 
+  		$TmaCompInsertPos[[Length[$TmaCompInsertPos]]] = $TmaCompInsertPos[[Length[$TmaCompInsertPos]]] + 1;
   		Return[v]
   	]
 
-compute[c_] := 
- 	Module[{result},
- 		calculation = {HoldForm[c]}; insertPosition = {2}; 
-  		AppendTo[calculation, result = c]; 
-  		NotebookWrite[EvaluationNotebook[], 
-  			Cell[BoxData[ToBoxes[Button["Show Calculation", showcalc[calculation], 
-  			ImageSize -> Automatic, Method -> "Queued"]]], "Output"]]; 
-  		result
-  	]
-
-showcalc[calclist_] := 
+displayComputation[calclist_] := 
  	Module[{cells}, 
  		cells = {Cell[CellGroupData[
  			Join[{Cell[BoxData[ToBoxes[First[calclist]]], "CalculationInput"]}, 
        			Map[subcompToCell, Drop[Drop[calclist, 1], -1]],
        			{Cell[BoxData[ToBoxes[Last[calclist]]], "CalculationInput"]}
-       			]]]}; 
-  		NotebookPut[Notebook[cells], StyleDefinitions -> getStyle];]
+       			]]]};
+       	$TmaComputationNotebook = tmaNotebookPut[ Notebook[ cells], "Computation"]
+  		]
 
 subcompToCell[{inp_, subcomp__, outp_}, level_: 0] := 
 	Module[{},
@@ -297,34 +280,6 @@ condToCell[{cond_, calc__, True}, level_: 0, status_: Open] :=
 
 createCellMargin[border_] := 
 	CellMargins -> {{border, Inherited}, {Inherited, Inherited}}
-
-
-(* already exists, make simpler *)
-
-getStyle := 
-	Module[{tmp, styles}, 
-		tmp = NotebookOpen[FileNameJoin[{NotebookDirectory[], "Computation-Template.nb"}], Visible -> False];
-		styles = NotebookGet[tmp];
-		NotebookClose[tmp]; 
-		styles /. Table[Apply[CMYKColor, IntegerDigits[i, 2, 4]] -> TMAcolor[i, "Milano"], {i, 0, 15}]
-	]
-
-TMAcolor[0, "Milano"] = RGBColor[0.91, 0.90, 0.85];(*beige*)
-TMAcolor[1, "Milano"] = RGBColor[0.29, 0.46, 0.60];(*strong blue*)
-TMAcolor[2, "Milano"] = RGBColor[0.36, 0.54, 0.69];(*light blue grey*)
-TMAcolor[3, "Milano"] = RGBColor[0.957, 0.96, 0.97];(*grey96*)
-TMAcolor[4, "Milano"] = RGBColor[0.88, 0.88, 0.92];(*grey90*)
-TMAcolor[5, "Milano"] = RGBColor[0.73, 0.74, 0.84];(*grey75*)
-TMAcolor[6, "Milano"] = RGBColor[0.404, 0.43, 0.545];(*blue*)
-TMAcolor[7, "Milano"] = RGBColor[0.486, 0.33, 0.32];(*brown*)
-TMAcolor[8, "Milano"] = RGBColor[0.89, 0.80, 0.69];(*light brown*)
-TMAcolor[9, "Milano"] = RGBColor[0.73, 0.65, 0.61];(*medium brown*)
-TMAcolor[10, "Milano"] = RGBColor[0.55, 0.44, 0.42];(*choko*)
-TMAcolor[11, "Milano"] = RGBColor[0.23, 0.25, 0.34];(*blue grey*)
-TMAcolor[12, "Milano"] = RGBColor[0.25, 0.19, 0.20];(*dark brown*)
-TMAcolor[13, "Milano"] = RGBColor[0.55, 0.55, 0.55];(*grey55*)
-TMAcolor[14, "Milano"] = RGBColor[0.40, 0.40, 0.40];(*grey40*)
-TMAcolor[15, "Milano"] = RGBColor[0.30, 0.30, 0.30];(*grey30*)
 
 End[]
 

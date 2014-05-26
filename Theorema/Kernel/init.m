@@ -138,6 +138,7 @@ EndPackage[]
 BeginPackage["Theorema`"]
 
 Get["Theorema`Language`"]
+Get["Theorema`Computation`"]
 Get["Theorema`Provers`"]
 Get["Theorema`Interface`GUI`"]
 

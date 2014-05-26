@@ -122,7 +122,14 @@ With[ {lang = "English"},
 	MessageName[buiActComputation, "usage", lang] = "buiActComputation[ f] indicates whether the builtin f is active during computation.";
 	MessageName[buiActProve, "usage", lang] = "buiActProve[ f] indicates whether the builtin f is active in a computation done during proving.";
 	MessageName[buiActSolve, "usage", lang] = "buiActSolve[ f] indicates whether the builtin f is active in a computation done during solving.";
-	
+
+(* 	Theorema`Computation`Common` *)
+	MessageName[trackCondition, "usage", lang] = "Track the evaluation of a condition during computation.";
+	MessageName[trackResult, "usage", lang] = "Track the evaluation of the result during computation.";
+	MessageName[$TmaComputationObject, "usage", lang] = "$TmaComputationObject is the global computation object.";
+	MessageName[$TmaCompInsertPos, "usage", lang] = "$TmaCompInsertPos is the position in the global computation object, where the next subcomputation must be inserted.";
+	MessageName[displayComputation, "usage", lang] = "displayComputation[ ...] displays the computation represented by the global computation object ....";
+
 (* Theorema`Interface`GUI` *)
 	MessageName[$kbStruct, "usage", lang] = "Structured knowledge base to be displayed in the KB browser";
 	MessageName[updateKBBrowser, "usage", lang] = "";
