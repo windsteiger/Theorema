@@ -512,17 +512,21 @@ findSelectedFormula[ sel_] := {}
 findSelectedFormula[args___] := unexpected[ findSelectedFormula, {args}]
 
 Clear[ applyGlobalDeclaration]
-applyGlobalDeclaration[ expr_, g_List] := Fold[ applyGlobalDeclaration, expr, Reverse[ g]]
+applyGlobalDeclaration[ expr_, g_List] :=
+	Module[ {form = Fold[ applyGlobalDeclaration, expr, Reverse[ g]]},
+		form //. {globalImplies$TM[ a_, b_] :> Module[ {fa}, b /; ((fa = freeVariables[ a]) =!= {} && Intersection[ fa, freeVariables[ b]] === {})]}
+			 //. {fa:(globalForall$TM[ _, _, _]) :> Module[ {res}, res /; (res = analyzeQuantifiedExpression[ fa]) =!= fa]}
+			 /. {globalForall$TM -> Forall$TM, globalImplies$TM -> Implies$TM}
+	]
 
 applyGlobalDeclaration[ expr_, globalForall$TM[ r_, c_]] := 
-	analyzeQuantifiedExpression[ Forall$TM[ r, c, ReleaseHold[ markVariables[ Hold[ QU$[ r, expr]]]]], {}]
-
+	globalForall$TM[ r, c, ReleaseHold[ markVariables[ Hold[ QU$[ r, expr]]]]]
 applyGlobalDeclaration[ expr_, globalForall$TM[ r_, c_, d_]] := 
 	With[ {new = applyGlobalDeclaration[ expr, d]},
 		applyGlobalDeclaration[ new, globalForall$TM[ r, c]]
 	]
-applyGlobalDeclaration[ expr_, globalImplies$TM[ c_]] := Implies$TM[ c, expr]
-applyGlobalDeclaration[ expr_, globalImplies$TM[ c_, d_]] := Implies$TM[ c, applyGlobalDeclaration[ expr, d]]
+applyGlobalDeclaration[ expr_, globalImplies$TM[ c_]] := globalImplies$TM[ c, expr]
+applyGlobalDeclaration[ expr_, globalImplies$TM[ c_, d_]] := globalImplies$TM[ c, applyGlobalDeclaration[ expr, d]]
 applyGlobalDeclaration[ expr_, domainConstruct$TM[ lhs_, rng:RNG$[ SIMPRNG$[ v_]]]] :=
 	substituteFree[ ReleaseHold[ markVariables[ Hold[ QU$[ rng, expr]]]], {v -> lhs}]
 applyGlobalDeclaration[ expr_, domainConstruct$TM[ lhs_, rng:RNG$[ DOMEXTRNG$[ v_, d_]]]] :=
@@ -534,7 +538,7 @@ applyGlobalDeclaration[ args___] := unexpected[ applyGlobalDeclaration, {args}]
 (*
 	analyze the ranges and drop all quantifiers that aren't needed
 *)
-analyzeQuantifiedExpression[ Forall$TM[ r:RNG$[ __], c_, e_], outerVar_List] :=
+analyzeQuantifiedExpression[ globalForall$TM[ r:RNG$[ __], c_, e_]] :=
 	Module[ {freeE, rc, sc, dropVar, thinnedRange, thinnedCond},
 		(* take the free vars in e *)
 		freeE = freeVariables[ e];
@@ -547,11 +551,9 @@ analyzeQuantifiedExpression[ Forall$TM[ r:RNG$[ __], c_, e_], outerVar_List] :=
 		If[ Length[ thinnedRange] == 0,
 			e,
 			thinnedCond = simplifiedAnd[ And$TM[ thinnedExpression[ sc, dropVar], rc]];
-			Forall$TM[ thinnedRange, thinnedCond, e]
+			globalForall$TM[ thinnedRange, thinnedCond, e]
 		]
 	]
-
-analyzeQuantifiedExpression[ args___] := unexpected[ analyzeQuantifiedExpression, {args}]
 
 initSession[] :=
     Module[ {},
