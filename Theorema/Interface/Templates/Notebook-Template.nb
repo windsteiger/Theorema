@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[     33892,       1147]
-NotebookOptionsPosition[     23174,        884]
-NotebookOutlinePosition[     23642,        904]
-CellTagsIndexPosition[     23599,        901]
+NotebookDataLength[     33722,       1140]
+NotebookOptionsPosition[     23005,        877]
+NotebookOutlinePosition[     23473,        897]
+CellTagsIndexPosition[     23430,        894]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -679,14 +679,13 @@ Cell[StyleData["ComputationResult", "SlideShow"],
 
 Cell[StyleData["ComputationInfo"],
  ShowCellBracket->False,
- CellMargins->{{120, 10}, {0, 0}},
- TextAlignment->Right,
- StyleMenuListing->None],
+ CellMargins->{{120, 10}, {10, 2}},
+ StyleMenuListing->None,
+ FontFamily->Arial],
 
 Cell[StyleData["ComputationInfoBody"],
  ShowCellBracket->False,
- CellMargins->{{144, 10}, {0, 0}},
- TextAlignment->Right,
+ CellMargins->{{144, 10}, {10, 2}},
  StyleMenuListing->None],
 
 Cell[StyleData["ProofInfo"],
@@ -694,17 +693,11 @@ Cell[StyleData["ProofInfo"],
  CellMargins->{{76, 10}, {6, 6}},
  CellFrameLabelMargins->15,
  StyleMenuListing->None,
- FontFamily->"Arial",
- FontSize->12,
- FontWeight->"Plain",
- FontSlant->"Plain",
- FontVariations->{"StrikeThrough"->False,
- "Underline"->False}],
+ FontFamily->"Arial"],
 
 Cell[StyleData["ProofInfoBody"],
  ShowCellBracket->False,
  CellMargins->{{100, 10}, {0, 0}},
- TextAlignment->Right,
  StyleMenuListing->None],
 
 Cell[CellGroupData[{
@@ -1101,53 +1094,53 @@ Cell[17507, 664, 359, 9, 39, 36, 0, "StyleData", "ComputationResult", "All",
 Cell[17869, 675, 85, 1, 70, 49, 0, "StyleData", "ComputationResult", \
 "SlideShow"]
 }, Open  ]],
-Cell[17969, 679, 142, 4, 32, 34, 0, "StyleData", "ComputationInfo", "All",
+Cell[17969, 679, 140, 4, 43, 34, 0, "StyleData", "ComputationInfo", "All",
  StyleMenuListing->None],
-Cell[18114, 685, 146, 4, 32, 38, 0, "StyleData", "ComputationInfoBody", "All",
+Cell[18112, 685, 124, 3, 44, 38, 0, "StyleData", "ComputationInfoBody", "All",
  
  StyleMenuListing->None],
-Cell[18263, 691, 284, 10, 43, 28, 0, "StyleData", "ProofInfo", "All",
+Cell[18239, 690, 162, 5, 43, 28, 0, "StyleData", "ProofInfo", "All",
  StyleMenuListing->None],
-Cell[18550, 703, 140, 4, 32, 32, 0, "StyleData", "ProofInfoBody", "All",
+Cell[18404, 697, 117, 3, 32, 32, 0, "StyleData", "ProofInfoBody", "All",
  StyleMenuListing->None],
 Cell[CellGroupData[{
-Cell[18715, 711, 367, 14, 36, 29, 0, "StyleData", "FrameLabel", "All",
+Cell[18546, 704, 367, 14, 36, 29, 0, "StyleData", "FrameLabel", "All",
  StyleMenuListing->None],
-Cell[19085, 727, 57, 1, 70, 42, 0, "StyleData", "FrameLabel", "SlideShow"],
-Cell[19145, 730, 41, 0, 70, 41, 0, "StyleData", "FrameLabel", "Printout"]
+Cell[18916, 720, 57, 1, 70, 42, 0, "StyleData", "FrameLabel", "SlideShow"],
+Cell[18976, 723, 41, 0, 70, 41, 0, "StyleData", "FrameLabel", "Printout"]
 }, Closed]],
-Cell[19201, 733, 476, 13, 43, 30, 0, "StyleData", "OpenArchive", "All",
+Cell[19032, 726, 476, 13, 43, 30, 0, "StyleData", "OpenArchive", "All",
  MenuSortingValue->1210],
-Cell[19680, 748, 325, 10, 42, 30, 0, "StyleData", "ArchiveInfo", "All",
+Cell[19511, 741, 325, 10, 42, 30, 0, "StyleData", "ArchiveInfo", "All",
  MenuSortingValue->1220],
-Cell[20008, 760, 535, 16, 71, 31, 0, "StyleData", "CloseArchive", "All",
+Cell[19839, 753, 535, 16, 71, 31, 0, "StyleData", "CloseArchive", "All",
  MenuSortingValue->1230],
-Cell[20546, 778, 361, 8, 40, 33, 0, "StyleData", "IncludeArchive", "All",
+Cell[20377, 771, 361, 8, 40, 33, 0, "StyleData", "IncludeArchive", "All",
  MenuSortingValue->1445],
-Cell[20910, 788, 127, 3, 40, 37, 0, "StyleData", "ExpressionVariable", \
+Cell[20741, 781, 127, 3, 40, 37, 0, "StyleData", "ExpressionVariable", \
 "All"],
-Cell[21040, 793, 122, 3, 40, 32, 0, "StyleData", "ExpressionABF", "All"],
-Cell[21165, 798, 123, 3, 40, 33, 0, "StyleData", "ExpressionMeta", "All"],
+Cell[20871, 786, 122, 3, 40, 32, 0, "StyleData", "ExpressionABF", "All"],
+Cell[20996, 791, 123, 3, 40, 33, 0, "StyleData", "ExpressionMeta", "All"],
 Cell[CellGroupData[{
-Cell[21313, 805, 71, 2, 40, 34, 0, "StyleData", "AutoParentheses", "All"],
-Cell[21387, 809, 61, 1, 40, 44, 0, "StyleData", "AutoParentheses", "Layout"],
-Cell[21451, 812, 64, 1, 40, 47, 0, "StyleData", "AutoParentheses", "SlideShow"]
+Cell[21144, 798, 71, 2, 40, 34, 0, "StyleData", "AutoParentheses", "All"],
+Cell[21218, 802, 61, 1, 40, 44, 0, "StyleData", "AutoParentheses", "Layout"],
+Cell[21282, 805, 64, 1, 40, 47, 0, "StyleData", "AutoParentheses", "SlideShow"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[21552, 818, 73, 2, 39, 29, 0, "StyleData", "Emphasized", "All",
+Cell[21383, 811, 73, 2, 39, 29, 0, "StyleData", "Emphasized", "All",
  MenuCommandKey->"E"],
-Cell[21628, 822, 98, 2, 40, 42, 0, "StyleData", "Emphasized", "SlideShow"]
+Cell[21459, 815, 98, 2, 40, 42, 0, "StyleData", "Emphasized", "SlideShow"]
 }, Open  ]],
-Cell[21741, 827, 288, 10, 41, 32, 0, "StyleData", "GenericButton", "All"],
-Cell[22032, 839, 184, 5, 39, 31, 0, "StyleData", "TheoremaForm", "All",
+Cell[21572, 820, 288, 10, 41, 32, 0, "StyleData", "GenericButton", "All"],
+Cell[21863, 832, 184, 5, 39, 31, 0, "StyleData", "TheoremaForm", "All",
  StyleMenuListing->None],
-Cell[22219, 846, 66, 1, 38, 34, 0, "StyleData", "ComponentActive", "All"],
-Cell[22288, 849, 87, 2, 38, 36, 0, "StyleData", "ComponentInactive", "All"],
-Cell[22378, 853, 107, 2, 38, 33, 0, "StyleData", "ComponentEmpty", "All"],
-Cell[22488, 857, 73, 2, 36, 26, 0, "StyleData", "TabView", "All"],
-Cell[22564, 861, 99, 3, 36, 31, 0, "StyleData", "TabViewLabel", "All"],
-Cell[22666, 866, 225, 6, 38, 71, 0, "StyleData", "FormReference", "All"],
-Cell[22894, 874, 264, 7, 38, 76, 0, "StyleData", "FormReferenceHover", "All"]
+Cell[22050, 839, 66, 1, 38, 34, 0, "StyleData", "ComponentActive", "All"],
+Cell[22119, 842, 87, 2, 38, 36, 0, "StyleData", "ComponentInactive", "All"],
+Cell[22209, 846, 107, 2, 38, 33, 0, "StyleData", "ComponentEmpty", "All"],
+Cell[22319, 850, 73, 2, 36, 26, 0, "StyleData", "TabView", "All"],
+Cell[22395, 854, 99, 3, 36, 31, 0, "StyleData", "TabViewLabel", "All"],
+Cell[22497, 859, 225, 6, 38, 71, 0, "StyleData", "FormReference", "All"],
+Cell[22725, 867, 264, 7, 38, 76, 0, "StyleData", "FormReferenceHover", "All"]
 }, Open  ]]
 }
 ]

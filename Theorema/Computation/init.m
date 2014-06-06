@@ -15,8 +15,9 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-BeginPackage[ "Theorema`Computation`", {"Theorema`"}]
+BeginPackage[ "Theorema`Computation`", {"Theorema`", "Theorema`Common`"}]
 
+(* We put "Theorema`Common`" to the context path in order to access "translate" from there. *)
 Map[ Get, FileNames[ "*.m", FileNameJoin[{$TheoremaDirectory, "Theorema", "Computation", "LanguageData"}]]];
 
 Get[ "Theorema`Computation`Common`"]

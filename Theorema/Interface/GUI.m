@@ -889,10 +889,10 @@ displayKBBrowser[ task_String] :=
             Column[{
             	Button[ translate[ "OKnext"], $tcActionView++],
             	Row[{
-            		With[ {label = Row[ {translate[ "FilteredBy"], InputField[ $kbFilterKW, String]}]},
+            		With[ {label = Row[ {translate[ "FilteredBy"] <> ": ", InputField[ $kbFilterKW, String]}]},
 						Button[ label,
 							CreateDialog[{
-								Row[ {translate[ "Keyword"], InputField[ Dynamic[ $kbFilterKW], String, ContinuousAction -> True]}],
+								Row[ {translate[ "Keyword"] <> ": ", InputField[ Dynamic[ $kbFilterKW], String, ContinuousAction -> True]}],
 								DefaultButton[ DialogReturn[]]},
 								WindowTitle-> translate[ "FilterKBWindow"]
 							],
@@ -1214,10 +1214,10 @@ selectProver[ ] :=
 				Button[ translate[ "RestoreDefaults"], setRulesDefaults[ $selectedRuleSet]],
 				Button[ translate[ "ShowAll"], $ruleFilterKW = ""]},
 				Spacer[2]],
-				With[ {label = Row[ {translate[ "FilteredBy"], InputField[ $ruleFilterKW, String]}]},
+				With[ {label = Row[ {translate[ "FilteredBy"] <> ": ", InputField[ $ruleFilterKW, String]}]},
 					Button[ label,
 						CreateDialog[{
-							Row[ {translate[ "Keyword"], InputField[ Dynamic[ $ruleFilterKW], String, ContinuousAction -> True]}],
+							Row[ {translate[ "Keyword"] <> ": ", InputField[ Dynamic[ $ruleFilterKW], String, ContinuousAction -> True]}],
 							DefaultButton[ DialogReturn[]]},
 							WindowTitle-> translate[ "FilterRulesWindow"]
 						],
@@ -1421,11 +1421,14 @@ printComputationInfo[ cellID_Integer] :=
 			I assume the speed gain from using mx is neglectable *)
 		file = FileNameJoin[ {nbDir, "c" <> ToString[ cellID]}];
 		saveComputationCacheDisplay[ cellID, file];
-		With[ {fn = file <> "-display.m"},
-			CellPrint[ Cell[ "", "ComputationInfo",
+		With[ {fnco = file <> "-co.m", fnd = file <> "-display.m"},
+			CellPrint[ Cell[ 
+				BoxData[ ToBoxes[ Button[ Style[ translate["ShowComputation"], FontVariations -> {"Underline" -> True}], 
+					displayComputation[ fnco], ImageSize -> Automatic, Appearance -> None, Method -> "Queued"]]], 
+				"ComputationInfo",
 				CellFrameLabels -> {{None, Cell[ BoxData[ ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeGroup[ ButtonNotebook[], file]]]]},
 					 {None, None}}]];
-			CellPrint[ Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ Get[ fn] /. FORM -> displayFormulaFromKey, TrackedSymbols :> {$tmaEnv}]]]], "ComputationInfoBody"]]
+			CellPrint[ Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ Get[ fnd] /. FORM -> displayFormulaFromKey, TrackedSymbols :> {$tmaEnv}]]]], "ComputationInfoBody"]]
 		];
 	]
 printComputationInfo[args___] := unexcpected[ printComputationInfo, {args}]
@@ -1439,6 +1442,7 @@ setCompEnv[ args___] := unexpected[ setCompEnv, {args}]
 
 saveComputationCacheDisplay[ cellID_Integer, file_String] :=
 	With[ {fn = file <> ".m", kbKeysLabels = Map[ {key[#], label[#]}&, Select[ $tmaEnv, kbSelectCompute[ key[ #]]&]]},
+		Put[ $TmaComputationObject, file <> "-co.m"];
 		Put[ Definition[ buiActComputation], Definition[ kbSelectCompute], fn];
 		Put[ 
 			TabView[ {
@@ -1934,7 +1938,8 @@ makeColoredStylesheet[ type_String, color_:$TheoremaColorScheme] :=
 		alias = Map[ langButtonData[ #][[4]] -> RowBox[ {autoParenthesis[ "("], langButtonData[ #][[2]], autoParenthesis[ ")"]}]&, 
 			Cases[ Flatten[ Transpose[ allFormulae][[2]]], _String]];
 		alias = Join[ alias, {"(" -> autoParenthesis[ "("], ")" -> autoParenthesis[ ")"]}];
-		styles /. Table[Apply[CMYKColor, IntegerDigits[i, 2, 4]] -> TMAcolor[i, color], {i, 0, 15}] /. (InputAliases -> {}) -> (InputAliases -> alias)
+		styles /. Table[Apply[CMYKColor, IntegerDigits[i, 2, 4]] -> TMAcolor[i, color], {i, 0, 15}] 
+				/. {(InputAliases -> {}) -> (InputAliases -> alias), "DOCKED_HEADER" -> "Theorema " <> translate[ type]}
 	]
 makeColoredStylesheet[ args___] := unexpected[ makeColoredStylesheet, {args}]
 
@@ -2551,6 +2556,7 @@ partitionFill[ args___] := unexpected[ partitionFill, {args}]
 tmaNotebookPut[ nb_Notebook, style_String, opts___?OptionQ] :=
 	NotebookPut[ nb, 
 		StyleDefinitions -> makeColoredStylesheet[ style],
+		WindowTitle -> "Theorema " <> translate[ style],
 		Magnification -> CurrentValue[ First[ getTheoremaCommander[]], Magnification],
 		opts
 	]
