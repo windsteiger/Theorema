@@ -1426,8 +1426,10 @@ printComputationInfo[ cellID_Integer] :=
 				BoxData[ ToBoxes[ Button[ Style[ translate["ShowComputation"], FontVariations -> {"Underline" -> True}], 
 					displayComputation[ fnco], ImageSize -> Automatic, Appearance -> None, Method -> "Queued"]]], 
 				"ComputationInfo",
-				CellFrameLabels -> {{None, Cell[ BoxData[ ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeGroup[ ButtonNotebook[], file]]]]},
-					 {None, None}}]];
+				CellFrameLabels -> {
+					{None, Cell[ BoxData[ ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, 
+						With[ {f = file}, ButtonFunction :> removeGroup[ ButtonNotebook[], f]]]]]},
+					{None, None}}]];
 			CellPrint[ Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ Get[ fnd] /. FORM -> displayFormulaFromKey, TrackedSymbols :> {$tmaEnv}]]]], "ComputationInfoBody"]]
 		];
 	]

@@ -42,17 +42,17 @@ a1[x_] /; active[a1] && condition[x > 0 && asdf[x] > 0, a1, {x}] := result[x^2]
  *)
 
 SetAttributes[ trackCondition, HoldAll]
-trackCondition[ {}, fct_, param_] :=
+trackCondition[ {}, expr_] :=
 	Module[{},
-		insertInTrace[ {Apply[ HoldForm[ fct], param]}, $TmaCompInsertPos];
+		insertInTrace[ {HoldForm[ expr]}, $TmaCompInsertPos];
   		AppendTo[ $TmaCompInsertPos, 2];
   		True
   	]
 
-trackCondition[ {x__}, fct_, param_] := 
+trackCondition[ {x__}, expr_] := 
 	Module[{c, i, cond}, 
 		cond = Hold[ x];
-		insertInTrace[ {Apply[ HoldForm[ fct], param]}, $TmaCompInsertPos];
+		insertInTrace[ {HoldForm[ expr]}, $TmaCompInsertPos];
 		AppendTo[ $TmaCompInsertPos, 2]; 
   		insertInTrace[ {}, $TmaCompInsertPos]; 
   		AppendTo[ $TmaCompInsertPos, 1];
@@ -102,9 +102,9 @@ insertInTrace[ toInsert_, pos_] :=
 insertInTrace[ args___] := unexpected[ insertInTrace, {args}]
 
 SetAttributes[ trackResult, HoldAll]
-trackResult[ body_] := 
+trackResult[ body_, key_] := 
  	Module[{v}, 
- 		insertInTrace[ {HoldForm[ body]}, $TmaCompInsertPos]; 
+ 		insertInTrace[ {{key, HoldForm[ body]}}, $TmaCompInsertPos]; 
   		$TmaCompInsertPos = AppendTo[ $TmaCompInsertPos, 2]; 
   		v = body; 
   		insertInTrace[ v, $TmaCompInsertPos]; 
@@ -137,7 +137,7 @@ subcompToCell[ {inp_, subcomp__, outp_}, level_:0] :=
      	]
 	]
 
-subcompToCell[ {def_, {held_HoldForm, res_}}, level_:0] := 
+subcompToCell[ {def_, {{key_List, held_HoldForm}, res_}}, level_:0] := 
  	Module[{},
  		Cell[ CellGroupData[{
  			Cell[ BoxData[ theoremaBoxes[ def]], "Subfct", createCellMargin[27 + 27*level]], 
@@ -157,7 +157,7 @@ subcompToCell[ {held_, {calc__}}, level_:0] :=
   		]
   	]
 
-subcompToCell[ {held_HoldForm, res_}, level_:0] := 
+subcompToCell[ {{key_List, held_HoldForm}, res_}, level_:0] := 
 	Module[{},
   		Cell[ CellGroupData[{
   			Cell[ BoxData[ theoremaBoxes[ held]], "Subfct", createCellMargin[27 + 27*level]], 
