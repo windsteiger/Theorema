@@ -98,12 +98,12 @@ Equal$TM[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM), _?mathemat
 Equal$TM[ a_?mathematicalConstantQ, b_?mathematicalConstantQ] /; buiActive["Equal"] := SameQ[ a, b]
 Equal$TM[ a_?tmaAtomQ, b_?tmaAtomQ] /; buiActive["Equal"] := a == b
 
-Plus$TM[ a___] /; buiActive["Plus"] := Plus[ a]
+Plus$TM[ a___] /; buiActive["Plus"] := Module[ {res = Plus[ a]}, res /; Head[ res] =!= Plus]
 Minus$TM[ a_] /; buiActive["Minus"] := Minus[ a]
 Subtract$TM[ a_, b_] /; buiActiveArithmetic["Subtract"] := Subtract[ a, b] (* "Subtract" requires exactly 2 arguments. *)
 Times$TM[ a___] /; buiActive["Times"] := Times[ a]
 Divide$TM[ a_, b_] /; buiActiveArithmetic["Divide"] := Divide[ a, b] (* "Divide" requires exactly 2 arguments. *)
-Power$TM[ a_, b_] /; buiActivePower[ b] := Power[ a, b]
+Power$TM[ a_, b_] /; buiActivePower[ b] := Module[ {res = Power[ a, b]}, res /; Head[ res] =!= Power]
 Radical$TM[ a_, b_] /; buiActive["Radical"] := Power[ a, 1/b]
 Factorial$TM[ a_] /; buiActive["Factorial"] := a!
 Less$TM[ a__] /; buiActive["Less"] := Less[ a]

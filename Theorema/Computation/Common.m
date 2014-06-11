@@ -62,20 +62,16 @@ trackCondition[ {x__}, expr_] :=
    			c = cond[[i]];
    			$TmaCompInsertPos = Most[ $TmaCompInsertPos];
    			If[ c === False,(* the current condition is not fulfilled *)
-    			insertInTrace[ Extract[ cond, {i}, HoldForm], Append[$TmaCompInsertPos, 1]];
-    			insertInTrace[ False, Append[$TmaCompInsertPos, Length[Extract[$TmaComputationObject, $TmaCompInsertPos]] + 1]];
-    			$TmaCompInsertPos = Most[$TmaCompInsertPos]; 
-    			insertInTrace[ {False, i}, $TmaCompInsertPos]; 
-    			$TmaCompInsertPos = Most[$TmaCompInsertPos]; 
+    			insertInTrace[ Extract[ cond, {i}, HoldForm], Append[ $TmaCompInsertPos, 1]];
+    			insertInTrace[ False, Append[ $TmaCompInsertPos, Length[ Extract[ $TmaComputationObject, $TmaCompInsertPos]] + 1]];
+    			$TmaCompInsertPos = Drop[ $TmaCompInsertPos, -2]; 
     			$TmaCompInsertPos = MapAt[ (# + 1)&, $TmaCompInsertPos, -1];
     			Return[ False]
     		];
    			If[ Not[ TrueQ[c]],(* the current condition couldn't be checked if it is true or false *)
     			insertInTrace[ Extract[ cond, {i}, HoldForm], Append[ $TmaCompInsertPos, 1]];
     			insertInTrace[ Indeterminate, Append[ $TmaCompInsertPos, Length[ Extract[ $TmaComputationObject, $TmaCompInsertPos]] + 1]];
-    			$TmaCompInsertPos = Most[ $TmaCompInsertPos]; 
-    			insertInTrace[ {Indeterminate, i}, $TmaCompInsertPos]; 
-    			$TmaCompInsertPos = Most[ $TmaCompInsertPos]; 
+    			$TmaCompInsertPos = Drop[ $TmaCompInsertPos, -2]; 
     			$TmaCompInsertPos = MapAt[ (# + 1)&, $TmaCompInsertPos, -1];
     			Return[ False]
     		];
@@ -85,8 +81,7 @@ trackCondition[ {x__}, expr_] :=
    			$TmaCompInsertPos = ReplacePart[ $TmaCompInsertPos, -1 -> i + 1];
    		];
   		$TmaCompInsertPos = Most[ $TmaCompInsertPos]; 
-  		insertInTrace[ {True, 0}, $TmaCompInsertPos];
-   		$TmaCompInsertPos = MapAt[ (# + 2)&, $TmaCompInsertPos, -1];
+   		$TmaCompInsertPos = MapAt[ (# + 1)&, $TmaCompInsertPos, -1];
    		Return[ True]
    	]
 trackCondition[ args___] := unexpected[ trackCondition, {args}]
@@ -126,7 +121,7 @@ displayComputation[ file_String] :=
   	]
 displayComputation[ args___] := unexpected[ displayComputation, {args}]
 
-subcompToCell[ {inp_, subcomp__, outp_}, level_:0] := 
+(*subcompToCell[ {inp_, subcomp__, outp_}, level_:0] := 
 	Module[{},
   		Cell[ CellGroupData[
     		Join[
@@ -136,12 +131,12 @@ subcompToCell[ {inp_, subcomp__, outp_}, level_:0] :=
      		]]
      	]
 	]
+*)
 
 subcompToCell[ {def_, {{key_List, held_HoldForm}, res_}}, level_:0] := 
  	Module[{},
  		Cell[ CellGroupData[{
  			Cell[ BoxData[ theoremaBoxes[ def]], "Subfct", createCellMargin[27 + 27*level]], 
-     		Cell[ TextData[ translate[ "Function has no conditions"]], "Text", createCellMargin[27 + 27*level]], 
      		Cell[ CellGroupData[{
      			Cell[ BoxData[ theoremaBoxes[ held]], "Subfct", createCellMargin[27 + 27*level]], 
         		Cell[ BoxData[ theoremaBoxes[ res]], "SubfctResult", createCellMargin[27 + 27*level]]}]
@@ -165,45 +160,24 @@ subcompToCell[ {{key_List, held_HoldForm}, res_}, level_:0] :=
      	]
      ]
 
-subcompToCell[ {def_, {Indeterminate, n_}, condlist_}, level_:0] := 
+subcompToCell[ {def_, condlist:{{__, True|False|Indeterminate}..}}, level_:0] := 
 	Module[{}, 
   		Cell[ CellGroupData[{
   			Cell[ BoxData[ theoremaBoxes[ def]], "Subfct", createCellMargin[27 + 27*level]], 
      		Cell[ CellGroupData[
      			Join[
-     				{Cell[ TextData[ translate[ "Function cannot be applied because a condition could not be evaluated to true"]], 
-     					"Text", createCellMargin[66 + 27*level]]}, 
-        			Map[ condToCell[ #, level, Closed]&, Take[ condlist, n-1]],
-        			{condToCell[ condlist[[n]]]}
+        			Map[ condToCell[ #, level, Closed]&, Drop[ condlist, -1]],
+        			{condToCell[ condlist[[-1]]]}
         		]
         	]]}]
         ]
 	]
 
-subcompToCell[ {def_, {False, n_}, condlist_}, level_:0] := 
- 	Module[{},
-  		Cell[ CellGroupData[{
-  			Cell[ BoxData[ theoremaBoxes[ def]], "Subfct", createCellMargin[27 + 27*level]], 
-     		Cell[ CellGroupData[
-       			Join[
-       				{Cell[ TextData[ translation[ "Function cannot be applied because a condition is not fulfilled"]], "Text", createCellMargin[66 + 27*level]]}, 
-        			Map[ condToCell[ #, level, Closed]&, Take[ condlist, n-1]], 
-        			{condToCell[ condlist[[n]]]}
-        		]
-        	]]}]
-        ]
-	]
-
-subcompToCell[ {def_, {True, _}, condlist_, res_}, level_:0] := 
+subcompToCell[ {def_, condlist:{{__, True|False|Indeterminate}..}, res_}, level_:0] := 
 	Module[{},
   		Cell[ CellGroupData[{
   			Cell[ BoxData[ theoremaBoxes[ def]], "Subfct", createCellMargin[27 + 27*level]], 
-     		Cell[ CellGroupData[
-       			Join[
-       				{Cell[ TextData[ translate[ "All conditions are fulfilled"]], "Text", createCellMargin[66 + 27*level]]}, 
-        			Map[ condToCell[ #, level]&, condlist]
-        		]]
-        	], 
+     		Cell[ CellGroupData[ Map[ condToCell[ #, level]&, condlist]]], 
      		Cell[ CellGroupData[ {subcompToCell[ res, level+1]}]]}
      	]] 
 	]
@@ -211,21 +185,15 @@ subcompToCell[ args___] := unexpected[ subcompToCell, {args}]
 
 condToCell[ {cond_, Indeterminate}, level_:0] := 
  	Module[{},
-  		Cell[ CellGroupData[{
-  			Cell[ BoxData[ theoremaBoxes[ cond]], "CondUndecided", createCellMargin[66 + 27*level]], 
-     		Cell[ TextData[ translate[ "Cannot be evaluated"]], "CondUndecided", createCellMargin[66 + 27*level],
-     			CellDingbat -> None]}]
-     	]
-     ]
+  		Cell[ BoxData[ theoremaBoxes[ cond]], "CondUndecided", createCellMargin[66 + 27*level]]
+    ]
 
 condToCell[ {cond_, calc__, Indeterminate}, level_:0] := 
  	Module[{},
   		Cell[ CellGroupData[
   			Join[
   				{Cell[ BoxData[ theoremaBoxes[ cond]], "CondUndecided", createCellMargin[66 + 27*level]]}, 
-     			Map[ subcompToCell[ #, level+1]&, {calc}], 
-     			{Cell[ TextData[ translate[ "Cannot be evaluated"]], "CondUndecided", createCellMargin[66 + 27*level],
-     				CellDingbat -> None]}
+     			Map[ subcompToCell[ #, level+1]&, {calc}]
      		]]
      	]
      ]
@@ -234,7 +202,7 @@ condToCell[ {cond_, False}, level_:0] :=
 	Module[{},
 		Cell[ CellGroupData[{
 			Cell[ BoxData[ theoremaBoxes[ cond]], "CondNotFulfilled", createCellMargin[66 + 27*level]], 
-     		Cell[ BoxData[ ToBoxes[False]], "CondNotFulfilled", createCellMargin[66 + 27*level],
+     		Cell[ BoxData[ ToBoxes[ False]], "CondNotFulfilled", createCellMargin[66 + 27*level],
      			CellDingbat -> None]}]
      	]
      ]
