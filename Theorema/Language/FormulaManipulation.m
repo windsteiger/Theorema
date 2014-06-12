@@ -270,6 +270,14 @@ extractVar[ args___] := unexpected[ extractVar, {args}]
 
 
 (* ::Subsubsection:: *)
+(* boundVariables *)
+
+boundVariables[ expr_] :=
+		Apply[ Union, Map[ rngVariables, Cases[ expr, _Theorema`Language`RNG$|_Theorema`Computation`Language`RNG$, Infinity]]]
+boundVariables[ args___] := unexpected[ boundVariables, {args}]
+
+
+(* ::Subsubsection:: *)
 (* substituteFree *)
 
 
@@ -303,6 +311,40 @@ substituteFree[ x:Hold[_], rules_List] := x
 substituteFree[ expr_, rule_?OptionQ] := substituteFree[ expr, {rule}]
 substituteFree[ expr_, rules_List] := ReleaseHold[ substituteFree[ Hold[ expr], rules]]
 substituteFree[ args___] := unexpected[ substituteFree, {args}]
+
+(* ::Section:: *)
+(* Expression categories *)
+
+isQuantifierFormula[ e_] := MatchQ[ e, 
+	_Theorema`Language`Forall$TM|_Theorema`Computation`Language`Forall$TM|
+	_Theorema`Language`Exists$TM|_Theorema`Computation`Language`Exists$TM]
+isQuantifierFormula[ args___] := unexpected[ isQuantifierFormula, {args}]
+
+isConnectiveFormula[ e_] := MatchQ[ e, 
+	_Theorema`Language`Not$TM|_Theorema`Computation`Language`Not$TM|
+	_Theorema`Language`And$TM|_Theorema`Computation`Language`And$TM|
+	_Theorema`Language`Or$TM|_Theorema`Computation`Language`Or$TM|
+	_Theorema`Language`Implies$TM|_Theorema`Computation`Language`Implies$TM|
+	_Theorema`Language`Iff$TM|_Theorema`Computation`Language`Iff$TM|
+	_Theorema`Language`IffDef$TM|_Theorema`Computation`Language`IffDef$TM]
+isConnectiveFormula[ args___] := unexpected[ isConnectiveFormula, {args}]
+
+isAtomicExpression[ e_] := !isQuantifierFormula[ e] && !isConnectiveFormula[ e]
+isAtomicExpression[ args___] := unexpected[ isAtomicExpression, {args}]
+
+isLiteralExpression[ Theorema`Language`Not$TM[ e_]|Theorema`Computation`Language`Not$TM[ e_]] := isAtomicExpression[ e]
+isLiteralExpression[ e_] := isAtomicExpression[ e]
+isLiteralExpression[ args___] := unexpected[ isLiteralExpression, {args}]
+
+isAtomicTerm[ _?isNonNumberAtomicTerm] := True
+isAtomicTerm[ _?NumberQ] := True
+isAtomicTerm[ _] := False
+isAtomicTerm[ args___] := unexpected[ isAtomicTerm, {args}]
+
+isNonNumberAtomicTerm[ _Theorema`Language`VAR$|_Theorema`Language`FIX$|_Symbol] := True
+isNonNumberAtomicTerm[ _] := False
+isNonNumberAtomicTerm[ args___] := unexpected[ isNonNumberAtomicTerm, {args}]
+
 
 (* ::Subsubsection:: *)
 (* isQuantifierFree *)
@@ -473,11 +515,11 @@ singleRangeToCondition[ args___] := unexpected[ singleRangeToCondition, {args}]
 executableForm[ {(Theorema`Language`Iff$TM|Theorema`Language`IffDef$TM|Theorema`Language`Equal$TM|Theorema`Language`EqualDef$TM)[ l_, r_], c_List, var_List}, key_] :=
     Block[ { $ContextPath = {"System`"}, $Context = "Global`"},
         With[ { left = execLeft[ Hold[l], var], 
-        	cond = makeConjunction[ Prepend[ c, "DUMMY$COND"], And],
-        	right = execRight[ Hold[r], var]},
+        	h = Head[ l],
+        	right = "Theorema`Common`trackResult[" <> execRight[ Hold[r], var] <> "]"},
         	(* The complicated DUMMY$COND... construction is necessary because the key itself contains strings,
         	   and we need to get the escaped strings into the Hold *)
-            StringReplace[ left <> "/;" <> execCondition[ Hold[ cond], var] <> ":=" <> right,
+            StringReplace[ left <> "/; DUMMY$COND && " <> execCondition[ Hold[ trackCondition[ c, h, var]], var] <> ":=" <> right,
             	{ "DUMMY$COND" -> "Theorema`Common`kbSelectCompute[" <> ToString[ key, InputForm] <> "]",
             		"Theorema`Language`" -> "Theorema`Computation`Language`",
             		"Theorema`Knowledge`" -> "Theorema`Computation`Knowledge`"}
@@ -575,6 +617,8 @@ formulaToRules[ args___] := unexpected[ formulaToRules, {args}]
 	It is of the form {form, c, var}, where form is neither forall nor implies, c is a list of conditions, and var is a list of (universally quantified) variables.
 	Result is a list of forward rules, a list of backward rules, and a list of elementary substitutions and/or definition rules.
 *)
+Clear[ makeRules]
+
 makeRules[ {(Theorema`Language`IffDef$TM|Theorema`Language`EqualDef$TM)[ l_, r_], c_List, var_List}, ref_] := 
 	{{}, {}, {makeSingleRule[ {l, r, c, var}, ref]}}
 makeRules[ {Theorema`Language`Iff$TM[ l_, r_], c_List, var_List}, ref_] := 
@@ -586,7 +630,7 @@ makeRules[ {form:Theorema`Language`Equal$TM[ l_, r_], c_List, var_List}, ref_] :
         	(* in this case, forward is also empty, we need not do anything *)
             backward = {makeSingleRule[ {form, makeConjunction[ c, Theorema`Language`And$TM], {}, var}, ref, "backward"]}
         ];
-        {forward, backward, {makeSingleRule[ {l, r, c, var}, ref], makeSingleRule[ {r, l, c, var}, ref]}}
+        {forward, backward, {If[ isNonNumberAtomicTerm[ r], makeSingleRule[ {r, l, c, var}, ref], makeSingleRule[ {l, r, c, var}, ref]]}}
     ]
 (* We do not introduce backward rules for the negated implications *)
 (*
@@ -595,19 +639,35 @@ makeRules[ {form:Theorema`Language`Equal$TM[ l_, r_], c_List, var_List}, ref_] :
 		2) B => C (under condition A)
 	When we augment the KB, in order to apply 1) we need A in the KB and check whether B is fulfilled, i.e. B is in the KB.
 	Similarly, for 2) we also need both A and B in the KB.
-	Thus, there is no benefit in generating both 1) and 2), we just use 1).
+	Thus, there is no benefit in generating both 1) and 2), we just use one of them.
+	If possible, we choose one, where the formula to be rewritten contains all variables, such that they can be instanciated when the rewrite
+	rule is applied. If we choose one with some variables missing, then makeSingleRule will not generate a forward rule but maybe still a useful backward rule!
 *)
-makeRules[ {form:Theorema`Language`And$TM[ f__], c:{c1_, cr___}, var_List}, ref_] := 
-	{Join[ (* We cannot use "Append" here, because the second argument originating from "makeSingleRule" could be "Sequence[]" *)
+makeRules[ {form:Theorema`Language`And$TM[ f__], c:{c0___, c1_, c2___}, var_List} /; Complement[ var, freeVariables[ c1]] === {}, ref_] := 
+	{Join[ (* amaletzk: We cannot use "Append" here, because the second argument could be "Sequence[]" *)
 		Map[ makeSingleRule[ 
 				{simplifiedNot[ Theorema`Language`Not$TM[ #]], makeDisjunction[ Map[ simplifiedNot[ Theorema`Language`Not$TM[ #]]&, c], Theorema`Language`Or$TM], {}, var}, 
 				ref]&, {f}],
-		{makeSingleRule[ {c1, form, {cr}, var}, ref]}
+		{makeSingleRule[ {c1, form, {c0, c2}, var}, ref]}
 	], 
 	Map[ makeSingleRule[ {#, makeConjunction[ c, Theorema`Language`And$TM], {}, var}, ref, "backward"]&, {f}],
 	{}}
-makeRules[ {form_, c:{c1_, cr___}, var_List}, ref_] := 
-	{{makeSingleRule[ {c1, form, {cr}, var}, ref],
+makeRules[ {form:Theorema`Language`And$TM[ f__], c:{c1_, c2___}, var_List}, ref_] := 
+	{Join[ 
+		Map[ makeSingleRule[ 
+				{simplifiedNot[ Theorema`Language`Not$TM[ #]], makeDisjunction[ Map[ simplifiedNot[ Theorema`Language`Not$TM[ #]]&, c], Theorema`Language`Or$TM], {}, var}, 
+				ref]&, {f}],
+		{makeSingleRule[ {c1, form, {c2}, var}, ref]}
+	], 
+	Map[ makeSingleRule[ {#, makeConjunction[ c, Theorema`Language`And$TM], {}, var}, ref, "backward"]&, {f}],
+	{}}
+makeRules[ {form_, c:{c0___, c1_, c2___}, var_List} /; Complement[ var, freeVariables[ c1]] === {}, ref_] := 
+	{{makeSingleRule[ {c1, form, {c0, c2}, var}, ref],
+	  makeSingleRule[ {simplifiedNot[ Theorema`Language`Not$TM[ form]], makeDisjunction[ Map[ simplifiedNot[ Theorema`Language`Not$TM[ #]]&, c], Theorema`Language`Or$TM], {}, var}, ref]}, 
+	{makeSingleRule[ {form, makeConjunction[ c, Theorema`Language`And$TM], {}, var}, ref, "backward"]},
+	{}}
+makeRules[ {form_, c:{c1_, c2___}, var_List}, ref_] := 
+	{{makeSingleRule[ {c1, form, {c2}, var}, ref],
 	  makeSingleRule[ {simplifiedNot[ Theorema`Language`Not$TM[ form]], makeDisjunction[ Map[ simplifiedNot[ Theorema`Language`Not$TM[ #]]&, c], Theorema`Language`Or$TM], {}, var}, ref]}, 
 	{makeSingleRule[ {form, makeConjunction[ c, Theorema`Language`And$TM], {}, var}, ref, "backward"]},
 	{}}

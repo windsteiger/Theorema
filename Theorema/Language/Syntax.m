@@ -328,23 +328,8 @@ isTmaRelationBox[ op_String] :=
 isTmaRelationBox[ SubscriptBox[ op_String, _]] :=
 	MemberQ[ $tmaSetRelations, Replace[ op, $tmaOperatorToName]]
 
-
-(* ::Section:: *)
-(* Expression categories *)
-
-isQuantifierFormula[ e_] := MatchQ[ e, _Forall$TM|_Exists$TM]
-isQuantifierFormula[ args___] := unexpected[ isQuantifierFormula, {args}]
-
-isConnectiveFormula[ e_] := MatchQ[ e, _Not$TM|_And$TM|_Or$TM|_Implies$TM|_Iff$TM|_IffDef$TM]
-isConnectiveFormula[ args___] := unexpected[ isConnectiveFormula, {args}]
-
-isAtomicExpression[ e_] := !isQuantifierFormula[ e] && !isConnectiveFormula[ e]
-isAtomicExpression[ args___] := unexpected[ isAtomicExpression, {args}]
-
-
 (* ::Section:: *)
 (* Set and tuple constructor *)
-
 
 (*
 	Expression specific parts -> Expression.m
@@ -354,8 +339,6 @@ isAtomicExpression[ args___] := unexpected[ isAtomicExpression, {args}]
 
 makeSet[ x___] := Apply[ ToExpression[ "Set$TM"], Union[ {x}]]
 makeTuple[ x___] := ToExpression[ "Tuple$TM"][x]
-
-
 
 (* ::Section:: *)
 (* MakeExpression *)
@@ -827,19 +810,29 @@ MakeExpression[RowBox[{a_, TagBox[ "\[DoubleLongRightArrow]", Identity, ___]}], 
 	MakeExpression[RowBox[{a, "\[DoubleLongRightArrow]"}], fmt] /; $parseTheoremaGlobals
 
 MakeExpression[ UnderscriptBox[ "\[ForAll]", rng_], fmt_] :=
-    standardGlobalQuantifier[ "globalForall", rng, "True", fmt] /; $parseTheoremaGlobals
+    Block[ {$parseTheoremaExpressions = True},
+    	standardGlobalQuantifier[ "globalForall", rng, "True", fmt]
+    ] /; $parseTheoremaGlobals
     
 MakeExpression[ UnderscriptBox[ UnderscriptBox[ "\[ForAll]", rng_], cond_], fmt_] :=
-    standardGlobalQuantifier[ "globalForall", rng, cond, fmt] /; $parseTheoremaGlobals
+    Block[ {$parseTheoremaExpressions = True},
+	    standardGlobalQuantifier[ "globalForall", rng, cond, fmt]
+    ] /; $parseTheoremaGlobals
 
 MakeExpression[ RowBox[ {UnderscriptBox[ "\[ForAll]", rng_], decl_}], fmt_] :=
-    standardQuantifier[ "globalForall", rng, "True", decl, fmt] /; $parseTheoremaGlobals
+    Block[ {$parseTheoremaExpressions = True},
+    	standardQuantifier[ "globalForall", rng, "True", decl, fmt]
+    ] /; $parseTheoremaGlobals
 
 MakeExpression[ RowBox[ {UnderscriptBox[ UnderscriptBox[ "\[ForAll]", rng_], cond_], decl_}], fmt_] :=
-    standardQuantifier[ "globalForall", rng, cond, decl, fmt] /; $parseTheoremaGlobals
+    Block[ {$parseTheoremaExpressions = True},
+    	standardQuantifier[ "globalForall", rng, cond, decl, fmt]
+    ] /; $parseTheoremaGlobals
 
 MakeExpression[ RowBox[ {cond_, "\[Implies]"|"\[DoubleLongRightArrow]"|"\[DoubleRightArrow]"}], fmt_] := 
-	MakeExpression[ RowBox[{ "globalImplies", "[", cond, "]"}], fmt] /; $parseTheoremaGlobals
+    Block[ {$parseTheoremaExpressions = True},
+		MakeExpression[ RowBox[{ "globalImplies", "[", cond, "]"}], fmt]
+    ] /; $parseTheoremaGlobals
 
 MakeExpression[ RowBox[{lhs_, ":=", UnderscriptBox[ "\[CapitalDelta]", rng_]}], fmt_] := 
 	(* We don't use the powerful toRangeBox because in this expression, the range does not have the many variants, multiranges, etc.*)
@@ -855,8 +848,10 @@ MakeExpression[ UnderscriptBox[ "let", rng_], fmt_] :=
 	(* We the powerful toRangeBox in order to have the many variants, multiranges, etc. However, only ABBRVRNG$ makes sense in a "let",
 	   but we do not consider it a syntax error to use one of the other ranges *)
 	With[ {r = toRangeBox[ rng]},
-		MakeExpression[ RowBox[{"QU$", "[", 
-            RowBox[{ r, ",", RowBox[{ "globalAbbrev", "[", r, "]"}]}], "]"}], fmt]
+		Block[ {$parseTheoremaExpressions = True},
+			MakeExpression[ RowBox[{"QU$", "[", 
+            	RowBox[{ r, ",", RowBox[{ "globalAbbrev", "[", r, "]"}]}], "]"}], fmt]
+		]
 	] /; $parseTheoremaGlobals
 
 

@@ -22,6 +22,9 @@ With[ {lang = "English"},
 	MessageName[isQuantifierFormula, "usage", lang] = "isQuantifierFormula[ e] is true iff e is built up by a logical quantifier.";	
 	MessageName[isConnectiveFormula, "usage", lang] = "isConnectiveFormula[ e] is true iff e is built up by a logical connective.";	
 	MessageName[isAtomicExpression, "usage", lang] = "isAtomicExpression[ e] is true iff e is neither a quantifier nor a connective formula.";	
+	MessageName[isLiteralExpression, "usage", lang] = "isLiteralExpression[ e] is true iff e is an atomic or a negated atomic expression.";	
+	MessageName[isAtomicTerm, "usage", lang] = "isAtomicTerm[ t] is true iff t is a variable or a constant.";	
+	MessageName[isNonNumberAtomicTerm, "usage", lang] = "isAtomicTerm[ t] is true iff t is an atomic term but not a number.";	
 	MessageName[makeSet, "usage", lang] = "makeSet[s] constructs a set from s during the phase of parsing an expression.";	
 	MessageName[makeTuple, "usage", lang] = "makeTuple[t] constructs a tuple from t during the phase of parsing an expression.";	
 	MessageName[$parseTheoremaExpressions, "usage", lang] = "whether to parse expressions with their Theorema meaning ...";
@@ -63,6 +66,7 @@ With[ {lang = "English"},
 	MessageName[rngVariables, "usage", lang] = "";	
 	MessageName[rngConstants, "usage", lang] = "";	
 	MessageName[specifiedVariables, "usage", lang] = "";
+	MessageName[boundVariables, "usage", lang] = "";
 	MessageName[splitAnd, "usage", lang] = "";	
 	MessageName[makeConjunction, "usage", lang] = "";	
 	MessageName[makeDisjunction, "usage", lang] = "";	
@@ -118,7 +122,14 @@ With[ {lang = "English"},
 	MessageName[buiActComputation, "usage", lang] = "buiActComputation[ f] indicates whether the builtin f is active during computation.";
 	MessageName[buiActProve, "usage", lang] = "buiActProve[ f] indicates whether the builtin f is active in a computation done during proving.";
 	MessageName[buiActSolve, "usage", lang] = "buiActSolve[ f] indicates whether the builtin f is active in a computation done during solving.";
-	
+
+(* 	Theorema`Computation`Common` *)
+	MessageName[trackCondition, "usage", lang] = "Track the evaluation of a condition during computation.";
+	MessageName[trackResult, "usage", lang] = "Track the evaluation of the result during computation.";
+	MessageName[$TmaComputationObject, "usage", lang] = "$TmaComputationObject is the global computation object.";
+	MessageName[$TmaCompInsertPos, "usage", lang] = "$TmaCompInsertPos is the position in the global computation object, where the next subcomputation must be inserted.";
+	MessageName[displayComputation, "usage", lang] = "displayComputation[ ...] displays the computation represented by the global computation object ....";
+
 (* Theorema`Interface`GUI` *)
 	MessageName[$kbStruct, "usage", lang] = "Structured knowledge base to be displayed in the KB browser";
 	MessageName[updateKBBrowser, "usage", lang] = "";
@@ -200,5 +211,14 @@ With[ {lang = "English"},
 	MessageName[$generated, "usage", lang] = "is a global variable used to accumulate newly generated rewrite rules corresponding to formulas in the KB.";
 	MessageName[$autoGenerateRules, "usage", lang] = "is a global switch to turn on/off automatic generation of rewrite rules when new formulas go into the KB.";
 	MessageName[performProofStep, "usage", lang] = "performProofStep[ prog_] is a wrapper to be used on the rhs of an inference rule, where prog is the actual program that performs the step.";
+
+(* Theorema`Language`Unification` *)
+	MessageName[unification, "usage", lang] = "";
+	MessageName[maximumUnifiers, "usage", lang] = "";
+	MessageName[maximumWidth, "usage", lang] = "";
+	MessageName[commutative, "usage", lang] = "";
+	MessageName[unifiable, "usage", lang] = "";
+	MessageName[instantiation, "usage", lang] = "";
+	MessageName[matches, "usage", lang] = "";
 
 ]

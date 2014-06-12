@@ -29,6 +29,10 @@ Begin["`Private`"]
 (* ::Section:: *)
 (* Termination rules *)
 
+(*
+	Termination rules are NOT applied with ReplaceList but just with Replace (efficiency!)
+	We cannot use the trick with returning $Failed to indicate non-applicability.
+*)
 inferenceRule[ goalInKB] = 
 PRFSIT$[ goal:FML$[ _, g_, __], {___, k:FML$[ _, g_, __], ___}, ___] :> performProofStep[
 	makeTERMINALNODE[ makePRFINFO[ name -> goalInKB, used -> {goal, k}], proved]
@@ -48,6 +52,29 @@ inferenceRule[ trueGoal] =
 PRFSIT$[ goal:FML$[ _, True | Not$TM[ False], __], _List, ___] :> performProofStep[
 	makeTERMINALNODE[ makePRFINFO[ name -> trueGoal, used -> goal], proved]
 ]
+
+inferenceRule[ contradictionUniv1] = 
+(PRFSIT$[ _, {___, c:FML$[ _, Not$TM[ B_?isAtomicExpression], _], ___, u:FML$[ _, Forall$TM[ _, _, A_?isAtomicExpression], _], ___}, _, ___?OptionQ]|
+PRFSIT$[ _, {___, u:FML$[ _, Forall$TM[ _, _, A_?isAtomicExpression], _], ___, c:FML$[ _, Not$TM[ B_?isAtomicExpression], _], ___}, _, ___?OptionQ]|
+PRFSIT$[ _, {___, c:FML$[ _, B_?isAtomicExpression, _], ___, u:FML$[ _, Forall$TM[ _, _, Not$TM[ A_?isAtomicExpression]], _], ___}, _, ___?OptionQ]|
+PRFSIT$[ _, {___, u:FML$[ _, Forall$TM[ _, _, Not$TM[ A_?isAtomicExpression]], _], ___,  c:FML$[ _, B_?isAtomicExpression, _], ___}, _, ___?OptionQ]) :> 
+	Module[ {inst},
+		Block[ {$generated = {}},
+			makeTERMINALNODE[ makePRFINFO[ name -> contradictionUniv1, used -> {u, c}, 
+				"instantiation" -> inst], proved]
+		] /; (inst = instantiation[ A, B]) =!= $Failed
+	]
+
+inferenceRule[ contradictionUniv2] = 
+(PRFSIT$[ _, {___, c:FML$[ _, Forall$TM[ _, _, Not$TM[ B_?isAtomicExpression]], _], ___, u:FML$[ _, Forall$TM[ _, _, A_?isAtomicExpression], _], ___}, _, ___?OptionQ]|
+PRFSIT$[ _, {___, u:FML$[ _, Forall$TM[ _, _, A_?isAtomicExpression], _], ___, c:FML$[ _, Forall$TM[ _, _, Not$TM[ B_?isAtomicExpression]], _], ___}, _, ___?OptionQ]) :> 
+	Module[ {com, inst, pos},
+		Block[ {$generated = {}},
+			makeTERMINALNODE[ makePRFINFO[ name -> contradictionUniv2, used -> {u, c}, 
+				"instantiation" -> Extract[ inst, pos[[1]]]], proved]
+		] /; ({com, inst} = unification[ A, B]) =!= {$Failed, $Failed} && (pos = Position[ com, _?(freeVariables[ #] === {}&), {1}, Heads -> False]) =!= {}
+]
+
 	
 (* ::Section:: *)
 (* Connectives *)
@@ -328,7 +355,7 @@ ps:PRFSIT$[ g_, k:{pre___, e:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], post__
 	Otherwise generate one new goal or an alternative of several new goals.
 *)
 inferenceRule[ goalRewriting] = 
-this:PRFSIT$[ g:FML$[ _, _?isAtomicExpression, __], k_List, id_, rest___?OptionQ] :> performProofStep[
+this:PRFSIT$[ g:FML$[ _, _?isLiteralExpression, __], k_List, id_, rest___?OptionQ] :> performProofStep[
 	Module[ {lastGoalRewriting, rules, usedSubsts, conds, newForms, newG, j, newNodes = {}},
 		lastGoalRewriting = getOptionalComponent[ this, "goalRewriting"];
 		If[
@@ -387,20 +414,23 @@ inferenceRule[ knowledgeRewriting] =
 this:PRFSIT$[ g_FML$, k_List, id_, rest___?OptionQ] :> performProofStep[
 	Module[ {rules, lastKBRewriting, rewritable, lastKjRewriting, usedSubsts, conds, newForms, newKB = {}, usedForRW = {}, j, i, thisKBRewriting = {}, pos},
 		If[ kbRules@this === {},
-			Catch[ $Failed]
+			Throw[ $Failed]
 		];
 		lastKBRewriting = getOptionalComponent[ this, "KBRewriting"];
-		rewritable = Cases[ k, FML$[ _, _?isAtomicExpression, __]];
+		rewritable = Cases[ k, FML$[ _, _?isLiteralExpression, __]];
 		(* try to rewrite each atomic formula individually *)
 		Do[
-			AppendTo[ thisKBRewriting, {key@rewritable[[j]], Map[ First, kbRules@this]}];
 			lastKjRewriting = Cases[ lastKBRewriting, {key@rewritable[[j]], rkj_} -> rkj];
 			If[ lastKjRewriting === {},
 				(* if kj has not been rewritten yet, use all rewrite rules *)
 				rules = kbRules@this,
 				(* else: use only new ones *)
+				(* lastKjRewriting must have length 1, we can safely access just the one element *)
+				lastKjRewriting = lastKjRewriting[[1]];
 				rules = DeleteCases[ kbRules@this, {Apply[ Alternatives, lastKjRewriting], _}];
 				If[ rules === {},
+					(* In this case, no new rules are there compared to those that applied already *)
+					AppendTo[ thisKBRewriting, {key@rewritable[[j]], lastKjRewriting}];
 					Continue[];
 				]
 			];
@@ -416,19 +446,29 @@ this:PRFSIT$[ g_FML$, k_List, id_, rest___?OptionQ] :> performProofStep[
 					(* pos contains a list of positions of plain formulas in the list of plain formulas. 
 					   When we extract exactly these positions from the whole KB we get the whole formula datastructures *)
 					AppendTo[ usedForRW, Prepend[ Join[ usedSubsts[[i]], Extract[ k, Flatten[ pos, 1]]], rewritable[[j]]]];
+					lastKjRewriting = Join[ lastKjRewriting, Map[ key, usedSubsts[[i]]]];
 				],
 				{i, Length[ newForms]}
-			], 
+			];
+			(* thisKBRewriting contains for each rewritable formula a list of keys of formulas that have actually been used for rewriting.
+				In the next run, we do not use these rules again. *)
+			AppendTo[ thisKBRewriting, {key@rewritable[[j]], Union[ lastKjRewriting]}], 
 			{j, Length[ rewritable]}
 		];
-		makeANDNODE[ makePRFINFO[ name -> knowledgeRewriting, used -> usedForRW, generated -> newKB], 
-			toBeProved[ goal -> g, kb -> joinKB[ Flatten[ newKB], k], "KBRewriting" -> thisKBRewriting, rest]]
+		If[ ValueQ[ newForms],
+			(* this means that at least one formula has been tried to rewrite with new formulas. We document this in the proof object *)
+			makeANDNODE[ makePRFINFO[ name -> knowledgeRewriting, used -> usedForRW, generated -> newKB], 
+				toBeProved[ goal -> g, kb -> joinKB[ Flatten[ newKB], k], "KBRewriting" -> thisKBRewriting, rest]],
+			(* this means we exited the outer loop always through the Continue[], i.e. there were no new rewrite rules available ->
+				the rule should not apply *)
+			$Failed
+		]
 	]
 ]
 
 posInKB[ kb_List, forms_List] := Map[ Position[ kb, #, {1}]&, forms]
 posInKB[ args___] := unexpected[ posInKB, {args}]
-
+	
 (* ::Section:: *)
 (* substitution *)
 
@@ -728,13 +768,20 @@ compatibleRange[ args___] := unexpected[ compatibleRange, {args}]
 
 
 (* ::Section:: *)
+(* unification *)
+
+
+
+(* ::Section:: *)
 (* Rule composition *)
 
 terminationRules = {"Termination Rules",
 	{goalInKB, True, True, 1, "term"},
 	{falseInKB, True, True, 1, "term"},
 	{trueGoal, True, True, 1, "term"},
-	{contradictionKB, True, True, 1, "term"}
+	{contradictionKB, True, True, 1, "term"},
+	{contradictionUniv1, True, True, 2, "term"},
+	{contradictionUniv2, True, True, 2, "term"}
 	};
 
 connectiveRules = {"Connectives Rules", 

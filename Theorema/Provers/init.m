@@ -47,7 +47,8 @@ proofStepTextId[ id_, step_, rest___] :=
 proofStepTextId[ args___] := unexpected[ proofStepTextId, {args}]
 
 subProofHeaderId[ id_, step_, rest___, pVal_, pos_List] :=
-	Block[ {$proofStepID = id, sp = subProofHeader[ step, $Language, rest, pVal, pos]},
+	Block[ {$proofStepID = id, sp},
+		sp = subProofHeader[ step, $Language, rest, pVal, pos];
 		If[ sp === {},
 			{},
 			(* else *)

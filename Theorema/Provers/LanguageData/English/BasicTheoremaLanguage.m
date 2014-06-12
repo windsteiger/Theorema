@@ -8,25 +8,27 @@ MessageName[ basicTheoremaLanguageRules, "usage", lang] = "Rules for the basic l
 MessageName[ quantifierRules, "usage", lang] = "Rules for quantifiers";
 
 MessageName[ contradictionKB, "usage", lang] = "Knowledge base contains contradicting formulae";
+MessageName[ contradictionUniv1, "usage", lang] = "Knowledge base contains a universally quantified formulae that contradicts some other formula.";
+MessageName[ contradictionUniv2, "usage", lang] = "Knowledge base contains two contradicting universally quantified formulae.";
 MessageName[ falseInKB, "usage", lang] = "Knowledge base contains a formula False";
 MessageName[ goalInKB, "usage", lang] = "Knowledge base contains the proof goal";
 MessageName[ trueGoal, "usage", lang] = "The proof goal is True";
 MessageName[ notGoal, "usage", lang] = "Prove negation by contradiction";
 MessageName[ andGoal, "usage", lang] = "Split a conjunction in the goal";
 MessageName[ andKB, "usage", lang] = "Split a conjunction in the knowledge base";
-MessageName[ orGoal, "usage", lang] = "Handle a disjunction in the goal";
+MessageName[ orGoal, "usage", lang] = "Prove disjunction";
 MessageName[ orKB, "usage", lang] = "Case distinction based on a disjunction in the knowledge base";
 MessageName[ implGoalDirect, "usage", lang] = "Prove implication directly";
 MessageName[ implGoalCP, "usage", lang] = "Prove implication using contraposition";
 MessageName[ equivGoal, "usage", lang] = "Prove equivalence by double implication";
 MessageName[ contradiction, "usage", lang] = "Prove by contradiction";
 MessageName[ forallGoal, "usage", lang] = "Prove universally quantified goal";
-MessageName[ forallKB, "usage", lang] = "Instantiate universally quantified formula";
-MessageName[ forallKBInteractive, "usage", lang] = "Interactively instantiate universally quantified formula";
-MessageName[ instantiate, "usage", lang] = "Instantiate universally quantified formula";
+MessageName[ forallKB, "usage", lang] = "Instantiate new universally quantified knowledge";
+MessageName[ forallKBInteractive, "usage", lang] = "Interactively instantiate universally quantified knowledge";
+MessageName[ instantiate, "usage", lang] = "Instantiate universally quantified knowledge with new constants";
 MessageName[ existsGoal, "usage", lang] = "Prove existentially quantified goal by introducing meta variables";
 MessageName[ existsGoalInteractive, "usage", lang] = "Prove existentially quantified goal by interactive instantiation";
-MessageName[ existsKB, "usage", lang] = "Instantiate existentially quantified formula";
+MessageName[ existsKB, "usage", lang] = "Skolemize existentially quantified knowledge";
 MessageName[ multipleGoalRewriting, "usage", lang] = "Goal can be rewritten in several ways";
 MessageName[ goalRewriting, "usage", lang] = "Goal rewriting based on (quantified) implications and equivalences in the knowledge base";
 MessageName[ knowledgeRewriting, "usage", lang] = "Knowledge rewriting based on (quantified) implications and equivalences in the knowledge base";
@@ -34,7 +36,6 @@ MessageName[ elementarySubstitution, "usage", lang] = "Elementary substitution b
 MessageName[ expandDef, "usage", lang] = "Expand explicit definitions";
 MessageName[ implicitDef, "usage", lang] = "Handle implicit function definitions";
 MessageName[ eqGoal, "usage", lang] = "Prove equalities";
-MessageName[ instantiate, "usage", lang] = "Instantiate using constants available in the proof";
 
 ] (* With *)
 
@@ -54,6 +55,14 @@ translate[ "Termination Rules", lang] = "Rules for Proof Termination";
 
 proofStepText[ contradictionKB, lang, {{k_, c_}}, {}, pVal_] := {textCell[ "The proof is finished, because ", formulaReference[ k], 
 	" contradicts ", formulaReference[ c], "."]
+    };
+
+proofStepText[ contradictionUniv1, lang, {{u_, c_}}, {}, ___, "instantiation" -> inst_List, ___, pVal_] := {textCell[ "The proof is finished, because instantiating ", formulaReference[ u], 
+	" by ", inlineTheoremaExpressionSeq[ inst, lang], " contradicts ", formulaReference[ c], "."]
+    };
+
+proofStepText[ contradictionUniv2, lang, {{u_, c_}}, {}, ___, "instantiation" -> inst_List, ___, pVal_] := {textCell[ "The proof is finished, because instantiating ", formulaReference[ u], 
+	" and ", formulaReference[ c], " by ", inlineTheoremaExpressionSeq[ inst, lang], " gives a contradiction."]
     };
 
 proofStepText[ falseInKB, lang, {{k_}}, {}, pVal_] := {textCell[ "The proof is finished, because ", formulaReference[ k], 

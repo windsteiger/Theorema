@@ -98,44 +98,61 @@ levelSaturation[ ps:PRFSIT$[ _, k_, _, rest___?OptionQ], sat1rules_List, sat2rul
 				{i, j+1, l}], 
 			{j, Length[ posNew]}];
 		newForms = Extract[ k, posNew];
-		Block[{$TMAcheckSuccess = False},
+		(* We do not check success and generate rewrite rules when applying the individual rules.
+			This will happen below when we use joinKB and toBeProved anyway. *)
+		Block[{$TMAcheckSuccess = False, $autoGenerateRules = False},
 			newFrom1 = Map[ applyAllRules[ #, sat1rules]&, Map[ dummyGoalPS[ #, rest]&, newForms]];
-		];
-		newFrom1 = Map[ extractGenerated, newFrom1];
-		newPairs = Map[ Extract[ k, #]&, pairs];
-		Block[{$TMAcheckSuccess = False},
+			newPairs = Map[ Extract[ k, #]&, pairs];
 			newFrom2 = Map[ applyAllRules[ #, sat2rules]&, Map[ dummyGoalPS[ #, rest]&, newPairs]];
 		];
-		newFrom2 = Map[ extractGenerated, newFrom2];
-		Do[
-			nextGen = newFrom1[[j]];
-			If[ nextGen =!= {},
-				AppendTo[ usd, {newForms[[j]]}];
-				AppendTo[ gen, nextGen];
-				psKB = joinKB[ nextGen, psKB]
-			],
-			{j, Length[ newFrom1]}
-		];
-		Do[
-			nextGen = newFrom2[[j]];
-			If[ nextGen =!= {},
-				AppendTo[ usd, newPairs[[j]]];
-				AppendTo[ gen, nextGen];
-				psKB = joinKB[ nextGen, psKB]
-			],
-			{j, Length[ newFrom2]}
-		];
-		If[ gen === {},
-			makePRFSIT[ goal -> goal@ps, kb -> psKB, id -> id@ps, "lastSat" -> Map[ key, k], rest],
-			(* else *)
-			makeANDNODE[ makePRFINFO[ name -> levelSat, used -> usd, generated -> gen], 
-                toBeProved[ goal -> goal@ps, kb -> psKB, "lastSat" -> Map[ key, k], rest]]
+		Block[ {$rewriteRules = {}},
+		(* Go through the new proof sits generated from one formula and extract the necessary info *)
+			Do[
+				nextGen = extractGenerated[ newFrom1[[j]]];
+				If[ nextGen =!= {},
+					(* if some new forms have been generated: we keep track *)
+					(* which forms were used ... *)
+					AppendTo[ usd, {newForms[[j]]}];
+					(* which forms were generated ... *)
+					AppendTo[ gen, nextGen];
+					(* and join the new forms to the kb *)
+					psKB = joinKB[ nextGen, psKB]
+				],
+				{j, Length[ newFrom1]}
+			];
+		(* Go through the new proof sits generated from two formulas and extract the necessary info *)
+			Do[
+				nextGen = extractGenerated[ newFrom2[[j]]];
+				If[ nextGen =!= {},
+					(* if some new forms have been generated: we keep track *)
+					(* which forms were used ... *)
+					AppendTo[ usd, newPairs[[j]]];
+					(* which forms were generated ... *)
+					AppendTo[ gen, nextGen];
+					(* and join the new forms to the kb *)
+					psKB = joinKB[ nextGen, psKB]
+				],
+				{j, Length[ newFrom2]}
+			];
+			If[ gen === {},
+				(* In this case, 'rest' already has the right rewrite rules. No new ones need to be joined *)
+				makePRFSIT[ goal -> goal@ps, kb -> psKB, id -> id@ps, "lastSat" -> Map[ key, k], rest],
+				(* else: In this case we must join the rules collected above to the ones that were aleady there *)
+				makeANDNODE[ makePRFINFO[ name -> levelSat, used -> usd, generated -> gen], 
+                	toBeProved[ goal -> goal@ps, kb -> psKB, "lastSat" -> Map[ key, k], rest]]
+			]
 		]
 	]
 levelSaturation[ args___] := unexpected[ levelSaturation, {args}]
 
-dummyGoalPS[ f_FML$, rest___] := makePRFSIT[ kb -> {f}, id -> "dummy", rest]
-dummyGoalPS[ pair:{_FML$, _FML$}, rest___] := makePRFSIT[ kb -> pair, id -> "dummy", rest]
+(* In level sat above, dummyGoalPS is called inside a Block[{$autoGenerateRules = False},...] anyway. We put the block here as well in case
+	we want to use the function somewhere else in future. *)
+dummyGoalPS[ f_FML$, rest___] := Block[ {$autoGenerateRules = False},
+	makePRFSIT[ kb -> {f}, id -> "dummy", rest]
+]
+dummyGoalPS[ pair:{_FML$, _FML$}, rest___] := Block[ {$autoGenerateRules = False},
+	makePRFSIT[ kb -> pair, id -> "dummy", rest]
+]
 dummyGoalPS[ args___] := unexpected[ dummyGoalPS, {args}]
 
 extractGenerated[ nodes_List] := Union[ Flatten[ Map[ generated, nodes]], SameTest -> (formula[#1] === formula[#2]&)]

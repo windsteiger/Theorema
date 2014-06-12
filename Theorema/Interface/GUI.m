@@ -158,6 +158,7 @@ initGUI[] :=
         $tcAllDeclOpener = True;
 		$kbStruct = {};
 		$ruleFilterKW = "";
+		$kbFilterKW = "";
 		$initLabel = "???";
 		$labelSeparator = ",";
 		$cellTagKeySeparator = ":";
@@ -238,15 +239,15 @@ openTheoremaCommander[ ] /; $Notebooks :=
         		{
         			(* session *){sessionCompose[], sessionInspect[], sessionArchive[]},
         			(* prove *)  {Dynamic[ Refresh[ displaySelectedGoal[], UpdateInterval -> 2]],
-        				Dynamic[ Refresh[ displayKBBrowser["prove"], TrackedSymbols :> {$kbStruct}]],
+        				Dynamic[ Refresh[ displayKBBrowser["prove"], TrackedSymbols :> {$kbFilterKW, $tcKBBrowseSelection, $kbStruct, kbSelectProve}]],
         				Dynamic[ Refresh[ displayBuiltinBrowser["prove"], TrackedSymbols :> {buiActProve}]],
         				Dynamic[ Refresh[ selectProver[], TrackedSymbols :> {$selectedRuleSet, $selectedStrategy, $ruleFilterKW}]],
         				Dynamic[ Refresh[ submitProveTask[ ], TrackedSymbols :> {$selectedProofGoal, $selectedProofKB, $selectedSearchDepth, $selectedSearchTime}]],
         				Dynamic[ Refresh[ proofNavigation[ $TMAproofTree], TrackedSymbols :> {$TMAproofTree, $TMAproofSearchRunning, $TMAproofNotebook, ruleTextActive, $proofTreeScale, $selectedProofStep}]]},
         			(* compute *){compSetup[],
-        				Dynamic[ Refresh[ displayKBBrowser["compute"], TrackedSymbols :> {$kbStruct}]],
+        				Dynamic[ Refresh[ displayKBBrowser["compute"], TrackedSymbols :> {$kbFilterKW, $tcKBBrowseSelection, $kbStruct}]],
         				Dynamic[ Refresh[ displayBuiltinBrowser["compute"], TrackedSymbols :> {buiActComputation}]]},
-        			(* solve *)  {Dynamic[Refresh[displayKBBrowser["solve"], TrackedSymbols :> {$kbStruct}]],
+        			(* solve *)  {Dynamic[Refresh[displayKBBrowser["solve"], TrackedSymbols :> {$kbFilterKW, $tcKBBrowseSelection, $kbStruct}]],
         				Dynamic[ Refresh[ displayBuiltinBrowser["solve"], TrackedSymbols :> {buiActSolve}]]},
         			(* prefs *)  {setPreferences[ ]}
         		}
@@ -483,7 +484,6 @@ $symBlockMap = {
 (* displaySelectedGoal *)
 
 
-   
 displaySelectedGoal[ ] :=
     Module[ { sel, goal},
     	$proofInitNotebook = InputNotebook[];
@@ -493,7 +493,7 @@ displaySelectedGoal[ ] :=
             translate["noGoal"],
             With[ {selGoal = goal[[1]]},
             	Column[ {
-            		Button[ translate[ "OKnext"], $selectedProofGoal = selGoal; $tcActionView++],
+            		Button[ translate[ "OKnext"], $selectedProofGoal = selGoal; $tcActionView++;],
             		Grid[ {displayLabeledFormula[ selGoal]}]
             		}]
             ]
@@ -520,12 +520,11 @@ displayLabeledFormula[ FML$[ key_, form_, lab_, ___]] :=
 	]
 displayLabeledFormula[ args___] := unexpected[ displayLabeledFormula, {args}]
 
-displaySelectedKB[ ] :=
+displaySelectedKB[ kb_List] :=
 	Module[ {},
-    	$selectedProofKB = Select[ $tmaEnv, kbSelectProve[#[[1]]]&];
-        If[ $selectedProofKB === {},
+        If[ kb === {},
             translate["noKB"],
-            displayLabeledFormulaListGrid[ $selectedProofKB]
+            displayLabeledFormulaListGrid[ kb]
         ]
     ]
 displaySelectedKB[ args___] := unexpected[ displaySelectedKB, {args}]
@@ -689,13 +688,13 @@ Clear[ structView];
    parameter 'task' decides whether the view is generated for the prove tab or the compute tab *)
    
 (* group with header and content *)   
-structView[ file_, {head:Cell[ sec_, style:"Title"|"Section"|"Subsection"|"Subsubsection"|"Subsubsubsection"|"EnvironmentHeader", opts___], rest___}, tags_, task_] :=
+structView[ file_, {head:Cell[ sec_, style:"Title"|"Section"|"Subsection"|"Subsubsection"|"Subsubsubsection"|"EnvironmentHeader", opts___], rest___}, tags_, headers_List, task_] :=
     Module[ {content, views, compTags, structControl},
     	(* process content componentwise
     	   during recursion, we collect all cell tags from cells contained in that group 
     	   Transpose -> pos 1 contains the list of subviews
     	   pos 2 contains the list of tags in subgroups *)
-    	content = DeleteCases[ Map[ structView[ file, #, tags, task] &, {rest}], {}];
+    	content = DeleteCases[ Map[ structView[ file, #, tags, Append[ headers, sec], task] &, {rest}], {}];
     	If[ content === {},
     		(* If content is empty then ignore entire unit *)
     		{},
@@ -716,13 +715,13 @@ structView[ file_, {head:Cell[ sec_, style:"Title"|"Section"|"Subsection"|"Subsu
     ]
     
 (* list processed componentwise *) 
-structView[ file_, item_List, tags_, task_] :=
+structView[ file_, item_List, tags_, headers_List, task_] :=
     Module[ {content, views, compTags},
      	(* process content componentwise
     	   during recursion, we collect all cell tags from cells contained in that group 
     	   Transpose -> pos 1 contains the list of subviews
     	   pos 2 contains the list of tags in subgroups *)
-    	content = DeleteCases[ Map[ structView[ file, #, tags, task] &, item], {}];
+    	content = DeleteCases[ Map[ structView[ file, #, tags, headers, task] &, item], {}];
     	If[ content === {},
     		{},
     		(* else *)
@@ -734,9 +733,13 @@ structView[ file_, item_List, tags_, task_] :=
     ]
 
 (* input cell with cell tags *)
-structView[ file_, Cell[ content_, "FormalTextInputFormula", a___, CellTags -> cellTags_, b___], tags_, task_] :=
+structView[ file_, Cell[ content_, "FormalTextInputFormula", a___, CellTags -> cellTags_, b___], tags_, headers_List, task_] :=
     Module[ { isEval, formPos, cleanCellTags, keyTags, formulaLabel, idLabel, nbAvail},
         cleanCellTags = getCleanCellTags[ cellTags];
+        (* If keyword does not match, return {} -> ignore *)
+        If[ StringLength[ $kbFilterKW] > 2 && testNoMatch[ Apply[ StringJoin, Riffle[ Join[ headers, cleanCellTags], ":"]], "*" <> $kbFilterKW <> "*"],
+        	Return[ {}]
+        ];
         (* keyTags are those cell tags that are used to uniquely identify the formula in the KB *)
         keyTags = getKeyTags[ cellTags];
         (* check whether cell has been evaluated -> formula is in KB? *)
@@ -796,7 +799,7 @@ structView[ file_, Cell[ content_, "FormalTextInputFormula", a___, CellTags -> c
     ]
 
 (* input cell without cell tags -> ignore *)
-structView[ file_, Cell[ content_, "FormalTextInputFormula", ___], tags_, task_] := {}
+structView[ file_, Cell[ content_, "FormalTextInputFormula", ___], tags_, headers_List, task_] := {}
 
 structView[ args___] :=
     unexpected[ structView, {args}]
@@ -845,7 +848,7 @@ textDataToString[ args___] := unexpected[ textDataToString, {args}]
    filename is the full filename of the notebook and
    struct is the nested cell structure containing the cells at those positions obtained by extractKBStruct *)
 updateKBBrowser[] :=
-    Module[ {file=CurrentValue["NotebookFullFileName"], pos, new},
+    Module[ {file = CurrentValue[ "NotebookFullFileName"], pos, new},
         pos = Position[ $kbStruct, file -> _];
         (* We don't extract the entire cells, we throw away all options except CellTags and CellID in order to not blow up $kbStruct too much *)
         new = file -> With[ {nb = NotebookGet[EvaluationNotebook[]]},
@@ -856,7 +859,9 @@ updateKBBrowser[] :=
         If[ pos === {},
             AppendTo[ $kbStruct, new],
             $kbStruct[[pos[[1,1]]]] = new
-        ]
+        ];
+        (* set $tcKBBrowseSelection such that the tab corresponding ot this notebook will be displayed in the knowledge browser *)
+        Scan[ ($tcKBBrowseSelection[ #] = file)&, {"prove", "compute", "solve"}]
     ]
 updateKBBrowser[args___] :=
     unexpected[updateKBBrowser, {args}]
@@ -868,22 +873,52 @@ updateKBBrowser[args___] :=
 
    
 displayKBBrowser[ task_String] :=
-    Module[ {},
-        If[ $kbStruct === {},
-            emptyPane[translate["noKnowl"]],
+    Module[ {cells, view, allNB},
+        If[ $kbStruct === {} || !ValueQ[ $tcKBBrowseSelection[ task]],
+            emptyPane[ translate[ "noKnowl"]],
             (* generate tabs for each notebook,
                tab label contains a short form of the filename, tab contains a Pane containing the structured view *)
-            Dynamic[
+            allNB = Map[ First, $kbStruct];
+            cells = Replace[ $tcKBBrowseSelection[ task], $kbStruct];
+            Assert[ ListQ[ cells]];
+            view = structView[ $tcKBBrowseSelection[ task], cells, {}, {}, task];
+            If[ view === {},
+            	view = translate[ "noKnowl"],
+            	(* else *)
+            	view = view[[1]]
+            ];
+            If[ task === "prove",
+                $selectedProofKB = Select[ $tmaEnv, kbSelectProve[#[[1]]]&];
+            ];
             Column[{
             	Button[ translate[ "OKnext"], $tcActionView++],
-                Row[ Map[ Button[ Tooltip[ FileBaseName[ #], #], $tcKBBrowseSelection[ task] = #, 
-					Background -> If[ $tcKBBrowseSelection[ task] === #, TMAcolor[0], TMAcolor[5]], FrameMargins -> 2, ImageMargins -> 0]&, Map[ First, $kbStruct]]],
-				PaneSelector[ Map[ #[[1]] -> 
-                     		Pane[ structView[ #[[1]], #[[2]], {}, task][[1]], ImageSizeAction -> "Scrollable", Scrollbars -> Automatic] &, 
-                   			$kbStruct], Dynamic[ $tcKBBrowseSelection[ task]], ImageSize -> {350, Automatic}],
+            	Row[{
+            		With[ {label = Row[ {translate[ "FilteredBy"], InputField[ $kbFilterKW, String]}]},
+						Button[ label,
+							CreateDialog[{
+								Row[ {translate[ "Keyword"], InputField[ Dynamic[ $kbFilterKW], String, ContinuousAction -> True]}],
+								DefaultButton[ DialogReturn[]]},
+								WindowTitle-> translate[ "FilterKBWindow"]
+							],
+							Appearance -> "Frameless"
+						]
+					], 
+					Button[ translate[ "ShowAll"], $kbFilterKW = ""]}, 
+					Spacer[2]
+				],
+				If[ Apply[ Plus, Map[ StringLength[ FileBaseName[ #]]&, allNB]] > 50,
+					(* button labels sum up to more than 50 chars long -> buttons become too wide -> provide a menu *)
+					PopupMenu[ Dynamic[ $tcKBBrowseSelection[ task]], Map[ First[#] -> Tooltip[ FileBaseName[ First[#]], First[#]]&, $kbStruct]],
+					(* else: select with buttons ala TabView *)
+					Row[ Map[ Button[ Tooltip[ FileBaseName[ #], #], $tcKBBrowseSelection[ task] = #, 
+						Background -> If[ $tcKBBrowseSelection[ task] === #, TMAcolor[0], TMAcolor[5]], 
+						FrameMargins -> 2, ImageMargins -> 0, ImageSize -> Automatic]&, Map[ First, $kbStruct]]]
+				],
+				Pane[ view, ImageSize -> {350, Automatic}]
+				(*PaneSelector[ Map[ #[[1]] -> structView[ #[[1]], #[[2]], {}, {}, task][[1]]&, 
+                   			$kbStruct], Dynamic[ $tcKBBrowseSelection[ task]], ImageSize -> {350, Automatic}]*),
                 Button[ translate[ "OKnext"], $tcActionView++]
             }]
-            ]
         ]
     ]
 displayKBBrowser[args___] :=
@@ -892,7 +927,7 @@ displayKBBrowser[args___] :=
 (*
 TabView[
                   		Map[Tooltip[Style[FileBaseName[#[[1]]], "NotebookName"], #[[1]]] -> 
-                     		Pane[structView[#[[1]], #[[2]], {}, task][[1]], ImageSizeAction -> "Scrollable", Scrollbars -> Automatic] &, 
+                     		Pane[structView[#[[1]], #[[2]], {}, {}, task][[1]], ImageSizeAction -> "Scrollable", Scrollbars -> Automatic] &, 
                    			$kbStruct], 
                   		Appearance -> {"Limited", 10}, FrameMargins->None]
                   		*)
@@ -1034,7 +1069,7 @@ Clear[displaySelectedRules];
 
 structViewRules[ {category_String},___] := Sequence[];
 
-(*Responsible for groupe name of rules *)
+(*Responsible for group name of rules *)
 structViewRules[ {category_String, r__}, tags_, open_:False] :=
     Module[ {sub, compTags, structControl},
 		sub = Map[ structViewRules[ #, tags] &, {r}];
@@ -1064,8 +1099,8 @@ structViewRules[ Hold[ rs_]] :=
 		]
 	]
 
-testNoMatch[s_String,p_String]:=Not[StringMatchQ[ s,p]]
-testNoMatch[s_,p_]:=True
+testNoMatch[ s_String, p_String] := Not[ StringMatchQ[ s, p, IgnoreCase -> True]]
+testNoMatch[ s_, p_] := True
 
 displaySelectedRules[ Hold[ rs_]] := 
 	Module[ {actRules},
@@ -1229,12 +1264,44 @@ selectProver[ ] :=
     		{Checkbox[ Dynamic[ allTrue[ {existsGoalInteractive, forallKBInteractive}, ruleActive], setAll[ {existsGoalInteractive, forallKBInteractive}, ruleActive, #] &]], translate[ "interactiveInstantiate"]}
     		}, Alignment -> {Left}], 
     		translate[ "pInteractive"], {{Top, Left}}],
-    	Labeled[ RadioButtonBar[ 
-    		Dynamic[ $proofCellStatus], {Automatic -> translate[ "auto"], Open -> translate[ "open"], Closed -> translate[ "closed"]}], 
-    		translate[ "proofCellStatus"], {{Top, Left}}],
+    	Module[ {po},
+    		po = {Labeled[ RadioButtonBar[ 
+    				Dynamic[ $proofCellStatus], {Automatic -> translate[ "auto"], Open -> translate[ "open"], Closed -> translate[ "closed"]}], 
+    				translate[ "proofCellStatus"], Left]};
+    		$numExistProofs = findNumExistingProofs[ $proofInitNotebook, $selectedProofGoal];
+    		$replExistProof = $numExistProofs + 1;
+    		If[ $numExistProofs > 0,
+    			PrependTo[ po,
+    				Labeled[ PopupMenu[ Dynamic[ $replExistProof], Prepend[ Table[ i -> "#"<>ToString[i], {i, $numExistProofs}], $numExistProofs+1 -> translate[ "None"]],
+    					BaselinePosition -> Baseline, ImageSize -> {50, 20}], 
+    				translate[ "replaceExistProof"], Left]
+    			]
+    		];
+    		Labeled[ Row[ {Spacer[20], Column[ po]}], translate[ "proofOutput"], {{Top, Left}}]
+    	],
     	Button[ translate[ "OKnext"], $tcActionView++]	
     	}]
 selectProver[ args___] := unexpected[ selectRuleSet, {args}]
+
+findNumExistingProofs[ nb_NotebookObject, goal_FML$] :=
+	Module[{sel},
+		(* Find all cells with the proofIdTag *)
+		sel = NotebookFind[ $proofInitNotebook, makeProofIDTag[ goal], All, CellTags];
+		If[ sel === $Failed,
+			(* if none occur -> 0 *)
+			0,
+			sel = NotebookRead[ $proofInitNotebook];
+			(* read selection *)
+			If[ ListQ[ sel],
+				(* multiple cells selected -> number of cells = number of proofs *)
+				Length[ sel],
+				(* single cell -> 1*)
+				1
+			]
+		]
+	]
+findNumExistingProofs[ nb_, g_] := 0
+findNumExistingProofs[ args___] := unexpected[ findNumExistingProofs, {args}]
 
 submitProveTask[ ] := 
 	Module[ {},
@@ -1249,11 +1316,11 @@ submitProveTask[ ] :=
 						Infinity,
 						$selectedSearchTime
 					],
-					{$eliminateBranches, $eliminateSteps, $eliminateFormulae}], 
+					{$eliminateBranches, $eliminateSteps, $eliminateFormulae}, $replExistProof], 
 				Method -> "Queued", Active -> ($selectedProofGoal =!= {})],
 			Column[{
 				Labeled[ displaySelectedGoal[ $selectedProofGoal], translate["selGoal"], {{Top, Left}}],
-				Labeled[ displaySelectedKB[], translate["selKB"], {{Top, Left}}],
+				Labeled[ displaySelectedKB[ $selectedProofKB], translate["selKB"], {{Top, Left}}],
 				Labeled[ summarizeBuiltins[ "prove"], translate["selBui"], {{Top, Left}}]
 			}],
 			
@@ -1268,21 +1335,24 @@ submitProveTask[ ] :=
     					If[ TrueQ[ $eliminateSteps], translate[ "elimSteps"], Sequence[]],
     					If[ TrueQ[ $eliminateFormulae], translate[ "elimForm"], Sequence[]]
     				}],
-    				translate[ "pSimp"]<>":", Left],
+    				translate[ "pSimp"]<>":", {{Left, Top}}],
 				Labeled[
 					Column[{
     					If[ TrueQ[ $interactiveProofSitSel], translate[ "interactiveProofSitSel"], Sequence[]],
     					If[ TrueQ[ $interactiveNewProofSitFilter], translate[ "interactiveNewProofSitFilter"], Sequence[]],
     					If[ TrueQ[ Map[ ruleActive, And[ existsGoalInteractive, forallKBInteractive]]], translate[ "interactiveInstantiate"], Sequence[]]
     				}],
-    				translate[ "pInteractive"]<>":", Left],
+    				translate[ "pInteractive"]<>":", {{Left, Top}}],
 				Labeled[ 
-					Switch[ $proofCellStatus,
-						Automatic, translate[ "auto"],
-						Open, translate[ "open"],
-						Closed, translate[ "closed"]
-					],
-    			translate[ "proofCellStatus"]<>":", Left]
+					Column[{
+						translate[ "replaceExistProof"] <> ": " <> If[ $replExistProof > $numExistProofs, translate[ "None"], ToString[ $replExistProof]],
+						translate[ "proofCellStatus"] <> ": " <>
+							Switch[ $proofCellStatus,
+								Automatic, translate[ "auto"],
+								Open, translate[ "open"],
+								Closed, translate[ "closed"]
+							]}],
+    				translate[ "proofOutput"]<>":", {{Left, Top}}]
 			}]			
 			,
 			(* Method -> "Queued" so that no time limit is set for proof to complete *)
@@ -1296,17 +1366,20 @@ submitProveTask[ ] :=
 						Infinity,
 						$selectedSearchTime
 					],
-					{$eliminateBranches, $eliminateSteps, $eliminateFormulae}], 
+					{$eliminateBranches, $eliminateSteps, $eliminateFormulae}, $replExistProof], 
 				Method -> "Queued", Active -> ($selectedProofGoal =!= {})]
 		}]
 	]
 submitProveTask[ args___] := unexpected[ submitProveTask, {args}]
 
-execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, strategy_, searchDepth_, searchTime_, simplification_List] :=
+execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, strategy_, searchDepth_, searchTime_, simplification_List, repl_Integer] :=
 	Module[{po, pv, pt, st},
 		{pv, po, pt} = callProver[ rules, strategy, goal, kb, searchDepth, searchTime];
+		(* At this point po is equal to the global $TMAproofObject and $TMAproofTree is the corresponding tree *)
 		{po, st} = simplifyProof[ po, simplification];
-		printProveInfo[ pv, pt, st];
+		(* po is the simplified proof object and $TMAproofTree is the corresponding simplified tree, but $TMAproofObject is still the unsimplified object *)
+		$TMAproofObject = po;
+		printProveInfo[ Map[ {key[#], label[#]}&, kb], pv, pt, st, repl];
 	]
 execProveCall[ args___] := unexpected[ execProveCall, {args}]
 
@@ -1343,23 +1416,7 @@ proofNavigation[ args___] := unexpected[ proofNavigation, {args}]
 
 (* this function is called during a computation (see processComputation[])
    effect: print a cell containg information about the environment settings for that computation *)
-(*printComputationInfo[] :=
-    Module[ {kbAct, bui, buiAct},
-        kbAct = Cases[ $tmaEnv, FML$[ k_, _, l_, ___] /; kbSelectCompute[k] -> l];
-        bui = Cases[ DownValues[ buiActComputation],
-        	HoldPattern[ Verbatim[HoldPattern][ buiActComputation[ op_String]] :> v_] -> {op, v}];
-        buiAct = Cases[ bui, { op_, True} -> op];
-        CellPrint[ Cell[ ToBoxes[ OpenerView[ {"", 
-            Column[ {OpenerView[ {Style[ translate[ "KBcomp"], "CIContent"], Style[ kbAct, "CIContent"]}],
-                OpenerView[ {Style[ translate[ "BuiComp"], "CIContent"], Style[ buiAct, "CIContent"]}],
-                With[ {kb = Cases[ DownValues[ kbSelectCompute],
-                	HoldPattern[ Verbatim[HoldPattern][ kbSelectCompute[ k_List]] :> v_] -> {k, v}],
-                    allBui = bui},
-                    Button[ translate["RestoreEnv"], setCompEnv[ kb, allBui], ImageSize -> Automatic]
-                ]}
-            ]}, False]], "ComputationInfo"]];
-    ]
-*)    
+  
 printComputationInfo[ cellID_Integer] := 
 	Module[ {nbDir, file},
 		nbDir = createPerNotebookDirectory[ CurrentValue[ "NotebookFullFileName"]];
@@ -1369,8 +1426,10 @@ printComputationInfo[ cellID_Integer] :=
 		file = FileNameJoin[ {nbDir, "c" <> ToString[ cellID]}];
 		saveComputationCacheDisplay[ cellID, file];
 		With[ {fn = file <> "-display.m"},
-			CellPrint[ Cell[ "", "ComputationInfo"]];
-			CellPrint[ Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ Get[ fn], None]]]], "ComputationInfoBody"]]
+			CellPrint[ Cell[ "", "ComputationInfo",
+				CellFrameLabels -> {{None, Cell[ BoxData[ ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeGroup[ ButtonNotebook[], file]]]]},
+					 {None, None}}]];
+			CellPrint[ Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ Get[ fn] /. FORM -> displayFormulaFromKey, TrackedSymbols :> {$tmaEnv}]]]], "ComputationInfoBody"]]
 		];
 	]
 printComputationInfo[args___] := unexcpected[ printComputationInfo, {args}]
@@ -1382,30 +1441,12 @@ setCompEnv[ file_String] :=
 	]
 setCompEnv[ args___] := unexpected[ setCompEnv, {args}]
 
-(*
-displayComputationCache[ cellID_Integer, dir_String, tab_Integer] :=
-	Block[ {kbSelectCompute, buiActComputation},
-		Get[ "c" <> ToString[ cellID] <> "`", Path -> {dir}];
-		Switch[ tab,
-			1, (* display kb *)
-			Map[ displayFormulaFromKey, Cases[ DownValues[ kbSelectCompute],
-        		HoldPattern[ Verbatim[HoldPattern][ kbSelectCompute[ k_List]] :> True] -> k]],
-			2, (* display builtin *)
-			summarizeBuiltins[ "compute"],
-			_, (* undefined *)
-			"???"
-		]
-	]
-displayComputationCache[ cellID_Integer, dir_String, tab_] := displayComputationCache[ cellID, dir, 1]
-displayComputationCache[ args___] := unexpected[ displayComputationCache, {args}]
-*)
 saveComputationCacheDisplay[ cellID_Integer, file_String] :=
-	With[ {fn = file <> ".m"},
+	With[ {fn = file <> ".m", kbKeysLabels = Map[ {key[#], label[#]}&, Select[ $tmaEnv, kbSelectCompute[ key[ #]]&]]},
 		Put[ Definition[ buiActComputation], Definition[ kbSelectCompute], fn];
 		Put[ 
 			TabView[ {
-				translate["tcComputeTabKBTabLabel"] -> Map[ displayFormulaFromKey, Cases[ DownValues[ kbSelectCompute],
-        			HoldPattern[ Verbatim[HoldPattern][ kbSelectCompute[ k_List]] :> True] -> k]],
+				translate["tcComputeTabKBTabLabel"] -> Pane[ Row[ Map[ FORM, kbKeysLabels], ", "], 500],
         		translate["tcComputeTabBuiltinTabLabel"] -> summarizeBuiltins[ "compute"],
         		translate["RestoreEnv"] -> Row[ {translate["RestoreEnvLong"], Button[ translate[ "OK"], setCompEnv[ fn]]}, Spacer[5]]
 				},
@@ -1416,20 +1457,23 @@ saveComputationCacheDisplay[ cellID_Integer, file_String] :=
 	
 saveComputationCacheDisplay[ args___] := unexpected[ saveComputationCacheDisplay, {args}]
 
-displayFormulaFromKey[ k_List] :=
+displayFormulaFromKey[ {k_List, l_String}] :=
 	Module[ {form},
 		form = Select[ $tmaEnv, key[ #] === k&];
 		If[ form === {},
-			Button[ "???", evalFormulaFromKey[ k], Appearance -> None],
+			Button[ Tooltip[ Style[ "?" <> l <> "?", "TabView"], translate[ "notEval"]], evalFormulaFromKey[ k], Appearance -> None],
 			form = form[[1]];
-			Tooltip[ label@form, theoremaDisplay[ formula@form]]
+			Tooltip[ l, theoremaDisplay[ formula@form]]
 		]
 	]
 displayFormulaFromKey[ args___] := unexpected[ displayFormulaFromKey, {args}]
 
 evalFormulaFromKey[ k_List] :=
-	With[ { file = Part[ StringSplit[ k[[2]], ":"], 2]},
-        NotebookLocate[ {file, k[[1]]}];
+	Module[ { file = Part[ StringSplit[ k[[2]], ":"], 2], nb},
+		nb = NotebookOpen[ file];
+		NotebookFind[ nb, "GlobalDeclaration", All, CellStyle];
+		FrontEndTokenExecute[ "EvaluateCells"];
+        NotebookFind[ nb, k[[1]], All, CellTags];
         FrontEndTokenExecute[ "EvaluateCells"];
        ]
 evalFormulaFromKey[ args___] := unexpected[ evalFormulaFromKey, {args}]
@@ -1437,96 +1481,54 @@ evalFormulaFromKey[ args___] := unexpected[ evalFormulaFromKey, {args}]
 (* ::Subsubsection:: *)
 (* printProofInfo *)
 
-(*
-printProveInfo[ goal_, kb_, rules_, strategy_, {pVal_, proofObj_}, {pTime_, sTime_}, searchDepth_] :=
-    Module[ {kbAct, bui, buiAct},
-    	(* pTime (prove time) and sTime (simplification time) currently unused, should be displayed somewhere *)
-        kbAct = Map[ makeLabel[ label[#]]&, kb];
-        bui = Cases[ DownValues[ buiActProve],
-        	HoldPattern[ Verbatim[HoldPattern][ buiActProve[ op_String]] :> v_] -> {op, v}];
-        buiAct = Cases[ bui, { op_, True} -> op];
-        If[ NotebookFind[ $proofInitNotebook, makeProofIDTag[ goal], All, CellTags] === $Failed,
-			NotebookFind[ $proofInitNotebook, goal[[1,1]], All, CellTags];
-			NotebookFind[ $proofInitNotebook, "CloseEnvironment", Next, CellStyle];
-			SelectionMove[ $proofInitNotebook, After, CellGroup],
-			SelectionMove[ $proofInitNotebook, All, CellGroup]
-		];
-		SetSelectedNotebook[ $proofInitNotebook];
-        NotebookWrite[ $proofInitNotebook, Cell[ TextData[ {translate[ "Proof of"]<>" ", formulaReference[ goal], ": ", 
-        	Cell[ BoxData[ ToBoxes[ proofStatusIndicator[ pVal]]]]}],
-        	"OpenProof", CellTags -> makeProofIDTag[ goal]]];
-        (* Use Method -> "Queued" so that no time limit for proof display applies *)
-        NotebookWrite[ $proofInitNotebook, Cell[ BoxData[ ToBoxes[
-        	Button[ translate["ShowProof"], displayProof[ proofObj], ImageSize -> Automatic, Method -> "Queued"]]], "ProofDisplay"]];
-        NotebookWrite[ $proofInitNotebook, Cell[ ToBoxes[
-        	OpenerView[ {Spacer[10], 
-            Column[ {OpenerView[ {Style[ translate[ "GoalProve"], "PIContent"], Style[ makeLabel[ label@goal], "PIContent"]}],
-            	OpenerView[ {Style[ translate[ "KBprove"], "PIContent"], Style[ kbAct, "PIContent"]}],
-                OpenerView[ {Style[ translate[ "BuiProve"], "PIContent"], Style[ buiAct, "PIContent"]}],
-                OpenerView[ {Style[ translate[ "selProver"], "PIContent"], Style[ {rules, strategy}, "PIContent"]}],
-                With[ {allKB = Cases[ DownValues[ kbSelectProve],
-                	HoldPattern[ Verbatim[HoldPattern][ kbSelectProve[ k_List]] :> v_] -> {k, v}],
-                    allBui = bui, allRules = Cases[ DownValues[ ruleActive],
-                	HoldPattern[ Verbatim[HoldPattern][ ruleActive[ r_Symbol]] :> v_] -> {r, v}]},
-                    Button[ translate["RestoreEnv"], setProveEnv[ goal, allKB, allBui, rules, strategy, allRules, searchDepth], ImageSize -> Automatic]
-                ]}
-            ]}, False]], "ProofInfo"]];
-        NotebookWrite[ $proofInitNotebook, Cell[ "\[EmptySquare]", "CloseProof"]];
-    ]
-*)
-printProveInfo[ pVal_, pTime_, sTime_] := 
+
+printProveInfo[ kbKeysLabels_, pVal_, pTime_, sTime_, subsP_] := 
 	Module[ {nbDir, cellID = getCellIDFromKey[ key@$selectedProofGoal], file},
 		nbDir = createPerNotebookDirectory[ CurrentValue[ $proofInitNotebook, "NotebookFullFileName"]];
 		(* Generate cache only in plain .m format, since this allows sharing notebooks with users on different platforms.
 			Also, loading a .m-file allows dynamic objects to react to new settings, whereas loading a .mx-file has no effect on dynamics.
 			I assume the speed gain from using mx is neglectable *)
-		file = FileNameJoin[ {nbDir, "p" <> cellID}];
-		saveProveCacheDisplay[ pTime, sTime, file];
-        If[ NotebookFind[ $proofInitNotebook, makeProofIDTag[ $selectedProofGoal], All, CellTags] === $Failed,
-			NotebookFind[ $proofInitNotebook, id@$selectedProofGoal, All, CellTags];
-			NotebookFind[ $proofInitNotebook, "CloseEnvironment", Next, CellStyle];
-			SelectionMove[ $proofInitNotebook, After, CellGroup],
+		file = FileNameJoin[ {nbDir, "p" <> cellID <> "-" <> ToString[ subsP]}];
+		saveProveCacheDisplay[ kbKeysLabels, pTime, sTime, file];
+        If[ NotebookFind[ $proofInitNotebook, makeProofIDTag[ $selectedProofGoal] <> "-" <> ToString[ subsP], All, CellTags] === $Failed,
+        	(* no replacement of existing proof -> new proof *)
+        	If[ NotebookFind[ $proofInitNotebook, makeProofIDTag[ $selectedProofGoal] <> "-" <> ToString[ subsP-1], All, CellTags] === $Failed,
+        		(* there are no proofs for this goal -> put after env *)
+				NotebookFind[ $proofInitNotebook, id@$selectedProofGoal, All, CellTags];
+				NotebookFind[ $proofInitNotebook, "CloseEnvironment", Next, CellStyle];
+				SelectionMove[ $proofInitNotebook, After, CellGroup],
+				(* there are already proofs for this goal *)
+				SelectionMove[ $proofInitNotebook, All, CellGroup];
+				SelectionMove[ $proofInitNotebook, After, CellGroup]
+        	],
+        	(* replace existing -> select group to overwrite *)
 			SelectionMove[ $proofInitNotebook, All, CellGroup]
 		];
 		SetSelectedNotebook[ $proofInitNotebook];
 		With[ {fnpo = file <> "-po.m", fnd = file <> "-display.m"},
         	NotebookWrite[ $proofInitNotebook, Cell[ TextData[ {Cell[ BoxData[ ToBoxes[ proofStatusIndicator[ pVal]]]], " " <> translate[ "Proof of"] <> " ",
-        		formulaReference[ $selectedProofGoal], ":   ",
-				Cell[ BoxData[ ToBoxes[ Button[ translate["ShowProof"], displayProof[ Get[ fnpo]], ImageSize -> Automatic, Appearance -> None, Method -> "Queued"]]]]}],
+        		formulaReference[ $selectedProofGoal], " #" <> ToString[ $replExistProof] <> ":   ",
+				Cell[ BoxData[ ToBoxes[ Button[ Style[ translate["ShowProof"], FontVariations -> {"Underline" -> True}], 
+					displayProof[ fnpo], ImageSize -> Automatic, Appearance -> None, Method -> "Queued"]]]]}],
         		"ProofInfo",
-        		CellTags -> makeProofIDTag[ $selectedProofGoal],
-        		CellFrameLabels -> {{None, Cell[ BoxData[ ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeGroup[ ButtonNotebook[]]]]]}, {None, None}}]];
-			NotebookWrite[ $proofInitNotebook, Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ Get[ fnd], None]]]], "ProofInfoBody"]]
+        		CellTags -> With[ {pTag = makeProofIDTag[ $selectedProofGoal]}, {pTag, pTag <> "-" <> ToString[ subsP]}],
+        		CellFrameLabels -> {{None, Cell[ BoxData[ ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, 
+        			With[ {f = file}, ButtonFunction :> removeGroup[ ButtonNotebook[], f]]]]]}, {None, None}}]];
+			NotebookWrite[ $proofInitNotebook, Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ Get[ fnd] /. FORM -> displayFormulaFromKey, TrackedSymbols :> {$tmaEnv}]]]], "ProofInfoBody"]]
 		]
 	]
 
 printProveInfo[args___] := unexcpected[ printProveInfo, {args}]
 
-removeGroup[ nb_NotebookObject] :=
+removeGroup[ nb_NotebookObject, file_String] :=
 	Module[{},
+		DeleteFile[ FileNames[ file <> "*.m"]];
 		SelectionMove[ nb, All, ButtonCell];
 		SelectionMove[ nb, All, CellGroup];
 		NotebookDelete[ nb];
 	]
 removeGroup[][ args___] := unexpected[ removeGroup[], {args}]
 
-(*
-setProveEnv[ goal_, kb_List, bui_List, ruleSet_, strategy_, allRules_List, searchDepth_] :=
-	Module[{},
-		$selectedProofGoal = goal;
-		NotebookLocate[ goal[[1,1]]];
-		Clear[kbSelectProve];
-		kbSelectProve[_] := False;
-		Scan[(kbSelectProve[#[[1]]] = #[[2]])&, kb];
-		Clear[ruleActive];
-		ruleActive[_] := True;
-		Scan[(ruleActive[#[[1]]] = #[[2]])&, allRules];
-		Scan[(buiActProve[#[[1]]] = #[[2]])&, bui];
-		$selectedRuleSet = ruleSet;
-		$selectedStrategy = strategy;
-		$selectedSearchDepth = searchDepth;
-	]
-	*)
 setProveEnv[ file_String] :=
 	Module[ {},
 		Clear[ kbSelectProve, ruleActive];
@@ -1534,17 +1536,16 @@ setProveEnv[ file_String] :=
 	]
 setProveEnv[ args___] := unexpected[ setProveEnv, {args}]
 
-makeProofIDTag[ FML$[ id_, _, __]] := Apply[ StringJoin, Riffle[ Prepend[ id, "Proof"], "|"]]
+makeProofIDTag[ f_FML$] := "Proof|" <> id@f
 makeProofIDTag[ args___] := unexpected[ makeProofIDTag, {args}]
 
-saveProveCacheDisplay[ pTime_, sTime_, file_String] :=
+saveProveCacheDisplay[ kbKeysLabels_, pTime_, sTime_, file_String] :=
 	With[ {fn = file <> ".m"},
-		Put[ Definition[ $TMAproofTree], Definition[ $TMAproofObject], file <> "-po.m"];
+		Put[ $TMAproofObject, file <> "-po.m"];
 		Apply[ Put[ ##, fn]&, Map[ Definition, $allProveSettings]];
 		Put[ 
 			TabView[ {
-				translate["tcProveTabKBTabLabel"] -> Map[ displayFormulaFromKey, Cases[ DownValues[ kbSelectProve],
-        			HoldPattern[ Verbatim[HoldPattern][ kbSelectProve[ k_List]] :> True] -> k]],
+				translate["tcProveTabKBTabLabel"] -> Pane[ Row[ Map[ FORM, kbKeysLabels], ", "], 500],
         		translate["tcProveTabBuiltinTabLabel"] -> summarizeBuiltins[ "prove"],
         		translate["tcProveTabProverTabLabel"] -> summarizeProverSettings[ pTime, sTime],
         		translate["RestoreEnv"] -> Row[ {translate["RestoreEnvLong"], Button[ translate[ "OK"], setProveEnv[ fn]]}, Spacer[5]]
@@ -1660,13 +1661,13 @@ newCloseEnvCell[args___] :=
 
 makeNbNewButton[] :=
 	Button[ translate[ "New"],
-		createNbRememberLocation[ ],
+		createNbRememberLocation[ Magnification -> CurrentValue[ First[ getTheoremaCommander[]], Magnification]],
 		Alignment -> {Left, Top}, Method -> "Queued"]
 makeNbNewButton[ args___] := unexpected[ makeNbNewButton, {args}]
 
 makeNbOpenButton[ ] :=
 	Button[ translate["Open"],
-		openNbRememberLocation[ ],
+		openNbRememberLocation[ Magnification -> CurrentValue[ First[ getTheoremaCommander[]], Magnification]],
 		Method -> "Queued"
 	]
 makeNbOpenButton[ args___] := unexpected[ makeNbOpenButton, {args}]
@@ -2489,12 +2490,12 @@ autoParenthesis[ c_String] := TagBox[ c, "AutoParentheses"]
 autoParenthesis[ args___] := unexpected[ autoParenthesis, {args}]
 
 allFormulae = {
-			   {"Arithmetic", {}},
 			   {"Logic", {{{"AND2", 1}, {"OR2", 1}, {"NOT", 1}, {"IMPL2", 1}}, 
 			   	{{"EQUIV2", 1}, {"EQ", 1}, {"EQUIVDEF", 1}, {"EQDEF", 1}}, 
 			   	{{"AND3", 1}, {"OR3", 1}, {"EQUIV3", 1}, {"CASEDIST", 1}}, 
 			   	{{"FORALL1", 1}, {"EXISTS1", 1}, {"FORALL2", 1}, {"EXISTS2", 1}}, 
 			   	{{"LET", 1}}}},
+			   {"Arithmetic", {}},
 			   {"Sets", {}},
 			   {"Tuples", {{{"APPEND", 1}, {"PREPEND", 1}, {"JOIN", 1}, {"ELEMTUP", 1}}}},
 			   {"Operators", {{{"SUBOP", 1}, {"SUPEROP", 1}, {"SUBSUPEROP", 1}}, 

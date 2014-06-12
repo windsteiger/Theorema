@@ -139,6 +139,7 @@ With[ {lang = "English"},
 	translate["OK", lang] = "OK";
 	translate["Filter", lang] = "Filter";
 	translate["FilterRulesWindow"] = "Filter by keyword";
+	translate["FilterKBWindow"] = "Filter by keyword";
 	translate["Keyword"] = "Keyword: ";
 	translate["RestoreDefaults"] = "Restore defaults";
 	translate["ShowAll"] = "Show all";
@@ -153,7 +154,9 @@ With[ {lang = "English"},
 	translate["interactiveNewProofSitFilter", lang] = "Filter new proof situations interactively";
 	translate["interactiveInstantiate", lang] = "Instantiate quantifiers interactively";
 	translate["noRoot", lang] = "Cannot identify root of proof tree";
-	translate["proofCellStatus", lang] = "Initial status of nested proof cells";
+	translate["proofOutput", lang] = "Proof Output";
+	translate["proofCellStatus", lang] = "Proof Cells";
+	translate["replaceExistProof", lang] = "Replace existing proof";
 	translate["auto", lang] = "automatic";
 	translate["open", lang] = "all open";
 	translate["closed", lang] = "all closed";
@@ -170,6 +173,7 @@ With[ {lang = "English"},
 	translate["instantiate later", lang] = "Instantiate later";
 	translate["instVar", lang] = "Variables to be instantiated";
 	translate["availConst", lang] = "Available constants";
+	translate["notEval", lang] = "Formula currently not evaluated. Click to eval.";
 
 	translate["Virtual Keyboard", lang] = "Virtual Keyboard";
 	    
