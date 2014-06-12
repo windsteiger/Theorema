@@ -487,8 +487,8 @@ occursBelow[args___] := unexpected[ occursBelow, {args}]
 
 updateKnowledgeBase[ form_, k_, glob_, tags_String] :=
     Module[ {newForm = applyGlobalDeclaration[ form, glob], fml},
-    	transferToComputation[ newForm, k];
     	fml = makeFML[ key -> k, formula -> newForm, label -> tags, simplify -> False];
+    	transferToComputation[ fml];
     	(* If new formulae are appended rather than prepended, the old formulae with the same label
     		have to be deleted first, because "DeleteDuplicates" would delete the new ones. *)
 		$tmaEnv = Append[ DeleteCases[ $tmaEnv, _[ First[ fml], ___]], fml];

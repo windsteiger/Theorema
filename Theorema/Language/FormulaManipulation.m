@@ -451,10 +451,10 @@ checkAllConds[ args___] := unexpected[ checkAllConds, {args}]
 (* ::Subsubsection:: *)
 (* transferToComputation *)
 
-transferToComputation[ form_, key_] :=
+transferToComputation[ f_FML$] :=
 	Module[{stripUniv, exec},
-		stripUniv = stripUniversalQuantifiers[ form];
-		exec = executableForm[ stripUniv, key];
+		stripUniv = stripUniversalQuantifiers[ formula@f];
+		exec = executableForm[ stripUniv, f];
 		(* Certain equalities cannot be made executable and generate an error when translated to Mma. 
 		   Since this operation is part of the preprocesing, we catch the error,
 		   otherwise preprocessing would end in a premature state. *)
@@ -512,10 +512,10 @@ singleRangeToCondition[ _] := Sequence[]
 singleRangeToCondition[ args___] := unexpected[ singleRangeToCondition, {args}]
 *)
 
-executableForm[ {(Theorema`Language`Iff$TM|Theorema`Language`IffDef$TM|Theorema`Language`Equal$TM|Theorema`Language`EqualDef$TM)[ l_, r_], c_List, var_List}, key_] :=
-    Block[ { $ContextPath = {"System`"}, $Context = "Global`", formKey = ToString[ key, InputForm]},
+executableForm[ {(Theorema`Language`Iff$TM|Theorema`Language`IffDef$TM|Theorema`Language`Equal$TM|Theorema`Language`EqualDef$TM)[ l_, r_], c_List, var_List}, f_FML$] :=
+    Block[ { $ContextPath = {"System`"}, $Context = "Global`", form = ToString[ f, InputForm], formKey = ToString[ key@f, InputForm]},
         With[ { left = execLeft[ Hold[l], var], 
-        	right = "Theorema`Common`trackResult[" <> execRight[ Hold[r], var] <> "," <> formKey <> "]"},
+        	right = "Theorema`Common`trackResult[" <> execRight[ Hold[r], var] <> "," <> form <> "]"},
         	(* The complicated DUMMY$COND... construction is necessary because the key itself contains strings,
         	   and we need to get the escaped strings into the Hold *)
             StringReplace[ left <> "/; DUMMY$COND && " <> execCondition[ Hold[ trackCondition[ c, l]], var] <> ":=" <> right,
@@ -529,7 +529,7 @@ executableForm[ {(Theorema`Language`Iff$TM|Theorema`Language`IffDef$TM|Theorema`
    ToExpression[...] in the calling transferToComputation calls openEnvironment once more (which means that $PreRead
    seems to be applied ???), resulting in messing up the contexts. With the string "$Failed" this
    does not happen *)
-executableForm[ expr_, key_] := "$Failed"
+executableForm[ expr_, f_FML$] := "$Failed"
 executableForm[ args___] := unexpected[ executableForm, {args}]
 
 execLeft[ e_Hold, var_List] := 

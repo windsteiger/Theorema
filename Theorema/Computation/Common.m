@@ -97,9 +97,9 @@ insertInTrace[ toInsert_, pos_] :=
 insertInTrace[ args___] := unexpected[ insertInTrace, {args}]
 
 SetAttributes[ trackResult, HoldAll]
-trackResult[ body_, key_] := 
+trackResult[ body_, form_FML$] := 
  	Module[{v}, 
- 		insertInTrace[ {{key, HoldForm[ body]}}, $TmaCompInsertPos]; 
+ 		insertInTrace[ {{form, HoldForm[ body]}}, $TmaCompInsertPos]; 
   		$TmaCompInsertPos = AppendTo[ $TmaCompInsertPos, 2]; 
   		v = body; 
   		insertInTrace[ v, $TmaCompInsertPos]; 
@@ -121,24 +121,12 @@ displayComputation[ file_String] :=
   	]
 displayComputation[ args___] := unexpected[ displayComputation, {args}]
 
-(*subcompToCell[ {inp_, subcomp__, outp_}, level_:0] := 
-	Module[{},
-  		Cell[ CellGroupData[
-    		Join[
-    			{Cell[ BoxData[ theoremaBoxes[ inp]], "Subfct", createCellMargin[27 + 27*level]]}, 
-     			Map[ subcompToCell[ #, level + 1]&, {subcomp}],
-     			{Cell[ BoxData[ theoremaBoxes[ outp]], "SubfctResult", createCellMargin[27 + 27*level]]}
-     		]]
-     	]
-	]
-*)
-
-subcompToCell[ {def_, {{key_List, held_HoldForm}, res_}}, level_:0] := 
+subcompToCell[ {def_, {{form_FML$, held_HoldForm}, res_}}, level_:0] := 
  	Module[{},
  		Cell[ CellGroupData[{
  			Cell[ BoxData[ theoremaBoxes[ def]], "Subfct", createCellMargin[27 + 27*level]], 
      		Cell[ CellGroupData[{
-     			Cell[ BoxData[ theoremaBoxes[ held]], "Subfct", createCellMargin[27 + 27*level]], 
+     			Cell[ BoxData[ theoremaBoxes[ held]], "Subfct", createCellMargin[27 + 27*level], CellFrameLabels -> {{label@form, ""}, {"", ""}}], 
         		Cell[ BoxData[ theoremaBoxes[ res]], "SubfctResult", createCellMargin[27 + 27*level]]}]
         	]}]
         ]
@@ -148,14 +136,14 @@ subcompToCell[ {held_, {calc__}}, level_:0] :=
 	Module[{},
   		Cell[ CellGroupData[{
   			Cell[ BoxData[ theoremaBoxes[ held]], "Subfct", createCellMargin[27 + 27*level]], 
-  			subcompToCell[{calc}, level + 1]}]
+  			subcompToCell[ {calc}, level + 1]}]
   		]
   	]
 
-subcompToCell[ {{key_List, held_HoldForm}, res_}, level_:0] := 
+subcompToCell[ {{def_FML$, held_HoldForm}, res_}, level_:0] := 
 	Module[{},
   		Cell[ CellGroupData[{
-  			Cell[ BoxData[ theoremaBoxes[ held]], "Subfct", createCellMargin[27 + 27*level]], 
+  			Cell[ BoxData[ theoremaBoxes[ held]], "Subfct", createCellMargin[27 + 27*level], CellFrameLabels -> {{label@def, ""}, {"", ""}}], 
      		Cell[ BoxData[ theoremaBoxes[ res]], "SubfctResult", createCellMargin[27 + 27*level]]}]
      	]
      ]
@@ -166,6 +154,7 @@ subcompToCell[ {def_, condlist:{{__, True|False|Indeterminate}..}}, level_:0] :=
   			Cell[ BoxData[ theoremaBoxes[ def]], "Subfct", createCellMargin[27 + 27*level]], 
      		Cell[ CellGroupData[
      			Join[
+     				{Cell[ "", "DummyHeaderFail", createCellMargin[66 + 27*level]]},
         			Map[ condToCell[ #, level, Closed]&, Drop[ condlist, -1]],
         			{condToCell[ condlist[[-1]]]}
         		]
@@ -177,10 +166,26 @@ subcompToCell[ {def_, condlist:{{__, True|False|Indeterminate}..}, res_}, level_
 	Module[{},
   		Cell[ CellGroupData[{
   			Cell[ BoxData[ theoremaBoxes[ def]], "Subfct", createCellMargin[27 + 27*level]], 
-     		Cell[ CellGroupData[ Map[ condToCell[ #, level]&, condlist]]], 
+     		Cell[ CellGroupData[ 
+     			Join[
+     				{Cell[ "", "DummyHeaderOK", createCellMargin[66 + 27*level]]},
+     				Map[ condToCell[ #, level]&, condlist]
+     			]]], 
      		Cell[ CellGroupData[ {subcompToCell[ res, level+1]}]]}
      	]] 
 	]
+	
+subcompToCell[ {{def_FML$, inp_HoldForm}, subcomp__, outp_}, level_:0] := 
+	Module[{},
+  		Cell[ CellGroupData[
+    		Join[
+    			{Cell[ BoxData[ theoremaBoxes[ inp]], "Subfct", createCellMargin[27 + 27*level], CellFrameLabels -> {{formulaReference[ def], ""}, {"", ""}}]}, 
+     			Map[ subcompToCell[ #, level + 1]&, {subcomp}],
+     			{Cell[ BoxData[ theoremaBoxes[ outp]], "SubfctResult", createCellMargin[27 + 27*level]]}
+     		]]
+     	]
+	]
+
 subcompToCell[ args___] := unexpected[ subcompToCell, {args}]
 
 condToCell[ {cond_, Indeterminate}, level_:0] := 

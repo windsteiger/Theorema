@@ -77,9 +77,9 @@ MakeBoxes[ IntegerQuotientRingPM$TM[ m_], TheoremaForm] :=
 	
 intervalToLetter[ r_Symbol] :=
 	Switch[ r,
-		Theorema`Language`IntegerInterval$TM, "\[DoubleStruckCapitalZ]",
-		Theorema`Language`RationalInterval$TM, "\[DoubleStruckCapitalQ]",
-		Theorema`Language`RealInterval$TM, "\[DoubleStruckCapitalR]"
+		Theorema`Language`IntegerInterval$TM|Theorema`Computation`Language`IntegerInterval$TM, "\[DoubleStruckCapitalZ]",
+		Theorema`Language`RationalInterval$TM|Theorema`Computation`Language`RationalInterval$TM, "\[DoubleStruckCapitalQ]",
+		Theorema`Language`RealInterval$TM|Theorema`Computation`Language`RealInterval$TM, "\[DoubleStruckCapitalR]"
 	]
 
 MakeBoxes[ (h:IntegerInterval$TM|RationalInterval$TM|RealInterval$TM)[ DirectedInfinity[-1], DirectedInfinity[1], _, _], TheoremaForm] :=
