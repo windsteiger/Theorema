@@ -30,7 +30,8 @@ theoremaBoxes[ expr_] := stripOutermostParen[ ToBoxes[ expr, TheoremaForm]]
 theoremaBoxes[ args___] := unexpected[ theoremaBoxes, {args}]
 
 (* The ToBoxes sometimes produces parentheses also around the entire expression. This is the place to remove them before display *)
-stripOutermostParen[ FormBox[ RowBox[ {TagBox["(", "AutoParentheses"], e___, TagBox[")", "AutoParentheses"]}], TheoremaForm]] := e
+stripOutermostParen[ FormBox[ RowBox[ {TagBox["(", "AutoParentheses"], e_, TagBox[")", "AutoParentheses"]}], TheoremaForm]] := FormBox[ e, TheoremaForm]
+stripOutermostParen[ FormBox[ RowBox[ {TagBox["(", "AutoParentheses"], e1_, e2__, TagBox[")", "AutoParentheses"]}], TheoremaForm]] := FormBox[ RowBox[ {e1, e2}], TheoremaForm]
 stripOutermostParen[ e_] := e
 stripOutermostParen[ args___] := unexpected[ stripOutermostParen, {args}]
 
