@@ -101,6 +101,7 @@ With[ {lang = "English"},
 	MessageName[simplify, "usage", lang] = "simplify is an option for the formula constructor makeFML deciding whether the constructed formula should be simplified by computation immediately.";
 	MessageName[id, "usage", lang] = "id is an option for the constructors makePRFINFO/makePRFSIT/toBeProved and a selector for the FML$/PRFINFO$/PRFSIT$ datastructures.";
 	MessageName[source, "usage", lang] = "source is a selector for the FML$ datastructure.";
+	MessageName[sourceFile, "usage", lang] = "sourceFile is a selector for the FML$ datastructure.";
 	MessageName[makeGoalFML, "usage", lang] = "makeGoalFML[ fmldata] generates a FML$ with a goal-specific label.";
 	MessageName[makeAssumptionFML, "usage", lang] = "makeAssumptionFML[ fmldata] generates a FML$ with an assumption-specific label.";
 	MessageName[initFormulaLabel, "usage", lang] = "initFormulaLabel[ ] initializes the formula labels used in a proof.";

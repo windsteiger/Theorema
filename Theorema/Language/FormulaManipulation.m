@@ -867,6 +867,10 @@ id[ FML$[ k_, _, __]] := k[[1]]
 source[ FML$[ k_, _, __]] := k[[2]]
 source[ args___] := unexpected[ source, {args}]
 
+sourceFile[ FML$[ k_, _, __]] := StringReplace[ k[[2]], StartOfString ~~ "Source" ~~ $cellTagKeySeparator  -> ""]
+sourceFile[ args___] := unexpected[ sourceFile, {args}]
+
+
 formulaReference[ fml_FML$] :=
     With[ { tag = id@fml, labelDisp = makeLabel[ label@fml], fmlDisp = theoremaDisplay[ formula@fml]},
         Cell[ BoxData[ ToBoxes[

@@ -126,7 +126,7 @@ subcompToCell[ {def_, {{form_FML$, held_HoldForm}, res_}}, level_:0] :=
  		Cell[ CellGroupData[{
  			Cell[ BoxData[ theoremaBoxes[ def]], "Subfct", createCellMargin[27 + 27*level]], 
      		Cell[ CellGroupData[{
-     			Cell[ BoxData[ theoremaBoxes[ held]], "Subfct", createCellMargin[27 + 27*level], CellFrameLabels -> {{label@form, ""}, {"", ""}}], 
+     			Cell[ BoxData[ theoremaBoxes[ held]], "Subfct", createCellMargin[27 + 27*level], CellFrameLabels -> {{formulaLabelRef[ form], ""}, {"", ""}}], 
         		Cell[ BoxData[ theoremaBoxes[ res]], "SubfctResult", createCellMargin[27 + 27*level]]}]
         	]}]
         ]
@@ -143,7 +143,7 @@ subcompToCell[ {held_, {calc__}}, level_:0] :=
 subcompToCell[ {{def_FML$, held_HoldForm}, res_}, level_:0] := 
 	Module[{},
   		Cell[ CellGroupData[{
-  			Cell[ BoxData[ theoremaBoxes[ held]], "Subfct", createCellMargin[27 + 27*level], CellFrameLabels -> {{label@def, ""}, {"", ""}}], 
+  			Cell[ BoxData[ theoremaBoxes[ held]], "Subfct", createCellMargin[27 + 27*level], CellFrameLabels -> {{formulaLabelRef[ def], ""}, {"", ""}}], 
      		Cell[ BoxData[ theoremaBoxes[ res]], "SubfctResult", createCellMargin[27 + 27*level]]}]
      	]
      ]
@@ -179,7 +179,7 @@ subcompToCell[ {{def_FML$, inp_HoldForm}, subcomp__, outp_}, level_:0] :=
 	Module[{},
   		Cell[ CellGroupData[
     		Join[
-    			{Cell[ BoxData[ theoremaBoxes[ inp]], "Subfct", createCellMargin[27 + 27*level], CellFrameLabels -> {{formulaReference[ def], ""}, {"", ""}}]}, 
+    			{Cell[ BoxData[ theoremaBoxes[ inp]], "Subfct", createCellMargin[27 + 27*level], CellFrameLabels -> {{formulaLabelRef[ def], ""}, {"", ""}}]}, 
      			Map[ subcompToCell[ #, level + 1]&, {subcomp}],
      			{Cell[ BoxData[ theoremaBoxes[ outp]], "SubfctResult", createCellMargin[27 + 27*level]]}
      		]]
@@ -248,8 +248,22 @@ condToCell[ {cond_, calc__, True}, level_:0, status_:Open] :=
     ]
 condToCell[ args___] := unexpected[ condToCell, {args}]
 
-createCellMargin[ border_] := CellMargins -> {{border, Inherited}, {Inherited, Inherited}}
+createCellMargin[ border_] := CellMargins -> {{border, Inherited}, {1, 1}}
 createCellMargin[ args___] := unexpected[ createCellMargin, {args}]
+
+formulaLabelRef[ f_FML$] :=
+	Module[{lab, fmlDisp = theoremaDisplay[ formula@f]},
+		lab = makeLabel[ label@f];
+		With[ {file = sourceFile@f, tag = id@f},
+			Cell[ BoxData[ ToBoxes[
+            	Button[ Tooltip[ Mouseover[ Style[ lab, "FormReference"], Style[ lab, "FormReferenceHover"]], fmlDisp],
+               		NotebookLocate[ {file, tag}], Appearance -> None]
+        	]]]
+		]
+	]
+formulaLabelRef[ args___] := unexpected[ formulaLabelRef, {args}]
+
+
 
 End[]
 EndPackage[]
