@@ -29,6 +29,7 @@ MessageName[ instantiate, "usage", lang] = "Instantiate universally quantified k
 MessageName[ existsGoal, "usage", lang] = "Prove existentially quantified goal by introducing meta variables";
 MessageName[ existsGoalInteractive, "usage", lang] = "Prove existentially quantified goal by interactive instantiation";
 MessageName[ existsKB, "usage", lang] = "Skolemize existentially quantified knowledge";
+MessageName[ solveMetaUnification, "usage", lang] = "Instantiate meta-variables by unification";
 MessageName[ multipleGoalRewriting, "usage", lang] = "Goal can be rewritten in several ways";
 MessageName[ goalRewriting, "usage", lang] = "Goal rewriting based on (quantified) implications and equivalences in the knowledge base";
 MessageName[ knowledgeRewriting, "usage", lang] = "Knowledge rewriting based on (quantified) implications and equivalences in the knowledge base";
@@ -334,8 +335,22 @@ proofStepText[ instantiate, lang, u_, g_, ___, "instantiation" -> inst_List, ___
 			{j, Length[u]}
 		];
 		stepText
-	]
+	];
+
+proofStepText[ solveMetaUnification, lang, {{u_}}, {{g_}}, ___, "instantiation" -> inst_List, ___] := {
+	textCell[ "Let now ", inlineTheoremaExpressionSeq[ inst[[ 1]], lang], ". In order to prove ", formulaReference[ u], " we now have to show"],
+	goalCell[ g, "."]
+	};
+
+proofStepText[ solveMetaUnification, lang, {{u_}}, {g_List}, ___, "instantiation" -> inst_List, ___] := 
+	{textCell[ "We can instantiate."]};
+
+subProofHeader[ solveMetaUnification, lang, {{u_}}, {g_List}, ___, "instantiation" -> inst_List, ___, {i_}] := {
+	textCell[ "Let now ", inlineTheoremaExpressionSeq[ inst[[i]], lang], ". In order to prove ", formulaReference[ u], " we now have to show"],
+	goalCell[ g[[i]], "."]
+	};	
 	
+		
 ] (* With *)
 
 End[]

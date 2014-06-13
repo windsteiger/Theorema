@@ -770,7 +770,25 @@ compatibleRange[ args___] := unexpected[ compatibleRange, {args}]
 (* ::Section:: *)
 (* unification *)
 
-
+inferenceRule[ solveMetaUnification] = 
+ps:PRFSIT$[ g:FML$[ _, a_And$TM, lab_, ___] /; MemberQ[ a, e_Equal$TM /; !FreeQ[ e, _META$]], K_List, id_, rest___?OptionQ] :> performProofStep[
+	Module[ {eq = Cases[ a, s_Equal$TM /; !FreeQ[ s, _META$], {1}, 1], com, inst, newGoalsAlt}, 
+		{com, inst} = Apply[ unification, eq[[1]]];
+		If[ com === $Failed,
+			Throw[ $Failed]
+		];
+		newGoalsAlt = Map[ makeGoalFML[ formula -> #]&, a /. inst];
+		If[ Length[ com] == 1,
+			makeANDNODE[ makePRFINFO[ name -> solveMetaUnification, used -> g, "instantiation" -> inst], 
+            	toBeProved[ goal -> newGoalsAlt[[1]], kb -> K, rest]
+        	],
+        	(* else *)
+        	makeORNODE[ makePRFINFO[ name -> solveMetaUnification, used -> g, "instantiation" -> inst], 
+            	Map[ toBeProved[ goal -> #, kb -> K, rest]&, newGoalsAlt]
+        	]
+		]
+	]
+]
 
 (* ::Section:: *)
 (* Rule composition *)
@@ -805,7 +823,8 @@ registerRuleSet[ "Quantifier Rules", quantifierRules, {
 	{instantiate, True, True, 35},
 	{existsGoal, True, True, 10},
 	{existsGoalInteractive, False, True, 12},
-	{existsKB, True, True, 11}
+	{existsKB, True, True, 11},
+	{solveMetaUnification, True, True, 9}
 	}]
 
 registerRuleSet[ "Basic Theorema Language Rules", basicTheoremaLanguageRules, {

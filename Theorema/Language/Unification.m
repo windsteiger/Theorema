@@ -51,7 +51,7 @@ unification[ s_, s_, ___?OptionQ] := {{s}, {{}}}
 unification[ s_, t_, opt___?OptionQ] :=
     Module[ {maxUnifiers, maxWidth, commutativeSymbols, unifierCounter = 0, widthCounter = 0, commonInstances = {}, unifiers = {}, outputAcc, output, 
     	     sVariant, sBoundVars, tVariant, tBoundVars, renamingSubst = {}, metaVariables }, 
-    	{maxUnifiers, maxWidth, commutativeSymbols} = {maximumUnifiers, maximumWidth, commutative} /. {opt} /. Options[unification];
+    	{maxUnifiers, maxWidth, commutativeSymbols} = {maximumUnifiers, maximumWidth, commutative} /. {opt} /. Options[ unification];
         outputAcc = {commonInstances, unifiers};
     	Block[ {$RecursionLimit = Infinity},
             {sVariant, sBoundVars} = alphaRenaming[ s, {}];
@@ -63,7 +63,7 @@ unification[ s_, t_, opt___?OptionQ] :=
     	(* The output might contain mappings for variables introduced at run-time. 
     	   They should be discarded from the final result. Only meta variables and
     	   free variables of s and t are relevant. *)
-    	metaVariables = Cases[ {s,t}, META$[_, _], {0, Infinity}];
+    	metaVariables = Cases[ {s,t}, META$[_, _, _], {0, Infinity}];
     	{output[[1]], restrictSubstitutions[ output[[2]], Join[ freeVariables[{s, t}], metaVariables]]}
     ]
 unification[ args___] := unexpected[ unification, {args}]
@@ -191,52 +191,52 @@ transform[ up[{{t_, VAR$[x_], _}, equations___}, lBoundVars_, rBoundVars_, renam
     The situations where a sequence meta-variable appears as a side of a unification problem should be very rare.
     In the first two rules y can be any variable name or a sequence object.
 *)
-transform[ up[{{m1:META$[SEQ0$[x_], fixedConstantList1_], m2:META$[y_, fixedConstantList2_], _}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
+transform[ up[{{m1:META$[SEQ0$[x_], _, fixedConstantList1_], m2:META$[y_, _, fixedConstantList2_], _}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
     Module[ {intersection, newVar, metaNew},
     	intersection = Intersection[ fixedConstantList1, fixedConstantList2];
     	newVar = If[ (Head[ y] === SEQ0$) || (Head[ y] === SEQ1$), Head[y][Unique["z"]], Unique["z"]];
-    	metaNew = META$[newVar, intersection];
+    	metaNew = META$[newVar, 0, intersection];
         {up[{equations}/.{m1->metaNew, m2->metaNew}, lBoundVars, rBoundVars, renaming, term, compose[subst, {m1->metaNew, m2->metaNew}]]}]
-transform[ up[{{m1:META$[y_, fixedConstantList1_], m2:META$[SEQ0$[x_], fixedConstantList2_], _}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
+transform[ up[{{m1:META$[y_, _, fixedConstantList1_], m2:META$[SEQ0$[x_], _, fixedConstantList2_], _}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
     Module[ {intersection, newVar, metaNew},
         intersection = Intersection[ fixedConstantList1, fixedConstantList2];
         newVar = If[ (Head[ y] === SEQ0$) || (Head[ y] === SEQ1$), Head[y][Unique["z"]], Unique["z"]];
-        metaNew = META$[newVar, intersection];
+        metaNew = META$[newVar, 0, intersection];
         {up[{equations}/.{m1->metaNew, m2->metaNew}, lBoundVars, rBoundVars, renaming, term, compose[subst, {m1->metaNew, m2->metaNew}]]}]
 (*   In the two rules below, y can not be a projectable sequence object    *)        
-transform[ up[{{m1:META$[SEQ1$[x_], fixedConstantList1_], m2:META$[y_, fixedConstantList2_], _}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
+transform[ up[{{m1:META$[SEQ1$[x_], _, fixedConstantList1_], m2:META$[y_, _, fixedConstantList2_], _}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
     Module[ {intersection, newVar, metaNew},
         intersection = Intersection[ fixedConstantList1, fixedConstantList2]; 
         newVar = If[ Head[ y] === SEQ1$, SEQ1$[Unique["z"]], Unique["z"]];
-        metaNew = META$[newVar, intersection];
+        metaNew = META$[newVar, 0, intersection];
         up[{equations}/.{m1->metaNew, m2->metaNew}, lBoundVars, rBoundVars, renaming, term, compose[subst, {m1->metaNew, m2->metaNew}]]]
-transform[ up[{{m1:META$[y_, fixedConstantList1_], m2:META$[SEQ1$[x_], fixedConstantList2_], _}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
+transform[ up[{{m1:META$[y_, _, fixedConstantList1_], m2:META$[SEQ1$[x_], _, fixedConstantList2_], _}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
     Module[ {intersection, newVar, metaNew},
         intersection = Intersection[ fixedConstantList1, fixedConstantList2]; 
         newVar = If[ Head[ y] === SEQ1$, SEQ1$[Unique["z"]], Unique["z"]];
-        metaNew = META$[newVar, intersection];
+        metaNew = META$[newVar, 0, intersection];
         up[{equations}/.{m1->metaNew, m2->metaNew}, lBoundVars, rBoundVars, renaming, term, compose[subst, {m1->metaNew, m2->metaNew}]]]
 (*   In the rule below, x1 and x2 can not be (projectable or non-projectable) sequence objects   *)        
-transform[ up[{{m1:META$[x1_, fixedConstantList1_], m2:META$[x2_, fixedConstantList2_], _}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
+transform[ up[{{m1:META$[x1_, _, fixedConstantList1_], m2:META$[x2_, _, fixedConstantList2_], _}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
     Module[ {intersection, metaNew},
         intersection = Intersection[ fixedConstantList1, fixedConstantList2]; 
-        metaNew = META$[Unique["y"], intersection];
+        metaNew = META$[Unique["y"], 0, intersection];
         {up[{equations}/.{m1->metaNew, m2->metaNew}, lBoundVars, rBoundVars, renaming, term, compose[subst, {m1->metaNew, m2->metaNew}]]}]
 (*  In the next two rules, t can not be a variable or a meta-variable *)  
-transform[ up[{{m:META$[(SEQ0$|SEQ1$)[x_], fixedConstantList_], t_, _}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
+transform[ up[{{m:META$[(SEQ0$|SEQ1$)[x_], _, fixedConstantList_], t_, _}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
     If[ FreeQ[ t, m], 
     	If[ containsExtraFixedConstant[ t, fixedConstantList], {}, {up[{equations}/.{m->t}, lBoundVars, rBoundVars, renaming, term, compose[subst, {m->t}]]}], 
     	   {}]
-transform[ up[{{t_, m:META$[(SEQ0$|SEQ1$)[x_], fixedConstantList_], _}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
+transform[ up[{{t_, m:META$[(SEQ0$|SEQ1$)[x_], _, fixedConstantList_], _}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
     If[ FreeQ[ t, m], 
         If[ containsExtraFixedConstant[ t, fixedConstantList], {}, {up[{equations}/.{m->t}, lBoundVars, rBoundVars, renaming, term, compose[subst, {m->t}]]}], 
             {}]
 (*  In the next two rules, t can not be a variable or a sequence meta-variable  *)
-transform[ up[{{m:META$[x_, fixedConstantList_], t_, _}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
+transform[ up[{{m:META$[x_, _, fixedConstantList_], t_, _}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
     If[ FreeQ[ t, m], 
         If[ containsExtraFixedConstant[ t, fixedConstantList], {}, {up[{equations}/.{m->t}, lBoundVars, rBoundVars, renaming, term, compose[subst, {m->t}]]}], 
             {}]
-transform[ up[{{t_, m:META$[x_, fixedConstantList_], _}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
+transform[ up[{{t_, m:META$[x_, _, fixedConstantList_], _}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
     If[ FreeQ[ t, m], 
         If[ containsExtraFixedConstant[ t, fixedConstantList], {}, {up[{equations}/.{m->t}, lBoundVars, rBoundVars, renaming, term, compose[subst, {m->t}]]}], 
             {}]
@@ -267,13 +267,13 @@ transform[ up[{{l:f_[args1___], r:f_[VAR$[SEQ1$[x_]], args2___], widthCounter_},
         META$[x1,l] is a fresh individual meta-variable, and
         META$[SEQ0$[x2],l] is a fresh projectable sequence variable.
 *)  
-transform[ up[{{l:f_[META$[SEQ1$[x_], fixedConstants_], args1___], r:f_[args2___], widthCounter_}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
+transform[ up[{{l:f_[META$[SEQ1$[x_], n_, fixedConstants_], args1___], r:f_[args2___], widthCounter_}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
     Module[{x1 = Unique[ToString[x]], x2 = Unique[ToString[x]], sub},
-        sub = {META$[SEQ1$[x], fixedConstants] -> Sequence[META$[x1, fixedConstants], META$[SEQ0$[x2], fixedConstants]]};
+        sub = {META$[SEQ1$[x], n, fixedConstants] -> Sequence[META$[x1, 0, fixedConstants], META$[SEQ0$[x2], 0, fixedConstants]]};
         {up[{{l/.sub, r/.sub, widthCounter}, Sequence@@({equations}/.sub)}, lBoundVars, rBoundVars, renaming, term, compose[subst, sub]]}]
-transform[ up[{{l:f_[args1___], r:f_[META$[SEQ1$[x_], fixedConstants_], args2___], widthCounter_}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
+transform[ up[{{l:f_[args1___], r:f_[META$[SEQ1$[x_], n_, fixedConstants_], args2___], widthCounter_}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
     Module[{x1 = Unique[ToString[x]], x2 = Unique[ToString[x]], sub},
-        sub = {META$[SEQ1$[x], fixedConstants] -> Sequence[META$[x1, fixedConstants], META$[SEQ0$[x2], fixedConstants]]};
+        sub = {META$[SEQ1$[x], n, fixedConstants] -> Sequence[META$[x1, 0, fixedConstants], META$[SEQ0$[x2], 0, fixedConstants]]};
         {up[{{l/.sub, r/.sub, widthCounter}, Sequence@@({equations}/.sub)}, lBoundVars, rBoundVars, renaming, term, compose[subst, sub]]}]
         
 (* 
@@ -297,11 +297,11 @@ transform[ up[{{l:f_[], r:f_[VAR$[SEQ0$[x_]], args___], widthCounter_}, equation
     f != VAR$.
     The projection method applies, replacing META$[SEQ0$[x], l] with the empty sequence.
 *)
-transform[ up[{{l:f_[META$[SEQ0$[x_], fixedConstants_], args___], r:f_[], widthCounter_}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
-    With[{subP = {META$[SEQ0$[x], fixedConstants] -> Sequence[]}},
+transform[ up[{{l:f_[META$[SEQ0$[x_], n_, fixedConstants_], args___], r:f_[], widthCounter_}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
+    With[{subP = {META$[SEQ0$[x], n, fixedConstants] -> Sequence[]}},
         {up[{{f[args]/.subP, r/.subP, widthCounter}, Sequence@@({equations}/.subP)}, lBoundVars, rBoundVars, renaming, term, compose[subst, subP]]}]
-transform[ up[{{l:f_[], r:f_[META$[SEQ0$[x_], fixedConstants_], args___], widthCounter_}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
-    With[{subP = {META$[SEQ0$[x], fixedConstants] -> Sequence[]}},
+transform[ up[{{l:f_[], r:f_[META$[SEQ0$[x_], n_, fixedConstants_], args___], widthCounter_}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
+    With[{subP = {META$[SEQ0$[x], n, fixedConstants] -> Sequence[]}},
         {up[{{l/.subP, f[args]/.subP, widthCounter}, Sequence@@({equations}/.subP)}, lBoundVars, rBoundVars, renaming, term, compose[subst, subP]]}] 
                  
 (*   
@@ -329,13 +329,13 @@ transform[ up[{{l:f_[args1__], r:f_[VAR$[SEQ0$[x_]], args2___], widthCounter_}, 
      An incomplete method of expression decomposition applies. It will replace each sequence variable under f with a sequence of individual meta-variables. 
      Details can be seen at the definition of the function decompose.   
 *) 
-transform[ up[{{l:f_[META$[SEQ0$[x_], fixedConstants_], args1___], r:f_[args2__], widthCounter_}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], maxWidth_, {commSymb1___,f_,commSymb2___}] :=
+transform[ up[{{l:f_[META$[SEQ0$[x_], _, fixedConstants_], args1___], r:f_[args2__], widthCounter_}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], maxWidth_, {commSymb1___,f_,commSymb2___}] :=
     decompose[ up[{{l, r, widthCounter}, equations}, lBoundVars, rBoundVars, renaming, term, subst], maxWidth, f]
-transform[ up[{{l:f_[args1__], r:f_[META$[SEQ0$[x_], fixedConstants_], args2___], widthCounter_}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], maxWidth_, {commSymb1___,f_,commSymb2___}] :=
+transform[ up[{{l:f_[args1__], r:f_[META$[SEQ0$[x_], _, fixedConstants_], args2___], widthCounter_}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], maxWidth_, {commSymb1___,f_,commSymb2___}] :=
     decompose[ up[{{l, r, widthCounter}, equations}, lBoundVars, rBoundVars, renaming, term, subst], maxWidth, f]
-transform[ up[{{l:f_[META$[SEQ0$[x_], fixedConstants_], args1___], r:f_[args2__], widthCounter_}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], maxWidth_, {commSymb1___,commutativeWrapper[f_],commSymb2___}] :=
+transform[ up[{{l:f_[META$[SEQ0$[x_], _, fixedConstants_], args1___], r:f_[args2__], widthCounter_}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], maxWidth_, {commSymb1___,commutativeWrapper[f_],commSymb2___}] :=
     decompose[ up[{{l, r, widthCounter}, equations}, lBoundVars, rBoundVars, renaming, term, subst], maxWidth, commutativeWrapper[f]]
-transform[ up[{{l:f_[args1__], r:f_[META$[SEQ0$[x_], fixedConstants_], args2___], widthCounter_}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], maxWidth_, {commSymb1___,commutativeWrapper[f_],commSymb2___}] :=
+transform[ up[{{l:f_[args1__], r:f_[META$[SEQ0$[x_], _, fixedConstants_], args2___], widthCounter_}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], maxWidth_, {commSymb1___,commutativeWrapper[f_],commSymb2___}] :=
     decompose[ up[{{l, r, widthCounter}, equations}, lBoundVars, rBoundVars, renaming, term, subst], maxWidth, commutativeWrapper[f]]      
 (*
     In the first equation, two expressions l and r to be unified have the same free head f,
@@ -375,15 +375,15 @@ transform[ up[{{l:f_[VAR$[SEQ0$[x_]], args1___], r:f_[VAR$[SEQ0$[y_]], args2___]
         replacing META$[SEQ0$[x], l1] with META$[SEQ0$[Unique["z"],Intersection[l1,l2]]] and
         META$[SEQ0$[y],l1] with a sequence META$[SEQ0$[Unique["z"],Intersection[l1,l2]]],META$[SEQ0$[Unique[y]],Intersection[l1,l2]].
 *)     
-transform[ up[{{l:f_[META$[SEQ0$[x_],fixedConstants1_], args1___], r:f_[META$[SEQ0$[y_], fixedConstants2_], args2___], widthCounter_}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
+transform[ up[{{l:f_[META$[SEQ0$[x_], nx_, fixedConstants1_], args1___], r:f_[META$[SEQ0$[y_], ny_, fixedConstants2_], args2___], widthCounter_}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
     Module[{subE, subW1, subW2, upE, upW1, upW2, freshX, freshY, freshZ, intersect},
         freshX = ToString[Unique[x]];
         freshY = ToString[Unique[y]];
         freshZ = ToString[Unique["z"]];
         intersect = Intersection[ fixedConstants1, fixedConstants2];
-        subE  = {META$[SEQ0$[x], fixedConstants1] -> META$[SEQ0$[freshZ], intersect], META$[SEQ0$[y], fixedConstants2] -> META$[SEQ0$[freshZ], intersect]};
-        subW1 = {META$[SEQ0$[x], fixedConstants1] -> Sequence[META$[SEQ0$[freshZ], intersect], META$[SEQ1$[freshX], intersect]], META$[SEQ0$[y], fixedConstants2] -> META$[SEQ0$[freshZ], intersect]};
-        subW2 = {META$[SEQ0$[x], fixedConstants1] -> META$[SEQ0$[freshZ], intersect], META$[SEQ0$[y], fixedConstants2] -> Sequence[META$[SEQ0$[freshZ], intersect], META$[SEQ1$[freshY], intersect]]};
+        subE  = {META$[SEQ0$[x], nx, fixedConstants1] -> META$[SEQ0$[freshZ], 0, intersect], META$[SEQ0$[y], ny, fixedConstants2] -> META$[SEQ0$[freshZ], 0, intersect]};
+        subW1 = {META$[SEQ0$[x], nx, fixedConstants1] -> Sequence[META$[SEQ0$[freshZ], 0, intersect], META$[SEQ1$[freshX], 0, intersect]], META$[SEQ0$[y], ny, fixedConstants2] -> META$[SEQ0$[freshZ], 0, intersect]};
+        subW2 = {META$[SEQ0$[x], nx, fixedConstants1] -> META$[SEQ0$[freshZ], 0, intersect], META$[SEQ0$[y], ny, fixedConstants2] -> Sequence[META$[SEQ0$[freshZ], 0, intersect], META$[SEQ1$[freshY], 0, intersect]]};
         upE  = up[{{f[args1]/.subE, f[args2]/.subE, widthCounter}, Sequence@@({equations}/.subE)}, lBoundVars, rBoundVars, renaming, term, compose[subst,subE]];
         upW1 = up[{{Drop[l/.subW1,1], f[args2]/.subW1, widthCounter+1}, Sequence@@({equations}/.subW1)}, lBoundVars, rBoundVars, renaming, term, compose[subst,subW1]];
         upW2 = up[{{f[args1]/.subW2, Drop[r/.subW2,1], widthCounter+1}, Sequence@@({equations}/.subW2)}, lBoundVars, rBoundVars, renaming, term, compose[subst,subW2]];
@@ -432,23 +432,23 @@ transform[ up[{{l:f_[t_, args1___], r:f_[VAR$[SEQ0$[x_]], args2___], widthCounte
     Widening replaces META$[SEQ0$[x],l] with the sequence t,VAR$[SEQ0$[x],l], if VAR$[SEQ0$[x],l] does not occur in t
     and t does not contain arbitrary biut fixed constants, which do not appear in l.
 *)
-transform[ up[{{l:f_[META$[SEQ0$[x_], fixedConstants_], args1___], r:f_[t_, args2___], widthCounter_}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
-    Module[{subP = {META$[SEQ0$[x], fixedConstants] -> Sequence[]}, fresh, subW, upP, upW},
+transform[ up[{{l:f_[META$[SEQ0$[x_], n_, fixedConstants_], args1___], r:f_[t_, args2___], widthCounter_}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
+    Module[{subP = {META$[SEQ0$[x], n, fixedConstants] -> Sequence[]}, fresh, subW, upP, upW},
         upP = up[{{f[args1]/.subP, r/.subP, widthCounter}, Sequence @@ ({equations}/.subP)}, lBoundVars, rBoundVars, renaming, term, compose[subst,subP]];  
-        If[ FreeQ[ t, META$[SEQ0$[x], fixedConstants]] && !containsExtraFixedConstant[ t, fixedConstants],
+        If[ FreeQ[ t, META$[SEQ0$[x], n, fixedConstants]] && !containsExtraFixedConstant[ t, fixedConstants],
             fresh = Unique[ToString[x]];
-            subW = {META$[SEQ0$[x], fixedConstants] -> Sequence[t, META$[SEQ0$[fresh], fixedConstants]]};
+            subW = {META$[SEQ0$[x], n, fixedConstants] -> Sequence[t, META$[SEQ0$[fresh], 0, fixedConstants]]};
             upW = up[{{Drop[l/.subW,1], f[args2]/.subW, widthCounter+1}, Sequence @@ ({equations}/.subW)}, lBoundVars, rBoundVars, renaming, term, compose[subst,subW]];
             {upP, upW},
                 {upP}
         ]
     ]
-transform[ up[{{l:f_[t_, args1___], r:f_[META$[SEQ0$[x_], fixedConstants_], args2___], widthCounter_}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
-    Module[{subP = {META$[SEQ0$[x], fixedConstants] -> Sequence[]}, fresh, subW, upP, upW},
+transform[ up[{{l:f_[t_, args1___], r:f_[META$[SEQ0$[x_], n_, fixedConstants_], args2___], widthCounter_}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_], _, _] :=
+    Module[{subP = {META$[SEQ0$[x], n, fixedConstants] -> Sequence[]}, fresh, subW, upP, upW},
         upP = up[{{l/.subP, f[args2]/.subP, widthCounter}, Sequence @@ ({equations}/.subP)}, lBoundVars, rBoundVars, renaming, term, compose[subst,subP]];
-        If[ FreeQ[ t, META$[SEQ0$[x], fixedConstants]] && !containsExtraFixedConstant[ t, fixedConstants],
+        If[ FreeQ[ t, META$[SEQ0$[x], n, fixedConstants]] && !containsExtraFixedConstant[ t, fixedConstants],
             fresh = Unique[ToString[x]];
-            subW = {META$[SEQ0$[x], fixedConstants] -> Sequence[t, META$[SEQ0$[fresh], fixedConstants]]};
+            subW = {META$[SEQ0$[x], n, fixedConstants] -> Sequence[t, META$[SEQ0$[fresh], 0, fixedConstants]]};
             upW = up[{{f[args1]/.subW, Drop[r/.subW,1], widthCounter+1}, Sequence @@ ({equations}/.subW)}, lBoundVars, rBoundVars, renaming, term, compose[subst,subW]];
             {upP, upW},
                 {upP}
@@ -529,7 +529,7 @@ decompose[ up[{{l:f_[args1___], r:f_[args2___], widthCounter_}, equations___}, l
         a1 = Complement[{args1}, {args2}];
         a2 = Complement[{args2}, {args1}];
         seqVariables = Union[Cases[{args1,args2}, VAR$[SEQ0$[_]]]];
-        metaSeqVariables = Union[Cases[{args1,args2}, META$[SEQ0$[_],_]]];
+        metaSeqVariables = Union[Cases[{args1,args2}, META$[SEQ0$[_],_,_]]];
           (* Each seqVarReplacingSubstritution below has a form 
              { VAR$[SEQ0$[x]]->Sequence[VAR$[x1],...,VAR$[xn]], VAR$[SEQ0$[y]]->Sequence[VAR$[y1],...,VAR$[yk]],...} 
              where {VAR$[SEQ0$[x]], VAR$[SEQ0$[y]], ...} = seqVariables, n,k =< widthCounter, and
@@ -547,7 +547,7 @@ decompose[ up[{{l:f_[args1___], r:f_[args2___], widthCounter_}, equations___}, l
           *)
         metaSeqVarReplacingSubstritutions = 
             Distribute[ Map[Function[{x}, 
-                Map[Rule[x, Sequence @@ #] &, Table[Table[META$[Unique[ToString[x[[1, 1]]]], x[[2]]], {i, j}], {j, 0, maxWidth}]]], metaSeqVariables], List];
+                Map[Rule[x, Sequence @@ #] &, Table[Table[META$[Unique[ToString[x[[1, 1]]]], 0, x[[2]]], {i, j}], {j, 0, maxWidth}]]], metaSeqVariables], List];
         replacingSubstritutions = Outer[Join, seqVarReplacingSubstritutions, metaSeqVarReplacingSubstritutions, 1];  
         instances = Map[ {l/.#, r/.#}&, replacingSubstritutions];
         decomposableInstances = Select[instances, Length[#[[1]]] === Length[#[[2]]] &];
@@ -564,8 +564,8 @@ decompose[ up[{{f_[], f_[], _}, equations___}, lBoundVars_, rBoundVars_, renamin
 	{up[{equations}, lBoundVars, rBoundVars, renaming, term, subst]}
 decompose[ up[{{l:f_[args1___], r:f_[args2___], widthCounter_}, equations___}, lBoundVars_, rBoundVars_, renaming_, term_, subst_]] := 
 	Module[ {l1, l2, minPrefix, decomposedPrefix, suffix1, suffix2, suffixEquation},
-		l1 = LengthWhile[ {args1}, !MatchQ[#, (VAR$[SEQ0$[_]] | META$[SEQ0$[_], _])]&];
-		l2 = LengthWhile[ {args2}, !MatchQ[#, (VAR$[SEQ0$[_]] | META$[SEQ0$[_], _])]&];
+		l1 = LengthWhile[ {args1}, !MatchQ[#, (VAR$[SEQ0$[_]] | META$[SEQ0$[_], _, _])]&];
+		l2 = LengthWhile[ {args2}, !MatchQ[#, (VAR$[SEQ0$[_]] | META$[SEQ0$[_], _, _])]&];
 	    minPrefix = Min[ l1, l2];
 	    If[ minPrefix === 0,
 	    	{},
