@@ -130,6 +130,7 @@ With[ {lang = "English"},
 	MessageName[$TmaComputationObject, "usage", lang] = "$TmaComputationObject is the global computation object.";
 	MessageName[$TmaCompInsertPos, "usage", lang] = "$TmaCompInsertPos is the position in the global computation object, where the next subcomputation must be inserted.";
 	MessageName[displayComputation, "usage", lang] = "displayComputation[ ...] displays the computation represented by the global computation object ....";
+	MessageName[$traceUserDef, "usage", lang] = "Global variable. If True, then user definitions are traced and appear in the computation object.";
 
 (* Theorema`Interface`GUI` *)
 	MessageName[$kbStruct, "usage", lang] = "Structured knowledge base to be displayed in the KB browser";

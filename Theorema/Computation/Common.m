@@ -42,14 +42,15 @@ a1[x_] /; active[a1] && condition[x > 0 && asdf[x] > 0, a1, {x}] := result[x^2]
  *)
 
 SetAttributes[ trackCondition, HoldAll]
-trackCondition[ {}, expr_] :=
+trackCondition[ {}, expr_] /; $traceUserDef :=
 	Module[{},
 		insertInTrace[ {HoldForm[ expr]}, $TmaCompInsertPos];
   		AppendTo[ $TmaCompInsertPos, 2];
   		True
   	]
+trackCondition[ {}, expr_] := True
 
-trackCondition[ {x__}, expr_] := 
+trackCondition[ {x__}, expr_] /; $traceUserDef := 
 	Module[{c, i, cond}, 
 		cond = Hold[ x];
 		insertInTrace[ {HoldForm[ expr]}, $TmaCompInsertPos];
@@ -84,6 +85,8 @@ trackCondition[ {x__}, expr_] :=
    		$TmaCompInsertPos = MapAt[ (# + 1)&, $TmaCompInsertPos, -1];
    		Return[ True]
    	]
+
+trackCondition[ {x__}, expr_] := And[ x]
 trackCondition[ args___] := unexpected[ trackCondition, {args}]
 
 (* Later maybe check condition with theorema prover *)
@@ -97,7 +100,7 @@ insertInTrace[ toInsert_, pos_] :=
 insertInTrace[ args___] := unexpected[ insertInTrace, {args}]
 
 SetAttributes[ trackResult, HoldAll]
-trackResult[ body_, form_FML$] := 
+trackResult[ body_, form_FML$] /; $traceUserDef := 
  	Module[{v}, 
  		insertInTrace[ {{form, HoldForm[ body]}}, $TmaCompInsertPos]; 
   		$TmaCompInsertPos = AppendTo[ $TmaCompInsertPos, 2]; 
@@ -107,6 +110,7 @@ trackResult[ body_, form_FML$] :=
   		$TmaCompInsertPos = MapAt[ (# + 1)&, $TmaCompInsertPos, -1];
   		Return[v]
   	]
+trackResult[ body_, form_FML$] := body
 trackResult[ args___] := unexpected[ trackResult, {args}]
 
 displayComputation[ file_String] := 
@@ -117,6 +121,7 @@ displayComputation[ file_String] :=
        			Map[ subcompToCell, Take[ calc, {2, -2}]],
        			{Cell[ BoxData[ theoremaBoxes[ Last[ calc]]], "ComputationOutput"]}
        		]]]};
+       	$TmaComputationObject = calc;
        	$TmaComputationNotebook = tmaNotebookPut[ Notebook[ cells], "Computation"]
   	]
 displayComputation[ args___] := unexpected[ displayComputation, {args}]

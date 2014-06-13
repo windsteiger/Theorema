@@ -158,6 +158,7 @@ initGUI[] :=
 		$initLabel = "???";
 		$labelSeparator = ",";
 		$cellTagKeySeparator = ":";
+		$traceUserDef = False;
 		Clear[ kbSelectProve, kbSelectSolve];
 		kbSelectProve[_] := False;
 		kbSelectSolve[_] := False;
@@ -1423,8 +1424,11 @@ printComputationInfo[ cellID_Integer] :=
 		saveComputationCacheDisplay[ cellID, file];
 		With[ {fnco = file <> "-co.m", fnd = file <> "-display.m"},
 			CellPrint[ Cell[ 
-				BoxData[ ToBoxes[ Button[ Style[ translate["ShowComputation"], FontVariations -> {"Underline" -> True}], 
-					displayComputation[ fnco], ImageSize -> Automatic, Appearance -> None, Method -> "Queued"]]], 
+				If[ TrueQ[ $traceUserDef],
+					BoxData[ ToBoxes[ Button[ Style[ translate["ShowComputation"], FontVariations -> {"Underline" -> True}], 
+						displayComputation[ fnco], ImageSize -> Automatic, Appearance -> None, Method -> "Queued"]]], 
+					(* else *)
+					""],
 				"ComputationInfo",
 				CellFrameLabels -> {
 					{None, Cell[ BoxData[ ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, 
@@ -2539,13 +2543,19 @@ langButtons[args___] :=
     
 compSetup[] := 
 	Column[{
-		makeCompButton[]
-	}, Dividers -> Center, Spacings -> 4]
+		makeCompButton[],
+		Labeled[ 
+			Grid[{
+    			{Checkbox[ Dynamic[ $traceUserDef]], translate[ "traceUserDef"]}
+    		}, Alignment -> {Left}], 
+    		translate[ "Trace"], {{Top, Left}}]
+		}
+	]
 compSetup[args___] :=
     unexpected[compSetup, {args}]
 
 makeCompButton[] :=
-    Button[ translate[ "New"], insertNewFormulaCell[ "COMPUTE"], Alignment -> {Left, Top}]
+    Button[ translate[ "New"], insertNewFormulaCell[ "COMPUTE"], Alignment -> {Left, Top}, ImageSize -> Automatic]
 makeCompButton[args___] := unexpected[makeCompButton, {args}]
 
 

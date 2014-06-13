@@ -214,6 +214,8 @@ With[ {lang = "English"},
     translate["Proof", lang] = "Proof";
     translate["ShowComputation", lang] = "Show computation";
     translate["Computation", lang] = "Computation";
+    translate["Trace", lang] = "Trace Computation";
+    translate["traceUserDef", lang] = "Trace user-definitions";
 
     translate["noNB", lang] = "No notebook file available: ";
 
