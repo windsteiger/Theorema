@@ -503,6 +503,19 @@ collectColumn[ {x_}] := x
 
 MakeExpression[ RowBox[ l:{_, PatternSequence[ _?isTmaRelationBox, _]..}], fmt_] :=
 	Module[ {ops, args},
+		ops = Take[ l, {2, -1, 2}];
+		If[ Length[ DeleteDuplicates[ ops]] === 1,
+			args = Take[ l, {1, -1, 2}];
+			MakeExpression[ RowBox[ {First[ops], "[", RowBox[ Riffle[ args, ","]], "]"}], fmt],
+			
+			MakeExpression[ RowBox[ {"OperatorChain", "[", RowBox[ Riffle[ l, ","]], "]"}], fmt]
+		]
+	]
+	
+(* Maybe flattening nested chains of relations should not happen automatically (i.e. regardless of whether the relations are activated or not).
+
+MakeExpression[ RowBox[ l:{_, PatternSequence[ _?isTmaRelationBox, _]..}], fmt_] :=
+	Module[ {ops, args},
 		{args, ops} = flattenRelations[ l, {}, {}];
 		If[ Length[ DeleteDuplicates[ ops]] === 1,
 			MakeExpression[ RowBox[ {First[ops], "[", RowBox[ Riffle[ args, ","]], "]"}], fmt],
@@ -518,6 +531,7 @@ flattenRelations[ {RowBox[ l:{_, PatternSequence[ _?isTmaRelationBox, _]..}]}, a
 	flattenRelations[ l, args, ops]
 flattenRelations[ {a_}, {args___}, ops_List] :=
 	{{args, a}, ops}
+*)
 
 	
 (* ::Subsubsection:: *)

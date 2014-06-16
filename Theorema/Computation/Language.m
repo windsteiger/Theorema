@@ -57,186 +57,184 @@ setComputationContext[ args___] := unexpected[ setComputationContext, {args}]
 (* ::Section:: *)
 (* Logical Abbreviations *)
 
-buiActiveRelation["Unequal"] := buiActive["Equal"]
-buiActiveRelation["NotLess"] := buiActive["Less"]
-buiActiveRelation["NotLessEqual"] := buiActive["LessEqual"]
-buiActiveRelation["NotGreater"] := buiActive["Greater"]
-buiActiveRelation["NotGreaterEqual"] := buiActive["GreaterEqual"]
-buiActiveRelation["NotSubset"] := buiActive["Subset"]
-buiActiveRelation["NotSubsetEqual"] := buiActive["SubsetEqual"]
-buiActiveRelation["NotSuperset"] := buiActive["Superset"]
-buiActiveRelation["NotSupersetEqual"] := buiActive["SupersetEqual"]
-buiActiveRelation["Element"|"NotElement"|"ReverseElement"|"NotReverseElement"] := buiActive["IsElement"]
-buiActiveRelation[ a:("Equal"|"Less"|"LessEqual"|"Greater"|"GreaterEqual"|"Subset"|"SubsetEqual"|"Superset"|"SupersetEqual")] := buiActive[a]
-buiActiveRelation[ _String] := False
+(* 'getOperatorPosition' returns the position of the main operator in an annotated/domain operator. *)
+getOperatorPosition[ DomainOperation$TM[ _, op_], {pos___}] := getOperatorPosition[ op, {pos, 2}]
+getOperatorPosition[ Annotated$TM[ op_, __], {pos___}] := getOperatorPosition[ op, {pos, 1}]
+getOperatorPosition[ op_Symbol, pos_List] := pos
+getOperatorPosition[ _] := $Failed
 
-Unequal$TM[ _] /; buiActiveRelation["Unequal"] := True
-Unequal$TM[ a_, b_] /; buiActiveRelation["Unequal"] := Not$TM[ Equal$TM[ a, b]]
-Unequal$TM[ a_, b_, c__] /; buiActiveRelation["Unequal"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Equal$TM[ #1, #2]]&]]
-Annotated$TM[ Unequal$TM, SubScript$TM[_]][ _] /; buiActiveRelation["Unequal"] := True
-Annotated$TM[ Unequal$TM, s:(SubScript$TM[_])][ a_, b_] /; buiActiveRelation["Unequal"] := Not$TM[ Annotated$TM[ Equal$TM, s][ a, b]]
-Annotated$TM[ Unequal$TM, s:(SubScript$TM[_])][ a_, b_, c__] /; buiActiveRelation["Unequal"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Annotated$TM[ Equal$TM, s][ #1, #2]]&]]
-(* Maybe it's better to leave domain operations untouched ... *)
-(*
-DomainOperation$TM[ _, Unequal$TM][ _] := True
-DomainOperation$TM[ dom_, Unequal$TM][ a_, b_] := Not$TM[ DomainOperation$TM[ dom, Equal$TM][ a, b]]
-DomainOperation$TM[ dom_, Unequal$TM][ a_, b_, c__] := Apply[ And$TM, Map[ Not$TM, ReplacePart[ Apply[ Hold, Subsets[ Hold[ a, b, c], {2}]], {_, 0} -> DomainOperation$TM[ dom, Equal$TM]]]]
-*)
-
-NotLess$TM[ _] /; buiActiveRelation["NotLess"] := True
-NotLess$TM[ a_, b_] /; buiActiveRelation["NotLess"] := Not$TM[ Less$TM[ a, b]]
-NotLess$TM[ a_, b_, c__] /; buiActiveRelation["NotLess"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Less$TM[ #1, #2]]&]]
-(*
-DomainOperation$TM[ _, NotLess$TM][ _] := True
-DomainOperation$TM[ dom_, NotLess$TM][ a_, b_] := Not$TM[ DomainOperation$TM[ dom, Less$TM][ a, b]]
-*)
-
-NotLessEqual$TM[ _] /; buiActiveRelation["NotLessEqual"] := True
-NotLessEqual$TM[ a_, b_] /; buiActiveRelation["NotLessEqual"] := Not$TM[ LessEqual$TM[ a, b]]
-NotLessEqual$TM[ a_, b_, c__] /; buiActiveRelation["NotLessEqual"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ LessEqual$TM[ #1, #2]]&]]
-(*
-DomainOperation$TM[ _, NotLessEqual$TM][ _] := True
-DomainOperation$TM[ dom_, NotLessEqual$TM][ a_, b_] := Not$TM[ DomainOperation$TM[ dom, LessEqual$TM][ a, b]]
-*)
-
-NotGreater$TM[ _] /; buiActiveRelation["NotGreater"] := True
-NotGreater$TM[ a_, b_] /; buiActiveRelation["NotGreater"] := Not$TM[ Greater$TM[ a, b]]
-NotGreater$TM[ a_, b_, c__] /; buiActiveRelation["NotGreater"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Greater$TM[ #1, #2]]&]]
-(*
-DomainOperation$TM[ _, NotGreater$TM][ _] := True
-DomainOperation$TM[ dom_, NotGreater$TM][ a_, b_] := Not$TM[ DomainOperation$TM[ dom, Greater$TM][ a, b]]
-*)
-
-NotGreaterEqual$TM[ _] /; buiActiveRelation["NotGreaterEqual"] := True
-NotGreaterEqual$TM[ a_, b_] /; buiActiveRelation["NotGreaterEqual"] := Not$TM[ GreaterEqual$TM[ a, b]]
-NotGreaterEqual$TM[ a_, b_, c__] /; buiActiveRelation["NotGreaterEqual"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ GreaterEqual$TM[ #1, #2]]&]]
-(*
-DomainOperation$TM[ _, NotGreaterEqual$TM][ _] := True
-DomainOperation$TM[ dom_, NotGreaterEqual$TM][ a_, b_] := Not$TM[ DomainOperation$TM[ dom, GreaterEqual$TM][ a, b]]
-*)
-
-NotSubset$TM[ _] /; buiActiveRelation["NotSubset"] := True
-NotSubset$TM[ a_, b_] /; buiActiveRelation["NotSubset"] := Not$TM[ Subset$TM[ a, b]]
-NotSubset$TM[ a_, b_, c__] /; buiActiveRelation["NotSubset"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Subset$TM[ #1, #2]]&]]
-Annotated$TM[ NotSubset$TM, SubScript$TM[_]][ _] /; buiActiveRelation["NotSubset"] := True
-Annotated$TM[ NotSubset$TM, s:(SubScript$TM[_])][ a_, b_] /; buiActiveRelation["NotSubset"] := Not$TM[ Annotated$TM[ Subset$TM, s][ a, b]]
-Annotated$TM[ NotSubset$TM, s:(SubScript$TM[_])][ a_, b_, c__] /; buiActiveRelation["NotSubset"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Annotated$TM[ Subset$TM, s][ #1, #2]]&]]
-(*
-DomainOperation$TM[ _, NotSubset$TM][ _] := True
-DomainOperation$TM[ dom_, NotSubset$TM][ a_, b_] := Not$TM[ DomainOperation$TM[ dom, Subset$TM][ a, b]]
-*)
-
-NotSubsetEqual$TM[ _] /; buiActiveRelation["NotSubsetEqual"] := True
-NotSubsetEqual$TM[ a_, b_] /; buiActiveRelation["NotSubsetEqual"] := Not$TM[ SubsetEqual$TM[ a, b]]
-NotSubsetEqual$TM[ a_, b_, c__] /; buiActiveRelation["NotSubsetEqual"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ SubsetEqual$TM[ #1, #2]]&]]
-Annotated$TM[ NotSubsetEqual$TM, SubScript$TM[_]][ _] /; buiActiveRelation["NotSubsetEqual"] := True
-Annotated$TM[ NotSubsetEqual$TM, s:(SubScript$TM[_])][ a_, b_] /; buiActiveRelation["NotSubsetEqual"] := Not$TM[ Annotated$TM[ SubsetEqual$TM, s][ a, b]]
-Annotated$TM[ NotSubsetEqual$TM, s:(SubScript$TM[_])][ a_, b_, c__] /; buiActiveRelation["NotSubsetEqual"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Annotated$TM[ SubsetEqual$TM, s][ #1, #2]]&]]
-(*
-DomainOperation$TM[ _, NotSubsetEqual$TM][ _] := True
-DomainOperation$TM[ dom_, NotSubsetEqual$TM][ a_, b_] := Not$TM[ DomainOperation$TM[ dom, SubsetEqual$TM][ a, b]]
-*)
-
-NotSuperset$TM[ _] /; buiActiveRelation["NotSuperset"] := True
-NotSuperset$TM[ a_, b_] /; buiActiveRelation["NotSuperset"] := Not$TM[ Superset$TM[ a, b]]
-NotSuperset$TM[ a_, b_, c__] /; buiActiveRelation["NotSuperset"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Superset$TM[ #1, #2]]&]]
-Annotated$TM[ NotSuperset$TM, SubScript$TM[_]][ _] /; buiActiveRelation["NotSuperset"] := True
-Annotated$TM[ NotSuperset$TM, s:(SubScript$TM[_])][ a_, b_] /; buiActiveRelation["NotSuperset"] := Not$TM[ Annotated$TM[ Superset$TM, s][ a, b]]
-Annotated$TM[ NotSuperset$TM, s:(SubScript$TM[_])][ a_, b_, c__] /; buiActiveRelation["NotSuperset"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Annotated$TM[ Superset$TM, s][ #1, #2]]&]]
-(*
-DomainOperation$TM[ _, NotSuperset$TM][ _] := True
-DomainOperation$TM[ dom_, NotSuperset$TM][ a_, b_] := Not$TM[ DomainOperation$TM[ dom, Superset$TM][ a, b]]
-*)
-
-NotSupersetEqual$TM[ _] /; buiActiveRelation["NotSupersetEqual"] := True
-NotSupersetEqual$TM[ a_, b_] /; buiActiveRelation["NotSupersetEqual"] := Not$TM[ Superset$TM[ a, b]]
-NotSupersetEqual$TM[ a_, b_, c__] /; buiActiveRelation["NotSupersetEqual"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ SupersetEqual$TM[ #1, #2]]&]]
-Annotated$TM[ NotSupersetEqual$TM, SubScript$TM[_]][ _] /; buiActiveRelation["NotSupersetEqual"] := True
-Annotated$TM[ NotSupersetEqual$TM, s:(SubScript$TM[_])][ a_, b_] /; buiActiveRelation["NotSupersetEqual"] := Not$TM[ Annotated$TM[ SupersetEqual$TM, s][ a, b]]
-Annotated$TM[ NotSupersetEqual$TM, s:(SubScript$TM[_])][ a_, b_, c__] /; buiActiveRelation["NotSupersetEqual"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Annotated$TM[ SupersetEqual$TM, s][ #1, #2]]&]]
-(*
-DomainOperation$TM[ _, NotSupersetEqual$TM][ _] := True
-DomainOperation$TM[ dom_, NotSupersetEqual$TM][ a_, b_] := Not$TM[ DomainOperation$TM[ dom, SupersetEqual$TM][ a, b]]
-*)
-
-(*
-DomainOperation$TM[ dom_, op:(NotLess$TM|NotLessEqual$TM|NotGreater$TM|NotGreaterEqual$TM|NotSubset$TM|NotSubsetEqual$TM|NotSuperset$TM|NotSupersetEqual$TM)][ a_, b_, c__] :=
-	Module[ {name = StringDrop[ SymbolName[ op], -3]},
-		(notification[ translate["predArgN"], name, Length[ {a, b, c}], 2];
-		DomainOperation$TM[ dom, ToExpression[ name]][ a, b, c])
+(* 'getOperator' retrieves the main operator from an annotated/domain operator. *)
+getOperator[ expr_] :=
+	Module[ {p = getOperatorPosition[ expr, {}]},
+		Switch[ p,
+			{},
+			expr,
+			{__Integer},
+			Extract[ expr, p],
+			_,
+			$Failed
+		]
 	]
-*)
 	
-ReverseElement$TM[ a_, b_] /; buiActiveRelation["ReverseElement"] := Element$TM[ b, a]
-ReverseElement$TM[ a_, b_, c__] /; buiActiveRelation["ReverseElement"] := chainToConjunction[ Riffle[ {a, b, c}, Element$TM[ #2, #1]&]]
-Annotated$TM[ ReverseElement$TM, s:(SubScript$TM[_])][ a_, b_] /; buiActiveRelation["ReverseElement"] := Annotated$TM[ Element$TM, s][ b, a]
-Annotated$TM[ ReverseElement$TM, s:(SubScript$TM[_])][ a_, b_, c__] /; buiActiveRelation["ReverseElement"] := chainToConjunction[ Riffle[ {a, b, c}, Annotated$TM[ Element$TM, s][ #2, #1]&]]
-(*
-DomainOperation$TM[ dom_, ReverseElement$TM][ a_, b_] := DomainOperation$TM[ dom, Element$TM][ b, a]
-*)
+(* 'setOperator' sets the main operator of an annotated/domain operator. *)
+setOperator[ op_, new_] :=
+	Module[ {pos = getOperatorPosition[ op, {}]},
+		Switch[ pos,
+			{},
+			new,
+			{__Integer},
+			ReplacePart[ op, pos :> new],
+			_,
+			op
+		]
+	]
+
+isPosRelation[ "Equal"|Equal$TM] := buiActive["Equal"]
+isPosRelation[ "Less"|Less$TM] := buiActive["Less"]
+isPosRelation[ "LessEqual"|LessEqual$TM] := buiActive["LessEqual"]
+isPosRelation[ "Greater"|Greater$TM] := buiActive["Greater"]
+isPosRelation[ "GreaterEqual"|GreaterEqual$TM] := buiActive["GreaterEqual"]
+isPosRelation[ "Subset"|Subset$TM] := buiActive["Subset"]
+isPosRelation[ "SubsetEqual"|SubsetEqual$TM] := buiActive["SubsetEqual"]
+isPosRelation[ "Superset"|Superset$TM] := buiActive["Superset"]
+isPosRelation[ "SupersetEqual"|SupersetEqual$TM] := buiActive["SupersetEqual"]
+isPosRelation[ "Element"|"ReverseElement"|Element$TM|ReverseElement$TM] := buiActive["IsElement"]
+isPosRelation[ _] := False
+
+isNegRelation[ "Unequal"|Unequal$TM] := buiActive["Equal"]
+isNegRelation[ "NotLess"|NotLess$TM] := buiActive["Less"]
+isNegRelation[ "NotLessEqual"|NotLessEqual$TM] := buiActive["LessEqual"]
+isNegRelation[ "NotGreater"|NotGreater$TM] := buiActive["Greater"]
+isNegRelation[ "NotGreaterEqual"|NotGreaterEqual$TM] := buiActive["GreaterEqual"]
+isNegRelation[ "NotSubset"|NotSubset$TM] := buiActive["Subset"]
+isNegRelation[ "NotSubsetEqual"|NotSubsetEqual$TM] := buiActive["SubsetEqual"]
+isNegRelation[ "NotSuperset"|NotSuperset$TM] := buiActive["Superset"]
+isNegRelation[ "NotSupersetEqual"|NotSupersetEqual$TM] := buiActive["SupersetEqual"]
+isNegRelation[ "NotElement"|"NotReverseElement"|NotElement$TM|NotReverseElement$TM] := buiActive["IsElement"]
+isNegRelation[ _] := False
+
+negateRelation[ Unequal$TM] := Equal$TM
+negateRelation[ Equal$TM] := Unequal$TM
+negateRelation[ op_Symbol] :=
+	Module[ {name = SymbolName[ op]},
+		If[ StringLength[ name] > 3 && StringTake[ name, 3] === "Not",
+			ToExpression[ StringDrop[ name, 3]],
+			ToExpression[ StringJoin[ "Not", name]]
+		]
+	]
+
+Equal$TM[ a_, b__, c_] /; isPosRelation["Equal"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Equal$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
+Unequal$TM[ a_] /; isNegRelation["Unequal"] := Not$TM[ Equal$TM[ a]]
+Unequal$TM[ a_, b_] /; isNegRelation["Unequal"] := Not$TM[ Equal$TM[ a, b]]
+Unequal$TM[ a_, b__, c_] /; isNegRelation["Unequal"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ Equal$TM[ #1, #2]]]&, {{a, b}, {b, c}}]], 1, Hold]
+
+Less$TM[ a_, b__, c_] /; isPosRelation["Less"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Less$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
+NotLess$TM[ a_] /; isNegRelation["NotLess"] := Not$TM[ Less$TM[ a]]
+NotLess$TM[ a_, b_] /; isNegRelation["NotLess"] := Not$TM[ Less$TM[ a, b]]
+NotLess$TM[ a_, b__, c_] /; isNegRelation["NotLess"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ Less$TM[ #1, #2]]]&, {{a, b}, {b, c}}]], 1, Hold]
+
+LessEqual$TM[ a_, b__, c_] /; isPosRelation["LessEqual"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ LessEqual$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
+NotLessEqual$TM[ a_] /; isNegRelation["NotLessEqual"] := Not$TM[ LessEqual$TM[ a]]
+NotLessEqual$TM[ a_, b_] /; isNegRelation["NotLessEqual"] := Not$TM[ LessEqual$TM[ a, b]]
+NotLessEqual$TM[ a_, b__, c_] /; isNegRelation["NotLessEqual"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ LessEqual$TM[ #1, #2]]]&, {{a, b}, {b, c}}]], 1, Hold]
+
+Greater$TM[ a_, b__, c_] /; isPosRelation["Greater"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Greater$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
+NotGreater$TM[ a_] /; isNegRelation["NotGreater"] := Not$TM[ Greater$TM[ a]]
+NotGreater$TM[ a_, b_] /; isNegRelation["NotGreater"] := Not$TM[ Greater$TM[ a, b]]
+NotGreater$TM[ a_, b__, c_] /; isNegRelation["NotGreater"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ Greater$TM[ #1, #2]]]&, {{a, b}, {b, c}}]], 1, Hold]
+
+GreaterEqual$TM[ a_, b__, c_] /; isPosRelation["GreaterEqual"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ GreaterEqual$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
+NotGreaterEqual$TM[ a_] /; isNegRelation["NotGreaterEqual"] := Not$TM[ GreaterEqual$TM[ a]]
+NotGreaterEqual$TM[ a_, b_] /; isNegRelation["NotGreaterEqual"] := Not$TM[ GreaterEqual$TM[ a, b]]
+NotGreaterEqual$TM[ a_, b__, c_] /; isNegRelation["NotGreaterEqual"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ GreaterEqual$TM[ #1, #2]]]&, {{a, b}, {b, c}}]], 1, Hold]
+
+Subset$TM[ a_, b__, c_] /; isPosRelation["Subset"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Subset$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
+NotSubset$TM[ a_] /; isNegRelation["NotSubset"] := Not$TM[ Subset$TM[ a]]
+NotSubset$TM[ a_, b_] /; isNegRelation["NotSubset"] := Not$TM[ Subset$TM[ a, b]]
+NotSubset$TM[ a_, b__, c_] /; isNegRelation["NotSubset"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ Subset$TM[ #1, #2]]]&, {{a, b}, {b, c}}]], 1, Hold]
+
+SubsetEqual$TM[ a_, b__, c_] /; isPosRelation["SubsetEqual"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ SubsetEqual$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
+NotSubsetEqual$TM[ a_] /; isNegRelation["NotSubsetEqual"] := Not$TM[ SubsetEqual$TM[ a]]
+NotSubsetEqual$TM[ a_, b_] /; isNegRelation["NotSubsetEqual"] := Not$TM[ SubsetEqual$TM[ a, b]]
+NotSubsetEqual$TM[ a_, b__, c_] /; isNegRelation["NotSubsetEqual"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ SubsetEqual$TM[ #1, #2]]]&, {{a, b}, {b, c}}]], 1, Hold]
+
+Superset$TM[ a_, b__, c_] /; isPosRelation["Superset"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Superset$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
+NotSuperset$TM[ a_] /; isNegRelation["NotSuperset"] := Not$TM[ Superset$TM[ a]]
+NotSuperset$TM[ a_, b_] /; isNegRelation["NotSuperset"] := Not$TM[ Superset$TM[ a, b]]
+NotSuperset$TM[ a_, b__, c_] /; isNegRelation["NotSuperset"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ Superset$TM[ #1, #2]]]&, {{a, b}, {b, c}}]], 1, Hold]
+
+SupersetEqual$TM[ a_, b__, c_] /; isPosRelation["SupersetEqual"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ SupersetEqual$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
+NotSupersetEqual$TM[ a_] /; isNegRelation["NotSupersetEqual"] := Not$TM[ SupersetEqual$TM[ a]]
+NotSupersetEqual$TM[ a_, b_] /; isNegRelation["NotSupersetEqual"] := Not$TM[ SupersetEqual$TM[ a, b]]
+NotSupersetEqual$TM[ a_, b_, c__] /; isNegRelation["NotSupersetEqual"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ SupersetEqual$TM[ #1, #2]]]&, {{a, b}, {b, c}}]], 1, Hold]
 	
-NotElement$TM[ a_, b_] /; buiActiveRelation["NotElement"] := Not$TM[ Element$TM[ a, b]]
-NotElement$TM[ a_, b_, c__] /; buiActiveRelation["NotElement"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Element$TM[ #1, #2]]&]]
-(* Special case: Unary domain decision predicate *)
-DomainOperation$TM[ dom_, NotElement$TM][ a_] /; buiActiveRelation["NotElement"] := Not$TM[ DomainOperation$TM[ dom, Element$TM][ a]]
-Annotated$TM[ NotElement$TM, s:(SubScript$TM[_])][ a_, b_] /; buiActiveRelation["NotElement"] := Not$TM[ Annotated$TM[ Element$TM, s][ a, b]]
-Annotated$TM[ NotElement$TM, s:(SubScript$TM[_])][ a_, b_, c__] /; buiActiveRelation["NotElement"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Annotated$TM[ Element$TM, s][ #1, #2]]&]]
-(*
-DomainOperation$TM[ dom_, NotElement$TM][ a_, b_] := Not$TM[ DomainOperation$TM[ dom, Element$TM][ a, b]]
-*)
+Element$TM[ a_, b__, c_] /; isPosRelation["Element"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Element$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
+NotElement$TM[ a_] /; isNegRelation["NotElement"] := Not$TM[ Element$TM[ a]]
+NotElement$TM[ a_, b_] /; isNegRelation["NotElement"] := Not$TM[ Element$TM[ a, b]]
+NotElement$TM[ a_, b__, c_] /; isNegRelation["NotElement"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ Element$TM[ #1, #2]]]&, {{a, b}, {b, c}}]], 1, Hold]
 
-NotReverseElement$TM[ a_, b_] /; buiActiveRelation["NotReverseElement"] := Not$TM[ Element$TM[ b, a]]
-NotReverseElement$TM[ a_, b_, c__] /; buiActiveRelation["NotReverseElement"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Element$TM[ #2, #1]]&]]
-Annotated$TM[ NotReverseElement$TM, s:(SubScript$TM[_])][ a_, b_] /; buiActiveRelation["NotReverseElement"] := Not$TM[ Annotated$TM[ Element$TM, s][ b, a]]
-Annotated$TM[ NotReverseElement$TM, s:(SubScript$TM[_])][ a_, b_, c__] /; buiActiveRelation["NotReverseElement"] := chainToConjunction[ Riffle[ {a, b, c}, Not$TM[ Annotated$TM[ Element$TM, s][ #2, #1]]&]]
-(*
-DomainOperation$TM[ dom_, NotReverseElement$TM][ a_, b_] := Not$TM[ DomainOperation$TM[ dom, Element$TM][ b, a]]
-*)
+ReverseElement$TM[ a_, b_] /; isPosRelation["ReverseElement"] := Element$TM[ b, a]
+ReverseElement$TM[ a_, b_, c__] /; isPosRelation["ReverseElement"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Element$TM[ #2, #1]]&, {{a, b}, {b, c}}]], 1, Hold]
+NotReverseElement$TM[ a_] /; isNegRelation["NotReverseElement"] := Not$TM[ Element$TM[ a]]
+NotReverseElement$TM[ a_, b_] /; isNegRelation["NotReverseElement"] := Not$TM[ Element$TM[ b, a]]
+NotReverseElement$TM[ a_, b__, c_] /; isNegRelation["NotReverseElement"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ Element$TM[ #2, #1]]]&, {{a, b}, {b, c}}]], 1, Hold]
 
-DoubleLeftArrow$TM[ a_, b_] := Implies$TM[ b, a]
-DoubleLeftArrow$TM[ a___] := (notification[ translate["connArgM"], "DoubleLeftArrow", Length[ {a}], 2]; DoubleLeftArrow[ a])
+DomainOperation$TM[ dom_, op_][ a_, b_] /; And[ getOperator[ op] === ReverseElement$TM, isPosRelation[ "ReverseElement"]] :=
+	DomainOperation$TM[ dom, setOperator[ op, Element$TM]][ b, a]
+DomainOperation$TM[ dom_, op_][ a_] :=
+	Module[ {rel},
+		Not$TM[ DomainOperation$TM[ dom, setOperator[ op, negateRelation[ rel]]][ a]] /; And[ (rel = getOperator[ op]) =!= $Failed, isNegRelation[ rel]]
+	]
+DomainOperation$TM[ dom_, op_][ a_, b_] :=
+	Module[ {rel},
+		Not$TM[ DomainOperation$TM[ dom, setOperator[ op, negateRelation[ rel]]][ a, b]] /; And[ (rel = getOperator[ op]) =!= $Failed, isNegRelation[ rel]]
+	]
+DomainOperation$TM[ dom_, op_][ a_, b__, c_] :=
+	Module[ {rel, p},
+		If[ p,
+			Flatten[ Apply[ And$TM, MapThread[ Hold[ DomainOperation$TM[ dom, op][ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold],
+			Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ DomainOperation$TM[ dom, setOperator[ op, negateRelation[ rel]]][ #1, #2]]]&, {{a, b}, {b, c}}]], 1, Hold]
+		] /; And[ (rel = getOperator[ op]) =!= $Failed, (p = isPosRelation[ rel]) || isNegRelation[ rel]]
+	]
 
-NotExists$TM[ r_RNG$, cond_, form_] := Not$TM[ Exists$TM[ r, cond, form]]
-
-Equal$TM[ a_, b_, c__] /; buiActiveRelation["Equal"] := chainToConjunction[ Riffle[ {a, b, c}, Equal$TM]]
-(op:(Annotated$TM[ Equal$TM, SubScript$TM[_]]))[ a_, b_, c__] /; buiActiveRelation["Equal"] := chainToConjunction[ Riffle[ {a, b, c}, op]]
-(*
-(op:(DomainOperation$TM[ _, Equal$TM]))[ a_, b_, c__] :=
-	And$TM[ op[ a, b], Apply[ And$TM, Map[ op[ a, #]&, Hold[ c]]]]
-*)
-
-Less$TM[ a_, b__, c_] /; buiActiveRelation["Less"] := chainToConjunction[ Riffle[ {a, b, c}, Less$TM]]
-LessEqual$TM[ a_, b__, c_] /; buiActiveRelation["LessEqual"] := chainToConjunction[ Riffle[ {a, b, c}, LessEqual$TM]]
-Greater$TM[ a_, b__, c_] /; buiActiveRelation["Greater"] := chainToConjunction[ Riffle[ {a, b, c}, Greater$TM]]
-GreaterEqual$TM[ a_, b__, c_] /; buiActiveRelation["GreaterEqual"] := chainToConjunction[ Riffle[ {a, b, c}, GreaterEqual$TM]]
-Subset$TM[ a_, b__, c_] /; buiActiveRelation["Subset"] := chainToConjunction[ Riffle[ {a, b, c}, Subset$TM]]
-SubsetEqual$TM[ a_, b__, c_] /; buiActiveRelation["SubsetEqual"] := chainToConjunction[ Riffle[ {a, b, c}, SubsetEqual$TM]]
-Superset$TM[ a_, b__, c_] /; buiActiveRelation["Superset"] := chainToConjunction[ Riffle[ {a, b, c}, Superset$TM]]
-SupersetEqual$TM[ a_, b__, c_] /; buiActiveRelation["SupersetEqual"] := chainToConjunction[ Riffle[ {a, b, c}, SupersetEqual$TM]]
-Element$TM[ a_, b__, c_] /; buiActiveRelation["Element"] := chainToConjunction[ Riffle[ {a, b, c}, Element$TM]]
-	
-(*
-(op:(DomainOperation$TM[ _, Less$TM|LessEqual$TM|Greater$TM|GreaterEqual$TM|Subset$TM|SubsetEqual$TM|Superset$TM|SupersetEqual$TM]))[ a_, b__, c_] :=
-	Flatten[ Apply[ And$TM, MapThread[ Hold[ op[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
-*)
-(op:(Annotated$TM[ Subset$TM|SubsetEqual$TM|Superset$TM|SupersetEqual$TM|Element$TM, SubScript$TM[_]]))[ a_, b__, c_] :=
-	chainToConjunction[ Riffle[ {a, b, c}, op]]
+Annotated$TM[ op_, ann___][ a_, b_] /; And[ getOperator[ op] === ReverseElement$TM, isPosRelation[ "ReverseElement"]] :=
+	Annotated$TM[ setOperator[ op, Element$TM], ann][ b, a]
+Annotated$TM[ op_, ann___][ a_] :=
+	Module[ {rel},
+		Not$TM[ Annotated$TM[ setOperator[ op, negateRelation[ rel]], ann][ a]] /; And[ (rel = getOperator[ op]) =!= $Failed, isNegRelation[ rel]]
+	]
+Annotated$TM[ op_, ann___][ a_, b_] :=
+	Module[ {rel},
+		Not$TM[ Annotated$TM[ setOperator[ op, negateRelation[ rel]], ann][ a, b]] /; And[ (rel = getOperator[ op]) =!= $Failed, isNegRelation[ rel]]
+	]
+Annotated$TM[ op_, ann___][ a_, b__, c_] :=
+	Module[ {rel, p},
+		If[ p,
+			Flatten[ Apply[ And$TM, MapThread[ Hold[ Annotated$TM[ op, ann][ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold],
+			Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ Annotated$TM[ setOperator[ op, negateRelation[ rel]], ann][ #1, #2]]]&, {{a, b}, {b, c}}]], 1, Hold]
+		] /; And[ (rel = getOperator[ op]) =!= $Failed, (p = isPosRelation[ rel]) || isNegRelation[ rel]]
+	]
 	
 OperatorChain$TM[ a1_, op1_, a2_, rest___] :=
-	Module[ {l, opList, opNames},
-		chainToConjunction[ {a1, op1, a2, rest}] /;
+	Module[ {opList},
+		(
+			chainToConjunction[ {a1, op1, a2, rest}, {}]
+		) /;
 			And[
-				Mod[ l = Length[ {rest}], 2] === 0,
-				opList = Prepend[ Take[ {rest}, {1, -1, 2}], op1];
-				opNames = Apply[ Hold, Map[ Replace[ #, Annotated$TM[ n:(Subset$TM|SubsetEqual$TM|Superset$TM|SupersetEqual$TM|Element$TM|ReverseElement$TM|Equal$TM|NotSubset$TM|NotSubsetEqual$TM|NotSuperset$TM|NotSupersetEqual$TM|NotElement$TM|NotReverseElement$TM|Unequal$TM), SubScript$TM[_]] :> n]&, opList]];
-				Apply[ And, Map[ buiActiveRelation[ Quiet[ Check[ StringDrop[ SymbolName[ #], -3], ""]]]&, opNames]]
+				Mod[ Length[ Hold[ rest]], 2] === 0,
+				opList = DeleteDuplicates[ Apply[ Hold, Map[ getOperator, Prepend[ Take[ {rest}, {1, -1, 2}], op1]]]];
+				Apply[ And, Map[ (isPosRelation[ #] || isNegRelation[ #])&, opList]]
 			]
 	]
 	
-chainToConjunction[ l_List] := chainToConjunction[ l, {}]
 chainToConjunction[ {a1_, op1_, a2_, rest___}, {accumulator___}] :=
 	chainToConjunction[ {a2, rest}, {accumulator, op1[ a1, a2]}]
 chainToConjunction[ l_List, {accumulator___}] := And$TM[ accumulator]
+
+DoubleLeftArrow$TM[ a_, b_] := Implies$TM[ b, a]
+DoubleLeftArrow$TM[ a_, b___] := Fold[ Implies$TM[ #2, #1]&, a, {b}]
+
+NotExists$TM[ r_RNG$, cond_, form_] := Not$TM[ Exists$TM[ r, cond, form]]
 	
 
 (* ::Section:: *)
