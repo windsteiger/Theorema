@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[     33722,       1140]
-NotebookOptionsPosition[     23005,        877]
-NotebookOutlinePosition[     23473,        897]
-CellTagsIndexPosition[     23430,        894]
+NotebookDataLength[     32332,       1105]
+NotebookOptionsPosition[     22359,        852]
+NotebookOutlinePosition[     22828,        872]
+CellTagsIndexPosition[     22785,        869]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -111,9 +111,6 @@ Cell[StyleData["Title"],
  "Underline"->False},
  FontColor->CMYKColor[1, 0, 1, 1]],
 
-Cell[StyleData["Title", "SlideShow"],
- CellMargins->{{27, 10}, {0, 45}}],
-
 Cell[StyleData["Title", "Printout"],
  ShowGroupOpener->False,
  CellMargins->{{6, 10}, {5, 30}}]
@@ -133,9 +130,6 @@ Cell[StyleData["Subtitle"],
  "Underline"->False},
  FontColor->CMYKColor[1, 0, 1, 1]],
 
-Cell[StyleData["Subtitle", "SlideShow"],
- CellMargins->{{27, 10}, {0, 3}}],
-
 Cell[StyleData["Subtitle", "Printout"],
  CellMargins->{{6, 10}, {5, 0}}]
 }, Closed]],
@@ -154,8 +148,23 @@ Cell[StyleData["Subsubtitle"],
  "Underline"->False},
  FontColor->CMYKColor[1, 0, 1, 1]],
 
-Cell[StyleData["Subsubtitle", "SlideShow"],
- CellMargins->{{27, 10}, {12, 3}}],
+Cell[StyleData["Subsubtitle", "Printout"],
+ CellMargins->{{6, 10}, {0, 0}}]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell[StyleData["Author"],
+ CellMargins->{{27, 27}, {18, 20}},
+ TextAlignment->Center,
+ MenuSortingValue->1200,
+ FontFamily->"Bitstream Charter",
+ FontSize->16,
+ FontWeight->"Plain",
+ FontSlant->"Plain",
+ FontVariations->{"StrikeThrough"->False,
+ "Underline"->False},
+ FontColor->CMYKColor[1, 0, 1, 1]],
 
 Cell[StyleData["Subsubtitle", "Printout"],
  CellMargins->{{6, 10}, {0, 0}}]
@@ -180,9 +189,6 @@ Cell[StyleData["Section"],
  "Underline"->False},
  FontColor->CMYKColor[1, 1, 1, 1]],
 
-Cell[StyleData["Section", "SlideShow"],
- CellMargins->{{27, 10}, {12, 51}}],
-
 Cell[StyleData["Section", "Printout"],
  ShowGroupOpener->False,
  CellMargins->{{2, 0}, {7, 22}}]
@@ -203,9 +209,6 @@ Cell[StyleData["Subsection"],
  FontVariations->{"StrikeThrough"->False,
  "Underline"->False},
  FontColor->CMYKColor[1, 1, 1, 1]],
-
-Cell[StyleData["Subsection", "SlideShow"],
- CellMargins->{{48, 10}, {12, 18}}],
 
 Cell[StyleData["Subsection", "Printout"],
  ShowGroupOpener->False,
@@ -228,9 +231,6 @@ Cell[StyleData["Subsubsection"],
  "Underline"->False},
  FontColor->CMYKColor[1, 1, 1, 0]],
 
-Cell[StyleData["Subsubsection", "SlideShow"],
- CellMargins->{{60, 10}, {3, 15}}],
-
 Cell[StyleData["Subsubsection", "Printout"],
  ShowGroupOpener->False,
  CellMargins->{{35, 0}, {7, 14}}]
@@ -250,14 +250,10 @@ Cell[StyleData["Subsubsubsection"],
  "Underline"->False},
  FontColor->CMYKColor[1, 1, 1, 0]],
 
-Cell[StyleData["Subsubsubsection", "SlideShow"],
- CellMargins->{{92, 10}, {3, 15}},
- LineSpacing->{1, 0}],
-
 Cell[StyleData["Subsubsubsection", "Printout"],
  CellMargins->{{50, 0}, {7, 14}}]
 }, Closed]]
-}, Closed]]
+}, Open  ]]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -275,10 +271,6 @@ Cell[StyleData["Author"],
  FontSize->14,
  FontSlant->"Italic"],
 
-Cell[StyleData["Author", "SlideShow"],
- CellMargins->{{27, 30}, {30, 8}},
- FontSize->28],
-
 Cell[StyleData["Author", "Printout"],
  CellMargins->{{6, 10}, {0, 10}},
  FontSize->10]
@@ -293,11 +285,6 @@ Cell[StyleData["Abstract"],
  MenuSortingValue->2050,
  FontFamily->"Times",
  FontSize->12],
-
-Cell[StyleData["Abstract", "SlideShow"],
- CellFrame->{{0, 0}, {1, 1}},
- CellMargins->{{27, 140}, {30, 30}},
- FontSize->24],
 
 Cell[StyleData["Abstract", "Printout"],
  Hyphenation->True,
@@ -358,7 +345,7 @@ Cell[StyleData["Item", "Presentation"],
  CellMargins->{{140, 10}, {7, 7}},
  CellFrameLabelMargins->6,
  FontSize->24]
-}, Closed]],
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -378,7 +365,7 @@ Cell[StyleData["ItemParagraph"],
 Cell[StyleData["ItemParagraph", "Presentation"],
  CellMargins->{{140, 10}, {7, 2}},
  FontSize->24]
-}, Closed]],
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -403,7 +390,7 @@ Cell[StyleData["Subitem", "Presentation"],
  CellMargins->{{176, 12}, {7, 7}},
  CellFrameLabelMargins->6,
  FontSize->24]
-}, Closed]],
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -424,7 +411,7 @@ Cell[StyleData["SubitemParagraph"],
 Cell[StyleData["SubitemParagraph", "Presentation"],
  CellMargins->{{176, 12}, {7, 2}},
  FontSize->24]
-}, Closed]],
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -448,7 +435,7 @@ Cell[StyleData["Subsubitem", "Presentation"],
  CellMargins->{{212, 12}, {7, 7}},
  CellFrameLabelMargins->6,
  FontSize->24]
-}, Closed]],
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -470,7 +457,7 @@ Cell[StyleData["SubsubitemParagraph"],
 Cell[StyleData["SubsubitemParagraph", "Presentation"],
  CellMargins->{{212, 12}, {7, 2}},
  FontSize->24]
-}, Closed]],
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -496,7 +483,7 @@ Cell[StyleData["ItemNumbered", "Presentation"],
  CellMargins->{{140, 10}, {7, 7}},
  CellFrameLabelMargins->6,
  FontSize->24]
-}, Closed]],
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -524,7 +511,7 @@ Cell[StyleData["SubitemNumbered", "Presentation"],
  CellMargins->{{176, 12}, {7, 7}},
  CellFrameLabelMargins->6,
  FontSize->24]
-}, Closed]],
+}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -552,8 +539,8 @@ Cell[StyleData["SubsubitemNumbered", "Presentation"],
  CellMargins->{{212, 12}, {7, 7}},
  CellFrameLabelMargins->6,
  FontSize->24]
-}, Closed]]
-}, Open  ]],
+}, Open  ]]
+}, Closed]],
 
 Cell[CellGroupData[{
 
@@ -654,13 +641,8 @@ Cell[StyleData["Computation", "Layout"],
  Editable->False],
 
 Cell[StyleData["Computation", "Presentation"],
- Editable->False],
-
-Cell[StyleData["Computation", "SlideShow"],
- CellMargins->{{74, 0}, {10, 15}}]
+ Editable->False]
 }, Open  ]],
-
-Cell[CellGroupData[{
 
 Cell[StyleData["ComputationResult"],
  CellFrame->{{1.5, 0}, {0, 0}},
@@ -672,10 +654,6 @@ Cell[StyleData["ComputationResult"],
  StyleMenuListing->None,
  FontColor->CMYKColor[1, 0, 1, 1],
  Background->CMYKColor[0, 1, 0, 0]],
-
-Cell[StyleData["ComputationResult", "SlideShow"],
- CellMargins->{{92, 10}, {15, 10}}]
-}, Open  ]],
 
 Cell[StyleData["ComputationInfo"],
  ShowCellBracket->False,
@@ -718,11 +696,8 @@ Cell[StyleData["FrameLabel"],
  FontColor->CMYKColor[1, 0, 1, 0],
  Background->None],
 
-Cell[StyleData["FrameLabel", "SlideShow"],
- FontSize->18],
-
 Cell[StyleData["FrameLabel", "Printout"]]
-}, Closed]],
+}, Open  ]],
 
 Cell[StyleData["OpenArchive"],
  CellFrame->{{False, False}, {False, True}},
@@ -880,7 +855,7 @@ AutoGeneratedPackage->None,
 Editable->True,
 Saveable->True,
 WindowSize->{740, 867},
-WindowMargins->{{117, Automatic}, {47, Automatic}},
+WindowMargins->{{-49, Automatic}, {Automatic, -24}},
 TrackCellChangeTimes->False,
 FrontEndVersion->"8.0 for Linux x86 (32-bit) (February 23, 2011)",
 StyleDefinitions->"StylesheetFormatting.nb"
@@ -924,223 +899,213 @@ Cell[CellGroupData[{
 Cell[3161, 100, 321, 11, 100, 24, 0, "StyleData", "Title", "All",
  MenuSortingValue->1100,
  MenuCommandKey->"1"],
-Cell[3485, 113, 72, 1, 145, 37, 0, "StyleData", "Title", "SlideShow"],
-Cell[3560, 116, 95, 2, 67, 36, 0, "StyleData", "Title", "Printout"]
+Cell[3485, 113, 95, 2, 67, 36, 0, "StyleData", "Title", "Printout"]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[3692, 123, 302, 10, 68, 27, 0, "StyleData", "Subtitle", "All",
+Cell[3617, 120, 302, 10, 68, 27, 0, "StyleData", "Subtitle", "All",
  MenuSortingValue->1150],
-Cell[3997, 135, 74, 1, 75, 40, 0, "StyleData", "Subtitle", "SlideShow"],
-Cell[4074, 138, 72, 1, 37, 39, 0, "StyleData", "Subtitle", "Printout"]
+Cell[3922, 132, 72, 1, 37, 39, 0, "StyleData", "Subtitle", "Printout"]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[4183, 144, 304, 10, 47, 30, 0, "StyleData", "Subsubtitle", "All",
+Cell[4031, 138, 304, 10, 47, 30, 0, "StyleData", "Subsubtitle", "All",
  MenuSortingValue->1200],
-Cell[4490, 156, 78, 1, 69, 43, 0, "StyleData", "Subsubtitle", "SlideShow"],
-Cell[4571, 159, 75, 1, 32, 42, 0, "StyleData", "Subsubtitle", "Printout"]
+Cell[4338, 150, 75, 1, 32, 42, 0, "StyleData", "Subsubtitle", "Printout"]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[4450, 156, 301, 10, 59, 25, 0, "StyleData", "Author", "All",
+ MenuSortingValue->1200],
+Cell[4754, 168, 75, 1, 32, 42, 0, "StyleData", "Subsubtitle", "Printout"]
 }, Closed]]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[4695, 166, 32, 0, 33, "Subsection"],
+Cell[4878, 175, 32, 0, 33, "Subsection"],
 Cell[CellGroupData[{
-Cell[4752, 170, 287, 10, 89, 26, 0, "StyleData", "Section", "All",
+Cell[4935, 179, 287, 10, 89, 26, 0, "StyleData", "Section", "All",
  MenuSortingValue->1250,
  MenuCommandKey->"4"],
-Cell[5042, 182, 75, 1, 136, 39, 0, "StyleData", "Section", "SlideShow"],
-Cell[5120, 185, 96, 2, 61, 38, 0, "StyleData", "Section", "Printout"]
+Cell[5225, 191, 96, 2, 61, 38, 0, "StyleData", "Section", "Printout"]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[5253, 192, 352, 12, 46, 29, 0, "StyleData", "Subsection", "All",
+Cell[5358, 198, 352, 12, 46, 29, 0, "StyleData", "Subsection", "All",
  MenuSortingValue->1300,
  MenuCommandKey->"5"],
-Cell[5608, 206, 78, 1, 80, 42, 0, "StyleData", "Subsection", "SlideShow"],
-Cell[5689, 209, 99, 2, 61, 41, 0, "StyleData", "Subsection", "Printout"]
+Cell[5713, 212, 99, 2, 61, 41, 0, "StyleData", "Subsection", "Printout"]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[5825, 216, 356, 12, 38, 32, 0, "StyleData", "Subsubsection", "All",
+Cell[5849, 219, 356, 12, 38, 32, 0, "StyleData", "Subsubsection", "All",
  MenuSortingValue->1350,
  MenuCommandKey->"6"],
-Cell[6184, 230, 80, 1, 63, 45, 0, "StyleData", "Subsubsection", "SlideShow"],
-Cell[6267, 233, 103, 2, 52, 44, 0, "StyleData", "Subsubsection", "Printout"]
+Cell[6208, 233, 103, 2, 52, 44, 0, "StyleData", "Subsubsection", "Printout"]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[6407, 240, 326, 10, 38, 35, 0, "StyleData", "Subsubsubsection", "All"],
-Cell[6736, 252, 105, 2, 63, 48, 0, "StyleData", "Subsubsubsection", \
-"SlideShow"],
-Cell[6844, 256, 81, 1, 53, 47, 0, "StyleData", "Subsubsubsection", \
+Cell[6348, 240, 326, 10, 38, 35, 0, "StyleData", "Subsubsubsection", "All"],
+Cell[6677, 252, 81, 1, 53, 47, 0, "StyleData", "Subsubsubsection", \
 "Printout"]
 }, Closed]]
-}, Closed]]
+}, Open  ]]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[6986, 264, 73, 2, 54, "Section"],
+Cell[6819, 260, 73, 2, 54, "Section"],
 Cell[CellGroupData[{
-Cell[7084, 270, 148, 5, 60, 25, 0, "StyleData", "Author", "All",
+Cell[6917, 266, 148, 5, 60, 25, 0, "StyleData", "Author", "All",
  MenuSortingValue->1900],
-Cell[7235, 277, 88, 2, 70, 38, 0, "StyleData", "Author", "SlideShow"],
-Cell[7326, 281, 86, 2, 70, 37, 0, "StyleData", "Author", "Printout"]
+Cell[7068, 273, 86, 2, 38, 37, 0, "StyleData", "Author", "Printout"]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[7449, 288, 184, 6, 75, 27, 0, "StyleData", "Abstract", "All",
+Cell[7191, 280, 184, 6, 75, 27, 0, "StyleData", "Abstract", "All",
  MenuSortingValue->2050],
-Cell[7636, 296, 122, 3, 70, 40, 0, "StyleData", "Abstract", "SlideShow"],
-Cell[7761, 301, 96, 3, 70, 39, 0, "StyleData", "Abstract", "Printout"]
+Cell[7378, 288, 96, 3, 36, 39, 0, "StyleData", "Abstract", "Printout"]
 }, Closed]]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[7906, 310, 23, 0, 38, "Section"],
-Cell[7932, 312, 275, 9, 40, 23, 0, "StyleData", "Text", "All"],
-Cell[8210, 323, 432, 13, 40, 34, 0, "StyleData", "EnvironmentText", "All",
+Cell[7523, 297, 23, 0, 38, "Section"],
+Cell[7549, 299, 275, 9, 40, 23, 0, "StyleData", "Text", "All"],
+Cell[7827, 310, 432, 13, 40, 34, 0, "StyleData", "EnvironmentText", "All",
  MenuSortingValue->1480,
  MenuCommandKey->"T"],
 Cell[CellGroupData[{
-Cell[8667, 340, 506, 14, 40, 23, 0, "StyleData", "Item", "All",
+Cell[8284, 327, 506, 14, 40, 23, 0, "StyleData", "Item", "All",
  CounterIncrements->"Item",
  CounterAssignments->{{"Subitem", 0}, {"Subsubitem", 0}},
  MenuSortingValue->1600],
-Cell[9176, 356, 116, 3, 59, 39, 0, "StyleData", "Item", "Presentation"]
-}, Closed]],
+Cell[8793, 343, 116, 3, 59, 39, 0, "StyleData", "Item", "Presentation"]
+}, Open  ]],
 Cell[CellGroupData[{
-Cell[9329, 364, 366, 11, 37, 32, 0, "StyleData", "ItemParagraph", "All",
+Cell[8946, 351, 366, 11, 37, 32, 0, "StyleData", "ItemParagraph", "All",
  MenuSortingValue->1600],
-Cell[9698, 377, 98, 2, 54, 48, 0, "StyleData", "ItemParagraph", "Presentation"]
-}, Closed]],
+Cell[9315, 364, 98, 2, 54, 48, 0, "StyleData", "ItemParagraph", "Presentation"]
+}, Open  ]],
 Cell[CellGroupData[{
-Cell[9833, 384, 527, 15, 40, 26, 0, "StyleData", "Subitem", "All",
+Cell[9450, 371, 527, 15, 40, 26, 0, "StyleData", "Subitem", "All",
  CounterIncrements->"Subitem",
  CounterAssignments->{{"Subsubitem", 0}},
  MenuSortingValue->1610],
-Cell[10363, 401, 119, 3, 59, 42, 0, "StyleData", "Subitem", "Presentation"]
-}, Closed]],
+Cell[9980, 388, 119, 3, 59, 42, 0, "StyleData", "Subitem", "Presentation"]
+}, Open  ]],
 Cell[CellGroupData[{
-Cell[10519, 409, 400, 12, 37, 35, 0, "StyleData", "SubitemParagraph", "All",
+Cell[10136, 396, 400, 12, 37, 35, 0, "StyleData", "SubitemParagraph", "All",
  MenuSortingValue->1610],
-Cell[10922, 423, 101, 2, 54, 51, 0, "StyleData", "SubitemParagraph", \
+Cell[10539, 410, 101, 2, 54, 51, 0, "StyleData", "SubitemParagraph", \
 "Presentation"]
-}, Closed]],
+}, Open  ]],
 Cell[CellGroupData[{
-Cell[11060, 430, 497, 14, 40, 29, 0, "StyleData", "Subsubitem", "All",
+Cell[10677, 417, 497, 14, 40, 29, 0, "StyleData", "Subsubitem", "All",
  CounterIncrements->"Subsubitem",
  MenuSortingValue->1620],
-Cell[11560, 446, 122, 3, 59, 45, 0, "StyleData", "Subsubitem", \
+Cell[11177, 433, 122, 3, 59, 45, 0, "StyleData", "Subsubitem", \
 "Presentation"]
-}, Closed]],
+}, Open  ]],
 Cell[CellGroupData[{
-Cell[11719, 454, 440, 13, 37, 38, 0, "StyleData", "SubsubitemParagraph", "All",
+Cell[11336, 441, 440, 13, 37, 38, 0, "StyleData", "SubsubitemParagraph", "All",
  CounterIncrements->"Subsubitem",
  MenuSortingValue->1625],
-Cell[12162, 469, 104, 2, 54, 54, 0, "StyleData", "SubsubitemParagraph", \
+Cell[11779, 456, 104, 2, 54, 54, 0, "StyleData", "SubsubitemParagraph", \
 "Presentation"]
-}, Closed]],
+}, Open  ]],
 Cell[CellGroupData[{
-Cell[12303, 476, 569, 16, 40, 31, 0, "StyleData", "ItemNumbered", "All",
+Cell[11920, 463, 569, 16, 40, 31, 0, "StyleData", "ItemNumbered", "All",
  CounterIncrements->"ItemNumbered",
  CounterAssignments->{{"SubitemNumbered", 0}, {"SubsubitemNumbered", 0}},
  MenuSortingValue->1630],
-Cell[12875, 494, 124, 3, 59, 47, 0, "StyleData", "ItemNumbered", \
+Cell[12492, 481, 124, 3, 59, 47, 0, "StyleData", "ItemNumbered", \
 "Presentation"]
-}, Closed]],
+}, Open  ]],
 Cell[CellGroupData[{
-Cell[13036, 502, 624, 18, 40, 34, 0, "StyleData", "SubitemNumbered", "All",
+Cell[12653, 489, 624, 18, 40, 34, 0, "StyleData", "SubitemNumbered", "All",
  CounterIncrements->"SubitemNumbered",
  CounterAssignments->{{"SubsubitemNumbered", 0}},
  MenuSortingValue->1640],
-Cell[13663, 522, 127, 3, 59, 50, 0, "StyleData", "SubitemNumbered", \
+Cell[13280, 509, 127, 3, 59, 50, 0, "StyleData", "SubitemNumbered", \
 "Presentation"]
-}, Closed]],
+}, Open  ]],
 Cell[CellGroupData[{
-Cell[13827, 530, 636, 18, 40, 37, 0, "StyleData", "SubsubitemNumbered", "All",
+Cell[13444, 517, 636, 18, 40, 37, 0, "StyleData", "SubsubitemNumbered", "All",
  
  CounterIncrements->"SubsubitemNumbered",
  MenuSortingValue->1645],
-Cell[14466, 550, 130, 3, 59, 53, 0, "StyleData", "SubsubitemNumbered", \
+Cell[14083, 537, 130, 3, 59, 53, 0, "StyleData", "SubsubitemNumbered", \
 "Presentation"]
-}, Closed]]
-}, Open  ]],
+}, Open  ]]
+}, Closed]],
 Cell[CellGroupData[{
-Cell[14645, 559, 27, 0, 54, "Section"],
-Cell[14675, 561, 388, 12, 37, 36, 0, "StyleData", "GlobalDeclaration", "All",
+Cell[14262, 546, 27, 0, 38, "Section"],
+Cell[14292, 548, 388, 12, 37, 36, 0, "StyleData", "GlobalDeclaration", "All",
  MenuSortingValue->1441,
  MenuCommandKey->"G"],
-Cell[15066, 575, 325, 9, 12, 34, 0, "StyleData", "OpenEnvironment", "All",
+Cell[14683, 562, 325, 9, 12, 34, 0, "StyleData", "OpenEnvironment", "All",
  MenuSortingValue->1485],
-Cell[15394, 586, 421, 11, 53, 36, 0, "StyleData", "EnvironmentHeader", "All",
+Cell[15011, 573, 421, 11, 53, 36, 0, "StyleData", "EnvironmentHeader", "All",
  MenuSortingValue->1450],
 Cell[CellGroupData[{
-Cell[15840, 601, 341, 10, 36, 41, 0, "StyleData", "FormalTextInputFormula", \
+Cell[15457, 588, 341, 10, 36, 41, 0, "StyleData", "FormalTextInputFormula", \
 "All",
  MenuSortingValue->1470,
  MenuCommandKey->"F"],
-Cell[16184, 613, 69, 1, 40, 51, 0, "StyleData", "FormalTextInputFormula", \
+Cell[15801, 600, 69, 1, 40, 51, 0, "StyleData", "FormalTextInputFormula", \
 "Layout"],
-Cell[16256, 616, 75, 1, 68, 57, 0, "StyleData", "FormalTextInputFormula", \
+Cell[15873, 603, 75, 1, 68, 57, 0, "StyleData", "FormalTextInputFormula", \
 "Presentation"]
 }, Open  ]],
-Cell[16346, 620, 142, 3, 40, 39, 0, "StyleData", "EndEnvironmentMarker", "All",
+Cell[15963, 607, 142, 3, 40, 39, 0, "StyleData", "EndEnvironmentMarker", "All",
  MenuSortingValue->1480],
-Cell[16491, 625, 325, 9, 16, 35, 0, "StyleData", "CloseEnvironment", "All",
+Cell[16108, 612, 325, 9, 16, 35, 0, "StyleData", "CloseEnvironment", "All",
  MenuSortingValue->1485],
 Cell[CellGroupData[{
-Cell[16841, 638, 420, 12, 46, 30, 0, "StyleData", "Computation", "All",
+Cell[16458, 625, 420, 12, 46, 30, 0, "StyleData", "Computation", "All",
  MenuSortingValue->1510,
  MenuCommandKey->"C"],
-Cell[17264, 652, 58, 1, 40, 40, 0, "StyleData", "Computation", "Layout"],
-Cell[17325, 655, 64, 1, 68, 46, 0, "StyleData", "Computation", "Presentation"],
-Cell[17392, 658, 78, 1, 70, 43, 0, "StyleData", "Computation", "SlideShow"]
+Cell[16881, 639, 58, 1, 40, 40, 0, "StyleData", "Computation", "Layout"],
+Cell[16942, 642, 64, 1, 68, 46, 0, "StyleData", "Computation", \
+"Presentation"]
 }, Open  ]],
-Cell[CellGroupData[{
-Cell[17507, 664, 359, 9, 39, 36, 0, "StyleData", "ComputationResult", "All",
+Cell[17021, 646, 359, 9, 39, 36, 0, "StyleData", "ComputationResult", "All",
  StyleMenuListing->None],
-Cell[17869, 675, 85, 1, 70, 49, 0, "StyleData", "ComputationResult", \
-"SlideShow"]
-}, Open  ]],
-Cell[17969, 679, 140, 4, 43, 34, 0, "StyleData", "ComputationInfo", "All",
+Cell[17383, 657, 140, 4, 43, 34, 0, "StyleData", "ComputationInfo", "All",
  StyleMenuListing->None],
-Cell[18112, 685, 124, 3, 44, 38, 0, "StyleData", "ComputationInfoBody", "All",
+Cell[17526, 663, 124, 3, 44, 38, 0, "StyleData", "ComputationInfoBody", "All",
  
  StyleMenuListing->None],
-Cell[18239, 690, 162, 5, 43, 28, 0, "StyleData", "ProofInfo", "All",
+Cell[17653, 668, 162, 5, 43, 28, 0, "StyleData", "ProofInfo", "All",
  StyleMenuListing->None],
-Cell[18404, 697, 117, 3, 32, 32, 0, "StyleData", "ProofInfoBody", "All",
+Cell[17818, 675, 117, 3, 32, 32, 0, "StyleData", "ProofInfoBody", "All",
  StyleMenuListing->None],
 Cell[CellGroupData[{
-Cell[18546, 704, 367, 14, 36, 29, 0, "StyleData", "FrameLabel", "All",
+Cell[17960, 682, 367, 14, 36, 29, 0, "StyleData", "FrameLabel", "All",
  StyleMenuListing->None],
-Cell[18916, 720, 57, 1, 70, 42, 0, "StyleData", "FrameLabel", "SlideShow"],
-Cell[18976, 723, 41, 0, 70, 41, 0, "StyleData", "FrameLabel", "Printout"]
-}, Closed]],
-Cell[19032, 726, 476, 13, 43, 30, 0, "StyleData", "OpenArchive", "All",
+Cell[18330, 698, 41, 0, 40, 41, 0, "StyleData", "FrameLabel", "Printout"]
+}, Open  ]],
+Cell[18386, 701, 476, 13, 49, 30, 0, "StyleData", "OpenArchive", "All",
  MenuSortingValue->1210],
-Cell[19511, 741, 325, 10, 42, 30, 0, "StyleData", "ArchiveInfo", "All",
+Cell[18865, 716, 325, 10, 42, 30, 0, "StyleData", "ArchiveInfo", "All",
  MenuSortingValue->1220],
-Cell[19839, 753, 535, 16, 71, 31, 0, "StyleData", "CloseArchive", "All",
+Cell[19193, 728, 535, 16, 71, 31, 0, "StyleData", "CloseArchive", "All",
  MenuSortingValue->1230],
-Cell[20377, 771, 361, 8, 40, 33, 0, "StyleData", "IncludeArchive", "All",
+Cell[19731, 746, 361, 8, 40, 33, 0, "StyleData", "IncludeArchive", "All",
  MenuSortingValue->1445],
-Cell[20741, 781, 127, 3, 40, 37, 0, "StyleData", "ExpressionVariable", \
+Cell[20095, 756, 127, 3, 40, 37, 0, "StyleData", "ExpressionVariable", \
 "All"],
-Cell[20871, 786, 122, 3, 40, 32, 0, "StyleData", "ExpressionABF", "All"],
-Cell[20996, 791, 123, 3, 40, 33, 0, "StyleData", "ExpressionMeta", "All"],
+Cell[20225, 761, 122, 3, 40, 32, 0, "StyleData", "ExpressionABF", "All"],
+Cell[20350, 766, 123, 3, 40, 33, 0, "StyleData", "ExpressionMeta", "All"],
 Cell[CellGroupData[{
-Cell[21144, 798, 71, 2, 40, 34, 0, "StyleData", "AutoParentheses", "All"],
-Cell[21218, 802, 61, 1, 40, 44, 0, "StyleData", "AutoParentheses", "Layout"],
-Cell[21282, 805, 64, 1, 40, 47, 0, "StyleData", "AutoParentheses", "SlideShow"]
+Cell[20498, 773, 71, 2, 40, 34, 0, "StyleData", "AutoParentheses", "All"],
+Cell[20572, 777, 61, 1, 40, 44, 0, "StyleData", "AutoParentheses", "Layout"],
+Cell[20636, 780, 64, 1, 40, 47, 0, "StyleData", "AutoParentheses", "SlideShow"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[21383, 811, 73, 2, 39, 29, 0, "StyleData", "Emphasized", "All",
+Cell[20737, 786, 73, 2, 39, 29, 0, "StyleData", "Emphasized", "All",
  MenuCommandKey->"E"],
-Cell[21459, 815, 98, 2, 40, 42, 0, "StyleData", "Emphasized", "SlideShow"]
+Cell[20813, 790, 98, 2, 40, 42, 0, "StyleData", "Emphasized", "SlideShow"]
 }, Open  ]],
-Cell[21572, 820, 288, 10, 41, 32, 0, "StyleData", "GenericButton", "All"],
-Cell[21863, 832, 184, 5, 39, 31, 0, "StyleData", "TheoremaForm", "All",
+Cell[20926, 795, 288, 10, 41, 32, 0, "StyleData", "GenericButton", "All"],
+Cell[21217, 807, 184, 5, 39, 31, 0, "StyleData", "TheoremaForm", "All",
  StyleMenuListing->None],
-Cell[22050, 839, 66, 1, 38, 34, 0, "StyleData", "ComponentActive", "All"],
-Cell[22119, 842, 87, 2, 38, 36, 0, "StyleData", "ComponentInactive", "All"],
-Cell[22209, 846, 107, 2, 38, 33, 0, "StyleData", "ComponentEmpty", "All"],
-Cell[22319, 850, 73, 2, 36, 26, 0, "StyleData", "TabView", "All"],
-Cell[22395, 854, 99, 3, 36, 31, 0, "StyleData", "TabViewLabel", "All"],
-Cell[22497, 859, 225, 6, 38, 71, 0, "StyleData", "FormReference", "All"],
-Cell[22725, 867, 264, 7, 38, 76, 0, "StyleData", "FormReferenceHover", "All"]
+Cell[21404, 814, 66, 1, 38, 34, 0, "StyleData", "ComponentActive", "All"],
+Cell[21473, 817, 87, 2, 38, 36, 0, "StyleData", "ComponentInactive", "All"],
+Cell[21563, 821, 107, 2, 38, 33, 0, "StyleData", "ComponentEmpty", "All"],
+Cell[21673, 825, 73, 2, 36, 26, 0, "StyleData", "TabView", "All"],
+Cell[21749, 829, 99, 3, 36, 31, 0, "StyleData", "TabViewLabel", "All"],
+Cell[21851, 834, 225, 6, 38, 71, 0, "StyleData", "FormReference", "All"],
+Cell[22079, 842, 264, 7, 38, 76, 0, "StyleData", "FormReferenceHover", "All"]
 }, Open  ]]
 }
 ]
