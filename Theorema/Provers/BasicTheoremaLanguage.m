@@ -770,6 +770,8 @@ compatibleRange[ args___] := unexpected[ compatibleRange, {args}]
 (* ::Section:: *)
 (* unification *)
 
+(* in both cases: check used and generated more thoroughly, whether they are correctly passed *)
+
 inferenceRule[ solveMetaUnification] = 
 ps:PRFSIT$[ g:FML$[ _, a_And$TM, lab_, ___] /; MemberQ[ a, e_Equal$TM /; !FreeQ[ e, _META$]], K_List, id_, rest___?OptionQ] :> performProofStep[
 	Module[ {eq = Cases[ a, s_Equal$TM /; !FreeQ[ s, _META$], {1}, 1], com, inst, newGoalsAlt}, 
@@ -790,6 +792,27 @@ ps:PRFSIT$[ g:FML$[ _, a_And$TM, lab_, ___] /; MemberQ[ a, e_Equal$TM /; !FreeQ[
 	]
 ]
 
+inferenceRule[ partSolveMetaMatching] = 
+ps:PRFSIT$[ g:FML$[ _, a:And$TM[ pre___, x_ /; !FreeQ[ x, _META$], post], lab_, ___], K_List, id_, rest___?OptionQ] :> performProofStep[
+	Module[ {inst = Map[ instantiation[ x, formula@#]&, K], posInst, newGoalsAlt},
+		posInst = Position[ inst, _List];
+		If[ posInst === {},
+			Throw[ $Failed],
+			(* else *)
+			inst = Extract[ inst, posInst];
+		];
+		newGoalsAlt = Map[ makeGoalFML[ formula -> #]&, a /. inst];
+		If[ Length[ posInst] == 1,
+			makeANDNODE[ makePRFINFO[ name -> partSolveMetaMatching, used -> g, "instantiation" -> inst], 
+            	toBeProved[ goal -> newGoalsAlt[[1]], kb -> K, rest]
+        	],
+        	(* else *)
+        	makeORNODE[ makePRFINFO[ name -> partSolveMetaMatching, used -> g, "instantiation" -> inst], 
+            	Map[ toBeProved[ goal -> #, kb -> K, rest]&, newGoalsAlt]
+        	]
+		]
+	]
+]
 (* ::Section:: *)
 (* Rule composition *)
 
@@ -815,6 +838,14 @@ connectiveRules = {"Connectives Rules",
 equalityRules = {"Equality Rules", 
 	{eqGoal, False, False, 20}
 	};
+	
+rewritingRules = {"Rewriting Rules",
+	{goalRewriting, True, True, 15},
+	{knowledgeRewriting, True, True, 25},
+	{elementarySubstitution, True, True, 4},
+	{expandDef, True, True, 80},
+	{implicitDef, True, True, 80}
+};
 
 registerRuleSet[ "Quantifier Rules", quantifierRules, {
 	{forallGoal, True, True, 10},
@@ -832,11 +863,7 @@ registerRuleSet[ "Basic Theorema Language Rules", basicTheoremaLanguageRules, {
 	quantifierRules, 
 	connectiveRules, 
 	equalityRules,
-	{goalRewriting, True, True, 15},
-	{knowledgeRewriting, True, True, 25},
-	{elementarySubstitution, True, True, 4},
-	{expandDef, True, True, 80},
-	{implicitDef, True, True, 80},
+	rewritingRules,
 	{contradiction, True, True, 100}
 	}]
 

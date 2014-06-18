@@ -30,6 +30,7 @@ MessageName[ existsGoal, "usage", lang] = "Prove existentially quantified goal b
 MessageName[ existsGoalInteractive, "usage", lang] = "Prove existentially quantified goal by interactive instantiation";
 MessageName[ existsKB, "usage", lang] = "Skolemize existentially quantified knowledge";
 MessageName[ solveMetaUnification, "usage", lang] = "Instantiate meta-variables by unification";
+MessageName[ partSolveMetaMatching, "usage", lang] = "Instantiate meta-variables by matching";
 MessageName[ multipleGoalRewriting, "usage", lang] = "Goal can be rewritten in several ways";
 MessageName[ goalRewriting, "usage", lang] = "Goal rewriting based on (quantified) implications and equivalences in the knowledge base";
 MessageName[ knowledgeRewriting, "usage", lang] = "Knowledge rewriting based on (quantified) implications and equivalences in the knowledge base";
@@ -53,6 +54,7 @@ translate[ "Basic Theorema Language Rules", lang] = "Basic Theorema Language Rul
 translate[ "Connectives Rules", lang] = "Rules for Logical Connectives";
 translate[ "Equality Rules", lang] = "Rules for Equality";
 translate[ "Termination Rules", lang] = "Rules for Proof Termination";
+translate[ "Rewriting Rules", lang] = "Rules based on Rewriting";
 
 proofStepText[ contradictionKB, lang, {{k_, c_}}, {}, pVal_] := {textCell[ "The proof is finished, because ", formulaReference[ k], 
 	" contradicts ", formulaReference[ c], "."]
@@ -350,6 +352,10 @@ subProofHeader[ solveMetaUnification, lang, {{u_}}, {g_List}, ___, "instantiatio
 	goalCell[ g[[i]], "."]
 	};	
 	
+proofStepText[ partSolveMetaMatching, lang, {{u_}}, {{g_}}, ___, "instantiation" -> inst_List, ___] := {
+	textCell[ "Let now ", inlineTheoremaExpressionSeq[ inst[[ 1]], lang], ". In order to prove ", formulaReference[ u], " we now have to show"],
+	goalCell[ g, "."]
+	};
 		
 ] (* With *)
 
