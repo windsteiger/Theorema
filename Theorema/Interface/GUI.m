@@ -490,7 +490,7 @@ displaySelectedGoal[ ] :=
             translate["noGoal"],
             With[ {selGoal = goal[[1]]},
             	Column[ {
-            		Button[ translate[ "OKnext"], $selectedProofGoal = selGoal; $tcActionView++;],
+            		Button[ translate[ "OKnext"], $selectedProofGoal = selGoal; $tcActionView++; $replExistProof=0;],
             		Grid[ {displayLabeledFormula[ selGoal]}]
             		}]
             ]
@@ -808,14 +808,16 @@ headerView[ file_, Cell[ content_String, style_, ___], tags_, task_] :=
    checkbox does not have an associated variable whose value the box represents
    instead, the checkbox is checked if all tags containd in the group are checked,
    checking the box calls function setAll in order to set/unset all tags contained in the group *)
-    Switch[ task,
+Module[ {trim = StringReplace[ content, "\n"|"\t" -> " "]},
+   	Switch[ task,
     	"prove",
-        Row[ {Checkbox[ Dynamic[ allTrue[ tags, kbSelectProve], setAll[ tags, kbSelectProve, #] &]], Style[ content, style]}, Spacer[10]],
+        Row[ {Checkbox[ Dynamic[ allTrue[ tags, kbSelectProve], setAll[ tags, kbSelectProve, #] &]], Style[ trim, style]}, Spacer[10]],
         "compute",
-        Row[ {Checkbox[ Dynamic[ allTrue[ tags, kbSelectCompute], setAll[ tags, kbSelectCompute, #] &]], Style[ content, style]}, Spacer[10]],
+        Row[ {Checkbox[ Dynamic[ allTrue[ tags, kbSelectCompute], setAll[ tags, kbSelectCompute, #] &]], Style[ trim, style]}, Spacer[10]],
         "solve",
-        Row[ {Checkbox[ Dynamic[ allTrue[ tags, kbSelectSolve], setAll[ tags, kbSelectSolve, #] &]], Style[ content, style]}, Spacer[10]]        
+        Row[ {Checkbox[ Dynamic[ allTrue[ tags, kbSelectSolve], setAll[ tags, kbSelectSolve, #] &]], Style[ trim, style]}, Spacer[10]]        
     ]
+]
 headerView[ file_, Cell[ content_TextData, style_, ___], tags_, task_] := headerView[ file, Cell[ formattedCellToString[ content], style], tags, task]
 headerView[ args___] := unexpected[ headerView, {args}]
 
@@ -827,7 +829,7 @@ formattedCellToString[ TextData[ l_List]] := Apply[ StringJoin, Map[ textDataToS
 formattedCellToString[ d_] := textDataToString[ d]
 formattedCellToString[ args___] := unexpected[ formattedCellToString, {args}]
 
-textDataToString[ s_String] := StringReplace[ s, "\n" -> " "]
+textDataToString[ s_String] := StringReplace[ s, "\n"|"\t" -> " "]
 textDataToString[ StyleBox[ s_String, ___]] := textDataToString[ s]
 textDataToString[ Cell[ BoxData[ b_], ___]] := "\!\(" <> ToString[ InputForm[ b]] <> "\)"
 textDataToString[ _] := "\[DownQuestion]?"
@@ -1266,7 +1268,9 @@ selectProver[ ] :=
     				Dynamic[ $proofCellStatus], {Automatic -> translate[ "auto"], Open -> translate[ "open"], Closed -> translate[ "closed"]}], 
     				translate[ "proofCellStatus"], Left]};
     		$numExistProofs = findNumExistingProofs[ $proofInitNotebook, $selectedProofGoal];
-    		$replExistProof = $numExistProofs + 1;
+    		If[ $replExistProof === 0,
+    			$replExistProof = $numExistProofs + 1;
+    		];
     		If[ $numExistProofs > 0,
     			PrependTo[ po,
     				Labeled[ PopupMenu[ Dynamic[ $replExistProof], Prepend[ Table[ i -> "#"<>ToString[i], {i, $numExistProofs}], $numExistProofs+1 -> translate[ "None"]],
