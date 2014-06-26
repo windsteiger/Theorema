@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       145,          7]
-NotebookDataLength[      6671,        199]
-NotebookOptionsPosition[      4591,        148]
-NotebookOutlinePosition[      5055,        168]
-CellTagsIndexPosition[      5012,        165]
+NotebookDataLength[      6734,        200]
+NotebookOptionsPosition[      4654,        149]
+NotebookOutlinePosition[      5118,        169]
+CellTagsIndexPosition[      5075,        166]
 MenuPosition->0
 WindowFrame->Normal*)
 
@@ -60,7 +60,8 @@ Cell[StyleData["GlobalDeclaration", StyleDefinitions -> StyleData["Input"]],
  CellProlog:>($PreRead = 
    Theorema`Language`Session`Private`openGlobalDeclaration; $Pre = 
    Theorema`Language`Session`Private`processGlobalDeclaration; Null),
- CellEpilog:>(Unset[$Pre]; Unset[$PreRead]; Null)],
+ CellEpilog:>(Theorema`Language`Session`Private`closeGlobalDeclaration[]; 
+  Unset[$Pre]; Unset[$PreRead]; Null)],
 
 Cell[StyleData["OpenEnvironment"],
  CellElementSpacings->{"CellMinHeight"->3},
@@ -181,25 +182,25 @@ Cell[1246, 49, 126, 1, 46, 73, 0, "StyleData", "EnvironmentText", "All"]
 }, Open  ]],
 Cell[CellGroupData[{
 Cell[1409, 55, 27, 0, 54, "Section"],
-Cell[1439, 57, 344, 5, 47, 76, 0, "StyleData", "GlobalDeclaration", "All"],
-Cell[1786, 64, 127, 3, 17, 34, 0, "StyleData", "OpenEnvironment", "All"],
-Cell[1916, 69, 137, 2, 40, 36, 0, "StyleData", "EnvironmentHeader", "All"],
-Cell[2056, 73, 447, 9, 47, 83, 1, "StyleData", "FormalTextInputFormula", \
+Cell[1439, 57, 407, 6, 47, 76, 0, "StyleData", "GlobalDeclaration", "All"],
+Cell[1849, 65, 127, 3, 17, 34, 0, "StyleData", "OpenEnvironment", "All"],
+Cell[1979, 70, 137, 2, 40, 36, 0, "StyleData", "EnvironmentHeader", "All"],
+Cell[2119, 74, 447, 9, 47, 83, 1, "StyleData", "FormalTextInputFormula", \
 "All"],
-Cell[2506, 84, 114, 2, 40, 39, 0, "StyleData", "EndEnvironmentMarker", \
+Cell[2569, 85, 114, 2, 40, 39, 0, "StyleData", "EndEnvironmentMarker", \
 "All"],
-Cell[2623, 88, 128, 3, 17, 35, 0, "StyleData", "CloseEnvironment", "All"],
-Cell[2754, 93, 451, 8, 47, 70, 0, "StyleData", "Computation", "All"],
-Cell[3208, 103, 171, 4, 40, 34, 0, "StyleData", "ComputationInfo", "All"],
-Cell[3382, 109, 152, 3, 40, 38, 0, "StyleData", "ComputationInfoBody", \
+Cell[2686, 89, 128, 3, 17, 35, 0, "StyleData", "CloseEnvironment", "All"],
+Cell[2817, 94, 451, 8, 47, 70, 0, "StyleData", "Computation", "All"],
+Cell[3271, 104, 171, 4, 40, 34, 0, "StyleData", "ComputationInfo", "All"],
+Cell[3445, 110, 152, 3, 40, 38, 0, "StyleData", "ComputationInfoBody", \
 "All"],
-Cell[3537, 114, 77, 0, 47, 77, 0, "StyleData", "ComputationResult", "All"],
-Cell[3617, 116, 165, 4, 40, 28, 0, "StyleData", "ProofInfo", "All"],
-Cell[3785, 122, 146, 3, 40, 32, 0, "StyleData", "ProofInfoBody", "All"],
-Cell[3934, 127, 145, 3, 40, 30, 0, "StyleData", "OpenArchive", "All"],
-Cell[4082, 132, 161, 4, 40, 30, 0, "StyleData", "ArchiveInfo", "All"],
-Cell[4246, 138, 155, 3, 40, 31, 0, "StyleData", "CloseArchive", "All"],
-Cell[4404, 143, 171, 2, 47, 73, 0, "StyleData", "IncludeArchive", "All"]
+Cell[3600, 115, 77, 0, 47, 77, 0, "StyleData", "ComputationResult", "All"],
+Cell[3680, 117, 165, 4, 40, 28, 0, "StyleData", "ProofInfo", "All"],
+Cell[3848, 123, 146, 3, 40, 32, 0, "StyleData", "ProofInfoBody", "All"],
+Cell[3997, 128, 145, 3, 40, 30, 0, "StyleData", "OpenArchive", "All"],
+Cell[4145, 133, 161, 4, 40, 30, 0, "StyleData", "ArchiveInfo", "All"],
+Cell[4309, 139, 155, 3, 40, 31, 0, "StyleData", "CloseArchive", "All"],
+Cell[4467, 144, 171, 2, 47, 73, 0, "StyleData", "IncludeArchive", "All"]
 }, Open  ]]
 }
 ]

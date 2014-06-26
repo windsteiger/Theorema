@@ -181,18 +181,17 @@ openGlobalDeclaration[ expr_] :=
     Module[ {},
         $parseTheoremaGlobals = True;
 		(* Remember context path *)
-		$origContextPath = $ContextPath;
         $ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
-        If[ !inArchive[], Begin["Theorema`Knowledge`"]];
+        If[ !inArchive[] && $Context =!= "Theorema`Knowledge`", Begin[ "Theorema`Knowledge`"]];
         expr
     ]
 openGlobalDeclaration[ args___] := unexpected[ openGlobalDeclaration, {args}]
 
 closeGlobalDeclaration[] :=
     Module[ {},
-		If[ !inArchive[], End[]];
+		If[ !inArchive[] && $Context === "Theorema`Knowledge`", End[]];
 		(* Restore context path that has been modified in openEnvironment *)
-		$ContextPath = $origContextPath;
+		$ContextPath = DeleteCases[ $ContextPath, Apply[ Alternatives, Join[ {"Theorema`Language`"}, $TheoremaArchives]]];
         $parseTheoremaGlobals = False;
     ]
 closeGlobalDeclaration[ args___] := unexpected[ closeGlobalDeclaration, {args}]
@@ -223,8 +222,7 @@ putGlobalDeclaration[ args___] := unexpected[ putGlobalDeclaration, {args}]
 SetAttributes[ processGlobalDeclaration, HoldAll];
 processGlobalDeclaration[ x_] := 
 	Module[ {},
-		putGlobalDeclaration[ CurrentValue["NotebookFullFileName"], CurrentValue["CellID"], ReleaseHold[ markVariables[ freshNames[ Hold[x]]]]];
-		closeGlobalDeclaration[];
+		putGlobalDeclaration[ CurrentValue[ "NotebookFullFileName"], CurrentValue[ "CellID"], ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]]];
 	]
 processGlobalDeclaration[ args___] := unexpected[ processGlobalDeclaration, {args}]
 
@@ -232,7 +230,7 @@ processGlobalDeclaration[ args___] := unexpected[ processGlobalDeclaration, {arg
 SetAttributes[ processEnvironment, HoldAll];
 processEnvironment[ Theorema`Language`nE] := Null
 
-processEnvironment[x_] :=
+processEnvironment[ x_] :=
     Module[ {nb = EvaluationNotebook[], rawNotebook, key, tags, globDec},
     	(* select current cell: we need to refer to this selection when we set the cell options *)
 		SelectionMove[ nb, All, EvaluationCell];
@@ -243,7 +241,7 @@ processEnvironment[x_] :=
 		(* extract the global declarations that are applicable in the current evaluation *)
 		globDec = applicableGlobalDeclarations[ nb, rawNotebook, evaluationPosition[ nb, rawNotebook]];
 		(* process the expression according the Theorema syntax rules and add it to the KB *)
-        Catch[ updateKnowledgeBase[ReleaseHold[ markVariables[ freshNames[ Hold[x]]]], key, globDec, cellTagsToString[ tags]]];
+        Catch[ updateKnowledgeBase[ ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]], key, globDec, cellTagsToString[ tags]]];
         SelectionMove[ nb, After, Cell];
     ]
 processEnvironment[args___] := unexcpected[ processEnvironment, {args}]
@@ -579,15 +577,18 @@ getFormulaCounter[nb_NotebookObject] :=
 			]
 	]
 getFormulaCounter[args___] := unexpected[ getFormulaCounter, {args}]
- 
-openEnvironment[expr_] :=
+
+(*
+	openEnvironment is assigned to $PreRead, which might be called under certain circumstances.
+	In order not to mess up the contexts, we do some checks.
+*) 
+openEnvironment[ expr_] :=
     Module[{},
 		$parseTheoremaExpressions = True;
 		(* Remember context path *)
-		$origContextPath = $ContextPath;
-        $ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
+        $ContextPath = DeleteDuplicates[ Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath]];
         (* Set default context when not in an archive *)
-        If[ !inArchive[], Begin["Theorema`Knowledge`"]];
+        If[ !inArchive[] && $Context =!= "Theorema`Knowledge`", Begin[ "Theorema`Knowledge`"]];
         expr
     ]
 openEnvironment[args___] := unexpected[ openEnvironment, {args}]
@@ -595,9 +596,9 @@ openEnvironment[args___] := unexpected[ openEnvironment, {args}]
 closeEnvironment[] := 
 	Module[{},
 		(* Leave "Theorema`Knowledge`" context when not in an archive *)
-		If[ !inArchive[], End[]];
+		If[ !inArchive[] && $Context === "Theorema`Knowledge`", End[]];
 		(* Restore context path that has been modified in openEnvironment *)
-		$ContextPath = $origContextPath;
+		$ContextPath = DeleteCases[ $ContextPath, Apply[ Alternatives, Join[ {"Theorema`Language`"}, $TheoremaArchives]]];
 		$parseTheoremaExpressions = False; 
         updateKBBrowser[];
 	]
