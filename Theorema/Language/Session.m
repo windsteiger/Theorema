@@ -55,7 +55,13 @@ isSubPosition[ l1_List, l2_List] :=
 	With[{len = Length[l2]}, 
  		Length[l1] >= len && l1[[1 ;; len]] === l2[[1 ;; len]]
  	]
-
+(*
+freshSymbols uses ToExpression in order to generate a symbol. If, e.g. in
+a computation, we use knowledge x==1, then the generated symbol x$TM has a 
+value and ToExpression evaluates. Therefore, we wrap the fresh symbol in
+Hold (using ToExpression[..., Hold]) and process the resulting expression
+with the expectation that all symbols are wrapped in Hold. (-> markVariables, etc.)
+*)
 
 freshSymbol[ Hold[ s_Symbol]] :=
     Module[ {name},
@@ -82,7 +88,7 @@ freshSymbol[ Hold[ s_Symbol]] :=
         	name = ToString[ Unevaluated[s]];
         	If[ StringTake[ name, -1] === "$" || (StringLength[ name] >= 3 && StringTake[ name, -3] === "$TM"),
         		s,
-            	ToExpression[ name <> "$TM"]
+            	ToExpression[ name <> "$TM", InputForm, Hold]
         	]
         ]
     ]
@@ -107,15 +113,15 @@ freshSymbolProg[ Hold[ s_Symbol]] :=
         			StringTake[ name, -1] === "$" || (StringLength[ name] >= 3 && StringTake[ name, -3] === "$TM"),
         			s,
         			StringLength[ name] >= 3 && StringTake[ name, -2] === "$M",
-        			s,
+        			Hold[ s],
         			True,
-        			ToExpression[ name <> "$TM"]
+        			ToExpression[ name <> "$TM", InputForm, Hold]
         	]
         ]
     ]
 freshSymbolProg[ args___] := unexpected[ freshSymbolProg, {args}]
 
-SetAttributes[isMathematicalConstant, HoldAll];
+SetAttributes[ isMathematicalConstant, HoldAll];
 isMathematicalConstant[ Indeterminate|True|False|I|Pi|E|Infinity|DirectedInfinity|Complex|Rational|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaisher] := True
 isMathematicalConstant[ _] := False
 
@@ -134,8 +140,8 @@ markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
         vars = specifiedVariables[ r];
         seq = Cases[vars, (SEQ0$|SEQ1$)[ _]];
         vars = Complement[ vars, seq];
-        s = Join[Map[ (h:(SEQ0$|SEQ1$))[sym_Symbol] /; SymbolName[ sym] === SymbolName[ #] -> VAR$[h[ #]]&, seq[[All, 1]]],
-        		 Map[ sym_Symbol /; SymbolName[ sym] === SymbolName[ #] -> VAR$[ #]&, vars]];
+        s = Join[Map[ (h:(SEQ0$|SEQ1$))[ Hold[ sym_Symbol]] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> VAR$[h[ #]]&, seq[[All, 1]]],
+        		 Map[ Hold[ sym_Symbol] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> VAR$[ #]&, vars]];
         replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {SEQ0$, SEQ1$, VAR$, FIX$}]
     ]
 
@@ -144,24 +150,24 @@ markVariables[ Hold[ Theorema`Computation`Language`QU$[ r_Theorema`Computation`L
     	vars = specifiedVariables[ Hold[ r]];
         seq = Cases[vars, (Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$)[ _]];
         vars = Complement[ vars, seq];
-        s = Join[Map[ (h:(Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$))[sym_Symbol] /; SymbolName[ sym] === SymbolName[ #] -> Theorema`Computation`Language`VAR$[h[ #]]&, seq[[All, 1]]],
-        		 Map[ sym_Symbol /; SymbolName[ sym] === SymbolName[ #] -> Theorema`Computation`Language`VAR$[ #]&, vars]];
+        s = Join[Map[ (h:(Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$))[ Hold[ sym_Symbol]] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> Theorema`Computation`Language`VAR$[ h[ #]]&, seq[[All, 1]]],
+        		 Map[ Hold[ sym_Symbol] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> Theorema`Computation`Language`VAR$[ #]&, vars]];
         replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {Theorema`Computation`Language`SEQ0$, Theorema`Computation`Language`SEQ1$, Theorema`Computation`Language`VAR$, Theorema`Computation`Language`FIX$}]
     ]
     
-markVariables[Hold[h_[e___]]] := applyHold[
-  		markVariables[Hold[h]],
-  		markVariables[Hold[e]]]
+markVariables[ Hold[ h_[ e___]]] := applyHold[
+  		markVariables[ Hold[ h]],
+  		markVariables[ Hold[ e]]]
 
-markVariables[Hold[f_, t__]] := joinHold[
-  		markVariables[Hold[f]],
-  		markVariables[Hold[t]]]
+markVariables[ Hold[ f_, t__]] := joinHold[
+  		markVariables[ Hold[ f]],
+  		markVariables[ Hold[ t]]]
 
-markVariables[Hold[]] := Hold[]
+markVariables[ Hold[]] := Hold[]
 
-markVariables[Hold[e_]] := Hold[e]
+markVariables[ Hold[e_]] := Hold[ e]
 
-markVariables[args___] := unexpected[ markVariables, {args}]
+markVariables[ args___] := unexpected[ markVariables, {args}]
 
 (*
 	makeTmaExpression[ e] is the combination of functions that we export to be used in other places if needed.
@@ -169,13 +175,25 @@ markVariables[args___] := unexpected[ markVariables, {args}]
 SetAttributes[ makeTmaExpression, HoldAll]
 makeTmaExpression[ e_Hold] := Block[ {$ContextPath},
 	$ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
-	ReleaseHold[ markVariables[ freshNames[ e]]]
+	removeHold[ markVariables[ freshNames[ e]]]
 ]
 makeTmaExpression[ e_] := Block[ {$ContextPath},
 	$ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
-	ReleaseHold[ markVariables[ freshNames[ Hold[ e]]]]
+	removeHold[ markVariables[ freshNames[ Hold[ e]]]]
 ]
 makeTmaExpression[ args___] := unexpected[ makeTmaExpression, {args}]
+
+(* processing Theorema expressions essentially works on Hold-expressions, where symbols inside are again
+   wrapped into Hold in order to prevent values to enter the expressions during their processing e.g. in a computation.
+   When processing is finished, the Holds mus be removed again. We first remove the inner Holds and finally remove the outer head Hold. *)
+removeHold[ expr_Hold] :=
+	(* level infinity does not apply to the main head. This is only removed with ReleaseHold. *)
+	ReleaseHold[ Replace[ expr, Hold[ x_] -> x, Infinity, Heads -> True]]
+removeHold[ args___] := unexpected[ removeHold, {args}]
+
+symbolNameHold[ Hold[ s_Symbol]] := SymbolName[ Unevaluated[ s]]
+symbolNameHold[ args___] := unexpected[ symbolNameHold, {args}]
+
 
 openGlobalDeclaration[ expr_] :=
     Module[ {},
@@ -221,7 +239,7 @@ putGlobalDeclaration[ args___] := unexpected[ putGlobalDeclaration, {args}]
 SetAttributes[ processGlobalDeclaration, HoldAll];
 processGlobalDeclaration[ x_] := 
 	Module[ {},
-		putGlobalDeclaration[ CurrentValue[ "NotebookFullFileName"], CurrentValue[ "CellID"], ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]]];
+		putGlobalDeclaration[ CurrentValue[ "NotebookFullFileName"], CurrentValue[ "CellID"], removeHold[ markVariables[ freshNames[ Hold[ x]]]]];
 	]
 processGlobalDeclaration[ args___] := unexpected[ processGlobalDeclaration, {args}]
 
@@ -240,7 +258,7 @@ processEnvironment[ x_] :=
 		(* extract the global declarations that are applicable in the current evaluation *)
 		globDec = applicableGlobalDeclarations[ nb, rawNotebook, evaluationPosition[ nb, rawNotebook]];
 		(* process the expression according the Theorema syntax rules and add it to the KB *)
-        Catch[ updateKnowledgeBase[ ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]], key, globDec, cellTagsToString[ tags]]];
+        Catch[ updateKnowledgeBase[ removeHold[ markVariables[ freshNames[ Hold[ x]]]], key, globDec, cellTagsToString[ tags]]];
         SelectionMove[ nb, After, Cell];
     ]
 processEnvironment[args___] := unexcpected[ processEnvironment, {args}]
@@ -667,7 +685,7 @@ processArchiveInfo[ a_] :=
 			translate[ "archLabelNeeds"],
 			$tmaArchNeeds = a; Scan[ loadArchive, a], (* Remember and load current dependencies. *)
 			translate["archLabelPublic"],
-			ReleaseHold[ freshNames[ Hold[a]]];
+			removeHold[ freshNames[ Hold[ a]]];
 			Begin[ "`private`"];     
 		];
 	]
@@ -723,7 +741,7 @@ loadArchive[ name_String, globalDecl_:{}] :=
         Block[ {$tmaArch},
             (* we could just Get[archivePath], but we read the content and prevent evaluation for the moment
                this would be the place to process the archive content before evaluation *)
-            archiveContent = ReadList[ archivePath, Hold[Expression]];
+            archiveContent = ReadList[ archivePath, Hold[ Expression]];
             ReleaseHold[ archiveContent];
             (* after reading and evaluating the archive $tmaArch has a value, namely the actual KB contained in the archive
                this is why we use the Block in order not
@@ -743,7 +761,7 @@ loadArchive[ name_String, globalDecl_:{}] :=
     ]
     Map[ StringReplace[ #, "Theorema`Knowledge`" -> "Theorema`Computation`Knowledge`", 1]&, $TheoremaArchives]
 loadArchive[ l_List, globalDecl_:{}] := Scan[ loadArchive[ #, globalDecl]&, l]
-loadArchive[args___] := unexpected[loadArchive, {args}]
+loadArchive[ args___] := unexpected[ loadArchive, {args}]
 
 includeArchive[ name_String] :=
 	Module[ {nb = EvaluationNotebook[], raw},
@@ -783,11 +801,11 @@ processComputation[ x:Theorema`Computation`Language`nE] :=
 		$Failed
 	]
 processComputation[x_] := Module[ { procSynt, res},
-	procSynt = markVariables[ freshNames[ Hold[x]]];
+	procSynt = markVariables[ freshNames[ Hold[ x]]];
 	$TmaComputationObject = {Apply[ HoldForm, procSynt]};
 	$TmaCompInsertPos = {2}; 
 	setComputationContext[ "compute"];
-	res = Check[ Catch[ ReleaseHold[ procSynt]], $Failed];
+	res = Check[ Catch[ removeHold[ procSynt]], $Failed];
 	setComputationContext[ "none"];
 	(*NotebookWrite[ EvaluationNotebook[], Cell[ ToBoxes[ res, TheoremaForm], "ComputationResult", CellLabel -> "Out["<>ToString[$Line]<>"]="]];*)
 	(* We force the MakeBoxes[ ..., TheoremaForm] to apply by setting $PrePrint in the CellProlog of a computation cell.
@@ -832,7 +850,7 @@ renameToStandardContext[ expr_] :=
 		
 		stringExpr = StringReplace[ stringExpr, "Theorema`Computation`" -> "Theorema`"];
 		$ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
-        ReleaseHold[ freshNames[ ToExpression[ stringExpr]]]
+        removeHold[ freshNames[ ToExpression[ stringExpr]]]
 	]
 renameToStandardContext[ args___] := unexpected[ renameToStandardContext, {args}]
 
