@@ -875,7 +875,7 @@ formulaReference[ fml_FML$] :=
     With[ { tag = id@fml, labelDisp = makeLabel[ label@fml], fmlDisp = theoremaDisplay[ formula@fml]},
         Cell[ BoxData[ ToBoxes[
             Button[ Tooltip[ Mouseover[ Style[ labelDisp, "FormReference"], Style[ labelDisp, "FormReferenceHover"]], fmlDisp],
-               NotebookLocate[ tag], Appearance->None]
+               NotebookLocate[ tag], Appearance -> None]
         ]]]
        ]
 formulaReference[ args___] := unexpected[ formulaReference, {args}]

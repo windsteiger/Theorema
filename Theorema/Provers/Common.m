@@ -713,10 +713,10 @@ proofNodeIndicator[ args___] := unexpected[ proofNodeIndicator, {args}]
 (* makeInitialProofObject *)
 
 makeInitialProofObject[ g_FML$, k_List, {r_Hold, act_List, prio_List}, s_] :=
-    Module[ {dummyPO, thinnedKB, dr, sr, gr, kr, const},
+    Module[ {dummyPO, simpG = computeInProof[ g], simpK = Map[ computeInProof, k], thinnedKB, dr, sr, gr, kr, const},
         dummyPO = PRFOBJ$[
-            makePRFINFO[ name -> initialProofSituation, generated -> Prepend[ k, g], id -> "OriginalPS"],
-            PRFSIT$[ g, k, "InitialPS"],
+            makePRFINFO[ name -> initialProofSituation, generated -> Prepend[ simpK, simpG], id -> "OriginalPS"],
+            PRFSIT$[ simpG, simpK, "InitialPS"],
             pending
         ];
         (* Use propagateProofValues and replaceProofSit in order to update the proof tree correspondingly *)
@@ -728,15 +728,15 @@ makeInitialProofObject[ g_FML$, k_List, {r_Hold, act_List, prio_List}, s_] :=
            We put the generated rules into the respective components in the proof object. We don't put the original formulae corresponding to definitions and
            elementary substitutions into the KB then *)
         (* We try to figure out all constants available in the formulas *)
-        const = guessConstants[ Append[ k, g]];
+        const = guessConstants[ Append[ simpK, simpG]];
         If[ const =!= {},
         	(* Mark the constants as new *)
         	const = {Map[ SIMPRNG$, Apply[ RNG$, const]]}
         ];        	
-        {thinnedKB, kr, gr, sr, dr} = trimKBforRewriting[ k];
+        {thinnedKB, kr, gr, sr, dr} = trimKBforRewriting[ simpK];
         propagateProofValues[ 
             replaceProofSit[ dummyPO,
-            	{2} -> toBeProved[ goal -> g, kb -> thinnedKB, id -> "InitialPS",
+            	{2} -> toBeProved[ goal -> simpG, kb -> thinnedKB, id -> "InitialPS",
                 		rules -> r, ruleActivity -> act, rulePriority -> prio, strategy -> s,
                 		substRules -> sr, defRules -> dr, kbRules -> kr, goalRules -> gr, "constants" -> const]
             ]

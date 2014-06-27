@@ -180,7 +180,6 @@ makeTmaExpression[ args___] := unexpected[ makeTmaExpression, {args}]
 openGlobalDeclaration[ expr_] :=
     Module[ {},
         $parseTheoremaGlobals = True;
-		(* Remember context path *)
         $ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
         If[ !inArchive[] && $Context =!= "Theorema`Knowledge`", Begin[ "Theorema`Knowledge`"]];
         expr
@@ -585,7 +584,6 @@ getFormulaCounter[args___] := unexpected[ getFormulaCounter, {args}]
 openEnvironment[ expr_] :=
     Module[{},
 		$parseTheoremaExpressions = True;
-		(* Remember context path *)
         $ContextPath = DeleteDuplicates[ Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath]];
         (* Set default context when not in an archive *)
         If[ !inArchive[] && $Context =!= "Theorema`Knowledge`", Begin[ "Theorema`Knowledge`"]];
@@ -834,13 +832,21 @@ renameToStandardContext[ expr_] :=
 		
 		stringExpr = StringReplace[ stringExpr, "Theorema`Computation`" -> "Theorema`"];
 		$ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
-        (* Set default context when not in an archive *)
         ReleaseHold[ freshNames[ ToExpression[ stringExpr]]]
 	]
 renameToStandardContext[ args___] := unexpected[ renameToStandardContext, {args}]
 
 (* ::Section:: *)
 (* Computation within proving *)
+
+(* This version will be used for simplification of the initial proof situation. *)
+computeInProof[ f:FML$[ _, _, _, ___, "origForm" -> _, ___]] := f
+	(* If there is already an "origForm" -> _, this means that computation has already been applied to this formula. We do nothing. *)
+
+computeInProof[ FML$[ k_, f_, l_, r___]] :=
+	(* computation happens in makeFML, which calls computeInProof[ expr] below.
+	   In presence of optional components r___, we restore them into the final formula. *)
+	Join[ makeFML[ key -> k, formula -> f, label -> l], FML$[ r]]
 
 computeInProof[ expr_] :=
 	Module[{simp},
