@@ -270,7 +270,7 @@ $tmaOperators = {
 	{"\[LeftTee]", {Infix}, "LeftTee"}, {"\[DoubleRightTee]", {Infix}, "DoubleRightTee"},
 	{"\[DoubleLeftTee]", {Infix}, "DoubleLeftTee"}, {"\[SuchThat]", {Infix}, "SuchThat"},
 	{"\[Distributed]", {Infix}, "Distributed"}, {"\[Conditioned]", {Infix}, "Conditioned"},
-	{"\:22ff", {Infix}, "elemTuple"}, {"\:2a1d", {Infix}, "joinTuples"},
+	{"\:22ff", {Infix}, "elemTuple"}, {"\:22c8", {Infix}, "joinTuples"},
 	{"\:293a", {Infix}, "appendElem"}, {"\:293b", {Infix}, "prependElem"}};
 	
 $tmaOperatorSymbols = Map[ First, $tmaOperators];
@@ -609,7 +609,7 @@ MakeExpression[ RowBox[{left_,"\[EmptyUpTriangle]", right_}], fmt_] :=
 MakeExpression[ RowBox[ {l_, "\:293a", r_}], fmt_] := MakeExpression[ RowBox[ {"appendElem", "[", RowBox[{ l, ",", r}], "]"}], fmt] /; $parseTheoremaExpressions
 (* The order of arguments must be exactly as in input, for otherwise we get incorrect output *)
 MakeExpression[ RowBox[ {l_, "\:293b", r_}], fmt_] := MakeExpression[ RowBox[ {"prependElem", "[", RowBox[{ l, ",", r}], "]"}], fmt] /; $parseTheoremaExpressions
-MakeExpression[ RowBox[ {l_, "\:2a1d", r_}], fmt_] := MakeExpression[ RowBox[ {"joinTuples", "[", RowBox[{ l, ",", r}], "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {l_, "\:22c8", r_}], fmt_] := MakeExpression[ RowBox[ {"joinTuples", "[", RowBox[{ l, ",", r}], "]"}], fmt] /; $parseTheoremaExpressions
 MakeExpression[ RowBox[ {l_, "\:22ff", r_}], fmt_] := MakeExpression[ RowBox[ {"elemTuple", "[", RowBox[{ l, ",", r}], "]"}], fmt] /; $parseTheoremaExpressions
 
 (* Bracketted expressions *)

@@ -81,9 +81,9 @@ initGUI[] :=
                 {"DeleteAt", SubscriptBox[ "T", RowBox[{"i", "\[LeftArrow]"}]], False, True, False},
         	    {"Replace", SubscriptBox[ "T", RowBox[{RowBox[{RowBox[{"e", ",", "\[Ellipsis]"}], "\[LeftArrowBar]", "newe"}], ",", "\[Ellipsis]"}]], False, True, False},
                 {"ReplacePart", SubscriptBox[ "T", RowBox[{RowBox[{"i", "\[LeftArrow]", "e"}], ",", "\[Ellipsis]"}] ], False, True, False},
-			    {"appendElem", RowBox[{"T",TagBox["\:293a",Identity,SyntaxForm -> "a*b"],"e"}], False, True, False},
-        		{"prependElem", RowBox[{"e",TagBox["\:293b",Identity,SyntaxForm -> "a*b"],"T"}], False, True, False},
-        		{"joinTuples", RowBox[{"T",TagBox["\:2a1d",Identity,SyntaxForm -> "a*b"],"S"}], False, True, False},
+			    {"appendElem", RowBox[{"T", "\:293a", "e"}], False, True, False},
+        		{"prependElem", RowBox[{"e", "\:293b", "T"}], False, True, False},
+        		{"joinTuples", RowBox[{"T", "\:22c8", "S"}], False, True, False},
         		{"Max", RowBox[{"max","[","T","]"}], False, True, False},
         		{"Min", RowBox[{"min","[","T","]"}], False, True, False}
         	},
@@ -105,7 +105,7 @@ initGUI[] :=
         		{"ProductOf", RowBox[{"\[Product]",SubscriptBox["A","i"]}], False, True, False}
         	},
         	{"Logic", 
-        		{"Not", RowBox[{"\[Not]","P"}], False, True, False},
+        		{"Not", RowBox[{"\[Not]","P"}], True, True, False},
         		{"And", RowBox[{"P", "\[And]","Q"}], True, True, False},
         		{"Or", RowBox[{"P", "\[Or]","Q"}], True, True, False},
         		{"Implies", RowBox[{"P", "\[Implies]","Q"}], True, True, False},
@@ -1227,7 +1227,13 @@ selectProver[ ] :=
 						Appearance -> "Frameless"
 					]
 				],
-				If[ view === {}, translate[ "noRules"], view]}], translate[ "pRulesSetup"], {{Top, Left}}]],
+				(* Pane[ views[[$tcActivitiesView, $tcActionView]], {400, 600}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic,
+                    ImageMargins -> 0, FrameMargins -> 10]*)
+				If[ view === {}, 
+					translate[ "noRules"], 
+					(* else *)
+					Pane[ view, {360, Automatic}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
+				]}], translate[ "pRulesSetup"], {{Top, Left}}]],
     	Labeled[ Tooltip[ PopupMenu[ Dynamic[ $selectedStrategy], Map[ MapAt[ translate, #, {2}]&, $registeredStrategies]],
     		With[ {ss = $selectedStrategy}, MessageName[ ss, "usage"]]], 
     		translate[ "pStrat"], {{ Top, Left}}],
@@ -1603,7 +1609,7 @@ summarizeProverSettings[ args___] := unexpected[ summarizeProverSettings, {args}
 (* Palettes *)
 
 
-insertNewEnv[type_String] :=
+insertNewEnv[ type_String] :=
     Module[ {nb = InputNotebook[]},
         NotebookWrite[
          nb, {newOpenEnvCell[],
@@ -1612,15 +1618,15 @@ insertNewEnv[type_String] :=
           newEndEnvCell[],
           newCloseEnvCell[]}];
     ]
-insertNewEnv[args___] :=
-    unexpected[insertNewEnv, {args}]
+insertNewEnv[ args___] :=
+    unexpected[ insertNewEnv, {args}]
 
-openNewEnv[type_String] :=
+openNewEnv[ type_String] :=
     Module[ {},
         NotebookWrite[ InputNotebook[], newOpenEnvCell[]];
         NotebookWrite[ InputNotebook[], newEnvHeaderCell[ type]];
     ]
-openNewEnv[args___] :=
+openNewEnv[ args___] :=
     unexpected[openNewEnv, {args}]
 
 insertNewFormulaCell[ style_String] := 
@@ -1629,40 +1635,35 @@ insertNewFormulaCell[ style_String] :=
 		(* we use NotebookFind because parameter Placeholder in NotebookWrite does not work (Mma 8.0.1) *)
 		NotebookFind[ InputNotebook[], "\[SelectionPlaceholder]", Previous];
 	]
-insertNewFormulaCell[args___] :=
-    unexpected[insertNewFormulaCell, {args}]
+insertNewFormulaCell[ args___] :=
+    unexpected[ insertNewFormulaCell, {args}]
 
 closeEnv[] :=
     Module[ {},
         NotebookWrite[ InputNotebook[], {newEndEnvCell[], newCloseEnvCell[]}];
     ]
-closeEnv[args___] :=
-    unexpected[closeEnv, {args}]
+closeEnv[ args___] :=
+    unexpected[ closeEnv, {args}]
 
-newFormulaCell[ "COMPUTE"] = Cell[BoxData["\[SelectionPlaceholder]"], "Computation"]	
-newFormulaCell[ "DECLARATION"] = Cell[BoxData["\[SelectionPlaceholder]"], "GlobalDeclaration"]	
-newFormulaCell[ style_, label_:$initLabel] = Cell[BoxData["\[SelectionPlaceholder]"], "FormalTextInputFormula", CellTags->{label}]	
-newFormulaCell[args___] :=
-    unexpected[newFormulaCell, {args}]
+newFormulaCell[ "COMPUTE"] = Cell[ BoxData[ "\[SelectionPlaceholder]"], "Computation"]	
+newFormulaCell[ "DECLARATION"] = Cell[ BoxData[ "\[SelectionPlaceholder]"], "GlobalDeclaration"]	
+newFormulaCell[ style_, label_:$initLabel] = Cell[ BoxData[ "\[SelectionPlaceholder]"], "FormalTextInputFormula", CellTags -> {label}]	
+newFormulaCell[ args___] := unexpected[ newFormulaCell, {args}]
 
 newOpenEnvCell[] := Cell[ "", "OpenEnvironment"]
-newOpenEnvCell[args___] :=
-    unexpected[newOpenEnvCell, {args}]
+newOpenEnvCell[ args___] := unexpected[ newOpenEnvCell, {args}]
 
-newEnvHeaderCell[ type_String] := Cell[ type, "EnvironmentHeader",
+newEnvHeaderCell[ type_String] := Cell[ type <> " (\[Ellipsis])", "EnvironmentHeader",
 	CellFrameLabels -> {{None, 
     	Cell[ BoxData[ ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None,
     		ButtonFunction :> removeEnvironment[ ButtonNotebook[]]]]]}, {None, None}}]
-newEnvHeaderCell[args___] :=
-    unexpected[newEnvHeaderCell, {args}]
+newEnvHeaderCell[ args___] := unexpected[ newEnvHeaderCell, {args}]
 
 newEndEnvCell[] := Cell[ "\[GraySquare]", "EndEnvironmentMarker"]
-newEndEnvCell[args___] :=
-    unexpected[newEndEnvCell, {args}]
+newEndEnvCell[ args___] := unexpected[ newEndEnvCell, {args}]
 
 newCloseEnvCell[] := Cell[ "", "CloseEnvironment"]
-newCloseEnvCell[args___] :=
-    unexpected[newCloseEnvCell, {args}]
+newCloseEnvCell[ args___] := unexpected[ newCloseEnvCell, {args}]
 
 
 (* ::Subsection:: *)
@@ -1688,15 +1689,14 @@ envButtonData["THM"] := "tcSessTabEnvTabButtonThmLabel";
 envButtonData["LMA"] := "tcSessTabEnvTabButtonLmaLabel";
 envButtonData["PRP"] := "tcSessTabEnvTabButtonPrpLabel";
 envButtonData["COR"] := "tcSessTabEnvTabButtonCorLabel";
-envButtonData["CNJ"] := "tcSessTabEnvTabButtonCnjLabel";
 envButtonData["ALG"] := "tcSessTabEnvTabButtonAlgLabel";
 envButtonData["EXM"] := "tcSessTabEnvTabButtonExmLabel";
 envButtonData[args___] :=
     unexpected[envButtonData, {args}]
 
 makeEnvButton[ bname_String] :=
-    With[ { bd = envButtonData[bname]},
-			Button[ translate[bd], insertNewEnv[ translate[bd]], Alignment -> {Left, Top}]
+    With[ { bd = If[ bname === "?", "?", translate[ envButtonData[ bname]]]},
+		Button[ bd, insertNewEnv[ bd], Alignment -> Center]
     ]
 makeEnvButton[args___] := unexpected[makeEnvButton, {args}]
 
@@ -1777,7 +1777,7 @@ displayEnv[ ] :=
 	]
 displayEnv[ args___] := unexpected[ displayEnv, {args}]
    
-allEnvironments = {"DEF", "THM", "LMA", "PRP", "COR", "CNJ", "ALG", "EXM"};
+allEnvironments = {"DEF", "THM", "LMA", "PRP", "COR", "ALG", "EXM", "?"};
 
 sessionCompose[] :=
     Column[{
@@ -2366,8 +2366,8 @@ langButtonData["JOIN"] :=
 	{
 		If[ TrueQ[ $buttonNat], 
 			translate["JOIN"], 
-			"\:2a1d"],
-		RowBox[ {"\[SelectionPlaceholder]", TagBox[ "\:2a1d", Identity, SyntaxForm -> "a*b"], "\[Placeholder]"}],
+			"\:22c8"],
+		RowBox[ {"\[SelectionPlaceholder]", TagBox[ "\:22c8", Identity, SyntaxForm -> "a*b"], "\[Placeholder]"}],
 		MessageName[ joinTuples$TM, "usage"],
 		"join"
 	}

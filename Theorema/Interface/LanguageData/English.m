@@ -29,14 +29,13 @@ With[ {lang = "English"},
     		translate["tcSessTabEnvTabButtonLmaLabel", lang] = "Lemma";
     		translate["tcSessTabEnvTabButtonPrpLabel", lang] = "Proposition";
     		translate["tcSessTabEnvTabButtonCorLabel", lang] = "Corollary";
-    		translate["tcSessTabEnvTabButtonCnjLabel", lang] = "Conjecture";
     		translate["tcSessTabEnvTabButtonAlgLabel", lang] = "Algorithm";
     		translate["tcSessTabEnvTabButtonExmLabel", lang] = "Example";
     		translate["Formulae", lang] = "Formulas";
     		translate["Theorema Environment", lang] = "Theorema Environment";
-    		translate["Declarations", lang] = "Declarations";
-     		translate["GVARTooltip", lang] = "Global variable";   	
-     		translate["GVARCONDTooltip", lang] = "Global variable with condition";   	
+    		translate["Declarations", lang] = "Globals";
+     		translate["GVARTooltip", lang] = "Global universally quantified variable";   	
+     		translate["GVARCONDTooltip", lang] = "Global universally quantified variable with condition";   	
       		translate["GCONDTooltip", lang] = "Global condition";   	
      		translate["GABBREVTooltip", lang] = "Global abbreviation";   	
      		translate["AND1", lang] = "\!\(\*FormBox[FrameBox[\"left\"], SelectionPlaceholder]\) and \!\(\*FormBox[FrameBox[\"right\"], SelectionPlaceholder]\)";   	
@@ -89,8 +88,8 @@ With[ {lang = "English"},
      		translate["tooltipButtonNoParen"] = "\nKeyboard shortcut:";   	
     	translate["tcSessTabInspectTabLabel", lang] = "inspect";
     		translate["tcSessTabEnvTabButtonAllFormLabel", lang] = "All Formulae";
-    		translate["tcSessTabEnvTabButtonAllDeclLabel", lang] = "All Declarations";
-    		translate["tcSessTabEnvTabButtonDeclLabel", lang] = "Identify global declarations";
+    		translate["tcSessTabEnvTabButtonAllDeclLabel", lang] = "All Globals";
+    		translate["tcSessTabEnvTabButtonDeclLabel", lang] = "Identify globals";
     	translate["tcSessTabArchTabLabel", lang] = "archives";
     		translate["tcLangTabArchTabSectionCreate", lang] = "Creating Archives";
     		translate["tcLangTabArchTabButtonMakeLabel", lang] = "Notebook \[RightArrow] Archive";
@@ -191,6 +190,7 @@ With[ {lang = "English"},
 	translate["instVar", lang] = "Variables to be instantiated";
 	translate["availConst", lang] = "Available constants";
 	translate["notEval", lang] = "Formula currently not evaluated. Click to eval.";
+	translate["?", lang] = "?";
 
 	translate["Virtual Keyboard", lang] = "Virtual Keyboard";
 	    
@@ -236,7 +236,7 @@ With[ {lang = "English"},
     translate["notUniqueLabel", lang] = "These labels are not unique in the notebook: ``\n\nThis is just a warning, you can continue,\nbut referencing formulae from this notebook\nmight turn out to be confusing.";
     translate["cantCreateDir", lang] = "Cannot create directory ``.";
     translate["noArchName", lang] = "No archive name available for chosen archive. Check file content.";
-    translate["Global Declarations"] = "Global Declarations valid at this cell";
+    translate["Global Declarations"] = "Globals valid at this cell";
     translate["None"] = "None";
 
 (* Theorema`Language`Parser` *)
