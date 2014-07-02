@@ -840,7 +840,7 @@ equalityRules = {"Equality Rules",
 	};
 	
 rewritingRules = {"Rewriting Rules",
-	{goalRewriting, True, True, 15},
+	{goalRewriting, True, True, 22},
 	{knowledgeRewriting, True, True, 25},
 	{elementarySubstitution, True, True, 4},
 	{expandDef, True, True, 80},
