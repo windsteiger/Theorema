@@ -175,6 +175,7 @@ initGUI[] :=
 		$ShiftActive = 0;
 		$TMAactDecl = translate[ "None"];
 		$proofTreeScale = 1;
+		$replExistProof = 0;
 	]
 
 initBuiltins[ l_List] :=
