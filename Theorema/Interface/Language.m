@@ -24,7 +24,7 @@ Begin["`Private`"] (* Begin Private Context *)
 availableLanguages[] := Map[ FileBaseName, allLanguageFiles[]]
 allLanguageFiles[] := FileNames[ "*.m", FileNameJoin[{$TheoremaDirectory, "Theorema", "Interface", "LanguageData"}]]
 
-translate[ s_String] := translate[ s, $Language];
+translate[ s_String] := translate[ s, $TmaLanguage];
 Map[ Get, allLanguageFiles[]];
 translate[ s_String, lang_String] := "???" <> s <> "???"
 

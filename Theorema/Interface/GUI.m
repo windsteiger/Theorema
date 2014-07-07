@@ -176,6 +176,7 @@ initGUI[] :=
 		$TMAactDecl = translate[ "None"];
 		$proofTreeScale = 1;
 		$replExistProof = 0;
+		$TmaLanguage = $Language;
 	]
 
 initBuiltins[ l_List] :=
@@ -249,7 +250,7 @@ openTheoremaCommander[ ] /; $Notebooks :=
         				Dynamic[ Refresh[ displayBuiltinBrowser["solve"], TrackedSymbols :> {buiActSolve}]]},
         			(* prefs *)  {setPreferences[ ]}
         		}
-        	], TrackedSymbols :> {$Language}]],
+        	], TrackedSymbols :> {$TmaLanguage}]],
         	StyleDefinitions -> makeColoredStylesheet[ "GUI"],
         	WindowTitle -> translate["Theorema Commander"],
         	WindowElements -> {"StatusArea"}]
@@ -1910,7 +1911,7 @@ loadArchiveInPlace[ args___] := unexpected[ loadArchiveInPlace, {args}]
 setPreferences[ ] :=
 	Column[ {
 	Column[ {
-		Labeled[ PopupMenu[Dynamic[$Language], availableLanguages[]], translate["tcPrefLanguage"], {{Top, Left}}],
+		Labeled[ PopupMenu[ Dynamic[ $TmaLanguage], availableLanguages[]], translate[ "tcPrefLanguage"], {{Top, Left}}],
 		Labeled[ Row[ {Dynamic[ Tooltip[ FileNameJoin[ Take[ FileNameSplit[$TheoremaArchiveDirectory], -2]], $TheoremaArchiveDirectory]],
 				FileNameSetter[Dynamic[$TheoremaArchiveDirectory], "Directory"]}, Spacer[10]], translate["tcPrefArchiveDir"], {{Top, Left}}],
 		Labeled[ Row[{PopupMenu[ Dynamic[ $TheoremaColorScheme], $availableColorSchemes, BaselinePosition -> Center], 
@@ -1966,11 +1967,11 @@ savePreferencesButton[ ] :=
         Column[{
         	Dynamic[ Refresh[ Row[{
         	translate["preferences last saved: "],
-            $prefsSaveStatus <> If[ {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen, $buttonNat} === $savedValues,
+            $prefsSaveStatus <> If[ {$TmaLanguage, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen, $buttonNat} === $savedValues,
                                         " \[Checkmark]",
                                         ""
-                                    ]}], TrackedSymbols :> {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen, $buttonNat, $prefsSaveStatus}]],
-         Button[ translate["save current settings"], savePreferences[]]
+                                    ]}], TrackedSymbols :> {$TmaLanguage, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen, $buttonNat, $prefsSaveStatus}]],
+         Button[ translate[ "save current settings"], savePreferences[]]
         }, Center, ItemSize -> {28.2,1}, Dividers -> {{False}, 1 -> True}
         ]
     ]
@@ -1986,8 +1987,8 @@ savePreferences[ ] :=
 				DeleteFile[ prefsFile]
 			]
 		];
-		$savedValues = {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen, $buttonNat};
-		Save[ prefsFile, {$Language, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen, $buttonNat, $savedValues}];
+		$savedValues = {$TmaLanguage, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen, $buttonNat};
+		Save[ prefsFile, {$TmaLanguage, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen, $buttonNat, $savedValues}];
 		$prefsSaveStatus = DateString[ FileDate[ FileNameJoin[{$UserBaseDirectory, "Applications", "Theorema", "Kernel", "TheoremaPreferences.m"}]]];
 	]
 savePreferences[ args___] := unexpected[ savePreferences, {args}]

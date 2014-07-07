@@ -1,4 +1,4 @@
-$Language = "English"
+$TmaLanguage = "English"
 
 $TheoremaArchiveDirectory = FileNameJoin[ {$TheoremaDirectory, "Theorema", "Knowledge"}];
   

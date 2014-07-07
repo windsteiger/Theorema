@@ -145,6 +145,7 @@ With[ {lang = "English"},
 	MessageName[tmaDialogInput, "usage", lang] = "Theorema version of Mathematica's DialogInput.";
 	MessageName[getExistGoalInstanceDialog, "usage", lang] = "The dialog window asking for an instantiation.";
 	MessageName[nextProofSitDialog, "usage", lang] = "The dialog window for choosing the next proof situation.";
+	MessageName[$TmaLanguage, "usage", lang] = "The language used in the Theorema interface.";
 	
 (* Theorema`Interface`Language` *)
 	MessageName[translate, "usage", lang] = "translate[s_String,lang_String] gives string s in language lang.";
