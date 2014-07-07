@@ -103,10 +103,10 @@ $TheoremaArchivePath = {$TheoremaArchiveDirectory, $HomeDirectory};
     BaseStyle -> {FontFamily -> "Helvetica", FontSize -> 11}]};
 
 `priv`center = {TMAcolor[8], 
-    Text["T h e o r e m a  " <> $TheoremaVersion, {0, -3}, 
-     BaseStyle -> {FontWeight -> Bold, FontSize -> 36}]};
+    Text["Theorema " <> $TheoremaVersion, {0, -3}, 
+     BaseStyle -> {FontWeight -> Bold, FontSize -> 36, FontTracking -> 8}]};
 
-showWelcomeScreen[] /; !ValueQ[`priv`welcomeScreen] && !TrueQ[$suppressWelcomeScreen] := Module[{},
+showWelcomeScreen[] /; !ValueQ[`priv`welcomeScreen] && !TrueQ[ $suppressWelcomeScreen] := Module[{},
     `priv`welcomeScreen = CreatePalette[
     	Dynamic[ Graphics[{`priv`RISCLogo[Clock[2 Pi, 2, 3]], `priv`topleft, `priv`topright, `priv`bottomright, `priv`bottomleft,
     		{With[{`priv`o = Clock[1, 5, 1]}, Opacity[ If[ `priv`o < 0.4, 0.1, 3/2*`priv`o-1/2]]], `priv`center}},
@@ -118,7 +118,7 @@ showWelcomeScreen[] /; !ValueQ[`priv`welcomeScreen] && !TrueQ[$suppressWelcomeSc
     		
 If[ TrueQ[$Notebooks],
     showWelcomeScreen[],
-    Print["Theorema Version " <> Riffle[{$TheoremaVersion, $TheoremaRelease}, "."] <> " (C) 2010-" <> 
+    Print[ "Theorema Version " <> StringJoin[ Riffle[ {$TheoremaVersion, $TheoremaRelease}, "."]] <> " (C) 2010-" <> 
      ToString[Date[][[1]]] <> " The Theorema Group.\n
     This program comes with ABSOLUTELY NO WARRANTY;\n\n    This is free software, and you are welcome to\n    redistribute it under the conditions of the\n    GNU General Public License, see <http://www.gnu.org/licenses/>."]
 ];
@@ -146,7 +146,8 @@ EndPackage[]
 	
 
 If[$Notebooks && MemberQ[Notebooks[], Theorema`priv`welcomeScreen],
-	NotebookClose[Theorema`priv`welcomeScreen]];
+	NotebookClose[ Theorema`priv`welcomeScreen];
+	Clear[ Theorema`priv`welcomeScreen]];
 
 (* For documentation generation with Workbench include the following packages,
    so that their symbols appear without context *)

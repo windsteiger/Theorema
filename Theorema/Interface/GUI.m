@@ -1950,7 +1950,7 @@ makeColoredStylesheet[ type_String, color_:$TheoremaColorScheme] :=
 			Cases[ Flatten[ Transpose[ allFormulae][[2]]], _String]];
 		alias = Join[ alias, {"(" -> autoParenthesis[ "("], ")" -> autoParenthesis[ ")"]}];
 		styles /. Table[Apply[CMYKColor, IntegerDigits[i, 2, 4]] -> TMAcolor[i, color], {i, 0, 15}] 
-				/. {(InputAliases -> {}) -> (InputAliases -> alias), "DOCKED_HEADER" -> "Theorema " <> translate[ type]}
+				/. {(InputAliases -> {}) -> (InputAliases -> alias), "DOCKED_HEADER" -> "Theorema " <> If[ type === "Notebook", $TheoremaVersion, translate[ type]]}
 	]
 makeColoredStylesheet[ args___] := unexpected[ makeColoredStylesheet, {args}]
 
