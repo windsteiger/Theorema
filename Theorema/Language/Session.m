@@ -140,8 +140,8 @@ markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
         vars = specifiedVariables[ r];
         seq = Cases[vars, (SEQ0$|SEQ1$)[ _]];
         vars = Complement[ vars, seq];
-        s = Join[Map[ (h:(SEQ0$|SEQ1$))[ Hold[ sym_Symbol]] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> VAR$[h[ #]]&, seq[[All, 1]]],
-        		 Map[ Hold[ sym_Symbol] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> VAR$[ #]&, vars]];
+        s = Join[ Map[ (h:(SEQ0$|SEQ1$))[ Hold[ sym_Symbol]] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> VAR$[ h[ #]]&, seq[[All, 1]]],
+        		  Map[ Hold[ sym_Symbol] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> VAR$[ #]&, vars]];
         replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {SEQ0$, SEQ1$, VAR$, FIX$}]
     ]
 
@@ -150,8 +150,8 @@ markVariables[ Hold[ Theorema`Computation`Language`QU$[ r_Theorema`Computation`L
     	vars = specifiedVariables[ Hold[ r]];
         seq = Cases[vars, (Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$)[ _]];
         vars = Complement[ vars, seq];
-        s = Join[Map[ (h:(Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$))[ Hold[ sym_Symbol]] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> Theorema`Computation`Language`VAR$[ h[ #]]&, seq[[All, 1]]],
-        		 Map[ Hold[ sym_Symbol] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> Theorema`Computation`Language`VAR$[ #]&, vars]];
+        s = Join[ Map[ (h:(Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$))[ Hold[ sym_Symbol]] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> Theorema`Computation`Language`VAR$[ h[ #]]&, seq[[All, 1]]],
+        		  Map[ Hold[ sym_Symbol] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> Theorema`Computation`Language`VAR$[ #]&, vars]];
         replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {Theorema`Computation`Language`SEQ0$, Theorema`Computation`Language`SEQ1$, Theorema`Computation`Language`VAR$, Theorema`Computation`Language`FIX$}]
     ]
     
@@ -185,7 +185,8 @@ makeTmaExpression[ args___] := unexpected[ makeTmaExpression, {args}]
 
 (* processing Theorema expressions essentially works on Hold-expressions, where symbols inside are again
    wrapped into Hold in order to prevent values to enter the expressions during their processing e.g. in a computation.
-   When processing is finished, the Holds mus be removed again. We first remove the inner Holds and finally remove the outer head Hold. *)
+   When processing is finished, the Holds must be removed again. We first remove the inner Holds and finally remove the outer head Hold.
+*)
 removeHold[ expr_Hold] :=
 	(* level infinity does not apply to the main head. This is only removed with ReleaseHold. *)
 	ReleaseHold[ Replace[ expr, Hold[ x_] -> x, Infinity, Heads -> True]]
@@ -239,7 +240,7 @@ putGlobalDeclaration[ args___] := unexpected[ putGlobalDeclaration, {args}]
 SetAttributes[ processGlobalDeclaration, HoldAll];
 processGlobalDeclaration[ x_] := 
 	Module[ {},
-		putGlobalDeclaration[ CurrentValue[ "NotebookFullFileName"], CurrentValue[ "CellID"], removeHold[ markVariables[ freshNames[ Hold[ x]]]]];
+		putGlobalDeclaration[ CurrentValue[ "NotebookFullFileName"], CurrentValue[ "CellID"], ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]]];
 	]
 processGlobalDeclaration[ args___] := unexpected[ processGlobalDeclaration, {args}]
 
@@ -257,8 +258,9 @@ processEnvironment[ x_] :=
 		ensureNotebookIntegrity[ nb, rawNotebook, tags];
 		(* extract the global declarations that are applicable in the current evaluation *)
 		globDec = applicableGlobalDeclarations[ nb, rawNotebook, evaluationPosition[ nb, rawNotebook]];
-		(* process the expression according the Theorema syntax rules and add it to the KB *)
-        Catch[ updateKnowledgeBase[ removeHold[ markVariables[ freshNames[ Hold[ x]]]], key, globDec, cellTagsToString[ tags]]];
+		(* process the expression according the Theorema syntax rules and add it to the KB 
+		   ReleaseHold will remove the outer Hold but leave the Holds around fresh symbols *)
+        Catch[ updateKnowledgeBase[ ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]], key, globDec, cellTagsToString[ tags]]];
         SelectionMove[ nb, After, Cell];
     ]
 processEnvironment[args___] := unexcpected[ processEnvironment, {args}]
@@ -487,7 +489,8 @@ displayGlobalDeclarations[ nb_NotebookObject] :=
 			{dir, {All, Next, Previous}}
 		];
 		pos = First[ Position[ raw, sel]];
-		availDecl = applicableGlobalDeclarations[ nb, raw, pos];
+		(* Remove the Holds around fresh symbols *)
+		availDecl = ReleaseHold[ applicableGlobalDeclarations[ nb, raw, pos]];
 		If[ availDecl =!= {},
 			globDecl = DisplayForm[ RowBox[ Map[ theoremaDisplay, availDecl]]],
 			globDecl = translate[ "None"]
@@ -500,8 +503,11 @@ occursBelow[ {a___, p_}, {a___, q_, ___}] /; q > p := True
 occursBelow[ x_, y_] := False
 occursBelow[args___] := unexpected[ occursBelow, {args}]
 
+(* 
+	form and glob still carry Holds around fresh symbols. After globals have been applied, ReleaseHold will remove them.
+*)
 updateKnowledgeBase[ form_, k_, glob_, tags_String] :=
-    Module[ {newForm = applyGlobalDeclaration[ form, glob], fml},
+    Module[ {newForm = ReleaseHold[ applyGlobalDeclaration[ form, glob]], fml},
     	fml = makeFML[ key -> k, formula -> newForm, label -> tags, simplify -> False];
     	transferToComputation[ fml];
     	(* If new formulae are appended rather than prepended, the old formulae with the same label
@@ -520,23 +526,28 @@ findSelectedFormula[ Cell[ _, ___, CellTags -> t_, ___]] :=
 findSelectedFormula[ sel_] := {}
 findSelectedFormula[args___] := unexpected[ findSelectedFormula, {args}]
 
+(*
+	The global declarations have all symbols still wrapped in Hold (from freshSymbols) 
+	in order to make things consistent with a local quantifier written in front of the expression.
+	As a result, also the globalForall$TM, globalImplies$TM, etc. have a Hold.
+*)
 Clear[ applyGlobalDeclaration]
 applyGlobalDeclaration[ expr_, g_List] := Fold[ applyGlobalDeclaration, expr, Reverse[ g]]
 
-applyGlobalDeclaration[ expr_, globalForall$TM[ r_, c_]] := 
+applyGlobalDeclaration[ expr_, Hold[ globalForall$TM][ r_, c_]] := 
 	analyzeQuantifiedExpression[ Forall$TM[ r, c, ReleaseHold[ markVariables[ Hold[ QU$[ r, expr]]]]], {}]
 
-applyGlobalDeclaration[ expr_, globalForall$TM[ r_, c_, d_]] := 
+applyGlobalDeclaration[ expr_, Hold[ globalForall$TM][ r_, c_, d_]] := 
 	With[ {new = applyGlobalDeclaration[ expr, d]},
-		applyGlobalDeclaration[ new, globalForall$TM[ r, c]]
+		applyGlobalDeclaration[ new, Hold[ globalForall$TM][ r, c]]
 	]
-applyGlobalDeclaration[ expr_, globalImplies$TM[ c_]] := Implies$TM[ c, expr]
-applyGlobalDeclaration[ expr_, globalImplies$TM[ c_, d_]] := Implies$TM[ c, applyGlobalDeclaration[ expr, d]]
-applyGlobalDeclaration[ expr_, domainConstruct$TM[ lhs_, rng:RNG$[ SIMPRNG$[ v_]]]] :=
+applyGlobalDeclaration[ expr_, Hold[ globalImplies$TM][ c_]] := Implies$TM[ c, expr]
+applyGlobalDeclaration[ expr_, Hold[ globalImplies$TM][ c_, d_]] := Implies$TM[ c, applyGlobalDeclaration[ expr, d]]
+applyGlobalDeclaration[ expr_, Hold[ domainConstruct$TM][ lhs_, rng:RNG$[ SIMPRNG$[ v_]]]] :=
 	substituteFree[ ReleaseHold[ markVariables[ Hold[ QU$[ rng, expr]]]], {v -> lhs}]
-applyGlobalDeclaration[ expr_, domainConstruct$TM[ lhs_, rng:RNG$[ DOMEXTRNG$[ v_, d_]]]] :=
+applyGlobalDeclaration[ expr_, Hold[ domainConstruct$TM][ lhs_, rng:RNG$[ DOMEXTRNG$[ v_, d_]]]] :=
 	substituteFree[ ReleaseHold[ markVariables[ Hold[ QU$[ rng, expr]]]], {v -> lhs}]
-applyGlobalDeclaration[ expr_, globalAbbrev$TM[ rng:RNG$[ a__ABBRVRNG$]]] := substituteFree[ ReleaseHold[ markVariables[ Hold[ QU$[ rng, expr]]]], 
+applyGlobalDeclaration[ expr_, Hold[ globalAbbrev$TM][ rng:RNG$[ a__ABBRVRNG$]]] := substituteFree[ ReleaseHold[ markVariables[ Hold[ QU$[ rng, expr]]]], 
 	Apply[ Rule, {a}, {1}]]
 applyGlobalDeclaration[ args___] := unexpected[ applyGlobalDeclaration, {args}]
 
