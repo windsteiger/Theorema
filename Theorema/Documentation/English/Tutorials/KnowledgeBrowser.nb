@@ -1,0 +1,295 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 8.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       157,          7]
+NotebookDataLength[      7631,        286]
+NotebookOptionsPosition[      5171,        198]
+NotebookOutlinePosition[      5586,        214]
+CellTagsIndexPosition[      5543,        211]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[TextData[{
+ "New in: ",
+ Cell["2.0", "HistoryData",
+  CellTags->"New"],
+ " | Modified in: ",
+ Cell[" ", "HistoryData",
+  CellTags->"Modified"],
+ " | Obsolete in: ",
+ Cell[" ", "HistoryData",
+  CellTags->"Obsolete"],
+ " | Excised in: ",
+ Cell[" ", "HistoryData",
+  CellTags->"Excised"]
+}], "History",
+ CellID->1247902091],
+
+Cell[CellGroupData[{
+
+Cell["Categorization", "CategorizationSection",
+ CellID->1122911449],
+
+Cell["Tutorial", "Categorization",
+ CellLabel->"Entity Type",
+ CellID->686433507],
+
+Cell["Theorema", "Categorization",
+ CellLabel->"Paclet Name",
+ CellID->605800465],
+
+Cell["Theorema`", "Categorization",
+ CellLabel->"Context",
+ CellID->468444828],
+
+Cell["Theorema/tutorial/KnowledgeBrowser", "Categorization",
+ CellLabel->"URI"]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Keywords", "KeywordsSection",
+ CellID->1427428552],
+
+Cell["XXXX", "Keywords",
+ CellID->1251852827]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Details", "DetailsSection",
+ CellID->307771771],
+
+Cell["XXXX", "Details",
+ CellLabel->"Lead",
+ CellID->218895918],
+
+Cell["XXXX", "Details",
+ CellLabel->"Developers",
+ CellID->350963985],
+
+Cell["XXXX", "Details",
+ CellLabel->"Authors",
+ CellID->795871300],
+
+Cell["XXXX", "Details",
+ CellLabel->"Feature Name",
+ CellID->199739161],
+
+Cell["XXXX", "Details",
+ CellLabel->"QA",
+ CellID->40625308],
+
+Cell["XXXX", "Details",
+ CellLabel->"DA",
+ CellID->357121918],
+
+Cell["XXXX", "Details",
+ CellLabel->"Docs",
+ CellID->35949532],
+
+Cell["XXXX", "Details",
+ CellLabel->"Features Page Notes",
+ CellID->929432370],
+
+Cell["XXXX", "Details",
+ CellLabel->"Comments",
+ CellID->240026365]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["The Knowledge Browser", "Title",
+ CellChangeTimes->{{3.613292819959137*^9, 3.613292823025467*^9}},
+ CellID->509267359],
+
+Cell["\<\
+The knowledge browse consists of (from top to bottom)\
+\>", "Text",
+ CellChangeTimes->{{3.61328863721892*^9, 3.613288694444047*^9}, {
+  3.613288799020344*^9, 3.613288801605852*^9}, {3.613288903129738*^9, 
+  3.613288947735902*^9}, {3.613292785492809*^9, 3.613292786069235*^9}, {
+  3.613292844131293*^9, 3.613292846596772*^9}, {3.613292927749332*^9, 
+  3.613292937078613*^9}},
+ CellID->1328483431],
+
+Cell["the filter area,", "BulletedText",
+ CellChangeTimes->{{3.613288955649669*^9, 3.613288961279416*^9}},
+ CellID->1431232138],
+
+Cell["the notebook selector, and", "BulletedText",
+ CellChangeTimes->{{3.613288965981805*^9, 3.613288973774205*^9}},
+ CellID->683025183],
+
+Cell["the notebook content browser.", "BulletedText",
+ CellChangeTimes->{{3.613288992672362*^9, 3.613289011112401*^9}, {
+  3.613290330319706*^9, 3.613290331677012*^9}},
+ CellID->600702994],
+
+Cell[TextData[{
+ "The ",
+ StyleBox["notebook selector",
+  FontSlant->"Italic"],
+ " allows to select the notebook, from which knowledge is to be chosen.  \
+Through buttons or a menu it offers all notebooks, in which formulas have \
+been evaluated during the current session. The ",
+ StyleBox["notebook content browser",
+  FontSlant->"Italic"],
+ " immediately below then displays an outline of the selected notebook \
+consisting only of the environments contained in the notebook displayed \
+according to the notebook's sectioning structure. Each unit from the entire \
+notebook through sections and subsections to environments and their \
+individual formulas is equipped with a checkbox to select or deselect all \
+formulas in the respective unit. The ",
+ StyleBox["filter area",
+  FontSlant->"Italic"],
+ " on top allows to filter the displayed outline according to keywords found \
+in the formula labels and the section headings."
+}], "Text",
+ CellChangeTimes->{{3.613289048478854*^9, 3.613289197649919*^9}, {
+  3.613290300818504*^9, 3.613290422612181*^9}, {3.613290471450809*^9, 
+  3.613290507413197*^9}, {3.613292147675097*^9, 3.613292264149212*^9}, {
+  3.613292968942618*^9, 3.613293056361697*^9}},
+ CellID->291877475],
+
+Cell["\<\
+Units can be collapsed or uncollapsed by mouse-click. Individual formulas are \
+displayed by their labels only\
+\>", "Text",
+ CellChangeTimes->{{3.613293094018386*^9, 3.613293162293272*^9}},
+ CellID->2139881526],
+
+Cell[CellGroupData[{
+
+Cell["More About", "TutorialMoreAboutSection",
+ CellID->23220180],
+
+Cell["XXXX", "TutorialMoreAbout",
+ CellID->1567025153]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Related Tutorials", "RelatedTutorialsSection",
+ CellID->415694126],
+
+Cell["XXXX", "RelatedTutorials",
+ CellID->806871991]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Related Wolfram Education Group Courses", "TutorialRelatedLinksSection",
+ CellID->415694148],
+
+Cell["XXXX", "TutorialRelatedLinks",
+ CellID->415694149]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{700, 770},
+WindowMargins->{{358, Automatic}, {Automatic, 106}},
+FrontEndVersion->"8.0 for Linux x86 (32-bit) (February 23, 2011)",
+StyleDefinitions->FrontEnd`FileName[{"Wolfram"}, "TutorialPageStyles.nb", 
+  CharacterEncoding -> "UTF-8"]
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[557, 20, 325, 14, 24, "History",
+ CellID->1247902091],
+Cell[CellGroupData[{
+Cell[907, 38, 68, 1, 29, "CategorizationSection",
+ CellID->1122911449],
+Cell[978, 41, 81, 2, 70, "Categorization",
+ CellID->686433507],
+Cell[1062, 45, 81, 2, 70, "Categorization",
+ CellID->605800465],
+Cell[1146, 49, 78, 2, 70, "Categorization",
+ CellID->468444828],
+Cell[1227, 53, 79, 1, 70, "Categorization"]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[1343, 59, 56, 1, 19, "KeywordsSection",
+ CellID->1427428552],
+Cell[1402, 62, 45, 1, 70, "Keywords",
+ CellID->1251852827]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[1484, 68, 53, 1, 19, "DetailsSection",
+ CellID->307771771],
+Cell[1540, 71, 63, 2, 70, "Details",
+ CellID->218895918],
+Cell[1606, 75, 69, 2, 70, "Details",
+ CellID->350963985],
+Cell[1678, 79, 66, 2, 70, "Details",
+ CellID->795871300],
+Cell[1747, 83, 71, 2, 70, "Details",
+ CellID->199739161],
+Cell[1821, 87, 60, 2, 70, "Details",
+ CellID->40625308],
+Cell[1884, 91, 61, 2, 70, "Details",
+ CellID->357121918],
+Cell[1948, 95, 62, 2, 70, "Details",
+ CellID->35949532],
+Cell[2013, 99, 78, 2, 70, "Details",
+ CellID->929432370],
+Cell[2094, 103, 67, 2, 70, "Details",
+ CellID->240026365]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[2198, 110, 124, 2, 106, "Title",
+ CellID->509267359],
+Cell[2325, 114, 405, 8, 24, "Text",
+ CellID->1328483431],
+Cell[2733, 124, 127, 2, 21, "BulletedText",
+ CellID->1431232138],
+Cell[2863, 128, 136, 2, 21, "BulletedText",
+ CellID->683025183],
+Cell[3002, 132, 188, 3, 21, "BulletedText",
+ CellID->600702994],
+Cell[3193, 137, 1221, 24, 168, "Text",
+ CellID->291877475],
+Cell[4417, 163, 221, 5, 42, "Text",
+ CellID->2139881526],
+Cell[CellGroupData[{
+Cell[4663, 172, 65, 1, 66, "TutorialMoreAboutSection",
+ CellID->23220180],
+Cell[4731, 175, 54, 1, 22, "TutorialMoreAbout",
+ CellID->1567025153]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4822, 181, 72, 1, 72, "RelatedTutorialsSection",
+ CellID->415694126],
+Cell[4897, 184, 52, 1, 22, "RelatedTutorials",
+ CellID->806871991]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4986, 190, 98, 1, 72, "TutorialRelatedLinksSection",
+ CellID->415694148],
+Cell[5087, 193, 56, 1, 22, "TutorialRelatedLinks",
+ CellID->415694149]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)

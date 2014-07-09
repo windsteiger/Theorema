@@ -1,0 +1,1105 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 8.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       157,          7]
+NotebookDataLength[     46685,       1096]
+NotebookOptionsPosition[      9978,        304]
+NotebookOutlinePosition[     44704,       1032]
+CellTagsIndexPosition[     44239,       1018]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["Theorema Session", "Title",
+ CellChangeTimes->{{3.594702844009749*^9, 3.594702849348565*^9}},
+ CellID->514594572],
+
+Cell[TextData[{
+ "A Theorema notebook should be seen as a structured mathematical document \
+containing structuring elements (e.g. section and subsection headings), text, \
+formal Theorema language blocks, and Theorema generated output. Notebook \
+editing follows the standard Mathematica rules for editing notebooks.\nFor \
+the formal Theorema language blocks, editing is supported through the ",
+ ButtonBox["Theorema Commander",
+  BaseStyle->"Link",
+  ButtonData->"paclet:Theorema/tutorial/TheoremaCommander"],
+ ". Formal language blocks contain mathematical formulas, such as definitions \
+or theorems, we also call them ",
+ StyleBox["environments", "Text"],
+ ". No Theorema formula may occur outside an environment."
+}], "Text",
+ CellChangeTimes->{{3.60430593559603*^9, 3.604305938982999*^9}, {
+   3.604305975589977*^9, 3.604306024546476*^9}, {3.604306060046638*^9, 
+   3.604306211512466*^9}, {3.604306267647196*^9, 3.604306279176756*^9}, {
+   3.604306413005448*^9, 3.604306486615393*^9}, {3.604306720312205*^9, 
+   3.604306746425759*^9}, {3.60430678012154*^9, 3.604306834817625*^9}, 
+   3.604308718204007*^9, {3.604309831135421*^9, 3.60430991703572*^9}, {
+   3.604311226458283*^9, 3.604311234992073*^9}, {3.604311352048969*^9, 
+   3.604311354438661*^9}},
+ CellID->1974247953],
+
+Cell[CellGroupData[{
+
+Cell["Theorema Environments", "Section",
+ CellChangeTimes->{{3.604311468322475*^9, 3.604311472182655*^9}},
+ CellID->1872173341],
+
+Cell["\<\
+A typical Theorema environment looks as follows:\
+\>", "Text",
+ CellChangeTimes->{{3.604311521555462*^9, 3.604311537145754*^9}},
+ CellID->340703733],
+
+Cell["", "OpenEnvironment",
+ CellID->645359186],
+
+Cell[CellGroupData[{
+
+Cell["Proposition", "EnvironmentHeader",
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      ButtonBox[
+      "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
+       Theorema`Language`Session`Private`removeEnvironment[
+         ButtonNotebook[]]]]]}, {None, None}},
+ CellID->1184198390],
+
+Cell[BoxData[
+ UnderscriptBox["\[ForAll]", "x"]], "GlobalDeclaration",
+ CellChangeTimes->{{3.591524845646321*^9, 3.591524846763712*^9}},
+ CellID->1050792618],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"P", "[", "x", "]"}], "\[And]", 
+  RowBox[{"Q", "[", "x", "]"}]}]], "FormalTextInputFormula",
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      RowBox[{
+        StyleBox["(2)", "FrameLabel"], "  ", 
+        ButtonBox[
+        "\[Times]", Evaluator -> Automatic, Appearance -> None, 
+         ButtonFunction :> 
+         Theorema`Language`Session`Private`removeFormula[{
+           "ID:290292271", 
+            "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/Session.nb"}]]}]]]}, {None, None}},
+ ShowCellTags->False,
+ CellChangeTimes->{{3.591510268027272*^9, 3.591510312012813*^9}, {
+  3.591510985699099*^9, 3.591510985861486*^9}, {3.591524852078326*^9, 
+  3.591524854017207*^9}},
+ CellTags->{
+  "ID:290292271", 
+   "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/Session.nb", "2"},
+ CellID->290292271],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"Q", "[", "x", "]"}], "\[Implies]", 
+  RowBox[{"R", "[", "x", "]"}]}]], "FormalTextInputFormula",
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      RowBox[{
+        StyleBox["(3)", "FrameLabel"], "  ", 
+        ButtonBox[
+        "\[Times]", Evaluator -> Automatic, Appearance -> None, 
+         ButtonFunction :> 
+         Theorema`Language`Session`Private`removeFormula[{
+           "ID:784538540", 
+            "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/Session.nb"}]]}]]]}, {None, None}},
+ ShowCellTags->False,
+ CellChangeTimes->{{3.591510351643279*^9, 3.59151040465438*^9}, {
+  3.591510990175526*^9, 3.591510990331483*^9}, {3.591524856889184*^9, 
+  3.59152486432153*^9}},
+ CellTags->{
+  "ID:784538540", 
+   "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/Session.nb", "3"},
+ CellID->784538540],
+
+Cell["\[GraySquare]", "EndEnvironmentMarker",
+ CellID->929304711]
+}, Open  ]],
+
+Cell["", "CloseEnvironment",
+ CellID->1459269126],
+
+Cell["\<\
+The most convenient way to produce an environment is to click one of the \
+buttons in the \
+\[OpenCurlyDoubleQuote]Environments\[CloseCurlyDoubleQuote]-section of the \
+\[OpenCurlyDoubleQuote]Session \[Rule] compose\[CloseCurlyDoubleQuote]-tab in \
+the Theorema Commander. \
+\>", "Text",
+ CellChangeTimes->{{3.604311588402647*^9, 3.604311749443438*^9}},
+ CellID->696345194]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Warm-up: An Easy Proving Example", "Section",
+ CellChangeTimes->{3.591510208274902*^9},
+ CellID->1753964852],
+
+Cell["", "OpenEnvironment",
+ CellID->2011368091],
+
+Cell[CellGroupData[{
+
+Cell["Theorem (Simple Logic)", "EnvironmentHeader",
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      ButtonBox[
+      "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
+       Theorema`Common`removeEnvironment[
+         ButtonNotebook[]]]]]}, {None, None}},
+ CellChangeTimes->{3.604312800212325*^9},
+ CellID->1339108772],
+
+Cell[BoxData[
+ RowBox[{
+  UnderscriptBox["\[ForAll]", "x"], 
+  RowBox[{
+   TagBox["(",
+    "AutoParentheses"], 
+   RowBox[{
+    RowBox[{"R", "[", "x", "]"}], "\[And]", 
+    RowBox[{"P", "[", "x", "]"}]}], 
+   TagBox[")",
+    "AutoParentheses"]}]}]], "FormalTextInputFormula",
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      RowBox[{
+        StyleBox["(univ)", "FrameLabel"], "  ", 
+        ButtonBox[
+        "\[Times]", Evaluator -> Automatic, Appearance -> None, 
+         ButtonFunction :> 
+         Theorema`Language`Session`Private`removeFormula[{
+           "ID:588283811", 
+            "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/Session.nb"}]]}]]]}, {None, None}},
+ ShowCellTags->False,
+ CellChangeTimes->{{3.592120886317194*^9, 3.592120908061435*^9}, 
+   3.592120967240247*^9, {3.592121121362033*^9, 3.59212112421866*^9}, {
+   3.592121225292371*^9, 3.592121231538424*^9}},
+ CellTags->{
+  "ID:588283811", 
+   "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/Session.nb", "univ"},
+ CellID->588283811],
+
+Cell["\[GraySquare]", "EndEnvironmentMarker",
+ CellID->845010067]
+}, Open  ]],
+
+Cell["", "CloseEnvironment",
+ CellID->2061232342],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ Cell[BoxData[
+  StyleBox["\<\"\[CheckmarkedBox]\"\>",
+   StripOnInput->False,
+   ShowStringCharacters->False]]],
+ " Proof of ",
+ Cell[BoxData[
+  ButtonBox[
+   TagBox[
+    TooltipBox[
+     PaneSelectorBox[{False->
+      StyleBox["\<\"(univ)\"\>", "FormReference",
+       StripOnInput->False], True->
+      StyleBox["\<\"(univ)\"\>", "FormReferenceHover",
+       StripOnInput->False]}, Dynamic[
+       CurrentValue["MouseOver"]],
+      FrameMargins->0,
+      ImageSize->Automatic],
+     TagBox[
+      FormBox[
+       RowBox[{
+         UnderscriptBox["\[ForAll]", 
+          RowBox[{
+            StyleBox["x", "ExpressionVariable"]}]], 
+         RowBox[{
+           RowBox[{"R", "[", 
+             StyleBox["x", "ExpressionVariable"], "]"}], "\[And]", 
+           RowBox[{"P", "[", 
+             StyleBox["x", "ExpressionVariable"], "]"}]}]}], TheoremaForm], 
+      DisplayForm]],
+    Annotation[#, 
+     DisplayForm[
+      FormBox[
+       RowBox[{
+         UnderscriptBox["\[ForAll]", 
+          RowBox[{
+            StyleBox["x", "ExpressionVariable"]}]], 
+         RowBox[{
+           RowBox[{"R", "[", 
+             StyleBox["x", "ExpressionVariable"], "]"}], "\[And]", 
+           RowBox[{"P", "[", 
+             StyleBox["x", "ExpressionVariable"], "]"}]}]}], TheoremaForm]], 
+     "Tooltip"]& ],
+   Appearance->None,
+   ButtonFunction:>NotebookLocate["ID:588283811"],
+   Evaluator->Automatic,
+   Method->"Preemptive"]]],
+ ":   ",
+ Cell[BoxData[
+  ButtonBox["\<\"Show proof\"\>",
+   ButtonFunction:>Theorema`Common`displayProof[
+     Get["/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/Session/p588283811-po.m"]],
+   Evaluator->Automatic,
+   ImageSize->Automatic,
+   Method->"Queued"]]]
+}], "ProofInfo",
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      ButtonBox[
+      "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
+       Theorema`Interface`GUI`Private`removeGroup[
+         ButtonNotebook[]]]]]}, {None, None}},
+ CellTags->
+  "Proof|ID:588283811|Source:/home/wwindste/Theorema.2/Theorema/Theorema/\
+Documentation/English/TheoremaNotebooks/Session.nb",
+ CellID->2005130574],
+
+Cell[BoxData[
+ DynamicBox[ToBoxes[
+   Refresh[
+    ReplaceAll[
+     Get["/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/Session/p588283811-display.m"], 
+     Theorema`Interface`GUI`Private`FORM -> 
+     Theorema`Interface`GUI`Private`displayFormulaFromKey], 
+    TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
+  ImageSizeCache->{290., {24., 29.}}]], "ProofInfoBody",
+ CellChangeTimes->{{3.604383806329737*^9, 3.604383822683536*^9}, {
+   3.604385325994319*^9, 3.604385371544901*^9}, 3.604385476699256*^9, 
+   3.604385553079603*^9, {3.604385593583672*^9, 3.604385593635684*^9}, 
+   3.604385739319958*^9},
+ CellID->905309659]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{885, 869},
+WindowMargins->{{151, Automatic}, {39, Automatic}},
+FrontEndVersion->"8.0 for Linux x86 (32-bit) (February 23, 2011)",
+StyleDefinitions->Notebook[{
+   Cell[
+    StyleData[
+    StyleDefinitions -> FrontEnd`FileName[{"Theorema"}, "TheoremaCore.nb"]]], 
+   
+   Cell["Modify the definitions below to change the default appearance of all \
+cells in a given style. \nMake modifications to any definition using commands \
+in the Format menu.", "Text"], 
+   Cell[
+    CellGroupData[{
+      Cell["Notebook Options Settings", "Section"], 
+      Cell[
+      "The options defined for the style below will be used at the Notebook \
+level.", "Text"], 
+      Cell[
+       CellGroupData[{
+         Cell[
+          StyleData["Notebook"], InputAliases -> {"and" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               
+               RowBox[{
+                "\[SelectionPlaceholder]", "\[And]", "\[Placeholder]"}], 
+               TagBox[")", "AutoParentheses"]}], "or" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{"\[SelectionPlaceholder]", "\[Or]", "\[Placeholder]"}], 
+               TagBox[")", "AutoParentheses"]}], "not" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{"\[Not]", "\[SelectionPlaceholder]"}], 
+               TagBox[")", "AutoParentheses"]}], "impl" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               
+               RowBox[{
+                "\[SelectionPlaceholder]", "\[Implies]", "\[Placeholder]"}], 
+               TagBox[")", "AutoParentheses"]}], "equiv" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{"\[SelectionPlaceholder]", 
+                 TagBox[
+                 "\[DoubleLeftRightArrow]", Identity, SyntaxForm -> 
+                  "a\[Implies]b"], "\[Placeholder]"}], 
+               TagBox[")", "AutoParentheses"]}], "eq" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{
+                "\[SelectionPlaceholder]", "\[Equal]", "\[Placeholder]"}], 
+               TagBox[")", "AutoParentheses"]}], ":equiv" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{"\[SelectionPlaceholder]", 
+                 TagBox[
+                  
+                  RowBox[{
+                   ":", "\[NegativeThickSpace]\[NegativeThinSpace]", 
+                    "\[DoubleLongLeftRightArrow]"}], Identity, SyntaxForm -> 
+                  "a\[Implies]b"], "\[Placeholder]"}], 
+               TagBox[")", "AutoParentheses"]}], ":eq" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{"\[SelectionPlaceholder]", ":=", "\[Placeholder]"}], 
+               TagBox[")", "AutoParentheses"]}], "andn" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{"\[And]", "\[Piecewise]", 
+                 GridBox[{{"\[SelectionPlaceholder]"}, {"\[Placeholder]"}}]}], 
+               TagBox[")", "AutoParentheses"]}], "orn" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{"\[Or]", "\[Piecewise]", 
+                 GridBox[{{"\[SelectionPlaceholder]"}, {"\[Placeholder]"}}]}], 
+               TagBox[")", "AutoParentheses"]}], "equivn" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{"\[DoubleLeftRightArrow]", "\[Piecewise]", 
+                 GridBox[{{"\[SelectionPlaceholder]"}, {"\[Placeholder]"}}]}], 
+               TagBox[")", "AutoParentheses"]}], "cdist" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{"\[Piecewise]", 
+                 
+                 GridBox[{{
+                   "\[SelectionPlaceholder]", "\[DoubleLeftArrow]", 
+                    "\[Placeholder]"}, {
+                   "\[Placeholder]", "\[DoubleLeftArrow]", 
+                    "\[Placeholder]"}}]}], 
+               TagBox[")", "AutoParentheses"]}], "far" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{
+                 UnderscriptBox["\[ForAll]", "\[Placeholder]"], 
+                 "\[SelectionPlaceholder]"}], 
+               TagBox[")", "AutoParentheses"]}], "exr" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{
+                 UnderscriptBox["\[Exists]", "\[Placeholder]"], 
+                 "\[SelectionPlaceholder]"}], 
+               TagBox[")", "AutoParentheses"]}], "farc" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{
+                 UnderscriptBox[
+                  UnderscriptBox["\[ForAll]", "\[Placeholder]"], 
+                  "\[Placeholder]"], "\[SelectionPlaceholder]"}], 
+               TagBox[")", "AutoParentheses"]}], "exrc" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{
+                 UnderscriptBox[
+                  UnderscriptBox["\[Exists]", "\[Placeholder]"], 
+                  "\[Placeholder]"], "\[SelectionPlaceholder]"}], 
+               TagBox[")", "AutoParentheses"]}], "let" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{
+                 UnderscriptBox["let", 
+                  RowBox[{"\[Placeholder]", "=", "\[Placeholder]"}]], 
+                 "\[SelectionPlaceholder]"}], 
+               TagBox[")", "AutoParentheses"]}], "app" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{"\[SelectionPlaceholder]", 
+                 TagBox["\:293a", Identity, SyntaxForm -> "a*b"], 
+                 "\[Placeholder]"}], 
+               TagBox[")", "AutoParentheses"]}], "prep" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{"\[SelectionPlaceholder]", 
+                 TagBox["\:293b", Identity, SyntaxForm -> "a*b"], 
+                 "\[Placeholder]"}], 
+               TagBox[")", "AutoParentheses"]}], "join" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{"\[SelectionPlaceholder]", 
+                 TagBox["\:2a1d", Identity, SyntaxForm -> "a*b"], 
+                 "\[Placeholder]"}], 
+               TagBox[")", "AutoParentheses"]}], "elemT" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{"\[SelectionPlaceholder]", 
+                 TagBox["\:22ff", Identity, SyntaxForm -> "a+b"], 
+                 "\[Placeholder]"}], 
+               TagBox[")", "AutoParentheses"]}], "subop" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               SubscriptBox["\[SelectionPlaceholder]", "\[Placeholder]"], 
+               TagBox[")", "AutoParentheses"]}], "supop" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               SuperscriptBox["\[SelectionPlaceholder]", "\[Placeholder]"], 
+               TagBox[")", "AutoParentheses"]}], "subsupop" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               SubsuperscriptBox[
+               "\[SelectionPlaceholder]", "\[Placeholder]", "\[Placeholder]"], 
+               TagBox[")", "AutoParentheses"]}], "oop" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               OverscriptBox["\[SelectionPlaceholder]", "\[Placeholder]"], 
+               TagBox[")", "AutoParentheses"]}], "uoop" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               UnderoverscriptBox[
+               "\[SelectionPlaceholder]", "\[Placeholder]", "\[Placeholder]"], 
+               TagBox[")", "AutoParentheses"]}], "osop" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               SubscriptBox[
+                OverscriptBox["\[SelectionPlaceholder]", "\[Placeholder]"], 
+                "\[Placeholder]"], 
+               TagBox[")", "AutoParentheses"]}], "op" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               TagBox["\[SelectionPlaceholder]", Identity], 
+               TagBox[")", "AutoParentheses"]}], "[]" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{
+                 TagBox["\:e114", Identity, SyntaxForm -> "("], 
+                 "\[SelectionPlaceholder]", 
+                 TagBox["\:e115", Identity, SyntaxForm -> ")"]}], 
+               TagBox[")", "AutoParentheses"]}], "()" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{
+                 TagBox["\:fd3e", Identity, SyntaxForm -> "("], 
+                 "\[SelectionPlaceholder]", 
+                 TagBox["\:fd3f", Identity, SyntaxForm -> ")"]}], 
+               TagBox[")", "AutoParentheses"]}], "<>" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{
+                 TagBox["\:27e8", Identity, SyntaxForm -> "("], 
+                 "\[SelectionPlaceholder]", 
+                 TagBox["\:27e9", Identity, SyntaxForm -> ")"]}], 
+               TagBox[")", "AutoParentheses"]}], "{}" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{
+                 TagBox["\:e117", Identity, SyntaxForm -> "("], 
+                 "\[SelectionPlaceholder]", 
+                 TagBox["\:e118", Identity, SyntaxForm -> ")"]}], 
+               TagBox[")", "AutoParentheses"]}], "[[]]" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{
+                 TagBox["\:27e6", Identity, SyntaxForm -> "("], 
+                 "\[SelectionPlaceholder]", 
+                 TagBox["\:27e7", Identity, SyntaxForm -> ")"]}], 
+               TagBox[")", "AutoParentheses"]}], "(())" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{
+                 TagBox["\:2e28", Identity, SyntaxForm -> "("], 
+                 "\[SelectionPlaceholder]", 
+                 TagBox["\:2e29", Identity, SyntaxForm -> ")"]}], 
+               TagBox[")", "AutoParentheses"]}], "<<>>" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{
+                 TagBox["\:27ea", Identity, SyntaxForm -> "("], 
+                 "\[SelectionPlaceholder]", 
+                 TagBox["\:27eb", Identity, SyntaxForm -> ")"]}], 
+               TagBox[")", "AutoParentheses"]}], "{{}}" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{
+                 TagBox["\:2983", Identity, SyntaxForm -> "("], 
+                 "\[SelectionPlaceholder]", 
+                 TagBox["\:2984", Identity, SyntaxForm -> ")"]}], 
+               TagBox[")", "AutoParentheses"]}], "(" -> 
+            TagBox["(", "AutoParentheses"], ")" -> 
+            TagBox[")", "AutoParentheses"]}, Background -> 
+          RGBColor[0.957, 0.96, 0.97]], 
+         Cell[
+          StyleData["Notebook", "Printout"], Background -> None]}, Open]]}, 
+     Open]], 
+   Cell[
+    CellGroupData[{
+      Cell["Style Environment Names", "Section"], 
+      Cell[
+       StyleData[All, "Working"], DockedCells -> {
+         Cell[
+         "T h e o r e m a   2", "SBO", CellMargins -> {{0, 0}, {0, 0}}, 
+          CellFrameMargins -> {{0, 50}, {0, 0}}, FontSize -> 28, FontSlant -> 
+          "Plain", FontColor -> RGBColor[0.29, 0.46, 0.6], TextAlignment -> 
+          Right, Background -> RGBColor[0.36, 0.54, 0.69]]}], 
+      Cell[
+       StyleData[
+       All, "Layout", StyleDefinitions -> StyleData[All, "Working"]], 
+       MenuSortingValue -> 1200], 
+      Cell[
+       StyleData[All, "Presentation"], DockedCells -> {
+         Cell[
+         "T h e o r e m a . 2", "SBO", CellMargins -> {{0, 0}, {0, 0}}, 
+          CellFrameMargins -> {{0, 50}, {0, 0}}, FontSize -> 28, FontSlant -> 
+          "Plain", FontColor -> RGBColor[0.289412, 0.458824, 0.6], 
+          TextAlignment -> Right, Background -> 
+          RGBColor[0.364705882, 0.541176471, 0.694117647]]}], 
+      Cell[
+       StyleData[
+       All, "SlideShow", StyleDefinitions -> StyleData[All, "Presentation"]], 
+       PageWidth -> WindowWidth, DockedCells -> {
+         FEPrivate`FrontEndResource["FEExpressions", "SlideshowToolbar"], 
+         Cell[
+         "T h e o r e m a . 2", "SBO", CellMargins -> {{0, 0}, {0, 0}}, 
+          CellFrameMargins -> {{0, 50}, {0, 0}}, FontSize -> 28, FontSlant -> 
+          "Plain", FontColor -> RGBColor[0.289412, 0.458824, 0.6], 
+          TextAlignment -> Right, Background -> 
+          RGBColor[0.364705882, 0.541176471, 0.694117647]]}, 
+       ScrollingOptions -> {
+        "PagewiseDisplay" -> True, "VerticalScrollRange" -> Fit}, 
+       MenuSortingValue -> 1300], 
+      Cell[
+       StyleData[All, "Printout"], DockedCells -> {
+         Cell[
+         "T h e o r e m a . 2", "SBO", CellMargins -> {{0, 0}, {0, 0}}, 
+          CellFrameMargins -> {{0, 50}, {0, 0}}, FontSize -> 28, FontSlant -> 
+          "Plain", FontColor -> RGBColor[0.289412, 0.458824, 0.6], 
+          TextAlignment -> Right, Background -> 
+          RGBColor[0.364705882, 0.541176471, 0.694117647]]}]}, Open]], 
+   Cell[
+    CellGroupData[{
+      Cell["Styles for Title and Section Cells", "Section"], 
+      Cell[
+       CellGroupData[{
+         Cell["Title", "Subsection"], 
+         Cell[
+          CellGroupData[{
+            Cell[
+             StyleData["Title"], CellMargins -> {{27, 27}, {10, 30}}, 
+             TextAlignment -> Center, MenuSortingValue -> 1100, 
+             MenuCommandKey -> "1", FontFamily -> "Bitstream Charter", 
+             FontSize -> 36, FontWeight -> "Bold", FontSlant -> "Plain", 
+             FontVariations -> {
+              "StrikeThrough" -> False, "Underline" -> False}, FontColor -> 
+             RGBColor[0.23, 0.25, 0.34]], 
+            Cell[
+             StyleData["Title", "SlideShow"], 
+             CellMargins -> {{27, 10}, {0, 45}}], 
+            Cell[
+             StyleData["Title", "Printout"], ShowGroupOpener -> False, 
+             CellMargins -> {{6, 10}, {5, 30}}]}, Closed]], 
+         Cell[
+          CellGroupData[{
+            Cell[
+             StyleData["Subtitle"], CellMargins -> {{27, 27}, {20, 2}}, 
+             TextAlignment -> Center, MenuSortingValue -> 1150, FontFamily -> 
+             "Bitstream Charter", FontSize -> 24, FontWeight -> "Plain", 
+             FontSlant -> "Plain", 
+             FontVariations -> {
+              "StrikeThrough" -> False, "Underline" -> False}, FontColor -> 
+             RGBColor[0.23, 0.25, 0.34]], 
+            Cell[
+             StyleData["Subtitle", "SlideShow"], 
+             CellMargins -> {{27, 10}, {0, 3}}], 
+            Cell[
+             StyleData["Subtitle", "Printout"], 
+             CellMargins -> {{6, 10}, {5, 0}}]}, Closed]], 
+         Cell[
+          CellGroupData[{
+            Cell[
+             StyleData["Subsubtitle"], CellMargins -> {{27, 27}, {8, 2}}, 
+             TextAlignment -> Center, MenuSortingValue -> 1200, FontFamily -> 
+             "Bitstream Charter", FontSize -> 16, FontWeight -> "Plain", 
+             FontSlant -> "Plain", 
+             FontVariations -> {
+              "StrikeThrough" -> False, "Underline" -> False}, FontColor -> 
+             RGBColor[0.23, 0.25, 0.34]], 
+            Cell[
+             StyleData["Subsubtitle", "SlideShow"], 
+             CellMargins -> {{27, 10}, {12, 3}}], 
+            Cell[
+             StyleData["Subsubtitle", "Printout"], 
+             CellMargins -> {{6, 10}, {0, 0}}]}, Closed]]}, Closed]], 
+      Cell[
+       CellGroupData[{
+         Cell["Sectioning", "Subsection"], 
+         Cell[
+          CellGroupData[{
+            Cell[
+             StyleData["Section"], ShowGroupOpener -> True, MenuSortingValue -> 
+             1250, MenuCommandKey -> "4", FontFamily -> "Bitstream Charter", 
+             FontSize -> 20, FontWeight -> "Bold", FontSlant -> "Plain", 
+             FontVariations -> {
+              "StrikeThrough" -> False, "Underline" -> False}, FontColor -> 
+             RGBColor[0.3, 0.3, 0.3]], 
+            Cell[
+             StyleData["Section", "SlideShow"], 
+             CellMargins -> {{27, 10}, {12, 51}}], 
+            Cell[
+             StyleData["Section", "Printout"], ShowGroupOpener -> False, 
+             CellMargins -> {{2, 0}, {7, 22}}]}, Closed]], 
+         Cell[
+          CellGroupData[{
+            Cell[
+             StyleData["Subsection"], CellDingbat -> None, ShowGroupOpener -> 
+             True, CellMargins -> {{27, Inherited}, {8, 12}}, 
+             MenuSortingValue -> 1300, MenuCommandKey -> "5", FontFamily -> 
+             "Bitstream Charter", FontSize -> 14, FontWeight -> "Bold", 
+             FontSlant -> "Plain", 
+             FontVariations -> {
+              "StrikeThrough" -> False, "Underline" -> False}, FontColor -> 
+             RGBColor[0.3, 0.3, 0.3]], 
+            Cell[
+             StyleData["Subsection", "SlideShow"], 
+             CellMargins -> {{48, 10}, {12, 18}}], 
+            Cell[
+             StyleData["Subsection", "Printout"], ShowGroupOpener -> False, 
+             CellMargins -> {{9, 0}, {7, 22}}]}, Closed]], 
+         Cell[
+          CellGroupData[{
+            Cell[
+             StyleData["Subsubsection"], CellDingbat -> None, ShowGroupOpener -> 
+             True, CellMargins -> {{27, Inherited}, {2, 10}}, 
+             MenuSortingValue -> 1350, MenuCommandKey -> "6", FontFamily -> 
+             "Bitstream Charter", FontSize -> 12, FontWeight -> "Bold", 
+             FontSlant -> "Italic", 
+             FontVariations -> {
+              "StrikeThrough" -> False, "Underline" -> False}, FontColor -> 
+             RGBColor[0.4, 0.4, 0.4]], 
+            Cell[
+             StyleData["Subsubsection", "SlideShow"], 
+             CellMargins -> {{60, 10}, {3, 15}}], 
+            Cell[
+             StyleData["Subsubsection", "Printout"], ShowGroupOpener -> False,
+              CellMargins -> {{35, 0}, {7, 14}}]}, Closed]], 
+         Cell[
+          CellGroupData[{
+            Cell[
+             StyleData["Subsubsubsection"], CellDingbat -> None, 
+             ShowGroupOpener -> True, 
+             CellMargins -> {{27, Inherited}, {Inherited, Inherited}}, 
+             FontFamily -> "Bitstream Charter", FontSize -> 11, FontWeight -> 
+             "Bold", FontSlant -> "Plain", 
+             FontVariations -> {
+              "StrikeThrough" -> False, "Underline" -> False}, FontColor -> 
+             RGBColor[0.4, 0.4, 0.4]], 
+            Cell[
+             StyleData["Subsubsubsection", "SlideShow"], 
+             CellMargins -> {{92, 10}, {3, 15}}, LineSpacing -> {1, 0}], 
+            Cell[
+             StyleData["Subsubsubsection", "Printout"], 
+             CellMargins -> {{50, 0}, {7, 14}}]}, Closed]]}, Closed]]}, 
+     Open]], 
+   Cell[
+    CellGroupData[{
+      Cell["Styles for Publication\[Hyphen]ready Documents", "Section"], 
+      Cell[
+       CellGroupData[{
+         Cell[
+          StyleData["Author"], CellMargins -> {{27, 30}, {20, 5}}, 
+          MenuSortingValue -> 1900, FontFamily -> "Helvetica", FontSize -> 14,
+           FontSlant -> "Italic"], 
+         Cell[
+          StyleData["Author", "SlideShow"], 
+          CellMargins -> {{27, 30}, {30, 8}}, FontSize -> 28], 
+         Cell[
+          StyleData["Author", "Printout"], CellMargins -> {{6, 10}, {0, 10}}, 
+          FontSize -> 10]}, Closed]], 
+      Cell[
+       CellGroupData[{
+         Cell[
+          StyleData["Abstract"], CellFrame -> {{0, 0}, {0.5, 0.5}}, 
+          CellMargins -> {{27, 140}, {20, 20}}, LineSpacing -> {0.9, 0}, 
+          MenuSortingValue -> 2050, FontFamily -> "Times", FontSize -> 12], 
+         Cell[
+          StyleData["Abstract", "SlideShow"], CellFrame -> {{0, 0}, {1, 1}}, 
+          CellMargins -> {{27, 140}, {30, 30}}, FontSize -> 24], 
+         Cell[
+          StyleData["Abstract", "Printout"], Hyphenation -> True, 
+          LineSpacing -> {1, 2}, FontSize -> 10]}, Closed]]}, Closed]], 
+   Cell[
+    CellGroupData[{
+      Cell["Text", "Section"], 
+      Cell[
+       StyleData["Text"], CellMargins -> {{27, 27}, {Inherited, Inherited}}, 
+       TextJustification -> 1., ParagraphIndent -> 15, FontFamily -> 
+       "Bitstream Charter", FontSize -> 12, FontWeight -> "Plain", FontSlant -> 
+       "Plain", 
+       FontVariations -> {"StrikeThrough" -> False, "Underline" -> False}], 
+      Cell[
+       StyleData["EnvironmentText"], ShowCellBracket -> Automatic, 
+       CellMargins -> {{82, Inherited}, {Inherited, Inherited}}, 
+       CellBracketOptions -> {"Color" -> RGBColor[0.73, 0.74, 0.84]}, 
+       TextJustification -> 1., ParagraphSpacing -> {0.3, 0.}, 
+       MenuSortingValue -> 1480, MenuCommandKey -> "T", FontFamily -> 
+       "Bitstream Charter", FontSize -> 12, FontWeight -> "Plain", FontSlant -> 
+       "Plain", 
+       FontVariations -> {"StrikeThrough" -> False, "Underline" -> False}]}, 
+     Open]], 
+   Cell[
+    CellGroupData[{
+      Cell["Theorema", "Section"], 
+      Cell[
+       StyleData["GlobalDeclaration"], CellFrame -> {{0, 2}, {0, 0}}, 
+       ShowCellBracket -> Automatic, CellMargins -> {{76, 10}, {2, 2}}, 
+       CellBracketOptions -> {"Color" -> RGBColor[0.73, 0.74, 0.84]}, 
+       InitializationCell -> True, CellFrameMargins -> 10, CellFrameColor -> 
+       RGBColor[0.73, 0.65, 0.61], CellFrameLabelMargins -> 33, 
+       ShowAutoStyles -> False, MenuSortingValue -> 1441, MenuCommandKey -> 
+       "G", FontSize -> 14], 
+      Cell[
+       StyleData["OpenEnvironment"], Editable -> False, Selectable -> False, 
+       CellFrame -> {{False, False}, {True, False}}, ShowCellBracket -> True, 
+       CellMargins -> {{76, 6}, {-4, Inherited}}, 
+       CellBracketOptions -> {"Color" -> RGBColor[0.73, 0.74, 0.84]}, 
+       CellFrameMargins -> 2, CellFrameColor -> RGBColor[0.4, 0.4, 0.4], 
+       MenuSortingValue -> 1485], 
+      Cell[
+       StyleData["EnvironmentHeader"], 
+       CellFrame -> {{False, False}, {False, False}}, 
+       CellMargins -> {{76, Inherited}, {Inherited, Inherited}}, 
+       CellBracketOptions -> {"Color" -> RGBColor[0.73, 0.74, 0.84]}, 
+       CellFrameMargins -> 6, CellFrameColor -> RGBColor[0.4, 0.4, 0.4], 
+       ShowAutoStyles -> False, MenuSortingValue -> 1450, FontSize -> 14, 
+       FontWeight -> "Bold", FontVariations -> {"CapsType" -> "SmallCaps"}, 
+       Background -> RGBColor[0.89, 0.8, 0.69]], 
+      Cell[
+       CellGroupData[{
+         Cell[
+          StyleData["FormalTextInputFormula"], ShowCellBracket -> Automatic, 
+          CellMargins -> {{96, 10}, {2, 2}}, 
+          CellBracketOptions -> {"Color" -> RGBColor[0.73, 0.74, 0.84]}, 
+          InitializationCell -> True, CellFrameLabelMargins -> 53, 
+          ShowAutoStyles -> False, MenuSortingValue -> 1470, MenuCommandKey -> 
+          "F", FontWeight -> "Bold", FontColor -> RGBColor[0.25, 0.19, 0.2]], 
+         
+         Cell[
+          StyleData["FormalTextInputFormula", "Layout"], Editable -> False], 
+         Cell[
+          StyleData["FormalTextInputFormula", "Presentation"], Editable -> 
+          False]}, Open]], 
+      Cell[
+       StyleData["EndEnvironmentMarker"], 
+       CellBracketOptions -> {"Color" -> RGBColor[0.73, 0.74, 0.84]}, 
+       TextAlignment -> Right, MenuSortingValue -> 1480], 
+      Cell[
+       StyleData["CloseEnvironment"], Editable -> False, Selectable -> False, 
+       CellFrame -> {{False, False}, {False, True}}, ShowCellBracket -> True, 
+       CellMargins -> {{76, 6}, {Inherited, 0}}, 
+       CellBracketOptions -> {"Color" -> RGBColor[0.73, 0.74, 0.84]}, 
+       CellFrameMargins -> 2, CellFrameColor -> RGBColor[0.4, 0.4, 0.4], 
+       MenuSortingValue -> 1485], 
+      Cell[
+       CellGroupData[{
+         Cell[
+          StyleData["Computation"], CellFrame -> {{1.5, 0}, {0, 0}}, 
+          ShowCellBracket -> Automatic, CellMargins -> {{76, 10}, {0, 7}}, 
+          CellBracketOptions -> {"Color" -> RGBColor[0.23, 0.25, 0.34]}, 
+          CellFrameMargins -> {{8, 8}, {3, 4}}, CellFrameColor -> 
+          RGBColor[0.486, 0.33, 0.32], ShowAutoStyles -> False, 
+          MenuSortingValue -> 1510, MenuCommandKey -> "C", FontWeight -> 
+          "Bold", FontColor -> RGBColor[0.23, 0.25, 0.34], Background -> 
+          RGBColor[0.88, 0.88, 0.92]], 
+         Cell[
+          StyleData["Computation", "Layout"], Editable -> False], 
+         Cell[
+          StyleData["Computation", "Presentation"], Editable -> False], 
+         Cell[
+          StyleData["Computation", "SlideShow"], 
+          CellMargins -> {{74, 0}, {10, 15}}]}, Open]], 
+      Cell[
+       CellGroupData[{
+         Cell[
+          StyleData["ComputationResult"], CellFrame -> {{1.5, 0}, {0, 0}}, 
+          ShowCellBracket -> Automatic, CellMargins -> {{76, 10}, {7, 0}}, 
+          CellBracketOptions -> {"Color" -> RGBColor[0.23, 0.25, 0.34]}, 
+          CellFrameMargins -> {{8, 8}, {4, 3}}, CellFrameColor -> 
+          RGBColor[0.486, 0.33, 0.32], StyleMenuListing -> None, FontColor -> 
+          RGBColor[0.23, 0.25, 0.34], Background -> 
+          RGBColor[0.88, 0.88, 0.92]], 
+         Cell[
+          StyleData["ComputationResult", "SlideShow"], 
+          CellMargins -> {{92, 10}, {15, 10}}]}, Open]], 
+      Cell[
+       StyleData["ComputationInfo"], ShowCellBracket -> False, 
+       CellMargins -> {{150, 10}, {6, 6}}, TextAlignment -> Right, 
+       StyleMenuListing -> None], 
+      Cell[
+       StyleData["ComputationInfoBody"], ShowCellBracket -> False, 
+       CellMargins -> {{150, 10}, {0, 0}}, TextAlignment -> Right, 
+       StyleMenuListing -> None], 
+      Cell[
+       StyleData["ProofInfo"], ShowCellBracket -> False, 
+       CellMargins -> {{76, 10}, {6, 6}}, CellFrameLabelMargins -> 15, 
+       StyleMenuListing -> None, FontFamily -> "Arial", FontSize -> 12, 
+       FontWeight -> "Plain", FontSlant -> "Plain", 
+       FontVariations -> {"StrikeThrough" -> False, "Underline" -> False}], 
+      Cell[
+       StyleData["ProofInfoBody"], ShowCellBracket -> False, 
+       CellMargins -> {{100, 10}, {0, 0}}, TextAlignment -> Right, 
+       StyleMenuListing -> None], 
+      Cell[
+       CellGroupData[{
+         Cell[
+          StyleData["FrameLabel"], LanguageCategory -> None, StyleMenuListing -> 
+          None, FontFamily -> "Times New Roman", FontSize -> 10, FontWeight -> 
+          "Plain", FontSlant -> "Italic", FontTracking -> "Plain", 
+          FontVariations -> {
+           "Masked" -> False, "Outline" -> False, "Shadow" -> False, 
+            "StrikeThrough" -> False, "Underline" -> False}, FontColor -> 
+          RGBColor[0.55, 0.44, 0.42], Background -> None], 
+         Cell[
+          StyleData["FrameLabel", "SlideShow"], FontSize -> 18], 
+         Cell[
+          StyleData["FrameLabel", "Printout"]]}, Closed]], 
+      Cell[
+       StyleData["OpenArchive"], CellFrame -> {{False, False}, {False, True}},
+        ShowCellBracket -> Automatic, CellMargins -> {{70, 70}, {0, 10}}, 
+       CellBracketOptions -> {"Color" -> RGBColor[0.73, 0.74, 0.84]}, 
+       CellGroupingRules -> {"SectionGrouping", 20}, CellFrameMargins -> 3, 
+       CellFrameColor -> RGBColor[0.4, 0.4, 0.4], CellFrameLabelMargins -> 1, 
+       DefaultFormatType -> DefaultInputFormatType, ShowAutoStyles -> False, 
+       MenuSortingValue -> 1210, FontWeight -> Bold, Background -> 
+       RGBColor[0.73, 0.74, 0.84]], 
+      Cell[
+       StyleData["ArchiveInfo"], ShowCellBracket -> Automatic, 
+       CellMargins -> {{70, 70}, {0, 0}}, 
+       CellBracketOptions -> {"Color" -> RGBColor[0.73, 0.74, 0.84]}, 
+       CellFrameMargins -> 5, CellFrameLabelMargins -> 3, ShowCellTags -> 
+       False, ShowAutoStyles -> False, MenuSortingValue -> 1220, FontWeight -> 
+       "Bold", Background -> RGBColor[0.88, 0.88, 0.92]], 
+      Cell[
+       StyleData["CloseArchive"], 
+       CellFrame -> {{False, False}, {True, False}}, ShowCellBracket -> 
+       Automatic, CellMargins -> {{0, 0}, {5, 10}}, 
+       CellBracketOptions -> {"Color" -> RGBColor[0.73, 0.74, 0.84]}, 
+       CellGroupingRules -> {"SectionGrouping", 25}, CellFrameMargins -> 2, 
+       CellFrameColor -> RGBColor[0.4, 0.4, 0.4], TextAlignment -> Center, 
+       MenuSortingValue -> 1230, FontFamily -> "Arial Black", FontSize -> 24, 
+       FontWeight -> "Plain", FontSlant -> "Plain", 
+       FontVariations -> {"StrikeThrough" -> False, "Underline" -> False}, 
+       Background -> RGBColor[0.73, 0.65, 0.61]], 
+      Cell[
+       StyleData["IncludeArchive"], CellFrame -> {{4, 0}, {False, False}}, 
+       ShowCellBracket -> Automatic, 
+       CellMargins -> {{81, 100}, {Inherited, Inherited}}, 
+       CellBracketOptions -> {"Color" -> RGBColor[0.73, 0.74, 0.84]}, 
+       CellFrameColor -> RGBColor[0.55, 0.44, 0.42], 
+       CellFrameLabels -> {{"\[RightSkeleton]", None}, {None, None}}, 
+       CellFrameLabelMargins -> 25, MenuSortingValue -> 1445], 
+      Cell[
+       StyleData["ExpressionVariable"], SingleLetterItalics -> True, 
+       MultiLetterItalics -> True, FontColor -> RGBColor[0.29, 0.46, 0.6]], 
+      Cell[
+       StyleData["ExpressionABF"], SingleLetterItalics -> True, 
+       MultiLetterItalics -> True, FontColor -> RGBColor[0.29, 0.46, 0.6]], 
+      Cell[
+       StyleData["ExpressionMeta"], SingleLetterItalics -> True, 
+       MultiLetterItalics -> True, FontColor -> RGBColor[0.29, 0.46, 0.6]], 
+      Cell[
+       CellGroupData[{
+         Cell[
+          StyleData["AutoParentheses"], SpanMaxSize -> 3, FontOpacity -> 
+          0.15], 
+         Cell[
+          StyleData["AutoParentheses", "Layout"], FontOpacity -> 0], 
+         Cell[
+          StyleData["AutoParentheses", "SlideShow"], FontOpacity -> 0]}, 
+        Open]], 
+      Cell[
+       CellGroupData[{
+         Cell[
+          StyleData["Emphasized"], MenuCommandKey -> "E", FontSlant -> 
+          "Italic"], 
+         Cell[
+          StyleData["Emphasized", "SlideShow"], FontSlant -> "Plain", 
+          FontColor -> RGBColor[0.36, 0.54, 0.69]]}, Open]], 
+      Cell[
+       StyleData["GenericButton"], FontFamily -> "Bitstream Charter", 
+       FontWeight -> "Plain", FontSlant -> "Italic", FontTracking -> "Plain", 
+       FontVariations -> {
+        "Masked" -> False, "Outline" -> False, "Shadow" -> False, 
+         "StrikeThrough" -> False, "Underline" -> False}, FontColor -> 
+       RGBColor[0.23, 0.25, 0.34]], 
+      Cell[
+       StyleData["TheoremaForm"], "TwoByteSyntaxCharacterAutoReplacement" -> 
+       True, LineSpacing -> {1.25, 0, 2}, SingleLetterItalics -> True, 
+       StyleMenuListing -> None, FontFamily -> "Courier"], 
+      Cell[
+       StyleData["ComponentActive"], FontFamily -> "Times New Roman"], 
+      Cell[
+       StyleData["ComponentInactive"], FontFamily -> "Times New Roman", 
+       FontOpacity -> 0.4], 
+      Cell[
+       StyleData["ComponentEmpty"], FontFamily -> "Times New Roman", 
+       FontVariations -> {"StrikeThrough" -> True}], 
+      Cell[
+       StyleData["TabView"], FontFamily -> "Times New Roman", FontSize -> 10], 
+      Cell[
+       StyleData["TabViewLabel"], FontFamily -> "Times New Roman", FontSize -> 
+       10, FontWeight -> "Bold"], 
+      Cell[
+       StyleData["FormReference", StyleDefinitions -> StyleData["Text"]], 
+       FontFamily -> "Times New Roman", FontSize -> 12, FontWeight -> "Plain",
+        FontSlant -> "Plain", 
+       FontVariations -> {"StrikeThrough" -> False, "Underline" -> False}], 
+      Cell[
+       StyleData["FormReferenceHover", StyleDefinitions -> StyleData["Text"]],
+        FontFamily -> "Times New Roman", FontSize -> 12, FontWeight -> 
+       "Plain", FontSlant -> "Plain", 
+       FontVariations -> {"StrikeThrough" -> False, "Underline" -> True}, 
+       FontColor -> RGBColor[0.404, 0.43, 0.545]]}, Open]]}, Visible -> False,
+   FrontEndVersion -> "8.0 for Linux x86 (32-bit) (February 23, 2011)", 
+  StyleDefinitions -> "StylesheetFormatting.nb"]
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{
+ "ID:290292271"->{
+  Cell[2849, 82, 934, 24, 22, "FormalTextInputFormula",
+   CellTags->{
+    "ID:290292271", 
+     "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/Session.nb", "2"},
+   CellID->290292271]},
+ "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/Session.nb"->{
+  Cell[2849, 82, 934, 24, 22, "FormalTextInputFormula",
+   CellTags->{
+    "ID:290292271", 
+     "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/Session.nb", "2"},
+   CellID->290292271],
+  Cell[3786, 108, 936, 24, 22, "FormalTextInputFormula",
+   CellTags->{
+    "ID:784538540", 
+     "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/Session.nb", "3"},
+   CellID->784538540],
+  Cell[5822, 174, 1111, 31, 27, "FormalTextInputFormula",
+   CellTags->{
+    "ID:588283811", 
+     "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/Session.nb", "univ"},
+   CellID->588283811]},
+ "2"->{
+  Cell[2849, 82, 934, 24, 22, "FormalTextInputFormula",
+   CellTags->{
+    "ID:290292271", 
+     "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/Session.nb", "2"},
+   CellID->290292271]},
+ "ID:784538540"->{
+  Cell[3786, 108, 936, 24, 22, "FormalTextInputFormula",
+   CellTags->{
+    "ID:784538540", 
+     "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/Session.nb", "3"},
+   CellID->784538540]},
+ "3"->{
+  Cell[3786, 108, 936, 24, 22, "FormalTextInputFormula",
+   CellTags->{
+    "ID:784538540", 
+     "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/Session.nb", "3"},
+   CellID->784538540]},
+ "ID:588283811"->{
+  Cell[5822, 174, 1111, 31, 27, "FormalTextInputFormula",
+   CellTags->{
+    "ID:588283811", 
+     "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/Session.nb", "univ"},
+   CellID->588283811]},
+ "univ"->{
+  Cell[5822, 174, 1111, 31, 27, "FormalTextInputFormula",
+   CellTags->{
+    "ID:588283811", 
+     "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/Session.nb", "univ"},
+   CellID->588283811]},
+ "Proof|ID:588283811|Source:/home/wwindste/Theorema.2/Theorema/Theorema/\
+Documentation/English/TheoremaNotebooks/Session.nb"->{
+  Cell[7090, 216, 2170, 67, 41, "ProofInfo",
+   CellTags->
+    "Proof|ID:588283811|Source:/home/wwindste/Theorema.2/Theorema/Theorema/\
+Documentation/English/TheoremaNotebooks/Session.nb",
+   CellID->2005130574]}
+ }
+*)
+(*CellTagsIndex
+CellTagsIndex->{
+ {"ID:290292271", 41576, 946},
+ {"Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/Session.nb", 41920, 954},
+ {"2", 42634, 973},
+ {"ID:784538540", 42887, 980},
+ {"3", 43130, 987},
+ {"ID:588283811", 43384, 994},
+ {"univ", 43634, 1001},
+ {"Proof|ID:588283811|Source:/home/wwindste/Theorema.2/Theorema/Theorema/\
+Documentation/English/TheoremaNotebooks/Session.nb", 44002, 1009}
+ }
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[579, 22, 119, 2, 84, "Title",
+ CellID->514594572],
+Cell[701, 26, 1280, 22, 119, "Text",
+ CellID->1974247953],
+Cell[CellGroupData[{
+Cell[2006, 52, 127, 2, 73, "Section",
+ CellID->1872173341],
+Cell[2136, 56, 158, 4, 24, "Text",
+ CellID->340703733],
+Cell[2297, 62, 47, 1, 12, "OpenEnvironment",
+ CellID->645359186],
+Cell[CellGroupData[{
+Cell[2369, 67, 317, 8, 37, "EnvironmentHeader",
+ CellID->1184198390],
+Cell[2689, 77, 157, 3, 29, "GlobalDeclaration",
+ CellID->1050792618],
+Cell[2849, 82, 934, 24, 22, "FormalTextInputFormula",
+ CellTags->{
+  "ID:290292271", 
+   "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/Session.nb", "2"},
+ CellID->290292271],
+Cell[3786, 108, 936, 24, 22, "FormalTextInputFormula",
+ CellTags->{
+  "ID:784538540", 
+   "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/Session.nb", "3"},
+ CellID->784538540],
+Cell[4725, 134, 65, 1, 24, "EndEnvironmentMarker",
+ CellID->929304711]
+}, Open  ]],
+Cell[4805, 138, 49, 1, 16, "CloseEnvironment",
+ CellID->1459269126],
+Cell[4857, 141, 383, 8, 43, "Text",
+ CellID->696345194]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[5277, 154, 114, 2, 73, "Section",
+ CellID->1753964852],
+Cell[5394, 158, 48, 1, 12, "OpenEnvironment",
+ CellID->2011368091],
+Cell[CellGroupData[{
+Cell[5467, 163, 352, 9, 37, "EnvironmentHeader",
+ CellID->1339108772],
+Cell[5822, 174, 1111, 31, 27, "FormalTextInputFormula",
+ CellTags->{
+  "ID:588283811", 
+   "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/Session.nb", "univ"},
+ CellID->588283811],
+Cell[6936, 207, 65, 1, 24, "EndEnvironmentMarker",
+ CellID->845010067]
+}, Open  ]],
+Cell[7016, 211, 49, 1, 16, "CloseEnvironment",
+ CellID->2061232342],
+Cell[CellGroupData[{
+Cell[7090, 216, 2170, 67, 41, "ProofInfo",
+ CellTags->
+  "Proof|ID:588283811|Source:/home/wwindste/Theorema.2/Theorema/Theorema/\
+Documentation/English/TheoremaNotebooks/Session.nb",
+ CellID->2005130574],
+Cell[9263, 285, 675, 14, 55, "ProofInfoBody",
+ CellID->905309659]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)

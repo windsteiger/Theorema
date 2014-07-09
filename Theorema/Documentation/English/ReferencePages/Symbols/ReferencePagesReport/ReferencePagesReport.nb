@@ -1,0 +1,2111 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 8.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       157,          7]
+NotebookDataLength[     60329,       2101]
+NotebookOptionsPosition[     53742,       1923]
+NotebookOutlinePosition[     54080,       1938]
+CellTagsIndexPosition[     54037,       1935]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+
+Cell[CellGroupData[{
+Cell["\<\
+Information About Usage Messages of Symbols Whose Reference Pages Were Left \
+With No Templatizing.\
+\>", "Section"],
+
+Cell["\<\
+This notebook is saved in the same directory as the reference pages which \
+have been created. The directory may be moved and the hyperlinks here will \
+continue to work. However if this notebook is moved out to a different \
+directory, then the hyperlinks will no longer function properly.\
+\>", "Text"],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+Usage messages for the following symbols are not plain strings:\
+\>", "Subsection"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`CompoundExpression$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin[
+     "Theorema`Computation`Language`CompoundExpression$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`IntersectionOf$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`IntersectionOf$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`GreaterEqual$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`GreaterEqual$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`SetDelayed$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`SetDelayed$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`LessEqual$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`LessEqual$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`EqualDef$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`EqualDef$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`TupleOf$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`TupleOf$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`Implies$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`Implies$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`Greater$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`Greater$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`Switch$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`Switch$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`Module$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`Module$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`IffDef$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`IffDef$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`Assign$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`Assign$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`While$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`While$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`Which$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`Which$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`Union$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`Union$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`Tuple$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`Tuple$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`Times$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`Times$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`SetOf$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`SetOf$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`Equal$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`Equal$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`Program",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`Program", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`Plus$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`Plus$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`List$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`List$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`Less$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`Less$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`transferToComputation",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`transferToComputation", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`Set$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`Set$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`Not$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`Not$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`Iff$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`Iff$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`For$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`For$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`And$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`And$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`Or$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`Or$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`If$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`If$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`Do$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`Do$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`VAR$",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`VAR$", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`RNG$",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`RNG$", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`specifiedVariables",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`specifiedVariables", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`displayKBBrowser",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`displayKBBrowser", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`updateKBBrowser",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`updateKBBrowser", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`makeDisjunction",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`makeDisjunction", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`makeConjunction",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`makeConjunction", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`substituteFree",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`substituteFree", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`freeVariables",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`freeVariables", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`variables",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`variables", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`splitAnd",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`splitAnd", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["CompoundExpression$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["CompoundExpression$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["IntersectionOf$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["IntersectionOf$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["GreaterEqual$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["GreaterEqual$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["SetDelayed$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["SetDelayed$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["SequenceOf$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["SequenceOf$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["LessEqual$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["LessEqual$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["EqualDef$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["EqualDef$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["TupleOf$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["TupleOf$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Implies$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Implies$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Greater$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Greater$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Switch$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Switch$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Module$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Module$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["IffDef$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["IffDef$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Forall$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Forall$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Exists$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Exists$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Assign$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Assign$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["While$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["While$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Which$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Which$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Union$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Union$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Tuple$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Tuple$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Times$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Times$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["SetOf$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["SetOf$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Equal$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Equal$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Program",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Program", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Plus$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Plus$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["List$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["List$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Less$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Less$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Set$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Set$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Not$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Not$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Iff$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Iff$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["For$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["For$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["And$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["And$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Or$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Or$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["If$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["If$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Do$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Do$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["VAR$",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["VAR$", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["RNG$",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["RNG$", ".nb"]]],
+  Evaluator->Automatic]], "Text"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+Usage messages for the following symbols do not begin with their symbol name:\
+\
+\>", "Subsection"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`globalImplies$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`globalImplies$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`globalForall$TM",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`globalForall$TM", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`$parseTheoremaExpressions",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`$parseTheoremaExpressions", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`STEPRNG$",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`STEPRNG$", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`SIMPRNG$",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`SIMPRNG$", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`PREDRNG$",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`PREDRNG$", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`SETRNG$",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`SETRNG$", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`$registeredStrategies",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`$registeredStrategies", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`$parseTheoremaGlobals",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`$parseTheoremaGlobals", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`setComputationContext",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`setComputationContext", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`$cellTagKeySeparator",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`$cellTagKeySeparator", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`printComputationInfo",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`printComputationInfo", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`$registeredRuleSets",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`$registeredRuleSets", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`$formulaCounterName",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`$formulaCounterName", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`showProofNavigation",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`showProofNavigation", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`findSelectedFormula",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`findSelectedFormula", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`processEnvironment",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`processEnvironment", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`processComputation",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`processComputation", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`cleanupComputation",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`cleanupComputation", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`availableLanguages",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`availableLanguages", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Computation`Language`QU$",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Computation`Language`QU$", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`$TheoremaArchives",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`$TheoremaArchives", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Provers`quantifierRules",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Provers`quantifierRules", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`replaceAllExcept",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`replaceAllExcept", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`registerStrategy",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`registerStrategy", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`getCleanCellTags",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`getCleanCellTags", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`cellTagsToString",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`cellTagsToString", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`$TMAproofObject",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`$TMAproofObject", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`$labelSeparator",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`$labelSeparator", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`theoremaDisplay",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`theoremaDisplay", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`registerRuleSet",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`registerRuleSet", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`subProofHeader",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`subProofHeader", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`proofDisproved",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`proofDisproved", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`getCellIDLabel",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`getCellIDLabel", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`getActiveRules",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`getActiveRules", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`$TMAproofTree",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`$TMAproofTree", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`$tmaArchNeeds",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`$tmaArchNeeds", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`proofSucceeds",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`proofSucceeds", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`proofStepText",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`proofStepText", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Provers`basicProver",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Provers`basicProver", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`$tmaArchTree",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`$tmaArchTree", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`$theoremaGUI",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`$theoremaGUI", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`notification",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`notification", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`getGenerated",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`getGenerated", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`displayProof",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`displayProof", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Provers`trySeveral",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Provers`trySeveral", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`makePRFINFO",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`makePRFINFO", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`cellIDLabel",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`cellIDLabel", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`archiveName",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`archiveName", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Provers`applyOnce",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Provers`applyOnce", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`$initLabel",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`$initLabel", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`unexpected",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`unexpected", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`proofFails",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`proofFails", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`makePRFSIT",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`makePRFSIT", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`getKeyTags",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`getKeyTags", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`callProver",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`callProver", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["$TheoremaArchiveDirectory",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["$TheoremaArchiveDirectory", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`$kbStruct",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`$kbStruct", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`translate",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`translate", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`proveSome",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`proveSome", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`makeTuple",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`makeTuple", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`inArchive",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`inArchive", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`getNodeID",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`getNodeID", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`applyHold",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`applyHold", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`$tmaArch",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`$tmaArch", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`proveAll",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`proveAll", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`joinHold",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`joinHold", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`$tmaEnv",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`$tmaEnv", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`makeSet",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`makeSet", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`getUsed",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`getUsed", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema`Common`joinKB",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema`Common`joinKB", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["$TheoremaArchivePath",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["$TheoremaArchivePath", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["$TheoremaDirectory",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["$TheoremaDirectory", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["Theorema",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["Theorema", ".nb"]]],
+  Evaluator->Automatic]], "Text"],
+
+Cell[BoxData[
+ ButtonBox["QU$",
+  Active->True,
+  Appearance->{Automatic, "DialogBox"},
+  ButtonFunction:>NotebookOpen[
+    ToFileName[{
+      ParentDirectory[
+       NotebookDirectory[
+        EvaluationNotebook[]]]}, 
+     StringJoin["QU$", ".nb"]]],
+  Evaluator->Automatic]], "Text"]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{740, 867},
+WindowMargins->{{590, Automatic}, {Automatic, 94}},
+FrontEndVersion->"8.0 for Linux x86 (32-bit) (February 23, 2011)",
+StyleDefinitions->"Default.nb"
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[CellGroupData[{
+Cell[579, 22, 126, 3, 103, "Section"],
+Cell[708, 27, 314, 5, 68, "Text"],
+Cell[CellGroupData[{
+Cell[1047, 36, 93, 2, 39, "Subsection"],
+Cell[1143, 40, 388, 11, 42, "Text"],
+Cell[1534, 53, 374, 10, 42, "Text"],
+Cell[1911, 65, 370, 10, 42, "Text"],
+Cell[2284, 77, 366, 10, 42, "Text"],
+Cell[2653, 89, 364, 10, 42, "Text"],
+Cell[3020, 101, 362, 10, 42, "Text"],
+Cell[3385, 113, 360, 10, 42, "Text"],
+Cell[3748, 125, 360, 10, 42, "Text"],
+Cell[4111, 137, 360, 10, 42, "Text"],
+Cell[4474, 149, 358, 10, 42, "Text"],
+Cell[4835, 161, 358, 10, 42, "Text"],
+Cell[5196, 173, 358, 10, 42, "Text"],
+Cell[5557, 185, 358, 10, 42, "Text"],
+Cell[5918, 197, 356, 10, 42, "Text"],
+Cell[6277, 209, 356, 10, 42, "Text"],
+Cell[6636, 221, 356, 10, 42, "Text"],
+Cell[6995, 233, 356, 10, 42, "Text"],
+Cell[7354, 245, 356, 10, 70, "Text"],
+Cell[7713, 257, 356, 10, 70, "Text"],
+Cell[8072, 269, 356, 10, 70, "Text"],
+Cell[8431, 281, 354, 10, 70, "Text"],
+Cell[8788, 293, 354, 10, 70, "Text"],
+Cell[9145, 305, 354, 10, 70, "Text"],
+Cell[9502, 317, 354, 10, 70, "Text"],
+Cell[9859, 329, 354, 10, 70, "Text"],
+Cell[10216, 341, 352, 10, 70, "Text"],
+Cell[10571, 353, 352, 10, 70, "Text"],
+Cell[10926, 365, 352, 10, 70, "Text"],
+Cell[11281, 377, 352, 10, 70, "Text"],
+Cell[11636, 389, 352, 10, 70, "Text"],
+Cell[11991, 401, 350, 10, 70, "Text"],
+Cell[12344, 413, 350, 10, 70, "Text"],
+Cell[12697, 425, 350, 10, 70, "Text"],
+Cell[13050, 437, 348, 10, 70, "Text"],
+Cell[13401, 449, 348, 10, 70, "Text"],
+Cell[13752, 461, 348, 10, 70, "Text"],
+Cell[14103, 473, 344, 10, 70, "Text"],
+Cell[14450, 485, 342, 10, 70, "Text"],
+Cell[14795, 497, 342, 10, 70, "Text"],
+Cell[15140, 509, 342, 10, 70, "Text"],
+Cell[15485, 521, 340, 10, 70, "Text"],
+Cell[15828, 533, 338, 10, 70, "Text"],
+Cell[16169, 545, 330, 10, 70, "Text"],
+Cell[16502, 557, 328, 10, 70, "Text"],
+Cell[16833, 569, 322, 10, 70, "Text"],
+Cell[17158, 581, 314, 10, 70, "Text"],
+Cell[17475, 593, 310, 10, 70, "Text"],
+Cell[17788, 605, 306, 10, 70, "Text"],
+Cell[18097, 617, 306, 10, 70, "Text"],
+Cell[18406, 629, 304, 10, 70, "Text"],
+Cell[18713, 641, 302, 10, 70, "Text"],
+Cell[19018, 653, 300, 10, 70, "Text"],
+Cell[19321, 665, 300, 10, 70, "Text"],
+Cell[19624, 677, 300, 10, 70, "Text"],
+Cell[19927, 689, 298, 10, 70, "Text"],
+Cell[20228, 701, 298, 10, 70, "Text"],
+Cell[20529, 713, 298, 10, 70, "Text"],
+Cell[20830, 725, 298, 10, 70, "Text"],
+Cell[21131, 737, 298, 10, 70, "Text"],
+Cell[21432, 749, 298, 10, 70, "Text"],
+Cell[21733, 761, 296, 10, 70, "Text"],
+Cell[22032, 773, 296, 10, 70, "Text"],
+Cell[22331, 785, 296, 10, 70, "Text"],
+Cell[22630, 797, 296, 10, 70, "Text"],
+Cell[22929, 809, 296, 10, 70, "Text"],
+Cell[23228, 821, 296, 10, 70, "Text"],
+Cell[23527, 833, 296, 10, 70, "Text"],
+Cell[23826, 845, 294, 10, 70, "Text"],
+Cell[24123, 857, 294, 10, 70, "Text"],
+Cell[24420, 869, 294, 10, 70, "Text"],
+Cell[24717, 881, 294, 10, 70, "Text"],
+Cell[25014, 893, 292, 10, 70, "Text"],
+Cell[25309, 905, 292, 10, 70, "Text"],
+Cell[25604, 917, 292, 10, 70, "Text"],
+Cell[25899, 929, 292, 10, 70, "Text"],
+Cell[26194, 941, 292, 10, 70, "Text"],
+Cell[26489, 953, 290, 10, 70, "Text"],
+Cell[26782, 965, 290, 10, 70, "Text"],
+Cell[27075, 977, 290, 10, 70, "Text"],
+Cell[27368, 989, 288, 10, 70, "Text"],
+Cell[27659, 1001, 288, 10, 70, "Text"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[27984, 1016, 109, 3, 70, "Subsection"],
+Cell[28096, 1021, 372, 10, 70, "Text"],
+Cell[28471, 1033, 370, 10, 70, "Text"],
+Cell[28844, 1045, 362, 10, 70, "Text"],
+Cell[29209, 1057, 356, 10, 70, "Text"],
+Cell[29568, 1069, 356, 10, 70, "Text"],
+Cell[29927, 1081, 356, 10, 70, "Text"],
+Cell[30286, 1093, 354, 10, 70, "Text"],
+Cell[30643, 1105, 354, 10, 70, "Text"],
+Cell[31000, 1117, 354, 10, 70, "Text"],
+Cell[31357, 1129, 354, 10, 70, "Text"],
+Cell[31714, 1141, 352, 10, 70, "Text"],
+Cell[32069, 1153, 352, 10, 70, "Text"],
+Cell[32424, 1165, 350, 10, 70, "Text"],
+Cell[32777, 1177, 350, 10, 70, "Text"],
+Cell[33130, 1189, 350, 10, 70, "Text"],
+Cell[33483, 1201, 350, 10, 70, "Text"],
+Cell[33836, 1213, 348, 10, 70, "Text"],
+Cell[34187, 1225, 348, 10, 70, "Text"],
+Cell[34538, 1237, 348, 10, 70, "Text"],
+Cell[34889, 1249, 348, 10, 70, "Text"],
+Cell[35240, 1261, 346, 10, 70, "Text"],
+Cell[35589, 1273, 346, 10, 70, "Text"],
+Cell[35938, 1285, 344, 10, 70, "Text"],
+Cell[36285, 1297, 344, 10, 70, "Text"],
+Cell[36632, 1309, 344, 10, 70, "Text"],
+Cell[36979, 1321, 344, 10, 70, "Text"],
+Cell[37326, 1333, 344, 10, 70, "Text"],
+Cell[37673, 1345, 342, 10, 70, "Text"],
+Cell[38018, 1357, 342, 10, 70, "Text"],
+Cell[38363, 1369, 342, 10, 70, "Text"],
+Cell[38708, 1381, 342, 10, 70, "Text"],
+Cell[39053, 1393, 340, 10, 70, "Text"],
+Cell[39396, 1405, 340, 10, 70, "Text"],
+Cell[39739, 1417, 340, 10, 70, "Text"],
+Cell[40082, 1429, 340, 10, 70, "Text"],
+Cell[40425, 1441, 338, 10, 70, "Text"],
+Cell[40766, 1453, 338, 10, 70, "Text"],
+Cell[41107, 1465, 338, 10, 70, "Text"],
+Cell[41448, 1477, 338, 10, 70, "Text"],
+Cell[41789, 1489, 336, 10, 70, "Text"],
+Cell[42128, 1501, 336, 10, 70, "Text"],
+Cell[42467, 1513, 336, 10, 70, "Text"],
+Cell[42806, 1525, 336, 10, 70, "Text"],
+Cell[43145, 1537, 336, 10, 70, "Text"],
+Cell[43484, 1549, 336, 10, 70, "Text"],
+Cell[43823, 1561, 334, 10, 70, "Text"],
+Cell[44160, 1573, 334, 10, 70, "Text"],
+Cell[44497, 1585, 334, 10, 70, "Text"],
+Cell[44834, 1597, 334, 10, 70, "Text"],
+Cell[45171, 1609, 332, 10, 70, "Text"],
+Cell[45506, 1621, 332, 10, 70, "Text"],
+Cell[45841, 1633, 332, 10, 70, "Text"],
+Cell[46176, 1645, 332, 10, 70, "Text"],
+Cell[46511, 1657, 332, 10, 70, "Text"],
+Cell[46846, 1669, 332, 10, 70, "Text"],
+Cell[47181, 1681, 332, 10, 70, "Text"],
+Cell[47516, 1693, 330, 10, 70, "Text"],
+Cell[47849, 1705, 330, 10, 70, "Text"],
+Cell[48182, 1717, 330, 10, 70, "Text"],
+Cell[48515, 1729, 330, 10, 70, "Text"],
+Cell[48848, 1741, 330, 10, 70, "Text"],
+Cell[49181, 1753, 330, 10, 70, "Text"],
+Cell[49514, 1765, 330, 10, 70, "Text"],
+Cell[49847, 1777, 330, 10, 70, "Text"],
+Cell[50180, 1789, 328, 10, 70, "Text"],
+Cell[50511, 1801, 328, 10, 70, "Text"],
+Cell[50842, 1813, 328, 10, 70, "Text"],
+Cell[51173, 1825, 326, 10, 70, "Text"],
+Cell[51502, 1837, 326, 10, 70, "Text"],
+Cell[51831, 1849, 326, 10, 70, "Text"],
+Cell[52160, 1861, 324, 10, 70, "Text"],
+Cell[52487, 1873, 320, 10, 70, "Text"],
+Cell[52810, 1885, 316, 10, 70, "Text"],
+Cell[53129, 1897, 296, 10, 70, "Text"],
+Cell[53428, 1909, 286, 10, 70, "Text"]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)
+

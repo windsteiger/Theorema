@@ -1,0 +1,227 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 8.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       157,          7]
+NotebookDataLength[      4935,        218]
+NotebookOptionsPosition[      2849,        142]
+NotebookOutlinePosition[      3261,        158]
+CellTagsIndexPosition[      3218,        155]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[TextData[{
+ "New in: ",
+ Cell["2.0", "HistoryData",
+  CellTags->"New"],
+ " | Modified in: ",
+ Cell[" ", "HistoryData",
+  CellTags->"Modified"],
+ " | Obsolete in: ",
+ Cell[" ", "HistoryData",
+  CellTags->"Obsolete"],
+ " | Excised in: ",
+ Cell[" ", "HistoryData",
+  CellTags->"Excised"]
+}], "History",
+ CellChangeTimes->{{3.613374962475698*^9, 3.613374962915085*^9}},
+ CellID->1247902091],
+
+Cell[CellGroupData[{
+
+Cell["Categorization", "CategorizationSection",
+ CellID->1122911449],
+
+Cell["Tutorial", "Categorization",
+ CellLabel->"Entity Type",
+ CellID->686433507],
+
+Cell["Theorema Package", "Categorization",
+ CellLabel->"Paclet Name",
+ CellID->605800465],
+
+Cell["Theorema`", "Categorization",
+ CellLabel->"Context",
+ CellID->468444828],
+
+Cell["Theorema/tutorial/ProofOutput", "Categorization",
+ CellLabel->"URI"]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Keywords", "KeywordsSection",
+ CellID->1427428552],
+
+Cell["XXXX", "Keywords",
+ CellID->1251852827]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Details", "DetailsSection",
+ CellID->307771771],
+
+Cell["XXXX", "Details",
+ CellLabel->"Lead",
+ CellID->218895918],
+
+Cell["XXXX", "Details",
+ CellLabel->"Developers",
+ CellID->350963985],
+
+Cell["XXXX", "Details",
+ CellLabel->"Authors",
+ CellID->795871300],
+
+Cell["XXXX", "Details",
+ CellLabel->"Feature Name",
+ CellID->199739161],
+
+Cell["XXXX", "Details",
+ CellLabel->"QA",
+ CellID->40625308],
+
+Cell["XXXX", "Details",
+ CellLabel->"DA",
+ CellID->357121918],
+
+Cell["XXXX", "Details",
+ CellLabel->"Docs",
+ CellID->35949532],
+
+Cell["XXXX", "Details",
+ CellLabel->"Features Page Notes",
+ CellID->929432370],
+
+Cell["XXXX", "Details",
+ CellLabel->"Comments",
+ CellID->240026365]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Proof Output", "Title",
+ CellID->509267359],
+
+Cell[CellGroupData[{
+
+Cell["More About", "TutorialMoreAboutSection",
+ CellID->23220180],
+
+Cell["XXXX", "TutorialMoreAbout",
+ CellID->1567025153]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Related Tutorials", "RelatedTutorialsSection",
+ CellID->415694126],
+
+Cell["XXXX", "RelatedTutorials",
+ CellID->806871991]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Related Wolfram Education Group Courses", "TutorialRelatedLinksSection",
+ CellID->415694148],
+
+Cell["XXXX", "TutorialRelatedLinks",
+ CellID->415694149]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{700, 770},
+WindowMargins->{{-4, Automatic}, {Automatic, 0}},
+FrontEndVersion->"8.0 for Linux x86 (32-bit) (February 23, 2011)",
+StyleDefinitions->FrontEnd`FileName[{"Wolfram"}, "TutorialPageStyles.nb", 
+  CharacterEncoding -> "UTF-8"]
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[557, 20, 391, 15, 24, "History",
+ CellID->1247902091],
+Cell[CellGroupData[{
+Cell[973, 39, 68, 1, 29, "CategorizationSection",
+ CellID->1122911449],
+Cell[1044, 42, 81, 2, 32, "Categorization",
+ CellID->686433507],
+Cell[1128, 46, 89, 2, 32, "Categorization",
+ CellID->605800465],
+Cell[1220, 50, 78, 2, 32, "Categorization",
+ CellID->468444828],
+Cell[1301, 54, 74, 1, 32, "Categorization"]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[1412, 60, 56, 1, 29, "KeywordsSection",
+ CellID->1427428552],
+Cell[1471, 63, 45, 1, 70, "Keywords",
+ CellID->1251852827]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[1553, 69, 53, 1, 19, "DetailsSection",
+ CellID->307771771],
+Cell[1609, 72, 63, 2, 70, "Details",
+ CellID->218895918],
+Cell[1675, 76, 69, 2, 70, "Details",
+ CellID->350963985],
+Cell[1747, 80, 66, 2, 70, "Details",
+ CellID->795871300],
+Cell[1816, 84, 71, 2, 70, "Details",
+ CellID->199739161],
+Cell[1890, 88, 60, 2, 70, "Details",
+ CellID->40625308],
+Cell[1953, 92, 61, 2, 70, "Details",
+ CellID->357121918],
+Cell[2017, 96, 62, 2, 70, "Details",
+ CellID->35949532],
+Cell[2082, 100, 78, 2, 70, "Details",
+ CellID->929432370],
+Cell[2163, 104, 67, 2, 70, "Details",
+ CellID->240026365]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[2267, 111, 49, 1, 106, "Title",
+ CellID->509267359],
+Cell[CellGroupData[{
+Cell[2341, 116, 65, 1, 72, "TutorialMoreAboutSection",
+ CellID->23220180],
+Cell[2409, 119, 54, 1, 22, "TutorialMoreAbout",
+ CellID->1567025153]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2500, 125, 72, 1, 72, "RelatedTutorialsSection",
+ CellID->415694126],
+Cell[2575, 128, 52, 1, 22, "RelatedTutorials",
+ CellID->806871991]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2664, 134, 98, 1, 72, "TutorialRelatedLinksSection",
+ CellID->415694148],
+Cell[2765, 137, 56, 1, 22, "TutorialRelatedLinks",
+ CellID->415694149]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)

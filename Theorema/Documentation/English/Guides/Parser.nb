@@ -1,0 +1,706 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 8.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       157,          7]
+NotebookDataLength[     18355,        696]
+NotebookOptionsPosition[     13823,        530]
+NotebookOutlinePosition[     14233,        546]
+CellTagsIndexPosition[     14190,        543]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[TextData[{
+ "New in: ",
+ Cell["0.0", "HistoryData",
+  CellTags->"New"],
+ " | Modified in: ",
+ Cell[" ", "HistoryData",
+  CellTags->"Modified"],
+ " | Obsolete in: ",
+ Cell[" ", "HistoryData",
+  CellTags->"Obsolete"],
+ " | Excised in: ",
+ Cell[" ", "HistoryData",
+  CellTags->"Excised"]
+}], "History",
+ CellID->1247902091],
+
+Cell[CellGroupData[{
+
+Cell["Categorization", "CategorizationSection",
+ CellID->1122911449],
+
+Cell["Guide", "Categorization",
+ CellLabel->"Entity Type",
+ CellID->686433507],
+
+Cell["Theorema", "Categorization",
+ CellLabel->"Paclet Name",
+ CellID->605800465],
+
+Cell["Theorema`", "Categorization",
+ CellLabel->"Context",
+ CellID->468444828],
+
+Cell["Theorema/guide/Parser", "Categorization",
+ CellLabel->"URI"]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Keywords", "KeywordsSection",
+ CellID->1427428552],
+
+Cell["XXXX", "Keywords",
+ CellID->1251852827]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Details", "DetailsSection",
+ CellID->307771771],
+
+Cell["XXXX", "Details",
+ CellLabel->"Lead",
+ CellID->795394057],
+
+Cell["XXXX", "Details",
+ CellLabel->"Developers",
+ CellID->350963985],
+
+Cell["XXXX", "Details",
+ CellLabel->"Authors",
+ CellID->802101],
+
+Cell["XXXX", "Details",
+ CellLabel->"Feature Name",
+ CellID->509823116],
+
+Cell["XXXX", "Details",
+ CellLabel->"QA",
+ CellID->199884516],
+
+Cell["XXXX", "Details",
+ CellLabel->"DA",
+ CellID->463951815],
+
+Cell["XXXX", "Details",
+ CellLabel->"Docs",
+ CellID->8237523],
+
+Cell["XXXX", "Details",
+ CellLabel->"Features Page Notes",
+ CellID->813936640],
+
+Cell["XXXX", "Details",
+ CellLabel->"Comments",
+ CellID->240026365]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Parser", "GuideTitle",
+ CellID->942062912],
+
+Cell["\<\
+This pages describes the Theorema parser package.\
+\>", "GuideAbstract",
+ CellChangeTimes->{{3.591835331194646*^9, 3.591835333392254*^9}},
+ CellID->2001916300],
+
+Cell[BoxData[GridBox[{
+   {
+    RowBox[{
+     ButtonBox["MakeExpression",
+      BaseStyle->"Link"], "[", 
+     RowBox[{
+      StyleBox["expr_", "TI"], ",", " ", 
+      StyleBox["fmt_", "TI"]}], "]"}], Cell[TextData[{
+     "syntax rules for parsing ",
+     Cell[BoxData[
+      StyleBox["expr", "TI"]], "InlineFormula"],
+     "."
+    }], "TableText"]}
+  }]], "DefinitionBox",
+ CellChangeTimes->{{3.533626052225242*^9, 3.533626141768668*^9}, {
+  3.533626578717475*^9, 3.533626588461226*^9}, {3.533626689107862*^9, 
+  3.53362668910816*^9}},
+ CellID->2096742444],
+
+Cell["Functions defined in the Parser package.", "Caption",
+ CellChangeTimes->{{3.533626244281812*^9, 3.533626257896675*^9}},
+ CellID->1891092685],
+
+Cell[TextData[{
+ "The examples in this tutorial show how expressions are parsed in the first \
+step by ",
+ Cell[BoxData[
+  ButtonBox["MakeExpression",
+   BaseStyle->"Link"]], "InlineFormula"],
+ ". In a Theorema session, this is typically only part of the whole parsing, \
+because most input cell styles define further preprocessing of Theorema \
+expressions through $PreRead, $Pre, CellProlog, CellEpilog, etc."
+}], "Text",
+ CellChangeTimes->{{3.533626325441782*^9, 3.533626421849454*^9}, 
+   3.53362664969451*^9, {3.533626715902868*^9, 3.533626871175791*^9}, {
+   3.533626902990921*^9, 3.533626908480562*^9}},
+ CellID->971117619],
+
+Cell[TextData[{
+ "Cells for global declarations use a cell style that defines ",
+ Cell[BoxData[
+  ButtonBox["CellProlog",
+   BaseStyle->"Link"]], "InlineFormula"],
+ " in such a way that ",
+ Cell[BoxData[
+  ButtonBox["$parseTheoremaGlobals",
+   BaseStyle->"Link",
+   ButtonData->"paclet:Theorema/ref/$parseTheoremaGlobals"]], "InlineFormula"],
+ " is guaranteed to be True during ",
+ Cell[BoxData[
+  ButtonBox["MakeExpression",
+   BaseStyle->"Link"]], "InlineFormula"],
+ "."
+}], "Text",
+ CellChangeTimes->{{3.533630691501237*^9, 3.533630741955653*^9}, {
+   3.533630774333094*^9, 3.533630834876574*^9}, 3.533630875444885*^9, {
+   3.53363090912577*^9, 3.533630921888281*^9}},
+ CellID->1171260537],
+
+Cell["Parsing global declarations", "MathCaption",
+ CellChangeTimes->{{3.533626266754784*^9, 3.53362627419876*^9}},
+ CellID->836781195],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"Theorema`Common`$parseTheoremaGlobals", "=", "True"}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.533622172119917*^9, 3.533622196227895*^9}, {
+  3.533622256956333*^9, 3.53362226977047*^9}},
+ CellLabel->"In[18]:=",
+ CellID->620918837],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ UnderscriptBox["\[ForAll]", "x"]], "Input",
+ CellChangeTimes->{{3.533622281824724*^9, 3.53362228843451*^9}},
+ CellLabel->"In[19]:=",
+ CellID->731497796],
+
+Cell[BoxData[
+ RowBox[{"QU$", "[", 
+  RowBox[{
+   RowBox[{"RNG$", "[", 
+    RowBox[{"SIMPRNG$", "[", "x", "]"}], "]"}], ",", 
+   RowBox[{"globalForall", "[", 
+    RowBox[{
+     RowBox[{"RNG$", "[", 
+      RowBox[{"SIMPRNG$", "[", "x", "]"}], "]"}], ",", "true"}], "]"}]}], 
+  "]"}]], "Output",
+ CellChangeTimes->{3.533622290219703*^9},
+ CellLabel->"Out[19]=",
+ CellID->1523217544]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ UnderscriptBox["\[ForAll]", 
+  RowBox[{"even", "[", "x", "]"}]]], "Input",
+ CellChangeTimes->{{3.533622281824724*^9, 3.53362228843451*^9}, {
+  3.533622413348518*^9, 3.533622420616283*^9}},
+ CellLabel->"In[22]:=",
+ CellID->1034465091],
+
+Cell[BoxData[
+ RowBox[{"QU$", "[", 
+  RowBox[{
+   RowBox[{"RNG$", "[", 
+    RowBox[{"PREDRNG$", "[", 
+     RowBox[{"x", ",", "even"}], "]"}], "]"}], ",", 
+   RowBox[{"globalForall", "[", 
+    RowBox[{
+     RowBox[{"RNG$", "[", 
+      RowBox[{"PREDRNG$", "[", 
+       RowBox[{"x", ",", "even"}], "]"}], "]"}], ",", "true"}], "]"}]}], 
+  "]"}]], "Output",
+ CellChangeTimes->{3.533622421245299*^9},
+ CellLabel->"Out[22]=",
+ CellID->840397382]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ UnderscriptBox["\[ForAll]", 
+  RowBox[{"x", "\[Element]", "A"}]]], "Input",
+ CellChangeTimes->{{3.533622281824724*^9, 3.53362228843451*^9}, {
+  3.533622413348518*^9, 3.533622436916099*^9}},
+ CellLabel->"In[23]:=",
+ CellID->486779359],
+
+Cell[BoxData[
+ RowBox[{"QU$", "[", 
+  RowBox[{
+   RowBox[{"RNG$", "[", 
+    RowBox[{"SETRNG$", "[", 
+     RowBox[{"x", ",", "A"}], "]"}], "]"}], ",", 
+   RowBox[{"globalForall", "[", 
+    RowBox[{
+     RowBox[{"RNG$", "[", 
+      RowBox[{"SETRNG$", "[", 
+       RowBox[{"x", ",", "A"}], "]"}], "]"}], ",", "true"}], "]"}]}], 
+  "]"}]], "Output",
+ CellChangeTimes->{3.533622438365787*^9},
+ CellLabel->"Out[23]=",
+ CellID->2025900725]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ UnderscriptBox[
+  UnderscriptBox["\[ForAll]", 
+   RowBox[{"x", "\[Element]", "A"}]], 
+  RowBox[{"x", ">", "3"}]]], "Input",
+ CellChangeTimes->{{3.533622281824724*^9, 3.53362228843451*^9}, {
+  3.533622413348518*^9, 3.533622460004749*^9}},
+ CellLabel->"In[24]:=",
+ CellID->86861373],
+
+Cell[BoxData[
+ RowBox[{"QU$", "[", 
+  RowBox[{
+   RowBox[{"RNG$", "[", 
+    RowBox[{"SETRNG$", "[", 
+     RowBox[{"x", ",", "A"}], "]"}], "]"}], ",", 
+   RowBox[{"globalForall", "[", 
+    RowBox[{
+     RowBox[{"RNG$", "[", 
+      RowBox[{"SETRNG$", "[", 
+       RowBox[{"x", ",", "A"}], "]"}], "]"}], ",", 
+     RowBox[{"x", ">", "3"}]}], "]"}]}], "]"}]], "Output",
+ CellChangeTimes->{3.533622462211955*^9},
+ CellLabel->"Out[24]=",
+ CellID->270304013]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  UnderscriptBox["\[ForAll]", "x"], 
+  UnderscriptBox["\[ForAll]", "y"]}]], "Input",
+ CellChangeTimes->{{3.533622281824724*^9, 3.53362228843451*^9}, {
+  3.53362233415166*^9, 3.533622339409017*^9}},
+ CellLabel->"In[20]:=",
+ CellID->1811098191],
+
+Cell[BoxData[
+ RowBox[{"QU$", "[", 
+  RowBox[{
+   RowBox[{"RNG$", "[", 
+    RowBox[{"SIMPRNG$", "[", "x", "]"}], "]"}], ",", 
+   RowBox[{"globalForall", "[", 
+    RowBox[{
+     RowBox[{"RNG$", "[", 
+      RowBox[{"SIMPRNG$", "[", "x", "]"}], "]"}], ",", "true", ",", 
+     RowBox[{"QU$", "[", 
+      RowBox[{
+       RowBox[{"RNG$", "[", 
+        RowBox[{"SIMPRNG$", "[", "y", "]"}], "]"}], ",", 
+       RowBox[{"globalForall", "[", 
+        RowBox[{
+         RowBox[{"RNG$", "[", 
+          RowBox[{"SIMPRNG$", "[", "y", "]"}], "]"}], ",", "true"}], "]"}]}], 
+      "]"}]}], "]"}]}], "]"}]], "Output",
+ CellChangeTimes->{3.533622341978807*^9},
+ CellLabel->"Out[20]=",
+ CellID->1469278655]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  UnderscriptBox["\[ForAll]", "x"], 
+  UnderscriptBox[
+   UnderscriptBox["\[ForAll]", "y"], 
+   RowBox[{"y", ">", "x"}]]}]], "Input",
+ CellChangeTimes->{{3.533622281824724*^9, 3.53362228843451*^9}, {
+  3.53362233415166*^9, 3.533622339409017*^9}, {3.533622488013268*^9, 
+  3.533622500721887*^9}},
+ CellLabel->"In[25]:=",
+ CellID->1027473528],
+
+Cell[BoxData[
+ RowBox[{"QU$", "[", 
+  RowBox[{
+   RowBox[{"RNG$", "[", 
+    RowBox[{"SIMPRNG$", "[", "x", "]"}], "]"}], ",", 
+   RowBox[{"globalForall", "[", 
+    RowBox[{
+     RowBox[{"RNG$", "[", 
+      RowBox[{"SIMPRNG$", "[", "x", "]"}], "]"}], ",", "true", ",", 
+     RowBox[{"QU$", "[", 
+      RowBox[{
+       RowBox[{"RNG$", "[", 
+        RowBox[{"SIMPRNG$", "[", "y", "]"}], "]"}], ",", 
+       RowBox[{"globalForall", "[", 
+        RowBox[{
+         RowBox[{"RNG$", "[", 
+          RowBox[{"SIMPRNG$", "[", "y", "]"}], "]"}], ",", 
+         RowBox[{"y", ">", "x"}]}], "]"}]}], "]"}]}], "]"}]}], 
+  "]"}]], "Output",
+ CellChangeTimes->{3.533622501592936*^9},
+ CellLabel->"Out[25]=",
+ CellID->75830913]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"even", "[", "x", "]"}], "\[Implies]"}]], "Input",
+ CellChangeTimes->{{3.533622389156272*^9, 3.533622396382855*^9}},
+ CellLabel->"In[21]:=",
+ CellID->814261257],
+
+Cell[BoxData[
+ RowBox[{"globalImplies", "[", 
+  RowBox[{"even", "[", "x", "]"}], "]"}]], "Output",
+ CellChangeTimes->{3.533622397533213*^9},
+ CellLabel->"Out[21]=",
+ CellID->133007470]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"even", "[", "x", "]"}], "\[DoubleLongRightArrow]"}]], "Input",
+ CellChangeTimes->{{3.533622389156272*^9, 3.533622396382855*^9}, {
+  3.533622515807733*^9, 3.533622539543858*^9}},
+ CellLabel->"In[27]:=",
+ CellID->1313937875],
+
+Cell[BoxData[
+ RowBox[{"globalImplies", "[", 
+  RowBox[{"even", "[", "x", "]"}], "]"}]], "Output",
+ CellChangeTimes->{{3.533622521315425*^9, 3.533622545444922*^9}},
+ CellLabel->"Out[27]=",
+ CellID->883236987]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"even", "[", "x", "]"}], "\[DoubleRightArrow]"}]], "Input",
+ CellChangeTimes->{{3.533622389156272*^9, 3.533622396382855*^9}, {
+  3.533622515807733*^9, 3.533622564683406*^9}},
+ CellLabel->"In[28]:=",
+ CellID->632166171],
+
+Cell[BoxData[
+ RowBox[{"globalImplies", "[", 
+  RowBox[{"even", "[", "x", "]"}], "]"}]], "Output",
+ CellChangeTimes->{3.533622566508382*^9},
+ CellLabel->"Out[28]=",
+ CellID->1411261169]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  UnderscriptBox["\[ForAll]", "x"], 
+  RowBox[{
+   UnderscriptBox[
+    UnderscriptBox["\[ForAll]", "y"], 
+    RowBox[{"y", ">", "x"}]], 
+   RowBox[{"(", 
+    RowBox[{
+     RowBox[{"even", "[", "x", "]"}], "\[Implies]"}], ")"}]}]}]], "Input",
+ CellChangeTimes->{{3.533622281824724*^9, 3.53362228843451*^9}, {
+  3.53362233415166*^9, 3.533622339409017*^9}, {3.533622488013268*^9, 
+  3.533622500721887*^9}, {3.533622600647483*^9, 3.533622610753698*^9}},
+ CellLabel->"In[29]:=",
+ CellID->184053853],
+
+Cell[BoxData[
+ RowBox[{"QU$", "[", 
+  RowBox[{
+   RowBox[{"RNG$", "[", 
+    RowBox[{"SIMPRNG$", "[", "x", "]"}], "]"}], ",", 
+   RowBox[{"globalForall", "[", 
+    RowBox[{
+     RowBox[{"RNG$", "[", 
+      RowBox[{"SIMPRNG$", "[", "x", "]"}], "]"}], ",", "true", ",", 
+     RowBox[{"QU$", "[", 
+      RowBox[{
+       RowBox[{"RNG$", "[", 
+        RowBox[{"SIMPRNG$", "[", "y", "]"}], "]"}], ",", 
+       RowBox[{"globalForall", "[", 
+        RowBox[{
+         RowBox[{"RNG$", "[", 
+          RowBox[{"SIMPRNG$", "[", "y", "]"}], "]"}], ",", "true", ",", 
+         RowBox[{"globalImplies", "[", 
+          RowBox[{"even", "[", "x", "]"}], "]"}]}], "]"}]}], "]"}]}], "]"}]}],
+   "]"}]], "Output",
+ CellChangeTimes->{3.533622612187401*^9},
+ CellLabel->"Out[29]=",
+ CellID->1611383834]
+}, Open  ]],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"Theorema`Common`$parseTheoremaGlobals", "=", "False"}], 
+  ";"}]], "Input",
+ CellChangeTimes->{{3.533622172119917*^9, 3.533622196227895*^9}, {
+  3.533622256956333*^9, 3.53362226977047*^9}, {3.533622847981131*^9, 
+  3.533622848805202*^9}},
+ CellLabel->"In[30]:=",
+ CellID->100788568]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["", "GuideFunctionsSection",
+ CellID->1866139230],
+
+Cell[TextData[{
+ Cell[BoxData["XXXX"], "InlineGuideFunction"],
+ " \[LongDash] XXXX"
+}], "GuideText",
+ CellID->203374175],
+
+Cell[TextData[{
+ Cell[BoxData["XXXX"], "InlineGuideFunction"],
+ " \[LongDash] XXXX"
+}], "GuideText",
+ CellID->1463276848],
+
+Cell[CellGroupData[{
+
+Cell["\t", "GuideDelimiter",
+ CellID->311258892],
+
+Cell["XXXX . XXXX . ", "InlineGuideFunctionListing",
+ CellID->58033752]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Tutorials", "GuideTutorialsSection",
+ CellID->415694126],
+
+Cell["XXXX", "GuideTutorial",
+ CellID->806871991],
+
+Cell["XXXX", "GuideTutorial",
+ CellID->1885805579]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["More About", "GuideMoreAboutSection",
+ CellID->23220180],
+
+Cell["XXXX", "GuideMoreAbout",
+ CellID->1567025153],
+
+Cell["XXXX", "GuideMoreAbout",
+ CellID->252299663]
+}, Open  ]],
+
+Cell["Related Links", "GuideRelatedLinksSection",
+ CellID->415694148]
+},
+WindowSize->{700, 770},
+WindowMargins->{{73, Automatic}, {Automatic, 54}},
+FrontEndVersion->"8.0 for Linux x86 (32-bit) (February 23, 2011)",
+StyleDefinitions->FrontEnd`FileName[{"Wolfram"}, "GuidePageStyles.nb", 
+  CharacterEncoding -> "UTF-8"]
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[557, 20, 325, 14, 24, "History",
+ CellID->1247902091],
+Cell[CellGroupData[{
+Cell[907, 38, 68, 1, 29, "CategorizationSection",
+ CellID->1122911449],
+Cell[978, 41, 78, 2, 70, "Categorization",
+ CellID->686433507],
+Cell[1059, 45, 81, 2, 70, "Categorization",
+ CellID->605800465],
+Cell[1143, 49, 78, 2, 70, "Categorization",
+ CellID->468444828],
+Cell[1224, 53, 66, 1, 70, "Categorization"]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[1327, 59, 56, 1, 19, "KeywordsSection",
+ CellID->1427428552],
+Cell[1386, 62, 45, 1, 70, "Keywords",
+ CellID->1251852827]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[1468, 68, 53, 1, 19, "DetailsSection",
+ CellID->307771771],
+Cell[1524, 71, 63, 2, 70, "Details",
+ CellID->795394057],
+Cell[1590, 75, 69, 2, 70, "Details",
+ CellID->350963985],
+Cell[1662, 79, 63, 2, 70, "Details",
+ CellID->802101],
+Cell[1728, 83, 71, 2, 70, "Details",
+ CellID->509823116],
+Cell[1802, 87, 61, 2, 70, "Details",
+ CellID->199884516],
+Cell[1866, 91, 61, 2, 70, "Details",
+ CellID->463951815],
+Cell[1930, 95, 61, 2, 70, "Details",
+ CellID->8237523],
+Cell[1994, 99, 78, 2, 70, "Details",
+ CellID->813936640],
+Cell[2075, 103, 67, 2, 70, "Details",
+ CellID->240026365]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[2179, 110, 48, 1, 76, "GuideTitle",
+ CellID->942062912],
+Cell[2230, 113, 169, 4, 28, "GuideAbstract",
+ CellID->2001916300],
+Cell[2402, 119, 557, 17, 27, "DefinitionBox",
+ CellID->2096742444],
+Cell[2962, 138, 146, 2, 24, "Caption",
+ CellID->1891092685],
+Cell[3111, 142, 630, 13, 58, "Text",
+ CellID->971117619],
+Cell[3744, 157, 692, 19, 41, "Text",
+ CellID->1171260537],
+Cell[4439, 178, 135, 2, 44, "MathCaption",
+ CellID->836781195],
+Cell[4577, 182, 267, 7, 26, "Input",
+ CellID->620918837],
+Cell[CellGroupData[{
+Cell[4869, 193, 167, 4, 34, "Input",
+ CellID->731497796],
+Cell[5039, 199, 380, 12, 25, "Output",
+ CellID->1523217544]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[5456, 216, 248, 6, 36, "Input",
+ CellID->1034465091],
+Cell[5707, 224, 439, 14, 45, "Output",
+ CellID->840397382]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[6183, 243, 248, 6, 34, "Input",
+ CellID->486779359],
+Cell[6434, 251, 432, 14, 25, "Output",
+ CellID->2025900725]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[6903, 270, 295, 8, 45, "Input",
+ CellID->86861373],
+Cell[7201, 280, 451, 14, 25, "Output",
+ CellID->270304013]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[7689, 299, 266, 7, 35, "Input",
+ CellID->1811098191],
+Cell[7958, 308, 688, 20, 45, "Output",
+ CellID->1469278655]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[8683, 333, 364, 10, 46, "Input",
+ CellID->1027473528],
+Cell[9050, 345, 709, 21, 45, "Output",
+ CellID->75830913]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[9796, 371, 194, 5, 26, "Input",
+ CellID->814261257],
+Cell[9993, 378, 184, 5, 25, "Output",
+ CellID->133007470]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[10214, 388, 257, 6, 26, "Input",
+ CellID->1313937875],
+Cell[10474, 396, 208, 5, 25, "Output",
+ CellID->883236987]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[10719, 406, 252, 6, 26, "Input",
+ CellID->632166171],
+Cell[10974, 414, 185, 5, 25, "Output",
+ CellID->1411261169]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[11196, 424, 517, 14, 46, "Input",
+ CellID->184053853],
+Cell[11716, 440, 780, 22, 64, "Output",
+ CellID->1611383834]
+}, Open  ]],
+Cell[12511, 465, 317, 8, 26, "Input",
+ CellID->100788568]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[12865, 478, 54, 1, 70, "GuideFunctionsSection",
+ CellID->1866139230],
+Cell[12922, 481, 120, 4, 23, "GuideText",
+ CellID->203374175],
+Cell[13045, 487, 121, 4, 23, "GuideText",
+ CellID->1463276848],
+Cell[CellGroupData[{
+Cell[13191, 495, 48, 1, 26, "GuideDelimiter",
+ CellID->311258892],
+Cell[13242, 498, 71, 1, 22, "InlineGuideFunctionListing",
+ CellID->58033752]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[13362, 505, 62, 1, 72, "GuideTutorialsSection",
+ CellID->415694126],
+Cell[13427, 508, 49, 1, 22, "GuideTutorial",
+ CellID->806871991],
+Cell[13479, 511, 50, 1, 22, "GuideTutorial",
+ CellID->1885805579]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[13566, 517, 62, 1, 72, "GuideMoreAboutSection",
+ CellID->23220180],
+Cell[13631, 520, 51, 1, 22, "GuideMoreAbout",
+ CellID->1567025153],
+Cell[13685, 523, 50, 1, 22, "GuideMoreAbout",
+ CellID->252299663]
+}, Open  ]],
+Cell[13750, 527, 69, 1, 72, "GuideRelatedLinksSection",
+ CellID->415694148]
+}
+]
+*)
+
+(* End of internal cache information *)
+

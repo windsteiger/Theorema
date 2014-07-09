@@ -1,0 +1,747 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 8.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       157,          7]
+NotebookDataLength[     22781,        738]
+NotebookOptionsPosition[     18052,        566]
+NotebookOutlinePosition[     18467,        582]
+CellTagsIndexPosition[     18424,        579]
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[TextData[{
+ "New in: ",
+ Cell["0.0", "HistoryData",
+  CellTags->"New"],
+ " | Modified in: ",
+ Cell[" ", "HistoryData",
+  CellTags->"Modified"],
+ " | Obsolete in: ",
+ Cell[" ", "HistoryData",
+  CellTags->"Obsolete"],
+ " | Excised in: ",
+ Cell[" ", "HistoryData",
+  CellTags->"Excised"]
+}], "History",
+ CellID->1247902091],
+
+Cell[CellGroupData[{
+
+Cell["Categorization", "CategorizationSection",
+ CellID->1122911449],
+
+Cell["Tutorial", "Categorization",
+ CellLabel->"Entity Type",
+ CellID->686433507],
+
+Cell["Theorema", "Categorization",
+ CellLabel->"Paclet Name",
+ CellID->605800465],
+
+Cell["Theorema`", "Categorization",
+ CellLabel->"Context",
+ CellID->468444828],
+
+Cell["Theorema/tutorial/TheTheoremaSystem", "Categorization",
+ CellLabel->"URI"]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Keywords", "KeywordsSection",
+ CellID->1427428552],
+
+Cell["XXXX", "Keywords",
+ CellID->1251852827]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["Details", "DetailsSection",
+ CellID->307771771],
+
+Cell["XXXX", "Details",
+ CellLabel->"Lead",
+ CellID->218895918],
+
+Cell["XXXX", "Details",
+ CellLabel->"Developers",
+ CellID->350963985],
+
+Cell["XXXX", "Details",
+ CellLabel->"Authors",
+ CellID->795871300],
+
+Cell["XXXX", "Details",
+ CellLabel->"Feature Name",
+ CellID->199739161],
+
+Cell["XXXX", "Details",
+ CellLabel->"QA",
+ CellID->40625308],
+
+Cell["XXXX", "Details",
+ CellLabel->"DA",
+ CellID->357121918],
+
+Cell["XXXX", "Details",
+ CellLabel->"Docs",
+ CellID->35949532],
+
+Cell["XXXX", "Details",
+ CellLabel->"Features Page Notes",
+ CellID->929432370],
+
+Cell["XXXX", "Details",
+ CellLabel->"Comments",
+ CellID->240026365]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+The Theorema System (Version 2.0)\
+\>", "Title",
+ CellChangeTimes->{{3.591836218195791*^9, 3.591836232604584*^9}},
+ CellID->509267359],
+
+Cell[CellGroupData[{
+
+Cell["What Is Theorema 2.0?", "Section",
+ CellChangeTimes->{{3.591836369006396*^9, 3.591836375259972*^9}, {
+  3.604295864853892*^9, 3.60429586555976*^9}},
+ CellID->1536843519],
+
+Cell[TextData[{
+ "Theorema 2.0 is a ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " package (a collection of packages, in fact) that provides a ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ "l Assistent System (MAS) inside of and based on ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ ". A MAS supports the user in"
+}], "Text",
+ CellChangeTimes->{{3.591836414412787*^9, 3.591836449396359*^9}, {
+  3.591836483919281*^9, 3.591836565687546*^9}},
+ CellID->1534169418],
+
+Cell["\<\
+formulating and structuring of mathematical knowledge,\
+\>", "BulletedText",
+ CellChangeTimes->{{3.591836641511592*^9, 3.591836667178105*^9}, 
+   3.604295790233309*^9},
+ CellID->1051780089],
+
+Cell["proving mathematical statements,", "BulletedText",
+ CellChangeTimes->{{3.591836768907576*^9, 3.591836777187335*^9}, 
+   3.604295797238526*^9},
+ CellID->816373380],
+
+Cell["\<\
+formulating and executing mathematical algorithms,\
+\>", "BulletedText",
+ CellChangeTimes->{{3.591836714235341*^9, 3.591836736393989*^9}, 
+   3.604295794033703*^9},
+ CellID->115550266],
+
+Cell["performing computations,", "BulletedText",
+ CellChangeTimes->{{3.604295815489262*^9, 3.604295834502683*^9}},
+ CellID->269976977],
+
+Cell["etc.", "BulletedText",
+ CellChangeTimes->{{3.591836781617577*^9, 3.591836782882663*^9}},
+ CellID->1548135267]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+When Should You be Interested in Theorema 2.0?\
+\>", "Section",
+ CellChangeTimes->{{3.591836871030723*^9, 3.591836893348136*^9}},
+ CellID->430678607],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+If you know the predecessor version Theorema 1.0.\
+\>", "Subsection",
+ CellChangeTimes->{{3.591836949670448*^9, 3.591837036095805*^9}, {
+  3.591837401539218*^9, 3.591837517489424*^9}, {3.591837554139852*^9, 
+  3.591837601936781*^9}, {3.591837997925915*^9, 3.591838015628227*^9}},
+ CellID->1005281005],
+
+Cell[TextData[{
+ "Theorema 2.0 is the successor version, it is completely re-designed and \
+re-implemented. While preserving the key features such as natural-style \
+mathematical input and output of formulas, natural-style automated proofs, \
+combination of proving and computing inside one system, etc., Theorema 2.0 \
+comes with an improved user-interface centered around a graphical user \
+interface (GUI) guiding the user through all phases of their work. ",
+ ButtonBox["More \[Ellipsis]",
+  BaseStyle->"Link",
+  ButtonData->"paclet:Theorema/tutorial/Theorema1-2"]
+}], "Text",
+ CellChangeTimes->{{3.591836949670448*^9, 3.591837036095805*^9}, {
+  3.591837401539218*^9, 3.591837517489424*^9}, {3.591837554139852*^9, 
+  3.591837601936781*^9}, {3.591837997925915*^9, 3.591838009943276*^9}, {
+  3.61311057566596*^9, 3.613110578826665*^9}, {3.613110779558976*^9, 
+  3.613110779681598*^9}},
+ CellID->691297121]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+If you write mathematical documents including proofs or algorithms.\
+\>", "Subsection",
+ CellChangeTimes->{{3.591837779229322*^9, 3.591837988210927*^9}, 
+   3.591838053575851*^9},
+ CellID->685153986],
+
+Cell["\<\
+Theorema 2.0 can help you in generating proofs fully automatically or \
+interactively. The proofs generated by the system are structured like proofs \
+done by a well-educated mathematician and can be displayed on the screen, \
+printed out, or included into the document.\
+\>", "Text",
+ CellChangeTimes->{{3.591837779229322*^9, 3.591837988210927*^9}, {
+  3.591838053575851*^9, 3.591838065075772*^9}},
+ CellID->201071277],
+
+Cell[TextData[{
+ "Theorema 2.0 allows you to express algorithms using the language of \
+predicate logic or parts of the ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " programming language supporting procedural programming, most importantly \
+various forms of loops. Moreover, the algorithms can be executed immediately \
+without any translation to any other system or language. ",
+ ButtonBox["More \[Ellipsis]",
+  BaseStyle->"Link",
+  ButtonData->"paclet:Theorema/tutorial/ProvingAndComputing"]
+}], "Text",
+ CellChangeTimes->{{3.591838088988038*^9, 3.591838180199696*^9}, {
+  3.591838213594593*^9, 3.591838247660461*^9}, {3.613110657293755*^9, 
+  3.613110658000702*^9}, {3.613110875163926*^9, 3.613110875289574*^9}},
+ CellID->2005491772]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+If you want to develop hierarchies of mathematical theories\
+\>", "Subsection",
+ CellChangeTimes->{{3.591838294938971*^9, 3.591838318023044*^9}},
+ CellID->956583128],
+
+Cell[TextData[{
+ "Theorema 2.0 allows you to organize mathematical knowledge as hierarchies \
+of interdependent theories. Once you define a mathematical concept through a \
+formula (expressed in predicate logic), you can \"try out\" the definition \
+immediately on small finite examples, whether the formula \"behaves\" as \
+expected, i.e. whether the formula expresses what you wanted to express with \
+it. Once the definitions are settled, you can continue and try to prove some \
+properties of the newly defined entities. ",
+ ButtonBox["More \[Ellipsis]",
+  BaseStyle->"Link",
+  ButtonData->"paclet:Theorema/tutorial/Archives"]
+}], "Text",
+ CellChangeTimes->{{3.591838327468435*^9, 3.591838419024887*^9}, {
+  3.59183846226243*^9, 3.591838605906976*^9}, {3.594646964442678*^9, 
+  3.594646965124372*^9}, {3.594647139430629*^9, 3.594647139588978*^9}, {
+  3.604295686303359*^9, 3.604295711725354*^9}, {3.613110660238795*^9, 
+  3.613110661653845*^9}, {3.613110902502266*^9, 3.613110902681677*^9}},
+ CellID->458281791]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["How Can You Use Theorema 2.0?", "Section",
+ CellChangeTimes->{{3.604295775240724*^9, 3.604295780106884*^9}, {
+  3.604295849826197*^9, 3.604295857882228*^9}, {3.604295900535648*^9, 
+  3.604295901497859*^9}},
+ CellID->623181546],
+
+Cell[CellGroupData[{
+
+Cell["Theorema Licensing", "Subsection",
+ CellChangeTimes->{{3.613207676668985*^9, 3.6132076813076*^9}},
+ CellID->1257241288],
+
+Cell[TextData[{
+ "Theorema 2.0 is free software: you can redistribute it and/or modify it \
+under the terms of the ",
+ ButtonBox["GNU General Public License (GPL)",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["http://www.gnu.org/licenses/#GPL"], None}],
+ " as published by the Free Software Foundation, either version 3 of the \
+License, or (at your option) any later version."
+}], "Text",
+ CellChangeTimes->{{3.613207683824006*^9, 3.613207783032755*^9}, {
+  3.613289773568561*^9, 3.613289774065587*^9}},
+ CellID->1565546150]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Installing Theorema 2.0", "Subsection",
+ CellChangeTimes->{{3.604297358289341*^9, 3.604297397236797*^9}},
+ CellID->1741540549],
+
+Cell[TextData[{
+ "Theorema 2.0 is a standard add-on package for ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " and it is distributed as an archive file in various formats (zip, tar, 7z, \
+etc.), which can be downloaded from the ",
+ ButtonBox["Theorema homepage",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["http://www.risc.jku.at/research/theorema/software/"], None}],
+ ". Installation of the system requires nothing more than unpacking the \
+archive and moving the directory \"Theorema\" into one of the ",
+ ButtonBox["locations for standard add-on packages",
+  BaseStyle->"Link",
+  ButtonData->"paclet:tutorial/MathematicaFileOrganization"],
+ "."
+}], "Text",
+ CellChangeTimes->{{3.604295892647584*^9, 3.604295928737119*^9}, {
+  3.604295971851871*^9, 3.604296025235906*^9}, {3.604296204605012*^9, 
+  3.604296297627536*^9}, {3.604296339205026*^9, 3.604296368841351*^9}, {
+  3.604296476310045*^9, 3.604296476373919*^9}, {3.604296522961331*^9, 
+  3.604296625607774*^9}, {3.604297161832156*^9, 3.604297162063735*^9}},
+ CellID->1549344858]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Loading Theorema 2.0", "Subsection",
+ CellChangeTimes->{{3.60429738918598*^9, 3.604297394406239*^9}},
+ CellID->330272324],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ "Once the system is properly installed, it is then ",
+ StyleBox["loaded",
+  FontSlant->"Italic"],
+ " into the current ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " session by executing the ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " command"
+}], "Text",
+ CellChangeTimes->{{3.604295892647584*^9, 3.604295928737119*^9}, {
+   3.604295971851871*^9, 3.604296025235906*^9}, {3.604296204605012*^9, 
+   3.604296297627536*^9}, {3.604296339205026*^9, 3.604296368841351*^9}, {
+   3.604296476310045*^9, 3.604296476373919*^9}, {3.604296522961331*^9, 
+   3.604296693160692*^9}, 3.604297410234424*^9, {3.613110952954767*^9, 
+   3.613110952975355*^9}},
+ CellID->1905121221],
+
+Cell[BoxData[
+ RowBox[{"Needs", "[", "\"\<Theorema`\>\"", "]"}]], "Input",
+ CellChangeTimes->{{3.604295999244631*^9, 3.604296006477858*^9}},
+ CellID->1257575355]
+}, Open  ]],
+
+Cell[TextData[{
+ "Theorema 2.0 requires at least ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " version 8."
+}], "Text",
+ CellChangeTimes->{{3.604296037828518*^9, 3.604296061083891*^9}},
+ CellID->1378783326]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+How Can You Work with Theorema 2.0\
+\>", "Section",
+ CellChangeTimes->{{3.604297445121964*^9, 3.604297451166185*^9}, {
+  3.613290914479649*^9, 3.613290921145241*^9}},
+ CellID->1533479522],
+
+Cell[TextData[{
+ "While the system is loading, you see a welcome window on the screen. After \
+this, a new window called ",
+ ButtonBox["Theorema Commander",
+  BaseStyle->"Link",
+  ButtonData->"paclet:Theorema/tutorial/TheoremaCommander"],
+ " opens and marks the completion of the loading process. You are ready to \
+start off."
+}], "Text",
+ CellChangeTimes->{{3.604297918444503*^9, 3.604298014048882*^9}, {
+  3.60429812537766*^9, 3.60429827539365*^9}, {3.604298788561693*^9, 
+  3.604298788792922*^9}, {3.613111072738683*^9, 3.613111087213621*^9}},
+ CellID->543322432],
+
+Cell[TextData[{
+ "\"Working in Theorema 2.0\" means developing a ",
+ ButtonBox["Theorema session",
+  BaseStyle->"Link",
+  ButtonData->"paclet:Theorema/tutorial/TheoremaSession"],
+ ", i.e."
+}], "Text",
+ CellChangeTimes->{{3.604298277176755*^9, 3.604298291569253*^9}, {
+  3.604299038358275*^9, 3.604299060141844*^9}, {3.604299144300579*^9, 
+  3.604299144603723*^9}},
+ CellID->499903409],
+
+Cell[TextData[{
+ "writing structured mathematical documents in ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " notebooks using one of the special Theorema stylesheets and"
+}], "BulletedText",
+ CellChangeTimes->{{3.604298305575467*^9, 3.604298366822463*^9}, {
+  3.604299192845752*^9, 3.604299215750563*^9}, {3.604299282869419*^9, 
+  3.604299293720337*^9}},
+ CellID->2117794442],
+
+Cell[TextData[{
+ "performing certain operations on parts of the notebook using actions \
+supported by the ",
+ ButtonBox["Theorema Commander",
+  BaseStyle->"Link",
+  ButtonData->"paclet:Theorema/tutorial/TheoremaCommander"],
+ " (e.g. prove a theorem)"
+}], "BulletedText",
+ CellChangeTimes->{{3.604298379614579*^9, 3.604298450811593*^9}, {
+  3.60429922367196*^9, 3.604299244930029*^9}},
+ CellID->1300560816],
+
+Cell[TextData[{
+ "For a first introduction to what can be done in a Theorema session we \
+suggest to follow the ",
+ ButtonBox["First Tour in Theorema 2.0",
+  BaseStyle->"Link",
+  ButtonData->"paclet:Theorema/tutorial/FirstTour"],
+ "."
+}], "Text",
+ CellChangeTimes->{{3.604299318799041*^9, 3.604299445592427*^9}, {
+  3.613111164922957*^9, 3.613111217182206*^9}},
+ CellID->447948591]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+How Can You Contribute to Theorema 2.0?\
+\>", "Section",
+ CellChangeTimes->{{3.604295775240724*^9, 3.604295780106884*^9}, {
+  3.604295849826197*^9, 3.604295857882228*^9}, {3.604295900535648*^9, 
+  3.604295901497859*^9}, {3.613207628439786*^9, 3.613207632207915*^9}},
+ CellID->55098215],
+
+Cell[TextData[{
+ "Theorema source code is available as a Git repository from ",
+ ButtonBox["GitHub",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["https://github.com/windsteiger/Theorema"], None}],
+ ". We assume basic knowledge on \"git\" for communicating contributions to \
+the Theorema source code."
+}], "Text",
+ CellChangeTimes->{{3.613207809713431*^9, 3.6132078633349*^9}, {
+  3.613208158739909*^9, 3.61320815891369*^9}, {3.613208237161964*^9, 
+  3.613208272857863*^9}, {3.613208304609714*^9, 3.6132083273871*^9}},
+ CellID->1286171582],
+
+Cell[TextData[{
+ "If you intend to implement changes or improvements to the Theorema system, \
+we recommend to ",
+ StyleBox[ButtonBox["contact the Theorema Group",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["http://www.risc.jku.at/research/theorema/"], None}],
+  FontSlant->"Italic"],
+ StyleBox[" in advance",
+  FontSlant->"Italic"],
+ " in order to coordinate possible modifications. When you want to contribute \
+code to the system, you need to provide a git repository from which we can \
+pull the modifications. We encourage to use GitHub, but this is not a must."
+}], "Text",
+ CellChangeTimes->{{3.613212401436613*^9, 3.613212471232283*^9}, {
+  3.613212557686673*^9, 3.613212577801584*^9}, {3.613212623149588*^9, 
+  3.613212637222041*^9}, {3.613212692079026*^9, 3.61321276871292*^9}, {
+  3.613212801527237*^9, 3.613212854460547*^9}, {3.613276136194715*^9, 
+  3.613276211544674*^9}},
+ CellID->529582062],
+
+Cell[TextData[{
+ "For programming Theorema code, we recommend to use the ",
+ ButtonBox["Wolfram Workbench",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["http://www.wolfram.com/products/workbench/"], None}],
+ ". When cloning the git repository you get a local directory that serves as \
+the base directory for a workbench-project. In the workbench, just import the \
+project from that directory into the default workspace. Due to formatting \
+issues with the resulting code, please refrain from editing programs in the \
+",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " notebook frontend. Please read the ",
+ ButtonBox["programmers' guidelines",
+  BaseStyle->"Link",
+  ButtonData->"paclet:Theorema/tutorial/ProgrammersGuidelines"],
+ " before you start implementing."
+}], "Text",
+ CellChangeTimes->{{3.613276310774613*^9, 3.613276336758664*^9}, {
+  3.613276430433975*^9, 3.613276464853237*^9}, {3.61327650913372*^9, 
+  3.613276800977285*^9}, {3.613276917485815*^9, 3.613276979830605*^9}},
+ CellID->679074924],
+
+Cell[CellGroupData[{
+
+Cell["More About", "TutorialMoreAboutSection",
+ CellID->23220180],
+
+Cell[TextData[ButtonBox["Where to store add-on packages",
+ BaseStyle->"Link",
+ ButtonData->
+  "paclet:tutorial/MathematicaFileOrganization"]], "TutorialMoreAbout",
+ CellChangeTimes->{{3.604297761057674*^9, 3.604297773262248*^9}, {
+  3.604297824793659*^9, 3.604297869586443*^9}},
+ CellID->1567025153]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Related Tutorials", "RelatedTutorialsSection",
+ CellID->415694126],
+
+Cell[TextData[ButtonBox["Theorema: A First Tour",
+ BaseStyle->"Link",
+ ButtonData->"paclet:Theorema/tutorial/FirstTour"]], "RelatedTutorials",
+ CellChangeTimes->{{3.61311393683762*^9, 3.613113956884372*^9}},
+ CellID->1628911651],
+
+Cell[TextData[ButtonBox["Theorema Session",
+ BaseStyle->"Link",
+ ButtonData->"paclet:Theorema/tutorial/TheoremaSession"]], "RelatedTutorials",\
+
+ CellChangeTimes->{{3.594646917901527*^9, 3.594646930544882*^9}},
+ CellID->806871991],
+
+Cell[TextData[ButtonBox["Theorema Commander",
+ BaseStyle->"Link",
+ ButtonData->
+  "paclet:Theorema/tutorial/TheoremaCommander"]], "RelatedTutorials",
+ CellChangeTimes->{{3.594646917901527*^9, 3.594646930544882*^9}},
+ CellID->1375069557]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Related Wolfram Education Group Courses", "TutorialRelatedLinksSection",
+ CellID->415694148],
+
+Cell["XXXX", "TutorialRelatedLinks",
+ CellID->415694149]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+},
+WindowSize->{700, 770},
+WindowMargins->{{392, Automatic}, {104, Automatic}},
+FrontEndVersion->"8.0 for Linux x86 (32-bit) (February 23, 2011)",
+StyleDefinitions->FrontEnd`FileName[{"Wolfram"}, "TutorialPageStyles.nb", 
+  CharacterEncoding -> "UTF-8"]
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[557, 20, 325, 14, 24, "History",
+ CellID->1247902091],
+Cell[CellGroupData[{
+Cell[907, 38, 68, 1, 29, "CategorizationSection",
+ CellID->1122911449],
+Cell[978, 41, 81, 2, 32, "Categorization",
+ CellID->686433507],
+Cell[1062, 45, 81, 2, 32, "Categorization",
+ CellID->605800465],
+Cell[1146, 49, 78, 2, 32, "Categorization",
+ CellID->468444828],
+Cell[1227, 53, 80, 1, 32, "Categorization"]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[1344, 59, 56, 1, 19, "KeywordsSection",
+ CellID->1427428552],
+Cell[1403, 62, 45, 1, 70, "Keywords",
+ CellID->1251852827]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[1485, 68, 53, 1, 19, "DetailsSection",
+ CellID->307771771],
+Cell[1541, 71, 63, 2, 70, "Details",
+ CellID->218895918],
+Cell[1607, 75, 69, 2, 70, "Details",
+ CellID->350963985],
+Cell[1679, 79, 66, 2, 70, "Details",
+ CellID->795871300],
+Cell[1748, 83, 71, 2, 70, "Details",
+ CellID->199739161],
+Cell[1822, 87, 60, 2, 70, "Details",
+ CellID->40625308],
+Cell[1885, 91, 61, 2, 70, "Details",
+ CellID->357121918],
+Cell[1949, 95, 62, 2, 70, "Details",
+ CellID->35949532],
+Cell[2014, 99, 78, 2, 70, "Details",
+ CellID->929432370],
+Cell[2095, 103, 67, 2, 70, "Details",
+ CellID->240026365]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[2199, 110, 144, 4, 106, "Title",
+ CellID->509267359],
+Cell[CellGroupData[{
+Cell[2368, 118, 175, 3, 43, "Section",
+ CellID->1536843519],
+Cell[2546, 123, 484, 14, 57, "Text",
+ CellID->1534169418],
+Cell[3033, 139, 199, 5, 21, "BulletedText",
+ CellID->1051780089],
+Cell[3235, 146, 168, 3, 21, "BulletedText",
+ CellID->816373380],
+Cell[3406, 151, 194, 5, 21, "BulletedText",
+ CellID->115550266],
+Cell[3603, 158, 134, 2, 21, "BulletedText",
+ CellID->269976977],
+Cell[3740, 162, 115, 2, 21, "BulletedText",
+ CellID->1548135267]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[3892, 169, 159, 4, 43, "Section",
+ CellID->430678607],
+Cell[CellGroupData[{
+Cell[4076, 177, 310, 6, 38, "Subsection",
+ CellID->1005281005],
+Cell[4389, 185, 907, 16, 96, "Text",
+ CellID->691297121]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[5333, 206, 209, 5, 38, "Subsection",
+ CellID->685153986],
+Cell[5545, 213, 429, 8, 57, "Text",
+ CellID->201071277],
+Cell[5977, 223, 745, 15, 78, "Text",
+ CellID->2005491772]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[6759, 243, 175, 4, 38, "Subsection",
+ CellID->956583128],
+Cell[6937, 249, 1015, 17, 113, "Text",
+ CellID->458281791]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[8001, 272, 232, 4, 43, "Section",
+ CellID->623181546],
+Cell[CellGroupData[{
+Cell[8258, 280, 125, 2, 38, "Subsection",
+ CellID->1257241288],
+Cell[8386, 284, 531, 12, 57, "Text",
+ CellID->1565546150]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[8954, 301, 132, 2, 38, "Subsection",
+ CellID->1741540549],
+Cell[9089, 305, 1050, 22, 74, "Text",
+ CellID->1549344858]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[10176, 332, 127, 2, 38, "Subsection",
+ CellID->330272324],
+Cell[CellGroupData[{
+Cell[10328, 338, 695, 18, 40, "Text",
+ CellID->1905121221],
+Cell[11026, 358, 161, 3, 26, "Input",
+ CellID->1257575355]
+}, Open  ]],
+Cell[11202, 364, 214, 7, 23, "Text",
+ CellID->1378783326]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[11465, 377, 197, 5, 43, "Section",
+ CellID->1533479522],
+Cell[11665, 384, 567, 12, 57, "Text",
+ CellID->543322432],
+Cell[12235, 398, 384, 10, 23, "Text",
+ CellID->499903409],
+Cell[12622, 410, 383, 9, 36, "BulletedText",
+ CellID->2117794442],
+Cell[13008, 421, 405, 10, 36, "BulletedText",
+ CellID->1300560816],
+Cell[13416, 433, 381, 10, 40, "Text",
+ CellID->447948591]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[13834, 448, 295, 6, 43, "Section",
+ CellID->55098215],
+Cell[14132, 456, 545, 12, 40, "Text",
+ CellID->1286171582],
+Cell[14680, 470, 913, 19, 74, "Text",
+ CellID->529582062],
+Cell[15596, 491, 1018, 22, 108, "Text",
+ CellID->679074924],
+Cell[CellGroupData[{
+Cell[16639, 517, 65, 1, 66, "TutorialMoreAboutSection",
+ CellID->23220180],
+Cell[16707, 520, 299, 6, 22, "TutorialMoreAbout",
+ CellID->1567025153]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[17043, 531, 72, 1, 72, "RelatedTutorialsSection",
+ CellID->415694126],
+Cell[17118, 534, 228, 4, 22, "RelatedTutorials",
+ CellID->1628911651],
+Cell[17349, 540, 230, 5, 22, "RelatedTutorials",
+ CellID->806871991],
+Cell[17582, 547, 236, 5, 22, "RelatedTutorials",
+ CellID->1375069557]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[17855, 557, 98, 1, 72, "TutorialRelatedLinksSection",
+ CellID->415694148],
+Cell[17956, 560, 56, 1, 22, "TutorialRelatedLinks",
+ CellID->415694149]
+}, Open  ]]
+}, Open  ]]
+}, Open  ]]
+}
+]
+*)
+
+(* End of internal cache information *)
