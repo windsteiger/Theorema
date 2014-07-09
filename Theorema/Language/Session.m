@@ -805,18 +805,20 @@ archiveName[args___] :=
 (* ::Section:: *)
 (* Computation *)
 
-SetAttributes[processComputation, HoldAll];
+SetAttributes[ processComputation, HoldAll];
 
 processComputation[ x:Theorema`Computation`Language`nE] := 
 	Module[{},
 		$Failed
 	]
-processComputation[x_] := Module[ { procSynt, res},
-	procSynt = markVariables[ freshNames[ Hold[ x]]];
-	$TmaComputationObject = {Apply[ HoldForm, procSynt]};
+processComputation[ x_] := Module[ { procSynt, res},
+	(* Remove the inner Holds around fresh symbols *)
+	procSynt = Replace[ markVariables[ freshNames[ Hold[ x]]], Hold[ s_] -> s, Infinity, Heads -> True];
+	(* As an initial computation object, we start with the box form of the input cell *)
+	$TmaComputationObject = {ToExpression[ InString[ $Line]]};
 	$TmaCompInsertPos = {2}; 
 	setComputationContext[ "compute"];
-	res = Check[ Catch[ removeHold[ procSynt]], $Failed];
+	res = Check[ Catch[ ReleaseHold[ procSynt]], $Failed];
 	setComputationContext[ "none"];
 	(*NotebookWrite[ EvaluationNotebook[], Cell[ ToBoxes[ res, TheoremaForm], "ComputationResult", CellLabel -> "Out["<>ToString[$Line]<>"]="]];*)
 	(* We force the MakeBoxes[ ..., TheoremaForm] to apply by setting $PrePrint in the CellProlog of a computation cell.
@@ -824,7 +826,7 @@ processComputation[x_] := Module[ { procSynt, res},
 	AppendTo[ $TmaComputationObject, res]; 
 	renameToStandardContext[ res]
 ]
-processComputation[args___] := unexcpected[ processComputation, {args}]
+processComputation[ args___] := unexcpected[ processComputation, {args}]
 
 openComputation[] := 
 	Module[{},

@@ -117,7 +117,8 @@ displayComputation[ file_String] :=
  	Module[{cells, calc = Get[ file]}, 
  		cells = {Cell[ CellGroupData[
  			Join[
- 				{Cell[ BoxData[ theoremaBoxes[ First[ calc]]], "ComputationInput", CellMargins -> {{Inherited, Inherited}, {Inherited, 20}}]}, 
+ 				(* The first element in the computation object is the box form of the input cell, we write it into the computation notebook as it is.*)
+ 				{Cell[ BoxData[ First[ calc]], "ComputationInput", CellMargins -> {{Inherited, Inherited}, {Inherited, 20}}]}, 
        			Map[ subcompToCell, Take[ calc, {2, -2}]],
        			{Cell[ BoxData[ theoremaBoxes[ Last[ calc]]], "ComputationOutput"]}
        		]]]};
