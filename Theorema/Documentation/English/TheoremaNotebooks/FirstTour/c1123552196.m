@@ -36,7 +36,7 @@ Theorema`Common`buiActComputation["Factorial"] = True
  
 Theorema`Common`buiActComputation["For"] = True
  
-Theorema`Common`buiActComputation["Forall"] = True
+Theorema`Common`buiActComputation["Forall"] = False
  
 Theorema`Common`buiActComputation["Greater"] = True
  

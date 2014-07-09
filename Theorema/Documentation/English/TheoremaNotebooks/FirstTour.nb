@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[     84679,       2197]
-NotebookOptionsPosition[     39604,       1200]
-NotebookOutlinePosition[     79593,       2026]
-CellTagsIndexPosition[     79185,       2014]
+NotebookDataLength[     85473,       2224]
+NotebookOptionsPosition[     40397,       1227]
+NotebookOutlinePosition[     80386,       2053]
+CellTagsIndexPosition[     79978,       2041]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -1142,7 +1142,34 @@ Cell[BoxData[
  CellID->1123552196],
 
 Cell[BoxData[
- FormBox["True", TheoremaForm]], "ComputationResult",
+ FormBox[
+  RowBox[{
+   UnderscriptBox["\[ForAll]", GridBox[{
+      {
+       RowBox[{
+        RowBox[{
+         StyleBox["j", "ExpressionVariable"], "=", "1"}], ",", "\[Ellipsis]", 
+        ",", "1"}]}
+     }]], 
+   RowBox[{
+    RowBox[{
+     TagBox["(",
+      "AutoParentheses"], 
+     SubscriptBox[
+      RowBox[{"\[LeftAngleBracket]", 
+       RowBox[{"1", ",", "1", ",", "1"}], "\[RightAngleBracket]"}], 
+      StyleBox["j", "ExpressionVariable"]], 
+     TagBox[")",
+      "AutoParentheses"]}], "\[Equal]", 
+    RowBox[{
+     TagBox["(",
+      "AutoParentheses"], 
+     SubscriptBox[
+      RowBox[{"\[LeftAngleBracket]", 
+       RowBox[{"1", ",", "2", ",", "0"}], "\[RightAngleBracket]"}], 
+      StyleBox["j", "ExpressionVariable"]], 
+     TagBox[")",
+      "AutoParentheses"]}]}]}], TheoremaForm]], "ComputationResult",
  CellChangeTimes->{
   3.613897419384082*^9, {3.613898593638248*^9, 3.613898605354134*^9}, 
    3.613902460654221*^9, 3.61390414548131*^9, 3.613904578428221*^9, 
@@ -1150,8 +1177,8 @@ Cell[BoxData[
    3.613905914147173*^9, 3.613905992547564*^9, 3.613906054276638*^9, 
    3.613906117626983*^9, 3.613906394724234*^9, 3.613906462485142*^9, 
    3.613906936507168*^9, 3.613907510945743*^9, 3.613907759913837*^9, 
-   3.613907790535206*^9, 3.613907971108183*^9},
- CellID->841073650]
+   3.613907790535206*^9, 3.613907971108183*^9, 3.613908984484839*^9},
+ CellID->1618282943]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -1178,8 +1205,8 @@ TheoremaNotebooks/FirstTour/c1123552196-co.m"],
          ButtonNotebook[], 
          "/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
 TheoremaNotebooks/FirstTour/c1123552196"]]]]}, {None, None}},
- CellChangeTimes->{3.613907971142858*^9},
- CellID->1579745290],
+ CellChangeTimes->{3.613908984587647*^9},
+ CellID->69103156],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
@@ -1192,8 +1219,8 @@ TheoremaNotebooks/FirstTour/c1123552196-display.m"],
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
   ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
- CellChangeTimes->{3.613907971189908*^9},
- CellID->680569461]
+ CellChangeTimes->{3.613908984635574*^9},
+ CellID->1910201185]
 }, Closed]]
 }, Open  ]]
 }, Open  ]]
@@ -2013,14 +2040,14 @@ English/TheoremaNotebooks/FirstTour.nb", "<lex"},
 *)
 (*CellTagsIndex
 CellTagsIndex->{
- {"ID:169304498", 77033, 1958},
+ {"ID:169304498", 77826, 1985},
  {"Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
-TheoremaNotebooks/FirstTour.nb", 77441, 1967},
- {"(P or Q \[And] if P then Q) \[DoubleLeftRightArrow] Q", 78038, 1981},
- {"Proof|ID:169304498", 78359, 1989},
- {"Proof|ID:169304498-1", 78517, 1993},
- {"ID:983404631", 78667, 1997},
- {"<lex", 78920, 2004}
+TheoremaNotebooks/FirstTour.nb", 78234, 1994},
+ {"(P or Q \[And] if P then Q) \[DoubleLeftRightArrow] Q", 78831, 2008},
+ {"Proof|ID:169304498", 79152, 2016},
+ {"Proof|ID:169304498-1", 79310, 2020},
+ {"ID:983404631", 79460, 2024},
+ {"<lex", 79713, 2031}
  }
 *)
 (*NotebookFileOutline
@@ -2188,14 +2215,14 @@ Cell[36798, 1121, 165, 4, 24, "Text",
 Cell[CellGroupData[{
 Cell[36988, 1129, 573, 12, 29, "Computation",
  CellID->1123552196],
-Cell[37564, 1143, 575, 10, 22, "ComputationResult",
- CellID->841073650]
+Cell[37564, 1143, 1369, 37, 31, "ComputationResult",
+ CellID->1618282943]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[38176, 1158, 869, 23, 29, "ComputationInfo",
- CellID->1579745290],
-Cell[39048, 1183, 516, 12, 70, "ComputationInfoBody",
- CellID->680569461]
+Cell[38970, 1185, 867, 23, 29, "ComputationInfo",
+ CellID->69103156],
+Cell[39840, 1210, 517, 12, 70, "ComputationInfoBody",
+ CellID->1910201185]
 }, Closed]]
 }, Open  ]]
 }, Open  ]]
