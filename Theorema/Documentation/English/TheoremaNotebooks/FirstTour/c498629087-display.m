@@ -15,7 +15,7 @@ Documentation/English/TheoremaNotebooks/FirstTour.nb"}, "<lex"}]}, ", "],
             "ComponentActive"]}], 
          Row[{Style["And", "ComponentInactive"]}]}]}, True], 
      "\[Checkmark] [Domains]", "\[Checkmark] [Programming]"}], 
-  "Restore environment" -> Row[{"Really restore all relevant settings to the \
+  "Restore settings" -> Row[{"Really restore all relevant settings to the \
 values they had when this action was performed last time?", 
      Button["OK", Theorema`Interface`GUI`Private`setCompEnv["/home/wwindste/T\
 heorema.2/Theorema/Theorema/Documentation/English/TheoremaNotebooks/FirstTour\

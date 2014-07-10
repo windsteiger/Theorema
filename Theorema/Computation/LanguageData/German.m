@@ -18,10 +18,14 @@
 *)
 
 With[ {lang = "German"},
-    translate[ "Function has no conditions", lang] = "Function has no conditions";
-    translate[ "Function cannot be applied because a condition could not be evaluated to true", lang] = "Function cannot be applied because a condition could not be evaluated to true";
-    translate[ "Cannot be evaluated", lang] = "Cannot be evaluated";
-    translate[ "Function cannot be applied because a condition is not fulfilled", lang] = "Function cannot be applied because a condition is not fulfilled";
+
+(* TRANSLATED *)
+
+(* UNTRANSLATED *)
     translate[ "All conditions are fulfilled", lang] = "All conditions are fulfilled";
+    translate[ "Cannot be evaluated", lang] = "Cannot be evaluated";
+    translate[ "Function cannot be applied because a condition could not be evaluated to true", lang] = "Function cannot be applied because a condition could not be evaluated to true";
+    translate[ "Function cannot be applied because a condition is not fulfilled", lang] = "Function cannot be applied because a condition is not fulfilled";
+    translate[ "Function has no conditions", lang] = "Function has no conditions";
 
 ]

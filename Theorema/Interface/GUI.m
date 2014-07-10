@@ -163,6 +163,7 @@ initGUI[] :=
 		kbSelectProve[_] := False;
 		kbSelectSolve[_] := False;
 		$selectedProofGoal = {};
+		$selectedProofKB = {};
 		$selectedSearchDepth = 30;
 		$maxSearchDepth = 200;
 		$selectedSearchTime = 360;
@@ -173,7 +174,7 @@ initGUI[] :=
 		Scan[ setRulesDefaults[ #[[1]]]&, $registeredRuleSets];
 		$CtrlActive = 0;
 		$ShiftActive = 0;
-		$TMAactDecl = translate[ "None"];
+		$TMAactDecl = "";
 		$proofTreeScale = 1;
 		$replExistProof = 0;
 		$TmaLanguage = $Language;
@@ -396,16 +397,16 @@ makeVkbButton[ label_, insert_, help_, alias_, opts___?OptionQ] :=
 makeVkbButton[ args___] := unexpected[ makeVkbButton, {args}]
 
 $formBlockMap = {
-	{1, 1} -> { langButtonData["FORALL1"], {}, {}, {}},
-	{1, 2} -> { langButtonData["FORALL2"], {}, {}, {}},
-	{1, 3} -> { langButtonData["AND1"], {}, {}, {}},
-	{1, 4} -> { langButtonData["IMPL1"], {}, {}, {}},
-	{1, 5} -> { langButtonData["EQDEF"], {}, {}, {}},
-	{2, 1} -> { langButtonData["EXISTS1"], {}, {}, {}},
-	{2, 2} -> { langButtonData["EXISTS2"], {}, {}, {}},
-	{2, 3} -> { langButtonData["OR1"], {}, {}, {}},
-	{2, 4} -> { langButtonData["EQUIV1"], {}, {}, {}},
-	{2, 5} -> { langButtonData["EQUIVDEF"], {}, {}, {}},
+	{1, 1} -> { langButtonData[ "FORALL1"], {}, {}, {}},
+	{1, 2} -> { langButtonData[ "FORALL2"], {}, {}, {}},
+	{1, 3} -> { langButtonData[ "AND2"], {}, {}, {}},
+	{1, 4} -> { langButtonData[ "IMPL2"], {}, {}, {}},
+	{1, 5} -> { langButtonData[ "EQDEF"], {}, {}, {}},
+	{2, 1} -> { langButtonData[ "EXISTS1"], {}, {}, {}},
+	{2, 2} -> { langButtonData[ "EXISTS2"], {}, {}, {}},
+	{2, 3} -> { langButtonData[ "OR2"], {}, {}, {}},
+	{2, 4} -> { langButtonData[ "EQUIV2"], {}, {}, {}},
+	{2, 5} -> { langButtonData[ "EQUIVDEF"], {}, {}, {}},
 	{i_, j_} -> Table[ {}, {4}]
 };
 
@@ -514,7 +515,7 @@ displayLabeledFormula[ FML$[ key_, form_, lab_, ___]] :=
 		nb = sourceToNotebookFile[ src];
 		{ If[ nb =!= $Failed,
 			Hyperlink[ Style[ labDisp, "FormulaLabel"], {nb, key[[1]]}],
-			Tooltip[ Style[ labDisp, "FormulaLabel"], translate[ "noNB"] <> src]],
+			Tooltip[ Style[ labDisp, "FormulaLabel"], translate[ "noNB"] <> " :" <> src]],
 		Style[ theoremaDisplay[ form], "DisplayFormula", LineBreakWithin -> False]}
 	]
 displayLabeledFormula[ args___] := unexpected[ displayLabeledFormula, {args}]
@@ -911,9 +912,12 @@ displayKBBrowser[ task_String] :=
 					(* button labels sum up to more than 50 chars long -> buttons become too wide -> provide a menu *)
 					PopupMenu[ Dynamic[ $tcKBBrowseSelection[ task]], Map[ First[#] -> Tooltip[ FileBaseName[ First[#]], First[#]]&, $kbStruct]],
 					(* else: select with buttons ala TabView *)
-					Row[ Map[ Button[ Tooltip[ FileBaseName[ #], #], $tcKBBrowseSelection[ task] = #, 
-						Background -> If[ $tcKBBrowseSelection[ task] === #, TMAcolor[0], TMAcolor[5]], 
-						FrameMargins -> 2, ImageMargins -> 0, ImageSize -> Automatic]&, Map[ First, $kbStruct]]]
+					Row[ Map[ Button[ 
+							Tooltip[ Style[ FileBaseName[ #], FontColor -> If[ $tcKBBrowseSelection[ task] === #, TMAcolor[4], TMAcolor[13]]], #], 
+							$tcKBBrowseSelection[ task] = #, 
+							Background -> If[ $tcKBBrowseSelection[ task] === #, TMAcolor[6], TMAcolor[0]], 
+							FrameMargins -> 2, ImageMargins -> 0, ImageSize -> Automatic]&, Map[ First, $kbStruct]]
+					]
 				],
 				Pane[ view, ImageSize -> {350, Automatic}]
 				(*PaneSelector[ Map[ #[[1]] -> structView[ #[[1]], #[[2]], {}, {}, task][[1]]&, 
@@ -1093,7 +1097,7 @@ structViewRules[{category_String}, tags_, open_]:=Sequence[];
 structViewRules[ Hold[ rs_]] := 
 	Module[{list = {}},
 		If[ StringLength[ $ruleFilterKW] > 2,		
-			list = DeleteCases[ rs, {r_Symbol /; testNoMatch[ MessageName[ r, "usage"], "*" <> $ruleFilterKW <> "*"], t_, text_, p_Integer ,___}, Infinity];
+			list = DeleteCases[ rs, {r_Symbol /; testNoMatch[ MessageName[ r, "usage", $TmaLanguage], "*" <> $ruleFilterKW <> "*"], t_, text_, p_Integer ,___}, Infinity];
 			structViewRules[ list, {}, True],
 			(* else *)
 			structViewRules[ rs, {}, True]
@@ -1120,7 +1124,7 @@ makeRuleRow[r_Symbol] :=
 	Module[ {}, 
 		Style[ 
 			Row[{ "(" <> ToString[ rulePriority[ r]] <> ")", Spacer[2],
-				Tooltip[ showProofTextPic[ ruleTextActive[ r]], MessageName[ ruleTextActive, "usage"]], Spacer[5], MessageName[ r, "usage"]}],
+				Tooltip[ showProofTextPic[ ruleTextActive[ r]], MessageName[ ruleTextActive, "usage", $TmaLanguage]], Spacer[5], MessageName[ r, "usage", $TmaLanguage]}],
 			LineBreakWithin -> False]
 	]
 
@@ -1141,12 +1145,12 @@ structViewRules[ {r_Symbol, active:(True|False), textActive:(True|False), p_Inte
                     Toggler[ Dynamic[ ruleTextActive[ r]],
                     	{False -> showProofTextPic[ False],
                     	True -> showProofTextPic[ True]}, BaselinePosition -> align],
-                	MessageName[ ruleTextActive, "usage"]],
+                	MessageName[ ruleTextActive, "usage", $TmaLanguage]],
                 Tooltip[ 
                 	PopupMenu[ Dynamic[ rulePriority[ r]], Table[ i, {i,1,100}], BaselinePosition -> align, ImageSize -> {45, 16}],
                     translate[ "rulePriority"]]}
             ],
-            MessageName[ r, "usage"]}, Spacer[7]], LineBreakWithin -> False], {r}}
+            MessageName[ r, "usage", $TmaLanguage]}, Spacer[7]], LineBreakWithin -> False], {r}}
     ]
 
 structViewRules[ category_String, tags_] :=
@@ -1208,7 +1212,7 @@ selectProver[ ] :=
     	Button[ translate[ "OKnext"], $tcActionView++],
 
     	Labeled[ Tooltip[ PopupMenu[ Dynamic[ $selectedRuleSet], Map[ MapAt[ translate, #, {2}]&, $registeredRuleSets]],
-    			Apply[ Function[ rs, MessageName[ rs, "usage"], {HoldFirst}], $selectedRuleSet]], 
+    			Apply[ Function[ rs, MessageName[ rs, "usage", $TmaLanguage], {HoldFirst}], $selectedRuleSet]], 
     		translate[ "pRules"], {{ Top, Left}}],
     	Module[ {view},
 			
@@ -1237,7 +1241,7 @@ selectProver[ ] :=
 					Pane[ view, {360, Automatic}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
 				]}], translate[ "pRulesSetup"], {{Top, Left}}]],
     	Labeled[ Tooltip[ PopupMenu[ Dynamic[ $selectedStrategy], Map[ MapAt[ translate, #, {2}]&, $registeredStrategies]],
-    		With[ {ss = $selectedStrategy}, MessageName[ ss, "usage"]]], 
+    		With[ {ss = $selectedStrategy}, MessageName[ ss, "usage", $TmaLanguage]]], 
     		translate[ "pStrat"], {{ Top, Left}}],
     	Labeled[ Grid[{
     		{translate[ "sDepth"], Dynamic[ Row[ {Slider[ Dynamic[ $selectedSearchDepth], {2, $maxSearchDepth, 1}, ImageSize -> 150],
@@ -1281,7 +1285,7 @@ selectProver[ ] :=
     		];
     		If[ $numExistProofs > 0,
     			PrependTo[ po,
-    				Labeled[ PopupMenu[ Dynamic[ $replExistProof], Prepend[ Table[ i -> "#"<>ToString[i], {i, $numExistProofs}], $numExistProofs+1 -> translate[ "None"]],
+    				Labeled[ PopupMenu[ Dynamic[ $replExistProof], Prepend[ Table[ i -> "#"<>ToString[i], {i, $numExistProofs}], $numExistProofs+1 -> "\[LongDash]"],
     					BaselinePosition -> Baseline, ImageSize -> {50, 20}], 
     				translate[ "replaceExistProof"], Left]
     			]
@@ -1335,7 +1339,7 @@ submitProveTask[ ] :=
 			
 			Column[{				
 				Labeled[ displaySelectedRules[ $selectedRuleSet], translate[ "selectedRules"]<>":", {{Top,Left}}],
-				Labeled[ Tooltip[ $selectedStrategy /. $registeredStrategies, MessageName[ Evaluate[ $selectedStrategy], "usage"]], translate[ "pStrat"]<>":", Left],
+				Labeled[ Tooltip[ $selectedStrategy /. $registeredStrategies, MessageName[ Evaluate[ $selectedStrategy], "usage", $TmaLanguage]], translate[ "pStrat"]<>":", Left],
 				Labeled[ $selectedSearchDepth, translate[ "sDepth"]<>":", Left],
 				Labeled[ $selectedSearchTime, translate[ "sTime"]<>":", Left],
 				Labeled[
@@ -1354,7 +1358,7 @@ submitProveTask[ ] :=
     				translate[ "pInteractive"]<>":", {{Left, Top}}],
 				Labeled[ 
 					Column[{
-						translate[ "replaceExistProof"] <> ": " <> If[ $replExistProof > $numExistProofs, translate[ "None"], ToString[ $replExistProof]],
+						translate[ "replaceExistProof"] <> ": " <> If[ $replExistProof > $numExistProofs, "\[LongDash]", ToString[ $replExistProof]],
 						translate[ "proofCellStatus"] <> ": " <>
 							Switch[ $proofCellStatus,
 								Automatic, translate[ "auto"],
@@ -1449,7 +1453,7 @@ printComputationInfo[ cellID_Integer] :=
 			CellPrint[ Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ Get[ fnd] /. FORM -> displayFormulaFromKey, TrackedSymbols :> {$tmaEnv}]]]], "ComputationInfoBody"]]
 		];
 	]
-printComputationInfo[args___] := unexcpected[ printComputationInfo, {args}]
+printComputationInfo[ args___] := unexcpected[ printComputationInfo, {args}]
      
 setCompEnv[ file_String] :=
 	Module[{},
@@ -1461,12 +1465,12 @@ setCompEnv[ args___] := unexpected[ setCompEnv, {args}]
 saveComputationCacheDisplay[ cellID_Integer, file_String] :=
 	With[ {fn = file <> ".m", kbKeysLabels = Map[ {key[#], label[#]}&, Select[ $tmaEnv, kbSelectCompute[ key[ #]]&]]},
 		Put[ $TmaComputationObject, file <> "-co.m"];
-		Put[ Definition[ buiActComputation], Definition[ kbSelectCompute], fn];
+		Put[ Definition[ buiActComputation], Definition[ kbSelectCompute], Definition[ $traceUserDef], fn];
 		Put[ 
 			TabView[ {
-				translate["tcComputeTabKBTabLabel"] -> Pane[ Row[ Map[ FORM, kbKeysLabels], ", "], 500],
-        		translate["tcComputeTabBuiltinTabLabel"] -> summarizeBuiltins[ "compute"],
-        		translate["RestoreEnv"] -> Row[ {translate["RestoreEnvLong"], Button[ translate[ "OK"], setCompEnv[ fn]]}, Spacer[5]]
+				translate[ "tcComputeTabKBTabLabel"] -> Pane[ Row[ Map[ FORM, kbKeysLabels], ", "], 500],
+        		translate[ "tcComputeTabBuiltinTabLabel"] -> summarizeBuiltins[ "compute"],
+        		translate[ "RestoreSettings"] -> Row[ {translate[ "RestoreSettingsLong"], Button[ translate[ "OK"], setCompEnv[ fn]]}, Spacer[5]]
 				},
 				ImageSize -> Automatic
 			],
@@ -1563,10 +1567,10 @@ saveProveCacheDisplay[ kbKeysLabels_, pTime_, sTime_, file_String] :=
 		Apply[ Put[ ##, fn]&, Map[ Definition, $allProveSettings]];
 		Put[ 
 			TabView[ {
-				translate["tcProveTabKBTabLabel"] -> Pane[ Row[ Map[ FORM, kbKeysLabels], ", "], 500],
-        		translate["tcProveTabBuiltinTabLabel"] -> summarizeBuiltins[ "prove"],
-        		translate["tcProveTabProverTabLabel"] -> summarizeProverSettings[ pTime, sTime],
-        		translate["RestoreEnv"] -> Row[ {translate["RestoreEnvLong"], Button[ translate[ "OK"], setProveEnv[ fn]]}, Spacer[5]]
+				translate[ "tcProveTabKBTabLabel"] -> Pane[ Row[ Map[ FORM, kbKeysLabels], ", "], 500],
+        		translate[ "tcProveTabBuiltinTabLabel"] -> summarizeBuiltins[ "prove"],
+        		translate[ "tcProveTabProverTabLabel"] -> summarizeProverSettings[ pTime, sTime],
+        		translate[ "RestoreSettings"] -> Row[ {translate[ "RestoreSettingsLong"], Button[ translate[ "OK"], setProveEnv[ fn]]}, Spacer[5]]
 				},
 				ImageSize -> Automatic
 			],
@@ -1960,13 +1964,13 @@ isTheoremaNotebook[ args___] := unexpected[ isTheoremaNotebook, {args}]
 
 
 savePreferencesButton[ ] :=
-    Module[ {prefsFile = FileNameJoin[{$UserBaseDirectory, "Applications", "Theorema", "Kernel", "TheoremaPreferences.m"}]},
-        $prefsSaveStatus = If[FileExistsQ[ prefsFile],
+    Module[ {prefsFile = FileNameJoin[ {$UserBaseDirectory, "Applications", "Theorema", "Kernel", "TheoremaPreferences.m"}]},
+        $prefsSaveStatus = If[ FileExistsQ[ prefsFile],
         	DateString[ FileDate[ prefsFile]],
         	"\[LongDash]"];
         Column[{
         	Dynamic[ Refresh[ Row[{
-        	translate["preferences last saved: "],
+        	translate[ "preferences last saved"] <> ": ",
             $prefsSaveStatus <> If[ {$TmaLanguage, $TheoremaArchiveDirectory, $TheoremaColorScheme, $suppressWelcomeScreen, $buttonNat} === $savedValues,
                                         " \[Checkmark]",
                                         ""
@@ -1998,261 +2002,197 @@ savePreferences[ args___] := unexpected[ savePreferences, {args}]
 (* ::Section:: *)
 (* Math Tab *)
 
-langButtonData["AND1"] := 
+langButtonData[ "AND2"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["AND1"], 
-			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
-				"\[Wedge]",
-				TagBox[ FrameBox["right"], "Placeholder"]}]]],
-		RowBox[{"\[SelectionPlaceholder]", "\[Wedge]", "\[Placeholder]"}],
-		translate["CONN2STRONGTooltip"],
-		""
-	}
-
-langButtonData["AND2"] := 
-	{
-		If[ TrueQ[ $buttonNat], 
-			translate["AND2"], 
-			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
+			translate[ "AND2"], 
+			DisplayForm[ RowBox[ {TagBox[ FrameBox[ "left"], "SelectionPlaceholder"],
 				"\[And]",
-				TagBox[ FrameBox["right"], "Placeholder"]}]]],
-		RowBox[{"\[SelectionPlaceholder]", "\[And]", "\[Placeholder]"}],
-		translate["CONN2WEAKTooltip"],
+				TagBox[ FrameBox[ "right"], "Placeholder"]}]]],
+		RowBox[ {"\[SelectionPlaceholder]", "\[And]", "\[Placeholder]"}],
+		translate[ "CONN2Tooltip"],
 		"and"
 	}
 	
-langButtonData["AND3"] := 
+langButtonData[ "AND3"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["AND3"], 
-			DisplayForm[RowBox[{"\[And]", "\[Piecewise]", GridBox[{{TagBox[ FrameBox[SubscriptBox["e","1"]], "SelectionPlaceholder"]},
+			translate[ "AND3"], 
+			DisplayForm[ RowBox[ {"\[And]", "\[Piecewise]", GridBox[{{TagBox[ FrameBox[ SubscriptBox[ "e", "1"]], "SelectionPlaceholder"]},
 				{"\[VerticalEllipsis]"},
-				{TagBox[ FrameBox[SubscriptBox["e","n"]], "Placeholder"]}}]}]]],
-		RowBox[{"\[And]", "\[Piecewise]", GridBox[{{"\[SelectionPlaceholder]"}, {"\[Placeholder]"}}]}],
-		translate["CONNTooltip"],
+				{TagBox[ FrameBox[ SubscriptBox[ "e", "n"]], "Placeholder"]}}]}]]],
+		RowBox[ {"\[And]", "\[Piecewise]", GridBox[ {{"\[SelectionPlaceholder]"}, {"\[Placeholder]"}}]}],
+		translate[ "CONNTooltip"],
 		"andn"
 	}
 	
-langButtonData["NOT"] := 
+langButtonData[ "NOT"] := 
 	{
 		If[ $buttonNat, 
-			translate["NOT"], 
-			DisplayForm[RowBox[{"\[Not]",
-				TagBox[ FrameBox["form"], "SelectionPlaceholder"]}]]],
-		RowBox[{"\[Not]", "\[SelectionPlaceholder]"}],
-		translate["NOTTooltip"],
+			translate[ "NOT"], 
+			DisplayForm[ RowBox[ {"\[Not]",
+				TagBox[ FrameBox[ "form"], "SelectionPlaceholder"]}]]],
+		RowBox[ {"\[Not]", "\[SelectionPlaceholder]"}],
+		translate[ "NOTTooltip"],
 		"not"
 	}
 
-langButtonData["OR1"] := 
+langButtonData[ "OR2"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["OR1"], 
-			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
-				"\[Vee]",
-				TagBox[ FrameBox["right"], "Placeholder"]}]]],
-		RowBox[{"\[SelectionPlaceholder]", "\[Vee]", "\[Placeholder]"}],
-		translate["CONN2STRONGTooltip"],
-		""
-	}
-
-langButtonData["OR2"] := 
-	{
-		If[ TrueQ[ $buttonNat], 
-			translate["OR2"], 
-			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
+			translate[ "OR2"], 
+			DisplayForm[ RowBox[ {TagBox[ FrameBox[ "left"], "SelectionPlaceholder"],
 				"\[Or]",
-				TagBox[ FrameBox["right"], "Placeholder"]}]]],
-		RowBox[{"\[SelectionPlaceholder]", "\[Or]", "\[Placeholder]"}],
-		translate["CONN2WEAKTooltip"],
+				TagBox[ FrameBox[ "right"], "Placeholder"]}]]],
+		RowBox[ {"\[SelectionPlaceholder]", "\[Or]", "\[Placeholder]"}],
+		translate[ "CONN2Tooltip"],
 		"or"
 	}
 	
-langButtonData["OR3"] := 
+langButtonData[ "OR3"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["OR3"], 
-			DisplayForm[RowBox[{"\[Or]", "\[Piecewise]", GridBox[{{TagBox[ FrameBox[SubscriptBox["e","1"]], "SelectionPlaceholder"]},
+			translate[ "OR3"], 
+			DisplayForm[ RowBox[ {"\[Or]", "\[Piecewise]", GridBox[ {{TagBox[ FrameBox[ SubscriptBox[ "e", "1"]], "SelectionPlaceholder"]},
 				{"\[VerticalEllipsis]"},
-				{TagBox[ FrameBox[SubscriptBox["e","n"]], "Placeholder"]}}]}]]],
-		RowBox[{"\[Or]", "\[Piecewise]", GridBox[{{"\[SelectionPlaceholder]"}, {"\[Placeholder]"}}]}],
-		translate["CONNTooltip"],
+				{TagBox[ FrameBox[ SubscriptBox[ "e", "n"]], "Placeholder"]}}]}]]],
+		RowBox[ {"\[Or]", "\[Piecewise]", GridBox[ {{"\[SelectionPlaceholder]"}, {"\[Placeholder]"}}]}],
+		translate[ "CONNTooltip"],
 		"orn"
 	}
 
-langButtonData["IMPL1"] := 
+langButtonData[ "IMPL2"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["IMPL1"], 
-			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
-				"\[DoubleLongRightArrow]",
-				TagBox[ FrameBox["right"], "Placeholder"]}]]],
-		RowBox[{"\[SelectionPlaceholder]",
-			TagBox[ "\[DoubleLongRightArrow]", Identity, SyntaxForm->"a\[DoubleRightArrow]b"], "\[Placeholder]"}],
-		translate["CONN2STRONGTooltip"],
-		""
-	}
-
-langButtonData["IMPL2"] := 
-	{
-		If[ TrueQ[ $buttonNat], 
-			translate["IMPL2"], 
-			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
+			translate[ "IMPL2"], 
+			DisplayForm[ RowBox[ {TagBox[ FrameBox[ "left"], "SelectionPlaceholder"],
 				"\[Implies]",
-				TagBox[ FrameBox["right"], "Placeholder"]}]]],
-		RowBox[{"\[SelectionPlaceholder]", "\[Implies]", "\[Placeholder]"}],
-		translate["CONN2WEAKTooltip"],
+				TagBox[ FrameBox[ "right"], "Placeholder"]}]]],
+		RowBox[ {"\[SelectionPlaceholder]", "\[Implies]", "\[Placeholder]"}],
+		translate[ "CONN2Tooltip"],
 		"impl"
 	}
 
-langButtonData["EQUIV1"] := 
+langButtonData[ "EQUIV2"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["EQUIV1"], 
-			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
+			translate[ "EQUIV2"], 
+			DisplayForm[ RowBox[ {TagBox[ FrameBox[ "left"], "SelectionPlaceholder"],
 				"\[DoubleLongLeftRightArrow]",
-				TagBox[ FrameBox["right"], "Placeholder"]}]]],
-		RowBox[{"\[SelectionPlaceholder]",
-			TagBox[ "\[DoubleLongLeftRightArrow]", Identity, SyntaxForm->"a\[DoubleRightArrow]b"], "\[Placeholder]"}],
-		translate["CONN2STRONGTooltip"],
-		""
-	}
-
-langButtonData["EQUIV2"] := 
-	{
-		If[ TrueQ[ $buttonNat], 
-			translate["EQUIV2"], 
-			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
-				"\[DoubleLeftRightArrow]",
-				TagBox[ FrameBox["right"], "Placeholder"]}]]],
-		RowBox[{"\[SelectionPlaceholder]",
-			TagBox[ "\[DoubleLeftRightArrow]", Identity, SyntaxForm->"a\[Implies]b"], "\[Placeholder]"}],
-		translate["CONN2WEAKTooltip"],
+				TagBox[ FrameBox[ "right"], "Placeholder"]}]]],
+		RowBox[ {"\[SelectionPlaceholder]", "\[DoubleLongLeftRightArrow]", "\[Placeholder]"}],
+		translate["CONN2Tooltip"],
 		"equiv"
 	}
 	
-langButtonData["EQUIV3"] := 
+langButtonData[ "EQUIV3"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["EQUIV3"], 
-			DisplayForm[RowBox[{"\[DoubleLeftRightArrow]", "\[Piecewise]", GridBox[{{TagBox[ FrameBox[SubscriptBox["e","1"]], "SelectionPlaceholder"]},
+			translate[ "EQUIV3"], 
+			DisplayForm[ RowBox[ {"\[DoubleLeftRightArrow]", "\[Piecewise]", GridBox[ {{TagBox[ FrameBox[ SubscriptBox[ "e", "1"]], "SelectionPlaceholder"]},
 				{"\[VerticalEllipsis]"},
-				{TagBox[ FrameBox[SubscriptBox["e","n"]], "Placeholder"]}}]}]]],
-		RowBox[{"\[DoubleLeftRightArrow]", "\[Piecewise]", GridBox[{{"\[SelectionPlaceholder]"}, {"\[Placeholder]"}}]}],
-		translate["CONNTooltip"],
+				{TagBox[ FrameBox[ SubscriptBox[ "e", "n"]], "Placeholder"]}}]}]]],
+		RowBox[ {"\[DoubleLeftRightArrow]", "\[Piecewise]", GridBox[ {{"\[SelectionPlaceholder]"}, {"\[Placeholder]"}}]}],
+		translate[ "CONNTooltip"],
 		"equivn"
 	}
 
-langButtonData["EQ"] := 
+langButtonData[ "EQ"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["EQ1"], 
-			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
+			translate[ "EQ"], 
+			DisplayForm[ RowBox[ {TagBox[ FrameBox[ "left"], "SelectionPlaceholder"],
 				"\[Equal]",
-				TagBox[ FrameBox["right"], "Placeholder"]}]]],
-		RowBox[{"\[SelectionPlaceholder]", "\[Equal]", "\[Placeholder]"}],
-		translate["CONN2Tooltip"],
+				TagBox[ FrameBox[ "right"], "Placeholder"]}]]],
+		RowBox[ {"\[SelectionPlaceholder]", "\[Equal]", "\[Placeholder]"}],
+		translate[ "CONN2Tooltip"],
 		"eq"
 	}
 
-langButtonData["EQ2"] := 
+langButtonData[ "EQUIVDEF"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["EQ2"], 
-			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
-				"=",
-				TagBox[ FrameBox["right"], "Placeholder"]}]]],
-		RowBox[{"\[SelectionPlaceholder]",
-			TagBox[ "=", Identity, SyntaxForm->"a\[Equal]b"], "\[Placeholder]"}],
-		translate["CONN2Tooltip"],
-		""
-	}
-
-langButtonData["EQUIVDEF"] := 
-	{
-		If[ TrueQ[ $buttonNat], 
-			translate["EQUIVDEF"], 
-			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
+			translate[ "EQUIVDEF"], 
+			DisplayForm[ RowBox[ {TagBox[ FrameBox[ "left"], "SelectionPlaceholder"],
 				RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}],
-				TagBox[ FrameBox["right"], "Placeholder"]}]]],
-		RowBox[{"\[SelectionPlaceholder]",
-			TagBox[ RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], Identity, SyntaxForm->"a\[Implies]b"], "\[Placeholder]"}],
-		translate["EQUIVDEFTooltip"],
+				TagBox[ FrameBox[ "right"], "Placeholder"]}]]],
+		RowBox[ {"\[SelectionPlaceholder]",
+			TagBox[ RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], Identity, SyntaxForm->"a\[DoubleLongLeftRightArrow]b"], "\[Placeholder]"}],
+		translate[ "EQUIVDEFTooltip"],
 		":equiv"
 	}
 
-langButtonData["EQDEF"] := 
+langButtonData[ "EQDEF"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["EQDEF"], 
-			DisplayForm[RowBox[{TagBox[ FrameBox["left"], "SelectionPlaceholder"],
+			translate[ "EQDEF"], 
+			DisplayForm[ RowBox[ {TagBox[ FrameBox[ "left"], "SelectionPlaceholder"],
 				":=",
-				TagBox[ FrameBox["right"], "Placeholder"]}]]],
-		RowBox[{"\[SelectionPlaceholder]", ":=", "\[Placeholder]"}],
-		translate["EQDEFTooltip"],
+				TagBox[ FrameBox[ "right"], "Placeholder"]}]]],
+		RowBox[ {"\[SelectionPlaceholder]", ":=", "\[Placeholder]"}],
+		translate[ "EQDEFTooltip"],
 		":eq"
 	}
 
-langButtonData["FORALL1"] := 
+langButtonData[ "FORALL1"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["FORALL1"], 
-			DisplayForm[RowBox[{UnderscriptBox[StyleBox["\[ForAll]", FontSize->14], Placeholder["rg"]], SelectionPlaceholder["expr"]}]]],
-		RowBox[{UnderscriptBox["\[ForAll]", "\[Placeholder]"], "\[SelectionPlaceholder]"}],
-		translate["QUANT1Tooltip"],
+			translate[ "FORALL1"], 
+			DisplayForm[ RowBox[ {UnderscriptBox[StyleBox[ "\[ForAll]", FontSize->14], Placeholder["rg"]], SelectionPlaceholder["expr"]}]]],
+		RowBox[ {UnderscriptBox[ "\[ForAll]", "\[Placeholder]"], "\[SelectionPlaceholder]"}],
+		translate[ "QUANT1Tooltip"],
 		"far"
 	}
 
-langButtonData["FORALL2"] := 
+langButtonData[ "FORALL2"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["FORALL2"], 
-			DisplayForm[RowBox[{UnderscriptBox[ UnderscriptBox[StyleBox["\[ForAll]", FontSize->14], Placeholder["rg"]], Placeholder["cond"]], SelectionPlaceholder["expr"]}]]],
-		RowBox[{UnderscriptBox[ UnderscriptBox["\[ForAll]", "\[Placeholder]"], "\[Placeholder]"], "\[SelectionPlaceholder]"}],
-		translate["QUANT2Tooltip"],
+			translate[ "FORALL2"], 
+			DisplayForm[ RowBox[{UnderscriptBox[ UnderscriptBox[ StyleBox["\[ForAll]", FontSize->14], Placeholder["rg"]], Placeholder["cond"]], SelectionPlaceholder["expr"]}]]],
+		RowBox[ {UnderscriptBox[ UnderscriptBox["\[ForAll]", "\[Placeholder]"], "\[Placeholder]"], "\[SelectionPlaceholder]"}],
+		translate[ "QUANT2Tooltip"],
 		"farc"
 	}
 	
-langButtonData["EXISTS1"] := 
+langButtonData[ "EXISTS1"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["EXISTS1"], 
-			DisplayForm[RowBox[{UnderscriptBox[StyleBox["\[Exists]", FontSize->14], Placeholder["rg"]], SelectionPlaceholder["expr"]}]]],
-		RowBox[{UnderscriptBox["\[Exists]", "\[Placeholder]"], "\[SelectionPlaceholder]"}],
-		translate["QUANT1Tooltip"],
+			translate[ "EXISTS1"], 
+			DisplayForm[ RowBox[ {UnderscriptBox[ StyleBox["\[Exists]", FontSize->14], Placeholder["rg"]], SelectionPlaceholder["expr"]}]]],
+		RowBox[ {UnderscriptBox[ "\[Exists]", "\[Placeholder]"], "\[SelectionPlaceholder]"}],
+		translate[ "QUANT1Tooltip"],
 		"exr"
 	}
 
-langButtonData["EXISTS2"] := 
+langButtonData[ "EXISTS2"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["EXISTS2"], 
-			DisplayForm[RowBox[{UnderscriptBox[ UnderscriptBox[StyleBox["\[Exists]", FontSize->14], Placeholder["rg"]], Placeholder["cond"]], SelectionPlaceholder["expr"]}]]],
-		RowBox[{UnderscriptBox[ UnderscriptBox["\[Exists]", "\[Placeholder]"], "\[Placeholder]"], "\[SelectionPlaceholder]"}],
-		translate["QUANT2Tooltip"],
+			translate[ "EXISTS2"], 
+			DisplayForm[ RowBox[{UnderscriptBox[ UnderscriptBox[ StyleBox["\[Exists]", FontSize->14], Placeholder["rg"]], Placeholder["cond"]], SelectionPlaceholder["expr"]}]]],
+		RowBox[ {UnderscriptBox[ UnderscriptBox[ "\[Exists]", "\[Placeholder]"], "\[Placeholder]"], "\[SelectionPlaceholder]"}],
+		translate[ "QUANT2Tooltip"],
 		"exrc"
 	}
 	
-langButtonData["LET"] := 
+langButtonData[ "LET"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["LET"], 
-			DisplayForm[RowBox[{UnderscriptBox[ "let", RowBox[ {Placeholder["a"], "=", Placeholder["x"]}]], SelectionPlaceholder["expr"]}]]],
-		RowBox[{UnderscriptBox[ "let", RowBox[ {"\[Placeholder]", "=", "\[Placeholder]"}]], "\[SelectionPlaceholder]"}],
-		translate["LETTooltip"],
+			translate[ "LET"], 
+			DisplayForm[ RowBox[{UnderscriptBox[ "let", RowBox[ {Placeholder["a"], "=", Placeholder["x"]}]], SelectionPlaceholder["expr"]}]]],
+		RowBox[ {UnderscriptBox[ "let", RowBox[ {"\[Placeholder]", "=", "\[Placeholder]"}]], "\[SelectionPlaceholder]"}],
+		translate[ "LETTooltip"],
 		"let"
 	}
 	
-langButtonData["CASEDIST"] := 
+langButtonData[ "CASEDIST"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["CASEDIST"], 
+			translate[ "CASEDIST"], 
 			DisplayForm[RowBox[{"\[Piecewise]",
 				GridBox[{
-					{TagBox[ FrameBox[SubscriptBox["e","1"]], "SelectionPlaceholder"], "\[DoubleLeftArrow]", TagBox[ FrameBox[SubscriptBox["c","1"]], "Placeholder"]},
+					{TagBox[ FrameBox[ SubscriptBox[ "e", "1"]], "SelectionPlaceholder"], "\[DoubleLeftArrow]", TagBox[ FrameBox[SubscriptBox[ "c", "1"]], "Placeholder"]},
 					{"", "\[VerticalEllipsis]", ""},
-					{TagBox[ FrameBox[SubscriptBox["e","n"]], "Placeholder"], "\[DoubleLeftArrow]", TagBox[ FrameBox[SubscriptBox["c","n"]], "Placeholder"]}
+					{TagBox[ FrameBox[ SubscriptBox[ "e", "n"]], "Placeholder"], "\[DoubleLeftArrow]", TagBox[ FrameBox[SubscriptBox[ "c", "n"]], "Placeholder"]}
 				}]
 			}]]],
 		RowBox[{"\[Piecewise]",
@@ -2261,211 +2201,210 @@ langButtonData["CASEDIST"] :=
 				{"\[Placeholder]", "\[DoubleLeftArrow]", "\[Placeholder]"}
 			}]
 		}],
-		translate["CASEDISTTooltip"],
+		translate[ "CASEDISTTooltip"],
 		"cdist"
 	}
 	
-langButtonData["SINGLEOP"] := 
+langButtonData[ "SINGLEOP"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["SINGLEOP"], 
-			DisplayForm[ TagBox[ FrameBox["\[CircleDot]"], "SelectionPlaceholder"]]],
+			translate[ "SINGLEOP"], 
+			DisplayForm[ TagBox[ FrameBox[ "\[CircleDot]"], "SelectionPlaceholder"]]],
 		TagBox[ "\[SelectionPlaceholder]", Identity],
-		translate["0ANNOPTooltip"],
+		translate[ "0ANNOPTooltip"],
 		"op"
 	}
 	
-langButtonData["OVEROP"] := 
+langButtonData[ "OVEROP"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["OVEROP"], 
+			translate[ "OVEROP"], 
 			DisplayForm[ OverscriptBox[ TagBox[ FrameBox["\[CircleDot]"], "SelectionPlaceholder"],
 										TagBox[ FrameBox["A"], "Placeholder"]]]],
 		OverscriptBox[ "\[SelectionPlaceholder]", "\[Placeholder]"],
-		translate["1ANNOPTooltip"],
+		translate[ "1ANNOPTooltip"],
 		"oop"
 	}
 	
-langButtonData["UNDEROVEROP"] := 
+langButtonData[ "UNDEROVEROP"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["UNDEROVEROP"], 
+			translate[ "UNDEROVEROP"], 
 			DisplayForm[ UnderoverscriptBox[ TagBox[ FrameBox["\[CircleDot]"], "SelectionPlaceholder"],
 										TagBox[ FrameBox["A"], "Placeholder"],
 										TagBox[ FrameBox["B"], "Placeholder"]]]],
 		UnderoverscriptBox[ "\[SelectionPlaceholder]", "\[Placeholder]", "\[Placeholder]"],
-		translate["2ANNOPTooltip"],
+		translate[ "2ANNOPTooltip"],
 		"uoop"
 	}
 	
-langButtonData["SUBOP"] := 
+langButtonData[ "SUBOP"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["SUBOP"], 
+			translate[ "SUBOP"], 
 			DisplayForm[ SubscriptBox[ TagBox[ FrameBox["\[CircleDot]"], "SelectionPlaceholder"],
-										TagBox[ FrameBox["A"], "Placeholder"]]]],
+									   TagBox[ FrameBox["A"], "Placeholder"]]]],
 		SubscriptBox[ "\[SelectionPlaceholder]", "\[Placeholder]"],
-		translate["1ANNOPTooltip"],
+		translate[ "1ANNOPTooltip"],
 		"subop"
 	}
 	
-langButtonData["SUPEROP"] := 
+langButtonData[ "SUPEROP"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["SUPEROP"], 
+			translate[ "SUPEROP"], 
 			DisplayForm[ SuperscriptBox[ TagBox[ FrameBox["\[CircleDot]"], "SelectionPlaceholder"],
-										TagBox[ FrameBox["A"], "Placeholder"]]]],
+										 TagBox[ FrameBox["A"], "Placeholder"]]]],
 		SuperscriptBox[ "\[SelectionPlaceholder]", "\[Placeholder]"],
-		translate["1ANNOPTooltip"],
+		translate[ "1ANNOPTooltip"],
 		"supop"
 	}
 	
-langButtonData["SUBSUPEROP"] := 
+langButtonData[ "SUBSUPEROP"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["SUBSUPEROP"], 
+			translate[ "SUBSUPEROP"], 
 			DisplayForm[ SubsuperscriptBox[ TagBox[ FrameBox["\[CircleDot]"], "SelectionPlaceholder"],
 										TagBox[ FrameBox["A"], "Placeholder"],
 										TagBox[ FrameBox["B"], "Placeholder"]]]],
 		SubsuperscriptBox[ "\[SelectionPlaceholder]", "\[Placeholder]", "\[Placeholder]"],
-		translate["2ANNOPTooltip"],
+		translate[ "2ANNOPTooltip"],
 		"subsupop"
 	}
 	
-langButtonData["OVERSUBOP"] := 
+langButtonData[ "OVERSUBOP"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["OVERSUBOP"], 
+			translate[ "OVERSUBOP"], 
 			DisplayForm[ SubscriptBox[ OverscriptBox[ TagBox[ FrameBox["\[CircleDot]"], "SelectionPlaceholder"],
-													TagBox[ FrameBox["A"], "Placeholder"]],
-										TagBox[ FrameBox["B"], "Placeholder"]]]],
+													  TagBox[ FrameBox["A"], "Placeholder"]],
+									   TagBox[ FrameBox["B"], "Placeholder"]]]],
 		SubscriptBox[ OverscriptBox[ "\[SelectionPlaceholder]", "\[Placeholder]"], "\[Placeholder]"],
-		translate["2ANNOPTooltip"],
+		translate[ "2ANNOPTooltip"],
 		"osop"
 	}
 
-langButtonData["APPEND"] := 
+langButtonData[ "APPEND"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["APPEND"], 
+			translate[ "APPEND"], 
 			"\:293a"],
 		RowBox[ {"\[SelectionPlaceholder]", TagBox[ "\:293a", Identity, SyntaxForm -> "a*b"], "\[Placeholder]"}],
-		MessageName[ appendElem$TM, "usage"],
+		MessageName[ appendElem$TM, "usage", $TmaLanguage],
 		"app"
 	}
 	
-langButtonData["PREPEND"] := 
+langButtonData[ "PREPEND"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["PREPEND"], 
+			translate[ "PREPEND"], 
 			"\:293b"],
 		RowBox[ {"\[SelectionPlaceholder]", TagBox[ "\:293b", Identity, SyntaxForm -> "a*b"], "\[Placeholder]"}],
-		MessageName[ prependElem$TM, "usage"],
+		MessageName[ prependElem$TM, "usage", $TmaLanguage],
 		"prep"
 	}
 	
-langButtonData["JOIN"] := 
+langButtonData[ "JOIN"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["JOIN"], 
+			translate[ "JOIN"], 
 			"\:22c8"],
 		RowBox[ {"\[SelectionPlaceholder]", TagBox[ "\:22c8", Identity, SyntaxForm -> "a*b"], "\[Placeholder]"}],
-		MessageName[ joinTuples$TM, "usage"],
+		MessageName[ joinTuples$TM, "usage", $TmaLanguage],
 		"join"
 	}
 	
-langButtonData["ELEMTUP"] := 
+langButtonData[ "ELEMTUP"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["ELEMTUP"], 
+			translate[ "ELEMTUP"], 
 			"\:22ff"],
 		RowBox[ {"\[SelectionPlaceholder]", TagBox[ "\:22ff", Identity, SyntaxForm -> "a+b"], "\[Placeholder]"}],
-		MessageName[ elemTuple$TM, "usage"],
+		MessageName[ elemTuple$TM, "usage", $TmaLanguage],
 		"elemT"
 	}
 
-langButtonData["[]"] := 
+langButtonData[ "[]"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["[]"], 
+			translate[ "[]"], 
 			"[ ]"],
 		RowBox[ {TagBox[ "\:e114", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:e115", Identity, SyntaxForm -> ")"]}],
-		MessageName[ squareBracketted$TM, "usage"],
+		MessageName[ squareBracketted$TM, "usage", $TmaLanguage],
 		"[]"
 	}
 
-langButtonData["[[]]"] := 
+langButtonData[ "[[]]"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["[[]]"], 
+			translate[ "[[]]"], 
 			"[[ ]]"],
 		RowBox[ {TagBox[ "\:27e6", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:27e7", Identity, SyntaxForm -> ")"]}],
-		MessageName[ doubleSquareBracketted$TM, "usage"],
+		MessageName[ doubleSquareBracketted$TM, "usage", $TmaLanguage],
 		"[[]]"
 	}
 
-langButtonData["<>"] := 
+langButtonData[ "<>"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["<>"], 
+			translate[ "<>"], 
 			"\[LeftAngleBracket] \[RightAngleBracket]"],
 		RowBox[ {TagBox[ "\:27e8", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:27e9", Identity, SyntaxForm -> ")"]}],
-		MessageName[ angleBracketted$TM, "usage"],
+		MessageName[ angleBracketted$TM, "usage", $TmaLanguage],
 		"<>"
 	}
 	
-langButtonData["<<>>"] := 
+langButtonData[ "<<>>"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["<<>>"], 
+			translate[ "<<>>"], 
 			"\[LeftAngleBracket]\[LeftAngleBracket] \[RightAngleBracket]\[RightAngleBracket]"],
 		RowBox[ {TagBox[ "\:27ea", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:27eb", Identity, SyntaxForm -> ")"]}],
-		MessageName[ doubleAngleBracketted$TM, "usage"],
+		MessageName[ doubleAngleBracketted$TM, "usage", $TmaLanguage],
 		"<<>>"
 	}
 	
-langButtonData["{}"] := 
+langButtonData[ "{}"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["{}"], 
+			translate[ "{}"], 
 			"{ }"],
 		RowBox[ {TagBox[ "\:e117", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:e118", Identity, SyntaxForm -> ")"]}],
-		MessageName[ braced$TM, "usage"],
+		MessageName[ braced$TM, "usage", $TmaLanguage],
 		"{}"
 	}
 	
-langButtonData["{{}}"] := 
+langButtonData[ "{{}}"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["{{}}"], 
+			translate[ "{{}}"], 
 			"{{ }}"],
 		RowBox[ {TagBox[ "\:2983", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:2984", Identity, SyntaxForm -> ")"]}],
-		MessageName[ doubleBraced$TM, "usage"],
+		MessageName[ doubleBraced$TM, "usage", $TmaLanguage],
 		"{{}}"
 	}
 	
-langButtonData["()"] := 
+langButtonData[ "()"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["()"], 
+			translate[ "()"], 
 			"( )"],
 		RowBox[ {TagBox[ "\:fd3e", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:fd3f", Identity, SyntaxForm -> ")"]}],
-		MessageName[ parenthesized$TM, "usage"],
+		MessageName[ parenthesized$TM, "usage", $TmaLanguage],
 		"()"
 	}
 	
-langButtonData["(())"] := 
+langButtonData[ "(())"] := 
 	{
 		If[ TrueQ[ $buttonNat], 
-			translate["(())"], 
+			translate[ "(())"], 
 			"(( ))"],
 		RowBox[ {TagBox[ "\:2e28", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:2e29", Identity, SyntaxForm -> ")"]}],
-		MessageName[ doubleParenthesized$TM, "usage"],
+		MessageName[ doubleParenthesized$TM, "usage", $TmaLanguage],
 		"(())"
 	}
 	
-langButtonData[args___] :=
-    unexpected[langButtonData, {args}]
+langButtonData[ args___] := unexpected[ langButtonData, {args}]
 
 (*
 	We distinguish several types of buttons:
@@ -2477,23 +2416,22 @@ makeLangButton[ {bname_String, 1}] :=
     	With[ {lab = bd[[1]], paste = bd[[2]], help = bd[[3]], key = bd[[4]]},
 			Tooltip[ Button[ lab,
 				If[ CurrentValue[ "ShiftKey"],
-					FrontEndExecute[{NotebookApply[ InputNotebook[], paste, Placeholder]}],
-					FrontEndExecute[{NotebookApply[ InputNotebook[], RowBox[ {autoParenthesis[ "("], paste, autoParenthesis[ ")"]}], Placeholder]}]
+					FrontEndExecute[ {NotebookApply[ InputNotebook[], paste, Placeholder]}],
+					FrontEndExecute[ {NotebookApply[ InputNotebook[], RowBox[ {autoParenthesis[ "("], paste, autoParenthesis[ ")"]}], Placeholder]}]
 				], Appearance -> "DialogBox", Alignment -> {Left, Top}, ImageSize -> All],
-				help <> translate[ "tooltipButtonParen"]<>" \[EscapeKey]"<> key <>"\[EscapeKey]", TooltipDelay -> 0.5]
+				help <> translate[ "tooltipButtonParen"]<>": \[EscapeKey]"<> key <>"\[EscapeKey]", TooltipDelay -> 0.5]
     	]
     ]
 makeLangButton[ {bname_String, 2}] :=
     With[ { bd = langButtonData[ bname]},
     	With[ {lab = bd[[1]], paste = bd[[2]], help = bd[[3]], key = bd[[4]]},
 			Tooltip[ Button[ lab,
-				FrontEndExecute[{NotebookApply[ InputNotebook[], paste, Placeholder]}], 
+				FrontEndExecute[ {NotebookApply[ InputNotebook[], paste, Placeholder]}], 
 				Appearance -> "DialogBox", Alignment -> {Left, Top}, ImageSize -> All],
-				help <> translate[ "tooltipButtonNoParen"]<>" \[EscapeKey]"<> key <>"\[EscapeKey]", TooltipDelay -> 0.5]
+				help <> translate[ "tooltipButtonNoParen"]<>": \[EscapeKey]"<> key <>"\[EscapeKey]", TooltipDelay -> 0.5]
     	]
     ]
-makeLangButton[args___] :=
-    unexpected[makeLangButton, {args}]
+makeLangButton[ args___] := unexpected[ makeLangButton, {args}]
 
 (*
 	We use TagBox because StyleBox did not work together with InputAliases: when entering formulae with alias, some StyleBoxes vanished
@@ -2538,14 +2476,13 @@ langButtons[] :=
 langButtons[] :=
 	Module[ {display = Map[ makeButtonCategory, allFormulae]},
 		Column[ {
-			Row[ Map[ Button[ #, $tcLangButtonSelection = #, 
-				Background -> If[ $tcLangButtonSelection === #, TMAcolor[0], TMAcolor[5]], FrameMargins -> 2, ImageMargins -> 0]&, Map[ First, display]]],
+			Row[ Map[ Button[ Style[ #, FontColor -> If[ $tcLangButtonSelection === #, TMAcolor[4], TMAcolor[13]]], $tcLangButtonSelection = #, 
+				Background -> If[ $tcLangButtonSelection === #, TMAcolor[6], TMAcolor[0]], FrameMargins -> 2, ImageMargins -> 0]&, Map[ First, display]]],
     		PaneSelector[ display, Dynamic[ $tcLangButtonSelection], ImageSize -> {350, Automatic}]
 		}]
 	]
 
-langButtons[args___] :=
-    unexpected[langButtons, {args}]
+langButtons[ args___] := unexpected[ langButtons, {args}]
     
 compSetup[] := 
 	Column[{
@@ -2557,12 +2494,11 @@ compSetup[] :=
     		translate[ "Trace"], {{Top, Left}}]
 		}
 	]
-compSetup[args___] :=
-    unexpected[compSetup, {args}]
+compSetup[ args___] := unexpected[ compSetup, {args}]
 
 makeCompButton[] :=
     Button[ translate[ "New"], insertNewFormulaCell[ "COMPUTE"], Alignment -> {Left, Top}, ImageSize -> Automatic]
-makeCompButton[args___] := unexpected[makeCompButton, {args}]
+makeCompButton[ args___] := unexpected[ makeCompButton, {args}]
 
 
 partitionFill[ l_List, n_Integer, default_:""] := Partition[ PadRight[ l, n*Ceiling[ Length[ l]/n], default], n]

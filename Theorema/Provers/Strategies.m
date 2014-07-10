@@ -176,7 +176,9 @@ trySeveral[ args___] := unexpected[ trySeveral, {args}]
 
 registerStrategy[ "Apply once", applyOnce]
 registerStrategy[ "Apply once + Level saturation", applyOnceAndLevelSaturation]
+(*
 registerStrategy[ "Try several", trySeveral]
+*)
 
 End[]
 

@@ -493,7 +493,7 @@ displayGlobalDeclarations[ nb_NotebookObject] :=
 		availDecl = ReleaseHold[ applicableGlobalDeclarations[ nb, raw, pos]];
 		If[ availDecl =!= {},
 			globDecl = DisplayForm[ RowBox[ Map[ theoremaDisplay, availDecl]]],
-			globDecl = translate[ "None"]
+			globDecl = "\[LongDash]"
 		];
 		globDecl
 	]

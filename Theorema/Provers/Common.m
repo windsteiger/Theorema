@@ -693,7 +693,7 @@ proofStatusIndicator[ status_, name_] := Tooltip[
 		noApplicableRule, "\[Dagger]",
 		_, proofStatusIndicator[ status]
 	],
-	translate[ SymbolName[ status]] <> If[ status =!= pending, " (" <> MessageName[ name, "usage"] <> ")", ""]]
+	translate[ SymbolName[ status]] <> If[ status =!= pending, " (" <> MessageName[ name, "usage", $TmaLanguage] <> ")", ""]]
 	
 proofStatusIndicator[ args___] := unexpected[ proofStatusIndicator, {args}]
 
@@ -701,8 +701,8 @@ proofNodeIndicator[ status_, type_, name_] :=
 	Module[ {label, description},
 		{label, description} = Switch[ type,
 			PRFSIT$, {"\[Paragraph]", translate[ "open proof situation"]},
-        	ANDNODE$, {"\[Wedge]", MessageName[ name, "usage"]},
-        	ORNODE$, {"\[Vee]", MessageName[ name, "usage"]},
+        	ANDNODE$, {"\[Wedge]", MessageName[ name, "usage", $TmaLanguage]},
+        	ORNODE$, {"\[Vee]", MessageName[ name, "usage", $TmaLanguage]},
         	_, {"\[DownQuestion]", translate[ "unknown proof node"]}
 		];
 		Tooltip[ Style[ label, ShowStringCharacters -> False], description <> " (" <> translate[ SymbolName[ status]] <> ")"]

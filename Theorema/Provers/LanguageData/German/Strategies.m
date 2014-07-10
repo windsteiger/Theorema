@@ -20,12 +20,14 @@
 (* ::Section:: *)
 (* Public Declaration Part: executes in Theorema`Provers` *)
 
-With[ {lang = "English"},
+With[ {lang = "German"},
+(* TRANSLATED *)
+	MessageName[ applyOnce, "usage", lang] = "applyOnce[ prfsit] wendet eine passende Beweisregel einmal auf eine Beweissituation an.";
+	MessageName[ applyOnceAndLevelSaturation, "usage", lang] = "applyOnceAndLevelSaturation[ prfsit] wendet eine passende Beweisregel einmal auf eine Beweissituation an und verwendet dann Level-Saturation Techniken.";
 
-	MessageName[ applyOnce, "usage", lang] = "applyOnce[ prfsit] applies a matching inference rule from rules to the proof situation prfsit once.";
-	MessageName[ applyOnceAndLevelSaturation, "usage", lang] = "applyOnceAndLevelSaturation[ prfsit] applies a matching inference rule to the proof situation prfsit once and then applies level saturation techniques.";
+	MessageName[ trySeveral, "usage", lang] = "trySeveral[ prfsit] is not serious, it just duplicates the proof situation into two children. Should be a test case for exhaustive search until search depth is reached.";
 
-	MessageName[ trySeveral, "usage", lang] = "trySeveral[ prfsit] tries several rules from rules to the proof situation prfsit at the same time.";
+(* UNTRANSLATED *)
 
 ] (* With *)
 
@@ -35,12 +37,14 @@ With[ {lang = "English"},
 
 Begin["`Private`"]
 
-With[ {lang = "English"},
+With[ {lang = "German"},
+(* TRANSLATED *)
+	translate[ "Apply once", lang] = "Einmal anwenden";
+	translate[ "Apply once + Level saturation", lang] = "Einmal anwenden + Level Saturation";
 
-	translate[ "Apply once", lang] = "Apply once";
-	translate[ "Apply once + Level saturation", lang] = "Apply once + Level saturation";
+	translate[ "Try several", lang] = "Mehrere probieren";
 
-	translate[ "Try several", lang] = "Try several";
+(* UNTRANSLATED *)
 
 ] (* With *)
 

@@ -172,3 +172,4 @@ ema.2/Theorema/Theorema/Documentation/English/TheoremaNotebooks/FirstTour.nb"}\
 ] = True
  
 Theorema`Common`kbSelectCompute[_] := False
+Theorema`Common`$traceUserDef = True

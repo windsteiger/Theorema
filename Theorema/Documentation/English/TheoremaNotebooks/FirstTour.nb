@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[     85473,       2224]
-NotebookOptionsPosition[     40397,       1227]
-NotebookOutlinePosition[     80386,       2053]
-CellTagsIndexPosition[     79978,       2041]
+NotebookDataLength[    125004,       3384]
+NotebookOptionsPosition[     70692,       2117]
+NotebookOutlinePosition[    116070,       3093]
+CellTagsIndexPosition[    114994,       3063]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -496,8 +496,9 @@ Cell[BoxData[
  CellChangeTimes->{{3.61381325061895*^9, 3.613813263653309*^9}, 
    3.613819687490465*^9, 3.613819788647933*^9, 3.613822257753311*^9, {
    3.613822288638917*^9, 3.613822307489429*^9}, 3.613823649524104*^9, 
-   3.613823729751019*^9, 3.613824584514902*^9, 3.613894889500056*^9},
- CellID->92305543]
+   3.613823729751019*^9, 3.613824584514902*^9, 3.613894889500056*^9, 
+   3.614003318121324*^9},
+ CellID->207035370]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -513,8 +514,8 @@ Cell["", "ComputationInfo",
          ButtonNotebook[], 
          "/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
 TheoremaNotebooks/FirstTour/c1142086229"]]]]}, {None, None}},
- CellChangeTimes->{3.613894889530407*^9},
- CellID->754904873],
+ CellChangeTimes->{3.614003318182123*^9},
+ CellID->1130843944],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
@@ -527,8 +528,8 @@ TheoremaNotebooks/FirstTour/c1142086229-display.m"],
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
   ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
- CellChangeTimes->{3.613894889535859*^9},
- CellID->603022459]
+ CellChangeTimes->{3.614003318258101*^9},
+ CellID->99148166]
 }, Closed]],
 
 Cell["\<\
@@ -560,8 +561,9 @@ Cell[BoxData[
 
 Cell[BoxData[
  FormBox["True", TheoremaForm]], "ComputationResult",
- CellChangeTimes->{{3.613896107880559*^9, 3.613896124197379*^9}},
- CellID->1078796215]
+ CellChangeTimes->{{3.613896107880559*^9, 3.613896124197379*^9}, 
+   3.614003334044671*^9},
+ CellID->14180547]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -577,8 +579,8 @@ Cell["", "ComputationInfo",
          ButtonNotebook[], 
          "/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
 TheoremaNotebooks/FirstTour/c1370474394"]]]]}, {None, None}},
- CellChangeTimes->{3.613896124237942*^9},
- CellID->213397556],
+ CellChangeTimes->{3.614003334086563*^9},
+ CellID->743033831],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
@@ -589,10 +591,10 @@ TheoremaNotebooks/FirstTour/c1370474394-display.m"],
      Theorema`Interface`GUI`Private`FORM -> 
      Theorema`Interface`GUI`Private`displayFormulaFromKey], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
-  ImageSizeCache->{516., {26., 32.}}]], "ComputationInfoBody",
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
- CellChangeTimes->{3.613896124306257*^9},
- CellID->546508370]
+ CellChangeTimes->{3.614003334177561*^9},
+ CellID->1701603057]
 }, Closed]],
 
 Cell[CellGroupData[{
@@ -613,8 +615,8 @@ Cell[BoxData[
 
 Cell[BoxData[
  FormBox["False", TheoremaForm]], "ComputationResult",
- CellChangeTimes->{3.613896144472993*^9},
- CellID->1704412910]
+ CellChangeTimes->{3.613896144472993*^9, 3.61400335012083*^9},
+ CellID->1122879473]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -630,8 +632,8 @@ Cell["", "ComputationInfo",
          ButtonNotebook[], 
          "/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
 TheoremaNotebooks/FirstTour/c1222685411"]]]]}, {None, None}},
- CellChangeTimes->{3.613896144543249*^9},
- CellID->60033741],
+ CellChangeTimes->{3.614003350156184*^9},
+ CellID->1039471126],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
@@ -642,10 +644,10 @@ TheoremaNotebooks/FirstTour/c1222685411-display.m"],
      Theorema`Interface`GUI`Private`FORM -> 
      Theorema`Interface`GUI`Private`displayFormulaFromKey], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
-  ImageSizeCache->{516., {26., 32.}}]], "ComputationInfoBody",
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
- CellChangeTimes->{3.613896144562765*^9},
- CellID->1643887056]
+ CellChangeTimes->{3.614003350264608*^9},
+ CellID->49606623]
 }, Closed]],
 
 Cell["\<\
@@ -679,8 +681,8 @@ Cell[BoxData[
    RowBox[{"\[LeftAngleBracket]", 
     RowBox[{"1", ",", "1", ",", "0", ",", "1"}], "\[RightAngleBracket]"}]}], 
   TheoremaForm]], "ComputationResult",
- CellChangeTimes->{3.613896161899494*^9},
- CellID->494883379]
+ CellChangeTimes->{3.613896161899494*^9, 3.614003356698191*^9},
+ CellID->1002462624]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -696,8 +698,8 @@ Cell["", "ComputationInfo",
          ButtonNotebook[], 
          "/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
 TheoremaNotebooks/FirstTour/c1811312768"]]]]}, {None, None}},
- CellChangeTimes->{3.613896161974782*^9},
- CellID->2113690964],
+ CellChangeTimes->{3.614003356715279*^9},
+ CellID->450997316],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
@@ -708,10 +710,10 @@ TheoremaNotebooks/FirstTour/c1811312768-display.m"],
      Theorema`Interface`GUI`Private`FORM -> 
      Theorema`Interface`GUI`Private`displayFormulaFromKey], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
-  ImageSizeCache->{516., {26., 32.}}]], "ComputationInfoBody",
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
- CellChangeTimes->{3.613896162035332*^9},
- CellID->1528797720]
+ CellChangeTimes->{3.614003356802146*^9},
+ CellID->142071748]
 }, Closed]],
 
 Cell["\<\
@@ -796,8 +798,8 @@ Cell[BoxData[
         StyleBox["j", "ExpressionVariable"]], 
        TagBox[")",
         "AutoParentheses"]}]}]}]}]}], TheoremaForm]], "ComputationResult",
- CellChangeTimes->{3.613896242425206*^9},
- CellID->767680011]
+ CellChangeTimes->{3.613896242425206*^9, 3.614003378422487*^9},
+ CellID->891286279]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -813,8 +815,8 @@ Cell["", "ComputationInfo",
          ButtonNotebook[], 
          "/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
 TheoremaNotebooks/FirstTour/c1265592774"]]]]}, {None, None}},
- CellChangeTimes->{3.613896242514419*^9},
- CellID->777008855],
+ CellChangeTimes->{3.614003378471556*^9},
+ CellID->741557555],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
@@ -825,10 +827,10 @@ TheoremaNotebooks/FirstTour/c1265592774-display.m"],
      Theorema`Interface`GUI`Private`FORM -> 
      Theorema`Interface`GUI`Private`displayFormulaFromKey], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
-  ImageSizeCache->{516., {26., 32.}}]], "ComputationInfoBody",
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
- CellChangeTimes->{3.61389624251885*^9},
- CellID->2142387132]
+ CellChangeTimes->{3.614003378569988*^9},
+ CellID->458912374]
 }, Closed]],
 
 Cell["\<\
@@ -885,8 +887,8 @@ Cell[BoxData[
       StyleBox["j", "ExpressionVariable"]], 
      TagBox[")",
       "AutoParentheses"]}]}]}], TheoremaForm]], "ComputationResult",
- CellChangeTimes->{3.613896412525579*^9},
- CellID->566591105]
+ CellChangeTimes->{3.613896412525579*^9, 3.614003395782738*^9},
+ CellID->576514393]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -902,8 +904,8 @@ Cell["", "ComputationInfo",
          ButtonNotebook[], 
          "/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
 TheoremaNotebooks/FirstTour/c1908188417"]]]]}, {None, None}},
- CellChangeTimes->{3.613896412628495*^9},
- CellID->482526801],
+ CellChangeTimes->{3.614003395853552*^9},
+ CellID->856606505],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
@@ -914,10 +916,10 @@ TheoremaNotebooks/FirstTour/c1908188417-display.m"],
      Theorema`Interface`GUI`Private`FORM -> 
      Theorema`Interface`GUI`Private`displayFormulaFromKey], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
-  ImageSizeCache->{516., {26., 32.}}]], "ComputationInfoBody",
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
- CellChangeTimes->{3.613896412698117*^9},
- CellID->1126555714]
+ CellChangeTimes->{3.614003395886189*^9},
+ CellID->1346976351]
 }, Closed]],
 
 Cell["\<\
@@ -1084,8 +1086,9 @@ Cell[BoxData[
         StyleBox["j", "ExpressionVariable"]], 
        TagBox[")",
         "AutoParentheses"]}]}]}]}]}], TheoremaForm]], "ComputationResult",
- CellChangeTimes->{3.613896486680624*^9, 3.613896606484411*^9},
- CellID->1891082906]
+ CellChangeTimes->{3.613896486680624*^9, 3.613896606484411*^9, 
+  3.614003409235448*^9},
+ CellID->1698308284]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -1101,8 +1104,8 @@ Cell["", "ComputationInfo",
          ButtonNotebook[], 
          "/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
 TheoremaNotebooks/FirstTour/c498629087"]]]]}, {None, None}},
- CellChangeTimes->{3.613896606559491*^9},
- CellID->326012139],
+ CellChangeTimes->{3.614003409306974*^9},
+ CellID->2103563416],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
@@ -1113,10 +1116,10 @@ TheoremaNotebooks/FirstTour/c498629087-display.m"],
      Theorema`Interface`GUI`Private`FORM -> 
      Theorema`Interface`GUI`Private`displayFormulaFromKey], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
-  ImageSizeCache->{516., {26., 32.}}]], "ComputationInfoBody",
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
- CellChangeTimes->{3.61389660656411*^9},
- CellID->948616050]
+ CellChangeTimes->{3.614003409412307*^9},
+ CellID->1595202554]
 }, Closed]],
 
 Cell["\<\
@@ -1177,8 +1180,9 @@ Cell[BoxData[
    3.613905914147173*^9, 3.613905992547564*^9, 3.613906054276638*^9, 
    3.613906117626983*^9, 3.613906394724234*^9, 3.613906462485142*^9, 
    3.613906936507168*^9, 3.613907510945743*^9, 3.613907759913837*^9, 
-   3.613907790535206*^9, 3.613907971108183*^9, 3.613908984484839*^9},
- CellID->1618282943]
+   3.613907790535206*^9, 3.613907971108183*^9, 3.613908984484839*^9, 
+   3.614003639510868*^9},
+ CellID->311742284]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -1205,8 +1209,8 @@ TheoremaNotebooks/FirstTour/c1123552196-co.m"],
          ButtonNotebook[], 
          "/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
 TheoremaNotebooks/FirstTour/c1123552196"]]]]}, {None, None}},
- CellChangeTimes->{3.613908984587647*^9},
- CellID->69103156],
+ CellChangeTimes->{3.614003639578694*^9},
+ CellID->58502634],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
@@ -1217,16 +1221,902 @@ TheoremaNotebooks/FirstTour/c1123552196-display.m"],
      Theorema`Interface`GUI`Private`FORM -> 
      Theorema`Interface`GUI`Private`displayFormulaFromKey], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
-  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
+  ImageSizeCache->{488., {31., 37.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
- CellChangeTimes->{3.613908984635574*^9},
- CellID->1910201185]
+ CellChangeTimes->{{3.614003639677324*^9, 3.614003657154506*^9}},
+ CellID->875809386]
 }, Closed]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+Examples of More Interesting Proofs\
+\>", "Section",
+ CellChangeTimes->{{3.614001842362893*^9, 3.614001848830821*^9}, {
+  3.614001980593412*^9, 3.614001989721261*^9}},
+ CellID->52812741],
+
+Cell[CellGroupData[{
+
+Cell["\[OpenCurlyDoubleQuote]Set Theory\[CloseCurlyDoubleQuote]", "Subsection",
+ PageBreakAbove->True,
+ CellChangeTimes->{{3.611656393255776*^9, 3.611656402353102*^9}, {
+  3.611910146105297*^9, 3.611910151505079*^9}, {3.611931177350288*^9, 
+  3.611931215524006*^9}, {3.611984940650739*^9, 3.611984944869727*^9}, {
+  3.611985124426716*^9, 3.61198513285874*^9}, {3.611987198278744*^9, 
+  3.611987210241048*^9}, {3.611990471042961*^9, 3.611990474187476*^9}, {
+  3.611992788922418*^9, 3.611992792555591*^9}, {3.611996372753644*^9, 
+  3.61199637934496*^9}},
+ CellID->1401737664],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   RowBox[{
+    RowBox[{"if", " ", "A"}], "\[SubsetEqual]", 
+    RowBox[{"B", ":", " ", 
+     RowBox[{"A", "\[Backslash]", "C"}]}]}], "=", 
+   RowBox[{"A", "\[Intersection]", 
+    RowBox[{"(", 
+     RowBox[{"B", "\[Backslash]", "C"}], ")"}]}]}], 
+  TraditionalForm]], "DisplayFormula",
+ CellChangeTimes->{{3.605592266056245*^9, 3.605592320234824*^9}, {
+   3.605592694117099*^9, 3.60559269416293*^9}, 3.611996464064112*^9},
+ CellID->1336903145],
+
+Cell["", "OpenEnvironment",
+ CellID->1862211767],
+
+Cell[CellGroupData[{
+
+Cell["Theorem (Set Theory)", "EnvironmentHeader",
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      ButtonBox[
+      "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
+       Theorema`Common`removeEnvironment[
+         ButtonNotebook[]]]]]}, {None, None}},
+ CellChangeTimes->{{3.612005321792655*^9, 3.612005325637682*^9}},
+ CellID->1969336855],
+
+Cell[BoxData[
+ UnderscriptBox["\[ForAll]", 
+  RowBox[{"A", ",", "B", ",", "C"}]]], "GlobalDeclaration",
+ CellChangeTimes->{{3.612005990888099*^9, 3.612005993876964*^9}},
+ CellID->1485425788],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   TagBox["(",
+    "AutoParentheses"], 
+   RowBox[{
+    UnderscriptBox["\[ForAll]", 
+     RowBox[{"x", "\[Element]", "A"}]], 
+    RowBox[{"x", "\[Element]", "B"}]}], 
+   TagBox[")",
+    "AutoParentheses"]}], "\[Implies]", 
+  RowBox[{
+   TagBox["(",
+    "AutoParentheses"], 
+   RowBox[{
+    UnderscriptBox["\[ForAll]", "x"], 
+    RowBox[{
+     TagBox["(",
+      "AutoParentheses"], 
+     RowBox[{
+      RowBox[{
+       TagBox["(",
+        "AutoParentheses"], 
+       RowBox[{
+        RowBox[{"x", "\[Element]", "A"}], "\[And]", 
+        RowBox[{"\[Not]", 
+         RowBox[{"(", 
+          RowBox[{"x", "\[Element]", "C"}], ")"}]}]}], 
+       TagBox[")",
+        "AutoParentheses"]}], 
+      TagBox["\[DoubleLeftRightArrow]",
+       Identity,
+       SyntaxForm->"a\[Implies]b"], 
+      RowBox[{
+       TagBox["(",
+        "AutoParentheses"], 
+       RowBox[{
+        RowBox[{"x", "\[Element]", "A"}], "\[And]", 
+        RowBox[{
+         TagBox["(",
+          "AutoParentheses"], 
+         RowBox[{
+          RowBox[{"x", "\[Element]", "B"}], "\[And]", 
+          RowBox[{"\[Not]", 
+           RowBox[{"(", 
+            RowBox[{"x", "\[Element]", "C"}], ")"}]}]}], 
+         TagBox[")",
+          "AutoParentheses"]}]}], 
+       TagBox[")",
+        "AutoParentheses"]}]}], 
+     TagBox[")",
+      "AutoParentheses"]}]}], 
+   TagBox[")",
+    "AutoParentheses"]}]}]], "FormalTextInputFormula",
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      RowBox[{
+        StyleBox["(A\\C)", "FrameLabel"], "  ", 
+        ButtonBox[
+        "\[Times]", Evaluator -> Automatic, Appearance -> None, 
+         ButtonFunction :> 
+         Theorema`Language`Session`Private`removeFormula[{
+           "ID:443431148", 
+            "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.\
+nb"}]]}]]]}, {None, None}},
+ ShowCellTags->False,
+ CellChangeTimes->{{3.612005081306463*^9, 3.612005175014719*^9}, {
+  3.612005216269997*^9, 3.612005271747585*^9}, {3.612005392882188*^9, 
+  3.612005464227052*^9}, {3.612006574103746*^9, 3.612006597336379*^9}, {
+  3.612006974070603*^9, 3.612006986168617*^9}},
+ CellTags->{
+  "ID:443431148", 
+   "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
+   "A\\C"},
+ CellID->443431148],
+
+Cell["\[GraySquare]", "EndEnvironmentMarker",
+ CellID->1135255444]
+}, Open  ]],
+
+Cell["", "CloseEnvironment",
+ CellID->2069904305],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ Cell[BoxData[
+  StyleBox["\<\"\[CheckmarkedBox]\"\>",
+   StripOnInput->False,
+   ShowStringCharacters->False]]],
+ " Proof of ",
+ Cell[BoxData[
+  ButtonBox[
+   TagBox[
+    TooltipBox[
+     PaneSelectorBox[{False->
+      StyleBox["\<\"(A\\\\C)\"\>", "FormReference",
+       StripOnInput->False], True->
+      StyleBox["\<\"(A\\\\C)\"\>", "FormReferenceHover",
+       StripOnInput->False]}, Dynamic[
+       CurrentValue["MouseOver"]],
+      FrameMargins->0,
+      ImageSize->Automatic],
+     TagBox[
+      FormBox[
+       RowBox[{
+         UnderscriptBox["\[ForAll]", 
+          RowBox[{
+            StyleBox["A", "ExpressionVariable"], ",", 
+            StyleBox["B", "ExpressionVariable"], ",", 
+            StyleBox["C", "ExpressionVariable"]}]], 
+         RowBox[{
+           RowBox[{
+             UnderscriptBox["\[ForAll]", 
+              GridBox[{{
+                 RowBox[{
+                   StyleBox["x", "ExpressionVariable"], "\[Element]", 
+                   StyleBox["A", "ExpressionVariable"]}]}}]], 
+             RowBox[{
+               StyleBox["x", "ExpressionVariable"], "\[Element]", 
+               StyleBox["B", "ExpressionVariable"]}]}], "\[Implies]", 
+           RowBox[{
+             UnderscriptBox["\[ForAll]", 
+              RowBox[{
+                StyleBox["x", "ExpressionVariable"]}]], 
+             RowBox[{
+               RowBox[{"(", 
+                 RowBox[{
+                   RowBox[{
+                    StyleBox["x", "ExpressionVariable"], "\[Element]", 
+                    StyleBox["A", "ExpressionVariable"]}], "\[And]", 
+                   RowBox[{"\[Not]", 
+                    RowBox[{
+                    TagBox["(", "AutoParentheses"], 
+                    RowBox[{
+                    StyleBox["x", "ExpressionVariable"], "\[Element]", 
+                    StyleBox["C", "ExpressionVariable"]}], 
+                    TagBox[")", "AutoParentheses"]}]}]}], ")"}], 
+               "\[DoubleLeftRightArrow]", 
+               RowBox[{"(", 
+                 RowBox[{
+                   RowBox[{
+                    StyleBox["x", "ExpressionVariable"], "\[Element]", 
+                    StyleBox["A", "ExpressionVariable"]}], "\[And]", 
+                   RowBox[{
+                    RowBox[{
+                    StyleBox["x", "ExpressionVariable"], "\[Element]", 
+                    StyleBox["B", "ExpressionVariable"]}], "\[And]", 
+                    RowBox[{"\[Not]", 
+                    RowBox[{
+                    TagBox["(", "AutoParentheses"], 
+                    RowBox[{
+                    StyleBox["x", "ExpressionVariable"], "\[Element]", 
+                    StyleBox["C", "ExpressionVariable"]}], 
+                    TagBox[")", "AutoParentheses"]}]}]}]}], ")"}]}]}]}]}], 
+       TheoremaForm], DisplayForm]],
+    Annotation[#, 
+     DisplayForm[
+      FormBox[
+       RowBox[{
+         UnderscriptBox["\[ForAll]", 
+          RowBox[{
+            StyleBox["A", "ExpressionVariable"], ",", 
+            StyleBox["B", "ExpressionVariable"], ",", 
+            StyleBox["C", "ExpressionVariable"]}]], 
+         RowBox[{
+           RowBox[{
+             UnderscriptBox["\[ForAll]", 
+              GridBox[{{
+                 RowBox[{
+                   StyleBox["x", "ExpressionVariable"], "\[Element]", 
+                   StyleBox["A", "ExpressionVariable"]}]}}]], 
+             RowBox[{
+               StyleBox["x", "ExpressionVariable"], "\[Element]", 
+               StyleBox["B", "ExpressionVariable"]}]}], "\[Implies]", 
+           RowBox[{
+             UnderscriptBox["\[ForAll]", 
+              RowBox[{
+                StyleBox["x", "ExpressionVariable"]}]], 
+             RowBox[{
+               RowBox[{"(", 
+                 RowBox[{
+                   RowBox[{
+                    StyleBox["x", "ExpressionVariable"], "\[Element]", 
+                    StyleBox["A", "ExpressionVariable"]}], "\[And]", 
+                   RowBox[{"\[Not]", 
+                    RowBox[{
+                    TagBox["(", "AutoParentheses"], 
+                    RowBox[{
+                    StyleBox["x", "ExpressionVariable"], "\[Element]", 
+                    StyleBox["C", "ExpressionVariable"]}], 
+                    TagBox[")", "AutoParentheses"]}]}]}], ")"}], 
+               "\[DoubleLeftRightArrow]", 
+               RowBox[{"(", 
+                 RowBox[{
+                   RowBox[{
+                    StyleBox["x", "ExpressionVariable"], "\[Element]", 
+                    StyleBox["A", "ExpressionVariable"]}], "\[And]", 
+                   RowBox[{
+                    RowBox[{
+                    StyleBox["x", "ExpressionVariable"], "\[Element]", 
+                    StyleBox["B", "ExpressionVariable"]}], "\[And]", 
+                    RowBox[{"\[Not]", 
+                    RowBox[{
+                    TagBox["(", "AutoParentheses"], 
+                    RowBox[{
+                    StyleBox["x", "ExpressionVariable"], "\[Element]", 
+                    StyleBox["C", "ExpressionVariable"]}], 
+                    TagBox[")", "AutoParentheses"]}]}]}]}], ")"}]}]}]}]}], 
+       TheoremaForm]], "Tooltip"]& ],
+   Appearance->None,
+   ButtonFunction:>NotebookLocate["ID:443431148"],
+   Evaluator->Automatic,
+   Method->"Preemptive"]]],
+ " #1:   ",
+ Cell[BoxData[
+  ButtonBox[
+   StyleBox["\<\"Show proof\"\>",
+    StripOnInput->False,
+    FontVariations->{"Underline"->True}],
+   Appearance->None,
+   ButtonFunction:>Theorema`Common`displayProof[
+    "/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18/p443431148-1-po.\
+m"],
+   Evaluator->Automatic,
+   ImageSize->Automatic,
+   Method->"Queued"]]]
+}], "ProofInfo",
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      ButtonBox[
+      "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
+       Theorema`Interface`GUI`Private`removeGroup[
+         ButtonNotebook[], 
+         "/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18/p443431148-\
+1"]]]]}, {None, None}},
+ CellTags->{"Proof|ID:443431148", "Proof|ID:443431148-1"},
+ CellID->2083166425],
+
+Cell[BoxData[
+ DynamicBox[ToBoxes[
+   Refresh[
+    ReplaceAll[
+     Get["/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18/p443431148-\
+1-display.m"], Theorema`Interface`GUI`Private`FORM -> 
+     Theorema`Interface`GUI`Private`displayFormulaFromKey], 
+    TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
+  ImageSizeCache->{516., {24., 30.}}]], "ProofInfoBody",
+ CellChangeTimes->{3.61208483024816*^9},
+ CellID->1055285153]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ Cell[BoxData[
+  StyleBox["\<\"\[CheckmarkedBox]\"\>",
+   StripOnInput->False,
+   ShowStringCharacters->False]]],
+ " Proof of ",
+ Cell[BoxData[
+  ButtonBox[
+   TagBox[
+    TooltipBox[
+     PaneSelectorBox[{False->
+      StyleBox["\<\"(A\\\\C)\"\>", "FormReference",
+       StripOnInput->False], True->
+      StyleBox["\<\"(A\\\\C)\"\>", "FormReferenceHover",
+       StripOnInput->False]}, Dynamic[
+       CurrentValue["MouseOver"]],
+      FrameMargins->0,
+      ImageSize->Automatic],
+     TagBox[
+      FormBox[
+       RowBox[{
+         UnderscriptBox["\[ForAll]", 
+          RowBox[{
+            StyleBox["A", "ExpressionVariable"], ",", 
+            StyleBox["B", "ExpressionVariable"], ",", 
+            StyleBox["C", "ExpressionVariable"]}]], 
+         RowBox[{
+           RowBox[{
+             UnderscriptBox["\[ForAll]", 
+              GridBox[{{
+                 RowBox[{
+                   StyleBox["x", "ExpressionVariable"], "\[Element]", 
+                   StyleBox["A", "ExpressionVariable"]}]}}]], 
+             RowBox[{
+               StyleBox["x", "ExpressionVariable"], "\[Element]", 
+               StyleBox["B", "ExpressionVariable"]}]}], "\[Implies]", 
+           RowBox[{
+             UnderscriptBox["\[ForAll]", 
+              RowBox[{
+                StyleBox["x", "ExpressionVariable"]}]], 
+             RowBox[{
+               RowBox[{"(", 
+                 RowBox[{
+                   RowBox[{
+                    StyleBox["x", "ExpressionVariable"], "\[Element]", 
+                    StyleBox["A", "ExpressionVariable"]}], "\[And]", 
+                   RowBox[{"\[Not]", 
+                    RowBox[{
+                    TagBox["(", "AutoParentheses"], 
+                    RowBox[{
+                    StyleBox["x", "ExpressionVariable"], "\[Element]", 
+                    StyleBox["C", "ExpressionVariable"]}], 
+                    TagBox[")", "AutoParentheses"]}]}]}], ")"}], 
+               "\[DoubleLeftRightArrow]", 
+               RowBox[{"(", 
+                 RowBox[{
+                   RowBox[{
+                    StyleBox["x", "ExpressionVariable"], "\[Element]", 
+                    StyleBox["A", "ExpressionVariable"]}], "\[And]", 
+                   RowBox[{
+                    RowBox[{
+                    StyleBox["x", "ExpressionVariable"], "\[Element]", 
+                    StyleBox["B", "ExpressionVariable"]}], "\[And]", 
+                    RowBox[{"\[Not]", 
+                    RowBox[{
+                    TagBox["(", "AutoParentheses"], 
+                    RowBox[{
+                    StyleBox["x", "ExpressionVariable"], "\[Element]", 
+                    StyleBox["C", "ExpressionVariable"]}], 
+                    TagBox[")", "AutoParentheses"]}]}]}]}], ")"}]}]}]}]}], 
+       TheoremaForm], DisplayForm]],
+    Annotation[#, 
+     DisplayForm[
+      FormBox[
+       RowBox[{
+         UnderscriptBox["\[ForAll]", 
+          RowBox[{
+            StyleBox["A", "ExpressionVariable"], ",", 
+            StyleBox["B", "ExpressionVariable"], ",", 
+            StyleBox["C", "ExpressionVariable"]}]], 
+         RowBox[{
+           RowBox[{
+             UnderscriptBox["\[ForAll]", 
+              GridBox[{{
+                 RowBox[{
+                   StyleBox["x", "ExpressionVariable"], "\[Element]", 
+                   StyleBox["A", "ExpressionVariable"]}]}}]], 
+             RowBox[{
+               StyleBox["x", "ExpressionVariable"], "\[Element]", 
+               StyleBox["B", "ExpressionVariable"]}]}], "\[Implies]", 
+           RowBox[{
+             UnderscriptBox["\[ForAll]", 
+              RowBox[{
+                StyleBox["x", "ExpressionVariable"]}]], 
+             RowBox[{
+               RowBox[{"(", 
+                 RowBox[{
+                   RowBox[{
+                    StyleBox["x", "ExpressionVariable"], "\[Element]", 
+                    StyleBox["A", "ExpressionVariable"]}], "\[And]", 
+                   RowBox[{"\[Not]", 
+                    RowBox[{
+                    TagBox["(", "AutoParentheses"], 
+                    RowBox[{
+                    StyleBox["x", "ExpressionVariable"], "\[Element]", 
+                    StyleBox["C", "ExpressionVariable"]}], 
+                    TagBox[")", "AutoParentheses"]}]}]}], ")"}], 
+               "\[DoubleLeftRightArrow]", 
+               RowBox[{"(", 
+                 RowBox[{
+                   RowBox[{
+                    StyleBox["x", "ExpressionVariable"], "\[Element]", 
+                    StyleBox["A", "ExpressionVariable"]}], "\[And]", 
+                   RowBox[{
+                    RowBox[{
+                    StyleBox["x", "ExpressionVariable"], "\[Element]", 
+                    StyleBox["B", "ExpressionVariable"]}], "\[And]", 
+                    RowBox[{"\[Not]", 
+                    RowBox[{
+                    TagBox["(", "AutoParentheses"], 
+                    RowBox[{
+                    StyleBox["x", "ExpressionVariable"], "\[Element]", 
+                    StyleBox["C", "ExpressionVariable"]}], 
+                    TagBox[")", "AutoParentheses"]}]}]}]}], ")"}]}]}]}]}], 
+       TheoremaForm]], "Tooltip"]& ],
+   Appearance->None,
+   ButtonFunction:>NotebookLocate["ID:443431148"],
+   Evaluator->Automatic,
+   Method->"Preemptive"]]],
+ " #2:   ",
+ Cell[BoxData[
+  ButtonBox[
+   StyleBox["\<\"Show proof\"\>",
+    StripOnInput->False,
+    FontVariations->{"Underline"->True}],
+   Appearance->None,
+   ButtonFunction:>Theorema`Common`displayProof[
+    "/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18/p443431148-2-po.\
+m"],
+   Evaluator->Automatic,
+   ImageSize->Automatic,
+   Method->"Queued"]]]
+}], "ProofInfo",
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      ButtonBox[
+      "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
+       Theorema`Interface`GUI`Private`removeGroup[
+         ButtonNotebook[], 
+         "/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18/p443431148-\
+2"]]]]}, {None, None}},
+ CellTags->{"Proof|ID:443431148", "Proof|ID:443431148-2"},
+ CellID->1919753329],
+
+Cell[BoxData[
+ DynamicBox[ToBoxes[
+   Refresh[
+    ReplaceAll[
+     Get["/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18/p443431148-\
+2-display.m"], Theorema`Interface`GUI`Private`FORM -> 
+     Theorema`Interface`GUI`Private`displayFormulaFromKey], 
+    TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
+  ImageSizeCache->{516., {24., 30.}}]], "ProofInfoBody",
+ CellChangeTimes->{3.612084837935105*^9},
+ CellID->340307678]
+}, Closed]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Existential Quantifiers", "Subsection",
+ PageBreakAbove->True,
+ CellChangeTimes->{{3.611656393255776*^9, 3.611656402353102*^9}, {
+  3.611910146105297*^9, 3.611910151505079*^9}, {3.611931177350288*^9, 
+  3.611931215524006*^9}, {3.611984940650739*^9, 3.611984944869727*^9}, {
+  3.611985124426716*^9, 3.61198513285874*^9}, {3.611987198278744*^9, 
+  3.611987210241048*^9}, {3.611990471042961*^9, 3.611990474187476*^9}, {
+  3.611992788922418*^9, 3.611992792555591*^9}, {3.611996372753644*^9, 
+  3.61199637934496*^9}, {3.612007833555386*^9, 3.612007835143034*^9}, {
+  3.614002039786759*^9, 3.614002045583227*^9}},
+ CellID->2098222979],
+
+Cell["", "OpenEnvironment",
+ CellID->161811718],
+
+Cell[CellGroupData[{
+
+Cell["Definition (Function Properties)", "EnvironmentHeader",
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      ButtonBox[
+      "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
+       Theorema`Language`Session`Private`removeEnvironment[
+         ButtonNotebook[]]]]]}, {None, None}},
+ CellChangeTimes->{{3.59565034732825*^9, 3.595650358338281*^9}, {
+  3.605592667222434*^9, 3.6055926766164*^9}, {3.605593096736335*^9, 
+  3.605593101411168*^9}},
+ CellID->875215552],
+
+Cell[BoxData[
+ UnderscriptBox["\[ForAll]", 
+  RowBox[{"f", ",", "A", ",", "B"}]]], "GlobalDeclaration",
+ CellChangeTimes->{{3.595650176235583*^9, 3.595650233612665*^9}, {
+  3.595650427991019*^9, 3.595650452155598*^9}, {3.59565048971824*^9, 
+  3.595650489796307*^9}, {3.605592623824743*^9, 3.605592624029842*^9}, {
+  3.605593211530067*^9, 3.605593221067677*^9}, {3.612015537749199*^9, 
+  3.612015538332148*^9}},
+ CellID->835697010],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"isSur", "[", 
+   RowBox[{"f", ",", "A", ",", "B"}], "]"}], 
+  TagBox[
+   RowBox[{
+   ":", "\[NegativeThickSpace]\[NegativeThinSpace]", 
+    "\[DoubleLongLeftRightArrow]"}],
+   Identity,
+   SyntaxForm->"a\[Implies]b"], 
+  RowBox[{
+   UnderscriptBox["\[ForAll]", 
+    RowBox[{"b", "\[Element]", "B"}]], 
+   RowBox[{
+    UnderscriptBox["\[Exists]", 
+     RowBox[{"a", "\[Element]", "A"}]], 
+    RowBox[{
+     TagBox["(",
+      "AutoParentheses"], 
+     RowBox[{
+      RowBox[{"f", "[", "a", "]"}], "\[Equal]", "b"}], 
+     TagBox[")",
+      "AutoParentheses"]}]}]}]}]], "FormalTextInputFormula",
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      RowBox[{
+        StyleBox["(surjective)", "FrameLabel"], "  ", 
+        ButtonBox[
+        "\[Times]", Evaluator -> Automatic, Appearance -> None, 
+         ButtonFunction :> 
+         Theorema`Language`Session`Private`removeFormula[{
+           "ID:794877354", 
+            "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.\
+nb"}]]}]]]}, {None, None}},
+ ShowCellTags->False,
+ CellChangeTimes->{{3.595650133177189*^9, 3.595650143887958*^9}, {
+  3.595650250726449*^9, 3.595650327641844*^9}},
+ CellTags->{
+  "ID:794877354", 
+   "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
+   "surjective"},
+ CellID->794877354],
+
+Cell[BoxData[
+ UnderscriptBox["\[ForAll]", 
+  RowBox[{"g", ",", "x"}]]], "GlobalDeclaration",
+ CellChangeTimes->{{3.611642373624592*^9, 3.611642392742692*^9}, {
+  3.612015670947496*^9, 3.61201567837047*^9}},
+ CellID->1404418786],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{
+   RowBox[{"(", 
+    RowBox[{"g", "\[SmallCircle]", "f"}], ")"}], "[", "x", "]"}], ":=", 
+  RowBox[{"g", "[", 
+   RowBox[{"f", "[", "x", "]"}], "]"}]}]], "FormalTextInputFormula",
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      RowBox[{
+        StyleBox["(composition)", "FrameLabel"], "  ", 
+        ButtonBox[
+        "\[Times]", Evaluator -> Automatic, Appearance -> None, 
+         ButtonFunction :> 
+         Theorema`Language`Session`Private`removeFormula[{
+           "ID:1636230891", 
+            "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.\
+nb"}]]}]]]}, {None, None}},
+ ShowCellTags->False,
+ CellChangeTimes->{{3.595650466764784*^9, 3.595650515668086*^9}},
+ CellTags->{
+  "ID:1636230891", 
+   "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
+   "composition"},
+ CellID->1636230891],
+
+Cell["\[GraySquare]", "EndEnvironmentMarker",
+ CellID->508918864]
+}, Open  ]],
+
+Cell["", "CloseEnvironment",
+ CellID->1758635247],
+
+Cell["", "OpenEnvironment",
+ CellID->486787166],
+
+Cell[CellGroupData[{
+
+Cell["Proposition (u from X to Y)", "EnvironmentHeader",
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      ButtonBox[
+      "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
+       Theorema`Common`removeEnvironment[
+         ButtonNotebook[]]]]]}, {None, None}},
+ CellChangeTimes->{{3.612016129128937*^9, 3.612016144229276*^9}},
+ CellID->321209696],
+
+Cell[BoxData[
+ RowBox[{
+  UnderscriptBox["\[ForAll]", 
+   RowBox[{"a", "\[Element]", "X"}]], 
+  RowBox[{
+   RowBox[{"u", "[", "a", "]"}], "\[Element]", 
+   "Y"}]}]], "FormalTextInputFormula",
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      RowBox[{
+        StyleBox["(u:X->Y)", "FrameLabel"], "  ", 
+        ButtonBox[
+        "\[Times]", Evaluator -> Automatic, Appearance -> None, 
+         ButtonFunction :> 
+         Theorema`Language`Session`Private`removeFormula[{
+           "ID:112294143", 
+            "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.\
+nb"}]]}]]]}, {None, None}},
+ ShowCellTags->False,
+ CellChangeTimes->{{3.612015565041473*^9, 3.612015569059937*^9}, {
+  3.612015602300718*^9, 3.612015636042988*^9}},
+ CellTags->{
+  "ID:112294143", 
+   "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
+   "u:X->Y"},
+ CellID->112294143],
+
+Cell["\[GraySquare]", "EndEnvironmentMarker",
+ CellID->229871635]
+}, Open  ]],
+
+Cell["", "CloseEnvironment",
+ CellID->697610862],
+
+Cell["", "OpenEnvironment",
+ CellID->797956083],
+
+Cell[CellGroupData[{
+
+Cell["Theorem (Composition Surjective)", "EnvironmentHeader",
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      ButtonBox[
+      "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
+       Theorema`Language`Session`Private`removeEnvironment[
+         ButtonNotebook[]]]]]}, {None, None}},
+ CellChangeTimes->{{3.605601286068392*^9, 3.605601303910967*^9}, {
+  3.612016159666186*^9, 3.612016170262328*^9}},
+ CellID->1624492557],
+
+Cell[BoxData[
+ RowBox[{
+  RowBox[{"isSur", "[", 
+   RowBox[{
+    RowBox[{"v", "\[SmallCircle]", "u"}], ",", "X", ",", "Z"}], "]"}], 
+  "\[Implies]", 
+  RowBox[{"isSur", "[", 
+   RowBox[{"v", ",", "Y", ",", "Z"}], "]"}]}]], "FormalTextInputFormula",
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      RowBox[{
+        StyleBox["(v \[SmallCircle] u surjective)", "FrameLabel"], "  ", 
+        ButtonBox[
+        "\[Times]", Evaluator -> Automatic, Appearance -> None, 
+         ButtonFunction :> 
+         Theorema`Language`Session`Private`removeFormula[{
+           "ID:978540590", 
+            "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.\
+nb"}]]}]]]}, {None, None}},
+ ShowCellTags->False,
+ CellChangeTimes->{{3.595650654707678*^9, 3.595650716465087*^9}, {
+  3.612015745549342*^9, 3.612015759667281*^9}, {3.612015790849976*^9, 
+  3.612015802464764*^9}},
+ CellTags->{
+  "ID:978540590", 
+   "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
+   "v \[SmallCircle] u surjective"},
+ CellID->978540590],
+
+Cell["\[GraySquare]", "EndEnvironmentMarker",
+ CellChangeTimes->{{3.595650689135293*^9, 3.595650707117728*^9}},
+ CellID->669906630]
+}, Open  ]],
+
+Cell["", "CloseEnvironment",
+ CellID->1376117217],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ Cell[BoxData[
+  StyleBox["\<\"\[CheckmarkedBox]\"\>",
+   StripOnInput->False,
+   ShowStringCharacters->False]]],
+ " Proof of ",
+ Cell[BoxData[
+  ButtonBox[
+   TagBox[
+    TooltipBox[
+     PaneSelectorBox[{False->
+      StyleBox["\<\"(v \[SmallCircle] u surjective)\"\>", "FormReference",
+       StripOnInput->False], True->
+      StyleBox["\<\"(v \[SmallCircle] u surjective)\"\>", "FormReferenceHover",
+       StripOnInput->False]}, Dynamic[
+       CurrentValue["MouseOver"]],
+      FrameMargins->0,
+      ImageSize->Automatic],
+     TagBox[
+      FormBox[
+       RowBox[{
+         RowBox[{"isSur", "[", 
+           RowBox[{
+             RowBox[{"v", "\[SmallCircle]", "u"}], ",", "X", ",", "Z"}], 
+           "]"}], "\[Implies]", 
+         RowBox[{"isSur", "[", 
+           RowBox[{"v", ",", "Y", ",", "Z"}], "]"}]}], TheoremaForm], 
+      DisplayForm]],
+    Annotation[#, 
+     DisplayForm[
+      FormBox[
+       RowBox[{
+         RowBox[{"isSur", "[", 
+           RowBox[{
+             RowBox[{"v", "\[SmallCircle]", "u"}], ",", "X", ",", "Z"}], 
+           "]"}], "\[Implies]", 
+         RowBox[{"isSur", "[", 
+           RowBox[{"v", ",", "Y", ",", "Z"}], "]"}]}], TheoremaForm]], 
+     "Tooltip"]& ],
+   Appearance->None,
+   ButtonFunction:>NotebookLocate["ID:978540590"],
+   Evaluator->Automatic,
+   Method->"Preemptive"]]],
+ " #1:   ",
+ Cell[BoxData[
+  ButtonBox[
+   StyleBox["\<\"Show proof\"\>",
+    StripOnInput->False,
+    FontVariations->{"Underline"->True}],
+   Appearance->None,
+   ButtonFunction:>Theorema`Common`displayProof[
+    "/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18/p978540590-1-po.\
+m"],
+   Evaluator->Automatic,
+   ImageSize->Automatic,
+   Method->"Queued"]]]
+}], "ProofInfo",
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      ButtonBox[
+      "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
+       Theorema`Interface`GUI`Private`removeGroup[
+         ButtonNotebook[], 
+         "/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18/p978540590-\
+1"]]]]}, {None, None}},
+ CellTags->{"Proof|ID:978540590", "Proof|ID:978540590-1"},
+ CellID->301406765],
+
+Cell[BoxData[
+ DynamicBox[ToBoxes[
+   Refresh[
+    ReplaceAll[
+     Get["/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18/p978540590-\
+1-display.m"], Theorema`Interface`GUI`Private`FORM -> 
+     Theorema`Interface`GUI`Private`displayFormulaFromKey], 
+    TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
+  ImageSizeCache->{516., {24., 30.}}]], "ProofInfoBody",
+ CellChangeTimes->{3.614002084724037*^9},
+ CellID->1393157431]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ Cell[BoxData[
+  StyleBox["\<\"\[CheckmarkedBox]\"\>",
+   StripOnInput->False,
+   ShowStringCharacters->False]]],
+ " Proof of ",
+ Cell[BoxData[
+  ButtonBox[
+   TagBox[
+    TooltipBox[
+     PaneSelectorBox[{False->
+      StyleBox["\<\"(v \[SmallCircle] u surjective)\"\>", "FormReference",
+       StripOnInput->False], True->
+      StyleBox["\<\"(v \[SmallCircle] u surjective)\"\>", "FormReferenceHover",
+       StripOnInput->False]}, Dynamic[
+       CurrentValue["MouseOver"]],
+      FrameMargins->0,
+      ImageSize->Automatic],
+     TagBox[
+      FormBox[
+       RowBox[{
+         RowBox[{"isSur", "[", 
+           RowBox[{
+             RowBox[{"v", "\[SmallCircle]", "u"}], ",", "X", ",", "Z"}], 
+           "]"}], "\[Implies]", 
+         RowBox[{"isSur", "[", 
+           RowBox[{"v", ",", "Y", ",", "Z"}], "]"}]}], TheoremaForm], 
+      DisplayForm]],
+    Annotation[#, 
+     DisplayForm[
+      FormBox[
+       RowBox[{
+         RowBox[{"isSur", "[", 
+           RowBox[{
+             RowBox[{"v", "\[SmallCircle]", "u"}], ",", "X", ",", "Z"}], 
+           "]"}], "\[Implies]", 
+         RowBox[{"isSur", "[", 
+           RowBox[{"v", ",", "Y", ",", "Z"}], "]"}]}], TheoremaForm]], 
+     "Tooltip"]& ],
+   Appearance->None,
+   ButtonFunction:>NotebookLocate["ID:978540590"],
+   Evaluator->Automatic,
+   Method->"Preemptive"]]],
+ " #2:   ",
+ Cell[BoxData[
+  ButtonBox[
+   StyleBox["\<\"Show proof\"\>",
+    StripOnInput->False,
+    FontVariations->{"Underline"->True}],
+   Appearance->None,
+   ButtonFunction:>Theorema`Common`displayProof[
+    "/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18/p978540590-2-po.\
+m"],
+   Evaluator->Automatic,
+   ImageSize->Automatic,
+   Method->"Queued"]]]
+}], "ProofInfo",
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      ButtonBox[
+      "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
+       Theorema`Interface`GUI`Private`removeGroup[
+         ButtonNotebook[], 
+         "/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18/p978540590-\
+2"]]]]}, {None, None}},
+ CellTags->{"Proof|ID:978540590", "Proof|ID:978540590-2"},
+ CellID->1636381004],
+
+Cell[BoxData[
+ DynamicBox[ToBoxes[
+   Refresh[
+    ReplaceAll[
+     Get["/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18/p978540590-\
+2-display.m"], Theorema`Interface`GUI`Private`FORM -> 
+     Theorema`Interface`GUI`Private`displayFormulaFromKey], 
+    TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
+  ImageSizeCache->{516., {24., 30.}}]], "ProofInfoBody",
+ CellID->1186717905]
+}, Closed]]
+}, Open  ]]
 }, Open  ]]
 }, Open  ]]
 },
 WindowSize->{809, 867},
-WindowMargins->{{523, Automatic}, {47, Automatic}},
+WindowMargins->{{317, Automatic}, {62, Automatic}},
 Magnification->1.,
 FrontEndVersion->"8.0 for Linux x86 (32-bit) (February 23, 2011)",
 StyleDefinitions->Notebook[{
@@ -1264,12 +2154,13 @@ level.", "Text"],
                 "\[SelectionPlaceholder]", "\[Implies]", "\[Placeholder]"}], 
                TagBox[")", "AutoParentheses"]}], "equiv" -> RowBox[{
                TagBox["(", "AutoParentheses"], 
-               RowBox[{"\[SelectionPlaceholder]", 
-                 TagBox[
-                 "\[DoubleLeftRightArrow]", Identity, SyntaxForm -> 
-                  "a\[Implies]b"], "\[Placeholder]"}], 
+               
+               RowBox[{
+                "\[SelectionPlaceholder]", "\[DoubleLongLeftRightArrow]", 
+                 "\[Placeholder]"}], 
                TagBox[")", "AutoParentheses"]}], "eq" -> RowBox[{
                TagBox["(", "AutoParentheses"], 
+               
                RowBox[{
                 "\[SelectionPlaceholder]", "\[Equal]", "\[Placeholder]"}], 
                TagBox[")", "AutoParentheses"]}], ":equiv" -> RowBox[{
@@ -1280,7 +2171,7 @@ level.", "Text"],
                   RowBox[{
                    ":", "\[NegativeThickSpace]\[NegativeThinSpace]", 
                     "\[DoubleLongLeftRightArrow]"}], Identity, SyntaxForm -> 
-                  "a\[Implies]b"], "\[Placeholder]"}], 
+                  "a\[DoubleLongLeftRightArrow]b"], "\[Placeholder]"}], 
                TagBox[")", "AutoParentheses"]}], ":eq" -> RowBox[{
                TagBox["(", "AutoParentheses"], 
                RowBox[{"\[SelectionPlaceholder]", ":=", "\[Placeholder]"}], 
@@ -2035,19 +2926,168 @@ English/TheoremaNotebooks/FirstTour.nb", "<lex"},
     "ID:983404631", 
      "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
 English/TheoremaNotebooks/FirstTour.nb", "<lex"},
-   CellID->983404631]}
+   CellID->983404631]},
+ "ID:443431148"->{
+  Cell[42541, 1289, 2262, 75, 31, "FormalTextInputFormula",
+   CellTags->{
+    "ID:443431148", 
+     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
+     "A\\C"},
+   CellID->443431148]},
+ "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb"->{
+  Cell[42541, 1289, 2262, 75, 31, "FormalTextInputFormula",
+   CellTags->{
+    "ID:443431148", 
+     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
+     "A\\C"},
+   CellID->443431148],
+  Cell[59618, 1756, 1333, 42, 27, "FormalTextInputFormula",
+   CellTags->{
+    "ID:794877354", 
+     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
+     "surjective"},
+   CellID->794877354],
+  Cell[61185, 1807, 876, 25, 22, "FormalTextInputFormula",
+   CellTags->{
+    "ID:1636230891", 
+     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
+     "composition"},
+   CellID->1636230891],
+  Cell[62651, 1857, 889, 26, 27, "FormalTextInputFormula",
+   CellTags->{
+    "ID:112294143", 
+     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
+     "u:X->Y"},
+   CellID->112294143],
+  Cell[64202, 1909, 1041, 28, 22, "FormalTextInputFormula",
+   CellTags->{
+    "ID:978540590", 
+     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
+     "v \[SmallCircle] u surjective"},
+   CellID->978540590]},
+ "A\\C"->{
+  Cell[42541, 1289, 2262, 75, 31, "FormalTextInputFormula",
+   CellTags->{
+    "ID:443431148", 
+     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
+     "A\\C"},
+   CellID->443431148]},
+ "Proof|ID:443431148"->{
+  Cell[44961, 1375, 6020, 153, 29, "ProofInfo",
+   CellTags->{"Proof|ID:443431148", "Proof|ID:443431148-1"},
+   CellID->2083166425],
+  Cell[51462, 1545, 6020, 153, 27, "ProofInfo",
+   CellTags->{"Proof|ID:443431148", "Proof|ID:443431148-2"},
+   CellID->1919753329]},
+ "Proof|ID:443431148-1"->{
+  Cell[44961, 1375, 6020, 153, 29, "ProofInfo",
+   CellTags->{"Proof|ID:443431148", "Proof|ID:443431148-1"},
+   CellID->2083166425]},
+ "Proof|ID:443431148-2"->{
+  Cell[51462, 1545, 6020, 153, 27, "ProofInfo",
+   CellTags->{"Proof|ID:443431148", "Proof|ID:443431148-2"},
+   CellID->1919753329]},
+ "ID:794877354"->{
+  Cell[59618, 1756, 1333, 42, 27, "FormalTextInputFormula",
+   CellTags->{
+    "ID:794877354", 
+     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
+     "surjective"},
+   CellID->794877354]},
+ "surjective"->{
+  Cell[59618, 1756, 1333, 42, 27, "FormalTextInputFormula",
+   CellTags->{
+    "ID:794877354", 
+     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
+     "surjective"},
+   CellID->794877354]},
+ "ID:1636230891"->{
+  Cell[61185, 1807, 876, 25, 22, "FormalTextInputFormula",
+   CellTags->{
+    "ID:1636230891", 
+     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
+     "composition"},
+   CellID->1636230891]},
+ "composition"->{
+  Cell[61185, 1807, 876, 25, 22, "FormalTextInputFormula",
+   CellTags->{
+    "ID:1636230891", 
+     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
+     "composition"},
+   CellID->1636230891]},
+ "ID:112294143"->{
+  Cell[62651, 1857, 889, 26, 27, "FormalTextInputFormula",
+   CellTags->{
+    "ID:112294143", 
+     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
+     "u:X->Y"},
+   CellID->112294143]},
+ "u:X->Y"->{
+  Cell[62651, 1857, 889, 26, 27, "FormalTextInputFormula",
+   CellTags->{
+    "ID:112294143", 
+     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
+     "u:X->Y"},
+   CellID->112294143]},
+ "ID:978540590"->{
+  Cell[64202, 1909, 1041, 28, 22, "FormalTextInputFormula",
+   CellTags->{
+    "ID:978540590", 
+     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
+     "v \[SmallCircle] u surjective"},
+   CellID->978540590]},
+ "v \[SmallCircle] u surjective"->{
+  Cell[64202, 1909, 1041, 28, 22, "FormalTextInputFormula",
+   CellTags->{
+    "ID:978540590", 
+     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
+     "v \[SmallCircle] u surjective"},
+   CellID->978540590]},
+ "Proof|ID:978540590"->{
+  Cell[65466, 1949, 2144, 67, 29, "ProofInfo",
+   CellTags->{"Proof|ID:978540590", "Proof|ID:978540590-1"},
+   CellID->301406765],
+  Cell[68092, 2033, 2145, 67, 27, "ProofInfo",
+   CellTags->{"Proof|ID:978540590", "Proof|ID:978540590-2"},
+   CellID->1636381004]},
+ "Proof|ID:978540590-1"->{
+  Cell[65466, 1949, 2144, 67, 29, "ProofInfo",
+   CellTags->{"Proof|ID:978540590", "Proof|ID:978540590-1"},
+   CellID->301406765]},
+ "Proof|ID:978540590-2"->{
+  Cell[68092, 2033, 2145, 67, 27, "ProofInfo",
+   CellTags->{"Proof|ID:978540590", "Proof|ID:978540590-2"},
+   CellID->1636381004]}
  }
 *)
 (*CellTagsIndex
 CellTagsIndex->{
- {"ID:169304498", 77826, 1985},
+ {"ID:169304498", 108106, 2876},
  {"Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
-TheoremaNotebooks/FirstTour.nb", 78234, 1994},
- {"(P or Q \[And] if P then Q) \[DoubleLeftRightArrow] Q", 78831, 2008},
- {"Proof|ID:169304498", 79152, 2016},
- {"Proof|ID:169304498-1", 79310, 2020},
- {"ID:983404631", 79460, 2024},
- {"<lex", 79713, 2031}
+TheoremaNotebooks/FirstTour.nb", 108514, 2885},
+ {"(P or Q \[And] if P then Q) \[DoubleLeftRightArrow] Q", 109111, 2899},
+ {"Proof|ID:169304498", 109432, 2907},
+ {"Proof|ID:169304498-1", 109590, 2911},
+ {"ID:983404631", 109740, 2915},
+ {"<lex", 109993, 2922},
+ {"ID:443431148", 110254, 2929},
+ {"Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", \
+110535, 2936},
+ {"A\\C", 111627, 2967},
+ {"Proof|ID:443431148", 111861, 2974},
+ {"Proof|ID:443431148-1", 112155, 2981},
+ {"Proof|ID:443431148-2", 112316, 2985},
+ {"ID:794877354", 112469, 2989},
+ {"surjective", 112701, 2996},
+ {"ID:1636230891", 112936, 3003},
+ {"composition", 113171, 3010},
+ {"ID:112294143", 113407, 3017},
+ {"u:X->Y", 113630, 3024},
+ {"ID:978540590", 113859, 3031},
+ {"v \[SmallCircle] u surjective", 114129, 3038},
+ {"Proof|ID:978540590", 114388, 3045},
+ {"Proof|ID:978540590-1", 114679, 3052},
+ {"Proof|ID:978540590-2", 114838, 3056}
  }
 *)
 (*NotebookFileOutline
@@ -2119,111 +3159,231 @@ Cell[15368, 463, 256, 6, 24, "Text",
 Cell[CellGroupData[{
 Cell[15649, 473, 501, 11, 29, "Computation",
  CellID->1142086229],
-Cell[16153, 486, 603, 13, 22, "ComputationResult",
- CellID->92305543]
+Cell[16153, 486, 630, 14, 22, "ComputationResult",
+ CellID->207035370]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[16793, 504, 483, 12, 29, "ComputationInfo",
- CellID->754904873],
-Cell[17279, 518, 516, 12, 70, "ComputationInfoBody",
- CellID->603022459]
+Cell[16820, 505, 484, 12, 29, "ComputationInfo",
+ CellID->1130843944],
+Cell[17307, 519, 515, 12, 71, "ComputationInfoBody",
+ CellID->99148166]
 }, Closed]],
-Cell[17810, 533, 541, 10, 62, "Text",
+Cell[17837, 534, 541, 10, 62, "Text",
  CellID->1890982231],
 Cell[CellGroupData[{
-Cell[18376, 547, 501, 11, 29, "Computation",
+Cell[18403, 548, 501, 11, 29, "Computation",
  CellID->1370474394],
-Cell[18880, 560, 154, 3, 22, "ComputationResult",
- CellID->1078796215]
+Cell[18907, 561, 178, 4, 22, "ComputationResult",
+ CellID->14180547]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[19071, 568, 483, 12, 29, "ComputationInfo",
- CellID->213397556],
-Cell[19557, 582, 516, 12, 70, "ComputationInfoBody",
- CellID->546508370]
+Cell[19122, 570, 483, 12, 29, "ComputationInfo",
+ CellID->743033831],
+Cell[19608, 584, 517, 12, 71, "ComputationInfoBody",
+ CellID->1701603057]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[20110, 599, 550, 12, 26, "Computation",
+Cell[20162, 601, 550, 12, 26, "Computation",
  CellID->1222685411],
-Cell[20663, 613, 131, 3, 22, "ComputationResult",
- CellID->1704412910]
+Cell[20715, 615, 152, 3, 22, "ComputationResult",
+ CellID->1122879473]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[20831, 621, 482, 12, 29, "ComputationInfo",
- CellID->60033741],
-Cell[21316, 635, 517, 12, 70, "ComputationInfoBody",
- CellID->1643887056]
+Cell[20904, 623, 484, 12, 29, "ComputationInfo",
+ CellID->1039471126],
+Cell[21391, 637, 515, 12, 71, "ComputationInfoBody",
+ CellID->49606623]
 }, Closed]],
-Cell[21848, 650, 175, 4, 24, "Text",
+Cell[21921, 652, 175, 4, 24, "Text",
  CellID->570068987],
 Cell[CellGroupData[{
-Cell[22048, 658, 560, 12, 29, "Computation",
+Cell[22121, 660, 560, 12, 29, "Computation",
  CellID->1811312768],
-Cell[22611, 672, 379, 10, 22, "ComputationResult",
- CellID->494883379]
+Cell[22684, 674, 402, 10, 22, "ComputationResult",
+ CellID->1002462624]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[23027, 687, 484, 12, 29, "ComputationInfo",
- CellID->2113690964],
-Cell[23514, 701, 517, 12, 70, "ComputationInfoBody",
- CellID->1528797720]
+Cell[23123, 689, 483, 12, 29, "ComputationInfo",
+ CellID->450997316],
+Cell[23609, 703, 516, 12, 71, "ComputationInfoBody",
+ CellID->142071748]
 }, Closed]],
-Cell[24046, 716, 252, 6, 24, "Text",
+Cell[24140, 718, 252, 6, 24, "Text",
  CellID->61175411],
 Cell[CellGroupData[{
-Cell[24323, 726, 501, 11, 29, "Computation",
+Cell[24417, 728, 501, 11, 29, "Computation",
  CellID->1265592774],
-Cell[24827, 739, 1844, 60, 34, "ComputationResult",
- CellID->767680011]
+Cell[24921, 741, 1866, 60, 34, "ComputationResult",
+ CellID->891286279]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[26708, 804, 483, 12, 29, "ComputationInfo",
- CellID->777008855],
-Cell[27194, 818, 516, 12, 70, "ComputationInfoBody",
- CellID->2142387132]
+Cell[26824, 806, 483, 12, 29, "ComputationInfo",
+ CellID->741557555],
+Cell[27310, 820, 516, 12, 71, "ComputationInfoBody",
+ CellID->458912374]
 }, Closed]],
-Cell[27725, 833, 361, 7, 24, "Text",
+Cell[27841, 835, 361, 7, 24, "Text",
  CellID->2049000387],
 Cell[CellGroupData[{
-Cell[28111, 844, 529, 12, 29, "Computation",
+Cell[28227, 846, 529, 12, 29, "Computation",
  CellID->1908188417],
-Cell[28643, 858, 900, 30, 31, "ComputationResult",
- CellID->566591105]
+Cell[28759, 860, 922, 30, 31, "ComputationResult",
+ CellID->576514393]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[29580, 893, 483, 12, 29, "ComputationInfo",
- CellID->482526801],
-Cell[30066, 907, 517, 12, 70, "ComputationInfoBody",
- CellID->1126555714]
+Cell[29718, 895, 483, 12, 29, "ComputationInfo",
+ CellID->856606505],
+Cell[30204, 909, 517, 12, 71, "ComputationInfoBody",
+ CellID->1346976351]
 }, Closed]],
-Cell[30598, 922, 214, 5, 24, "Text",
+Cell[30736, 924, 214, 5, 24, "Text",
  CellID->840614047],
 Cell[CellGroupData[{
-Cell[30837, 931, 550, 12, 29, "Computation",
+Cell[30975, 933, 550, 12, 29, "Computation",
  CellID->498629087],
-Cell[31390, 945, 4357, 142, 98, "ComputationResult",
- CellID->1891082906]
+Cell[31528, 947, 4382, 143, 98, "ComputationResult",
+ CellID->1698308284]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[35784, 1092, 482, 12, 29, "ComputationInfo",
- CellID->326012139],
-Cell[36269, 1106, 514, 12, 70, "ComputationInfoBody",
- CellID->948616050]
+Cell[35947, 1095, 483, 12, 29, "ComputationInfo",
+ CellID->2103563416],
+Cell[36433, 1109, 516, 12, 71, "ComputationInfoBody",
+ CellID->1595202554]
 }, Closed]],
-Cell[36798, 1121, 165, 4, 24, "Text",
+Cell[36964, 1124, 165, 4, 24, "Text",
  CellID->1272002923],
 Cell[CellGroupData[{
-Cell[36988, 1129, 573, 12, 29, "Computation",
+Cell[37154, 1132, 573, 12, 29, "Computation",
  CellID->1123552196],
-Cell[37564, 1143, 1369, 37, 31, "ComputationResult",
- CellID->1618282943]
+Cell[37730, 1146, 1394, 38, 31, "ComputationResult",
+ CellID->311742284]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[38970, 1185, 867, 23, 29, "ComputationInfo",
- CellID->69103156],
-Cell[39840, 1210, 517, 12, 70, "ComputationInfoBody",
- CellID->1910201185]
+Cell[39161, 1189, 867, 23, 29, "ComputationInfo",
+ CellID->58502634],
+Cell[40031, 1214, 540, 12, 82, "ComputationInfoBody",
+ CellID->875809386]
 }, Closed]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[40620, 1232, 196, 5, 73, "Section",
+ CellID->52812741],
+Cell[CellGroupData[{
+Cell[40841, 1241, 573, 9, 38, "Subsection",
+ PageBreakAbove->True,
+ CellID->1401737664],
+Cell[41417, 1252, 478, 13, 30, "DisplayFormula",
+ CellID->1336903145],
+Cell[41898, 1267, 48, 1, 12, "OpenEnvironment",
+ CellID->1862211767],
+Cell[CellGroupData[{
+Cell[41971, 1272, 374, 9, 37, "EnvironmentHeader",
+ CellID->1969336855],
+Cell[42348, 1283, 190, 4, 30, "GlobalDeclaration",
+ CellID->1485425788],
+Cell[42541, 1289, 2262, 75, 31, "FormalTextInputFormula",
+ CellTags->{
+  "ID:443431148", 
+   "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
+   "A\\C"},
+ CellID->443431148],
+Cell[44806, 1366, 66, 1, 24, "EndEnvironmentMarker",
+ CellID->1135255444]
+}, Open  ]],
+Cell[44887, 1370, 49, 1, 16, "CloseEnvironment",
+ CellID->2069904305],
+Cell[CellGroupData[{
+Cell[44961, 1375, 6020, 153, 29, "ProofInfo",
+ CellTags->{"Proof|ID:443431148", "Proof|ID:443431148-1"},
+ CellID->2083166425],
+Cell[50984, 1530, 441, 10, 841, "ProofInfoBody",
+ CellID->1055285153]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[51462, 1545, 6020, 153, 27, "ProofInfo",
+ CellTags->{"Proof|ID:443431148", "Proof|ID:443431148-2"},
+ CellID->1919753329],
+Cell[57485, 1700, 441, 10, 841, "ProofInfoBody",
+ CellID->340307678]
+}, Closed]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[57975, 1716, 634, 10, 38, "Subsection",
+ PageBreakAbove->True,
+ CellID->2098222979],
+Cell[58612, 1728, 47, 1, 12, "OpenEnvironment",
+ CellID->161811718],
+Cell[CellGroupData[{
+Cell[58684, 1733, 498, 11, 37, "EnvironmentHeader",
+ CellID->875215552],
+Cell[59185, 1746, 430, 8, 30, "GlobalDeclaration",
+ CellID->835697010],
+Cell[59618, 1756, 1333, 42, 27, "FormalTextInputFormula",
+ CellTags->{
+  "ID:794877354", 
+   "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
+   "surjective"},
+ CellID->794877354],
+Cell[60954, 1800, 228, 5, 30, "GlobalDeclaration",
+ CellID->1404418786],
+Cell[61185, 1807, 876, 25, 22, "FormalTextInputFormula",
+ CellTags->{
+  "ID:1636230891", 
+   "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
+   "composition"},
+ CellID->1636230891],
+Cell[62064, 1834, 65, 1, 24, "EndEnvironmentMarker",
+ CellID->508918864]
+}, Open  ]],
+Cell[62144, 1838, 49, 1, 16, "CloseEnvironment",
+ CellID->1758635247],
+Cell[62196, 1841, 47, 1, 12, "OpenEnvironment",
+ CellID->486787166],
+Cell[CellGroupData[{
+Cell[62268, 1846, 380, 9, 37, "EnvironmentHeader",
+ CellID->321209696],
+Cell[62651, 1857, 889, 26, 27, "FormalTextInputFormula",
+ CellTags->{
+  "ID:112294143", 
+   "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
+   "u:X->Y"},
+ CellID->112294143],
+Cell[63543, 1885, 65, 1, 24, "EndEnvironmentMarker",
+ CellID->229871635]
+}, Open  ]],
+Cell[63623, 1889, 48, 1, 16, "CloseEnvironment",
+ CellID->697610862],
+Cell[63674, 1892, 47, 1, 12, "OpenEnvironment",
+ CellID->797956083],
+Cell[CellGroupData[{
+Cell[63746, 1897, 453, 10, 37, "EnvironmentHeader",
+ CellID->1624492557],
+Cell[64202, 1909, 1041, 28, 22, "FormalTextInputFormula",
+ CellTags->{
+  "ID:978540590", 
+   "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
+   "v \[SmallCircle] u surjective"},
+ CellID->978540590],
+Cell[65246, 1939, 131, 2, 24, "EndEnvironmentMarker",
+ CellID->669906630]
+}, Open  ]],
+Cell[65392, 1944, 49, 1, 16, "CloseEnvironment",
+ CellID->1376117217],
+Cell[CellGroupData[{
+Cell[65466, 1949, 2144, 67, 29, "ProofInfo",
+ CellTags->{"Proof|ID:978540590", "Proof|ID:978540590-1"},
+ CellID->301406765],
+Cell[67613, 2018, 442, 10, 188, "ProofInfoBody",
+ CellID->1393157431]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[68092, 2033, 2145, 67, 27, "ProofInfo",
+ CellTags->{"Proof|ID:978540590", "Proof|ID:978540590-2"},
+ CellID->1636381004],
+Cell[70240, 2102, 400, 9, 235, "ProofInfoBody",
+ CellID->1186717905]
+}, Closed]]
+}, Open  ]]
 }, Open  ]]
 }, Open  ]]
 }

@@ -1,15 +1,39 @@
+(* Theorema 
+    Copyright (C) 2010 The Theorema Group
+
+    This file is part of Theorema 2.0
+    
+    Theorema 2.0 is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+
+    Theorema 2.0 is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+
+    You should have received a copy of the GNU General Public License
+    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+*)
+
 (* ::Section:: *)
 (* Public Declaration Part: executes in Theorema`Provers` *)
 
 With[ {lang = "English"},
 	
-MessageName[ initialProofSituation, "usage", lang] = "The initial proof situation at the beginning of a proof";
-MessageName[ openProofSituation, "usage", lang] = "An open proof situation in a proof";
-MessageName[ proofAlternatives, "usage", lang] = "Alternatives to continue a proof when multiple inference rules apply";
-MessageName[ searchDepthLimit, "usage", lang] = "Proof terminates due to search depth limitation";
-MessageName[ invalidProofNode, "usage", lang] = "A proof strategy returns an invalid proof node";
-MessageName[ noApplicableRule, "usage", lang] = "Proof fails since there is no applicable rule";
-MessageName[ levelSat, "usage", lang] = "Level saturation";
+	MessageName[ initialProofSituation, "usage", lang] = "The initial proof situation at the beginning of a proof";
+	MessageName[ invalidProofNode, "usage", lang] = "A proof strategy returns an invalid proof node";
+
+	MessageName[ levelSat, "usage", lang] = "Level saturation";
+
+	MessageName[ noApplicableRule, "usage", lang] = "Proof fails since there is no applicable rule";
+
+	MessageName[ openProofSituation, "usage", lang] = "An open proof situation in a proof";
+
+	MessageName[ proofAlternatives, "usage", lang] = "Alternatives to continue a proof when multiple inference rules apply";
+
+	MessageName[ searchDepthLimit, "usage", lang] = "Proof terminates due to search depth limitation";
 
 ] (* With *)
 
@@ -34,6 +58,8 @@ formulaReferenceSequence[ {f_, m__, g_}, lang] := Join[ {formulaReference[f]},
 	{"and ", formulaReference[g]}];
 formulaReferenceSequence[ args___] := unexpected[ formulaReferenceSequence, {args}];
 
+
+
 proofStepText[ initialProofSituation, lang, {}, {{goal_FML$}}, pVal_] := {If[ pVal === proved, textCell[ "We prove:"], textCell[ "We have to prove:"]], 
          goalCell[ goal],
          textCell[ "with no assumptions."]
@@ -43,6 +69,28 @@ proofStepText[ initialProofSituation, lang, {}, {{goal_FML$, kb__FML$}}, pVal_] 
          textCell[ "under the assumptions:"], 
          assumptionListCells[ {kb}, ",", "."]
          };
+
+proofStepText[ invalidProofNode, lang, expr_, ___] := {textCell[ "The expression returned by the selected proof strategy is not a valid proof tree node."],
+	Cell[ BoxData[ ToBoxes[ expr]], "Print"]};
+
+
+proofStepText[ levelSat, lang, u_List, g_List, pVal_] := Module[{i, cells = {textCell[ "From what we already know, we can derive new knowledge."]}},
+	Do[
+		cells = Join[ cells, {textCell[ "From ", formulaReferenceSequence[ u[[i]], lang], " we infer"], assumptionListCells[ g[[i]], ",", "."]}],
+		{i, Length[ u]}
+	];
+	cells
+];
+
+proofStepText[ noApplicableRule, lang, {{goal_FML$, kb___FML$}}, {}, ___, "openPS" -> ps_, ___] := 
+	{Cell[ CellGroupData[
+		Join[{textCell[ "There is no proof rule to apply. The open proof situation is:"]},
+			proofStepText[ openProofSituation, lang, {{goal, kb}}, {}],
+			{Cell[ CellGroupData[ {Cell[ "The proof situation data (for debugging)", "Text"],
+			 Cell[ BoxData[ ToBoxes[ ps]], "Input"]}, Closed]]}
+		]
+	]]};
+
 
 (* The data for openProofSituation comes from a PRFSIT$, which has no proofValue yet. Hence, we cannot pass a pVal as last parameter,
    like we do it in all other proofStepText cases. This is no problem, since we don't need a pVal here anyway. *)         
@@ -63,30 +111,10 @@ proofStepText[ proofAlternatives, lang, ___] := {textCell[ "We have several alte
 
 subProofHeader[ proofAlternatives, lang, ___, pVal_, {p_}] := {textCell[ ToString[ StringForm[ "Alternative ``:", p]]]};
 
-proofStepText[ levelSat, lang, u_List, g_List, pVal_] := Module[{i, cells = {textCell[ "From what we already know, we can derive new knowledge."]}},
-	Do[
-		cells = Join[ cells, {textCell[ "From ", formulaReferenceSequence[ u[[i]], lang], " we infer"], assumptionListCells[ g[[i]], ",", "."]}],
-		{i, Length[ u]}
-	];
-	cells
-];
-
 proofStepText[ searchDepthLimit, lang, {{goal_FML$, kb___FML$}}, {}, ___] :=
 	Join[{textCell[ "Search depth exceeded! The open proof situation is:"]}, 
 		proofStepText[ openProofSituation, lang, {{goal, kb}}, {}]
 	];
-
-proofStepText[ invalidProofNode, lang, expr_, ___] := {textCell[ "The expression returned by the selected proof strategy is not a valid proof tree node."],
-	Cell[ BoxData[ ToBoxes[ expr]], "Print"]};
-
-proofStepText[ noApplicableRule, lang, {{goal_FML$, kb___FML$}}, {}, ___, "openPS" -> ps_, ___] := 
-	{Cell[ CellGroupData[
-		Join[{textCell[ "There is no proof rule to apply. The open proof situation is:"]},
-			proofStepText[ openProofSituation, lang, {{goal, kb}}, {}],
-			{Cell[ CellGroupData[ {Cell[ "The proof situation data (for debugging)", "Text"],
-			 Cell[ BoxData[ ToBoxes[ ps]], "Input"]}, Closed]]}
-		]
-	]]};
 
 proofStepText[ step_Symbol, lang, ___] := {
 	textCell[ ToString[ StringForm[ "We have no explanatory text for step '``'. Please implement the respective case for the function 'proofStepText'.", step]]]
