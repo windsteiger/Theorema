@@ -83,6 +83,7 @@ With[ {lang = "English"},
     translate[ "GCONDTooltip", lang] = "Global condition";   	
     translate[ "Global Declarations"] = "Globals valid at this cell";
     translate[ "GoalProve", lang] = "Proof goal";
+	translate[ "group/ungroup", lang] = "Group / Ungroup";
     translate[ "GVARCONDTooltip", lang] = "Global universally quantified variable with condition";   	
     translate[ "GVARTooltip", lang] = "Global universally quantified variable";   	
 
@@ -230,6 +231,7 @@ With[ {lang = "English"},
     translate[ "tcSolveTabLabel", lang] = "Solve";
 	translate[ "Theorema Commander", lang] = "Theorema Commander";
     translate[ "Theorema Environment", lang] = "Theorema Environment";
+	translate[ "tooltipButtonGroupUngroup", lang] = "Group selected expression. Press \[ShiftKey] to ungroup selection.";
     translate[ "tooltipButtonNoParen", lang] = "\nKeyboard shortcut";   	
     translate[ "tooltipButtonParen", lang] = "\nPress \[ShiftKey] to omit parentheses\nKeyboard shortcut";   	
     translate[ "Trace", lang] = "Trace Computation";

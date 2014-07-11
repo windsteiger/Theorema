@@ -1690,15 +1690,14 @@ makeNbOpenButton[ ] :=
 makeNbOpenButton[ args___] := unexpected[ makeNbOpenButton, {args}]
 		
 
-envButtonData["DEF"] := "tcSessTabEnvTabButtonDefLabel";
-envButtonData["THM"] := "tcSessTabEnvTabButtonThmLabel";
-envButtonData["LMA"] := "tcSessTabEnvTabButtonLmaLabel";
-envButtonData["PRP"] := "tcSessTabEnvTabButtonPrpLabel";
-envButtonData["COR"] := "tcSessTabEnvTabButtonCorLabel";
-envButtonData["ALG"] := "tcSessTabEnvTabButtonAlgLabel";
-envButtonData["EXM"] := "tcSessTabEnvTabButtonExmLabel";
-envButtonData[args___] :=
-    unexpected[envButtonData, {args}]
+envButtonData[ "DEF"] := "tcSessTabEnvTabButtonDefLabel";
+envButtonData[ "THM"] := "tcSessTabEnvTabButtonThmLabel";
+envButtonData[ "LMA"] := "tcSessTabEnvTabButtonLmaLabel";
+envButtonData[ "PRP"] := "tcSessTabEnvTabButtonPrpLabel";
+envButtonData[ "COR"] := "tcSessTabEnvTabButtonCorLabel";
+envButtonData[ "ALG"] := "tcSessTabEnvTabButtonAlgLabel";
+envButtonData[ "EXM"] := "tcSessTabEnvTabButtonExmLabel";
+envButtonData[ args___] := unexpected[envButtonData, {args}]
 
 makeEnvButton[ bname_String] :=
     With[ { bd = If[ bname === "?", "?", translate[ envButtonData[ bname]]]},
@@ -1708,6 +1707,22 @@ makeEnvButton[args___] := unexpected[makeEnvButton, {args}]
 
 makeFormButton[] := Button[ translate[ "New"], insertNewFormulaCell[ "Env"], Alignment -> {Left, Top}, ImageSize -> Automatic]
 makeFormButton[args___] := unexpected[ makeFormButton, {args}]
+
+makeGroupUngroupButton[ ] := Tooltip[ 
+	Button[ translate[ "group/ungroup"],
+		If[ CurrentValue[ "ShiftKey"],
+			FrontEndExecute[ {NotebookApply[ InputNotebook[], removeAutoParen[ NotebookRead[ InputNotebook[]]], Placeholder]}],
+			(* else *)
+			FrontEndExecute[ {NotebookApply[ InputNotebook[], RowBox[ {autoParenthesis[ "("], "\[SelectionPlaceholder]", autoParenthesis[ ")"]}], Placeholder]}]
+		]
+	], translate[ "tooltipButtonGroupUngroup"], TooltipDelay -> 0.5
+]
+makeGroupUngroupButton[ args___] := unexpected[ makeGroupUngroupButton, {args}]
+
+removeAutoParen[ RowBox[ {autoParenthesis[ "("], expr_, autoParenthesis[ ")"]}]] := expr
+removeAutoParen[ expr_] := expr
+removeAutoParen[ args___] := unexpected[ removeAutoParen, {args}]
+
 
 makeNewDeclButton[] :=
     Button[ translate[ "New"], insertNewFormulaCell[ "DECLARATION"], Alignment -> {Left, Top}, ImageSize -> Automatic]
@@ -1791,7 +1806,8 @@ sessionCompose[] :=
     		translate[ "Notebooks"], {{Top, Left}}],
     	Labeled[ Grid[ Partition[ Map[ makeEnvButton, allEnvironments], 4]],
     		translate[ "Environments"], {{Top, Left}}],
-    	Labeled[ Column[ {makeFormButton[], Dynamic[ Refresh[ langButtons[], TrackedSymbols :> {$buttonNat, $tcLangButtonSelection}]]}, Left, Spacer[2]],
+    	Labeled[ Column[ {Row[ {makeFormButton[], makeGroupUngroupButton[]}, Spacer[5]], 
+    				Dynamic[ Refresh[ langButtons[], TrackedSymbols :> {$buttonNat, $tcLangButtonSelection}]]}, Left, Spacer[2]],
     		translate[ "Formulae"], {{Top, Left}}],
     	Labeled[ Column[ {makeNewDeclButton[], makeDeclButtons[]}, Left, Spacer[2]],
     		translate[ "Declarations"], {{Top, Left}}]

@@ -84,6 +84,7 @@ With[ {lang = "German"},
     translate[ "GCONDTooltip", lang] = "Globale Bedingung";   	
     translate[ "Global Declarations"] = "In dieser Zelle g\[UDoubleDot]ltige Globale";
     translate[ "GoalProve", lang] = "Beweisziel";
+	translate[ "group/ungroup", lang] = "Gruppieren / Gruppierung aufheben";
     translate[ "GVARCONDTooltip", lang] = "Global universal gebundene Variable mit Bedingung";   	
     translate[ "GVARTooltip", lang] = "Global universal gebundene Variable";   	
 
@@ -231,6 +232,7 @@ With[ {lang = "German"},
     translate[ "tcSolveTabLabel", lang] = "L\[ODoubleDot]sen";
 	translate[ "Theorema Commander", lang] = "Theorema Commander";
     translate[ "Theorema Environment", lang] = "Theorema Umgebung";
+	translate[ "tooltipButtonGroupUngroup", lang] = "Den ausgew\[ADoubleDot]hlten Ausdruck gruppieren. Taste \[ShiftKey] dr\[UDoubleDot]cken, um eine Gruppierugn aufzuheben.";
     translate[ "tooltipButtonNoParen", lang] = "\nTastaturk\[UDoubleDot]rzel";   	
     translate[ "tooltipButtonParen", lang] = "\nTaste \[ShiftKey] dr\[UDoubleDot]cken, um die Klammern wegzulassen\nTastaturk\[UDoubleDot]rzel";   	
     translate[ "Trace", lang] = "Berechnung verfolgen";
