@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[    125004,       3384]
-NotebookOptionsPosition[     70692,       2117]
-NotebookOutlinePosition[    116070,       3093]
-CellTagsIndexPosition[    114994,       3063]
+NotebookDataLength[    125675,       3364]
+NotebookOptionsPosition[     71034,       2105]
+NotebookOutlinePosition[    116483,       3070]
+CellTagsIndexPosition[    115525,       3043]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -1221,7 +1221,7 @@ TheoremaNotebooks/FirstTour/c1123552196-display.m"],
      Theorema`Interface`GUI`Private`FORM -> 
      Theorema`Interface`GUI`Private`displayFormulaFromKey], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
-  ImageSizeCache->{488., {31., 37.}}]], "ComputationInfoBody",
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
  CellChangeTimes->{{3.614003639677324*^9, 3.614003657154506*^9}},
  CellID->875809386]
@@ -1250,6 +1250,10 @@ Cell["\[OpenCurlyDoubleQuote]Set Theory\[CloseCurlyDoubleQuote]", "Subsection",
   3.61199637934496*^9}},
  CellID->1401737664],
 
+Cell["Suppose we want to prove", "Text",
+ CellChangeTimes->{{3.614052579371747*^9, 3.614052585577143*^9}},
+ CellID->1259721794],
+
 Cell[BoxData[
  FormBox[
   RowBox[{
@@ -1264,6 +1268,14 @@ Cell[BoxData[
  CellChangeTimes->{{3.605592266056245*^9, 3.605592320234824*^9}, {
    3.605592694117099*^9, 3.60559269416293*^9}, 3.611996464064112*^9},
  CellID->1336903145],
+
+Cell["\<\
+Since the current version of Theorema has not yet integrated proof support \
+for set theory constructs, we need to formulate the statement in raw \
+predicate logic.\
+\>", "Text",
+ CellChangeTimes->{{3.614052593137134*^9, 3.614052684087742*^9}},
+ CellID->1586537506],
 
 Cell["", "OpenEnvironment",
  CellID->1862211767],
@@ -1351,8 +1363,8 @@ Cell[BoxData[
          ButtonFunction :> 
          Theorema`Language`Session`Private`removeFormula[{
            "ID:443431148", 
-            "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.\
-nb"}]]}]]]}, {None, None}},
+            "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/FirstTour.nb"}]]}]]]}, {None, None}},
  ShowCellTags->False,
  CellChangeTimes->{{3.612005081306463*^9, 3.612005175014719*^9}, {
   3.612005216269997*^9, 3.612005271747585*^9}, {3.612005392882188*^9, 
@@ -1360,8 +1372,8 @@ nb"}]]}]]]}, {None, None}},
   3.612006974070603*^9, 3.612006986168617*^9}},
  CellTags->{
   "ID:443431148", 
-   "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
-   "A\\C"},
+   "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/FirstTour.nb", "A\\C"},
  CellID->443431148],
 
 Cell["\[GraySquare]", "EndEnvironmentMarker",
@@ -1510,8 +1522,8 @@ Cell[TextData[{
     FontVariations->{"Underline"->True}],
    Appearance->None,
    ButtonFunction:>Theorema`Common`displayProof[
-    "/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18/p443431148-1-po.\
-m"],
+    "/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/FirstTour/p443431148-1-po.m"],
    Evaluator->Automatic,
    ImageSize->Automatic,
    Method->"Queued"]]]
@@ -1523,22 +1535,22 @@ m"],
       "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
        Theorema`Interface`GUI`Private`removeGroup[
          ButtonNotebook[], 
-         "/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18/p443431148-\
-1"]]]]}, {None, None}},
+         "/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/FirstTour/p443431148-1"]]]]}, {None, None}},
  CellTags->{"Proof|ID:443431148", "Proof|ID:443431148-1"},
- CellID->2083166425],
+ CellID->746284607],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
    Refresh[
     ReplaceAll[
-     Get["/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18/p443431148-\
-1-display.m"], Theorema`Interface`GUI`Private`FORM -> 
+     Get["/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/FirstTour/p443431148-1-display.m"], 
+     Theorema`Interface`GUI`Private`FORM -> 
      Theorema`Interface`GUI`Private`displayFormulaFromKey], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
   ImageSizeCache->{516., {24., 30.}}]], "ProofInfoBody",
- CellChangeTimes->{3.61208483024816*^9},
- CellID->1055285153]
+ CellID->2132376103]
 }, Closed]],
 
 Cell[CellGroupData[{
@@ -1680,8 +1692,8 @@ Cell[TextData[{
     FontVariations->{"Underline"->True}],
    Appearance->None,
    ButtonFunction:>Theorema`Common`displayProof[
-    "/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18/p443431148-2-po.\
-m"],
+    "/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/FirstTour/p443431148-2-po.m"],
    Evaluator->Automatic,
    ImageSize->Automatic,
    Method->"Queued"]]]
@@ -1693,23 +1705,32 @@ m"],
       "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
        Theorema`Interface`GUI`Private`removeGroup[
          ButtonNotebook[], 
-         "/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18/p443431148-\
-2"]]]]}, {None, None}},
+         "/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/FirstTour/p443431148-2"]]]]}, {None, None}},
  CellTags->{"Proof|ID:443431148", "Proof|ID:443431148-2"},
- CellID->1919753329],
+ CellID->1162424408],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
    Refresh[
     ReplaceAll[
-     Get["/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18/p443431148-\
-2-display.m"], Theorema`Interface`GUI`Private`FORM -> 
+     Get["/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/FirstTour/p443431148-2-display.m"], 
+     Theorema`Interface`GUI`Private`FORM -> 
      Theorema`Interface`GUI`Private`displayFormulaFromKey], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
   ImageSizeCache->{516., {24., 30.}}]], "ProofInfoBody",
- CellChangeTimes->{3.612084837935105*^9},
- CellID->340307678]
-}, Closed]]
+ CellID->336711669]
+}, Closed]],
+
+Cell["\<\
+Proof #1 runs with all standard settings of the prover, proof #2 uses the \
+same settings and simplifies the resulting proof in order to get a \
+streamlined version lacking all failing proof attempts.\
+\>", "Text",
+ CellChangeTimes->{{3.614052560220533*^9, 3.614052563171415*^9}, {
+  3.614052742138776*^9, 3.614052827815512*^9}},
+ CellID->1718372575]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -1756,7 +1777,7 @@ Cell[BoxData[
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{"isSur", "[", 
+  RowBox[{"surjective", "[", 
    RowBox[{"f", ",", "A", ",", "B"}], "]"}], 
   TagBox[
    RowBox[{
@@ -1787,15 +1808,16 @@ Cell[BoxData[
          ButtonFunction :> 
          Theorema`Language`Session`Private`removeFormula[{
            "ID:794877354", 
-            "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.\
-nb"}]]}]]]}, {None, None}},
+            "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/FirstTour.nb"}]]}]]]}, {None, None}},
  ShowCellTags->False,
  CellChangeTimes->{{3.595650133177189*^9, 3.595650143887958*^9}, {
-  3.595650250726449*^9, 3.595650327641844*^9}},
+  3.595650250726449*^9, 3.595650327641844*^9}, {3.614053082290491*^9, 
+  3.614053084430657*^9}},
  CellTags->{
   "ID:794877354", 
-   "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
-   "surjective"},
+   "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/FirstTour.nb", "surjective"},
  CellID->794877354],
 
 Cell[BoxData[
@@ -1822,14 +1844,14 @@ Cell[BoxData[
          ButtonFunction :> 
          Theorema`Language`Session`Private`removeFormula[{
            "ID:1636230891", 
-            "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.\
-nb"}]]}]]]}, {None, None}},
+            "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/FirstTour.nb"}]]}]]]}, {None, None}},
  ShowCellTags->False,
  CellChangeTimes->{{3.595650466764784*^9, 3.595650515668086*^9}},
  CellTags->{
   "ID:1636230891", 
-   "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
-   "composition"},
+   "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/FirstTour.nb", "composition"},
  CellID->1636230891],
 
 Cell["\[GraySquare]", "EndEnvironmentMarker",
@@ -1838,6 +1860,47 @@ Cell["\[GraySquare]", "EndEnvironmentMarker",
 
 Cell["", "CloseEnvironment",
  CellID->1758635247],
+
+Cell[TextData[{
+ "Suppose we have a function ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    RowBox[{"u", ":", "X"}], "\[Rule]", "Y"}], TraditionalForm]],
+  FormatType->"TraditionalForm"],
+ " and another function ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{
+    RowBox[{"v", ":", "Y"}], "\[Rule]", "Z"}], TraditionalForm]],
+  FormatType->"TraditionalForm"],
+ ". We want to show that if ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"v", "\[SmallCircle]", "u"}], TraditionalForm]],
+  FormatType->"TraditionalForm"],
+ " is surjective then ",
+ Cell[BoxData[
+  FormBox["v", TraditionalForm]],
+  FormatType->"TraditionalForm"],
+ " must be surjective as well. Theorema does not yet support function \
+notation, hence we state explicitly what it means for ",
+ Cell[BoxData[
+  FormBox["u", TraditionalForm]],
+  FormatType->"TraditionalForm"],
+ " to be a function from ",
+ Cell[BoxData[
+  FormBox["X", TraditionalForm]],
+  FormatType->"TraditionalForm"],
+ " to ",
+ Cell[BoxData[
+  FormBox["Y", TraditionalForm]],
+  FormatType->"TraditionalForm"],
+ "."
+}], "Text",
+ CellChangeTimes->{{3.614053146328775*^9, 3.614053282667319*^9}, {
+  3.614053314941175*^9, 3.614053436985571*^9}},
+ CellID->1735954631],
 
 Cell["", "OpenEnvironment",
  CellID->486787166],
@@ -1866,21 +1929,21 @@ Cell[BoxData[
     Cell[
      BoxData[
       RowBox[{
-        StyleBox["(u:X->Y)", "FrameLabel"], "  ", 
+        StyleBox["(u:X\[RightArrow]Y)", "FrameLabel"], "  ", 
         ButtonBox[
         "\[Times]", Evaluator -> Automatic, Appearance -> None, 
          ButtonFunction :> 
          Theorema`Language`Session`Private`removeFormula[{
            "ID:112294143", 
-            "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.\
-nb"}]]}]]]}, {None, None}},
+            "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/FirstTour.nb"}]]}]]]}, {None, None}},
  ShowCellTags->False,
  CellChangeTimes->{{3.612015565041473*^9, 3.612015569059937*^9}, {
   3.612015602300718*^9, 3.612015636042988*^9}},
  CellTags->{
   "ID:112294143", 
-   "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
-   "u:X->Y"},
+   "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/FirstTour.nb", "u:X\[RightArrow]Y"},
  CellID->112294143],
 
 Cell["\[GraySquare]", "EndEnvironmentMarker",
@@ -1889,6 +1952,13 @@ Cell["\[GraySquare]", "EndEnvironmentMarker",
 
 Cell["", "CloseEnvironment",
  CellID->697610862],
+
+Cell["\<\
+The theorem then reads as follows.\
+\>", "Text",
+ CellChangeTimes->{{3.614053488553511*^9, 3.61405349671257*^9}, 
+   3.614053536047894*^9},
+ CellID->1427335156],
 
 Cell["", "OpenEnvironment",
  CellID->797956083],
@@ -1909,11 +1979,11 @@ Cell["Theorem (Composition Surjective)", "EnvironmentHeader",
 
 Cell[BoxData[
  RowBox[{
-  RowBox[{"isSur", "[", 
+  RowBox[{"surjective", "[", 
    RowBox[{
     RowBox[{"v", "\[SmallCircle]", "u"}], ",", "X", ",", "Z"}], "]"}], 
   "\[Implies]", 
-  RowBox[{"isSur", "[", 
+  RowBox[{"surjective", "[", 
    RowBox[{"v", ",", "Y", ",", "Z"}], "]"}]}]], "FormalTextInputFormula",
  CellFrameLabels->{{None, 
     Cell[
@@ -1925,16 +1995,17 @@ Cell[BoxData[
          ButtonFunction :> 
          Theorema`Language`Session`Private`removeFormula[{
            "ID:978540590", 
-            "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.\
-nb"}]]}]]]}, {None, None}},
+            "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/FirstTour.nb"}]]}]]]}, {None, None}},
  ShowCellTags->False,
  CellChangeTimes->{{3.595650654707678*^9, 3.595650716465087*^9}, {
   3.612015745549342*^9, 3.612015759667281*^9}, {3.612015790849976*^9, 
-  3.612015802464764*^9}},
+  3.612015802464764*^9}, {3.614053134661842*^9, 3.614053141868476*^9}, {
+  3.614053639700018*^9, 3.614053706066162*^9}},
  CellTags->{
   "ID:978540590", 
-   "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
-   "v \[SmallCircle] u surjective"},
+   "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/FirstTour.nb", "v \[SmallCircle] u surjective"},
  CellID->978540590],
 
 Cell["\[GraySquare]", "EndEnvironmentMarker",
@@ -1968,22 +2039,22 @@ Cell[TextData[{
      TagBox[
       FormBox[
        RowBox[{
-         RowBox[{"isSur", "[", 
+         RowBox[{"surjective", "[", 
            RowBox[{
              RowBox[{"v", "\[SmallCircle]", "u"}], ",", "X", ",", "Z"}], 
            "]"}], "\[Implies]", 
-         RowBox[{"isSur", "[", 
+         RowBox[{"surjective", "[", 
            RowBox[{"v", ",", "Y", ",", "Z"}], "]"}]}], TheoremaForm], 
       DisplayForm]],
     Annotation[#, 
      DisplayForm[
       FormBox[
        RowBox[{
-         RowBox[{"isSur", "[", 
+         RowBox[{"surjective", "[", 
            RowBox[{
              RowBox[{"v", "\[SmallCircle]", "u"}], ",", "X", ",", "Z"}], 
            "]"}], "\[Implies]", 
-         RowBox[{"isSur", "[", 
+         RowBox[{"surjective", "[", 
            RowBox[{"v", ",", "Y", ",", "Z"}], "]"}]}], TheoremaForm]], 
      "Tooltip"]& ],
    Appearance->None,
@@ -1998,8 +2069,8 @@ Cell[TextData[{
     FontVariations->{"Underline"->True}],
    Appearance->None,
    ButtonFunction:>Theorema`Common`displayProof[
-    "/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18/p978540590-1-po.\
-m"],
+    "/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/FirstTour/p978540590-1-po.m"],
    Evaluator->Automatic,
    ImageSize->Automatic,
    Method->"Queued"]]]
@@ -2011,105 +2082,22 @@ m"],
       "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
        Theorema`Interface`GUI`Private`removeGroup[
          ButtonNotebook[], 
-         "/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18/p978540590-\
-1"]]]]}, {None, None}},
+         "/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/FirstTour/p978540590-1"]]]]}, {None, None}},
  CellTags->{"Proof|ID:978540590", "Proof|ID:978540590-1"},
- CellID->301406765],
+ CellID->1365081522],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
    Refresh[
     ReplaceAll[
-     Get["/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18/p978540590-\
-1-display.m"], Theorema`Interface`GUI`Private`FORM -> 
+     Get["/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/FirstTour/p978540590-1-display.m"], 
+     Theorema`Interface`GUI`Private`FORM -> 
      Theorema`Interface`GUI`Private`displayFormulaFromKey], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
   ImageSizeCache->{516., {24., 30.}}]], "ProofInfoBody",
- CellChangeTimes->{3.614002084724037*^9},
- CellID->1393157431]
-}, Closed]],
-
-Cell[CellGroupData[{
-
-Cell[TextData[{
- Cell[BoxData[
-  StyleBox["\<\"\[CheckmarkedBox]\"\>",
-   StripOnInput->False,
-   ShowStringCharacters->False]]],
- " Proof of ",
- Cell[BoxData[
-  ButtonBox[
-   TagBox[
-    TooltipBox[
-     PaneSelectorBox[{False->
-      StyleBox["\<\"(v \[SmallCircle] u surjective)\"\>", "FormReference",
-       StripOnInput->False], True->
-      StyleBox["\<\"(v \[SmallCircle] u surjective)\"\>", "FormReferenceHover",
-       StripOnInput->False]}, Dynamic[
-       CurrentValue["MouseOver"]],
-      FrameMargins->0,
-      ImageSize->Automatic],
-     TagBox[
-      FormBox[
-       RowBox[{
-         RowBox[{"isSur", "[", 
-           RowBox[{
-             RowBox[{"v", "\[SmallCircle]", "u"}], ",", "X", ",", "Z"}], 
-           "]"}], "\[Implies]", 
-         RowBox[{"isSur", "[", 
-           RowBox[{"v", ",", "Y", ",", "Z"}], "]"}]}], TheoremaForm], 
-      DisplayForm]],
-    Annotation[#, 
-     DisplayForm[
-      FormBox[
-       RowBox[{
-         RowBox[{"isSur", "[", 
-           RowBox[{
-             RowBox[{"v", "\[SmallCircle]", "u"}], ",", "X", ",", "Z"}], 
-           "]"}], "\[Implies]", 
-         RowBox[{"isSur", "[", 
-           RowBox[{"v", ",", "Y", ",", "Z"}], "]"}]}], TheoremaForm]], 
-     "Tooltip"]& ],
-   Appearance->None,
-   ButtonFunction:>NotebookLocate["ID:978540590"],
-   Evaluator->Automatic,
-   Method->"Preemptive"]]],
- " #2:   ",
- Cell[BoxData[
-  ButtonBox[
-   StyleBox["\<\"Show proof\"\>",
-    StripOnInput->False,
-    FontVariations->{"Underline"->True}],
-   Appearance->None,
-   ButtonFunction:>Theorema`Common`displayProof[
-    "/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18/p978540590-2-po.\
-m"],
-   Evaluator->Automatic,
-   ImageSize->Automatic,
-   Method->"Queued"]]]
-}], "ProofInfo",
- CellFrameLabels->{{None, 
-    Cell[
-     BoxData[
-      ButtonBox[
-      "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
-       Theorema`Interface`GUI`Private`removeGroup[
-         ButtonNotebook[], 
-         "/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18/p978540590-\
-2"]]]]}, {None, None}},
- CellTags->{"Proof|ID:978540590", "Proof|ID:978540590-2"},
- CellID->1636381004],
-
-Cell[BoxData[
- DynamicBox[ToBoxes[
-   Refresh[
-    ReplaceAll[
-     Get["/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18/p978540590-\
-2-display.m"], Theorema`Interface`GUI`Private`FORM -> 
-     Theorema`Interface`GUI`Private`displayFormulaFromKey], 
-    TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
-  ImageSizeCache->{516., {24., 30.}}]], "ProofInfoBody",
- CellID->1186717905]
+ CellID->7364924]
 }, Closed]]
 }, Open  ]]
 }, Open  ]]
@@ -2896,7 +2884,37 @@ English/TheoremaNotebooks/FirstTour.nb",
     "ID:983404631", 
      "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
 English/TheoremaNotebooks/FirstTour.nb", "<lex"},
-   CellID->983404631]},
+   CellID->983404631],
+  Cell[42949, 1301, 2336, 75, 31, "FormalTextInputFormula",
+   CellTags->{
+    "ID:443431148", 
+     "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/FirstTour.nb", "A\\C"},
+   CellID->443431148],
+  Cell[60619, 1777, 1461, 43, 27, "FormalTextInputFormula",
+   CellTags->{
+    "ID:794877354", 
+     "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/FirstTour.nb", "surjective"},
+   CellID->794877354],
+  Cell[62314, 1829, 950, 25, 22, "FormalTextInputFormula",
+   CellTags->{
+    "ID:1636230891", 
+     "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/FirstTour.nb", "composition"},
+   CellID->1636230891],
+  Cell[65034, 1920, 985, 26, 27, "FormalTextInputFormula",
+   CellTags->{
+    "ID:112294143", 
+     "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/FirstTour.nb", "u:X\[RightArrow]Y"},
+   CellID->112294143],
+  Cell[66854, 1979, 1220, 29, 22, "FormalTextInputFormula",
+   CellTags->{
+    "ID:978540590", 
+     "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/FirstTour.nb", "v \[SmallCircle] u surjective"},
+   CellID->978540590]},
  "(P or Q \[And] if P then Q) \[DoubleLeftRightArrow] Q"->{
   Cell[4925, 135, 2081, 71, 32, "FormalTextInputFormula",
    CellTags->{
@@ -2928,166 +2946,125 @@ English/TheoremaNotebooks/FirstTour.nb", "<lex"},
 English/TheoremaNotebooks/FirstTour.nb", "<lex"},
    CellID->983404631]},
  "ID:443431148"->{
-  Cell[42541, 1289, 2262, 75, 31, "FormalTextInputFormula",
+  Cell[42949, 1301, 2336, 75, 31, "FormalTextInputFormula",
    CellTags->{
     "ID:443431148", 
-     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
-     "A\\C"},
+     "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/FirstTour.nb", "A\\C"},
    CellID->443431148]},
- "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb"->{
-  Cell[42541, 1289, 2262, 75, 31, "FormalTextInputFormula",
-   CellTags->{
-    "ID:443431148", 
-     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
-     "A\\C"},
-   CellID->443431148],
-  Cell[59618, 1756, 1333, 42, 27, "FormalTextInputFormula",
-   CellTags->{
-    "ID:794877354", 
-     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
-     "surjective"},
-   CellID->794877354],
-  Cell[61185, 1807, 876, 25, 22, "FormalTextInputFormula",
-   CellTags->{
-    "ID:1636230891", 
-     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
-     "composition"},
-   CellID->1636230891],
-  Cell[62651, 1857, 889, 26, 27, "FormalTextInputFormula",
-   CellTags->{
-    "ID:112294143", 
-     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
-     "u:X->Y"},
-   CellID->112294143],
-  Cell[64202, 1909, 1041, 28, 22, "FormalTextInputFormula",
-   CellTags->{
-    "ID:978540590", 
-     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
-     "v \[SmallCircle] u surjective"},
-   CellID->978540590]},
  "A\\C"->{
-  Cell[42541, 1289, 2262, 75, 31, "FormalTextInputFormula",
+  Cell[42949, 1301, 2336, 75, 31, "FormalTextInputFormula",
    CellTags->{
     "ID:443431148", 
-     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
-     "A\\C"},
+     "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/FirstTour.nb", "A\\C"},
    CellID->443431148]},
  "Proof|ID:443431148"->{
-  Cell[44961, 1375, 6020, 153, 29, "ProofInfo",
+  Cell[45443, 1387, 6095, 153, 29, "ProofInfo",
    CellTags->{"Proof|ID:443431148", "Proof|ID:443431148-1"},
-   CellID->2083166425],
-  Cell[51462, 1545, 6020, 153, 27, "ProofInfo",
+   CellID->746284607],
+  Cell[52022, 1557, 6096, 153, 27, "ProofInfo",
    CellTags->{"Proof|ID:443431148", "Proof|ID:443431148-2"},
-   CellID->1919753329]},
+   CellID->1162424408]},
  "Proof|ID:443431148-1"->{
-  Cell[44961, 1375, 6020, 153, 29, "ProofInfo",
+  Cell[45443, 1387, 6095, 153, 29, "ProofInfo",
    CellTags->{"Proof|ID:443431148", "Proof|ID:443431148-1"},
-   CellID->2083166425]},
+   CellID->746284607]},
  "Proof|ID:443431148-2"->{
-  Cell[51462, 1545, 6020, 153, 27, "ProofInfo",
+  Cell[52022, 1557, 6096, 153, 27, "ProofInfo",
    CellTags->{"Proof|ID:443431148", "Proof|ID:443431148-2"},
-   CellID->1919753329]},
+   CellID->1162424408]},
  "ID:794877354"->{
-  Cell[59618, 1756, 1333, 42, 27, "FormalTextInputFormula",
+  Cell[60619, 1777, 1461, 43, 27, "FormalTextInputFormula",
    CellTags->{
     "ID:794877354", 
-     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
-     "surjective"},
+     "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/FirstTour.nb", "surjective"},
    CellID->794877354]},
  "surjective"->{
-  Cell[59618, 1756, 1333, 42, 27, "FormalTextInputFormula",
+  Cell[60619, 1777, 1461, 43, 27, "FormalTextInputFormula",
    CellTags->{
     "ID:794877354", 
-     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
-     "surjective"},
+     "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/FirstTour.nb", "surjective"},
    CellID->794877354]},
  "ID:1636230891"->{
-  Cell[61185, 1807, 876, 25, 22, "FormalTextInputFormula",
+  Cell[62314, 1829, 950, 25, 22, "FormalTextInputFormula",
    CellTags->{
     "ID:1636230891", 
-     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
-     "composition"},
+     "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/FirstTour.nb", "composition"},
    CellID->1636230891]},
  "composition"->{
-  Cell[61185, 1807, 876, 25, 22, "FormalTextInputFormula",
+  Cell[62314, 1829, 950, 25, 22, "FormalTextInputFormula",
    CellTags->{
     "ID:1636230891", 
-     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
-     "composition"},
+     "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/FirstTour.nb", "composition"},
    CellID->1636230891]},
  "ID:112294143"->{
-  Cell[62651, 1857, 889, 26, 27, "FormalTextInputFormula",
+  Cell[65034, 1920, 985, 26, 27, "FormalTextInputFormula",
    CellTags->{
     "ID:112294143", 
-     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
-     "u:X->Y"},
+     "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/FirstTour.nb", "u:X\[RightArrow]Y"},
    CellID->112294143]},
- "u:X->Y"->{
-  Cell[62651, 1857, 889, 26, 27, "FormalTextInputFormula",
+ "u:X\[RightArrow]Y"->{
+  Cell[65034, 1920, 985, 26, 27, "FormalTextInputFormula",
    CellTags->{
     "ID:112294143", 
-     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
-     "u:X->Y"},
+     "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/FirstTour.nb", "u:X\[RightArrow]Y"},
    CellID->112294143]},
  "ID:978540590"->{
-  Cell[64202, 1909, 1041, 28, 22, "FormalTextInputFormula",
+  Cell[66854, 1979, 1220, 29, 22, "FormalTextInputFormula",
    CellTags->{
     "ID:978540590", 
-     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
-     "v \[SmallCircle] u surjective"},
+     "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/FirstTour.nb", "v \[SmallCircle] u surjective"},
    CellID->978540590]},
  "v \[SmallCircle] u surjective"->{
-  Cell[64202, 1909, 1041, 28, 22, "FormalTextInputFormula",
+  Cell[66854, 1979, 1220, 29, 22, "FormalTextInputFormula",
    CellTags->{
     "ID:978540590", 
-     "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
-     "v \[SmallCircle] u surjective"},
+     "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/\
+English/TheoremaNotebooks/FirstTour.nb", "v \[SmallCircle] u surjective"},
    CellID->978540590]},
  "Proof|ID:978540590"->{
-  Cell[65466, 1949, 2144, 67, 29, "ProofInfo",
+  Cell[68297, 2020, 2241, 67, 29, "ProofInfo",
    CellTags->{"Proof|ID:978540590", "Proof|ID:978540590-1"},
-   CellID->301406765],
-  Cell[68092, 2033, 2145, 67, 27, "ProofInfo",
-   CellTags->{"Proof|ID:978540590", "Proof|ID:978540590-2"},
-   CellID->1636381004]},
+   CellID->1365081522]},
  "Proof|ID:978540590-1"->{
-  Cell[65466, 1949, 2144, 67, 29, "ProofInfo",
+  Cell[68297, 2020, 2241, 67, 29, "ProofInfo",
    CellTags->{"Proof|ID:978540590", "Proof|ID:978540590-1"},
-   CellID->301406765]},
- "Proof|ID:978540590-2"->{
-  Cell[68092, 2033, 2145, 67, 27, "ProofInfo",
-   CellTags->{"Proof|ID:978540590", "Proof|ID:978540590-2"},
-   CellID->1636381004]}
+   CellID->1365081522]}
  }
 *)
 (*CellTagsIndex
 CellTagsIndex->{
- {"ID:169304498", 108106, 2876},
+ {"ID:169304498", 108448, 2864},
  {"Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
-TheoremaNotebooks/FirstTour.nb", 108514, 2885},
- {"(P or Q \[And] if P then Q) \[DoubleLeftRightArrow] Q", 109111, 2899},
- {"Proof|ID:169304498", 109432, 2907},
- {"Proof|ID:169304498-1", 109590, 2911},
- {"ID:983404631", 109740, 2915},
- {"<lex", 109993, 2922},
- {"ID:443431148", 110254, 2929},
- {"Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", \
-110535, 2936},
- {"A\\C", 111627, 2967},
- {"Proof|ID:443431148", 111861, 2974},
- {"Proof|ID:443431148-1", 112155, 2981},
- {"Proof|ID:443431148-2", 112316, 2985},
- {"ID:794877354", 112469, 2989},
- {"surjective", 112701, 2996},
- {"ID:1636230891", 112936, 3003},
- {"composition", 113171, 3010},
- {"ID:112294143", 113407, 3017},
- {"u:X->Y", 113630, 3024},
- {"ID:978540590", 113859, 3031},
- {"v \[SmallCircle] u surjective", 114129, 3038},
- {"Proof|ID:978540590", 114388, 3045},
- {"Proof|ID:978540590-1", 114679, 3052},
- {"Proof|ID:978540590-2", 114838, 3056}
+TheoremaNotebooks/FirstTour.nb", 108856, 2873},
+ {"(P or Q \[And] if P then Q) \[DoubleLeftRightArrow] Q", 110714, 2917},
+ {"Proof|ID:169304498", 111035, 2925},
+ {"Proof|ID:169304498-1", 111193, 2929},
+ {"ID:983404631", 111343, 2933},
+ {"<lex", 111596, 2940},
+ {"ID:443431148", 111857, 2947},
+ {"A\\C", 112111, 2954},
+ {"Proof|ID:443431148", 112379, 2961},
+ {"Proof|ID:443431148-1", 112672, 2968},
+ {"Proof|ID:443431148-2", 112832, 2972},
+ {"ID:794877354", 112985, 2976},
+ {"surjective", 113251, 2983},
+ {"ID:1636230891", 113520, 2990},
+ {"composition", 113789, 2997},
+ {"ID:112294143", 114059, 3004},
+ {"u:X\[RightArrow]Y", 114338, 3011},
+ {"ID:978540590", 114612, 3018},
+ {"v \[SmallCircle] u surjective", 114916, 3025},
+ {"Proof|ID:978540590", 115209, 3032},
+ {"Proof|ID:978540590-1", 115369, 3036}
  }
 *)
 (*NotebookFileOutline
@@ -3272,116 +3249,119 @@ Cell[CellGroupData[{
 Cell[40841, 1241, 573, 9, 38, "Subsection",
  PageBreakAbove->True,
  CellID->1401737664],
-Cell[41417, 1252, 478, 13, 30, "DisplayFormula",
+Cell[41417, 1252, 127, 2, 24, "Text",
+ CellID->1259721794],
+Cell[41547, 1256, 478, 13, 30, "DisplayFormula",
  CellID->1336903145],
-Cell[41898, 1267, 48, 1, 12, "OpenEnvironment",
+Cell[42028, 1271, 275, 6, 43, "Text",
+ CellID->1586537506],
+Cell[42306, 1279, 48, 1, 12, "OpenEnvironment",
  CellID->1862211767],
 Cell[CellGroupData[{
-Cell[41971, 1272, 374, 9, 37, "EnvironmentHeader",
+Cell[42379, 1284, 374, 9, 37, "EnvironmentHeader",
  CellID->1969336855],
-Cell[42348, 1283, 190, 4, 30, "GlobalDeclaration",
+Cell[42756, 1295, 190, 4, 30, "GlobalDeclaration",
  CellID->1485425788],
-Cell[42541, 1289, 2262, 75, 31, "FormalTextInputFormula",
+Cell[42949, 1301, 2336, 75, 31, "FormalTextInputFormula",
  CellTags->{
   "ID:443431148", 
-   "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
-   "A\\C"},
+   "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/FirstTour.nb", "A\\C"},
  CellID->443431148],
-Cell[44806, 1366, 66, 1, 24, "EndEnvironmentMarker",
+Cell[45288, 1378, 66, 1, 24, "EndEnvironmentMarker",
  CellID->1135255444]
 }, Open  ]],
-Cell[44887, 1370, 49, 1, 16, "CloseEnvironment",
+Cell[45369, 1382, 49, 1, 16, "CloseEnvironment",
  CellID->2069904305],
 Cell[CellGroupData[{
-Cell[44961, 1375, 6020, 153, 29, "ProofInfo",
+Cell[45443, 1387, 6095, 153, 29, "ProofInfo",
  CellTags->{"Proof|ID:443431148", "Proof|ID:443431148-1"},
- CellID->2083166425],
-Cell[50984, 1530, 441, 10, 841, "ProofInfoBody",
- CellID->1055285153]
+ CellID->746284607],
+Cell[51541, 1542, 444, 10, 56, "ProofInfoBody",
+ CellID->2132376103]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[51462, 1545, 6020, 153, 27, "ProofInfo",
+Cell[52022, 1557, 6096, 153, 27, "ProofInfo",
  CellTags->{"Proof|ID:443431148", "Proof|ID:443431148-2"},
- CellID->1919753329],
-Cell[57485, 1700, 441, 10, 841, "ProofInfoBody",
- CellID->340307678]
-}, Closed]]
+ CellID->1162424408],
+Cell[58121, 1712, 443, 10, 56, "ProofInfoBody",
+ CellID->336711669]
+}, Closed]],
+Cell[58579, 1725, 360, 7, 43, "Text",
+ CellID->1718372575]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[57975, 1716, 634, 10, 38, "Subsection",
+Cell[58976, 1737, 634, 10, 38, "Subsection",
  PageBreakAbove->True,
  CellID->2098222979],
-Cell[58612, 1728, 47, 1, 12, "OpenEnvironment",
+Cell[59613, 1749, 47, 1, 12, "OpenEnvironment",
  CellID->161811718],
 Cell[CellGroupData[{
-Cell[58684, 1733, 498, 11, 37, "EnvironmentHeader",
+Cell[59685, 1754, 498, 11, 37, "EnvironmentHeader",
  CellID->875215552],
-Cell[59185, 1746, 430, 8, 30, "GlobalDeclaration",
+Cell[60186, 1767, 430, 8, 30, "GlobalDeclaration",
  CellID->835697010],
-Cell[59618, 1756, 1333, 42, 27, "FormalTextInputFormula",
+Cell[60619, 1777, 1461, 43, 27, "FormalTextInputFormula",
  CellTags->{
   "ID:794877354", 
-   "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
-   "surjective"},
+   "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/FirstTour.nb", "surjective"},
  CellID->794877354],
-Cell[60954, 1800, 228, 5, 30, "GlobalDeclaration",
+Cell[62083, 1822, 228, 5, 30, "GlobalDeclaration",
  CellID->1404418786],
-Cell[61185, 1807, 876, 25, 22, "FormalTextInputFormula",
+Cell[62314, 1829, 950, 25, 22, "FormalTextInputFormula",
  CellTags->{
   "ID:1636230891", 
-   "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
-   "composition"},
+   "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/FirstTour.nb", "composition"},
  CellID->1636230891],
-Cell[62064, 1834, 65, 1, 24, "EndEnvironmentMarker",
+Cell[63267, 1856, 65, 1, 24, "EndEnvironmentMarker",
  CellID->508918864]
 }, Open  ]],
-Cell[62144, 1838, 49, 1, 16, "CloseEnvironment",
+Cell[63347, 1860, 49, 1, 16, "CloseEnvironment",
  CellID->1758635247],
-Cell[62196, 1841, 47, 1, 12, "OpenEnvironment",
+Cell[63399, 1863, 1177, 39, 64, "Text",
+ CellID->1735954631],
+Cell[64579, 1904, 47, 1, 12, "OpenEnvironment",
  CellID->486787166],
 Cell[CellGroupData[{
-Cell[62268, 1846, 380, 9, 37, "EnvironmentHeader",
+Cell[64651, 1909, 380, 9, 37, "EnvironmentHeader",
  CellID->321209696],
-Cell[62651, 1857, 889, 26, 27, "FormalTextInputFormula",
+Cell[65034, 1920, 985, 26, 27, "FormalTextInputFormula",
  CellTags->{
   "ID:112294143", 
-   "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
-   "u:X->Y"},
+   "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/FirstTour.nb", "u:X\[RightArrow]Y"},
  CellID->112294143],
-Cell[63543, 1885, 65, 1, 24, "EndEnvironmentMarker",
+Cell[66022, 1948, 65, 1, 24, "EndEnvironmentMarker",
  CellID->229871635]
 }, Open  ]],
-Cell[63623, 1889, 48, 1, 16, "CloseEnvironment",
+Cell[66102, 1952, 48, 1, 16, "CloseEnvironment",
  CellID->697610862],
-Cell[63674, 1892, 47, 1, 12, "OpenEnvironment",
+Cell[66153, 1955, 170, 5, 24, "Text",
+ CellID->1427335156],
+Cell[66326, 1962, 47, 1, 12, "OpenEnvironment",
  CellID->797956083],
 Cell[CellGroupData[{
-Cell[63746, 1897, 453, 10, 37, "EnvironmentHeader",
+Cell[66398, 1967, 453, 10, 37, "EnvironmentHeader",
  CellID->1624492557],
-Cell[64202, 1909, 1041, 28, 22, "FormalTextInputFormula",
+Cell[66854, 1979, 1220, 29, 22, "FormalTextInputFormula",
  CellTags->{
   "ID:978540590", 
-   "Source:/home/wwindste/Habilitation/Talks/KeplerSymposium-06-18.nb", 
-   "v \[SmallCircle] u surjective"},
+   "Source:/home/wwindste/Theorema.2/Theorema/Theorema/Documentation/English/\
+TheoremaNotebooks/FirstTour.nb", "v \[SmallCircle] u surjective"},
  CellID->978540590],
-Cell[65246, 1939, 131, 2, 24, "EndEnvironmentMarker",
+Cell[68077, 2010, 131, 2, 24, "EndEnvironmentMarker",
  CellID->669906630]
 }, Open  ]],
-Cell[65392, 1944, 49, 1, 16, "CloseEnvironment",
+Cell[68223, 2015, 49, 1, 16, "CloseEnvironment",
  CellID->1376117217],
 Cell[CellGroupData[{
-Cell[65466, 1949, 2144, 67, 29, "ProofInfo",
+Cell[68297, 2020, 2241, 67, 29, "ProofInfo",
  CellTags->{"Proof|ID:978540590", "Proof|ID:978540590-1"},
- CellID->301406765],
-Cell[67613, 2018, 442, 10, 188, "ProofInfoBody",
- CellID->1393157431]
-}, Closed]],
-Cell[CellGroupData[{
-Cell[68092, 2033, 2145, 67, 27, "ProofInfo",
- CellTags->{"Proof|ID:978540590", "Proof|ID:978540590-2"},
- CellID->1636381004],
-Cell[70240, 2102, 400, 9, 235, "ProofInfoBody",
- CellID->1186717905]
+ CellID->1365081522],
+Cell[70541, 2089, 441, 10, 56, "ProofInfoBody",
+ CellID->7364924]
 }, Closed]]
 }, Open  ]]
 }, Open  ]]

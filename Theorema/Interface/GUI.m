@@ -1331,11 +1331,11 @@ submitProveTask[ ] :=
 					],
 					{$eliminateBranches, $eliminateSteps, $eliminateFormulae}, $replExistProof], 
 				Method -> "Queued", Active -> ($selectedProofGoal =!= {})],
-			Column[{
-				Labeled[ displaySelectedGoal[ $selectedProofGoal], translate["selGoal"], {{Top, Left}}],
-				Labeled[ displaySelectedKB[ $selectedProofKB], translate["selKB"], {{Top, Left}}],
-				Labeled[ summarizeBuiltins[ "prove"], translate["selBui"], {{Top, Left}}]
-			}],
+			Pane[ Column[{
+					Labeled[ displaySelectedGoal[ $selectedProofGoal], translate["selGoal"], {{Top, Left}}],
+					Labeled[ displaySelectedKB[ $selectedProofKB], translate["selKB"], {{Top, Left}}],
+					Labeled[ summarizeBuiltins[ "prove"], translate["selBui"], {{Top, Left}}]}
+				], {360, Automatic}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic],
 			
 			Column[{				
 				Labeled[ displaySelectedRules[ $selectedRuleSet], translate[ "selectedRules"]<>":", {{Top,Left}}],
@@ -1358,7 +1358,7 @@ submitProveTask[ ] :=
     				translate[ "pInteractive"]<>":", {{Left, Top}}],
 				Labeled[ 
 					Column[{
-						translate[ "replaceExistProof"] <> ": " <> If[ $replExistProof > $numExistProofs, "\[LongDash]", ToString[ $replExistProof]],
+						translate[ "replaceExistProof"] <> ": " <> If[ $replExistProof > $numExistProofs, "\[LongDash]", "#" <> ToString[ $replExistProof]],
 						translate[ "proofCellStatus"] <> ": " <>
 							Switch[ $proofCellStatus,
 								Automatic, translate[ "auto"],
