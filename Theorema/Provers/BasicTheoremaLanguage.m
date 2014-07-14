@@ -412,7 +412,8 @@ this:PRFSIT$[ g:FML$[ _, _?isLiteralExpression, __], k_List, id_, rest___?Option
 
 inferenceRule[ knowledgeRewriting] = 
 this:PRFSIT$[ g_FML$, k_List, id_, rest___?OptionQ] :> performProofStep[
-	Module[ {rules, lastKBRewriting, rewritable, lastKjRewriting, usedSubsts, conds, newForms, newKB = {}, usedForRW = {}, j, i, thisKBRewriting = {}, pos},
+	Module[ {rules, lastKBRewriting, rewritable, lastKjRewriting, usedSubsts, conds, newForms, newKB = {}, usedForRW = {}, 
+			j, i, thisKBRewriting = {}, pos},
 		If[ kbRules@this === {},
 			Throw[ $Failed]
 		];
@@ -437,6 +438,8 @@ this:PRFSIT$[ g_FML$, k_List, id_, rest___?OptionQ] :> performProofStep[
 			(* there are potential rules for kj *)
 			(* do not use a rule derived from kj to kj itself *)
 			{newForms, usedSubsts, conds} = replaceListAndTrack[ formula@rewritable[[j]], filterRules[ rules, key@rewritable[[j]]]];
+			(* record the rules already tried for this formula, these will not be tried again on the same formula *)
+			lastKjRewriting = DeleteCases[ DeleteDuplicates[ Map[ First, rules]], key@rewritable[[j]]];
 			(* walk through newForms and join them to the newKB *)
 			Do[
 				pos = {};
@@ -445,14 +448,16 @@ this:PRFSIT$[ g_FML$, k_List, id_, rest___?OptionQ] :> performProofStep[
 					AppendTo[ newKB, {makeAssumptionFML[ formula -> newForms[[i]]]}];
 					(* pos contains a list of positions of plain formulas in the list of plain formulas. 
 					   When we extract exactly these positions from the whole KB we get the whole formula datastructures *)
-					AppendTo[ usedForRW, Prepend[ Join[ usedSubsts[[i]], Extract[ k, Flatten[ pos, 1]]], rewritable[[j]]]];
-					lastKjRewriting = Join[ lastKjRewriting, Map[ key, usedSubsts[[i]]]];
+					AppendTo[ usedForRW, Prepend[ Join[ usedSubsts[[i]], Extract[ k, Flatten[ pos, 1]]], rewritable[[j]]]],
+					(* else *)
+					(* the conditions were not fulfilled, we try the rules again next time, because conditions may be fulfilled then *)
+					lastKjRewriting = Complement[ lastKjRewriting, Map[ key, usedSubsts[[i]]]];
 				],
 				{i, Length[ newForms]}
 			];
-			(* thisKBRewriting contains for each rewritable formula a list of keys of formulas that have actually been used for rewriting.
+			(* thisKBRewriting contains for each rewritable formula a list of keys of formulas that have already been tried for rewriting.
 				In the next run, we do not use these rules again. *)
-			AppendTo[ thisKBRewriting, {key@rewritable[[j]], Union[ lastKjRewriting]}], 
+			AppendTo[ thisKBRewriting, {key@rewritable[[j]], lastKjRewriting}], 
 			{j, Length[ rewritable]}
 		];
 		If[ ValueQ[ newForms],
@@ -461,7 +466,7 @@ this:PRFSIT$[ g_FML$, k_List, id_, rest___?OptionQ] :> performProofStep[
 				toBeProved[ goal -> g, kb -> joinKB[ Flatten[ newKB], k], "KBRewriting" -> thisKBRewriting, rest]],
 			(* this means we exited the outer loop always through the Continue[], i.e. there were no new rewrite rules available ->
 				the rule should not apply *)
-			$Failed
+			Throw[ $Failed]
 		]
 	]
 ]

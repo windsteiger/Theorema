@@ -43,7 +43,7 @@ whether the proof text for the rule will be activated. (ruleTextActive)"],
             Tooltip["\:270d", "Specifies, whether the proof text for the rule \
 will be activated. (ruleTextActive)"], Spacer[5], 
             "Knowledge base contains two contradicting universally quantified \
-formulae."}], LineBreakWithin -> False], Style[Row[{"(2)", Spacer[2], 
+formulas."}], LineBreakWithin -> False], Style[Row[{"(2)", Spacer[2], 
             Tooltip["\:270d", "Specifies, whether the proof text for the rule \
 will be activated. (ruleTextActive)"], Spacer[5], "Knowledge base contains a \
 universally quantified formulae that contradicts some other formula."}], 
@@ -118,11 +118,11 @@ will be activated. (ruleTextActive)"], Spacer[5],
         Labeled[360, "Search Time:", Left]}], "Proof Simplification" -> 
       Column[{Null, Null, Null}], "Interactive Proving" -> 
       Column[{Null, Null, Null}], "Proof Cells" -> "automatic", 
-     "statistics" -> Column[{Labeled[16.299744`7.362695781361074, 
+     "statistics" -> Column[{Labeled[2.580242`6.5621754380339254, 
          "Time spent for finding the proof:", Left], 
         Labeled[0., "Time spent for simplifying the proof:", Left]}]}, 
     AutoAction -> True, ControlPlacement -> Left], 
-  "Restore environment" -> Row[{"Really restore all relevant settings to the \
+  "Restore settings" -> Row[{"Really restore all relevant settings to the \
 values they had when this action was performed last time?", 
      Button["OK", Theorema`Interface`GUI`Private`setProveEnv["/home/wwindste/\
 Theorema.2/Theorema/Theorema/Documentation/English/TheoremaNotebooks/FirstTou\
