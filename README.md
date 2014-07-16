@@ -3,14 +3,14 @@ Theorema
 A System for Mathematical Theory Exploration and Automated Theorem Proving
 --------------
 
-This repository serves for the development of the Theorema system, see
-also http://www.risc.jku.at/research/theorema/software/.
-
 Theorema was conceived and initiated around 1995 by Bruno Buchberger and
 reflects his view of "doing mathematics". It is being developed under his
 guidance by the Theorema Working Group at the Research Institute for Symbolic
 Computation, Johannes Kepler University, Linz - Hagenberg, Austria.
 Theorema 2.0 is a major re-launch mainly developed by Wolfgang Windsteiger.
+
+This repository serves for the development of the Theorema system, see
+also http://www.risc.jku.at/research/theorema/software/.
 
 Theorema is a Mathematica package implemented in the Mathematica programming
 language. The repository contains an entire _Wolfram Workbench project_ for
