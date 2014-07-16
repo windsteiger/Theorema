@@ -257,4 +257,8 @@ With[ {lang = "English"},
 	translate[ "()", lang] = "Parenthesized expression";
 	translate[ "(())", lang] = "Double parenthesized expression";
 
+(* Theorema`Computation`Language` *)
+	translate["predArgN", lang] = "Predicate \"`1`\" applied on `2` arguments; At most `3` arguments are expected.";
+	translate["connArgM", lang] = "Connective \"`1`\" applied on `2` arguments; Exactly `3` arguments are expected.";
+
 ]

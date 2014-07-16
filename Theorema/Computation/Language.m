@@ -55,6 +55,189 @@ setComputationContext[ args___] := unexpected[ setComputationContext, {args}]
 
 
 (* ::Section:: *)
+(* Logical Abbreviations *)
+
+(* 'getOperatorPosition' returns the position of the main operator in an annotated/domain operator. *)
+getOperatorPosition[ DomainOperation$TM[ _, op_], {pos___}] := getOperatorPosition[ op, {pos, 2}]
+getOperatorPosition[ Annotated$TM[ op_, __], {pos___}] := getOperatorPosition[ op, {pos, 1}]
+getOperatorPosition[ op_Symbol, pos_List] := pos
+getOperatorPosition[ _] := $Failed
+
+(* 'getOperator' retrieves the main operator from an annotated/domain operator. *)
+getOperator[ expr_] :=
+	Module[ {p = getOperatorPosition[ expr, {}]},
+		Switch[ p,
+			{},
+			expr,
+			{__Integer},
+			Extract[ expr, p],
+			_,
+			$Failed
+		]
+	]
+	
+(* 'setOperator' sets the main operator of an annotated/domain operator. *)
+setOperator[ op_, new_] :=
+	Module[ {pos = getOperatorPosition[ op, {}]},
+		Switch[ pos,
+			{},
+			new,
+			{__Integer},
+			ReplacePart[ op, pos :> new],
+			_,
+			op
+		]
+	]
+
+isPosRelation[ "Equal"|Equal$TM] := buiActive["Equal"]
+isPosRelation[ "Less"|Less$TM] := buiActive["Less"]
+isPosRelation[ "LessEqual"|LessEqual$TM] := buiActive["LessEqual"]
+isPosRelation[ "Greater"|Greater$TM] := buiActive["Greater"]
+isPosRelation[ "GreaterEqual"|GreaterEqual$TM] := buiActive["GreaterEqual"]
+isPosRelation[ "Subset"|Subset$TM] := buiActive["Subset"]
+isPosRelation[ "SubsetEqual"|SubsetEqual$TM] := buiActive["SubsetEqual"]
+isPosRelation[ "Superset"|Superset$TM] := buiActive["Superset"]
+isPosRelation[ "SupersetEqual"|SupersetEqual$TM] := buiActive["SupersetEqual"]
+isPosRelation[ "Element"|"ReverseElement"|Element$TM|ReverseElement$TM] := buiActive["IsElement"]
+isPosRelation[ _] := False
+
+isNegRelation[ "Unequal"|Unequal$TM] := buiActive["Equal"]
+isNegRelation[ "NotLess"|NotLess$TM] := buiActive["Less"]
+isNegRelation[ "NotLessEqual"|NotLessEqual$TM] := buiActive["LessEqual"]
+isNegRelation[ "NotGreater"|NotGreater$TM] := buiActive["Greater"]
+isNegRelation[ "NotGreaterEqual"|NotGreaterEqual$TM] := buiActive["GreaterEqual"]
+isNegRelation[ "NotSubset"|NotSubset$TM] := buiActive["Subset"]
+isNegRelation[ "NotSubsetEqual"|NotSubsetEqual$TM] := buiActive["SubsetEqual"]
+isNegRelation[ "NotSuperset"|NotSuperset$TM] := buiActive["Superset"]
+isNegRelation[ "NotSupersetEqual"|NotSupersetEqual$TM] := buiActive["SupersetEqual"]
+isNegRelation[ "NotElement"|"NotReverseElement"|NotElement$TM|NotReverseElement$TM] := buiActive["IsElement"]
+isNegRelation[ _] := False
+
+negateRelation[ Unequal$TM] := Equal$TM
+negateRelation[ Equal$TM] := Unequal$TM
+negateRelation[ op_Symbol] :=
+	Module[ {name = SymbolName[ op]},
+		If[ StringLength[ name] > 3 && StringTake[ name, 3] === "Not",
+			ToExpression[ StringDrop[ name, 3]],
+			ToExpression[ StringJoin[ "Not", name]]
+		]
+	]
+
+Equal$TM[ a_, b__, c_] /; isPosRelation["Equal"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Equal$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
+Unequal$TM[ a_] /; isNegRelation["Unequal"] := Not$TM[ Equal$TM[ a]]
+Unequal$TM[ a_, b_] /; isNegRelation["Unequal"] := Not$TM[ Equal$TM[ a, b]]
+Unequal$TM[ a_, b__, c_] /; isNegRelation["Unequal"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ Equal$TM[ #1, #2]]]&, {{a, b}, {b, c}}]], 1, Hold]
+
+Less$TM[ a_, b__, c_] /; isPosRelation["Less"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Less$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
+NotLess$TM[ a_] /; isNegRelation["NotLess"] := Not$TM[ Less$TM[ a]]
+NotLess$TM[ a_, b_] /; isNegRelation["NotLess"] := Not$TM[ Less$TM[ a, b]]
+NotLess$TM[ a_, b__, c_] /; isNegRelation["NotLess"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ Less$TM[ #1, #2]]]&, {{a, b}, {b, c}}]], 1, Hold]
+
+LessEqual$TM[ a_, b__, c_] /; isPosRelation["LessEqual"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ LessEqual$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
+NotLessEqual$TM[ a_] /; isNegRelation["NotLessEqual"] := Not$TM[ LessEqual$TM[ a]]
+NotLessEqual$TM[ a_, b_] /; isNegRelation["NotLessEqual"] := Not$TM[ LessEqual$TM[ a, b]]
+NotLessEqual$TM[ a_, b__, c_] /; isNegRelation["NotLessEqual"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ LessEqual$TM[ #1, #2]]]&, {{a, b}, {b, c}}]], 1, Hold]
+
+Greater$TM[ a_, b__, c_] /; isPosRelation["Greater"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Greater$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
+NotGreater$TM[ a_] /; isNegRelation["NotGreater"] := Not$TM[ Greater$TM[ a]]
+NotGreater$TM[ a_, b_] /; isNegRelation["NotGreater"] := Not$TM[ Greater$TM[ a, b]]
+NotGreater$TM[ a_, b__, c_] /; isNegRelation["NotGreater"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ Greater$TM[ #1, #2]]]&, {{a, b}, {b, c}}]], 1, Hold]
+
+GreaterEqual$TM[ a_, b__, c_] /; isPosRelation["GreaterEqual"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ GreaterEqual$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
+NotGreaterEqual$TM[ a_] /; isNegRelation["NotGreaterEqual"] := Not$TM[ GreaterEqual$TM[ a]]
+NotGreaterEqual$TM[ a_, b_] /; isNegRelation["NotGreaterEqual"] := Not$TM[ GreaterEqual$TM[ a, b]]
+NotGreaterEqual$TM[ a_, b__, c_] /; isNegRelation["NotGreaterEqual"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ GreaterEqual$TM[ #1, #2]]]&, {{a, b}, {b, c}}]], 1, Hold]
+
+Subset$TM[ a_, b__, c_] /; isPosRelation["Subset"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Subset$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
+NotSubset$TM[ a_] /; isNegRelation["NotSubset"] := Not$TM[ Subset$TM[ a]]
+NotSubset$TM[ a_, b_] /; isNegRelation["NotSubset"] := Not$TM[ Subset$TM[ a, b]]
+NotSubset$TM[ a_, b__, c_] /; isNegRelation["NotSubset"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ Subset$TM[ #1, #2]]]&, {{a, b}, {b, c}}]], 1, Hold]
+
+SubsetEqual$TM[ a_, b__, c_] /; isPosRelation["SubsetEqual"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ SubsetEqual$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
+NotSubsetEqual$TM[ a_] /; isNegRelation["NotSubsetEqual"] := Not$TM[ SubsetEqual$TM[ a]]
+NotSubsetEqual$TM[ a_, b_] /; isNegRelation["NotSubsetEqual"] := Not$TM[ SubsetEqual$TM[ a, b]]
+NotSubsetEqual$TM[ a_, b__, c_] /; isNegRelation["NotSubsetEqual"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ SubsetEqual$TM[ #1, #2]]]&, {{a, b}, {b, c}}]], 1, Hold]
+
+Superset$TM[ a_, b__, c_] /; isPosRelation["Superset"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Superset$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
+NotSuperset$TM[ a_] /; isNegRelation["NotSuperset"] := Not$TM[ Superset$TM[ a]]
+NotSuperset$TM[ a_, b_] /; isNegRelation["NotSuperset"] := Not$TM[ Superset$TM[ a, b]]
+NotSuperset$TM[ a_, b__, c_] /; isNegRelation["NotSuperset"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ Superset$TM[ #1, #2]]]&, {{a, b}, {b, c}}]], 1, Hold]
+
+SupersetEqual$TM[ a_, b__, c_] /; isPosRelation["SupersetEqual"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ SupersetEqual$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
+NotSupersetEqual$TM[ a_] /; isNegRelation["NotSupersetEqual"] := Not$TM[ SupersetEqual$TM[ a]]
+NotSupersetEqual$TM[ a_, b_] /; isNegRelation["NotSupersetEqual"] := Not$TM[ SupersetEqual$TM[ a, b]]
+NotSupersetEqual$TM[ a_, b_, c__] /; isNegRelation["NotSupersetEqual"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ SupersetEqual$TM[ #1, #2]]]&, {{a, b}, {b, c}}]], 1, Hold]
+	
+Element$TM[ a_, b__, c_] /; isPosRelation["Element"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Element$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
+NotElement$TM[ a_] /; isNegRelation["NotElement"] := Not$TM[ Element$TM[ a]]
+NotElement$TM[ a_, b_] /; isNegRelation["NotElement"] := Not$TM[ Element$TM[ a, b]]
+NotElement$TM[ a_, b__, c_] /; isNegRelation["NotElement"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ Element$TM[ #1, #2]]]&, {{a, b}, {b, c}}]], 1, Hold]
+
+ReverseElement$TM[ a_, b_] /; isPosRelation["ReverseElement"] := Element$TM[ b, a]
+ReverseElement$TM[ a_, b_, c__] /; isPosRelation["ReverseElement"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Element$TM[ #2, #1]]&, {{a, b}, {b, c}}]], 1, Hold]
+NotReverseElement$TM[ a_] /; isNegRelation["NotReverseElement"] := Not$TM[ Element$TM[ a]]
+NotReverseElement$TM[ a_, b_] /; isNegRelation["NotReverseElement"] := Not$TM[ Element$TM[ b, a]]
+NotReverseElement$TM[ a_, b__, c_] /; isNegRelation["NotReverseElement"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ Element$TM[ #2, #1]]]&, {{a, b}, {b, c}}]], 1, Hold]
+
+DomainOperation$TM[ dom_, op_][ a_, b_] /; And[ getOperator[ op] === ReverseElement$TM, isPosRelation[ "ReverseElement"]] :=
+	DomainOperation$TM[ dom, setOperator[ op, Element$TM]][ b, a]
+DomainOperation$TM[ dom_, op_][ a_] :=
+	Module[ {rel},
+		Not$TM[ DomainOperation$TM[ dom, setOperator[ op, negateRelation[ rel]]][ a]] /; And[ (rel = getOperator[ op]) =!= $Failed, isNegRelation[ rel]]
+	]
+DomainOperation$TM[ dom_, op_][ a_, b_] :=
+	Module[ {rel},
+		Not$TM[ DomainOperation$TM[ dom, setOperator[ op, negateRelation[ rel]]][ a, b]] /; And[ (rel = getOperator[ op]) =!= $Failed, isNegRelation[ rel]]
+	]
+DomainOperation$TM[ dom_, op_][ a_, b__, c_] :=
+	Module[ {rel, p},
+		If[ p,
+			Flatten[ Apply[ And$TM, MapThread[ Hold[ DomainOperation$TM[ dom, op][ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold],
+			Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ DomainOperation$TM[ dom, setOperator[ op, negateRelation[ rel]]][ #1, #2]]]&, {{a, b}, {b, c}}]], 1, Hold]
+		] /; And[ (rel = getOperator[ op]) =!= $Failed, (p = isPosRelation[ rel]) || isNegRelation[ rel]]
+	]
+
+Annotated$TM[ op_, ann___][ a_, b_] /; And[ getOperator[ op] === ReverseElement$TM, isPosRelation[ "ReverseElement"]] :=
+	Annotated$TM[ setOperator[ op, Element$TM], ann][ b, a]
+Annotated$TM[ op_, ann___][ a_] :=
+	Module[ {rel},
+		Not$TM[ Annotated$TM[ setOperator[ op, negateRelation[ rel]], ann][ a]] /; And[ (rel = getOperator[ op]) =!= $Failed, isNegRelation[ rel]]
+	]
+Annotated$TM[ op_, ann___][ a_, b_] :=
+	Module[ {rel},
+		Not$TM[ Annotated$TM[ setOperator[ op, negateRelation[ rel]], ann][ a, b]] /; And[ (rel = getOperator[ op]) =!= $Failed, isNegRelation[ rel]]
+	]
+Annotated$TM[ op_, ann___][ a_, b__, c_] :=
+	Module[ {rel, p},
+		If[ p,
+			Flatten[ Apply[ And$TM, MapThread[ Hold[ Annotated$TM[ op, ann][ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold],
+			Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ Annotated$TM[ setOperator[ op, negateRelation[ rel]], ann][ #1, #2]]]&, {{a, b}, {b, c}}]], 1, Hold]
+		] /; And[ (rel = getOperator[ op]) =!= $Failed, (p = isPosRelation[ rel]) || isNegRelation[ rel]]
+	]
+	
+OperatorChain$TM[ a1_, op1_, a2_, rest___] :=
+	Module[ {opList},
+		(
+			chainToConjunction[ {a1, op1, a2, rest}, {}]
+		) /;
+			And[
+				Mod[ Length[ Hold[ rest]], 2] === 0,
+				opList = DeleteDuplicates[ Apply[ Hold, Map[ getOperator, Prepend[ Take[ {rest}, {1, -1, 2}], op1]]]];
+				Apply[ And, Map[ (isPosRelation[ #] || isNegRelation[ #])&, opList]]
+			]
+	]
+	
+chainToConjunction[ {a1_, op1_, a2_, rest___}, {accumulator___}] :=
+	chainToConjunction[ {a2, rest}, {accumulator, op1[ a1, a2]}]
+chainToConjunction[ l_List, {accumulator___}] := And$TM[ accumulator]
+
+DoubleLeftArrow$TM[ a_, b_] := Implies$TM[ b, a]
+DoubleLeftArrow$TM[ a_, b___] := Fold[ Implies$TM[ #2, #1]&, a, {b}]
+
+NotExists$TM[ r_RNG$, cond_, form_] := Not$TM[ Exists$TM[ r, cond, form]]
+	
+
+(* ::Section:: *)
 (* Arithmetic *)
 
 tmaAtomQ[ VAR$[ _]] := True
@@ -121,54 +304,17 @@ isValidArgNum[ Plus$TM|Times$TM, _Integer?NonNegative] := True
 isValidArgNum[ Subtract$TM|Divide$TM, 2] := True
 isValidArgNum[ Minus$TM, 1] := True
 isValidArgNum[ _, _] := False
-
-(* amaletzk: Although the following definitions do exactly the same thing (only that they are defined for the different
-	intervals), I think it is not possible to only give 1 definition dealing with all of those intervals at once
-	(alternatives ("|") unfortunately don't work in this case). *)
 	
-(* Note that we have to treat the case "Power[a, b]" differently, since 'b' does not have to be in the domain.
-	Same for "Radical[a, b]". *)
-(dom_IntegerInterval$TM)[Power$TM][ a_, b_] /; buiActive["IntegerInterval"] && buiActivePower[ b] && isInInterval[ a, dom] :=
+(* We have to treat the case "Power[a, b]" differently, since 'b' does not have to be in the domain. Same for "Radical". *)
+DomainOperation$TM[ dom:((h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ _, _, _, _]), Power$TM][ a_, b_] /; buiActive[StringDrop[SymbolName[h], -3]] && buiActivePower[ b] && isInInterval[ a, dom] :=
 	Module[ {out},
 		out /; (out = Power[ a, b]; isInInterval[ out, dom])
 	]
-(dom_IntegerInterval$TM)[Radical$TM][ a_, b_] /; buiActive["IntegerInterval"] && buiActive["Radical"] && isInInterval[ a, dom] :=
+DomainOperation$TM[ dom:((h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ _, _, _, _]), Radical$TM][ a_, b_] /; buiActive[StringDrop[SymbolName[h], -3]] && buiActive[ "Radical"] && isInInterval[ a, dom] :=
 	Module[ {out},
 		out /; (out = Power[ a, Power[ b, -1]]; isInInterval[ out, dom])
 	]
-(dom_IntegerInterval$TM)[op_Symbol][ a___] /; buiActive["IntegerInterval"] && isValidArgNum[ op, Length[{a}]] && Apply[ And, Map[ isInInterval[ #, dom]&, Hold[ a]]] :=
-	Module[ {out, opShortName, opShort},
-		out /; And[
-					opShortName = StringDrop[ SymbolName[ op], -3]; buiActiveArithmetic[ opShortName],
-					opShort = ToExpression[ opShortName]; out = opShort[ a]; isInInterval[ out, dom]
-				  ]
-	]
-	
-(dom_RationalInterval$TM)[Power$TM][ a_, b_] /; buiActive["RationalInterval"] && buiActivePower[ b] && isInInterval[ a, dom] :=
-	Module[ {out},
-		out /; (out = Power[ a, b]; isInInterval[ out, dom])
-	]
-(dom_RationalInterval$TM)[Radical$TM][ a_, b_] /; buiActive["RationalInterval"] && buiActive["Radical"] && isInInterval[ a, dom] :=
-	Module[ {out},
-		out /; (out = Power[ a, Power[ b, -1]]; isInInterval[ out, dom])
-	]
-(dom_RationalInterval$TM)[op_Symbol][ a___] /; buiActive["RationalInterval"] && isValidArgNum[ op, Length[{a}]] && Apply[ And, Map[ isInInterval[ #, dom]&, Hold[ a]]] :=
-	Module[ {out, opShortName, opShort},
-		out /; And[
-					opShortName = StringDrop[ SymbolName[ op], -3]; buiActiveArithmetic[ opShortName],
-					opShort = ToExpression[ opShortName]; out = opShort[ a]; isInInterval[ out, dom]
-				  ]
-	]
-	
-(dom_RealInterval$TM)[Power$TM][ a_, b_] /; buiActive["RealInterval"] && buiActivePower[ b] && isInInterval[ a, dom] :=
-	Module[ {out},
-		out /; (out = Power[ a, b]; isInInterval[ out, dom])
-	]
-(dom_RealInterval$TM)[Radical$TM][ a_, b_] /; buiActive["RealInterval"] && buiActive["Radical"] && isInInterval[ a, dom] :=
-	Module[ {out},
-		out /; (out = Power[ a, Power[ b, -1]]; isInInterval[ out, dom])
-	]
-(dom_RealInterval$TM)[op_Symbol][ a___] /; buiActive["RealInterval"] && isValidArgNum[ op, Length[{a}]] && Apply[ And, Map[ isInInterval[ #, dom]&, Hold[ a]]] :=
+DomainOperation$TM[ dom:((h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ _, _, _, _]), op_Symbol][ a___] /; buiActive[StringDrop[SymbolName[h], -3]] && isValidArgNum[ op, Length[{a}]] && Apply[ And, Map[ isInInterval[ #, dom]&, Hold[ a]]] :=
 	Module[ {out, opShortName, opShort},
 		out /; And[
 					opShortName = StringDrop[ SymbolName[ op], -3]; buiActiveArithmetic[ opShortName],
@@ -176,15 +322,15 @@ isValidArgNum[ _, _] := False
 				  ]
 	]
 
-\[DoubleStruckCapitalC]$TM[Power$TM][ a_, b_] /; buiActive["\[DoubleStruckCapitalC]"] && buiActivePower[ b] && isComplex[ a] :=
+DomainOperation$TM[\[DoubleStruckCapitalC]$TM, Power$TM][ a_, b_] /; buiActive["\[DoubleStruckCapitalC]"] && buiActivePower[ b] && isComplex[ a] :=
 	Module[ {out},
 		out /; (out = Power[ a, b]; isComplex[ out])
 	]
-\[DoubleStruckCapitalC]$TM[Radical$TM][ a_, b_] /; buiActive["\[DoubleStruckCapitalC]"] && buiActive["Radical"] && isComplex[ a] :=
+DomainOperation$TM[\[DoubleStruckCapitalC]$TM, Radical$TM][ a_, b_] /; buiActive["\[DoubleStruckCapitalC]"] && buiActive["Radical"] && isComplex[ a] :=
 	Module[ {out},
 		out /; (out = Power[ a, Power[ b, -1]]; isComplex[ out])
 	]
-\[DoubleStruckCapitalC]$TM[op_Symbol][ a___] /; buiActive["\[DoubleStruckCapitalC]"] && isValidArgNum[ op, Length[{a}]] && Apply[ And, Map[ isComplex, Hold[ a]]] :=
+DomainOperation$TM[\[DoubleStruckCapitalC]$TM, op_Symbol][ a___] /; buiActive["\[DoubleStruckCapitalC]"] && isValidArgNum[ op, Length[{a}]] && Apply[ And, Map[ isComplex, Hold[ a]]] :=
 	Module[ {out, opShortName, opShort},
 		out /; And[
 					opShortName = StringDrop[ SymbolName[ op], -3]; buiActiveArithmetic[ opShortName],
@@ -192,30 +338,30 @@ isValidArgNum[ _, _] := False
 				  ]
 	]
 	
-\[DoubleStruckCapitalC]P$TM[Radical$TM][ a_Tuple$TM, b:Tuple$TM[ _?Positive, _]] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActive["Radical"] && isComplexP[ a] && isComplexP[ b] :=
+DomainOperation$TM[\[DoubleStruckCapitalC]P$TM, Radical$TM][ a_Tuple$TM, b:Tuple$TM[ _?Positive, _]] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActive["Radical"] && isComplexP[ a] && isComplexP[ b] :=
 	Module[ {out},
 		out /; (out = polarPower[ a, polarPower[ b, -1]]; isComplexP[ out])
 	]
-\[DoubleStruckCapitalC]P$TM[Radical$TM][ a:Tuple$TM[ r_, phi_], b_] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActive["Radical"] && isComplexP[ a] :=
+DomainOperation$TM[\[DoubleStruckCapitalC]P$TM, Radical$TM][ a:Tuple$TM[ r_, phi_], b_] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActive["Radical"] && isComplexP[ a] :=
 	Module[ {out},
 		out /; (out = polarPower[ a, Power[ b, -1]]; isComplexP[ out])
 	]
 (* We implement some operations on polar-complexes separately because of efficiency. *)
-\[DoubleStruckCapitalC]P$TM[Minus$TM][ a:Tuple$TM[ r_, phi_]] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActive["Minus"] && isComplexP[ a] :=
+DomainOperation$TM[\[DoubleStruckCapitalC]P$TM, Minus$TM][ a:Tuple$TM[ r_, phi_]] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActive["Minus"] && isComplexP[ a] :=
 	Tuple$TM[ r, If[ phi >= Pi, phi - Pi, phi + Pi]]
-\[DoubleStruckCapitalC]P$TM[Times$TM][ a:Tuple$TM[ ra_, phia_], b:Tuple$TM[ rb_, phib_]] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActive["Times"] && isComplexP[ a] && isComplexP[ b] :=
+DomainOperation$TM[\[DoubleStruckCapitalC]P$TM, Times$TM][ a:Tuple$TM[ ra_, phia_], b:Tuple$TM[ rb_, phib_]] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActive["Times"] && isComplexP[ a] && isComplexP[ b] :=
 	Tuple$TM[ ra * rb, phia + phib]
-\[DoubleStruckCapitalC]P$TM[Divide$TM][ a:Tuple$TM[ ra_, phia_], b:Tuple$TM[ rb_?Positive, phib_]] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActiveArithmetic["Divide"] && isComplexP[ a] && isComplexP[ b] :=
+DomainOperation$TM[\[DoubleStruckCapitalC]P$TM, Divide$TM][ a:Tuple$TM[ ra_, phia_], b:Tuple$TM[ rb_?Positive, phib_]] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActiveArithmetic["Divide"] && isComplexP[ a] && isComplexP[ b] :=
 	Tuple$TM[ ra / rb, phia - phib]
-\[DoubleStruckCapitalC]P$TM[Power$TM][ a_Tuple$TM, b_Tuple$TM] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActive["Power"] && isComplexP[ a] && isComplexP[ b] :=
+DomainOperation$TM[\[DoubleStruckCapitalC]P$TM, Power$TM][ a_Tuple$TM, b_Tuple$TM] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActive["Power"] && isComplexP[ a] && isComplexP[ b] :=
 	Module[ {out},
 		out /; (out = polarPower[ a, b]; isComplexP[ out])
 	]
-\[DoubleStruckCapitalC]P$TM[Power$TM][ a:Tuple$TM[ r_, phi_], b_] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActivePower[ b] && isComplexP[ a] :=
+DomainOperation$TM[\[DoubleStruckCapitalC]P$TM, Power$TM][ a:Tuple$TM[ r_, phi_], b_] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActivePower[ b] && isComplexP[ a] :=
 	Module[ {out},
 		out /; (out = Tuple$TM[ Power[ r, b], phi * b]; isComplexP[ out])
 	]
-\[DoubleStruckCapitalC]P$TM[op_Symbol][ a___Tuple$TM] /; buiActive["\[DoubleStruckCapitalC]P"] && isValidArgNum[ op, Length[{a}]] && Apply[ And, Map[ isComplexP, Hold[ a]]] :=
+DomainOperation$TM[\[DoubleStruckCapitalC]P$TM, op_Symbol][ a___Tuple$TM] /; buiActive["\[DoubleStruckCapitalC]P"] && isValidArgNum[ op, Length[{a}]] && Apply[ And, Map[ isComplexP, Hold[ a]]] :=
 	Module[ {outCartesian, out, opShortName, opShort, aCartesian},
 		out /; And[
 					opShortName = StringDrop[ SymbolName[ op], -3]; buiActiveArithmetic[ opShortName],
@@ -247,21 +393,21 @@ polarPower[ Tuple$TM[ ra_, phia_], Tuple$TM[ rb_, phib_]] :=
 		]
 	]
 	
-IntegerQuotientRing$TM[ m_?isModulus][Divide$TM][ a_?isInteger, b_?isInteger] /; buiActive["IntegerQuotientRing"] && buiActive["Radical"] && NonNegative[ a] && a < m && Positive[ b] && b < m:=
+DomainOperation$TM[IntegerQuotientRing$TM[ m_?isModulus], Divide$TM][ a_?isInteger, b_?isInteger] /; buiActive["IntegerQuotientRing"] && buiActive["Radical"] && NonNegative[ a] && a < m && Positive[ b] && b < m:=
 	Module[ {gcd, qr},
 		Mod[ First[ qr] * gcd[[2, 1]], m] /; (gcd = ExtendedGCD[ b, m]; qr = QuotientRemainder[ a, First[ gcd]]; Last[ qr] === 0)
 	]
 (* We use "PowerMod" rather than "Mod[Power[..]]", because it is much more efficient
 	(according to Mathematica's documentation center). *)
-IntegerQuotientRing$TM[ m_?isModulus][Radical$TM][ a_?isInteger, b_] /; buiActive["IntegerQuotientRing"] && buiActive["Radical"] && NonNegative[ a] && a < m :=
+DomainOperation$TM[IntegerQuotientRing$TM[ m_?isModulus], Radical$TM][ a_?isInteger, b_] /; buiActive["IntegerQuotientRing"] && buiActive["Radical"] && NonNegative[ a] && a < m :=
 	Module[ {out},
 		out /; Quiet[ Check[ out = PowerMod[ a, Power[ b, -1], m]; True, False]]
 	]
-IntegerQuotientRing$TM[ m_?isModulus][Power$TM][ a_?isInteger, b_] /; buiActive["IntegerQuotientRing"] && buiActivePower[ b] && NonNegative[ a] && a < m :=
+DomainOperation$TM[IntegerQuotientRing$TM[ m_?isModulus], Power$TM][ a_?isInteger, b_] /; buiActive["IntegerQuotientRing"] && buiActivePower[ b] && NonNegative[ a] && a < m :=
 	Module[ {out},
 		out /; Quiet[ Check[ out = PowerMod[ a, b, m]; True, False]]
 	]
-IntegerQuotientRing$TM[ m_?isModulus][op_Symbol][ a___?isInteger] /; buiActive["IntegerQuotientRing"] && isValidArgNum[ op, Length[{a}]] && Apply[ And, Map[ (NonNegative[#] && # < m)&, Hold[ a]]] :=
+DomainOperation$TM[IntegerQuotientRing$TM[ m_?isModulus], op_Symbol][ a___?isInteger] /; buiActive["IntegerQuotientRing"] && isValidArgNum[ op, Length[{a}]] && Apply[ And, Map[ (NonNegative[#] && # < m)&, Hold[ a]]] :=
 	Module[ {out, opShortName, opShort},
 		Mod[ out, m] /; And[
 						opShortName = StringDrop[ SymbolName[ op], -3]; buiActiveArithmetic[ opShortName],
@@ -269,21 +415,21 @@ IntegerQuotientRing$TM[ m_?isModulus][op_Symbol][ a___?isInteger] /; buiActive["
 					]
 	]
 	
-IntegerQuotientRingPM$TM[ m_?isModulus][Divide$TM][ a_?isInteger, b_?isInteger] /; buiActive["IntegerQuotientRingPM"] && buiActive["Radical"] && lowerPM[ m] <= a <= upperPM[ m] && lowerPM[ m] <= b <= upperPM[ m] :=
+DomainOperation$TM[IntegerQuotientRingPM$TM[ m_?isModulus], Divide$TM][ a_?isInteger, b_?isInteger] /; buiActive["IntegerQuotientRingPM"] && buiActive["Radical"] && lowerPM[ m] <= a <= upperPM[ m] && lowerPM[ m] <= b <= upperPM[ m] :=
 	Module[ {gcd, qr},
 		representPM[ First[ qr] * gcd[[2, 1]], m] /; (gcd = ExtendedGCD[ b, m]; qr = QuotientRemainder[ a, First[ gcd]]; Last[ qr] === 0)
 	]
 (* We use "PowerMod" rather than "Mod[Power[..]]", because it is much more efficient
 	(according to Mathematica's documentation center). *)
-IntegerQuotientRingPM$TM[ m_?isModulus][Radical$TM][ a_?isInteger, b_] /; buiActive["IntegerQuotientRingPM"] && buiActive["Radical"] && lowerPM[ m] <= a <= upperPM[ m] :=
+DomainOperation$TM[IntegerQuotientRingPM$TM[ m_?isModulus], Radical$TM][ a_?isInteger, b_] /; buiActive["IntegerQuotientRingPM"] && buiActive["Radical"] && lowerPM[ m] <= a <= upperPM[ m] :=
 	Module[ {out},
 		representPM[ out, m] /; Quiet[ Check[ out = PowerMod[ a, Power[ b, -1], m]; True, False]]
 	]
-IntegerQuotientRingPM$TM[ m_?isModulus][Power$TM][ a_?isInteger, b_] /; buiActive["IntegerQuotientRingPM"] && buiActivePower[ b] && lowerPM[ m] <= a <= upperPM[ m] :=
+DomainOperation$TM[IntegerQuotientRingPM$TM[ m_?isModulus], Power$TM][ a_?isInteger, b_] /; buiActive["IntegerQuotientRingPM"] && buiActivePower[ b] && lowerPM[ m] <= a <= upperPM[ m] :=
 	Module[ {out},
 		representPM[ out, m] /; Quiet[ Check[ out = PowerMod[ a, b, m]; True, False]]
 	]
-IntegerQuotientRingPM$TM[ m_?isModulus][op_Symbol][ a___?isInteger] /; buiActive["IntegerQuotientRingPM"] && isValidArgNum[ op, Length[{a}]] :=
+DomainOperation$TM[IntegerQuotientRingPM$TM[ m_?isModulus], op_Symbol][ a___?isInteger] /; buiActive["IntegerQuotientRingPM"] && isValidArgNum[ op, Length[{a}]] :=
 	With[ {l = lowerPM[ m], u = upperPM[ m]},
 	Module[ {out, opShortName, opShort},
 		representPM[ out, m] /; And[
@@ -302,34 +448,23 @@ upperPM[ m_] := Ceiling[ (m - 1) / 2];
 isBinaryRelation[ Equal$TM|Less$TM|LessEqual$TM|Greater$TM|GreaterEqual$TM] := True
 isBinaryRelation[ _] := False
 
-(* Although the following definitions do exactly the same thing (only that they are defined for the different
-	intervals), I think it is not possible to only give 1 definition dealing with all of those intervals at once
-	(alternatives ("|") unfortunately don't work). *)
-(dom_IntegerInterval$TM)[rel_Symbol?isBinaryRelation][ a_, b_] /; buiActive["IntegerInterval"] && isInInterval[ a, dom] && isInInterval[ b, dom] :=
+DomainOperation$TM[ dom:((h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ _, _, _, _]), rel_Symbol?isBinaryRelation][ a_, b_] /; buiActive[StringDrop[SymbolName[h], -3]] && isInInterval[ a, dom] && isInInterval[ b, dom] :=
 	Module[ {relShortName, relShort},
 		(relShort = ToExpression[ relShortName];
 		relShort[ a, b]) /; (relShortName = StringDrop[ SymbolName[ rel], -3]; buiActive[ relShortName])
 	]
-(dom_RationalInterval$TM)[rel_Symbol?isBinaryRelation][ a_, b_] /; buiActive["RationalInterval"] && isInInterval[ a, dom] && isInInterval[ b, dom] :=
-	Module[ {relShortName, relShort},
-		(relShort = ToExpression[ relShortName];
-		relShort[ a, b]) /; (relShortName = StringDrop[ SymbolName[ rel], -3]; buiActive[ relShortName])
-	]
-(dom_RealInterval$TM)[rel_Symbol?isBinaryRelation][ a_, b_] /; buiActive["RealInterval"] && isInInterval[ a, dom] && isInInterval[ b, dom] :=
-	Module[ {relShortName, relShort},
-		(relShort = ToExpression[ relShortName];
-		relShort[ a, b]) /; (relShortName = StringDrop[ SymbolName[ rel], -3]; buiActive[ relShortName])
-	]
+
 (* The only relation that makes sense for complex numbers is equality, since no meaningful order relations
 	are defined (give error by Mathematica). *)
-\[DoubleStruckCapitalC]$TM[Equal$TM][ a_, b_] /; buiActive["\[DoubleStruckCapitalC]"] && buiActive["Equal"] && isComplex[ a] && isComplex[ b] :=
+DomainOperation$TM[ \[DoubleStruckCapitalC]$TM, Equal$TM][ a_, b_] /; buiActive["\[DoubleStruckCapitalC]"] && buiActive["Equal"] && isComplex[ a] && isComplex[ b] :=
 	a == b
-\[DoubleStruckCapitalC]P$TM[Equal$TM][ a:Tuple$TM[ ra_, phia_], b:Tuple$TM[ rb_, phib_]] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActive["Equal"] && isComplexP[ a] && isComplexP[ b] :=
+DomainOperation$TM[ \[DoubleStruckCapitalC]P$TM, Equal$TM][ a:Tuple$TM[ ra_, phia_], b:Tuple$TM[ rb_, phib_]] /; buiActive["\[DoubleStruckCapitalC]P"] && buiActive["Equal"] && isComplexP[ a] && isComplexP[ b] :=
 	ra == rb && (ra == 0 || EvenQ[ (phia - phib) / Pi])
+
 (* The only relation that makes sense for quotient rings is equality. *)
-IntegerQuotientRing$TM[ m_?isModulus][Equal$TM][ a_, b_] /; buiActive["IntegerQuotientRing"] && buiActive["Equal"] && NonNegative[ a] && a < m && NonNegative[ b] && b < m :=
+DomainOperation$TM[ IntegerQuotientRing$TM[ m_?isModulus], Equal$TM][ a_, b_] /; buiActive["IntegerQuotientRing"] && buiActive["Equal"] && NonNegative[ a] && a < m && NonNegative[ b] && b < m :=
 	a == b
-IntegerQuotientRingPM$TM[ m_?isModulus][Equal$TM][ a_, b_] /; buiActive["IntegerQuotientRingPM"] && buiActive["Equal"] && lowerPM[ m] <= a <= upperPM[ m] && lowerPM[ m] <= b <= upperPM[ m] :=
+DomainOperation$TM[ IntegerQuotientRingPM$TM[ m_?isModulus], Equal$TM][ a_, b_] /; buiActive["IntegerQuotientRingPM"] && buiActive["Equal"] && lowerPM[ m] <= a <= upperPM[ m] && lowerPM[ m] <= b <= upperPM[ m] :=
 	a == b
 
 
@@ -337,29 +472,21 @@ IntegerQuotientRingPM$TM[ m_?isModulus][Equal$TM][ a_, b_] /; buiActive["Integer
 (* ::Section:: *)
 (* Ring Constants/Operations *)
 
-(dom_IntegerInterval$TM)[0] /; buiActive["IntegerInterval"] && isInInterval[ 0, dom] := 0
-(dom_RationalInterval$TM)[0] /; buiActive["RationalInterval"] && isInInterval[ 0, dom] := 0
-(dom_RealInterval$TM)[0] /; buiActive["RealInterval"] && isInInterval[ 0, dom] := 0
-\[DoubleStruckCapitalC]$TM[0] /; buiActive["\[DoubleStruckCapitalC]"] := 0
-\[DoubleStruckCapitalC]P$TM[0] /; buiActive["\[DoubleStruckCapitalC]P"] := Tuple$TM[0, 0]
-IntegerQuotientRing$TM[ m_?isModulus][0] /; buiActive["IntegerQuotientRing"] := 0
-IntegerQuotientRingPM$TM[ m_?isModulus][0] /; buiActive["IntegerQuotientRingPM"] := 0
+DomainOperation$TM[ dom:((h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ _, _, _, _]), 0] /; buiActive[StringDrop[SymbolName[h], -3]] && isInInterval[ 0, dom] := 0
+DomainOperation$TM[ \[DoubleStruckCapitalC]$TM, 0] /; buiActive["\[DoubleStruckCapitalC]"] := 0
+DomainOperation$TM[ \[DoubleStruckCapitalC]P$TM, 0] /; buiActive["\[DoubleStruckCapitalC]P"] := Tuple$TM[0, 0]
+DomainOperation$TM[ (h:(IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ _?isModulus], 0] /; buiActive[StringDrop[SymbolName[h], -3]] := 0
 
-(dom_IntegerInterval$TM)[1] /; buiActive["IntegerInterval"] && isInInterval[ 1, dom] := 1
-(dom_RationalInterval$TM)[1] /; buiActive["RationalInterval"] && isInInterval[ 1, dom] := 1
-(dom_RealInterval$TM)[1] /; buiActive["RealInterval"] && isInInterval[ 1, dom] := 1
-\[DoubleStruckCapitalC]$TM[1] /; buiActive["\[DoubleStruckCapitalC]"] := 1
-\[DoubleStruckCapitalC]P$TM[1] /; buiActive["\[DoubleStruckCapitalC]P"] := Tuple$TM[1, 0]
-IntegerQuotientRing$TM[ m_?isModulus][1] /; buiActive["IntegerQuotientRing"] && m > 1 := 1
-IntegerQuotientRingPM$TM[ m_?isModulus][1] /; buiActive["IntegerQuotientRingPM"] && m > 1 := 1
+DomainOperation$TM[ dom:((h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ _, _, _, _]), 1] /; buiActive[StringDrop[SymbolName[h], -3]] && isInInterval[ 1, dom] := 1
+DomainOperation$TM[ \[DoubleStruckCapitalC]$TM, 1] /; buiActive["\[DoubleStruckCapitalC]"] := 1
+DomainOperation$TM[ \[DoubleStruckCapitalC]P$TM, 1] /; buiActive["\[DoubleStruckCapitalC]P"] := Tuple$TM[1, 0]
+DomainOperation$TM[ (h:(IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ m_?isModulus], 1] /; buiActive[StringDrop[SymbolName[h], -3]] && m > 1 := 1
 
-(dom_IntegerInterval$TM)[Element$TM][ a_] /; buiActive["IntegerInterval"] := isInInterval[ a, dom]
-(dom_RationalInterval$TM)[Element$TM][ a_] /; buiActive["RationalInterval"] := isInInterval[ a, dom]
-(dom_RealInterval$TM)[Element$TM][ a_] /; buiActive["RealInterval"] := isInInterval[ a, dom]
-\[DoubleStruckCapitalC]$TM[Element$TM][ a_] /; buiActive["\[DoubleStruckCapitalC]"] := isComplex[ a]
-\[DoubleStruckCapitalC]P$TM[Element$TM][ a_] /; buiActive["\[DoubleStruckCapitalC]P"] := isComplexP[ a]
-IntegerQuotientRing$TM[ m_?isModulus][Element$TM][ a_] /; buiActive["IntegerQuotientRing"] := isInteger[ a] && 0 <= a && a <= m-1
-IntegerQuotientRingPM$TM[ m_?isModulus][Element$TM][ a_] /; buiActive["IntegerQuotientRingPM"] := isInteger[ a] && lowerPM[ m] <= a && a <= upperPM[ m]
+DomainOperation$TM[ dom:((h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ _, _, _, _]), Element$TM][ a_] /; buiActive["IsElement"] && buiActive[StringDrop[SymbolName[h], -3]] := isInInterval[ a, dom]
+DomainOperation$TM[ \[DoubleStruckCapitalC]$TM, Element$TM][ a_] /; buiActive["IsElement"] && buiActive["\[DoubleStruckCapitalC]"] := isComplex$TM[ a]
+DomainOperation$TM[ \[DoubleStruckCapitalC]P$TM, Element$TM][ a_] /; buiActive["IsElement"] && buiActive["\[DoubleStruckCapitalC]P"] := isComplexP$TM[ a]
+DomainOperation$TM[ IntegerQuotientRing$TM[ m_?isModulus], Element$TM][ a_] /; buiActive["IsElement"] && buiActive["IntegerQuotientRing"] := isInteger$TM[ a] && 0 <= a && a <= m-1
+DomainOperation$TM[ IntegerQuotientRingPM$TM[ m_?isModulus], Element$TM][ a_] /; buiActive["IsElement"] && buiActive["IntegerQuotientRingPM"] := isInteger$TM[ a] && lowerPM[ m] <= a && a <= upperPM[ m]
 
 
 
@@ -367,14 +494,47 @@ IntegerQuotientRingPM$TM[ m_?isModulus][Element$TM][ a_] /; buiActive["IntegerQu
 (* Logic *)
 
 
-SetAttributes[ {And$TM, Or$TM}, HoldAll]
+SetAttributes[ {And$TM, Or$TM, Nand$TM, Nor$TM}, HoldAll]
 Not$TM[ a_] /; buiActive["Not"] := Not[ a]
 And$TM[ pre___, a_, mid___, a_, post___] /; buiActive["And"] := And$TM[ pre, a, mid, post]
 And$TM[ a___] /; buiActive["And"] := And[ a]
 Or$TM[ pre___, a_, mid___, a_, post___] /; buiActive["Or"] := Or$TM[ pre, a, mid, post]
 Or$TM[ a___] /; buiActive["Or"] := Or[ a]
 Implies$TM[ a__] /; buiActive["Implies"] := Implies[ a]
-Iff$TM[ a__] /; buiActive["Iff"] := Equivalent[ a]
+Iff$TM[ _] /; buiActive["Iff"] := True
+Iff$TM[ PatternSequence[___, True, ___, False, ___]|PatternSequence[___, False, ___, True, ___]] /; buiActive["Iff"] := False
+Iff$TM[ a__] /; buiActive["Iff"] :=
+	Module[ {res},
+		Apply[ Iff$TM, res] /; (res = DeleteDuplicates[ Hold[ a]]) =!= Hold[ a]
+	]
+Nand$TM[ a___] /; buiActive["Nand"] := Not$TM[ And$TM[ a]]
+Nor$TM[ a___] /; buiActive["Nor"] := Not$TM[ Or$TM[ a]]
+Xor$TM[ ] /; buiActive["Xor"] := False
+Xor$TM[ a_] /; buiActive["Xor"] := a
+Xor$TM[ pre___, False, post___] /; buiActive["Xor"] := Xor$TM[ pre, post]
+Xor$TM[ pre___, a_, mid___, a_, post___] /; buiActive["Xor"] := Xor$TM[ pre, mid, post]
+Xor$TM[ pre___, True, post___] /; buiActive["Xor"] := Not$TM[ Xor$TM[ pre, post]]
+Xor$TM[ a__] /; buiActive["Xor"] :=
+	Module[ {l = Hold[ a], i, n, out = Hold[]},
+		n = Length[ l];
+		For[ i = 1, i <= n, i += 2,
+			Scan[ PrependTo[ out, Join[ #, Map[ Not$TM, Complement[ l, #]]]]&, Subsets[ l, {i}]]
+		];
+		Apply[ Or$TM, ReplacePart[ out, {_, 0} -> And$TM]]
+	]
+Xnor$TM[ ] /; buiActive["Xnor"] := True
+Xnor$TM[ a_] /; buiActive["Xnor"] := Not$TM[ a]
+Xnor$TM[ pre___, False, post___] /; buiActive["Xnor"] := Xnor$TM[ pre, post]
+Xnor$TM[ pre___, a_, mid___, a_, post___] /; buiActive["Xnor"] := Xnor$TM[ pre, mid, post]
+Xnor$TM[ pre___, True, post___] /; buiActive["Xnor"] := Not$TM[ Xnor$TM[ pre, post]]
+Xnor$TM[ a__] /; buiActive["Xnor"] :=
+	Module[ {l = Hold[ a], i, n, out = Hold[]},
+		n = Length[ l];
+		For[ i = 0, i <= n, i += 2,
+			Scan[ PrependTo[ out, Join[ #, Map[ Not$TM, Complement[ l, #]]]]&, Subsets[ l, {i}]]
+		];
+		Apply[ Or$TM, ReplacePart[ out, {_, 0} -> And$TM]]
+	]
 Componentwise$TM[ P_, args___] /; buiActive["Componentwise"] := Apply[ And, Map[ P, Hold[args]]]
 
 (* We replace the free variables one after the other, because some might depend on others, and a
@@ -399,12 +559,14 @@ Scan[ SetAttributes[ #, HoldRest] &, {Forall$TM, Exists$TM,
   UnionOf$TM, IntersectionOf$TM, Such$TM, SuchUnique$TM, ArgMin$TM, ArgMax$TM, TheArgMin$TM, TheArgMax$TM}]
 Scan[ SetAttributes[ #, HoldFirst] &, {SETRNG$, STEPRNG$}]
 
-Forall$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["Forall"] := 
+Forall$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, form_] /; buiActive["Forall"] := 
  	Module[ {splitC},
  		(* The condition MUST be kept unevaluated! Same in all other quantifiers. *)
  		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
-   			Forall$TM[ RNG$[r], rc, Forall$TM[ RNG$[s], sc, form]]
+ 		With[ {rc = First[ splitC], sc = Last[ splitC]},
+ 			With[ {tmp = Delete[ Hold[ Forall$TM[ RNG$[ s], sc, form]], {1, 2, 0}]},
+	 			Apply[ Forall$TM, Flatten[ Hold[ RNG$[ r], rc, tmp], 1, Hold]]
+ 			]
    		]
   	]
 
@@ -449,11 +611,13 @@ forallIteration[ {x_, iter__}, cond_, form_] :=
 	] (*end catch*)
  ]
     
-Exists$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["Exists"] := 
+Exists$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, form_] /; buiActive["Exists"] := 
  	Module[ {splitC},
  		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
-   			Exists$TM[ RNG$[r], rc, Exists$TM[ RNG$[s], sc, form]]
+   		With[ {rc = First[ splitC], sc = Last[ splitC]},
+ 			With[ {tmp = Delete[ Hold[ Exists$TM[ RNG$[ s], sc, form]], {1, 2, 0}]},
+	 			Apply[ Exists$TM, Flatten[ Hold[ RNG$[ r], rc, tmp], 1, Hold]]
+ 			]
    		]
   	]
 
@@ -532,63 +696,73 @@ sequenceOfIteration[ $Failed, _, _] := $Failed
 sequenceOfIteration[ args___] := 
  unexpected[ sequenceOfIteration, {args}]
 
+(* amaletzk: If we use 'makeSet' and 'makeTuple', then we get problems with contexts in proofs:
+	'Set$TM' and 'Tuple$TM' appear without any context then ... *)
 SetOf$TM[ RNG$[ r__], cond_, form_] :=
 	Module[ {s},
-		Apply[ makeSet, s] /; (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
+		Apply[ Set$TM, s] /; (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
 	]
 
 TupleOf$TM[ RNG$[ r__], cond_, form_] :=
 	Module[ {s},
-		Apply[ makeTuple, s] /; (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
+		Apply[ Tuple$TM, s] /; (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
 	]
   	
 (* We have to split several summations into individual ones,
 	because the various ranges may depend on each other, and this does not work in connection with
 	"sequenceOfIteration". Same with "ProductOf", "MaximumOf", etc. *)
-SumOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["SumOf"] :=
+SumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, form_] /; buiActive["SumOf"] :=
  	Module[ {splitC},
  		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
- 			SumOf$TM[ RNG$[r], rc, SumOf$TM[ RNG$[s], sc, form]]
- 		]
+ 		With[ {rc = First[ splitC], sc = Last[ splitC]},
+ 			With[ {tmp = Delete[ Hold[ SumOf$TM[ RNG$[ s], sc, form]], {1, 2, 0}]},
+	 			Apply[ SumOf$TM, Flatten[ Hold[ RNG$[ r], rc, tmp], 1, Hold]]
+ 			]
+   		]
 	]
 SumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["SumOf"] :=
 	Module[ {v},
 		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Plus$TM, 0]) =!= $Failed
 	]
-SumOf$TM[ RNG$[ r_, s__], cond_, dom_, form_] /; buiActive["SumOf"] :=
+SumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, dom_, form_] /; buiActive["SumOf"] :=
  	Module[ {splitC},
  		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
- 			SumOf$TM[ RNG$[r], rc, dom, SumOf$TM[ RNG$[s], sc, dom, form]]
- 		]
+ 		With[ {rc = First[ splitC], sc = Last[ splitC]},
+ 			With[ {tmp = Delete[ Hold[ SumOf$TM[ RNG$[ s], sc, dom, form]], {1, 2, 0}]},
+	 			Apply[ SumOf$TM, Flatten[ Hold[ RNG$[ r], rc, dom, tmp], 1, Hold]]
+ 			]
+   		]
 	]
 SumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, dom_, form_] /; buiActive["SumOf"] :=
 	Module[ {v},
-		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, dom[Plus$TM], Theorema`Computation`Knowledge`Underscript$TM[0, dom]]) =!= $Failed
+		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, DomainOperation$TM[ dom, Plus$TM], DomainOperation$TM[ dom, 0]]) =!= $Failed
 	]
 	
-ProductOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["ProductOf"] :=
+ProductOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, form_] /; buiActive["ProductOf"] :=
  	Module[ {splitC},
  		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
- 			ProductOf$TM[ RNG$[r], rc, ProductOf$TM[ RNG$[s], sc, form]]
- 		]
+ 		With[ {rc = First[ splitC], sc = Last[ splitC]},
+ 			With[ {tmp = Delete[ Hold[ ProductOf$TM[ RNG$[ s], sc, form]], {1, 2, 0}]},
+	 			Apply[ ProductOf$TM, Flatten[ Hold[ RNG$[ r], rc, tmp], 1, Hold]]
+ 			]
+   		]
 	]
 ProductOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["ProductOf"] :=
 	Module[ {v},
 		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Times$TM, 1]) =!= $Failed
 	]
-ProductOf$TM[ RNG$[ r_, s__], cond_, dom_, form_] /; buiActive["ProductOf"] :=
+ProductOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, dom_, form_] /; buiActive["ProductOf"] :=
  	Module[ {splitC},
  		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
- 			ProductOf$TM[ RNG$[r], rc, dom, ProductOf$TM[ RNG$[s], sc, dom, form]]
- 		]
+ 		With[ {rc = First[ splitC], sc = Last[ splitC]},
+ 			With[ {tmp = Delete[ Hold[ ProductOf$TM[ RNG$[ s], sc, dom, form]], {1, 2, 0}]},
+	 			Apply[ ProductOf$TM, Flatten[ Hold[ RNG$[ r], rc, dom, tmp], 1, Hold]]
+ 			]
+   		]
 	]
 ProductOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, dom_, form_] /; buiActive["ProductOf"] :=
 	Module[ {v},
-		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, dom[Times$TM], Theorema`Computation`Knowledge`Underscript$TM[1, dom]]) =!= $Failed
+		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, DomainOperation$TM[ dom, Times$TM], DomainOperation$TM[ dom, 1]]) =!= $Failed
 	]
 	
 SetAttributes[ valueIteration, HoldRest]
@@ -648,94 +822,110 @@ valueIteration[ $Failed, _, _] := $Failed
 valueIteration[ args___] := unexpected[ valueIteration, {args}]
 
 
-MaximumOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["MaximumOf"] :=
+MaximumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, form_] /; buiActive["MaximumOf"] :=
  	Module[ {splitC},
  		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
- 			MaximumOf$TM[ RNG$[r], rc, MaximumOf$TM[ RNG$[s], sc, form]]
- 		]
+ 		With[ {rc = First[ splitC], sc = Last[ splitC]},
+ 			With[ {tmp = Delete[ Hold[ MaximumOf$TM[ RNG$[ s], sc, form]], {1, 2, 0}]},
+	 			Apply[ MaximumOf$TM, Flatten[ Hold[ RNG$[ r], rc, tmp], 1, Hold]]
+ 			]
+   		]
 	]
-MaximumOf$TM[ RNG$[ r_], cond_, form_] /; buiActive["MaximumOf"] :=
+MaximumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["MaximumOf"] :=
 	Module[ {v},
 		max$TM[ Apply[ makeSet, v]] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
-MaximumOf$TM[ RNG$[ r_, s__], cond_, ord_, form_] /; buiActive["MaximumOf"] :=
+MaximumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, ord_, form_] /; buiActive["MaximumOf"] :=
  	Module[ {splitC},
  		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
- 			MaximumOf$TM[ RNG$[r], rc, ord, MaximumOf$TM[ RNG$[s], sc, ord, form]]
- 		]
+ 		With[ {rc = First[ splitC], sc = Last[ splitC]},
+ 			With[ {tmp = Delete[ Hold[ MaximumOf$TM[ RNG$[ s], sc, ord, form]], {1, 2, 0}]},
+	 			Apply[ MaximumOf$TM, Flatten[ Hold[ RNG$[ r], rc, ord, tmp], 1, Hold]]
+ 			]
+   		]
 	]
-MaximumOf$TM[ RNG$[ r_], cond_, ord_, form_] /; buiActive["MaximumOf"] :=
+MaximumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, ord_, form_] /; buiActive["MaximumOf"] :=
 	Module[ {v},
 		Subscript$TM[ max$TM, ord][ Apply[ makeSet, v]] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
 	
-MinimumOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["MinimumOf"] :=
+MinimumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, form_] /; buiActive["MinimumOf"] :=
  	Module[ {splitC},
  		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
- 			MinimumOf$TM[ RNG$[r], rc, MinimumOf$TM[ RNG$[s], sc, form]]
- 		]
+ 		With[ {rc = First[ splitC], sc = Last[ splitC]},
+ 			With[ {tmp = Delete[ Hold[ MinimumOf$TM[ RNG$[ s], sc, form]], {1, 2, 0}]},
+	 			Apply[ MinimumOf$TM, Flatten[ Hold[ RNG$[ r], rc, tmp], 1, Hold]]
+ 			]
+   		]
 	]
-MinimumOf$TM[ RNG$[ r_], cond_, form_] /; buiActive["MinimumOf"] :=
+MinimumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["MinimumOf"] :=
 	Module[ {v},
 		min$TM[ Apply[ makeSet, v]] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
-MinimumOf$TM[ RNG$[ r_, s__], cond_, ord_, form_] /; buiActive["MinimumOf"] :=
+MinimumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, ord_, form_] /; buiActive["MinimumOf"] :=
  	Module[ {splitC},
  		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
- 			MinimumOf$TM[ RNG$[r], rc, ord, MinimumOf$TM[ RNG$[s], sc, ord, form]]
- 		]
+ 		With[ {rc = First[ splitC], sc = Last[ splitC]},
+ 			With[ {tmp = Delete[ Hold[ MinimumOf$TM[ RNG$[ s], sc, ord, form]], {1, 2, 0}]},
+	 			Apply[ MinimumOf$TM, Flatten[ Hold[ RNG$[ r], rc, ord, tmp], 1, Hold]]
+ 			]
+   		]
 	]
-MinimumOf$TM[ RNG$[ r_], cond_, ord_, form_] /; buiActive["MinimumOf"] :=
+MinimumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, ord_, form_] /; buiActive["MinimumOf"] :=
 	Module[ {v},
 		Subscript$TM[ min$TM, ord][ Apply[ makeSet, v]] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
 	
-UnionOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["UnionOf"] :=
+UnionOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, form_] /; buiActive["UnionOf"] :=
  	Module[ {splitC},
  		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
- 			UnionOf$TM[ RNG$[r], rc, UnionOf$TM[ RNG$[s], sc, form]]
- 		]
+ 		With[ {rc = First[ splitC], sc = Last[ splitC]},
+ 			With[ {tmp = Delete[ Hold[ UnionOf$TM[ RNG$[ s], sc, form]], {1, 2, 0}]},
+	 			Apply[ UnionOf$TM, Flatten[ Hold[ RNG$[ r], rc, tmp], 1, Hold]]
+ 			]
+   		]
 	]
-UnionOf$TM[ RNG$[ r_], cond_, form_] /; buiActive["UnionOf"] :=
+UnionOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["UnionOf"] :=
 	Module[ {v},
 		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Union$TM, Set$TM[]]) =!= $Failed
 	]
-UnionOf$TM[ RNG$[ r_, s__], cond_, dom_, form_] /; buiActive["UnionOf"] :=
+UnionOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, dom_, form_] /; buiActive["UnionOf"] :=
  	Module[ {splitC},
  		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
- 			UnionOf$TM[ RNG$[r], rc, dom, UnionOf$TM[ RNG$[s], sc, dom, form]]
- 		]
+ 		With[ {rc = First[ splitC], sc = Last[ splitC]},
+ 			With[ {tmp = Delete[ Hold[ UnionOf$TM[ RNG$[ s], sc, dom, form]], {1, 2, 0}]},
+	 			Apply[ UnionOf$TM, Flatten[ Hold[ RNG$[ r], rc, dom, tmp], 1, Hold]]
+ 			]
+   		]
 	]
-UnionOf$TM[ RNG$[ r_], cond_, dom_, form_] /; buiActive["UnionOf"] :=
+UnionOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, dom_, form_] /; buiActive["UnionOf"] :=
 	Module[ {v},
 		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Annotated$TM[ Union$TM, SubScript$TM[ dom]], Set$TM[]]) =!= $Failed
 	]
 	
-IntersectionOf$TM[ RNG$[ r_, s__], cond_, form_] /; buiActive["IntersectionOf"] :=
+IntersectionOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, form_] /; buiActive["IntersectionOf"] :=
  	Module[ {splitC},
  		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
- 			IntersectionOf$TM[ RNG$[r], rc, IntersectionOf$TM[ RNG$[s], sc, form]]
- 		]
+ 		With[ {rc = First[ splitC], sc = Last[ splitC]},
+ 			With[ {tmp = Delete[ Hold[ IntersectionOf$TM[ RNG$[ s], sc, form]], {1, 2, 0}]},
+	 			Apply[ IntersectionOf$TM, Flatten[ Hold[ RNG$[ r], rc, tmp], 1, Hold]]
+ 			]
+   		]
 	]
-IntersectionOf$TM[ RNG$[ r_], cond_, form_] /; buiActive["IntersectionOf"] :=
+IntersectionOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["IntersectionOf"] :=
 	Module[ {v},
 		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Intersection$TM, $Failed]) =!= $Failed
 	]
-IntersectionOf$TM[ RNG$[ r_, s__], cond_, dom_, form_] /; buiActive["IntersectionOf"] :=
+IntersectionOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, dom_, form_] /; buiActive["IntersectionOf"] :=
  	Module[ {splitC},
  		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = Apply[ Unevaluated, splitC[[1]]], sc = Apply[ Unevaluated, splitC[[2]]]},
- 			IntersectionOf$TM[ RNG$[r], rc, dom, IntersectionOf$TM[ RNG$[s], sc, dom, form]]
- 		]
+ 		With[ {rc = First[ splitC], sc = Last[ splitC]},
+ 			With[ {tmp = Delete[ Hold[ IntersectionOf$TM[ RNG$[ s], sc, dom, form]], {1, 2, 0}]},
+	 			Apply[ IntersectionOf$TM, Flatten[ Hold[ RNG$[ r], rc, dom, tmp], 1, Hold]]
+ 			]
+   		]
 	]
-IntersectionOf$TM[ RNG$[ r_], cond_, dom_, form_] /; buiActive["IntersectionOf"] :=
+IntersectionOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, dom_, form_] /; buiActive["IntersectionOf"] :=
 	Module[ {v},
 		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Annotated$TM[ Intersection$TM, SubScript$TM[ dom]], $Failed]) =!= $Failed
 	]
@@ -1153,11 +1343,24 @@ TheArgMax$TM[ r:RNG$[ __], cond_, ord_, term_] /; buiActive["TheArgMax"] :=
 (* Sets *)
 
 Set$TM /: Equal$TM[ _Set$TM, _Tuple$TM] /; buiActive["SetEqual"] || buiActive["TupleEqual"] := False
+Set$TM /: Annotated$TM[Equal$TM, SubScript$TM[ _]][ _Set$TM, _Tuple$TM] /; buiActive["SetEqual"] || buiActive["TupleEqual"] := False
+Set$TM /: (h:(SubsetEqual$TM|Subset$TM|SupersetEqual$TM|Superset$TM))[ _Set$TM, _Tuple$TM] /; buiActive[StringDrop[SymbolName[h], -3]] := False
+Set$TM /: Annotated$TM[ h:(SubsetEqual$TM|Subset$TM|SupersetEqual$TM|Superset$TM), SubScript$TM[ _]][ _Set$TM, _Tuple$TM] /; buiActive[StringDrop[SymbolName[h], -3]] := False
 
 Set$TM /: Equal$TM[(a_Set$TM)..] /; buiActive["SetEqual"] := True
-Set$TM /: Equal$TM[_Set$TM] /; buiActive["SetEqual"] := True
-Set$TM /: Equal$TM[a_Set$TM, b_Set$TM, c__Set$TM] /; buiActive["SetEqual"] :=
-	Equal$TM[ a, b] && Map[ Equal$TM[ a, #]&, And[ c]]
+
+Set$TM /: Equal$TM[ _Set$TM] /; buiActive["SetEqual"] := True
+Set$TM /: Annotated$TM[Equal$TM, SubScript$TM[_]][ _Set$TM] /; buiActive["SetEqual"] := True
+Set$TM /: (op:(SubsetEqual$TM|Subset$TM|SupersetEqual$TM|Superset$TM))[ _Set$TM] /; buiActive[StringDrop[SymbolName[op], -3]] := True
+Set$TM /: Annotated$TM[ h:(SubsetEqual$TM|Subset$TM|SupersetEqual$TM|Superset$TM), SubScript$TM[_]][ _Set$TM] /; buiActive[StringDrop[SymbolName[h], -3]] := True
+Set$TM /: Intersection$TM[ a_Set$TM] /; buiActive["Intersection"] := a
+Set$TM /: Intersection$TM[ a_Set$TM, b_, c__] /; buiActive["Intersection"] :=
+	Fold[ Intersection$TM, a, {b, c}]
+Set$TM /: Annotated$TM[ Intersection$TM, SubScript$TM[_]][ a_Set$TM] /; buiActive["Intersection"] := a
+Set$TM /: (op:(Annotated$TM[ Intersection$TM, SubScript$TM[_]]))[ a_Set$TM, b_, c__] /; buiActive["Intersection"] :=
+	Fold[ op, a, {b, c}]
+
+
 Set$TM /: Equal$TM[a_Set$TM, b_Set$TM] /; buiActive["SetEqual"] :=
 	Module[ {res},
 		res /; (res = subseteq[ a, b, Equal$TM];
@@ -1166,14 +1369,11 @@ Set$TM /: Equal$TM[a_Set$TM, b_Set$TM] /; buiActive["SetEqual"] :=
 				];
 				MatchQ[ res, True|False])
 	]
-Set$TM /: Annotated$TM[Equal$TM, SubScript$TM[ _]][_Set$TM] /; buiActive["SetEqual"] := True
-Set$TM /: Annotated$TM[Equal$TM, SubScript$TM[ dom_]][a_Set$TM, b_Set$TM, c__Set$TM] /; buiActive["SetEqual"] :=
-	dom[Equal$TM][ a, b] && Map[ dom[Equal$TM][ a, #]&, And[ c]]
 Set$TM /: Annotated$TM[Equal$TM, SubScript$TM[ dom_]][a_Set$TM, b_Set$TM] /; buiActive["SetEqual"] :=
 	Module[ {res},
-		res /; (res = subseteq[ a, b, dom[Equal$TM]];
+		res /; (res = subseteq[ a, b, DomainOperation$TM[ dom, Equal$TM]];
 				If[ res === True,
-					res = subseteq[ b, a, dom[Equal$TM]]
+					res = subseteq[ b, a, DomainOperation$TM[ dom, Equal$TM]]
 				];
 				MatchQ[ res, True|False])
 	]
@@ -1183,7 +1383,7 @@ Set$TM /: SubsetEqual$TM[a_Set$TM, b_Set$TM] /; buiActive["SubsetEqual"] :=
 	]
 Set$TM /: Annotated$TM[SubsetEqual$TM, SubScript$TM[ dom_]][a_Set$TM, b_Set$TM] /; buiActive["SubsetEqual"] :=
 		Module[ {res},
-		res /; (res = subseteq[ a, b, dom[Equal$TM]]; MatchQ[ res, True|False])
+		res /; (res = subseteq[ a, b, DomainOperation$TM[ dom, Equal$TM]]; MatchQ[ res, True|False])
 	]
 Set$TM /: Subset$TM[a_Set$TM, b_Set$TM] /; buiActive["Subset"] :=
 	Module[ {res},
@@ -1195,9 +1395,9 @@ Set$TM /: Subset$TM[a_Set$TM, b_Set$TM] /; buiActive["Subset"] :=
 	]
 Set$TM /: Annotated$TM[Subset$TM, SubScript$TM[ dom_]][a_Set$TM, b_Set$TM] /; buiActive["Subset"] :=
 	Module[ {res},
-		res /; (res = subseteq[ a, b, dom[Equal$TM]];
+		res /; (res = subseteq[ a, b, DomainOperation$TM[ dom, Equal$TM]];
 				If[ res === True,
-					res = !subseteq[ b, a, dom[Equal$TM]]
+					res = !subseteq[ b, a, DomainOperation$TM[ dom, Equal$TM]]
 				];
 				MatchQ[ res, True|False])
 	]
@@ -1207,7 +1407,7 @@ Set$TM /: SupersetEqual$TM[a_Set$TM, b_Set$TM] /; buiActive["SupersetEqual"] :=
 	]
 Set$TM /: Annotated$TM[SupersetEqual$TM, SubScript$TM[ dom_]][a_Set$TM, b_Set$TM] /; buiActive["SupersetEqual"] :=
 	Module[ {res},
-		res /; (res = subseteq[ b, a, dom[Equal$TM]]; MatchQ[ res, True|False])
+		res /; (res = subseteq[ b, a, DomainOperation$TM[ dom, Equal$TM]]; MatchQ[ res, True|False])
 	]
 Set$TM /: Superset$TM[a_Set$TM, b_Set$TM] /; buiActive["Superset"] :=
 	Module[ {res},
@@ -1219,9 +1419,9 @@ Set$TM /: Superset$TM[a_Set$TM, b_Set$TM] /; buiActive["Superset"] :=
 	]
 Set$TM /: Annotated$TM[Superset$TM, SubScript$TM[ dom_]][a_Set$TM, b_Set$TM] /; buiActive["Superset"] :=
 	Module[ {res},
-		res /; (res = subseteq[ b, a, dom[Equal$TM]];
+		res /; (res = subseteq[ b, a, DomainOperation$TM[ dom, Equal$TM]];
 				If[ res === True,
-					res = !subseteq[ a, b, dom[Equal$TM]]
+					res = !subseteq[ a, b, DomainOperation$TM[ dom, Equal$TM]]
 				];
 				MatchQ[ res, True|False])
 	]
@@ -1231,22 +1431,22 @@ Set$TM /: Annotated$TM[Superset$TM, SubScript$TM[ dom_]][a_Set$TM, b_Set$TM] /; 
 	(some might be equal).
 	Also note that it is possible to form the union over 0 sets, whereas the intersection of 0 sets is not defined. *)
 Set$TM /: Union$TM[ a___Set$TM] /; buiActive["Union"] := Union[ a, SameTest -> (TrueQ[ Equal$TM[ #1, #2]]&)]
-Set$TM /: Annotated$TM[ Union$TM, SubScript$TM[ dom_]][ a___Set$TM] /; buiActive["Union"] := Union[ a, SameTest -> (TrueQ[ dom[Equal$TM][ #1, #2]]&)]
-Set$TM /: Intersection$TM[ a_Set$TM, b___Set$TM] /; buiActive["Intersection"] :=
+Set$TM /: Annotated$TM[ Union$TM, SubScript$TM[ dom_]][ a___Set$TM] /; buiActive["Union"] := Union[ a, SameTest -> (TrueQ[ DomainOperation$TM[ dom, Equal$TM][ #1, #2]]&)]
+Set$TM /: Intersection$TM[ a_Set$TM, b_Set$TM] /; buiActive["Intersection"] :=
 	Module[ {res = Set$TM[]},
-		res /; (Scan[ If[ ElementOfAll[#, {b}, Equal$TM], AppendTo[res, #], Null, res = False; Return[]] &, a]; res =!= False)
+		res /; (Scan[ If[ ElementOf[#, b, Equal$TM], AppendTo[res, #], Null, res = False; Return[]]&, a]; res =!= False)
 	]
-Set$TM /: Annotated$TM[ Intersection$TM, SubScript$TM[ dom_]][ a_Set$TM, b___Set$TM] /; buiActive["Intersection"] :=
+Set$TM /: Annotated$TM[ Intersection$TM, SubScript$TM[ dom_]][ a_Set$TM, b_Set$TM] /; buiActive["Intersection"] :=
 	Module[ {res = Set$TM[]},
-		res /; (Scan[ If[ ElementOfAll[#, {b}, dom[Equal$TM]], AppendTo[res, #], Null, res = False; Return[]] &, a]; res =!= False)
+		res /; (Scan[ If[ ElementOf[#, b, DomainOperation$TM[ dom, Equal$TM]], AppendTo[res, #], Null, res = False; Return[]]&, a]; res =!= False)
 	]
-Set$TM /: Backslash$TM[ a_Set$TM, b_Set$TM] /; buiActive["Difference"] :=
+Set$TM /: Backslash$TM[ a_Set$TM, b___Set$TM] /; buiActive["Difference"] :=
 	Module[ {res = Set$TM[]},
-		res /; (Scan[ If[ ElementOf[#, b, Equal$TM], Null, AppendTo[res, #], res = False; Return[]] &, a]; res =!= False)
+		res /; (Scan[ If[ ElementOf[#, Union[ b], Equal$TM], Null, AppendTo[res, #], res = False; Return[]] &, a]; res =!= False)
 	]
-Set$TM /: Annotated$TM[ Backslash$TM, SubScript$TM[ dom_]][ a_Set$TM, b_Set$TM] /; buiActive["Difference"] :=
+Set$TM /: Annotated$TM[ Backslash$TM, SubScript$TM[ dom_]][ a_Set$TM, b___Set$TM] /; buiActive["Difference"] :=
 	Module[ {res = Set$TM[]},
-		res /; (Scan[ If[ ElementOf[#, b, dom[Equal$TM]], Null, AppendTo[res, #], res = False; Return[]] &, a]; res =!= False)
+		res /; (Scan[ If[ ElementOf[#, Union[ b], DomainOperation$TM[ dom, Equal$TM]], Null, AppendTo[res, #], res = False; Return[]] &, a]; res =!= False)
 	]
 Set$TM /: EmptyUpTriangle$TM[ a_Set$TM, b_Set$TM] /; buiActive["SymmetricDifference"] :=
 	Module[ {res = Set$TM[]},
@@ -1261,10 +1461,10 @@ Set$TM /: EmptyUpTriangle$TM[ a_Set$TM, b_Set$TM] /; buiActive["SymmetricDiffere
 Set$TM /: Annotated$TM[ EmptyUpTriangle$TM, SubScript$TM[ dom_]][ a_Set$TM, b_Set$TM] /; buiActive["SymmetricDifference"] :=
 	Module[ {res = Set$TM[]},
 		res /;
-			(Scan[ If[ ElementOf[#, b, dom[Equal$TM]], Null, AppendTo[res, #], res = False; Return[]] &, a];
+			(Scan[ If[ ElementOf[#, b, DomainOperation$TM[ dom, Equal$TM]], Null, AppendTo[res, #], res = False; Return[]] &, a];
 			If[ res === False,
 				False,
-				Scan[ If[ ElementOf[#, a, dom[Equal$TM]], Null, AppendTo[res, #], res = False; Return[]] &, b];
+				Scan[ If[ ElementOf[#, a, DomainOperation$TM[ dom, Equal$TM]], Null, AppendTo[res, #], res = False; Return[]] &, b];
 				res =!= False
 			])
 	]
@@ -1275,7 +1475,7 @@ Set$TM /: Element$TM[ p_, a_Set$TM] /; buiActive["IsElement"] :=
 	]
 Set$TM /: Annotated$TM[ Element$TM, SubScript$TM[dom_]][ p_, a_Set$TM] /; buiActive["IsElement"] :=
 	Module[ {res},
-		res /; (res = ElementOf[ p, a, dom[Equal$TM]]; MatchQ[ res, True|False])
+		res /; (res = ElementOf[ p, a, DomainOperation$TM[ dom, Equal$TM]]; MatchQ[ res, True|False])
 	]
 Set$TM /: \[ScriptCapitalP]$TM[ a_Set$TM] /; buiActive["PowerSet"] := Subsets[ a] /. List -> Set$TM
 Set$TM /: BracketingBar$TM[ a_Set$TM?isSequenceFree] /; buiActive["Cardinality"] && pairwiseDistinct[ a, Equal$TM] :=
@@ -1284,23 +1484,19 @@ Set$TM /: max$TM[ Set$TM[ e__]] /; buiActive["MaximumElementSet"] :=
 	Module[ {s},
 		(s /. Max -> max$TM /. {max$TM[x_Set$TM] :> max$TM[x], max$TM[x___] :> max$TM[Set$TM[x]]}) /; (s = Max[ e]; Apply[ Hold, {s}] =!= Hold[ Max[ e]])
 	]
+Set$TM /: Subscript$TM[ max$TM, _][ Set$TM[ e_]] /; buiActive["MaximumElementSet"] := e
 Set$TM /: Subscript$TM[ max$TM, ord_][ Set$TM[ e__]] /; buiActive["MaximumElementSet"] :=
 	Module[ {res},
-		If[ Length[ res] === 1,
-			First[ res],
-			Subscript$TM[ max$TM, ord][ Apply[ Set$TM, res]]
-		] /; (res = max[ {e}, ord]; Length[ res] < Length[ Hold[ e]])
+		Subscript$TM[ max$TM, ord][ Apply[ Set$TM, res]] /; (res = max[ {e}, ord]; Length[ res] < Length[ Hold[ e]])
 	]
 Set$TM /: min$TM[ Set$TM[ e__]] /; buiActive["MinimumElementSet"] :=
 	Module[ {s},
 		(s /. Min -> min$TM /. {min$TM[x_Set$TM] :> min$TM[x], min$TM[x___] :> min$TM[Set$TM[x]]}) /; (s = Min[ e]; Apply[ Hold, {s}] =!= Hold[ Min[ e]])
 	]
+Set$TM /: Subscript$TM[ min$TM, _][ Set$TM[ e_]] /; buiActive["MinimumElementSet"] := e
 Set$TM /: Subscript$TM[ min$TM, ord_][ Set$TM[ e__]] /; buiActive["MinimumElementSet"] :=
 	Module[ {res},
-		If[ Length[ res] === 1,
-			First[ res],
-			Subscript$TM[ min$TM, ord][ Apply[ Set$TM, res]]
-		] /; (res = min[ {e}, ord]; Length[ res] < Length[ Hold[ e]])
+		Subscript$TM[ min$TM, ord][ Apply[ Set$TM, res]] /; (res = min[ {e}, ord]; Length[ res] < Length[ Hold[ e]])
 	]
 Set$TM /: \[AE]$TM[ Set$TM[ a_, ___]] /; buiActive["AnElement"] := a
 	
@@ -1344,17 +1540,168 @@ updateMinList[ {}, _, _, l_List, False] := l
 updateMinList[ {}, a_, _, {n___}, True] := {n, a}
 
 ElementOf[ p_, a_, test_] := Apply[ Or, Map[ (test[ p, #])&, Apply[ Hold, a]]]
-ElementOfAll[ p_, {a_, rest___}, test_] := ElementOf[ p, a, test] && ElementOfAll[ p, {rest}, test]
-ElementOfAll[ _, {}, _] := True
 
 pairwiseDistinct[ _[ f_, rest___], test_] := ElementOf[ f, {rest}, test] === False && pairwiseDistinct[ {rest}, test]
 pairwiseDistinct[ _[], _] := True
 
-subseteq[ a_, b_, test_] :=
+subseteq[ a_, a_, Equal$TM] := True
+subseteq[ a_Set$TM, b_Set$TM, test_] :=
 	Module[ {res = True},
 		Scan[ If[ ElementOf[#, b, test], Null, res = False; Return[], res = Null] &, a];
 		res
 	]
+subseteq[ IntegerInterval$TM[ al_, ar_, alc_, arc_], b_Set$TM, Equal$TM] :=
+	Module[ {s = intervalSize[ IntegerInterval$TM, al, ar, alc, arc], l, r},
+		If[ s <= Length[ b],
+			l = integerBoundary[ "left", al, alc];
+			r = integerBoundary[ "right", ar, arc];
+			NumberQ[ l] && NumberQ[ r] && subseteq[ Apply[ Set$TM, Range[ l, r]], b, Equal$TM],
+			False
+		]
+	]
+subseteq[ (a:(RationalInterval$TM|RealInterval$TM))[ al_, ar_, alc_, arc_], b_Set$TM, Equal$TM] :=
+	Switch[ intervalSize[ a, al, ar, alc, arc],
+		1, ElementOf[ al, b, Equal$TM],
+		$Failed, $Failed,
+		_, False
+	]
+subseteq[ \[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM, b_Set$TM, Equal$TM] := False
+subseteq[ a_Set$TM, b:(_IntegerInterval$TM|_RationalInterval$TM|_RealInterval$TM), Equal$TM] :=
+	Module[ {subset = True},
+		Catch[
+			Scan[ If[ isInInterval[ #, b], Null, Throw[ False], subset = $Failed]&, a];
+			subset
+		]
+	]
+subseteq[ a_Set$TM, \[DoubleStruckCapitalC]$TM, Equal$TM] :=
+	Module[ {subset = True},
+		Catch[
+			Scan[ If[ isComplex[ #], Null, Throw[ False], subset = $Failed]&, a];
+			subset
+		]
+	]
+subseteq[ a_Set$TM, \[DoubleStruckCapitalC]P$TM, Equal$TM] :=
+	Module[ {subset = True},
+		Catch[
+			Scan[ If[ isComplexP[ #], Null, Throw[ False], subset = $Failed]&, a];
+			subset
+		]
+	]
+subseteq[ _IntegerInterval$TM|_RationalInterval$TM|_RealInterval$TM, \[DoubleStruckCapitalC]$TM, Equal$TM] := True
+subseteq[ _IntegerInterval$TM|_RationalInterval$TM|_RealInterval$TM, \[DoubleStruckCapitalC]P$TM, Equal$TM] := False
+subseteq[ \[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM, _IntegerInterval$TM|_RationalInterval$TM|_RealInterval$TM, Equal$TM] := False
+subseteq[ \[DoubleStruckCapitalC]$TM, \[DoubleStruckCapitalC]P$TM, Equal$TM] := False
+subseteq[ \[DoubleStruckCapitalC]P$TM, \[DoubleStruckCapitalC]$TM, Equal$TM] := False
+subseteq[ IntegerInterval$TM[ al_, ar_, alc_, arc_], IntegerInterval$TM[ bl_, br_, blc_, brc_], Equal$TM] :=
+	integerBoundary["left", al, alc] >= integerBoundary["left", bl, blc] && integerBoundary["right", ar, arc] <= integerBoundary["right", br, brc]
+subseteq[ IntegerInterval$TM[ al_, ar_, alc_, arc_], (b:(RationalInterval$TM|RealInterval$TM))[ bl_, br_, blc_, brc_], Equal$TM] :=
+	Module[ {l, r,
+			all = integerBoundary["left", al, alc],
+			arr = integerBoundary[ "right", ar, arc],
+			blcc = blc && TrueQ[ isInIntervalDomain[ b, bl]],
+			brcc = brc && TrueQ[ isInIntervalDomain[ b, br]]},
+		l = If[ MatchQ[ all, _DirectedInfinity] || blcc, GreaterEqual, Greater];
+		r = If[ MatchQ[ arr, _DirectedInfinity] || brcc, LessEqual, Less];
+		l[ all, bl] && r[ arr, br]
+	]
+subseteq[ (h:(RationalInterval$TM|RealInterval$TM))[ al_, ar_, alc_, arc_], b_IntegerInterval$TM, Equal$TM] :=
+	Switch[ intervalSize[ h, al, ar, alc, arc],
+		1, isInInterval[ al, b],
+		$Failed, $Failed,
+		_, False
+	]
+subseteq[ RationalInterval$TM[ al_, ar_, alc_, arc_], RationalInterval$TM[ bl_, br_, blc_, brc_], Equal$TM] :=
+	Module[ {alcc = If[ alc && isInIntervalDomain[ RationalInterval$TM, al], True, False, $Failed],
+			blcc = If[ blc && isInIntervalDomain[ RationalInterval$TM, bl], True, False, $Failed],
+			arcc = If[ arc && isInIntervalDomain[ RationalInterval$TM, ar], True, False, $Failed],
+			brcc = If[ brc && isInIntervalDomain[ RationalInterval$TM, br], True, False, $Failed]},
+		Catch[
+			And[
+				Switch[ alcc,
+					$Failed,
+					Switch[ blcc,
+						$Failed,
+						al >= bl,
+						_,
+						Which[ al > bl, True, al < bl, False, True, Throw[ $Failed]]
+					],
+					True,
+					Switch[ blcc,
+						True,
+						al >= bl,
+						_,
+						al > bl
+					],
+					False,
+					al >= bl
+				],
+				Switch[ arcc,
+					$Failed,
+					Switch[ brcc,
+						$Failed,
+						ar <= br,
+						_,
+						Which[ ar < br, True, ar > br, False, True, Throw[ $Failed]]
+					],
+					True,
+					Switch[ brcc,
+						True,
+						ar <= br,
+						_,
+						ar < br
+					],
+					False,
+					ar <= br
+				]
+			]
+		]
+	]
+subseteq[ RationalInterval$TM[ al_, ar_, alc_, arc_], RealInterval$TM[ bl_, br_, blc_, brc_], Equal$TM] :=
+	Module[ {alcc = If[ alc && isInIntervalDomain[ RationalInterval$TM, al], True, False, $Failed],
+			arcc = If[ arc && isInIntervalDomain[ RationalInterval$TM, ar], True, False, $Failed]},
+		Catch[
+			And[
+				If[ blc && isInIntervalDomain[ RealInterval$TM, bl],
+					al >= bl,
+					Switch[ alcc,
+						$Failed,
+						Which[ al > bl, True, al < bl, False, True, Throw[ $Failed]],
+						True,
+						al > bl,
+						False,
+						al >= bl
+					]
+				],
+				If[ brc && isInIntervalDomain[ RealInterval$TM, br],
+					ar <= br,
+					Switch[ arcc,
+						$Failed,
+						Which[ ar < br, True, ar > br, False, True, Throw[ $Failed]],
+						True,
+						ar < br,
+						False,
+						ar <= br
+					]
+				]
+			]
+		]
+	]
+subseteq[ RealInterval$TM[ al_, ar_, alc_, arc_], b_RationalInterval$TM, Equal$TM] :=
+	Switch[ intervalSize[ RealInterval$TM, al, ar, alc, arc],
+		1, isInInterval[ al, b],
+		$Failed, $Failed,
+		_, False
+	]
+subseteq[ RealInterval$TM[ al_, ar_, alc_, arc_], RealInterval$TM[ bl_, br_, blc_, brc_], Equal$TM] :=
+	Module[ {l = If[ !alc || !isInIntervalDomain[ RealInterval$TM, al] || (blc && isInIntervalDomain[ RealInterval$TM, bl]), GreaterEqual, Greater],
+			r = If[ !arc || !isInIntervalDomain[ RealInterval$TM, ar] || (brc && isInIntervalDomain[ RealInterval$TM, br]), LessEqual, Less]},
+		l[ al, bl] && r[ ar, br]
+	]
+	
+subseteq[ IntegerQuotientRing$TM[ m_], b_, rel_] := subseteq[ IntegerInterval$TM[ 0, m - 1, True, True], b, rel]
+subseteq[ a_, IntegerQuotientRing$TM[ m_], rel_] := subseteq[ a, IntegerInterval$TM[ 0, m - 1, True, True], rel]
+subseteq[ IntegerQuotientRingPM$TM[ m_], b_, rel_] := subseteq[ IntegerInterval$TM[ lowerPM[ m], upperPM[ m], True, True], b, rel]
+subseteq[ a_, IntegerQuotientRingPM$TM[ m_], rel_] := subseteq[ a, IntegerInterval$TM[ lowerPM[ m], upperPM[ m], True, True], rel]
 
 
 (* ::Section:: *)
@@ -1370,138 +1717,252 @@ RealInterval$TM[ l_?isRealOrInf, r_?isRealOrInf, lc:(True|False), rc:(True|False
 IntegerQuotientRing$TM[ 0] /; buiActive["IntegerQuotientRing"] := IntegerInterval$TM[ DirectedInfinity[ -1], DirectedInfinity[ 1], False, False] (* Z_0 is isomorphic to Z *)
 IntegerQuotientRingPM$TM[ 0] /; buiActive["IntegerQuotientRingPM"] := IntegerInterval$TM[ DirectedInfinity[ -1], DirectedInfinity[ 1], False, False]
 
+(* Transform operations called on only one argument (more than two arguments have already been eliminated at the beginning of this file) *)
+(* Since domain-subscripted operations are not defined for intervals, we do not need to transform them here *)
+Equal$TM[ _?isActiveDomain] /; buiActive["SetEqual"] := True
+SubsetEqual$TM[ _?isActiveDomain] /; buiActive["SubsetEqual"] := True
+Subset$TM[ _?isActiveDomain] /; buiActive["Subset"] := True
+SupersetEqual$TM[ _?isActiveDomain] /; buiActive["SupersetEqual"] := True
+Superset$TM[ _?isActiveDomain] /; buiActive["Superset"] := True
+
+Intersection$TM[ a_?isActiveDomain] /; buiActive["Intersection"] := a
+Intersection$TM[ a_?isActiveDomain, c__, d_] /; buiActive["Intersection"] :=
+	Fold[ Intersection$TM, a, {c, d}]
+
 
 (* ::Subsection:: *)
-(* equality *)
+(* Equal *)
 
-Tuple$TM /: Equal$TM[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___], _Tuple$TM] /; (buiActive["SetEqual"] || buiActive["TupleEqual"]) && buiActive[StringDrop[SymbolName[h], -3]] := False
-Tuple$TM /: Equal$TM[ _Tuple$TM, (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; (buiActive["SetEqual"] || buiActive["TupleEqual"]) && buiActive[StringDrop[SymbolName[h], -3]] := False
-Tuple$TM /: Equal$TM[ _Tuple$TM, b:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; (buiActive["SetEqual"] || buiActive["TupleEqual"]) && buiActive[StringDrop[SymbolName[b], -3]] := False
-Tuple$TM /: Equal$TM[ b:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM), _Tuple$TM] /; (buiActive["SetEqual"] || buiActive["TupleEqual"]) && buiActive[StringDrop[SymbolName[b], -3]] := False
+Tuple$TM /: Equal$TM[ _?isActiveDomain, _Tuple$TM] /; (buiActive["SetEqual"] || buiActive["TupleEqual"]) := False
+Tuple$TM /: Equal$TM[ _Tuple$TM, _?isActiveDomain] /; (buiActive["SetEqual"] || buiActive["TupleEqual"]) := False
+Tuple$TM /: (op:(SubsetEqual$TM|Subset$TM|SupersetEqual$TM|Superset$TM))[ _?isActiveDomain, _Tuple$TM] /; buiActive[StringDrop[SymbolName[op], -3]] := False
+Tuple$TM /: (op:(SubsetEqual$TM|Subset$TM|SupersetEqual$TM|Superset$TM))[ _Tuple$TM, _?isActiveDomain] /; buiActive[StringDrop[SymbolName[op], -3]] := False
+
+Equal$TM[ a_?isActiveDomain, a_] /; buiActive["SetEqual"] := True
 
 Set$TM /: Equal$TM[ a:(h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ al_?isRealOrInf, ar_?isRealOrInf, alc:(True|False), arc:(True|False)],
-		b:Set$TM[ e___?isGround]] :=
-	Module[ {rs},
-		SameQ[ rs, Length[ b], Length[ Select[ b, isInInterval[ #, a]&]]] /; buiActive["SetEqual"] && buiActive[StringDrop[SymbolName[h], -3]] && ((rs = intervalSize[h, al, ar, alc, arc]) =!= $Failed)
+		b:Set$TM[ e___]] /; buiActive["SetEqual"] && buiActive[StringDrop[SymbolName[h], -3]] :=
+	Module[ {rs, subset},
+		subset && rs === Length[ b] /;
+			And[
+				(rs = intervalSize[ h, al, ar, alc, arc]) =!= $Failed,
+				MatchQ[ subset = subseteq[ b, a, Equal$TM], True|False]
+			]
 	]
 Set$TM /: Equal$TM[ a_Set$TM, b:(_IntegerInterval$TM|_RationalInterval$TM|_RealInterval$TM)] /; buiActive["SetEqual"] := Equal$TM[ b, a]
 Set$TM /: Equal$TM[ _Set$TM, b:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive["SetEqual"] && buiActive[StringDrop[SymbolName[b], -3]] := False
 Set$TM /: Equal$TM[ b:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM), _Set$TM] /; buiActive["SetEqual"] && buiActive[StringDrop[SymbolName[b], -3]] := False
-(* Set$TM /: Equal$TM[ (h:(IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ m_?isModulus], a:Set$TM[ e___?isGround]] /; buiActive["SetEqual"] && buiActive[StringDrop[SymbolName[h], -3]] :=
-	Length[ a] == m && Apply[ And, Map[ (isInteger[ #] && IQRLower[ h, m] <= # <= IQRUpper[ h, m])&, Hold[ e]]]
-Set$TM /: Equal$TM[ a_Set$TM, b:(_IntegerQuotientRing$TM|_IntegerQuotientRingPM$TM)] /; buiActive["SetEqual"] := Equal$TM[ b, a] *)
+Set$TM /: Equal$TM[ IntegerQuotientRing$TM[ m_?isModulus], a_Set$TM] /; buiActive["SetEqual"] && buiActive["IntegerQuotientRing"] :=
+	Length[ a] == m && Apply[ And, Map[ (isInteger$TM[ #] && 0 <= # && # < m)&, Apply[ Hold, a]]]
+Set$TM /: Equal$TM[ IntegerQuotientRingPM$TM[ m_?isModulus], a_Set$TM] /; buiActive["SetEqual"] && buiActive["IntegerQuotientRingPM"] :=
+	Length[ a] == m && Apply[ And, Map[ (isInteger$TM[ #] && lowerPM[ m] <= # && # <= upperPM[ m])&, Apply[ Hold, a]]]
+Set$TM /: Equal$TM[ a_Set$TM, b:(_IntegerQuotientRing$TM|_IntegerQuotientRingPM$TM)] /; buiActive["SetEqual"] := Equal$TM[ b, a]
 
-\[DoubleStruckCapitalC]$TM /: Equal$TM[ (a:IntegerInterval$TM|RationalInterval$TM|RealInterval$TM)[ ___], \[DoubleStruckCapitalC]$TM] :=
-	False /; buiActive["SetEqual"] && buiActive[StringDrop[SymbolName[a], -3]] && buiActive["\[DoubleStruckCapitalC]"]
-\[DoubleStruckCapitalC]$TM /: Equal$TM[ \[DoubleStruckCapitalC]$TM, (a:IntegerInterval$TM|RationalInterval$TM|RealInterval$TM)[ ___]] :=
-	False /; buiActive["SetEqual"] && buiActive[StringDrop[SymbolName[a], -3]] && buiActive["\[DoubleStruckCapitalC]"]
-\[DoubleStruckCapitalC]P$TM /: Equal$TM[ (a:IntegerInterval$TM|RationalInterval$TM|RealInterval$TM)[ ___], \[DoubleStruckCapitalC]P$TM] :=
-	False /; buiActive["SetEqual"] && buiActive[StringDrop[SymbolName[a], -3]] && buiActive["\[DoubleStruckCapitalC]P"]
-\[DoubleStruckCapitalC]P$TM /: Equal$TM[ \[DoubleStruckCapitalC]P$TM, (a:IntegerInterval$TM|RationalInterval$TM|RealInterval$TM)[ ___]] :=
-	False /; buiActive["SetEqual"] && buiActive[StringDrop[SymbolName[a], -3]] && buiActive["\[DoubleStruckCapitalC]P"]
-\[DoubleStruckCapitalC]$TM /: Equal$TM[ (h:(IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ _], \[DoubleStruckCapitalC]$TM] :=
-	False /; buiActive["SetEqual"] && buiActive[StringDrop[SymbolName[h], -3]] && buiActive["\[DoubleStruckCapitalC]"]
-\[DoubleStruckCapitalC]$TM /: Equal$TM[ \[DoubleStruckCapitalC]$TM, (h:(IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ _]] :=
-	False /; buiActive["SetEqual"] && buiActive[StringDrop[SymbolName[h], -3]] && buiActive["\[DoubleStruckCapitalC]"]
-\[DoubleStruckCapitalC]P$TM /: Equal$TM[ (h:(IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ _], \[DoubleStruckCapitalC]P$TM] :=
-	False /; buiActive["SetEqual"] && buiActive[StringDrop[SymbolName[h], -3]] && buiActive["\[DoubleStruckCapitalC]P"]
-\[DoubleStruckCapitalC]P$TM /: Equal$TM[ \[DoubleStruckCapitalC]P$TM, (h:(IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ _]] :=
-	False /; buiActive["SetEqual"] && buiActive[StringDrop[SymbolName[h], -3]] && buiActive["\[DoubleStruckCapitalC]P"]
-	
-\[DoubleStruckCapitalC]$TM /: Equal$TM[ \[DoubleStruckCapitalC]$TM, \[DoubleStruckCapitalC]P$TM] :=
-	False /; buiActive["SetEqual"] && buiActive["\[DoubleStruckCapitalC]"] && buiActive["\[DoubleStruckCapitalC]P"]
-\[DoubleStruckCapitalC]$TM /: Equal$TM[ \[DoubleStruckCapitalC]$TM, \[DoubleStruckCapitalC]$TM] :=
-	True /; buiActive["SetEqual"] && buiActive["\[DoubleStruckCapitalC]"]
-\[DoubleStruckCapitalC]P$TM /: Equal$TM[ \[DoubleStruckCapitalC]P$TM, \[DoubleStruckCapitalC]$TM] :=
-	False /; buiActive["SetEqual"] && buiActive["\[DoubleStruckCapitalC]"] && buiActive["\[DoubleStruckCapitalC]P"]
-\[DoubleStruckCapitalC]P$TM /: Equal$TM[ \[DoubleStruckCapitalC]P$TM, \[DoubleStruckCapitalC]P$TM] :=
-	True /; buiActive["SetEqual"] && buiActive["\[DoubleStruckCapitalC]P"]
-	
-(* IntegerQuotientRing$TM /: Equal$TM[ _IntegerQuotientRing$TM, (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ ___]] :=
-	False /; buiActive["SetEqual"] && buiActive["IntegerQuotientRing"] && buiActive[StringDrop[SymbolName[h], -3]]
-IntegerQuotientRing$TM /: Equal$TM[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ ___], _IntegerQuotientRing$TM] :=
-	False /; buiActive["SetEqual"] && buiActive["IntegerQuotientRing"] && buiActive[StringDrop[SymbolName[h], -3]]
-IntegerQuotientRingPM$TM /: Equal$TM[ _IntegerQuotientRingPM$TM, (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ ___]] :=
-	False /; buiActive["SetEqual"] && buiActive["IntegerQuotientRingPM"] && buiActive[StringDrop[SymbolName[h], -3]]
-IntegerQuotientRingPM$TM /: Equal$TM[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ ___], _IntegerQuotientRingPM$TM] :=
-	False /; buiActive["SetEqual"] && buiActive["IntegerQuotientRingPM"] && buiActive[StringDrop[SymbolName[h], -3]]
-	
-IntegerQuotientRing$TM /: Equal$TM[ IntegerQuotientRing$TM[ m_], IntegerQuotientRing$TM[ n_]] :=
-	m == n /; buiActive["SetEqual"] && buiActive["IntegerQuotientRing"]
-IntegerQuotientRing$TM /: Equal$TM[ IntegerQuotientRing$TM[ m_?isModulus], IntegerQuotientRingPM$TM[ n_?isModulus]] :=
-	m == n && m <= 2 /; buiActive["SetEqual"] && buiActive["IntegerQuotientRing"] && buiActive["IntegerQuotientRingPM"]
-IntegerQuotientRingPM$TM /: Equal$TM[ IntegerQuotientRingPM$TM[ m_?isModulus], IntegerQuotientRing$TM[ n_?isModulus]] :=
-	m == n && m <= 2 /; buiActive["SetEqual"] && buiActive["IntegerQuotientRing"] && buiActive["IntegerQuotientRingPM"]
-IntegerQuotientRingPM$TM /: Equal$TM[ IntegerQuotientRingPM$TM[ m_], IntegerQuotientRingPM$TM[ n_]] :=
-	m == n /; buiActive["SetEqual"] && buiActive["IntegerQuotientRingPM"] *)
-
-IntegerInterval$TM /: Equal$TM[ IntegerInterval$TM[ al_?isRealOrInf, ar_?isRealOrInf, alc:(True|False), arc:(True|False)],
-		IntegerInterval$TM[ bl_?isRealOrInf, br_?isRealOrInf, blc:(True|False), brc:(True|False)]] /; buiActive["SetEqual"] && buiActive["IntegerInterval"] :=
-	And[ integerBoundary["left", al, alc] == integerBoundary["left", bl, blc], integerBoundary["right", ar, arc] == integerBoundary["right", br, brc]]
-IntegerInterval$TM /: Equal$TM[ IntegerInterval$TM[ al_?isRealOrInf, ar_?isRealOrInf, alc:(True|False), arc:(True|False)],
-		(b:(RationalInterval$TM|RealInterval$TM))[ bl_?isRealOrInf, br_?isRealOrInf, blc:(True|False), brc:(True|False)]] /; buiActive["SetEqual"] && buiActive["IntegerInterval"] && buiActive[StringDrop[SymbolName[b],-3]] :=
-	And[ SameQ[ 1, intervalSize[IntegerInterval$TM, al, ar, alc, arc], intervalSize[b, bl, br, blc, brc]], integerBoundary["left", al, alc] == bl]
-IntegerInterval$TM /: Equal$TM[ a:(_RationalInterval$TM|_RealInterval$TM), b_IntegerInterval$TM] /; buiActive["SetEqual"] := Equal$TM[ b, a]
-
-RationalInterval$TM /: Equal$TM[ RationalInterval$TM[ al_?isRealOrInf, ar_?isRealOrInf, alc:(True|False), arc:(True|False)],
-		RationalInterval$TM[ bl_?isRealOrInf, br_?isRealOrInf, blc:(True|False), brc:(True|False)]] /; buiActive["SetEqual"] && buiActive["RationalInterval"] :=
-	Module[ {alcc, arcc, blcc, brcc},
-		(al === bl && ar === br && alcc === blcc && arcc === brcc) /;
-				(alcc = If[ alc && isInIntervalDomain[ RationalInterval$TM, al], True, False, $Failed];
-				arcc = If[ arc && isInIntervalDomain[ RationalInterval$TM, ar], True, False, $Failed];
-				blcc = If[ blc && isInIntervalDomain[ RationalInterval$TM, bl], True, False, $Failed];
-				brcc = If[ brc && isInIntervalDomain[ RationalInterval$TM, br], True, False, $Failed];
-				Xor[ alcc =!= $Failed, blcc === $Failed] && Xor[ arcc =!= $Failed, brcc === $Failed])
-	]
-RationalInterval$TM /: Equal$TM[ RationalInterval$TM[ al_?isRealOrInf, ar_?isRealOrInf, alc:(True|False), arc:(True|False)],
-		RealInterval$TM[ bl_?isRealOrInf, br_?isRealOrInf, blc:(True|False), brc:(True|False)]] :=
-	Module[ {rs},
-		And[ SameQ[ 1, rs, intervalSize[RealInterval$TM, bl, br, blc, brc]], al == bl] /;
-				buiActive["SetEqual"] && buiActive["RationalInterval"] && buiActive["RealInterval"] && ((rs = intervalSize[RationalInterval$TM, al, ar, alc, arc]) =!= $Failed)
-	]
-RationalInterval$TM /: Equal$TM[ a_RealInterval$TM, b_RationalInterval$TM] /; buiActive["SetEqual"] := Equal$TM[ b, a]
-
-RealInterval$TM /: Equal$TM[ RealInterval$TM[ al_?isRealOrInf, ar_?isRealOrInf, alc:(True|False), arc:(True|False)],
-		RealInterval$TM[ bl_?isRealOrInf, br_?isRealOrInf, blc:(True|False), brc:(True|False)]] /; buiActive["SetEqual"] && buiActive["RealInterval"] :=
-	With[ {alcc = Switch[ al, _DirectedInfinity, False, _, alc],
-			arcc = Switch[ ar, _DirectedInfinity, False, _, arc],
-			blcc = Switch[ bl, _DirectedInfinity, False, _, blc],
-			brcc = Switch[ br, _DirectedInfinity, False, _, brc]},
-		And[ al == bl, ar == br, alcc === blcc, arcc === brcc]
+Equal$TM[ a_?isActiveDomain, b_?isActiveDomain] /; buiActive["SetEqual"] :=
+	Module[ {res},
+		res /; (If[ TrueQ[ res = subseteq[ a, b, Equal$TM]],
+					res = subseteq[ b, a, Equal$TM]
+				];
+				MatchQ[ res, True|False])
 	]
 	
 	
 (* ::Subsection:: *)
-(* intersection *)
+(* SubsetEqual *)
+
+SubsetEqual$TM[ a_?isActiveDomain, a_] /; buiActive["SubsetEqual"] := True
+
+Set$TM /: SubsetEqual$TM[ a_?isActiveDomain, b_Set$TM] /; buiActive["SubsetEqual"] :=
+	Module[ {res},
+		res /; MatchQ[ res = subseteq[ a, b, Equal$TM], True|False]
+	]
+Set$TM /: SubsetEqual$TM[ a_Set$TM, b_?isActiveDomain] /; buiActive["SubsetEqual"] :=
+	Module[ {res},
+		res /; MatchQ[ res = subseteq[ a, b, Equal$TM], True|False]
+	]
+SubsetEqual$TM[ a_?isActiveDomain, b_?isActiveDomain] /; buiActive["SubsetEqual"] :=
+	Module[ {res},
+		res /; MatchQ[ res = subseteq[ a, b, Equal$TM], True|False]
+	]
+	
+	
+(* ::Subsection:: *)
+(* Subset *)
+
+Subset$TM[ a_?isActiveDomain, a_] /; buiActive["Subset"] := False
+
+Set$TM /: Subset$TM[ a_?isActiveDomain, b_Set$TM] /; buiActive["Subset"] :=
+	Module[ {res},
+		res /; (If[ TrueQ[ res = subseteq[ a, b, Equal$TM]],
+					res = !subseteq[ b, a, Equal$TM]
+				];
+				MatchQ[ res, True|False])
+	]
+Set$TM /: Subset$TM[ a_Set$TM, b_?isActiveDomain] /; buiActive["Subset"] :=
+	Module[ {res},
+		res /; (If[ TrueQ[ res = subseteq[ a, b, Equal$TM]],
+					res = !subseteq[ b, a, Equal$TM]
+				];
+				MatchQ[ res, True|False])
+	]
+Subset$TM[ a_?isActiveDomain, b_?isActiveDomain] /; buiActive["Subset"] :=
+	Module[ {res},
+		res /; (If[ TrueQ[ res = subseteq[ a, b, Equal$TM]],
+					res = !subseteq[ b, a, Equal$TM]
+				];
+				MatchQ[ res, True|False])
+	]
+	
+	
+(* ::Subsection:: *)
+(* SupersetEqual *)
+
+SupersetEqual$TM[ a_?isActiveDomain, a_] /; buiActive["SupersetEqual"] := True
+
+Set$TM /: SupersetEqual$TM[ a_?isActiveDomain, b_Set$TM] /; buiActive["SupersetEqual"] :=
+	Module[ {res},
+		res /; MatchQ[ res = subseteq[ b, a, Equal$TM], True|False]
+	]
+Set$TM /: SupersetEqual$TM[ a_Set$TM, b_?isActiveDomain] /; buiActive["SupersetEqual"] :=
+	Module[ {res},
+		res /; MatchQ[ res = subseteq[ b, a, Equal$TM], True|False]
+	]
+SupersetEqual$TM[ a_?isActiveDomain, b_?isActiveDomain] /; buiActive["SupersetEqual"] :=
+	Module[ {res},
+		res /; MatchQ[ res = subseteq[ b, a, Equal$TM], True|False]
+	]
+	
+	
+(* ::Subsection:: *)
+(* Superset *)
+
+Superset$TM[ a_?isActiveDomain, a_] /; buiActive["Superset"] := False
+
+Set$TM /: Superset$TM[ a_?isActiveDomain, b_Set$TM] /; buiActive["Superset"] :=
+	Module[ {res},
+		res /; (If[ TrueQ[ res = subseteq[ b, a, Equal$TM]],
+					res = !subseteq[ a, b, Equal$TM]
+				];
+				MatchQ[ res, True|False])
+	]
+Set$TM /: Superset$TM[ a_Set$TM, b_?isActiveDomain] /; buiActive["Superset"] :=
+	Module[ {res},
+		res /; (If[ TrueQ[ res = subseteq[ b, a, Equal$TM]],
+					res = !subseteq[ a, b, Equal$TM]
+				];
+				MatchQ[ res, True|False])
+	]
+Superset$TM[ a_?isActiveDomain, b_?isActiveDomain] /; buiActive["Superset"] :=
+	Module[ {res},
+		res /; (If[ TrueQ[ res = subseteq[ b, a, Equal$TM]],
+					res = !subseteq[ a, b, Equal$TM]
+				];
+				MatchQ[ res, True|False])
+	]
+	
+	
+(* ::Subsection:: *)
+(* Intersection *)
+
+Intersection$TM[ a_?isActiveDomain, a_] /; buiActive["Intersection"] := a
 
 Set$TM /: Intersection$TM[ a:(h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ _?isRealOrInf, _?isRealOrInf, True|False, True|False],
-		b:Set$TM[ ___?isGround]] /; buiActive["Intersection"] && buiActive[StringDrop[SymbolName[h],-3]] :=
-	Select[ b, isInInterval[ #, a]&]
+		b:Set$TM[ ___]] /; buiActive["Intersection"] && buiActive[StringDrop[SymbolName[h],-3]] :=
+	Module[ {out = Set$TM[]},
+		out /; Catch[
+				Scan[(
+					If[ isInInterval[ #, a],
+						AppendTo[ out, #],
+						Null,
+						Throw[ False]]
+					)&,
+					b
+				];
+				True
+			]
+	]
 Set$TM /: Intersection$TM[ a_Set$TM, b:(_IntegerInterval$TM|_RationalInterval$TM|_RealInterval$TM)] /; buiActive["Intersection"] := Intersection$TM[ b, a]
-Set$TM /: Intersection$TM[ \[DoubleStruckCapitalC]$TM, b:Set$TM[ ___?isGround]] /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]"] :=
-	Select[ b, isComplex]
+Set$TM /: Intersection$TM[ \[DoubleStruckCapitalC]$TM, b:Set$TM[ ___]] /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]"] :=
+	Module[ {out = Set$TM[]},
+		out /; Catch[
+				Scan[(
+					If[ isComplex[ #],
+						AppendTo[ out, #],
+						Null,
+						Throw[ False]]
+					)&,
+					b
+				];
+				True
+			]
+	]
 Set$TM /: Intersection$TM[ b_Set$TM, \[DoubleStruckCapitalC]$TM] /; buiActive["Intersection"] := Intersection$TM[ \[DoubleStruckCapitalC]$TM, b]
-Set$TM /: Intersection$TM[ \[DoubleStruckCapitalC]P$TM, b:Set$TM[ ___?isGround]] /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]"] :=
-	Select[ b, isComplex]
+Set$TM /: Intersection$TM[ \[DoubleStruckCapitalC]P$TM, b:Set$TM[ ___]] /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]"] :=
+	Module[ {out = Set$TM[]},
+		out /; Catch[
+				Scan[(
+					If[ isComplexP[ #],
+						AppendTo[ out, #],
+						Null,
+						Throw[ False]]
+					)&,
+					b
+				];
+				True
+			]
+	]
 Set$TM /: Intersection$TM[ b_Set$TM, \[DoubleStruckCapitalC]P$TM] /; buiActive["Intersection"] := Intersection$TM[ \[DoubleStruckCapitalC]P$TM, b]
+Set$TM /: Intersection$TM[ IntegerQuotientRing$TM[ m_?isModulus], b_Set$TM] /; buiActive["Intersection"] && buiActive["IntegerQuotientRing"] :=
+	Module[ {out = Set$TM[]},
+		out /; Catch[
+				Scan[(
+					If[ isInteger[ #] && NonNegative[ #] && # < m,
+						AppendTo[ out, #],
+						Null,
+						Throw[ False]]
+					)&,
+					b
+				];
+				True
+			]
+	]
+Set$TM /: Intersection$TM[ IntegerQuotientRingPM$TM[ m_?isModulus], b_Set$TM] /; buiActive["Intersection"] && buiActive["IntegerQuotientRingPM"] :=
+	Module[ {l = lowerPM[ m], u = upperPM[ m], out = Set$TM[]},
+		out /; Catch[
+				Scan[(
+					If[ isInteger[ #] && l <= # && # <= u,
+						AppendTo[ out, #],
+						Null,
+						Throw[ False]]
+					)&,
+					b
+				];
+				True
+			]
+	]
+Set$TM /: Intersection$TM[ a_Set$TM, b:(_IntegerQuotientRing$TM|_IntegerQuotientRingPM$TM)] /; buiActive["Intersection"] := Intersection$TM[ b, a]
 
 \[DoubleStruckCapitalC]$TM /: Intersection$TM[ \[DoubleStruckCapitalC]$TM, b:((h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ ___])] :=
 	b /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]"] && buiActive[StringDrop[SymbolName[h], -3]]
 \[DoubleStruckCapitalC]$TM /: Intersection$TM[ b:((h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ ___]), \[DoubleStruckCapitalC]$TM] :=
 	b /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]"] && buiActive[StringDrop[SymbolName[h], -3]]
+\[DoubleStruckCapitalC]$TM /: Intersection$TM[ \[DoubleStruckCapitalC]$TM, b:((h:(IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ _])] :=
+	b /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]"] && buiActive[StringDrop[SymbolName[h], -3]]
+\[DoubleStruckCapitalC]$TM /: Intersection$TM[ b:((h:(IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ _]), \[DoubleStruckCapitalC]$TM] :=
+	b /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]"] && buiActive[StringDrop[SymbolName[h], -3]]
 \[DoubleStruckCapitalC]P$TM /: Intersection$TM[ \[DoubleStruckCapitalC]P$TM, (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ ___]] :=
 	Set$TM[ ] /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]P"] && buiActive[StringDrop[SymbolName[h], -3]]
 \[DoubleStruckCapitalC]P$TM /: Intersection$TM[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ ___], \[DoubleStruckCapitalC]P$TM] :=
 	Set$TM[ ] /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]P"] && buiActive[StringDrop[SymbolName[h], -3]]
+\[DoubleStruckCapitalC]P$TM /: Intersection$TM[ \[DoubleStruckCapitalC]P$TM, b:((h:(IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ _])] :=
+	Set$TM[ ] /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]P"] && buiActive[StringDrop[SymbolName[h], -3]]
+\[DoubleStruckCapitalC]P$TM /: Intersection$TM[ b:((h:(IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ _]), \[DoubleStruckCapitalC]P$TM] :=
+	Set$TM[ ] /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]P"] && buiActive[StringDrop[SymbolName[h], -3]]
 	
-\[DoubleStruckCapitalC]$TM /: Intersection$TM[ \[DoubleStruckCapitalC]$TM, \[DoubleStruckCapitalC]$TM] :=
-	\[DoubleStruckCapitalC]$TM /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]"]
 \[DoubleStruckCapitalC]$TM /: Intersection$TM[ \[DoubleStruckCapitalC]$TM, \[DoubleStruckCapitalC]P$TM] :=
 	Set$TM[ ] /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]"] && buiActive["\[DoubleStruckCapitalC]P"]
 \[DoubleStruckCapitalC]P$TM /: Intersection$TM[ \[DoubleStruckCapitalC]P$TM, \[DoubleStruckCapitalC]$TM] :=
 	Set$TM[ ] /; buiActive["Intersection"] && buiActive["\[DoubleStruckCapitalC]P"] && buiActive["\[DoubleStruckCapitalC]"]
-\[DoubleStruckCapitalC]P$TM /: Intersection$TM[ \[DoubleStruckCapitalC]P$TM, \[DoubleStruckCapitalC]P$TM] :=
-	\[DoubleStruckCapitalC]P$TM /; buiActive["Intersection"] buiActive["\[DoubleStruckCapitalC]P"]
 		
 IntegerInterval$TM /: Intersection$TM[ a:IntegerInterval$TM[ _?isRealOrInf, _?isRealOrInf, True|False, True|False],
 		b:(h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ _?isRealOrInf, _?isRealOrInf, True|False, True|False]] /;
@@ -1513,19 +1974,54 @@ RationalInterval$TM /: Intersection$TM[ a:RationalInterval$TM[ _?isRealOrInf, _?
 		b:(h:(RationalInterval$TM|RealInterval$TM))[ _?isRealOrInf, _?isRealOrInf, True|False, True|False]] /;
 			buiActive["Intersection"] && buiActive["RationalInterval"] && buiActive[StringDrop[SymbolName[h],-3]] :=
 	RationalInterval$TM[ intersectIntervals[ a, b]]
-RationalInterval$TM /: Intersection$TM[ a_RationalInterval$TM, b_RealInterval$TM] /; buiActive["Intersection"] := Intersection$TM[ b, a]
+RationalInterval$TM /: Intersection$TM[ a_RealInterval$TM, b_RationalInterval$TM] /; buiActive["Intersection"] := Intersection$TM[ b, a]
 
 RealInterval$TM /: Intersection$TM[ a:RealInterval$TM[ _?isRealOrInf, _?isRealOrInf, True|False, True|False],
 		b:RealInterval$TM[ _?isRealOrInf, _?isRealOrInf, True|False, True|False]] /; buiActive["Intersection"] && buiActive["RealInterval"] :=
 	RealInterval$TM[ intersectIntervals[ a, b]]
+	
+IntegerQuotientRing$TM /: Intersection$TM[ IntegerQuotientRing$TM[ m_?isModulus],
+		b:(h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ _?isRealOrInf, _?isRealOrInf, True|False, True|False]] /;
+			buiActive["Intersection"] && buiActive["IntegerQuotientRing"] && buiActive[StringDrop[SymbolName[h],-3]] :=
+	IntegerInterval$TM[ intersectIntervals[ IntegerInterval$TM[ 0, m - 1, True, True], b]]
+IntegerQuotientRingPM$TM /: Intersection$TM[ IntegerQuotientRingPM$TM[ m_?isModulus],
+		b:(h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ _?isRealOrInf, _?isRealOrInf, True|False, True|False]] /;
+			buiActive["Intersection"] && buiActive["IntegerQuotientRingPM"] && buiActive[StringDrop[SymbolName[h],-3]] :=
+	IntegerInterval$TM[ intersectIntervals[ IntegerInterval$TM[ lowerPM[ m], upperPM[ m], True, True], b]]
+Intersection$TM[ a:(_IntegerInterval$TM|_RationalInterval$TM|_RealInterval$TM), b:(_IntegerQuotientRing$TM|_IntegerQuotientRingPM$TM)] /; buiActive["Intersection"] := Intersection$TM[ b, a]
 
+IntegerQuotientRing$TM /: Intersection$TM[ IntegerQuotientRing$TM[ m1_?isModulus], IntegerQuotientRingPM$TM[ m2_?isModulus]] /;
+			buiActive["Intersection"] && buiActive["IntegerQuotientRing"] && buiActive["IntegerQuotientRingPM"] :=
+	IntegerInterval$TM[ 0, Min[ m1 - 1, upperPM[ m2]], True, True]
+IntegerQuotientRing$TM /: Intersection$TM[ a_IntegerQuotientRingPM$TM, b_IntegerQuotientRing$TM] /; buiActive["Intersection"] := Intersection$TM[ b, a]
+	
+IntegerQuotientRing$TM /: Intersection$TM[ IntegerQuotientRing$TM[ m1_?isModulus], IntegerQuotientRing$TM[ m2_?isModulus]] /;
+			buiActive["Intersection"] && buiActive["IntegerQuotientRing"] :=
+	IntegerQuotientRing$TM[ Min[ m1, m2]]
+IntegerQuotientRingPM$TM /: Intersection$TM[ IntegerQuotientRingPM$TM[ m1_?isModulus], IntegerQuotientRingPM$TM[ m2_?isModulus]] /;
+			buiActive["Intersection"] && buiActive["IntegerQuotientRingPM"] :=
+	IntegerQuotientRingPM$TM[ Min[ m1, m2]]
+
+
+(* ::Subsection:: *)
+(* Union *)
+
+IntegerQuotientRing$TM /: Union$TM[ IntegerQuotientRing$TM[ m1_?isModulus], IntegerQuotientRing$TM[ m2_?isModulus]] /;
+			buiActive["Union"] && buiActive["IntegerQuotientRing"] :=
+	IntegerQuotientRing$TM[ Max[ m1, m2]]
+IntegerQuotientRingPM$TM /: Union$TM[ IntegerQuotientRingPM$TM[ m1_?isModulus], IntegerQuotientRingPM$TM[ m2_?isModulus]] /;
+			buiActive["Union"] && buiActive["IntegerQuotientRingPM"] :=
+	IntegerQuotientRingPM$TM[ Max[ m1, m2]]
+	
 
 (* ::Subsection:: *)
 (* element *)
 
-\[DoubleStruckCapitalC]$TM /: Element$TM[ p_, \[DoubleStruckCapitalC]$TM] /; buiActive["IsElement"] && buiActive["\[DoubleStruckCapitalC]"] := isComplex[ p]
-\[DoubleStruckCapitalC]P$TM /: Element$TM[ p_, \[DoubleStruckCapitalC]P$TM] /; buiActive["IsElement"] && buiActive["\[DoubleStruckCapitalC]P"] := isComplexP[ p]
+\[DoubleStruckCapitalC]$TM /: Element$TM[ p_, \[DoubleStruckCapitalC]$TM] /; buiActive["IsElement"] && buiActive["\[DoubleStruckCapitalC]"] := isComplex$TM[ p]
+\[DoubleStruckCapitalC]P$TM /: Element$TM[ p_, \[DoubleStruckCapitalC]P$TM] /; buiActive["IsElement"] && buiActive["\[DoubleStruckCapitalC]P"] := isComplexP$TM[ p]
 Element$TM[ p_, h:(_IntegerInterval$TM|_RationalInterval$TM|_RealInterval$TM)] /; buiActive["IsElement"] && buiActive[StringDrop[SymbolName[Head[h]],-3]] := isInInterval[ p, h]
+IntegerQuotientRing$TM /: Element$TM[ p_, IntegerQuotientRing$TM[ m_?isModulus]] := isInteger$TM[ p] && 0 <= p && p <= m - 1
+IntegerQuotientRingPM$TM /: Element$TM[ p_, IntegerQuotientRingPM$TM[ m_?isModulus]] := isInteger$TM[ p] && lowerPM[ m] <= p && p <= upperPM[ m]
 
 
 (* ::Subsection:: *)
@@ -1554,6 +2050,10 @@ RationalInterval$TM /: min$TM[ RationalInterval$TM[ l_?isInIntervalDomain[ Ratio
 	l
 RealInterval$TM /: min$TM[ RealInterval$TM[ l_?isRealOrInf, _?isRealOrInf, True, True|False]] /; buiActive["MinimumElementSet"] && buiActive["RealInterval"] && l > -Infinity :=
 	l
+IntegerQuotientRing$TM /: min$TM[ IntegerQuotientRing$TM[ m_?isModulus]] /; buiActive["MinimumElementSet"] && buiActive["IntegerQuotientRing"] :=
+	0
+IntegerQuotientRingPM$TM /: min$TM[ IntegerQuotientRingPM$TM[ m_?isModulus]] /; buiActive["MinimumElementSet"] && buiActive["IntegerQuotientRingPM"] :=
+	lowerPM[ m]
 	
 IntegerInterval$TM /: max$TM[ IntegerInterval$TM[ _?isRealOrInf, r_?isRealOrInf, True|False, rc:(True|False)]] /; buiActive["MaximumElementSet"] && buiActive["IntegerInterval"] && r < Infinity :=
 	integerBoundary[ "right", r, rc]
@@ -1561,10 +2061,62 @@ RationalInterval$TM /: max$TM[ RationalInterval$TM[ _?isRealOrInf, r_?isInInterv
 	r
 RealInterval$TM /: max$TM[ RealInterval$TM[ _?isRealOrInf, r_?isRealOrInf, True|False, True]] /; buiActive["MaximumElementSet"] && buiActive["RealInterval"] && r < Infinity :=
 	r
+IntegerQuotientRing$TM /: max$TM[ IntegerQuotientRing$TM[ m_?isModulus]] /; buiActive["MaximumElementSet"] && buiActive["IntegerQuotientRing"] :=
+	m - 1
+IntegerQuotientRingPM$TM /: max$TM[ IntegerQuotientRingPM$TM[ m_?isModulus]] /; buiActive["MaximumElementSet"] && buiActive["IntegerQuotientRingPM"] :=
+	upperPM[ m]
+	
+	
+(* ::Subsection:: *)
+(* ae *)
+
+IntegerInterval$TM /: \[AE]$TM[ IntegerInterval$TM[ DirectedInfinity[-1], DirectedInfinity[1], True|False, True|False]] /; buiActive["AnElement"] && buiActive["IntegerInterval"] :=
+	0
+IntegerInterval$TM /: \[AE]$TM[ IntegerInterval$TM[ DirectedInfinity[-1], r_?isReal, True|False, rc:(True|False)]] /; buiActive["AnElement"] && buiActive["IntegerInterval"] :=
+	integerBoundary[ "right", r, rc]
+IntegerInterval$TM /: \[AE]$TM[ IntegerInterval$TM[ l_?isReal, _?isRealOrInf, lc:(True|False), True|False]] /; buiActive["AnElement"] && buiActive["IntegerInterval"] :=
+	integerBoundary[ "left", l, lc]
+	
+RationalInterval$TM /: \[AE]$TM[ RationalInterval$TM[ DirectedInfinity[-1], DirectedInfinity[1], True|False, True|False]] /; buiActive["AnElement"] && buiActive["RationalInterval"] :=
+	0
+RationalInterval$TM /: \[AE]$TM[ RationalInterval$TM[ DirectedInfinity[-1], r_?isReal, True|False, True|False]] /; buiActive["AnElement"] && buiActive["RationalInterval"] :=
+	Floor[ r] - 1
+RationalInterval$TM /: \[AE]$TM[ RationalInterval$TM[ l_?isReal, DirectedInfinity[1], True|False, True|False]] /; buiActive["AnElement"] && buiActive["RationalInterval"] :=
+	Ceiling[ l] + 1
+RationalInterval$TM /: \[AE]$TM[ RationalInterval$TM[ l_?isRational, r_?isRational, True|False, True|False]] /; buiActive["AnElement"] && buiActive["RationalInterval"] :=
+	(l + r) / 2
+RationalInterval$TM /: \[AE]$TM[ RationalInterval$TM[ l_?isReal, r_?isReal, True|False, True|False]] /; buiActive["AnElement"] && buiActive["RationalInterval"] :=
+	Module[ {res},
+		res /; isRational[ res = Rationalize[ (l + r) / 2, (r - l) / 4]]
+	]
+	
+RealInterval$TM /: \[AE]$TM[ RealInterval$TM[ DirectedInfinity[-1], DirectedInfinity[1], True|False, True|False]] /; buiActive["AnElement"] && buiActive["RealInterval"] :=
+	0
+RealInterval$TM /: \[AE]$TM[ RealInterval$TM[ DirectedInfinity[-1], r_?isReal, True|False, True|False]] /; buiActive["AnElement"] && buiActive["RealInterval"] :=
+	Floor[ r] - 1
+RealInterval$TM /: \[AE]$TM[ RealInterval$TM[ l_?isReal, DirectedInfinity[1], True|False, True|False]] /; buiActive["AnElement"] && buiActive["RealInterval"] :=
+	Ceiling[ l] + 1
+RealInterval$TM /: \[AE]$TM[ RealInterval$TM[ l_?isReal, r_?isReal, True|False, True|False]] /; buiActive["AnElement"] && buiActive["RealInterval"] :=
+	(l + r) / 2
+	
+\[DoubleStruckCapitalC]$TM /: \[AE]$TM[ \[DoubleStruckCapitalC]$TM] /; buiActive["AnElement"] && buiActive["\[DoubleStruckCapitalC]"] :=
+	0
+\[DoubleStruckCapitalC]P$TM /: \[AE]$TM[ \[DoubleStruckCapitalC]P$TM] /; buiActive["AnElement"] && buiActive["\[DoubleStruckCapitalC]P"] :=
+	Tuple$TM[ 0, 0]
+	
+IntegerQuotientRing$TM /: \[AE]$TM[ IntegerQuotientRing$TM[ m_?isModulus]] /; buiActive["AnElement"] && buiActive["IntegerQuotientRing"] :=
+	0
+IntegerQuotientRingPM$TM /: \[AE]$TM[ IntegerQuotientRingPM$TM[ m_?isModulus]] /; buiActive["AnElement"] && buiActive["IntegerQuotientRingPM"] :=
+	0
 
 
 (* ::Subsection:: *)
 (* auxiliary functions *)
+
+isActiveDomain[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM))[ _?isRealOrInf, _?isRealOrInf, True|False, True|False]] := buiActive[ StringDrop[ SymbolName[ h], -3]]
+isActiveDomain[ (h:(IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ _?isModulus]] := buiActive[ StringDrop[ SymbolName[ h], -3]]
+isActiveDomain[ a:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] := buiActive[ StringDrop[ SymbolName[ a], -3]]
+isActiveDomain[ _] := False
 
 isInInterval[ p_, (h:IntegerInterval$TM|RationalInterval$TM|RealInterval$TM)[DirectedInfinity[-1], DirectedInfinity[1], _, _]] :=
 	isInIntervalDomain[ h, p]
@@ -1587,9 +2139,9 @@ isInInterval[ p_, (h:IntegerInterval$TM|RationalInterval$TM|RealInterval$TM)[l_,
 
 (* The only thing that function "isInIntervalDomain" does is to provide a shortcut, such that one does not have to
 	distinguish all the time between the 3 different intervals; "isInIntervalDomain" does the job. *)
-isInIntervalDomain[ IntegerInterval$TM, a_] := isInteger[ a]
-isInIntervalDomain[ RationalInterval$TM, a_] := isRational[ a]
-isInIntervalDomain[ RealInterval$TM, a_] := isReal[ a]
+isInIntervalDomain[ IntegerInterval$TM, a_] := isInteger$TM[ a]
+isInIntervalDomain[ RationalInterval$TM, a_] := isRational$TM[ a]
+isInIntervalDomain[ RealInterval$TM, a_] := isReal$TM[ a]
 
 (* isRealOrInf returns True iff its argument is either a real number or real infinity. These are the only
 	values that make sense as interval boundaries. *)
@@ -1658,9 +2210,13 @@ Tuple$TM /: Equal$TM[a__Tuple$TM] /; buiActive["TupleEqual"] && SameQ[a ] := Tru
 Tuple$TM /: Equal$TM[a__Tuple$TM?isSequenceFree] /; buiActive["TupleEqual"] :=
 	Module[ {res},
 		res /; (res = If[ Apply[ SameQ, Map[ Length, Hold[ a]]],
-						Map[ Replace[#, {x__} :> Equal$TM[ x]] &, Apply[ And, Transpose[
-							Map[ Replace[ #, Tuple$TM[ x__] :> {x}]&, {a}]]]
-							],
+						Apply[ And,
+							Replace[
+								Apply[ Hold, Transpose[ Map[ Replace[ #, Tuple$TM[ x__] :> {x}]&, {a}]]],
+								{x__} :> Equal$TM[ x],
+								{1}
+							]
+						],
 						False
 					];
 				MatchQ[ res, True|False])
@@ -1668,16 +2224,20 @@ Tuple$TM /: Equal$TM[a__Tuple$TM?isSequenceFree] /; buiActive["TupleEqual"] :=
 Tuple$TM /: Annotated$TM[Equal$TM, SubScript$TM[ dom_]][a__Tuple$TM?isSequenceFree] /; buiActive["TupleEqual"] :=
 	Module[ {res},
 		res /; (res = If[ Apply[ SameQ, Map[ Length, Hold[ a]]],
-						Map[ Replace[#, {x__} :> dom[Equal$TM][ x]] &, Apply[ And, Transpose[
-							Map[ Replace[ #, Tuple$TM[ x__] :> {x}]&, {a}]]]
-							],
+						Apply[ And,
+							Replace[
+								Apply[ Hold, Transpose[ Map[ Replace[ #, Tuple$TM[ x__] :> {x}]&, {a}]]],
+								{x__} :> DomainOperation$TM[ dom, Equal$TM][ x],
+								{1}
+							]
+						],
 						False
 					];
 				MatchQ[ res, True|False])
 	]
 
 Tuple$TM /: appendElem$TM[a_Tuple$TM, p_] /; buiActive["appendElem"] := Append[ a, p]
-Tuple$TM /: prependElem$TM[a_Tuple$TM, p_] /; buiActive["prependElem"] := Prepend[ a, p]
+Tuple$TM /: prependElem$TM[p_, a_Tuple$TM] /; buiActive["prependElem"] := Prepend[ a, p]
 Tuple$TM /: joinTuples$TM[a__Tuple$TM] /; buiActive["joinTuples"] := Join[ a]
 
 Tuple$TM /: elemTuple$TM[ p_, a_Tuple$TM] /; buiActive["elemTuple"] :=
@@ -1686,30 +2246,26 @@ Tuple$TM /: elemTuple$TM[ p_, a_Tuple$TM] /; buiActive["elemTuple"] :=
 	]
 Tuple$TM /: Annotated$TM[ elemTuple$TM, SubScript$TM[ dom_]][ p_, a_Tuple$TM] /; buiActive["elemTuple"] :=
 	Module[ {res},
-		res /; (res = ElementOf[ p, a, dom[Equal$TM]]; MatchQ[ res, True|False])
+		res /; (res = ElementOf[ p, a, DomainOperation$TM[ dom, Equal$TM]]; MatchQ[ res, True|False])
 	]
 
 Tuple$TM /: max$TM[ Tuple$TM[ e__]] /; buiActive["Max"] :=
 	Module[ {s},
 		(s /. Max -> max$TM /. {max$TM[x_Tuple$TM] :> max$TM[x], max$TM[x___] :> max$TM[Tuple$TM[x]]}) /; (s = Max[ e]; Apply[ Hold, {s}] =!= Hold[ Max[ e]])
 	]
+Tuple$TM /: Subscript$TM[ max$TM, _][ Tuple$TM[ e_]] /; buiActive["Max"] := e
 Tuple$TM /: Subscript$TM[ max$TM, ord_][ Tuple$TM[ e__]] /; buiActive["Max"] :=
 	Module[ {res},
-		If[ Length[ res] === 1,
-			First[ res],
-			Subscript$TM[ max$TM, ord][ Apply[ Tuple$TM, res]]
-		] /; (res = max[ {e}, ord]; Length[ res] < Length[ Hold[ e]])
+		Subscript$TM[ max$TM, ord][ Apply[ Tuple$TM, res]] /; (res = max[ {e}, ord]; Length[ res] < Length[ Hold[ e]])
 	]
 Tuple$TM /: min$TM[ Tuple$TM[ e__]] /; buiActive["Min"] :=
 	Module[ {s},
 		(s /. Min -> min$TM /. {min$TM[x_Tuple$TM] :> min$TM[x], min$TM[x___] :> min$TM[Tuple$TM[x]]}) /; (s = Min[ e]; Apply[ Hold, {s}] =!= Hold[ Min[ e]])
 	]
+Tuple$TM /: Subscript$TM[ min$TM, _][ Tuple$TM[ e_]] /; buiActive["Min"] := e
 Tuple$TM /: Subscript$TM[ min$TM, ord_][ Tuple$TM[ e__]] /; buiActive["Min"] :=
 	Module[ {res},
-		If[ Length[ res] === 1,
-			First[ res],
-			Subscript$TM[ min$TM, ord][ Apply[ Tuple$TM, res]]
-		] /; (res = min[ {e}, ord]; Length[ res] < Length[ Hold[ e]])
+		Subscript$TM[ min$TM, ord][ Apply[ Tuple$TM, res]] /; (res = min[ {e}, ord]; Length[ res] < Length[ Hold[ e]])
 	]
 
 Tuple$TM /: BracketingBar$TM[ a_Tuple$TM?isSequenceFree] /; buiActive["Length"] := Length[ a]
@@ -1734,13 +2290,34 @@ isPositionSpec[ args___] := unexpected[ isPositionSpec, {args}]
 (* ::Section:: *)
 (* Data Types *)
 
-isInteger$TM[ a_] /; buiActive["isInteger"] := isInteger[ a]
-isRational$TM[ a_] /; buiActive["isRational"] := isRational[ a]
-isReal$TM[ a_] /; buiActive["isReal"] := isReal[ a]
-isComplex$TM[ a_] /; buiActive["isComplex"] := isComplex[ a]
-isComplexP$TM[ a_] /; buiActive["isComplexP"] := isComplexP[ a]
-isSet$TM[ a_] /; buiActive["isSet"] := isSet[ a]
-isTuple$TM[ a_] /; buiActive["isTuple"] := isTuple[ a]
+isInteger$TM[ a_] /; buiActive["isInteger"] :=
+	Module[ {res},
+		res /; !MatchQ[ res = isInteger[ a], _isInteger]
+	]
+isRational$TM[ a_] /; buiActive["isRational"] :=
+	Module[ {res},
+		res /; !MatchQ[ res = isRational[ a], _isRational]
+	]
+isReal$TM[ a_] /; buiActive["isReal"] :=
+	Module[ {res},
+		res /; !MatchQ[ res = isReal[ a], _isReal]
+	]
+isComplex$TM[ a_] /; buiActive["isComplex"] :=
+	Module[ {res},
+		res /; !MatchQ[ res = isComplex[ a], _isComplex]
+	]
+isComplexP$TM[ a_] /; buiActive["isComplexP"] :=
+	Module[ {res},
+		res /; !MatchQ[ res = isComplexP[ a], _isComplexP]
+	]
+isSet$TM[ a_] /; buiActive["isSet"] :=
+	Module[ {res},
+		res /; !MatchQ[ res = isSet[ a], _isSet]
+	]
+isTuple$TM[ a_] /; buiActive["isTuple"] :=
+	Module[ {res},
+		res /; !MatchQ[ res = isTuple[ a], _isTuple]
+	]
 
 
 isInteger[ _Integer] := True
@@ -1773,7 +2350,7 @@ isComplex[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuo
 isComplex[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False
 isComplex[ Indeterminate|True|False|Infinity] := False
 
-isComplexP[ Tuple$TM[ a_, b_]] := isReal[ a] && isReal[ b] && a >= 0
+isComplexP[ Tuple$TM[ a_, b_]] := isReal$TM[ a] && isReal$TM[ b] && a >= 0
 isComplexP[ _Integer|_Rational|_Real|_Complex|_Set$TM|_Tuple$TM|_DirectedInfinity] := False
 isComplexP[ (h:(IntegerInterval$TM|RationalInterval$TM|RealInterval$TM|IntegerQuotientRing$TM|IntegerQuotientRingPM$TM))[ ___]] /; buiActive[StringDrop[SymbolName[h],-3]] := False
 isComplexP[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM)] /; buiActive[StringDrop[SymbolName[h],-3]] := False

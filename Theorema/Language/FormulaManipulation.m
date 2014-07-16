@@ -643,20 +643,20 @@ makeRules[ {form:Theorema`Language`Equal$TM[ l_, r_], c_List, var_List}, ref_] :
 	rule is applied. If we choose one with some variables missing, then makeSingleRule will not generate a forward rule but maybe still a useful backward rule!
 *)
 makeRules[ {form:Theorema`Language`And$TM[ f__], c:{c0___, c1_, c2___}, var_List} /; Complement[ var, freeVariables[ c1]] === {}, ref_] := 
-	{Append[ 
+	{Join[ (* amaletzk: We cannot use "Append" here, because the second argument could be "Sequence[]" *)
 		Map[ makeSingleRule[ 
 				{simplifiedNot[ Theorema`Language`Not$TM[ #]], makeDisjunction[ Map[ simplifiedNot[ Theorema`Language`Not$TM[ #]]&, c], Theorema`Language`Or$TM], {}, var}, 
 				ref]&, {f}],
-		makeSingleRule[ {c1, form, {c0, c2}, var}, ref]
+		{makeSingleRule[ {c1, form, {c0, c2}, var}, ref]}
 	], 
 	Map[ makeSingleRule[ {#, makeConjunction[ c, Theorema`Language`And$TM], {}, var}, ref, "backward"]&, {f}],
 	{}}
 makeRules[ {form:Theorema`Language`And$TM[ f__], c:{c1_, c2___}, var_List}, ref_] := 
-	{Append[ 
+	{Join[ 
 		Map[ makeSingleRule[ 
 				{simplifiedNot[ Theorema`Language`Not$TM[ #]], makeDisjunction[ Map[ simplifiedNot[ Theorema`Language`Not$TM[ #]]&, c], Theorema`Language`Or$TM], {}, var}, 
 				ref]&, {f}],
-		makeSingleRule[ {c1, form, {c2}, var}, ref]
+		{makeSingleRule[ {c1, form, {c2}, var}, ref]}
 	], 
 	Map[ makeSingleRule[ {#, makeConjunction[ c, Theorema`Language`And$TM], {}, var}, ref, "backward"]&, {f}],
 	{}}

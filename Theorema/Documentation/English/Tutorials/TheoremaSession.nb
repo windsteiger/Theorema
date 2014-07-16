@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[     25412,        615]
-NotebookOptionsPosition[     22695,        516]
-NotebookOutlinePosition[     23110,        532]
-CellTagsIndexPosition[     23067,        529]
+NotebookDataLength[     24933,        599]
+NotebookOptionsPosition[     22321,        504]
+NotebookOutlinePosition[     22736,        520]
+CellTagsIndexPosition[     22693,        517]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -479,20 +479,8 @@ Cell[TextData[{
   3.613193365987921*^9}},
  CellID->717170223],
 
-Cell[CellGroupData[{
-
 Cell["More About", "TutorialMoreAboutSection",
  CellID->23220180],
-
-Cell[TextData[ButtonBox["Theorema Session Demo",
- BaseStyle->"Link",
- ButtonData->
-  "paclet:Theorema/TheoremaNotebooks/Session"]], "TutorialMoreAbout",
- CellChangeTimes->{{3.604300668482305*^9, 3.604300684646646*^9}, {
-  3.604300721659642*^9, 3.604300722010154*^9}, {3.605005825913288*^9, 
-  3.605005829713222*^9}},
- CellID->1567025153]
-}, Open  ]],
 
 Cell[CellGroupData[{
 
@@ -597,22 +585,18 @@ Cell[6771, 220, 14749, 248, 233, "Picture",
 }, Open  ]],
 Cell[21535, 471, 332, 8, 23, "Text",
  CellID->717170223],
-Cell[CellGroupData[{
-Cell[21892, 483, 65, 1, 66, "TutorialMoreAboutSection",
+Cell[21870, 481, 65, 1, 66, "TutorialMoreAboutSection",
  CellID->23220180],
-Cell[21960, 486, 337, 7, 22, "TutorialMoreAbout",
- CellID->1567025153]
-}, Open  ]],
 Cell[CellGroupData[{
-Cell[22334, 498, 72, 1, 72, "RelatedTutorialsSection",
+Cell[21960, 486, 72, 1, 66, "RelatedTutorialsSection",
  CellID->415694126],
-Cell[22409, 501, 52, 1, 22, "RelatedTutorials",
+Cell[22035, 489, 52, 1, 22, "RelatedTutorials",
  CellID->806871991]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[22498, 507, 98, 1, 72, "TutorialRelatedLinksSection",
+Cell[22124, 495, 98, 1, 72, "TutorialRelatedLinksSection",
  CellID->415694148],
-Cell[22599, 510, 56, 1, 22, "TutorialRelatedLinks",
+Cell[22225, 498, 56, 1, 22, "TutorialRelatedLinks",
  CellID->415694149]
 }, Open  ]]
 }, Open  ]]

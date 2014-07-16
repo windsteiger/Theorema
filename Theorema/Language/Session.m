@@ -71,10 +71,14 @@ freshSymbol[ Hold[ s_Symbol]] :=
             _?isMathematicalConstant, s,
             (* processing the number domain symbols by MakeExpression does not work, I think MakeExpression is only
                applied to boxes and not to individual symbols. We convert them to respective ranges here. *)
-            ToExpression["\[DoubleStruckCapitalN]"], ToExpression[ "IntegerInterval$TM[ 1, Infinity, True, False]"],
-            ToExpression["\[DoubleStruckCapitalZ]"], ToExpression[ "IntegerInterval$TM[ -Infinity, Infinity, False, False]"],
-            ToExpression["\[DoubleStruckCapitalQ]"], ToExpression[ "RationalInterval$TM[ -Infinity, Infinity, False, False]"],
-            ToExpression["\[DoubleStruckCapitalR]"], ToExpression[ "RealInterval$TM[ -Infinity, Infinity, False, False]"],
+            Theorema`Computation`Knowledge`\[DoubleStruckCapitalN]|Theorema`Knowledge`\[DoubleStruckCapitalN],
+            	ToExpression[ "IntegerInterval$TM[ 1, Infinity, True, False]"],
+            Theorema`Computation`Knowledge`\[DoubleStruckCapitalZ]|Theorema`Knowledge`\[DoubleStruckCapitalZ],
+            	ToExpression[ "IntegerInterval$TM[ -Infinity, Infinity, False, False]"],
+            Theorema`Computation`Knowledge`\[DoubleStruckCapitalQ]|Theorema`Knowledge`\[DoubleStruckCapitalQ],
+            	ToExpression[ "RationalInterval$TM[ -Infinity, Infinity, False, False]"],
+            Theorema`Computation`Knowledge`\[DoubleStruckCapitalR]|Theorema`Knowledge`\[DoubleStruckCapitalR],
+            	ToExpression[ "RealInterval$TM[ -Infinity, Infinity, False, False]"],
             DoubleLongRightArrow|DoubleRightArrow, ToExpression[ "Implies$TM"],
             DoubleLongLeftRightArrow|DoubleLeftRightArrow|Equivalent, ToExpression[ "Iff$TM"],
         	SetDelayed, ToExpression[ "EqualDef$TM"], 
@@ -84,6 +88,7 @@ freshSymbol[ Hold[ s_Symbol]] :=
         	Vee, ToExpression[ "Or$TM"],
         	List, makeSet,
         	AngleBracket, makeTuple,
+        	Inequality, ToExpression[ "OperatorChain$TM"],
         	_,
         	name = ToString[ Unevaluated[s]];
         	If[ StringTake[ name, -1] === "$" || (StringLength[ name] >= 3 && StringTake[ name, -3] === "$TM"),
@@ -107,6 +112,7 @@ freshSymbolProg[ Hold[ s_Symbol]] :=
             Theorema`Computation`Knowledge`\[DoubleStruckCapitalR]|Theorema`Knowledge`\[DoubleStruckCapitalR],
             	ToExpression[ "RealInterval$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]"],
         	Set, ToExpression[ "Assign$TM"],
+        	Inequality, ToExpression[ "OperatorChain$TM"],
         	_,
         	name = ToString[s];
         	Which[
@@ -532,17 +538,21 @@ findSelectedFormula[args___] := unexpected[ findSelectedFormula, {args}]
 	As a result, also the globalForall$TM, globalImplies$TM, etc. have a Hold.
 *)
 Clear[ applyGlobalDeclaration]
-applyGlobalDeclaration[ expr_, g_List] := Fold[ applyGlobalDeclaration, expr, Reverse[ g]]
+applyGlobalDeclaration[ expr_, g_List] :=
+	Module[ {form = Fold[ applyGlobalDeclaration, expr, Reverse[ g]]},
+		form //. {globalImplies$TM[ a_, b_] :> Module[ {fa}, b /; ((fa = freeVariables[ a]) =!= {} && Intersection[ fa, freeVariables[ b]] === {})]}
+			 //. {fa:(globalForall$TM[ _, _, _]) :> Module[ {res}, res /; (res = analyzeQuantifiedExpression[ fa]) =!= fa]}
+			 /. {globalForall$TM -> Forall$TM, globalImplies$TM -> Implies$TM}
+	]
 
 applyGlobalDeclaration[ expr_, Hold[ globalForall$TM][ r_, c_]] := 
-	analyzeQuantifiedExpression[ Forall$TM[ r, c, ReleaseHold[ markVariables[ Hold[ QU$[ r, expr]]]]], {}]
-
+	globalForall$TM[ r, c, ReleaseHold[ markVariables[ Hold[ QU$[ r, expr]]]]]
 applyGlobalDeclaration[ expr_, Hold[ globalForall$TM][ r_, c_, d_]] := 
 	With[ {new = applyGlobalDeclaration[ expr, d]},
 		applyGlobalDeclaration[ new, Hold[ globalForall$TM][ r, c]]
 	]
-applyGlobalDeclaration[ expr_, Hold[ globalImplies$TM][ c_]] := Implies$TM[ c, expr]
-applyGlobalDeclaration[ expr_, Hold[ globalImplies$TM][ c_, d_]] := Implies$TM[ c, applyGlobalDeclaration[ expr, d]]
+applyGlobalDeclaration[ expr_, Hold[ globalImplies$TM]] := globalImplies$TM[ c, expr]
+applyGlobalDeclaration[ expr_, Hold[ globalImplies$TM][ c_, d_]] := globalImplies$TM[ c, applyGlobalDeclaration[ expr, d]]
 applyGlobalDeclaration[ expr_, Hold[ domainConstruct$TM][ lhs_, rng:RNG$[ SIMPRNG$[ v_]]]] :=
 	substituteFree[ ReleaseHold[ markVariables[ Hold[ QU$[ rng, expr]]]], {v -> lhs}]
 applyGlobalDeclaration[ expr_, Hold[ domainConstruct$TM][ lhs_, rng:RNG$[ DOMEXTRNG$[ v_, d_]]]] :=
@@ -554,7 +564,7 @@ applyGlobalDeclaration[ args___] := unexpected[ applyGlobalDeclaration, {args}]
 (*
 	analyze the ranges and drop all quantifiers that aren't needed
 *)
-analyzeQuantifiedExpression[ Forall$TM[ r:RNG$[ __], c_, e_], outerVar_List] :=
+analyzeQuantifiedExpression[ globalForall$TM[ r:RNG$[ __], c_, e_]] :=
 	Module[ {freeE, rc, sc, dropVar, thinnedRange, thinnedCond},
 		(* take the free vars in e *)
 		freeE = freeVariables[ e];
@@ -567,11 +577,9 @@ analyzeQuantifiedExpression[ Forall$TM[ r:RNG$[ __], c_, e_], outerVar_List] :=
 		If[ Length[ thinnedRange] == 0,
 			e,
 			thinnedCond = simplifiedAnd[ And$TM[ thinnedExpression[ sc, dropVar], rc]];
-			Forall$TM[ thinnedRange, thinnedCond, e]
+			globalForall$TM[ thinnedRange, thinnedCond, e]
 		]
 	]
-
-analyzeQuantifiedExpression[ args___] := unexpected[ analyzeQuantifiedExpression, {args}]
 
 initSession[] :=
     Module[ {},
@@ -860,7 +868,6 @@ renameToStandardContext[ expr_] :=
 			We don't use makeTuple[] here, because otherwise we get problems with contexts. *)
 		(* Do not substitute into a META$, because a META$ has a list of a.b.f. constants at pos. 3 *)
 		stringExpr = ToString[ replaceAllExcept[ FullForm[ Hold[ expr]], {List -> Tuple$TM}, {}, Heads -> {Theorema`Computation`Language`META$}]];
-		
 		stringExpr = StringReplace[ stringExpr, "Theorema`Computation`" -> "Theorema`"];
 		$ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
         removeHold[ freshNames[ ToExpression[ stringExpr]]]
@@ -882,11 +889,12 @@ computeInProof[ FML$[ k_, f_, l_, r___]] :=
 computeInProof[ expr_] :=
 	Module[{simp},
 		setComputationContext[ "prove"];
-		simp = ToExpression[ StringReplace[ ToString[ expr], "Theorema`Language`" -> "Theorema`Computation`Language`"]];
+		simp = ToExpression[ StringReplace[ ToString[ FullForm[ expr]], "Theorema`Language`" -> "Theorema`Computation`Language`"]];
 		setComputationContext[ "none"];
 		(* simp does not evaluate further *)
 		With[ {res = simp},
-			ToExpression[ StringReplace[ ToString[ renameToStandardContext[ res]], "Theorema`Computation`" -> "Theorema`"]]
+			(* We need FullForm here, for the same reason as in "renameToStandardContext" *)
+			ToExpression[ StringReplace[ ToString[ FullForm[ renameToStandardContext[ res]]], "Theorema`Computation`" -> "Theorema`"]]
 		]
 	]
 computeInProof[ args___] := unexpected[ computeInProof, {args}]

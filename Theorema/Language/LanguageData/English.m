@@ -42,10 +42,12 @@ With[ {lang = "English"},
 	MessageName[ Delete$TM, "usage", lang] = "";
 	MessageName[ Divide$TM, "usage", lang] = "";
 	MessageName[ domainConstruct$TM, "usage", lang] = "domainConstruct$TM[ dom, rng] is a datastructure representing a domain constructor for domain dom being 'the rng such that ...'.";
+	MessageName[ DomainOperation$TM, "usage", lang] = "";
 	MessageName[ DOMEXTRNG$, "usage", lang] = "DOMEXTRNG$[ x, dom] denotes that the variable x extends domain dom (in a domain extension definition).";
 	MessageName[ Do$TM, "usage", lang] = "";	
 	MessageName[ doubleAngleBracketted$TM, "usage", lang] = "";	
-	MessageName[ doubleBraced$TM, "usage", lang] = "";	
+	MessageName[ doubleBraced$TM, "usage", lang] = "";
+	MessageName[ DoubleLeftArrow$TM, "usage", lang] = "";
 	MessageName[ doubleParenthesized$TM, "usage", lang] = "";	
 	MessageName[ doubleSquareBracketted$TM, "usage", lang] = "";	
 	MessageName[ \[DoubleStruckCapitalC]P$TM, "usage", lang] = "";
@@ -104,8 +106,22 @@ With[ {lang = "English"},
 	MessageName[ Minus$TM, "usage", lang] = "";
 	MessageName[ Module$TM, "usage", lang] = "";	
 
+	MessageName[ Nand$TM, "usage", lang] = "";
+	MessageName[ Nor$TM, "usage", lang] = "";
+	MessageName[ NotElement$TM, "usage", lang] = "";
+	MessageName[ NotExists$TM, "usage", lang] = "";
+	MessageName[ NotGreaterEqual$TM, "usage", lang] = "";
+	MessageName[ NotGreater$TM, "usage", lang] = "";
+	MessageName[ NotLessEqual$TM, "usage", lang] = "";
+	MessageName[ NotLess$TM, "usage", lang] = "";
+	MessageName[ NotReverseElement$TM, "usage", lang] = "";
+    MessageName[ NotSubsetEqual$TM, "usage", lang] = "";
+    MessageName[ NotSubset$TM, "usage", lang] = "";
+    MessageName[ NotSupersetEqual$TM, "usage", lang] = "";
+    MessageName[ NotSuperset$TM, "usage", lang] = "";
 	MessageName[ Not$TM, "usage", lang] = "";
 
+	MessageName[ OperatorChain$TM, "usage", lang] = "";
 	MessageName[ Or$TM, "usage", lang] = "";
 	MessageName[ OverScript$TM, "usage", lang] = "";
 
@@ -125,6 +141,7 @@ With[ {lang = "English"},
 	MessageName[ RealInterval$TM, "usage", lang] = "";	
     MessageName[ ReplacePart$TM, "usage", lang] = "";	
     MessageName[ Replace$TM, "usage", lang] = "";	
+	MessageName[ ReverseElement$TM, "usage", lang] = "";
 	MessageName[ RNG$, "usage", lang] = "";
 
     MessageName[ \[ScriptCapitalP]$TM, "usage", lang] = "";
@@ -159,12 +176,16 @@ With[ {lang = "English"},
 	MessageName[ Tuple$TM, "usage", lang] = "";	
 
 	MessageName[ UnderScript$TM, "usage", lang] = "";
-    MessageName[ UnionOf$TM, "usage", lang] = "";
+ 	MessageName[ Unequal$TM, "usage", lang] = "";
+	MessageName[ UnionOf$TM, "usage", lang] = "";
 	MessageName[ Union$TM, "usage", lang] = "";
 
 	MessageName[ VAR$, "usage", lang] = "";
 
 	MessageName[ Which$TM, "usage", lang] = "";	
 	MessageName[ While$TM, "usage", lang] = "";	
+
+	MessageName[ Xnor$TM, "usage", lang] = "";
+	MessageName[ Xor$TM, "usage", lang] = "";
 ]
 
