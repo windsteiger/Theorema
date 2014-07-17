@@ -505,7 +505,7 @@ Iff$TM[ _] /; buiActive["Iff"] := True
 Iff$TM[ PatternSequence[___, True, ___, False, ___]|PatternSequence[___, False, ___, True, ___]] /; buiActive["Iff"] := False
 Iff$TM[ a__] /; buiActive["Iff"] :=
 	Module[ {res},
-		Apply[ Iff$TM, res] /; (res = DeleteDuplicates[ Hold[ a]]) =!= Hold[ a]
+		ReleaseHold[ Apply[ Iff$TM, res]] /; (res = DeleteDuplicates[ Apply[ List, Map[ Hold, Hold[ a]]]]) =!= Apply[ List, Map[ Hold, Hold[ a]]]
 	]
 Nand$TM[ a___] /; buiActive["Nand"] := Not$TM[ And$TM[ a]]
 Nor$TM[ a___] /; buiActive["Nor"] := Not$TM[ Or$TM[ a]]

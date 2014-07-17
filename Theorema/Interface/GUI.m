@@ -1723,7 +1723,7 @@ makeGroupUngroupButton[ ] := Tooltip[
 ]
 makeGroupUngroupButton[ args___] := unexpected[ makeGroupUngroupButton, {args}]
 
-removeAutoParen[ RowBox[ {autoParenthesis[ "("], expr_, autoParenthesis[ ")"]}]] := expr
+removeAutoParen[ RowBox[ {TagBox[ "(", "AutoParentheses"], expr_, TagBox[ ")", "AutoParentheses"]}]] := expr
 removeAutoParen[ expr_] := expr
 removeAutoParen[ args___] := unexpected[ removeAutoParen, {args}]
 
