@@ -510,7 +510,7 @@ MakeExpression[ RowBox[ l:{_, PatternSequence[ _?isTmaRelationBox, _]..}], fmt_]
 			
 			MakeExpression[ RowBox[ {"OperatorChain", "[", RowBox[ Riffle[ l, ","]], "]"}], fmt]
 		]
-	]
+	] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 	
 (* Maybe flattening nested chains of relations should not happen automatically (i.e. regardless of whether the relations are activated or not).
 
@@ -834,13 +834,13 @@ MakeExpression[ UnderscriptBox[ UnderscriptBox[ "\[ForAll]", rng_], cond_], fmt_
     ] /; $parseTheoremaGlobals
 
 MakeExpression[ RowBox[ {UnderscriptBox[ "\[ForAll]", rng_], decl_}], fmt_] :=
-    Block[ {$parseTheoremaExpressions = True},
-    	standardQuantifier[ "globalForall", rng, "True", decl, fmt]
+    With[ {r = Block[ {$parseTheoremaExpressions = True}, rng]},
+    	standardQuantifier[ "globalForall", r, "True", decl, fmt]
     ] /; $parseTheoremaGlobals
 
 MakeExpression[ RowBox[ {UnderscriptBox[ UnderscriptBox[ "\[ForAll]", rng_], cond_], decl_}], fmt_] :=
-    Block[ {$parseTheoremaExpressions = True},
-    	standardQuantifier[ "globalForall", rng, cond, decl, fmt]
+    With[ {r = Block[ {$parseTheoremaExpressions = True}, rng], c = Block[ {$parseTheoremaExpressions = True}, cond]},
+    	standardQuantifier[ "globalForall", r, c, decl, fmt]
     ] /; $parseTheoremaGlobals
 
 MakeExpression[ RowBox[ {cond_, "\[Implies]"|"\[DoubleLongRightArrow]"|"\[DoubleRightArrow]"}], fmt_] := 

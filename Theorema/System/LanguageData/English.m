@@ -193,7 +193,6 @@ With[ {lang = "English"},
 	MessageName[ sourceFile, "usage", lang] = "sourceFile is a selector for the FML$ datastructure.";
 	MessageName[ source, "usage", lang] = "source is a selector for the FML$ datastructure.";
 	MessageName[ specifiedVariables, "usage", lang] = "";
-	MessageName[ splitAnd, "usage", lang] = "";	
 	MessageName[ strategy, "usage", lang] = "strategy is an option for the constructor makePRFSIT/toBeProved and a selector for the PRFSIT$ datastructure.";
 	MessageName[ subProofHeaderId, "usage", lang] = "subProofHeaderId[ name_, lang_, pos_] generates the cell expression used as header for the subproof at position pos.";
 	MessageName[ substituteFree, "usage", lang] = "";	

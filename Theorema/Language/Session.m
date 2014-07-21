@@ -439,8 +439,6 @@ ensureNotebookIntegrity[ nb_NotebookObject, rawNotebook_Notebook, cellTags_List]
         	updateKeys[ sl, srcTags];
         	outdPos = Position[ rawNotebook, CellTags -> { ___, s_String /; StringMatchQ[ s, "Source" ~~ $cellTagKeySeparator ~~ __] && s =!= sl, ___}];
         	updNb = MapAt[ (# /. s_String /; StringMatchQ[ s, "Source" ~~ $cellTagKeySeparator ~~ __] -> sl)&, rawNotebook, outdPos];
-        	(* TODO: notify the user that outdated labels have been encountered, ask for update *)
-        	(* NotebookPut[ updNb, nb] *)
         ]
     ]
 ensureNotebookIntegrity[ args___] := unexpected[ ensureNotebookIntegrity, {args}]
@@ -545,13 +543,17 @@ applyGlobalDeclaration[ expr_, g_List] :=
 			 /. {globalForall$TM -> Forall$TM, globalImplies$TM -> Implies$TM}
 	]
 
+applyGlobalDeclaration[ expr:globalForall$TM[ rng_, cond_, e_], Hold[ globalForall$TM][ r_, c_]] :=
+	Module[ {tmp = ReleaseHold[ markVariables[ Hold[ QU$[ r, expr]]]]},
+		globalForall$TM[ Join[ r, tmp[[1]]], makeConjunction[ {c, tmp[[2]]}, Hold[ And$TM]], tmp[[3]]]
+	]
 applyGlobalDeclaration[ expr_, Hold[ globalForall$TM][ r_, c_]] := 
 	globalForall$TM[ r, c, ReleaseHold[ markVariables[ Hold[ QU$[ r, expr]]]]]
 applyGlobalDeclaration[ expr_, Hold[ globalForall$TM][ r_, c_, d_]] := 
 	With[ {new = applyGlobalDeclaration[ expr, d]},
 		applyGlobalDeclaration[ new, Hold[ globalForall$TM][ r, c]]
 	]
-applyGlobalDeclaration[ expr_, Hold[ globalImplies$TM]] := globalImplies$TM[ c, expr]
+applyGlobalDeclaration[ expr_, Hold[ globalImplies$TM][ c_]] := globalImplies$TM[ c, expr]
 applyGlobalDeclaration[ expr_, Hold[ globalImplies$TM][ c_, d_]] := globalImplies$TM[ c, applyGlobalDeclaration[ expr, d]]
 applyGlobalDeclaration[ expr_, Hold[ domainConstruct$TM][ lhs_, rng:RNG$[ SIMPRNG$[ v_]]]] :=
 	substituteFree[ ReleaseHold[ markVariables[ Hold[ QU$[ rng, expr]]]], {v -> lhs}]
@@ -565,21 +567,124 @@ applyGlobalDeclaration[ args___] := unexpected[ applyGlobalDeclaration, {args}]
 	analyze the ranges and drop all quantifiers that aren't needed
 *)
 analyzeQuantifiedExpression[ globalForall$TM[ r:RNG$[ __], c_, e_]] :=
-	Module[ {freeE, rc, sc, dropVar, thinnedRange, thinnedCond},
+	Module[ {freeE, rc, thinnedRange, freerc},
 		(* take the free vars in e *)
 		freeE = freeVariables[ e];
 		(* watch out for all conditions involving the free variables in e ... *)
-		{rc, sc} = splitAnd[ c, freeE, False];
+		{rc, freerc} = thinnedConnect[ c, freeE];
 		(* ... and collect all free variables therein: these are the variables that require the quantifiers, the others can be dropped *)
-		dropVar = Complement[ rngVariables[ r], freeVariables[ rc], freeE];
-		(* all others and conditions involving the others can be dropped *)
-		thinnedRange = thinnedExpression[ r, dropVar];
+		thinnedRange = Select[ r, MemberQ[ Union[ freeE, freerc], First[ #]]&];
 		If[ Length[ thinnedRange] == 0,
-			e,
-			thinnedCond = simplifiedAnd[ And$TM[ thinnedExpression[ sc, dropVar], rc]];
-			globalForall$TM[ thinnedRange, thinnedCond, e]
+			simplifiedImplies[ Implies$TM[ rc, e]],
+			(* else *)
+			Forall$TM[ thinnedRange, rc, e]
 		]
 	]
+
+(*
+	thinnedConnect[ expr, v]
+	If expr is an And or Or connective: drop all parts that do not depend on the variables v.
+	
+	Used when a global quantifier is applied to an expression. Only the variables that really occur should
+	finally be bound. No spurious conditions for variables not occurring in v shall remain.
+*)
+thinnedConnect[ expr:Hold[ And$TM][ x__], v_List] :=
+	Module[ {depv = {}, depdistinct = {}, fv, p, l, e = simplifiedAnd[ expr /. Hold[ And$TM] -> And$TM], fi, i, move = {1}},
+		(* move needs to be initialized to something non-empty *)
+		Switch[ e,
+			_And$TM,
+			l = Length[ e];
+			Do[
+				p = e[[i]];
+				fi = freeVariables[ p];
+				Which[ Intersection[ fi, v] =!= {},
+					(* p contains variables from v and maybe also others *)
+					AppendTo[ depv, p],
+					True,
+					(* p contains variables distinct from v, we keep them because they might be linked to the depv *)
+					AppendTo[ depdistinct, p]
+				],
+				{i, l}
+			];
+			(* Move those from depdistinct to depv, which share some variables
+			   We need to try until no more moves happen *)
+			fv = freeVariables[ depv];
+			While[ move =!= {} && depdistinct =!= {},
+				move = {};
+				Do[
+					p = depdistinct[[i]];
+					fi = freeVariables[ p];
+					If[ Intersection[ fv, fi] =!= {},
+						AppendTo[ move, {i}];
+						fv = Union[ fv, fi]
+					],
+					{i, Length[ depdistinct]}
+				];
+				depv = Join[ depv, Extract[ depdistinct, move]];
+				depdistinct = Delete[ depdistinct, move]
+			];
+			(* Those that remain in depdistinct can be dropped *)
+			{makeConjunction[ depv, And$TM], fv},
+
+			_,
+			thinnedConnect[ e, v]
+		]
+	]
+
+thinnedConnect[ expr:Hold[ Or$TM][ x__], v_List] :=
+	Module[ {depv = {}, depdistinct = {}, fv, p, l, e = simplifiedOr[ expr /. Hold[ Or$TM] -> Or$TM], fi, i, move = {1}},
+		(* move needs to be initialized to something non-empty *)
+		Switch[ e,
+			_Or$TM,
+			l = Length[ e];
+			Do[
+				p = e[[i]];
+				fi = freeVariables[ p];
+				Which[ Intersection[ fi, v] =!= {},
+					(* p contains variables from v and maybe also others *)
+					AppendTo[ depv, p],
+					True,
+					(* p contains variables distinct from v, we keep them because they might be linked to the depv *)
+					AppendTo[ depdistinct, p]
+				],
+				{i, l}
+			];
+			(* Move those from depdistinct to depv, which share some variables
+			   We need to try until no more moves happen *)
+			fv = freeVariables[ depv];
+			While[ move =!= {} && depdistinct =!= {},
+				move = {};
+				Do[
+					p = depdistinct[[i]];
+					fi = freeVariables[ p];
+					If[ Intersection[ fv, fi] =!= {},
+						AppendTo[ move, {i}];
+						fv = Union[ fv, fi]
+					],
+					{i, Length[ depdistinct]}
+				];
+				depv = Join[ depv, Extract[ depdistinct, move]];
+				depdistinct = Delete[ depdistinct, move]
+			];
+			(* Those that remain in depdistinct can be dropped *)
+			{makeDisjunction[ depv, Or$TM], fv},
+
+			_,
+			thinnedConnect[ e, v]
+		]
+	]
+
+thinnedConnect[ e_, v_List] :=
+	Module[ {fe},
+		fe = freeVariables[ e];
+		Which[ Intersection[ fe, v] =!= {},
+			{e, fe},
+			True,
+			{True, {}}
+		]
+	]
+thinnedConnect[ args___] := unexpected[ thinnedConnect, {args}]
+
 
 initSession[] :=
     Module[ {},

@@ -551,6 +551,90 @@ rangeToIterator[
 rangeToIterator[ _] := $Failed
 rangeToIterator[ args___] := unexpected[ rangeToIterator, {args}]
 
+(* ::Subsubsection:: *)
+(* splitAnd *)
+
+
+(*
+	splitAnd[ expr_, v_List] splits a conjunction expr into 1. a conjunction of subexpr with free variables v and 2. the rest 
+	splitAnd[ expr_, v_List, False] splits a conjunction expr into 1. a conjunction of subexpr containing the free variables in v and 2. the rest 
+*)
+
+splitAnd[ expr:Hold[(h:And$TM|And)[ __]], v_List, sub_:True] :=
+	Module[ {depSingle = Hold[], depMulti = Hold[], p, l, e = simplifiedAnd[ expr], fi, i},
+		Switch[ e,
+			Hold[ (And$TM|And)[ __]],
+			e = Map[ Hold, FlattenAt[ e, {1}]];
+			l = Length[ e];
+			Do[
+				p = e[[i]];
+				fi = freeVariables[ p];
+				If[ (sub && fi === v) || (!sub && Intersection[ v, fi] =!= {}), 
+					AppendTo[ depSingle, p],
+					AppendTo[ depMulti, p]
+				],
+				{i, l}
+			];
+			depSingle = Switch[ Length[ depSingle],
+				0,
+				Hold[ True],
+				1,
+				First[ depSingle],
+				_,
+				Replace[ Flatten[ depSingle, 1], Hold[ a__] :> Hold[ h[ a]]]
+			];
+			depMulti = Switch[ Length[ depMulti],
+				0,
+				Hold[ True],
+				1,
+				First[ depMulti],
+				_,
+				Replace[ Flatten[ depMulti, 1], Hold[ a__] :> Hold[ h[ a]]]
+			];
+			{depSingle, depMulti},
+			
+			Hold[ _],
+			fi = freeVariables[ e];
+			If[ (sub && fi === v) || (!sub && Intersection[ v, fi] =!= {}), 
+				{e, True},
+				{True, e}
+			],
+			
+			_,
+			{$Failed, $Failed}
+		]
+	]
+splitAnd[ expr_Hold, v_List, sub_:True] :=
+    Module[ {fi = freeVariables[ expr]},
+        If[ (sub && fi === v) || (!sub && Intersection[ v, fi] =!= {}),
+            { expr, Hold[ True]},
+            { Hold[ True], expr}
+        ]
+    ]
+splitAnd[ expr:(h:And$TM|And)[ __], v_List, sub_:True] :=
+	Module[ {depSingle = {}, depMulti = {}, p, l, e = simplifiedAnd[ expr], fi, i},
+		l = Length[ e];
+		Do[
+			p = e[[i]];
+			fi = freeVariables[ p];
+			If[ (sub && fi === v) || (!sub && Intersection[ v, fi] =!= {}), 
+				AppendTo[ depSingle, p],
+				AppendTo[ depMulti, p]
+			],
+			{i, l}
+		];
+		{makeConjunction[ depSingle, h], makeConjunction[ depMulti, h]}
+	]
+splitAnd[ expr_, v_List, sub_:True] :=
+    Module[ {fi = freeVariables[ expr]},
+        If[ (sub && fi === v) || (!sub && Intersection[ v, fi] =!= {}),
+            {expr, True},
+            {True, expr}
+        ]
+    ]
+splitAnd[ args___] := unexpected[ splitAnd, {args}]
+
+
 ClearAll[ Forall$TM, Exists$TM, SequenceOf$TM, SumOf$TM, ProductOf$TM,
 	SetOf$TM, TupleOf$TM, MaximumOf$TM, MinimumOf$TM, UnionOf$TM, IntersectionOf$TM, Such$TM, SuchUnique$TM,
 	ArgMin$TM, ArgMax$TM, TheArgMin$TM, TheArgMax$TM]

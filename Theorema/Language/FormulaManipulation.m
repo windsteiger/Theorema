@@ -23,108 +23,25 @@ Needs[ "Theorema`Common`"]
 
 Begin["`Private`"]
 
-
-(* ::Subsubsection:: *)
-(* splitAnd *)
-
-
-(*
-	splitAnd[ expr_, v_List] splits a conjunction expr into 1. a conjunction of subexpr with free variables v and 2. the rest 
-	splitAnd[ expr_, v_List, False] splits a conjunction expr into 1. a conjunction of subexpr containing the free variables in v and 2. the rest 
-*)
-splitAnd[ expr:Hold[(h:Theorema`Language`And$TM|Theorema`Computation`Language`And$TM|And)[ __]], v_List, sub_:True] :=
-	Module[ {depSingle = Hold[], depMulti = Hold[], p, l, e = simplifiedAnd[ expr], fi, i},
-		Switch[ e,
-			Hold[ (Theorema`Language`And$TM|Theorema`Computation`Language`And$TM|And)[ __]],
-			e = Map[ Hold, FlattenAt[ e, {1}]];
-			l = Length[ e];
-			Do[
-				p = e[[i]];
-				fi = freeVariables[ p];
-				If[ (sub && fi === v) || (!sub && Intersection[ v, fi] =!= {}), 
-					AppendTo[ depSingle, p],
-					AppendTo[ depMulti, p]
-				],
-				{i, l}
-			];
-			depSingle = Switch[ Length[ depSingle],
-				0,
-				Hold[True],
-				1,
-				First[ depSingle],
-				_,
-				Replace[ Flatten[ depSingle, 1], Hold[ a__] :> Hold[ h[ a]]]
-			];
-			depMulti = Switch[ Length[ depMulti],
-				0,
-				Hold[True],
-				1,
-				First[ depMulti],
-				_,
-				Replace[ Flatten[ depMulti, 1], Hold[ a__] :> Hold[ h[ a]]]
-			];
-			{depSingle, depMulti},
-			
-			Hold[ _],
-			fi = freeVariables[ e];
-			If[ (sub && fi === v) || (!sub && Intersection[ v, fi] =!= {}), 
-				{e, True},
-				{True, e}
-			],
-			
-			_,
-			{$Failed, $Failed}
-		]
-	]
-splitAnd[ expr_Hold, v_List, sub_:True] :=
-    Module[ {fi = freeVariables[ expr]},
-        If[ (sub && fi === v) || (!sub && Intersection[ v, fi] =!= {}),
-            { expr, Hold[ True]},
-            { Hold[ True], expr}
-        ]
-    ]
-splitAnd[ expr:(h:Theorema`Language`And$TM|Theorema`Computation`Language`And$TM|And)[ __], v_List, sub_:True] :=
-	Module[ {depSingle = {}, depMulti = {}, p, l, e = simplifiedAnd[ expr], fi, i},
-		l = Length[ e];
-		Do[
-			p = e[[i]];
-			fi = freeVariables[ p];
-			If[ (sub && fi === v) || (!sub && Intersection[ v, fi] =!= {}), 
-				AppendTo[ depSingle, p],
-				AppendTo[ depMulti, p]
-			],
-			{i, l}
-		];
-		{ makeConjunction[ depSingle, h], makeConjunction[ depMulti, h]}
-	]
-splitAnd[ expr_, v_List, sub_:True] :=
-    Module[ {fi = freeVariables[ expr]},
-        If[ (sub && fi === v) || (!sub && Intersection[ v, fi] =!= {}),
-            { expr, True},
-            { True, expr}
-        ]
-    ]
-splitAnd[ args___] := unexpected[ splitAnd, {args}]
-
-makeConjunction[ l_List, a_] :=
-    Switch[ Length[ l],
+makeConjunction[ h_[ x___], a_] :=
+    Switch[ Length[ {x}],
             0,
             True,
             1,
-            l[[1]],
+            First[ {x}],
             _,
-            Apply[ a, l]
+            a[ x]
         ]
 makeConjunction[ args___] := unexpected[ makeConjunction, {args}]
 
-makeDisjunction[ l_List, a_] :=
-    Switch[ Length[ l],
+makeDisjunction[ h_[ x___], a_] :=
+    Switch[ Length[ {x}],
             0,
             False,
             1,
-            l[[1]],
+            First[ {x}],
             _,
-            Apply[ a, l]
+            a[ x]
         ]
 makeDisjunction[ args___] := unexpected[ makeDisjunction, {args}]
 
@@ -132,37 +49,39 @@ makeDisjunction[ args___] := unexpected[ makeDisjunction, {args}]
 (* ::Subsubsection:: *)
 (* simplifiedAnd *)
 
-simplifiedAnd[ expr:Hold[True|False]] := expr
-simplifiedAnd[ Hold[ h_[ True...]]] := Hold[True]
-simplifiedAnd[ Hold[ h_[ ___, False, ___]]] := Hold[False]
+simplifiedAnd[ expr:Hold[ True|False]] := expr
+simplifiedAnd[ Hold[ h_[ True...]]] := Hold[ True]
+simplifiedAnd[ Hold[ h_[ ___, False, ___]]] := Hold[ False]
 simplifiedAnd[ expr_Hold] :=  
 	Module[ {simp = expr //. {(h:(Theorema`Language`And$TM|Theorema`Computation`Language`And$TM))[pre___, True, post___] :> h[pre, post],
 								(h:(Theorema`Language`And$TM|Theorema`Computation`Language`And$TM))[pre___, (Theorema`Language`And$TM|Theorema`Computation`Language`And$TM)[ mid___], post___] :> h[pre, mid, post],
 								(Theorema`Language`And$TM|Theorema`Computation`Language`And$TM)[a_] :> a}},
-		If[ MatchQ[ simp, Hold[(Theorema`Language`And$TM|Theorema`Computation`Language`And$TM)[]]],
-			Hold[True],
+		If[ MatchQ[ simp, Hold[ (Theorema`Language`And$TM|Theorema`Computation`Language`And$TM)[]]],
+			Hold[ True],
 			simp
 		]
 	]
-simplifiedAnd[ expr:Except[_Hold]] := ReleaseHold[ simplifiedAnd[ Hold[ expr]]]
+(* If we simplify an non-Hold And, we wrap it in Hold and RealeaseHold afterwards *)
+simplifiedAnd[ expr:Except[ _Hold]] := ReleaseHold[ simplifiedAnd[ Hold[ expr]]]
 simplifiedAnd[ args___] := unexpected[ simplifiedAnd, {args}]
 
 (* ::Subsubsection:: *)
 (* simplifiedOr *)
 
-simplifiedOr[ expr:Hold[True|False]] := expr
-simplifiedOr[ Hold[ h_[ False...]]] := Hold[False]
-simplifiedOr[ Hold[ h_[ ___, True, ___]]] := Hold[True]
+simplifiedOr[ expr:Hold[ True|False]] := expr
+simplifiedOr[ Hold[ h_[ False...]]] := Hold[ False]
+simplifiedOr[ Hold[ h_[ ___, True, ___]]] := Hold[ True]
 simplifiedOr[ expr_Hold] :=  
 	Module[ {simp = expr //. {(h:(Theorema`Language`Or$TM|Theorema`Computation`Language`Or$TM))[pre___, False, post___] :> h[pre, post],
 								(h:(Theorema`Language`Or$TM|Theorema`Computation`Language`Or$TMM))[pre___, (Theorema`Language`Or$TM|Theorema`Computation`Language`Or$TM)[ mid___], post___] :> h[pre, mid, post],
 								(Theorema`Language`Or$TM|Theorema`Computation`Language`Or$TMM)[a_] :> a}},
-		If[ MatchQ[ simp, Hold[(Theorema`Language`Or$TM|Theorema`Computation`Language`Or$TM)[]]],
-			Hold[False],
+		If[ MatchQ[ simp, Hold[ (Theorema`Language`Or$TM|Theorema`Computation`Language`Or$TM)[]]],
+			Hold[ False],
 			simp
 		]
 	]
-simplifiedOr[ expr:Except[_Hold]] := ReleaseHold[ simplifiedOr[ Hold[ expr]]]
+(* If we simplify an non-Hold Or, we wrap it in Hold and RealeaseHold afterwards *)
+simplifiedOr[ expr:Except[ _Hold]] := ReleaseHold[ simplifiedOr[ Hold[ expr]]]
 simplifiedOr[ args___] := unexpected[ simplifiedOr, {args}]
 
 
@@ -214,8 +133,7 @@ standardFormQuantifier[ args___] := unexpected[ standardFormQuantifier, {args}]
 (* ::Subsubsection:: *)
 (* thinnedExpression *)
 
-thinnedExpression[ e_, drop_List] :=
-	Fold[ thinnedExpression, e, drop]
+thinnedExpression[ e_, drop_List] := Fold[ thinnedExpression, e, drop]
 thinnedExpression[ e_, v_] := DeleteCases[ e, _?(!FreeQ[ #, v]&)]
 thinnedExpression[ args___] := unexpected[ thinnedExpression, {args}]
 
