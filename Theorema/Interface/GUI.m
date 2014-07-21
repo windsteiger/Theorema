@@ -1742,7 +1742,7 @@ showDecl[ args___] := unexpected[ showDecl, {args}]
 displayDecl[ ] :=
 	Row[ {
 		Pane[ $TMAactDecl, {300, 50}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic],
-		Tooltip[ Button[ Style[ "\[LightBulb]", {Medium, Bold}], $TMAactDecl = displayGlobalDeclarations[ InputNotebook[]]], translate[ "tcSessTabEnvTabButtonDeclLabel"]]
+		Tooltip[ Button[ Style[ "\:21ba", {Medium}], $TMAactDecl = displayGlobalDeclarations[ InputNotebook[]]], translate[ "tcSessTabEnvTabButtonDeclLabel"]]
 		}, Spacer[5]]
 displayDecl[ args___] := unexpected[ displayDecl, {args}]
 
