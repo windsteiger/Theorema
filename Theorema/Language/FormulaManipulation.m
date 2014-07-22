@@ -196,8 +196,30 @@ boundVariables[ args___] := unexpected[ boundVariables, {args}]
 
 
 (* ::Subsubsection:: *)
-(* substituteFree *)
+(* substituteBound *)
 
+(* We assume that we don't have nested quantifiers binding the same variable *)
+Clear[ substituteBound]
+substituteBound[ expr_Hold, {}] := expr
+substituteBound[ Hold[], _] := Hold[]
+(* Some quantifiers (e.g. "Sum") can be used together with subscripts. *)
+substituteBound[ Hold[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[ rng__], rest__]], rules_List] :=
+	Module[ {qvars = rngVariables[ Hold[ r]], vars},
+		vars = Select[ rules, !MemberQ[ qvars, #[[1]]]&];
+		Hold[ q[ r, rest]] /. rules
+	]
+substituteBound[ Hold[ f_[ x___]], rules_List] :=
+	Module[ { sx = Map[ substituteBound[ #, rules]&, Map[ Hold, Hold[ x]]]},
+		sx = Fold[ joinHold, Hold[], {ReleaseHold[ sx]}];
+		applyHold[ substituteBound[ Hold[ f], rules], sx]
+	]
+substituteBound[ x:Hold[_], rules_List] := x
+substituteBound[ expr_, rule_?OptionQ] := substituteBound[ expr, {rule}]
+substituteBound[ expr_, rules_List] := ReleaseHold[ substituteBound[ Hold[ expr], rules]]
+substituteBound[ args___] := unexpected[ substituteBound, {args}]
+
+(* ::Subsubsection:: *)
+(* substituteFree *)
 
 Clear[ substituteFree]
 substituteFree[ expr_Hold, {}] := expr
@@ -430,10 +452,12 @@ singleRangeToCondition[ _] := Sequence[]
 singleRangeToCondition[ args___] := unexpected[ singleRangeToCondition, {args}]
 *)
 
+Clear[ executableForm]
+(* The condition must not contain variables other than the variables in the left hand side, since they would not get instanciated *)
 executableForm[ {(Theorema`Language`Iff$TM|Theorema`Language`IffDef$TM|Theorema`Language`Equal$TM|Theorema`Language`EqualDef$TM)[ l_, r_], c_List, var_List}, f_FML$] :=
     Block[ { $ContextPath = {"System`"}, $Context = "Global`", form = ToString[ f, InputForm], formKey = ToString[ key@f, InputForm]},
-        With[ { left = execLeft[ Hold[l], var], 
-        	right = "Theorema`Common`trackResult[" <> execRight[ Hold[r], var] <> "," <> form <> "]"},
+        With[ { left = execLeft[ Hold[ l], var], 
+        	right = "Theorema`Common`trackResult[" <> execRight[ Hold[ r], var] <> "," <> form <> "]"},
         	(* The complicated DUMMY$COND... construction is necessary because the key itself contains strings,
         	   and we need to get the escaped strings into the Hold *)
             StringReplace[ left <> "/; DUMMY$COND && " <> execCondition[ Hold[ trackCondition[ c, l]], var] <> ":=" <> right,
@@ -442,39 +466,47 @@ executableForm[ {(Theorema`Language`Iff$TM|Theorema`Language`IffDef$TM|Theorema`
             		"Theorema`Knowledge`" -> "Theorema`Computation`Knowledge`"}
             ]
         ]
-    ]
+    ] /; Complement[ Intersection[ freeVariables[ c], var], Intersection[ freeVariables[ l], var]] === {}
+
+
+(* An atomic formula asserts truth *)
+executableForm[ {atom_ /; Head[ atom] =!= Theorema`Language`Equal$TM && isAtomicExpression[ atom], c_List, var_List}, f_FML$] :=
+    executableForm[ {Theorema`Language`Equal$TM[ atom, True], c, var}, f]   
+    
 (* We return a string "$Failed", because when returning the expression $Failed (or also Null) the 
-   ToExpression[...] in the calling transferToComputation calls openEnvironment once more (which means that $PreRead
-   seems to be applied ???), resulting in messing up the contexts. With the string "$Failed" this
-   does not happen *)
+   ToExpression[...] in the calling transferToComputation calls $PreRead and $Pre, resulting in messing up the contexts.
+   With the string "$Failed" this does not happen *)
 executableForm[ expr_, f_FML$] := "$Failed"
 executableForm[ args___] := unexpected[ executableForm, {args}]
 
 execLeft[ e_Hold, var_List] := 
-	Module[ {s},
+	Module[ {s, bound = boundVariables[ e]},
 		s = substituteFree[ e, Map[ varToPattern, var]];
-		ReleaseHold[ Map[ ToString[ Unevaluated[#]]&, s]]
+		s = substituteBound[ s, Map[ varToPattern, bound]];
+		ReleaseHold[ Map[ ToString[ Unevaluated[ #]]&, s]]
 	]
 execLeft[ args___] := unexpected[ execLeft, {args}]
 
 (* execCondition does precisely the same what execRight previously did, i.e. it leaves symbols
 	with suffix "$M" unchanged. *)
 execCondition[ e_Hold, var_List] := 
-	Module[ {s},
+	Module[ {s, bound = boundVariables[ e]},
 		s = substituteFree[ e, Map[ stripVar, var]] /. {Theorema`Language`Assign$TM -> Set,
 			Theorema`Language`SetDelayed$TM -> SetDelayed, 
 			Theorema`Language`CompoundExpression$TM -> CompoundExpression,
 			Theorema`Language`List$TM -> List};
+		s = substituteBound[ s, Map[ stripVar, bound]];
 		ReleaseHold[ Map[ Function[ expr, ToString[ Unevaluated[ expr]], {HoldAll}], s]]
 	]
 execCondition[ args___] := unexpected[ execCondition, {args}]
 
 execRight[ e_Hold, var_List] := 
-	Module[ {s},
+	Module[ {s, bound = boundVariables[ e]},
 		s = substituteFree[ e, Map[ stripVar, var]] /. {Theorema`Language`Assign$TM -> Set,
 			Theorema`Language`SetDelayed$TM -> SetDelayed, 
 			Theorema`Language`CompoundExpression$TM -> CompoundExpression,
 			Theorema`Language`List$TM -> List};
+		s = substituteBound[ s, Map[ stripVar, bound]];
 		ReleaseHold[ Map[ Function[ expr, toRightString[ Hold[ expr]], {HoldAll}], s]]
 	]
 execRight[ args___] := unexpected[ execRight, {args}]
