@@ -52,6 +52,10 @@ With[ {lang = "English"},
 	MessageName[ doubleSquareBracketted$TM, "usage", lang] = "";	
 	MessageName[ \[DoubleStruckCapitalC]P$TM, "usage", lang] = "";
 	MessageName[ \[DoubleStruckCapitalC]$TM, "usage", lang] = "";	
+	MessageName[ \[DoubleStruckCapitalN], "usage", lang] = "";	
+	MessageName[ \[DoubleStruckCapitalQ], "usage", lang] = "";	
+	MessageName[ \[DoubleStruckCapitalR], "usage", lang] = "";	
+	MessageName[ \[DoubleStruckCapitalZ], "usage", lang] = "";	
 
 	MessageName[ Element$TM, "usage", lang] = "";
     MessageName[ elemTuple$TM, "usage", lang] = "elemTuple[ e, T] tests whether e is contained in T (written \!\(e \"\:22ff\" T\))";	
