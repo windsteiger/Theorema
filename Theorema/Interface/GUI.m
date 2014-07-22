@@ -17,15 +17,14 @@
     along with this program.  If not, see <http://www.gnu.org/licenses/>.
 *)
 
-BeginPackage["Theorema`Interface`GUI`", {"Theorema`"}];
-(* Exported symbols added here with SymbolName::usage *)  
+BeginPackage[ "Theorema`Interface`GUI`"];
 
-Needs["Theorema`Common`"]
-Needs["Theorema`Language`"]
-Needs["Theorema`Provers`"]
-Needs["Theorema`Interface`Language`"]
+Needs[ "Theorema`Common`"]
+Needs[ "Theorema`Language`"]
+Needs[ "Theorema`Provers`"]
+Needs[ "Theorema`Interface`Language`"]
 
-Begin["`Private`"] (* Begin Private Context *) 
+Begin[ "`Private`"]
 
 If[ $Notebooks,
 	closeTheoremaCommander[]
@@ -154,8 +153,6 @@ initGUI[] :=
         (* Init status of opener views *)
         Scan[ ToExpression, Map[ "$builtinStructState$" <> # <> "=True"&, Map[ First, $tmaBuiltins]]];
         (*Scan[ ToExpression, Map[ "$tcSessMathOpener$" <> # <> "=True"&, Map[ First, allFormulae]]];*)
-        $tcAllFormulaeOpener = True;
-        $tcAllDeclOpener = True;
 		$kbStruct = {};
 		$ruleFilterKW = "";
 		$kbFilterKW = "";
@@ -181,6 +178,7 @@ initGUI[] :=
 		$TMAactDecl = "";
 		$proofTreeScale = 1;
 		$replExistProof = 0;
+		$numExistProofs = -1;
 		$TmaLanguage = $Language;
 	]
 
@@ -498,7 +496,7 @@ displaySelectedGoal[ ] :=
             With[ {selGoal = goal[[1]]},
             	Column[ {
             		Button[ translate[ "OKnext"], $selectedProofGoal = selGoal; $tcActionView++; $replExistProof=0;],
-            		Grid[ {displayLabeledFormula[ selGoal]}]
+            		displayLabeledFormula[ selGoal, {1}]
             		}]
             ]
         ]
@@ -507,20 +505,29 @@ displaySelectedGoal[ goal_] :=
     Module[ { },
         If[ goal === {},
             translate["noGoal"],
-            Grid[ {displayLabeledFormula[ goal]}]
+            displayLabeledFormula[ goal, {1}]
         ]
     ]
-displaySelectedGoal[args___] :=
-    unexpected[displaySelectedGoal, {args}]
+displaySelectedGoal[args___] := unexpected[ displaySelectedGoal, {args}]
 
-displayLabeledFormula[ FML$[ key_, form_, lab_, ___]] := 
-	Module[ {src, nb, labDisp = makeLabel[ lab]},
-		src = StringReplace[ key[[2]], "Source"<>$cellTagKeySeparator -> "", 1];
+displayLabeledFormula[ f:FML$[ key_, form_, lab_, ___], {i_Integer}] := 
+	Module[ {src, nb, labDisp = makeLabel[ lab], orig = getOptionalComponent[ f, "origForm"],
+		formDisp = Style[ theoremaDisplay[ form], "DisplayFormula", LineBreakWithin -> False]},
+		src = StringReplace[ key[[2]], "Source" <> $cellTagKeySeparator -> "", 1];
 		nb = sourceToNotebookFile[ src];
-		{ If[ nb =!= $Failed,
-			Hyperlink[ Style[ labDisp, "FormulaLabel"], {nb, key[[1]]}],
-			Tooltip[ Style[ labDisp, "FormulaLabel"], translate[ "noNB"] <> " :" <> src]],
-		Style[ theoremaDisplay[ form], "DisplayFormula", LineBreakWithin -> False]}
+		If[ orig =!= {},
+            formDisp = Tooltip[ formDisp, theoremaDisplay[ orig]]
+    	];
+		Labeled[ 
+			Panel[ formDisp, 
+				FrameMargins -> 1, ImageSize -> {{360, 1000}, Automatic},
+				Background -> Append[ TMAcolor[13], If[ OddQ[ i], 0.05, 0.15]]],
+			If[ nb =!= $Failed,
+				Hyperlink[ Style[ labDisp, "FormulaLabel"], {nb, key[[1]]}],
+				Tooltip[ Style[ labDisp, "FormulaLabel"], translate[ "noNB"] <> " :" <> src]],
+			{{Top, Left}},
+			Spacings -> {Automatic, 0}
+		]
 	]
 displayLabeledFormula[ args___] := unexpected[ displayLabeledFormula, {args}]
 
@@ -528,16 +535,13 @@ displaySelectedKB[ kb_List] :=
 	Module[ {},
         If[ kb === {},
             translate["noKB"],
-            displayLabeledFormulaListGrid[ kb]
+            Column[ displayLabeledFormulaList[ kb], Left, 0.2]
         ]
     ]
 displaySelectedKB[ args___] := unexpected[ displaySelectedKB, {args}]
 
-displayLabeledFormulaList[ l_List] := Map[ displayLabeledFormula, l]
+displayLabeledFormulaList[ l_List] := MapIndexed[ displayLabeledFormula, l]
 displayLabeledFormulaList[ args___] := unexpected[ displayLabeledFormulaList, {args}]
-
-displayLabeledFormulaListGrid[ l_List] := Grid[ displayLabeledFormulaList[ l], Alignment -> {{Center, Left}, Automatic}]
-displayLabeledFormulaListGrid[ args___] := unexpected[ displayLabeledFormulaListGrid, {args}]
 
 sourceToNotebookFile[ s_String] :=
 	Module[ {fn, absfn},
@@ -1335,11 +1339,15 @@ submitProveTask[ ] :=
 					],
 					{$eliminateBranches, $eliminateSteps, $eliminateFormulae}, $replExistProof], 
 				Method -> "Queued", Active -> ($selectedProofGoal =!= {})],
-			Pane[ Column[{
-					Labeled[ displaySelectedGoal[ $selectedProofGoal], translate["selGoal"], {{Top, Left}}],
-					Labeled[ displaySelectedKB[ $selectedProofKB], translate["selKB"], {{Top, Left}}],
-					Labeled[ summarizeBuiltins[ "prove"], translate["selBui"], {{Top, Left}}]}
-				], {360, Automatic}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic],
+			Column[{
+					Labeled[ Pane[ displaySelectedGoal[ $selectedProofGoal], {360, Automatic}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic],
+						translate["selGoal"], {{Top, Left}}],
+					Labeled[ Pane[ displaySelectedKB[ $selectedProofKB], {360, {10, 250}}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic], 
+						translate["selKB"], {{Top, Left}}],
+					Labeled[ Pane[ summarizeBuiltins[ "prove"], {360, {10, 250}}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic], 
+						translate["selBui"], {{Top, Left}}]},
+					Left
+				],
 			
 			Column[{				
 				Labeled[ displaySelectedRules[ $selectedRuleSet], translate[ "selectedRules"]<>":", {{Top,Left}}],
@@ -1736,14 +1744,11 @@ makeNewDeclButton[args___] := unexpected[ makeNewDeclButton, {args}]
 makeDeclButtons[] := Row[ Map[ makeDeclBut, {"VAR", "VARCOND", "COND", "ABBREV"}], Spacer[5]]
 makeDeclButtons[args___] := unexpected[ makeDeclButtons, {args}]
 
-showDecl[ ] := OpenerView[ {Style[ translate["tcSessTabEnvTabButtonAllDeclLabel"], "SmallHeader"], displayDecl[]}, Dynamic[$tcAllDeclOpener]]
-showDecl[ args___] := unexpected[ showDecl, {args}]
-
 displayDecl[ ] :=
 	Row[ {
-		Pane[ $TMAactDecl, {300, 50}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic],
+		Pane[ $TMAactDecl, {350, {10, 100}}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic],
 		Tooltip[ Button[ Style[ "\:21ba", {Medium}], $TMAactDecl = displayGlobalDeclarations[ InputNotebook[]]], translate[ "tcSessTabEnvTabButtonDeclLabel"]]
-		}, Spacer[5]]
+		}, Spacer[3]]
 displayDecl[ args___] := unexpected[ displayDecl, {args}]
 
 declButtonData["VAR"] := 
@@ -1792,13 +1797,10 @@ makeDeclBut[ bname_String, style_String] :=
     ]
 makeDeclBut[args___] := unexpected[ makeDeclBut, {args}]
 
-showEnv[ ] := OpenerView[ {Style[ translate["tcSessTabEnvTabButtonAllFormLabel"], "SmallHeader"], displayEnv[]}, Dynamic[$tcAllFormulaeOpener]]
-showEnv[ args___] := unexpected[ showEnv, {args}]
-
 displayEnv[ ] :=
 	If[ $tmaEnv === {},
 		emptyPane[ "", {350, 30}],
-		Pane[ displayLabeledFormulaListGrid[ $tmaEnv], {340, 250}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
+		Pane[ Column[ displayLabeledFormulaList[ $tmaEnv], Left, 0.2], {380, {10, 400}}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
 	]
 displayEnv[ args___] := unexpected[ displayEnv, {args}]
    
@@ -1821,9 +1823,9 @@ sessionCompose[args___] :=
 
 sessionInspect[ ] :=
 	Column[{
-    	Labeled[ Column[ {Dynamic[ showEnv[]]}, Left, Spacer[2]],
+    	Labeled[ Column[ {Dynamic[ displayEnv[]]}, Left, Spacer[2]],
     		translate[ "Formulae"], {{Top, Left}}],
-    	Labeled[ Column[ {Dynamic[ showDecl[]]}, Left, Spacer[2]],
+    	Labeled[ Column[ {Dynamic[ displayDecl[]]}, Left, Spacer[2]],
     		translate[ "Declarations"], {{Top, Left}}]
     }]
 sessionInspect[ args___] := unexpected[ sessionInspect, {args}]
@@ -2608,6 +2610,5 @@ If[ $Notebooks,
 	openTheoremaCommander[]
 ];
 
-End[]; (* End Private Context *)
-
+End[];
 EndPackage[];
