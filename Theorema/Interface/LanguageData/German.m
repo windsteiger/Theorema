@@ -47,10 +47,12 @@ With[ {lang = "German"},
     translate[ "CASEDISTTooltip", lang] = "e1, \[Ellipsis], en \[Ellipsis] Ausdr\[UDoubleDot]cke \nc1, \[Ellipsis], cn \[Ellipsis] Bedingungen";   	
 	translate[ "closed", lang] = "alle geschlossen";
     translate[ "Computation", lang] = "Berechnung";
+	translate[ "computationTime", lang] = "Rechenzeit";
     translate[ "CONN2Tooltip", lang] = "links, rechts \[Ellipsis] Aussage";   	
     translate[ "CONNTooltip", lang] = "e1, \[Ellipsis], en \[Ellipsis] Aussage";
 
     translate[ "Declarations", lang] = "Globale";
+    translate[ "DemoMode", lang] = "Demo Modus";
 	translate[ "disproved", lang] = "widerlegt";
     translate[ "Domains", lang] = "Bereiche und Datenstrukturen";
 
@@ -160,6 +162,7 @@ With[ {lang = "German"},
     translate[ "ResetBui", lang] = "Built-ins zur\[UDoubleDot]cksetzen";
 	translate[ "RestoreDefaults", lang] = "Auf Standardwerte setzen";
     translate[ "RestoreSettings", lang] = "Einstellungen zur\[UDoubleDot]cksetzen";
+    translate[ "restoreSettingsBeforeComp", lang] = "Vor jeder Berechnung die Einstellungen zur\[UDoubleDot]cksetzen";
     translate[ "RestoreSettingsLong", lang] = "Einstellungen wirklich auf die Werte zur\[UDoubleDot]cksetzen, die bei letzmaliger Ausf\[UDoubleDot]hrung dieser Aktion verwendet wurden?";
 	translate[ "ruleActive", lang] = "Aktivieren/Deaktivieren der Beweisregel";
 	translate[ "rulePriority", lang] = "Priorit\[ADoubleDot]t der Regel ist eine ganze Zahl zwischen 1 und 100. Niedriger Wert bedeutet hohe Priorit\[ADoubleDot]t";

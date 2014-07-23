@@ -160,6 +160,7 @@ initGUI[] :=
 		$labelSeparator = ",";
 		$cellTagKeySeparator = ":";
 		$traceUserDef = False;
+		$TMAcomputationDemoMode = False;
 		Clear[ kbSelectProve, kbSelectSolve];
 		kbSelectProve[_] := False;
 		kbSelectSolve[_] := False;
@@ -1442,14 +1443,18 @@ proofNavigation[ args___] := unexpected[ proofNavigation, {args}]
 (* this function is called during a computation (see processComputation[])
    effect: print a cell containg information about the environment settings for that computation *)
   
-printComputationInfo[ cellID_Integer] := 
+printComputationInfo[ cellID_Integer, cache_, cTime_] := 
 	Module[ {nbDir, file},
 		nbDir = createPerNotebookDirectory[ CurrentValue[ "NotebookFullFileName"]];
 		(* Generate cache only in plain .m format, since this allows sharing notebooks with users on different platforms.
 			Also, loading a .m-file allows dynamic objects to react to new settings, whereas loading a .mx-file has no effect on dynamics.
 			I assume the speed gain from using mx is neglectable *)
 		file = FileNameJoin[ {nbDir, "c" <> ToString[ cellID]}];
-		saveComputationCacheDisplay[ cellID, file];
+		If[ cache,
+			(* we generate new cache files only if needed *)
+			saveComputationCacheDisplay[ cellID, file, cTime]
+		];
+		(* the comp info has to be written in any case, otherwise the old info is removed (GeneratedCell, CellAutoOverwrite) *)
 		With[ {fnco = file <> "-co.m", fnd = file <> "-display.m"},
 			CellPrint[ Cell[ 
 				If[ TrueQ[ $traceUserDef],
@@ -1467,14 +1472,14 @@ printComputationInfo[ cellID_Integer] :=
 	]
 printComputationInfo[ args___] := unexcpected[ printComputationInfo, {args}]
      
-setCompEnv[ file_String] :=
+setComputationEnvironment[ file_String] :=
 	Module[{},
 		Clear[ kbSelectCompute];
 		Get[ file];
 	]
-setCompEnv[ args___] := unexpected[ setCompEnv, {args}]
+setComputationEnvironment[ args___] := unexpected[ setComputationEnvironment, {args}]
 
-saveComputationCacheDisplay[ cellID_Integer, file_String] :=
+saveComputationCacheDisplay[ cellID_Integer, file_String, cTime_] :=
 	With[ {fn = file <> ".m", kbKeysLabels = Map[ {key[#], label[#]}&, Select[ $tmaEnv, kbSelectCompute[ key[ #]]&]]},
 		Put[ $TmaComputationObject, file <> "-co.m"];
 		Put[ Definition[ buiActComputation], Definition[ kbSelectCompute], Definition[ $traceUserDef], fn];
@@ -1482,7 +1487,8 @@ saveComputationCacheDisplay[ cellID_Integer, file_String] :=
 			TabView[ {
 				translate[ "tcComputeTabKBTabLabel"] -> Pane[ Row[ Map[ FORM, kbKeysLabels], ", "], 500],
         		translate[ "tcComputeTabBuiltinTabLabel"] -> summarizeBuiltins[ "compute"],
-        		translate[ "RestoreSettings"] -> Row[ {translate[ "RestoreSettingsLong"], Button[ translate[ "OK"], setCompEnv[ fn]]}, Spacer[5]]
+        		translate[ "Computation"] -> summarizeComputationSettings[ cTime],
+        		translate[ "RestoreSettings"] -> Row[ {translate[ "RestoreSettingsLong"], Button[ translate[ "OK"], setComputationEnvironment[ fn]]}, Spacer[5]]
 				},
 				ImageSize -> Automatic
 			],
@@ -1490,6 +1496,16 @@ saveComputationCacheDisplay[ cellID_Integer, file_String] :=
 	]	
 	
 saveComputationCacheDisplay[ args___] := unexpected[ saveComputationCacheDisplay, {args}]
+
+summarizeComputationSettings[ cTime_] :=
+	Module[{},
+		TabView[{				
+			translate[ "statistics"] -> Column[{
+    			Labeled[ cTime, translate[ "computationTime"] <> ":", Left]
+    			}]
+			}, AutoAction -> True, ControlPlacement -> Left]
+	]
+summarizeComputationSettings[ args___] := unexpected[ summarizeComputationSettings, {args}]
 
 displayFormulaFromKey[ {k_List, l_String}] :=
 	Module[ {form},
@@ -2513,8 +2529,11 @@ compSetup[] :=
 			Grid[{
     			{Checkbox[ Dynamic[ $traceUserDef]], translate[ "traceUserDef"]}
     		}, Alignment -> {Left}], 
-    		translate[ "Trace"], {{Top, Left}}]
-		}
+    		translate[ "Trace"], {{Top, Left}}],
+		Labeled[ 
+			Row[ {Checkbox[ Dynamic[ $TMAcomputationDemoMode]], translate[ "restoreSettingsBeforeComp"]}, Spacer[5]], 
+    		translate[ "DemoMode"], {{Top, Left}}]
+    	}
 	]
 compSetup[ args___] := unexpected[ compSetup, {args}]
 

@@ -210,6 +210,7 @@ With[ {lang = "German"},
 	MessageName[ $tmaArch, "usage", lang] = "Collection of environments evaluated in the current archive.";
 	MessageName[ $TMAcheckSuccess, "usage", lang] = "$TMAcheckSuccess decides whether proof success is automatically checked when a new subgoal is constructed.";
 	MessageName[ $TmaCompInsertPos, "usage", lang] = "$TmaCompInsertPos is the position in the global computation object, where the next subcomputation must be inserted.";
+	MessageName[ $TMAcomputationDemoMode, "usage", lang] = "$TMAcomputationDemoMode is true if computations should run in demo-mode.";
 	MessageName[ $TmaComputationObject, "usage", lang] = "$TmaComputationObject is the global computation object.";
 	MessageName[ tmaDialogInput, "usage", lang] = "Theorema version of Mathematica's DialogInput.";
 	MessageName[ $tmaEnv, "usage", lang] = "Collection of environments evaluated in the current session, i.e. the knowledge base.";

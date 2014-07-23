@@ -46,10 +46,12 @@ With[ {lang = "English"},
     translate[ "CASEDISTTooltip", lang] = "e1, \[Ellipsis], en \[Ellipsis] expressions\nc1, \[Ellipsis], cn \[Ellipsis] conditions";   	
 	translate[ "closed", lang] = "all closed";
     translate[ "Computation", lang] = "Computation";
+	translate[ "computationTime", lang] = "Computation time";
     translate[ "CONN2Tooltip", lang] = "left, right \[Ellipsis] formula";   	
     translate[ "CONNTooltip", lang] = "e1, \[Ellipsis], en \[Ellipsis] formula";
 
     translate[ "Declarations", lang] = "Globals";
+    translate[ "DemoMode", lang] = "Demo Mode";
 	translate[ "disproved", lang] = "disproved";
     translate[ "Domains", lang] = "Domains and Data Types";
 
@@ -159,6 +161,7 @@ With[ {lang = "English"},
     translate[ "ResetBui", lang] = "Reset built-ins";
 	translate[ "RestoreDefaults", lang] = "Restore defaults";
     translate[ "RestoreSettings", lang] = "Restore settings";
+    translate[ "restoreSettingsBeforeComp", lang] = "Restore settings before each computation";
     translate[ "RestoreSettingsLong", lang] = "Really restore all relevant settings to the values they had when this action was performed last time?";
 	translate[ "ruleActive", lang] = "Activate/deactivate the inference rule";
 	translate[ "rulePriority", lang] = "The priority of the rule as an integer between 1 and 100. Lower value means higher priority";

@@ -931,7 +931,7 @@ processComputation[ x_] := Module[ { procSynt, res},
 	$TmaComputationObject = {ToExpression[ InString[ $Line]]};
 	$TmaCompInsertPos = {2}; 
 	setComputationContext[ "compute"];
-	res = Check[ Catch[ ReleaseHold[ procSynt]], $Failed];
+	{$compTime, res} = Timing[ Check[ Catch[ ReleaseHold[ procSynt]], $Failed]];
 	setComputationContext[ "none"];
 	(*NotebookWrite[ EvaluationNotebook[], Cell[ ToBoxes[ res, TheoremaForm], "ComputationResult", CellLabel -> "Out["<>ToString[$Line]<>"]="]];*)
 	(* We force the MakeBoxes[ ..., TheoremaForm] to apply by setting $PrePrint in the CellProlog of a computation cell.
@@ -942,8 +942,18 @@ processComputation[ x_] := Module[ { procSynt, res},
 processComputation[ args___] := unexcpected[ processComputation, {args}]
 
 openComputation[] := 
-	Module[{},
+	Module[ {fileCache, fileEvalNb},
 		$evalCellID = CurrentValue[ "CellID"];
+		(* whether to cache the computation environment, default=True *)
+		$cacheComp = True;
+		If[ TrueQ[ $TMAcomputationDemoMode],
+			fileEvalNb = CurrentValue[ EvaluationNotebook[], "NotebookFullFileName"];
+			fileCache = FileNameJoin[ {DirectoryName[ fileEvalNb], FileBaseName[ fileEvalNb], "c" <> ToString[ $evalCellID] <> ".m"}];
+			If[ FileExistsQ[ fileCache],
+				setComputationEnvironment[ fileCache];
+				$cacheComp = False;
+			]
+		];
 		$parseTheoremaExpressions = True;
 		$ContextPath = Join[ 
 			{"Theorema`Computation`Language`"}, 
@@ -958,7 +968,7 @@ closeComputation[] :=
         End[];
 		$ContextPath = Select[ $ContextPath, (!StringMatchQ[ #, "Theorema`Computation`" ~~ __])&];
 		$parseTheoremaExpressions = False;
-		printComputationInfo[ $evalCellID];
+		printComputationInfo[ $evalCellID, $cacheComp, $compTime];
     ]
 closeComputation[args___] := unexcpected[ closeComputation, {args}]
 
@@ -1106,6 +1116,7 @@ saveNbRememberLocation[ nb_NotebookObject] :=
 		file
 	]
 saveNbRememberLocation[ args___] := unexpected[ saveNbRememberLocation, {args}]
+
 
 (* ::Section:: *)
 (* end of package *)
