@@ -1484,7 +1484,10 @@ setComputationEnvironment[ file_String] :=
 			Clear[ kbSelectCompute];
 			Get[ fn];
 			Apply[ Clear, Map[ # <> "*"&, $allCurrentComputationContexts]];
-			Get[ file <> ".mx"];
+			fn = file <> ".mx";
+			If[ FileExistsQ[ fn],
+				Get[ fn]
+			];
 			(* whether to cache the computation environment: if we use existing caches, we will not re-generate them later *)
 			False,
 			(* else *)
