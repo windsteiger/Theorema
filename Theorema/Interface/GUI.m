@@ -234,24 +234,26 @@ openTheoremaCommander[ ] /; $Notebooks :=
         			(* session *){translate["tcSessTabComposeTabLabel"], translate["tcSessTabInspectTabLabel"], translate["tcSessTabArchTabLabel"]},
         			(* prove *)  {translate["tcProveTabGoalTabLabel"], translate["tcProveTabKBTabLabel"], translate["tcProveTabBuiltinTabLabel"],
         				translate["tcProveTabProverTabLabel"], translate["tcProveTabSubmitTabLabel"], translate["tcProveTabInspectTabLabel"]},
-        			(* compute *){translate["tcComputeTabSetupTabLabel"], translate["tcComputeTabKBTabLabel"], translate["tcComputeTabBuiltinTabLabel"]},
-        			(* solve *)  {translate["tcSolveTabKBTabLabel"], translate["tcSolveTabBuiltinTabLabel"]},
+        			(* compute *){translate["tcComputeTabNewTabLabel"], translate["tcComputeTabKBTabLabel"], translate["tcComputeTabBuiltinTabLabel"], translate["tcComputeTabSetupTabLabel"]},
+        			(* solve *)  {translate["tcSolveTabKBTabLabel"], translate["tcSolveTabBuiltinTabLabel"], translate["tcSolveTabSetupTabLabel"]},
         			(* prefs *)  {(*, , *)}
         		},
         		(* for each activity and each action the respective content *)
         		{
         			(* session *){sessionCompose[], sessionInspect[], sessionArchive[]},
         			(* prove *)  {Dynamic[ Refresh[ displaySelectedGoal[], UpdateInterval -> 2]],
-        				Dynamic[ Refresh[ displayKBBrowser["prove"], TrackedSymbols :> {$kbFilterKW, $tcKBBrowseSelection, $kbStruct, kbSelectProve}]],
-        				Dynamic[ Refresh[ displayBuiltinBrowser["prove"], TrackedSymbols :> {buiActProve}]],
+        				Dynamic[ Refresh[ displayKBBrowser[ "prove"], TrackedSymbols :> {$kbFilterKW, $tcKBBrowseSelection, $kbStruct}]],
+        				Dynamic[ Refresh[ displayBuiltinBrowser[ "prove"], TrackedSymbols :> {buiActProve}]],
         				Dynamic[ Refresh[ selectProver[], TrackedSymbols :> {$selectedRuleSet, $selectedStrategy, $ruleFilterKW}]],
         				Dynamic[ Refresh[ submitProveTask[ ], TrackedSymbols :> {$selectedProofGoal, $selectedProofKB, $selectedSearchDepth, $selectedSearchTime}]],
         				Dynamic[ Refresh[ proofNavigation[ $TMAproofTree], TrackedSymbols :> {$TMAproofTree, $TMAproofSearchRunning, $TMAproofNotebook, ruleTextActive, $proofTreeScale, $selectedProofStep}]]},
-        			(* compute *){compSetup[],
-        				Dynamic[ Refresh[ displayKBBrowser["compute"], TrackedSymbols :> {$kbFilterKW, $tcKBBrowseSelection, $kbStruct}]],
-        				Dynamic[ Refresh[ displayBuiltinBrowser["compute"], TrackedSymbols :> {buiActComputation}]]},
-        			(* solve *)  {Dynamic[Refresh[displayKBBrowser["solve"], TrackedSymbols :> {$kbFilterKW, $tcKBBrowseSelection, $kbStruct}]],
-        				Dynamic[ Refresh[ displayBuiltinBrowser["solve"], TrackedSymbols :> {buiActSolve}]]},
+        			(* compute *){compNew[],
+        				Dynamic[ Refresh[ displayKBBrowser[ "compute"], TrackedSymbols :> {$kbFilterKW, $tcKBBrowseSelection, $kbStruct}]],
+        				displayBuiltinBrowser[ "compute"](*Dynamic[ Refresh[ displayBuiltinBrowser[ "compute"], TrackedSymbols :> {buiActComputation}]]*),
+        				compSetup[]},
+        			(* solve *)  {Dynamic[Refresh[ displayKBBrowser[ "solve"], TrackedSymbols :> {$kbFilterKW, $tcKBBrowseSelection, $kbStruct}]],
+        				Dynamic[ Refresh[ displayBuiltinBrowser[ "solve"], TrackedSymbols :> {buiActSolve}]],
+        				solveSetup[]},
         			(* prefs *)  {setPreferences[ ]}
         		}
         	], TrackedSymbols :> {$TmaLanguage}]],
@@ -568,41 +570,40 @@ sourceToNotebookFile[ args___] := unexpected[ sourceToNotebookFile, {args}]
 extract hierarchically structured knowledge from a notebook
 *)
 
-extractKBStruct[ nb_NotebookObject] := extractKBStruct[ NotebookGet[nb]]
+extractKBStruct[ nb_NotebookObject] := extractKBStruct[ NotebookGet[ nb]]
 
 extractKBStruct[ Notebook[ l_List, __?OptionQ]] := extractKBStruct[ Notebook[ l]] (* process the notebook cells only, without any notebook options *)
 	
 extractKBStruct[ nb_Notebook] :=
-    Module[ {posTit = Cases[ Position[ nb, Cell[_, "Title", ___]], {a___, 1}],
-      posSec =  Cases[ Position[ nb, Cell[_, "Section", ___]], {a___, 1}], 
-      posSubsec = Cases[ Position[ nb, Cell[_, "Subsection", ___]], {a___, 1}], 
-      posSubsubsec = Cases[ Position[ nb, Cell[_, "Subsubsection", ___]], {a___, 1}], 
-      posSubsubsubsec = Cases[ Position[ nb, Cell[_, "Subsubsubsection", ___]], {a___, 1}], 
-      posEnv = Cases[ Position[ nb, Cell[_, "EnvironmentHeader", ___]], {a___, 1}], 
-      posInp = Position[ nb, Cell[_, "FormalTextInputFormula", ___]], inputs, depth, sub, root, heads, isolated},
+    Module[ {posTit = Cases[ Position[ nb, Cell[ _, "Title", ___]], {a___, 1}],
+      posSec =  Cases[ Position[ nb, Cell[ _, "Section", ___]], {a___, 1}], 
+      posSubsec = Cases[ Position[ nb, Cell[ _, "Subsection", ___]], {a___, 1}], 
+      posSubsubsec = Cases[ Position[ nb, Cell[ _, "Subsubsection", ___]], {a___, 1}], 
+      posSubsubsubsec = Cases[ Position[ nb, Cell[ _, "Subsubsubsection", ___]], {a___, 1}], 
+      posEnv = Cases[ Position[ nb, Cell[ _, "EnvironmentHeader", ___]], {a___, 1}], 
+      posInp = Position[ nb, Cell[ _, "FormalTextInputFormula", ___]], inputs, depth, sub, root, heads, isolated},
       (* extract all positions of relevant cells
          join possible containers with decreasing level of nesting *)
-        heads = Join[posEnv, posSubsubsubsec, posSubsubsec, posSubsec, posSec, posTit];
+        heads = Join[ posEnv, posSubsubsubsec, posSubsubsec, posSubsec, posSec, posTit];
         (* build up a nested list structure representing the nested cell structure 
            start with singleton lists containing a header and add input cells to the respective group *)
-        {inputs, isolated} = Fold[arrangeInput, {Map[List, heads], {}}, posInp];
-        depth = Union[Map[Length[#[[1]]] &, inputs]];
+        {inputs, isolated} = Fold[ arrangeInput, {Map[List, heads], {}}, posInp];
+        depth = Union[ Map[ Length[ #[[1]]]&, inputs]];
         (* go through all groups starting with the most deeply nested one *)
-        While[Length[depth] > 1,
+        While[ Length[ depth] > 1,
             (* the most deeply nested ones are the possible candidates to be joined to other groups *)
-         sub = Select[inputs, Length[#[[1]]] == depth[[-1]] &];
+         sub = Select[ inputs, Length[ #[[1]]] == depth[[-1]] &];
          (* the less deeply nested ones are groups to which subitems may be added *)
-         root = Select[inputs, Length[#[[1]]] < depth[[-1]] &];
+         root = Select[ inputs, Length[#[[1]]] < depth[[-1]] &];
          (* one after the other add lower priority groups to higher priority ones *)
-         inputs = Fold[arrangeSub, root, sub];
-         depth = Drop[depth, -1];
+         inputs = Fold[ arrangeSub, root, sub];
+         depth = Drop[ depth, -1];
          ];
          (* finally, add isolated nodes at the beginning *)
-        Join[isolated, inputs]
+        Join[ isolated, inputs]
     ]
 
-extractKBStruct[ args___] :=
-    unexpected[ extractKBStruct, {args}]
+extractKBStruct[ args___] := unexpected[ extractKBStruct, {args}]
 
 
 (* ::Subsubsection:: *)
@@ -862,20 +863,19 @@ updateKBBrowser[] :=
     Module[ {file = CurrentValue[ "NotebookFullFileName"], pos, new},
         pos = Position[ $kbStruct, file -> _];
         (* We don't extract the entire cells, we throw away all options except CellTags and CellID in order to not blow up $kbStruct too much *)
-        new = file -> With[ {nb = NotebookGet[EvaluationNotebook[]]},
-                          extractKBStruct[nb] /. l_?VectorQ :> (Extract[nb, l] /. {c:Cell[ _, _, ___] :> DeleteCases[ c, Except[ CellTags|CellID] -> _]})
+        new = file -> With[ {nb = $TMAcurrentEvalNB},
+                          extractKBStruct[ nb] /. l_?VectorQ :> (Extract[ nb, l] /. {c:Cell[ _, _, ___] :> DeleteCases[ c, Except[ CellTags|CellID] -> _]})
                       ];
         (* if there is already an entry for that notebook then replace the structure,
            otherwise add new entry *)
         If[ pos === {},
             AppendTo[ $kbStruct, new],
-            $kbStruct[[pos[[1,1]]]] = new
+            $kbStruct[[ pos[[1,1]]]] = new
         ];
         (* set $tcKBBrowseSelection such that the tab corresponding ot this notebook will be displayed in the knowledge browser *)
         Scan[ ($tcKBBrowseSelection[ #] = file)&, {"prove", "compute", "solve"}]
     ]
-updateKBBrowser[args___] :=
-    unexpected[updateKBBrowser, {args}]
+updateKBBrowser[args___] := unexpected[ updateKBBrowser, {args}]
 
 
 (* ::Subsubsection:: *)
@@ -899,7 +899,7 @@ displayKBBrowser[ task_String] :=
             	view = view[[1]]
             ];
             If[ task === "prove",
-                $selectedProofKB = Select[ $tmaEnv, kbSelectProve[#[[1]]]&];
+                $selectedProofKB = Select[ $tmaEnv, kbSelectProve[ #[[1]]]&];
             ];
             Column[{
             	Button[ translate[ "OKnext"], $tcActionView++],
@@ -935,8 +935,7 @@ displayKBBrowser[ task_String] :=
             }]
         ]
     ]
-displayKBBrowser[args___] :=
-    unexpected[displayKBBrowser, {args}]
+displayKBBrowser[args___] := unexpected[ displayKBBrowser, {args}]
 
 (*
 TabView[
@@ -960,7 +959,7 @@ structViewBuiltin[{category_String, rest__List}, tags_, task_String] :=
     Module[ {sub, compTags, opGroup},
         sub = Transpose[Map[structViewBuiltin[#, tags, task] &, {rest}]];
         compTags = Apply[Union, sub[[2]]];
-        opGroup = partitionFill[ sub[[1]], 4];
+        opGroup = partitionFill[ sub[[1]], 3];
         {OpenerView[{headerViewBuiltin[category, compTags, task], Grid[ opGroup, Alignment -> {Left, Baseline}, Spacings -> {2, Automatic}, ItemSize -> Full]}, 
         	ToExpression["Dynamic[Theorema`Interface`GUI`Private`$builtinStructState$"<>category<>"]"]], 
          compTags}
@@ -1205,8 +1204,11 @@ setAll[l_, test_, val_] :=
 
 displayBuiltinBrowser[ task_String] :=
   Column[{
-	Row[ {Button[ translate[ "ResetBui"], initBuiltins[ {task}]], Button[ translate[ "OKnext"], $tcActionView++]}, Spacer[3]],
-  	structViewBuiltin[ $tmaBuiltins, {}, task][[1]],
+  	Button[ translate[ "OKnext"], $tcActionView++],
+	Row[ {Button[ translate[ "ResetBui"], initBuiltins[ {task}]]}, Spacer[3]],
+	(* Putting an invisible frame around the pane allows to measure its size correctly. Otherwise its width is calculated as the width
+	   of the content, regardless of the {355, Automatic} size spezified *)
+  	Framed[ Pane[ structViewBuiltin[ $tmaBuiltins, {}, task][[1]], {354, Automatic}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic], FrameStyle -> None],
   	Button[ translate[ "OKnext"], $tcActionView++]
   }]
 displayBuiltinBrowser[args___] := unexcpected[ displayBuiltinBrowser, {args}]
@@ -1214,7 +1216,7 @@ displayBuiltinBrowser[args___] := unexcpected[ displayBuiltinBrowser, {args}]
 $allProveSettings = Hold[ $selectedProofGoal, $selectedProofKB, $selectedRuleSet, $selectedStrategy, $selectedSearchDepth, $selectedSearchTime,
 	$eliminateBranches, $eliminateSteps, $eliminateFormulae,
 	$interactiveProofSitSel, $interactiveNewProofSitFilter, $proofCellStatus,
-	kbSelectProve, buiActProve, ruleActive];
+	kbSelectProve, buiActProve, ruleActive, $tcKBBrowseSelection];
 
 selectProver[ ] :=
     Column[{
@@ -1467,39 +1469,60 @@ printComputationInfo[ cellID_Integer, cache_, cTime_] :=
 					{None, Cell[ BoxData[ ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, 
 						With[ {f = file}, ButtonFunction :> removeGroup[ ButtonNotebook[], f]]]]]},
 					{None, None}}]];
-			CellPrint[ Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ Get[ fnd] /. FORM -> displayFormulaFromKey, TrackedSymbols :> {$tmaEnv}]]]], "ComputationInfoBody"]]
+			(* This needs to be done in that complicated way, because saving formatted Theorema expressions to the file would result in syntax errors
+			   when reading in the file later (Theorema MakeExpressions are not applied when reading from a file!).
+			   Therefore, we must write something to the file, which is syntactically OK on the plain Mma-level and format it after reading the file *)
+			CellPrint[ Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ Get[ fnd] /. {FORM -> displayFormulaFromKey, RESULT -> theoremaDisplay},
+				TrackedSymbols :> {$tmaEnv}]]]], "ComputationInfoBody"]]
 		];
 	]
 printComputationInfo[ args___] := unexcpected[ printComputationInfo, {args}]
      
 setComputationEnvironment[ file_String] :=
-	Module[{},
-		Clear[ kbSelectCompute];
-		Get[ file];
+	Module[ {fn = file <> ".m"},
+		If[ FileExistsQ[ fn],
+			Clear[ kbSelectCompute];
+			Get[ fn];
+			Apply[ Clear, Map[ # <> "*"&, $allCurrentComputationContexts]];
+			Get[ file <> ".mx"];
+			(* whether to cache the computation environment: if we use existing caches, we will not re-generate them later *)
+			False,
+			(* else *)
+			(* whether to cache the computation environment, default=True *)
+			True
+		]
 	]
 setComputationEnvironment[ args___] := unexpected[ setComputationEnvironment, {args}]
 
 saveComputationCacheDisplay[ cellID_Integer, file_String, cTime_] :=
-	With[ {fn = file <> ".m", kbKeysLabels = Map[ {key[#], label[#]}&, Select[ $tmaEnv, kbSelectCompute[ key[ #]]&]]},
+	With[ {fn = file <> ".m", fc = file <> ".mx", kbKeysLabels = Map[ {key[#], label[#]}&, Select[ $tmaEnv, kbSelectCompute[ key[ #]]&]]},
 		Put[ $TmaComputationObject, file <> "-co.m"];
-		Put[ Definition[ buiActComputation], Definition[ kbSelectCompute], Definition[ $traceUserDef], fn];
+		$allCurrentComputationContexts = Join[ {"Theorema`Computation`Knowledge`"}, 
+			Map[ StringReplace[ #, "Theorema`Knowledge`" -> "Theorema`Computation`Knowledge`", 1]&, $TheoremaArchives]];
+		Put[ Definition[ buiActComputation], Definition[ kbSelectCompute], Definition[ $traceUserDef], Definition[ $allCurrentComputationContexts],
+			 Definition[ $tmaEnv], Definition[ $kbStruct], Definition[ $tcKBBrowseSelection], fn];
+		(* we save all computation contexts into an mx-cache file that can be loaded quickly (dynamics need not react to that *)
+		DumpSave[ fc, Evaluate[ $allCurrentComputationContexts]];
 		Put[ 
 			TabView[ {
 				translate[ "tcComputeTabKBTabLabel"] -> Pane[ Row[ Map[ FORM, kbKeysLabels], ", "], 500],
         		translate[ "tcComputeTabBuiltinTabLabel"] -> summarizeBuiltins[ "compute"],
         		translate[ "Computation"] -> summarizeComputationSettings[ cTime],
-        		translate[ "RestoreSettings"] -> Row[ {translate[ "RestoreSettingsLong"], Button[ translate[ "OK"], setComputationEnvironment[ fn]]}, Spacer[5]]
+        		translate[ "RestoreSettings"] -> Row[ {translate[ "RestoreSettingsLong"], Button[ translate[ "OK"], setComputationEnvironment[ file]]}, Spacer[5]]
 				},
 				ImageSize -> Automatic
 			],
 			file <> "-display.m"];
 	]	
-	
 saveComputationCacheDisplay[ args___] := unexpected[ saveComputationCacheDisplay, {args}]
 
 summarizeComputationSettings[ cTime_] :=
 	Module[{},
-		TabView[{				
+		TabView[{
+			translate[ "input"] -> 	DisplayForm[ $TmaComputationObject[[1]]],
+			(* Out[] is the result of the computation translated to standard context, not anymore Computation`-context.
+			   This ensures that no evaluations will happen even when displaying the result under different built-in settings. *)
+			translate[ "result"] -> RESULT[ Out[]],			
 			translate[ "statistics"] -> Column[{
     			Labeled[ cTime, translate[ "computationTime"] <> ":", Left]
     			}]
@@ -1593,6 +1616,7 @@ saveProveCacheDisplay[ kbKeysLabels_, pTime_, sTime_, file_String] :=
 	With[ {fn = file <> ".m"},
 		Put[ $TMAproofObject, file <> "-po.m"];
 		Apply[ Put[ ##, fn]&, Map[ Definition, $allProveSettings]];
+		PutAppend[ Definition[ $tmaEnv], Definition[ $kbStruct], fn];
 		Put[ 
 			TabView[ {
 				translate[ "tcProveTabKBTabLabel"] -> Pane[ Row[ Map[ FORM, kbKeysLabels], ", "], 500],
@@ -2522,9 +2546,18 @@ langButtons[] :=
 
 langButtons[ args___] := unexpected[ langButtons, {args}]
     
+compNew[] := Column[{makeCompButton[]}]
+compNew[ args___] := unexpected[ compNew, {args}]
+
+makeCompButton[] :=
+    Button[ translate[ "New"], insertNewFormulaCell[ "COMPUTE"], Alignment -> {Left, Top}, ImageSize -> Automatic]
+makeCompButton[ args___] := unexpected[ makeCompButton, {args}]
+
+partitionFill[ l_List, n_Integer, default_:""] := Partition[ PadRight[ l, n*Ceiling[ Length[ l]/n], default], n]
+partitionFill[ args___] := unexpected[ partitionFill, {args}]
+
 compSetup[] := 
 	Column[{
-		makeCompButton[],
 		Labeled[ 
 			Grid[{
     			{Checkbox[ Dynamic[ $traceUserDef]], translate[ "traceUserDef"]}
@@ -2537,13 +2570,8 @@ compSetup[] :=
 	]
 compSetup[ args___] := unexpected[ compSetup, {args}]
 
-makeCompButton[] :=
-    Button[ translate[ "New"], insertNewFormulaCell[ "COMPUTE"], Alignment -> {Left, Top}, ImageSize -> Automatic]
-makeCompButton[ args___] := unexpected[ makeCompButton, {args}]
-
-
-partitionFill[ l_List, n_Integer, default_:""] := Partition[ PadRight[ l, n*Ceiling[ Length[ l]/n], default], n]
-partitionFill[ args___] := unexpected[ partitionFill, {args}]
+solveSetup[ ] := ""
+solveSetup[ args___] := unexpected[ solveSetup, {args}]
 
 (* ::Section:: *)
 (* Windowing functions *)

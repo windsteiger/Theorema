@@ -186,6 +186,7 @@ With[ {lang = "German"},
 
 	MessageName[ $selectedProofStep, "usage", lang] = "$selectedProofStep refers to the id of the proof step that is selected in the current proof notebook.";
 	MessageName[ setComputationContext, "usage", lang] = "setComputationContext[ c] sets the context for the next computation to c.";
+	MessageName[ setComputationEnvironment, "usage", lang] = "setComputationEnvironment[ f] sets the environment values for sa computation from the values stored in file f.";
 	MessageName[ showProofNavigation, "usage", lang] = "showProofNavigation[ proofObject_] shows a tree navigation through a proof.";
 	MessageName[ simplifiedAnd, "usage", lang] = "";	
 	MessageName[ simplifiedForall, "usage", lang] = "";	
@@ -212,6 +213,7 @@ With[ {lang = "German"},
 	MessageName[ $TmaCompInsertPos, "usage", lang] = "$TmaCompInsertPos is the position in the global computation object, where the next subcomputation must be inserted.";
 	MessageName[ $TMAcomputationDemoMode, "usage", lang] = "$TMAcomputationDemoMode is true if computations should run in demo-mode.";
 	MessageName[ $TmaComputationObject, "usage", lang] = "$TmaComputationObject is the global computation object.";
+	MessageName[ $TMAcurrentEvalNB, "usage", lang] = "$TMAcurrentEvalNB is the notebook in which the current evaluation has been initiated.";
 	MessageName[ tmaDialogInput, "usage", lang] = "Theorema version of Mathematica's DialogInput.";
 	MessageName[ $tmaEnv, "usage", lang] = "Collection of environments evaluated in the current session, i.e. the knowledge base.";
 	MessageName[ $TmaLanguage, "usage", lang] = "The language used in the Theorema interface.";

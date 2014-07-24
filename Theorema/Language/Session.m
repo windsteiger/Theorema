@@ -255,15 +255,15 @@ SetAttributes[ processEnvironment, HoldAll];
 processEnvironment[ Theorema`Language`nE] := Null
 
 processEnvironment[ x_] :=
-    Module[ {nb = EvaluationNotebook[], rawNotebook, key, tags, globDec},
+    Module[ {nb = EvaluationNotebook[], key, tags, globDec},
     	(* select current cell: we need to refer to this selection when we set the cell options *)
 		SelectionMove[ nb, All, EvaluationCell];
     	{key, tags} = adjustFormulaLabel[ nb];
 		(* Perform necessary actions on the whole notebook *)
-        rawNotebook = NotebookGet[ nb];
-		ensureNotebookIntegrity[ nb, rawNotebook, tags];
+        $TMAcurrentEvalNB = NotebookGet[ nb];
+		ensureNotebookIntegrity[ nb, $TMAcurrentEvalNB, tags];
 		(* extract the global declarations that are applicable in the current evaluation *)
-		globDec = applicableGlobalDeclarations[ nb, rawNotebook, evaluationPosition[ nb, rawNotebook]];
+		globDec = applicableGlobalDeclarations[ nb, $TMAcurrentEvalNB, evaluationPosition[ nb, $TMAcurrentEvalNB]];
 		(* process the expression according the Theorema syntax rules and add it to the KB 
 		   ReleaseHold will remove the outer Hold but leave the Holds around fresh symbols *)
         Catch[ updateKnowledgeBase[ ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]], key, globDec, cellTagsToString[ tags]]];
@@ -274,18 +274,18 @@ processEnvironment[args___] := unexcpected[ processEnvironment, {args}]
 evaluationPosition[ nb_NotebookObject, raw_Notebook] :=
 	Module[{pos},
 		SelectionMove[ nb, All, EvaluationCell];
-		pos = Position[ raw, NotebookRead[nb]];
+		pos = Position[ raw, NotebookRead[ nb]];
 		pos[[1]]
 		(* we leave the current cell selected, the calling function should decide where to move the selection *)
 	]
 evaluationPosition[ args___] := unexpected[ evaluationPosition, {args}]
 
 adjustFormulaLabel[nb_NotebookObject] := 
-	Module[{ cellTags = CurrentValue["CellTags"], cellID = CurrentValue["CellID"], cleanCellTags, key},
+	Module[{ cellTags = CurrentValue[ "CellTags"], cellID = CurrentValue[ "CellID"], cleanCellTags, key},
 		(*
 		 * Make sure we have a list of CellTags (could also be a plain string)
 		 *)
-		cellTags = Flatten[{cellTags}];
+		cellTags = Flatten[ {cellTags}];
 		(*
 		 * Remove any automated labels (begins with "ID<sep>" or "Source<sep>").
 		 * Remove initLabel.
@@ -294,7 +294,7 @@ adjustFormulaLabel[nb_NotebookObject] :=
         (*
          * Replace unlabeled formula with counter.
          *)
-         If[cleanCellTags==={},
+         If[cleanCellTags === {},
          	cleanCellTags = automatedFormulaLabel[ nb]
          ];
         (*
@@ -418,13 +418,13 @@ ensureNotebookIntegrity[ nb_NotebookObject, rawNotebook_Notebook, cellTags_List]
     Module[ {allCellTags, selectedCellTags, duplicateCellTags, srcTags, sl, outdPos, updNb},
     	sl = sourceLabel[ nb];
         (* Collect all CellTags from document. *)
-        allCellTags = Flatten[Cases[rawNotebook,Cell[___,CellTags -> tags_,___] -> tags, Infinity]];
+        allCellTags = Flatten[ Cases[ rawNotebook, Cell[ ___, CellTags -> tags_, ___] -> tags, Infinity]];
         (* We look only for the duplicates to elements of current CellTags list.*)
-        selectedCellTags = Select[allCellTags,MemberQ[cellTags,#] &];
+        selectedCellTags = Select[ allCellTags, MemberQ[ cellTags, #]&];
         (* Check if CellTags are unique in current Notebook. *)
-        If[ Length[selectedCellTags] > Length[DeleteDuplicates[selectedCellTags]],
+        If[ Length[ selectedCellTags] > Length[ DeleteDuplicates[ selectedCellTags]],
             (* If not give an appropriate warning *)
-            duplicateCellTags = Cases[Select[Tally[selectedCellTags], duplicateLabel],{cellTag_,_} -> cellTag];
+            duplicateCellTags = Cases[ Select[ Tally[ selectedCellTags], duplicateLabel], {cellTag_, _} -> cellTag];
             notification[ translate["notUniqueLabel"], duplicateCellTags]
         ];
         (* Check if we have cell tags Source<sep>src with src != current notebook filename *)
@@ -898,21 +898,21 @@ includeArchive[ l_List] := Scan[ includeArchive, l]
 includeArchive[ args___] := unexpected[ includeArchive, {args}]
 
 archiveName[ f_String] :=
-    Module[ {file = OpenRead[f],meta,n},
-        While[ !(OptionQ[meta = Read[file, Expression]] || meta === EndOfFile)];
-        Close[file];
-        If[ meta===EndOfFile,
-            Return[translate["noArchName"]],
+    Module[ {file = OpenRead[ f],meta,n},
+        While[ !(OptionQ[ meta = Read[ file, Expression]] || meta === EndOfFile)];
+        Close[ file];
+        If[ meta === EndOfFile,
+            Return[ translate[ "noArchName"]],
             n = "Archive name" /. meta;
-            If[ StringQ[n] && StringMatchQ[n, (WordCharacter|"`")..~~"`"],
+            If[ StringQ[ n] && StringMatchQ[ n, (WordCharacter|"`").. ~~ "`"],
                 n,
-                translate["noArchName"]
+                (* else *)
+                translate[ "noArchName"]
             ]
         ]
     ]
 archiveName[ f_String, Short] := StringReplace[ archiveName[ f], "Theorema`Knowledge`" -> ""]
-archiveName[args___] :=
-    unexpected[archiveName, {args}]
+archiveName[ args___] := unexpected[archiveName, {args}]
 
 
 (* ::Section:: *)
@@ -944,15 +944,11 @@ processComputation[ args___] := unexcpected[ processComputation, {args}]
 openComputation[] := 
 	Module[ {fileCache, fileEvalNb},
 		$evalCellID = CurrentValue[ "CellID"];
-		(* whether to cache the computation environment, default=True *)
 		$cacheComp = True;
 		If[ TrueQ[ $TMAcomputationDemoMode],
 			fileEvalNb = CurrentValue[ EvaluationNotebook[], "NotebookFullFileName"];
-			fileCache = FileNameJoin[ {DirectoryName[ fileEvalNb], FileBaseName[ fileEvalNb], "c" <> ToString[ $evalCellID] <> ".m"}];
-			If[ FileExistsQ[ fileCache],
-				setComputationEnvironment[ fileCache];
-				$cacheComp = False;
-			]
+			fileCache = FileNameJoin[ {DirectoryName[ fileEvalNb], FileBaseName[ fileEvalNb], "c" <> ToString[ $evalCellID]}];
+			$cacheComp = setComputationEnvironment[ fileCache];
 		];
 		$parseTheoremaExpressions = True;
 		$ContextPath = Join[ 
