@@ -490,23 +490,21 @@ execLeft[ args___] := unexpected[ execLeft, {args}]
 (* execCondition does precisely the same what execRight previously did, i.e. it leaves symbols
 	with suffix "$M" unchanged. *)
 execCondition[ e_Hold, var_List] := 
-	Module[ {s, bound = boundVariables[ e]},
+	Module[ {s},
 		s = substituteFree[ e, Map[ stripVar, var]] /. {Theorema`Language`Assign$TM -> Set,
 			Theorema`Language`SetDelayed$TM -> SetDelayed, 
 			Theorema`Language`CompoundExpression$TM -> CompoundExpression,
 			Theorema`Language`List$TM -> List};
-		s = substituteBound[ s, Map[ stripVar, bound]];
 		ReleaseHold[ Map[ Function[ expr, ToString[ Unevaluated[ expr]], {HoldAll}], s]]
 	]
 execCondition[ args___] := unexpected[ execCondition, {args}]
 
 execRight[ e_Hold, var_List] := 
-	Module[ {s, bound = boundVariables[ e]},
+	Module[ {s},
 		s = substituteFree[ e, Map[ stripVar, var]] /. {Theorema`Language`Assign$TM -> Set,
 			Theorema`Language`SetDelayed$TM -> SetDelayed, 
 			Theorema`Language`CompoundExpression$TM -> CompoundExpression,
 			Theorema`Language`List$TM -> List};
-		s = substituteBound[ s, Map[ stripVar, bound]];
 		ReleaseHold[ Map[ Function[ expr, toRightString[ Hold[ expr]], {HoldAll}], s]]
 	]
 execRight[ args___] := unexpected[ execRight, {args}]
