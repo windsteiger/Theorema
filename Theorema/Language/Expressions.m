@@ -42,6 +42,7 @@ $tmaNonStandardOperators = Join[ $tmaNonStandardOperators,
 (* The default cases for non-SequenceOf are in Syntax.m, otherwise the defs are in wrong order when
    this file is loaded twice
 *)
+(* The alternatives without Hold wrapped around SequenceOf$TM are most probably superfluous *)
 makeSet[ (SequenceOf$TM|Hold[SequenceOf$TM])[ s__]] := ToExpression[ "SetOf$TM"][ s]
 
 makeTuple[ (SequenceOf$TM|Hold[SequenceOf$TM])[ r:RNG$[ __STEPRNG$], c_, e_]] := ToExpression[ "TupleOf$TM"][ r, c, e]
