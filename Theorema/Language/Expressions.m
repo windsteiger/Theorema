@@ -42,10 +42,10 @@ $tmaNonStandardOperators = Join[ $tmaNonStandardOperators,
 (* The default cases for non-SequenceOf are in Syntax.m, otherwise the defs are in wrong order when
    this file is loaded twice
 *)
-makeSet[ SequenceOf$TM[ s__]] := ToExpression[ "SetOf$TM"][ s]
+makeSet[ (SequenceOf$TM|Hold[SequenceOf$TM])[ s__]] := ToExpression[ "SetOf$TM"][ s]
 
-makeTuple[ SequenceOf$TM[ r:RNG$[ __STEPRNG$], c_, e_]] := ToExpression[ "TupleOf$TM"][ r, c, e]
-makeTuple[ SequenceOf$TM[ r_, __]] := 
+makeTuple[ (SequenceOf$TM|Hold[SequenceOf$TM])[ r:RNG$[ __STEPRNG$], c_, e_]] := ToExpression[ "TupleOf$TM"][ r, c, e]
+makeTuple[ (SequenceOf$TM|Hold[SequenceOf$TM])[ r_, __]] := 
 	Module[ {},
 		notification[ translate[ "tupleOfRange"], DisplayForm[ makeRangeBox[ r, TheoremaForm]]];
 		Throw[ $Failed]
