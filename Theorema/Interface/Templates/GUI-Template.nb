@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       145,          7]
-NotebookDataLength[     14023,        528]
-NotebookOptionsPosition[      9148,        406]
-NotebookOutlinePosition[      9640,        427]
-CellTagsIndexPosition[      9597,        424]
+NotebookDataLength[     14171,        533]
+NotebookOptionsPosition[      9222,        410]
+NotebookOutlinePosition[      9714,        431]
+CellTagsIndexPosition[      9671,        428]
 MenuPosition->0
 WindowFrame->Normal*)
 
@@ -401,7 +401,11 @@ Cell[StyleData["ComponentInactive"],
 
 Cell[StyleData["ComponentEmpty"],
  FontFamily->"Times New Roman",
- FontVariations->{"StrikeThrough"->True}]
+ FontVariations->{"StrikeThrough"->True}],
+
+Cell[StyleData["AutoParentheses"],
+ SpanMaxSize->3,
+ FontOpacity->0.15]
 }, Open  ]]
 },
 FileChangeProtection->None,
@@ -528,7 +532,8 @@ Cell[8711, 386, 74, 2, 38, 33, 0, "StyleData", "PopupMenuLabel", "All"],
 Cell[8788, 390, 75, 2, 38, 34, 0, "StyleData", "FileNameSetters", "All"],
 Cell[8866, 394, 66, 1, 38, 34, 0, "StyleData", "ComponentActive", "All"],
 Cell[8935, 397, 87, 2, 38, 36, 0, "StyleData", "ComponentInactive", "All"],
-Cell[9025, 401, 107, 2, 38, 33, 0, "StyleData", "ComponentEmpty", "All"]
+Cell[9025, 401, 107, 2, 38, 33, 0, "StyleData", "ComponentEmpty", "All"],
+Cell[9135, 405, 71, 2, 40, 34, 0, "StyleData", "AutoParentheses", "All"]
 }, Open  ]]
 }
 ]

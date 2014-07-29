@@ -1183,7 +1183,7 @@ MakeBoxes[ (op_?isNonStandardOperatorName)[ arg___], TheoremaForm] :=
 	2) We parenthesize expressions with "AutoParenthesies" like in input, except for 
 			expressions that format as f[...] and
 			expressions starting with a "("
-	3) We do not parenthesize arithmetic expressions.
+	3) We do not parenthesize arithmetic expressions, subscripts, bracketing bar, etc.
 	4) On demand, more exceptions can be implemented at this point.
 *)
 MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
@@ -1197,7 +1197,7 @@ MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
     		tmaInfixBox[ {arg}, "\[Or]"],
     		Not,
     		RowBox[{ "\[Not]", parenthesize[ arg]}],
-    		Plus|Times|Power,
+    		Plus|Times|Power|Subscript|BracketingBar,
     		MakeBoxes[ b[ arg], TheoremaForm],
     		_,
     		If[ isTmaOperatorName[ op],
