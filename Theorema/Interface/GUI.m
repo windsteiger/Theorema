@@ -1766,7 +1766,7 @@ makeFormButton[args___] := unexpected[ makeFormButton, {args}]
 makeGroupUngroupButton[ ] := Tooltip[ 
 	Button[ translate[ "group/ungroup"],
 		If[ CurrentValue[ "ShiftKey"],
-			FrontEndExecute[ {NotebookApply[ InputNotebook[], removeAutoParen[ NotebookRead[ InputNotebook[]]], Placeholder]}],
+			FrontEndExecute[ {NotebookWrite[ InputNotebook[], removeAutoParen[ NotebookRead[ InputNotebook[]]], Placeholder]}],
 			(* else *)
 			FrontEndExecute[ {NotebookApply[ InputNotebook[], RowBox[ {autoParenthesis[ "("], "\[SelectionPlaceholder]", autoParenthesis[ ")"]}], Placeholder]}]
 		]
@@ -2086,7 +2086,7 @@ langButtonData[ "AND3"] :=
 			DisplayForm[ RowBox[ {"\[And]", "\[Piecewise]", GridBox[{{TagBox[ FrameBox[ SubscriptBox[ "e", "1"]], "SelectionPlaceholder"]},
 				{"\[VerticalEllipsis]"},
 				{TagBox[ FrameBox[ SubscriptBox[ "e", "n"]], "Placeholder"]}}]}]]],
-		RowBox[ {"\[And]", "\[Piecewise]", GridBox[ {{"\[SelectionPlaceholder]"}, {"\[Placeholder]"}}]}],
+		RowBox[ {"\[And]", "\[Piecewise]", GridBox[ {{"\[SelectionPlaceholder]"}, {"\[Placeholder]"}}, ColumnAlignments -> Left]}],
 		translate[ "CONNTooltip"],
 		"andn"
 	}
@@ -2121,7 +2121,7 @@ langButtonData[ "OR3"] :=
 			DisplayForm[ RowBox[ {"\[Or]", "\[Piecewise]", GridBox[ {{TagBox[ FrameBox[ SubscriptBox[ "e", "1"]], "SelectionPlaceholder"]},
 				{"\[VerticalEllipsis]"},
 				{TagBox[ FrameBox[ SubscriptBox[ "e", "n"]], "Placeholder"]}}]}]]],
-		RowBox[ {"\[Or]", "\[Piecewise]", GridBox[ {{"\[SelectionPlaceholder]"}, {"\[Placeholder]"}}]}],
+		RowBox[ {"\[Or]", "\[Piecewise]", GridBox[ {{"\[SelectionPlaceholder]"}, {"\[Placeholder]"}}, ColumnAlignments -> Left]}],
 		translate[ "CONNTooltip"],
 		"orn"
 	}
