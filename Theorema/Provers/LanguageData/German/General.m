@@ -85,7 +85,7 @@ proofStepText[ levelSat, lang, u_List, g_List, pVal_] := Module[{i, cells = {tex
 	cells
 ];
 
-proofStepText[ noApplicableRule, lang, ps_, {}] := 
+proofStepText[ noApplicableRule, lang, ps_, {}, pVal_] := 
 	{Cell[ CellGroupData[
 		Join[{textCell[ "Es ist keine Beweisregel anwendbar. Die offene Beweissituation lautet:"]},
 			proofStepText[ openProofSituation, lang, ps, {}]
@@ -121,12 +121,12 @@ proofStepText[ searchDepthLimit, lang, ps_, {}, ___] :=
 		proofStepText[ openProofSituation, lang, ps, {}]
 	];
 
-proofStepText[ step_Symbol, lang, ___] := {
-	textCell[ ToString[ StringForm[ "Es gibt keinen Text zu '``'. Bitte in der Funktion 'proofStepText' einen entsprechenden Fall implementieren.", step]]]
+proofStepText[ step_Symbol, lang, r___] := {
+	textCell[ ToString[ StringForm[ "Es gibt keinen Text zu '``'. Bitte in der Funktion 'proofStepText' einen entsprechenden Fall implementieren. Parameter: ``", step, {r}]]]
 	};
 
 subProofHeader[ step_Symbol, lang, ___] := {
-	textCell[ ToString[ StringForm[ "Es gibt keinen Text zu Unterbeweisen zu '``'. Bitte in der Funktion 'subProofHeader' einen entsprechenden Fall implementieren.", step]]]
+	textCell[ ToString[ StringForm[ "Es gibt keinen Text zu Unterbeweisen zu '``'. Bitte in der Funktion 'subProofHeader' einen entsprechenden Fall implementieren. Parameter: ``", step, {r}]]]
 	};
 
 (* UNTRANSLATED *)

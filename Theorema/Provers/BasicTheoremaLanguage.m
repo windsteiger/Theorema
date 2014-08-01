@@ -478,6 +478,7 @@ posInKB[ args___] := unexpected[ posInKB, {args}]
 (* ::Section:: *)
 (* substitution *)
 
+(* We should generate rules in both directions for equalities. As soon as one is applied, remove the other one. *)
 inferenceRule[ elementarySubstitution] = 
 this:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
 	Module[ {rules, usedSubst, cond, newForm, newG, substCond = {}, usedInCond = {}, newK = {}, substApplied = False, j, usedForms, genForms, replBy = {}},
@@ -583,8 +584,12 @@ this:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
             If[ defExpand,
             	newGoals = {toBeProved[ goal -> newG, kb -> newK, "AuxiliaryKB" -> Join[ auxKB, Flatten[ usedForms]], rest]};
             	If[ defCond =!= {},
+            		(* To be done: When we are in a proof by contradiction we have to take care. Verifying conditions should not be done on the basis of a contradictiong KB.
+            		   At the moment: no contradiction proof and the only termination rule active is goalInKB, maybe this is good enough. *)
             		newForm = makeGoalFML[ formula -> makeConjunction[ defCond, And$TM]];
-            		AppendTo[ newGoals, toBeProved[ goal -> newForm, kb -> k, rest]],
+            		AppendTo[ newGoals, 
+            			Apply[ toBeProved[ goal -> newForm, kb -> newK, "AuxiliaryKB" -> Join[ auxKB, Flatten[ usedForms]], ##]&, 
+            				setRuleActivity[ {contradiction -> False, contradictionKB -> False, contradictionUniv1 -> False, contradictionUniv2 -> False, falseInKB -> False}, rest]]],
             		(* else *)
             		newForm = True
             	];
@@ -602,6 +607,13 @@ this:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
 		]
 	]
 ]
+
+setRuleActivity[ l_List, o1___, ruleActivity -> a_, o2___] := 
+	Module[ {new},
+		new = a /. Map[ ReplacePart[ #, 2 -> _] -> #&, l];
+		{o1, ruleActivity -> new, o2}
+	]
+setRuleActivity[ args___] := unexpected[ setRuleActivity, {args}]
 
 
 (* ::Section:: *)
@@ -858,7 +870,7 @@ equalityRules = {"Equality Rules",
 rewritingRules = {"Rewriting Rules",
 	{goalRewriting, True, True, 22},
 	{knowledgeRewriting, True, True, 25},
-	{elementarySubstitution, True, True, 4},
+	{elementarySubstitution, True, True, 8},
 	{expandDef, True, True, 80},
 	{implicitDef, True, True, 80}
 };

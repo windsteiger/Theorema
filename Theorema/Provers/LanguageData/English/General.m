@@ -82,7 +82,7 @@ proofStepText[ levelSat, lang, u_List, g_List, pVal_] := Module[{i, cells = {tex
 	cells
 ];
 
-proofStepText[ noApplicableRule, lang, ps_, {}] := 
+proofStepText[ noApplicableRule, lang, ps_, {}, pVal_] := 
 	{Cell[ CellGroupData[
 		Join[{textCell[ "There is no proof rule to apply. The open proof situation is:"]},
 			proofStepText[ openProofSituation, lang, ps, {}]
@@ -121,12 +121,12 @@ proofStepText[ searchDepthLimit, lang, ps_, {}, ___] :=
 		proofStepText[ openProofSituation, lang, ps, {}]
 	];
 
-proofStepText[ step_Symbol, lang, ___] := {
-	textCell[ ToString[ StringForm[ "We have no explanatory text for step '``'. Please implement the respective case for the function 'proofStepText'.", step]]]
+proofStepText[ step_Symbol, lang, r___] := {
+	textCell[ ToString[ StringForm[ "We have no explanatory text for step '``'. Please implement the respective case for the function 'proofStepText'. Parameters: ``", step, {r}]]]
 	};
 
-subProofHeader[ step_Symbol, lang, ___] := {
-	textCell[ ToString[ StringForm[ "We have no explanatory header text for subproofs of step '``'. Please implement the respective case for the function 'subProofHeader'.", step]]]
+subProofHeader[ step_Symbol, lang, r___] := {
+	textCell[ ToString[ StringForm[ "We have no explanatory header text for subproofs of step '``'. Please implement the respective case for the function 'subProofHeader'. Parameters: ``", step, {r}]]]
 	};
 
 ] (* With *)
