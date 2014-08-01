@@ -242,7 +242,7 @@ openTheoremaCommander[ ] /; $Notebooks :=
         		{
         			(* session *){sessionCompose[], sessionInspect[], sessionArchive[]},
         			(* prove *)  {Dynamic[ Refresh[ displaySelectedGoal[], UpdateInterval -> 2]],
-        				Dynamic[ Refresh[ displayKBBrowser[ "prove"], TrackedSymbols :> {$kbFilterKW, $tcKBBrowseSelection, $kbStruct}]],
+        				Dynamic[ Refresh[ displayKBBrowser[ "prove"], TrackedSymbols :> {$kbFilterKW, $tcKBBrowseSelection, $kbStruct, kbSelectProve}]],
         				Dynamic[ Refresh[ displayBuiltinBrowser[ "prove"], TrackedSymbols :> {buiActProve}]],
         				Dynamic[ Refresh[ selectProver[], TrackedSymbols :> {$selectedRuleSet, $selectedStrategy, $ruleFilterKW}]],
         				Dynamic[ Refresh[ submitProveTask[ ], TrackedSymbols :> {$selectedProofGoal, $selectedProofKB, $selectedSearchDepth, $selectedSearchTime}]],
@@ -1558,12 +1558,16 @@ evalFormulaFromKey[ args___] := unexpected[ evalFormulaFromKey, {args}]
 (* printProofInfo *)
 
 
-printProveInfo[ kbKeysLabels_, pVal_, pTime_, sTime_, subsP_] := 
-	Module[ {nbDir, cellID = getCellIDFromKey[ key@$selectedProofGoal], file},
+printProveInfo[ kbKeysLabels_, pVal_, pTime_, sTime_, replP_] := 
+	Module[ {nbDir, subsP = replP, cellID = getCellIDFromKey[ key@$selectedProofGoal], file},
 		nbDir = createPerNotebookDirectory[ CurrentValue[ $proofInitNotebook, "NotebookFullFileName"]];
 		(* Generate cache only in plain .m format, since this allows sharing notebooks with users on different platforms.
 			Also, loading a .m-file allows dynamic objects to react to new settings, whereas loading a .mx-file has no effect on dynamics.
 			I assume the speed gain from using mx is neglectable *)
+		If[ subsP === 0,
+			(* This may occur if the prover tab has been skipped and $replexistProof still has init val 0 *)
+			subsP = findNumExistingProofs[ $proofInitNotebook, $selectedProofGoal] + 1;
+		];
 		file = FileNameJoin[ {nbDir, "p" <> cellID <> "-" <> ToString[ subsP]}];
 		saveProveCacheDisplay[ kbKeysLabels, pTime, sTime, file];
         If[ NotebookFind[ $proofInitNotebook, makeProofIDTag[ $selectedProofGoal] <> "-" <> ToString[ subsP], All, CellTags] === $Failed,
@@ -1583,7 +1587,7 @@ printProveInfo[ kbKeysLabels_, pVal_, pTime_, sTime_, subsP_] :=
 		SetSelectedNotebook[ $proofInitNotebook];
 		With[ {fnpo = file <> "-po.m", fnd = file <> "-display.m"},
         	NotebookWrite[ $proofInitNotebook, Cell[ TextData[ {Cell[ BoxData[ ToBoxes[ proofStatusIndicator[ pVal]]]], " " <> translate[ "Proof of"] <> " ",
-        		formulaReference[ $selectedProofGoal], " #" <> ToString[ $replExistProof] <> ":   ",
+        		formulaReference[ $selectedProofGoal], " #" <> ToString[ subsP] <> ":   ",
 				Cell[ BoxData[ ToBoxes[ Button[ Style[ translate["ShowProof"], FontVariations -> {"Underline" -> True}], 
 					displayProof[ fnpo], ImageSize -> Automatic, Appearance -> None, Method -> "Queued"]]]]}],
         		"ProofInfo",
