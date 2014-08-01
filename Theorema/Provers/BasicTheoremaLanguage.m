@@ -412,11 +412,12 @@ this:PRFSIT$[ g:FML$[ _, _?isLiteralExpression, __], k_List, id_, rest___?Option
 
 inferenceRule[ knowledgeRewriting] = 
 this:PRFSIT$[ g_FML$, k_List, id_, rest___?OptionQ] :> performProofStep[
-	Module[ {rules, lastKBRewriting, rewritable, lastKjRewriting, usedSubsts, conds, newForms, newKB = {}, usedForRW = {}, 
+	Module[ {rules, auxKB, lastKBRewriting, rewritable, lastKjRewriting, usedSubsts, conds, newForms, newKB = {}, usedForRW = {}, 
 			j, i, thisKBRewriting = {}, pos},
 		If[ kbRules@this === {},
 			Throw[ $Failed]
 		];
+		auxKB = getOptionalComponent[ this, "AuxiliaryKB"];
 		lastKBRewriting = getOptionalComponent[ this, "KBRewriting"];
 		rewritable = Cases[ k, FML$[ _, _?isLiteralExpression, __]];
 		(* try to rewrite each atomic formula individually *)
@@ -439,16 +440,16 @@ this:PRFSIT$[ g_FML$, k_List, id_, rest___?OptionQ] :> performProofStep[
 			(* do not use a rule derived from kj to kj itself *)
 			{newForms, usedSubsts, conds} = replaceListAndTrack[ formula@rewritable[[j]], filterRules[ rules, key@rewritable[[j]]]];
 			(* record the rules already tried for this formula, these will not be tried again on the same formula *)
-			lastKjRewriting = DeleteCases[ DeleteDuplicates[ Map[ First, rules]], key@rewritable[[j]]];
+			lastKjRewriting = Join[ lastKjRewriting, DeleteCases[ DeleteDuplicates[ Map[ First, rules]], key@rewritable[[j]]]];
 			(* walk through newForms and join them to the newKB *)
 			Do[
 				pos = {};
-				If[ TrueQ[ conds[[i]]] || !MemberQ[ pos = posInKB[ Map[ formula, k], Apply[ List, conds[[i]]]], {}],
+				If[ TrueQ[ conds[[i]]] || !MemberQ[ pos = posInKB[ Map[ formula, Join[ k, auxKB]], Apply[ List, conds[[i]]]], {}],
 					(* conditions are True or all fulfilled in k *)
 					AppendTo[ newKB, {makeAssumptionFML[ formula -> newForms[[i]]]}];
 					(* pos contains a list of positions of plain formulas in the list of plain formulas. 
 					   When we extract exactly these positions from the whole KB we get the whole formula datastructures *)
-					AppendTo[ usedForRW, Prepend[ Join[ usedSubsts[[i]], Extract[ k, Flatten[ pos, 1]]], rewritable[[j]]]],
+					AppendTo[ usedForRW, Prepend[ Join[ usedSubsts[[i]], Extract[ Join[ k, auxKB], Flatten[ pos, 1]]], rewritable[[j]]]],
 					(* else *)
 					(* the conditions were not fulfilled, we try the rules again next time, because conditions may be fulfilled then *)
 					lastKjRewriting = Complement[ lastKjRewriting, Map[ key, usedSubsts[[i]]]];
@@ -478,9 +479,9 @@ posInKB[ args___] := unexpected[ posInKB, {args}]
 (* substitution *)
 
 inferenceRule[ elementarySubstitution] = 
-ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
+this:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
 	Module[ {rules, usedSubst, cond, newForm, newG, substCond = {}, usedInCond = {}, newK = {}, substApplied = False, j, usedForms, genForms, replBy = {}},
-		rules = substRules@ps;
+		rules = substRules@this;
 		If[ rules === {},
 			(* There are no substitutions available -> rule does not apply *)
 			$Failed,
@@ -524,7 +525,7 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
             If[ substApplied,
             	(* We have to explicitly specify generated-> because we need the proper nesting *)
             	makeANDNODE[ makePRFINFO[ name -> elementarySubstitution, used -> usedForms, generated -> genForms, "usedSubst" -> replBy], 
-					toBeProved[ goal -> newG, kb -> newK, substRules -> {}, rest]],
+					toBeProved[ goal -> newG, kb -> newK, substRules -> DeleteCases[ rules, {_, _FIX$ :> _}], rest]],
 				$Failed
             ]
 		]
@@ -535,9 +536,10 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
 (* Expand Definitions *)
 
 inferenceRule[ expandDef] = 
-ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
-	Module[ {rules, usedDefs, cond, new, newG, newForm, newK = {}, defExpand = False, defCond = {}, usedInCond = {}, j, usedForms, genForms, replBy = {}, newGoals},
-		rules = defRules@ps;
+this:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
+	Module[ {rules, auxKB, usedDefs, cond, new, newG, newForm, newK = {}, defExpand = False, defCond = {}, usedInCond = {}, j, usedForms, genForms, replBy = {}, newGoals},
+		rules = defRules@this;
+		auxKB = getOptionalComponent[ this, "AuxiliaryKB"];
 		If[ rules === {},
 			(* There are no definitions available at all in this proof -> expanding defs does not apply *)
 			$Failed,
@@ -579,7 +581,7 @@ ps:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
                 {j, Length[ k]}
             ];
             If[ defExpand,
-            	newGoals = {toBeProved[ goal -> newG, kb -> newK, rest]};
+            	newGoals = {toBeProved[ goal -> newG, kb -> newK, "AuxiliaryKB" -> Join[ auxKB, Flatten[ usedForms]], rest]};
             	If[ defCond =!= {},
             		newForm = makeGoalFML[ formula -> makeConjunction[ defCond, And$TM]];
             		AppendTo[ newGoals, toBeProved[ goal -> newForm, kb -> k, rest]],
@@ -754,11 +756,19 @@ getAllConstants[ args___] := unexpected[ getAllConstants, {args}]
 
 
 instantiateForall[ f:FML$[ _, Forall$TM[ R1_RNG$, C_, A_], __], R2_RNG$] :=
-    Module[ {possibleInst = Select[ Tuples[ {R1, R2}], compatibleRange], inst = {}, subst = {}, S, i},
+    Module[ {possibleInst = Select[ Tuples[ {R1, R2}], compatibleRange], groupVar, inst = {}, subst = {}, S, i},
+    	(* we run over the possible pairs and sow them with their first element (the variable to be instantiated) as tag, i.e.
+    	   pairs are grouped into different lists with identical var within each list. *)
+    	If[ possibleInst =!= {},
+    		groupVar = Reap[ Scan[ Sow[ #, First[ #]]&, possibleInst]];
+    		(* now we take all tuples, which then gives all possible combinations of instantiations. 
+    	   	   has the advantage that we *)
+    		possibleInst = Tuples[ groupVar[[2]]]
+    	];
         Do[
-        	S = MapThread[ Rule, {rngVariables[ RNG$[ possibleInst[[i, 1]]]], rngConstants[ RNG$[ possibleInst[[i, 2]]]]}];
-            AppendTo[ inst, makeAssumptionFML[ formula -> substituteFree[ simplifiedForall[ Forall$TM[ DeleteCases[ R1, possibleInst[[i, 1]]], C, A]], S]]];
-            subst = Join[ subst, S],
+        	S = Map[ Rule[ #[[1, 1]], #[[2, 1]]]&, possibleInst[[i]]];
+            AppendTo[ inst, makeAssumptionFML[ formula -> substituteFree[ simplifiedForall[ Forall$TM[ DeleteCases[ R1, Apply[ Alternatives, Map[ First, possibleInst[[i]]]]], C, A]], S]]];
+            AppendTo[ subst, S],
         	{i, Length[ possibleInst]}
         ];
         {inst, subst}
@@ -768,6 +778,7 @@ instantiateForall[ args___] := unexpected[ instantiateForall, {args}]
 compatibleRange[ {SIMPRNG$[ _], _}] := True
 compatibleRange[ {STEPRNG$[ _, l1_Integer, u1_Integer, s_], STEPRNG$[ _, l2_Integer, u2_Integer, s_]}] /; l1 <= l2 && u1 >= u2 := True
 compatibleRange[ {SETRNG$[ _, s_], SETRNG$[ _, s_]}] := True
+compatibleRange[ {PREDRNG$[ _, s_], PREDRNG$[ _, s_]}] := True
 compatibleRange[ {_, _}] := False
 compatibleRange[ args___] := unexpected[ compatibleRange, {args}]
 
