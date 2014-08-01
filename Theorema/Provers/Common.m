@@ -542,7 +542,7 @@ nodeValue[ ORNODE$, _List] := pending
 nodeValue[ PRFOBJ$, {v_}] := v
 nodeValue[ args___] := unexpected[ nodeValue, {args}]
 
-searchDepthExceeded[ ps_PRFSIT$] := makeTERMINALNODE[ makePRFINFO[ name -> searchDepthLimit, used -> Prepend[ kb@ps, goal@ps], id -> id@ps], failed]
+searchDepthExceeded[ ps_PRFSIT$] := makeTERMINALNODE[ makePRFINFO[ name -> searchDepthLimit, used -> {Apply[ List, ps]}, id -> id@ps], failed]
 searchDepthExceeded[ args___] := unexpected[ searchDepthExceeded, {args}]
 
 noProofNode[ expr_, i_] := makeTERMINALNODE[ makePRFINFO[ name -> invalidProofNode, used -> {expr}, id -> i], failed]
@@ -793,7 +793,7 @@ proofObjectToCell[ PRFOBJ$[ pi_PRFINFO$, sub_, pVal_]] :=
 	]
 proofObjectToCell[ PRFINFO$[ name_?ruleTextActive, u_, g_, id_String, rest___?OptionQ], pVal_] := proofStepTextId[ id, name, u, g, rest, pVal]
 proofObjectToCell[ PRFINFO$[ _, _, _, _String, ___?OptionQ], _] := {}
-proofObjectToCell[ PRFSIT$[ g_FML$, kb_List, id_String, ___], pVal_] := Cell[ CellGroupData[ proofStepTextId[ id, openProofSituation, {Prepend[ kb, g]}, {}],
+proofObjectToCell[ ps:PRFSIT$[ g_FML$, kb_List, id_String, ___], pVal_] := Cell[ CellGroupData[ proofStepTextId[ id, openProofSituation, {Apply[ List, ps]}, {}],
 																			cellStatus[ $proofCellStatus, pending, pVal]]]
 proofObjectToCell[ (ANDNODE$|ORNODE$)[ pi_PRFINFO$, subnodes__, pVal_], overallVal_] := 
 	Module[{header, sub = {}},

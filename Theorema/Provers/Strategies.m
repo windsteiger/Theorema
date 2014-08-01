@@ -32,7 +32,7 @@ applyOnce[ ps_PRFSIT$] :=
 		newNodes = applyAllRules[ ps, allRules];
 		Switch[ Length[ newNodes],
 			0,
-			makeTERMINALNODE[ makePRFINFO[ name -> noApplicableRule, used -> Prepend[ kb@ps, goal@ps], "openPS" -> Drop[ Apply[ List, ps], 2]], failed],
+			makeTERMINALNODE[ makePRFINFO[ name -> noApplicableRule, used -> {Apply[ List, ps]}], failed],
 			1,
 			First[ newNodes],
 			_,
@@ -67,7 +67,7 @@ applyOnceAndLevelSaturation[ ps_PRFSIT$] :=
 		];
 		Switch[ Length[ newNodes],
 			0,
-			makeTERMINALNODE[ makePRFINFO[ name -> noApplicableRule, used -> Prepend[ kb@ps, goal@ps], "openPS" -> Drop[ Apply[ List, ps], 2]], failed],
+			makeTERMINALNODE[ makePRFINFO[ name -> noApplicableRule, used -> {Apply[ List, ps]}], failed],
 			1,
 			First[ newNodes],
 			_,

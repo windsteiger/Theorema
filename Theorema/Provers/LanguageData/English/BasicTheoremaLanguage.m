@@ -340,7 +340,7 @@ proofStepText[ instantiate, lang, u_, g_, ___, "instantiation" -> inst_List, ___
 			instText = {textCell[ "We can instantiate ", formulaReference[ u[[j, 1]]], ":"]};
 			Do[
 				instText = Join[ instText,
-					{textCell[ "With ", inlineTheoremaExpression[ inst[[j, i]]], " we get"],
+					{textCell[ "With ", inlineTheoremaExpressionSeq[ inst[[j, i]], lang], " we get"],
 					assumptionCell[ g[[j, i]], "."]}],
 				{i, Length[ g[[j]]]}
 			];
