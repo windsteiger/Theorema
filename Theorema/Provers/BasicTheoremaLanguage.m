@@ -178,6 +178,19 @@ PRFSIT$[ g:FML$[ _, Implies$TM[ P_, Q_], __], k_List, id_, rest___?OptionQ] :> p
 Modus Ponens is superseded by the much more general rewriting technique, hence, by default it will be deactivated.
 *)
 
+inferenceRule[ implKBCases] = 
+PRFSIT$[ g_, {pre___, k:FML$[ _, Implies$TM[ l_?isAtomicExpression, r_?isAtomicExpression], lab_, ___], post___}, id_, rest___?OptionQ] :> performProofStep[
+	Module[ {case1, case2},
+		case1 = makeAssumptionFML[ formula -> Not$TM[ l], label -> lab <> ".1"];
+		case2 = makeAssumptionFML[ formula -> r, label -> lab <> ".2"];
+		makeANDNODE[ makePRFINFO[ name -> implKBCases, used -> k], 
+			{toBeProved[ goal -> g, kb -> prependKB[ {pre, post}, case1], rest],
+			 toBeProved[ goal -> g, kb -> prependKB[ {pre, post}, case2], rest]}
+		]
+	]
+]
+
+
 (* ::Subsection:: *)
 (* IFF *)
 
@@ -861,6 +874,7 @@ connectiveRules = {"Connectives Rules",
 	{orKB, True, True, 19},
 	{implGoalDirect, True, True, 5},
 	{implGoalCP, False, False, 10},
+	{implKBCases, True, True, 22},
 	{equivGoal, True, True, 10}};
 
 equalityRules = {"Equality Rules", 

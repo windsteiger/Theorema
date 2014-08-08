@@ -51,6 +51,7 @@ With[ {lang = "German"},
 	MessageName[ implGoalCP, "usage", lang] = "Beweise Implikation mittels Kontraposition";
 	MessageName[ implGoalDirect, "usage", lang] = "Beweise Implikation direkt";
 	MessageName[ implicitDef, "usage", lang] = "Behandle implizite Funktionsdefinitionen";
+	MessageName[ implKBCases, "usage", lang] = "Fallunterscheidung basierend auf Implikation in der Wissensbasis";
 	MessageName[ instantiate, "usage", lang] = "Instanzieren Allaussagen in der Wissensbasis mit neuen Konstanten";
 
 	MessageName[ knowledgeRewriting, "usage", lang] = "Umformen der Wissensbasis basierend auf (quantifizierten) Implikationen und \[CapitalADoubleDot]quivalenzen in der Wissensbasis";
