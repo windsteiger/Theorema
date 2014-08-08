@@ -51,6 +51,7 @@ With[ {lang = "English"},
 	MessageName[ implGoalCP, "usage", lang] = "Prove implication using contraposition";
 	MessageName[ implGoalDirect, "usage", lang] = "Prove implication directly";
 	MessageName[ implicitDef, "usage", lang] = "Handle implicit function definitions";
+	MessageName[ implKBCases, "usage", lang] = "Case distinction based on an implication in the knowledge base";
 	MessageName[ instantiate, "usage", lang] = "Instantiate universally quantified knowledge with new constants";
 
 	MessageName[ knowledgeRewriting, "usage", lang] = "Knowledge rewriting based on (quantified) implications and equivalences in the knowledge base";
@@ -328,6 +329,12 @@ proofStepText[ implicitDef, lang, u_, g_, ___, "introConstFor" -> termConst_List
 		];
 		stepText
 	];
+
+proofStepText[ implKBCases, lang, {{g_}}, {{_, _}}, ___] := {textCell[ "Based on the assumption ", formulaReference[ g], " we distinguish several cases:"]};
+
+subProofHeader[ implKBCases, lang, _, {generated:{_, _}}, ___, pVal_, {p_}] := {textCell[ "Case ", ToString[ p], ": we assume"],
+	assumptionCell[ Part[ generated, p], "."]
+	};
 	
 proofStepText[ instantiate, lang, u_, {}, ___] := 
 	(* Instantiation has been tried, but none of them could be successfully applied *)
