@@ -621,7 +621,8 @@ showProofNavigation[ p:{__Rule}, scale_, maxDepth_, mode_] :=
         If[ root === {},
             translate[ "noRoot"],
             TreePlot[ edges, Automatic, First[ root], VertexRenderingFunction -> (proofStepNode[ #1, #2, font]&),
-            EdgeRenderingFunction -> ({Dashed, GrayLevel[0.5], Line[#1]}&), ImageSize -> geometry, AspectRatio -> 1/Apply[ Divide, geometry],
+            (* Originally, we had explicit AspectRatio setting, but this produced ugly "squashed" nodes in case of non-branching trees *)
+            EdgeRenderingFunction -> ({Dashed, GrayLevel[0.5], Line[#1]}&), ImageSize -> geometry,
             Frame -> framed, FrameStyle -> Dotted]
         ]
     ]
