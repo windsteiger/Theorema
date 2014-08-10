@@ -394,6 +394,8 @@ checkAllConds[ args___] := unexpected[ checkAllConds, {args}]
 transferToComputation[ f_FML$] :=
 	Module[{stripUniv, exec},
 		stripUniv = stripUniversalQuantifiers[ formula@f];
+		(* if we have a definition in a domain, we need to register the operation, otherwise extension domains will not work *)
+		registerDomainDefinitionSymbol[ stripUniv];
 		exec = executableForm[ stripUniv, f];
 		(* Certain equalities cannot be made executable and generate an error when translated to Mma. 
 		   Since this operation is part of the preprocesing, we catch the error,
@@ -437,6 +439,24 @@ joinConditions[ c_List, newCond_Theorema`Language`And$TM] :=
 joinConditions[ c_List, newCond_] := Prepend[ c, newCond]
 joinConditions[ args___] := unexpected[ joinConditions, {args}]
 
+(* If it is not of the form of a domain definition then do nothing, no unexpected[...] must be there
+   we store ops in the appropriate contexts for proving and computing, respectively. *)
+registerDomainDefinitionSymbol[ {(Theorema`Language`EqualDef$TM|Theorema`Language`IffDef$TM)[ 
+	(Theorema`Language`DomainOperation$TM[ dom_, o_][___])|Theorema`Language`DomainOperation$TM[ dom_, o_], _], c_, var_}] :=
+	Block[ {$ContextPath = {"System`"}, $Context = "Global`", dl, dr, assignString}, 
+		dl = execLeft[ Hold[ dom], var];
+		dr = execRight[ Hold[ dom], var];
+		assignString = "Theorema`Language`opDefInDom[" <> dl <> "] = Union[ Theorema`Language`opDefInDom[" <> dr <> "],{" <>
+			ToString[ o] <> "}]";
+		(* update Theorema`Language`opDefInDom *)
+		ToExpression[ assignString];
+		(* update Theorema`Computation`Language`opDefInDom *)
+		ToExpression[ StringReplace[ assignString, 
+			{"Theorema`Language`" -> "Theorema`Computation`Language`",
+     		 "Theorema`Knowledge`" -> "Theorema`Computation`Knowledge`"}]];
+	]
+
+
 (*
 was used in stripUniversalQuantifiers: turned out that rngToCondition does the same.
 
@@ -461,7 +481,7 @@ executableForm[ {(Theorema`Language`Iff$TM|Theorema`Language`IffDef$TM|Theorema`
         	(* The complicated DUMMY$COND... construction is necessary because the key itself contains strings,
         	   and we need to get the escaped strings into the Hold *)
             StringReplace[ left <> "/; DUMMY$COND && " <> execCondition[ Hold[ trackCondition[ c, l]], var] <> ":=" <> right,
-            	{ "DUMMY$COND" -> "Theorema`Common`kbSelectCompute[" <> formKey <> "]",
+            	{"DUMMY$COND" -> "Theorema`Common`kbSelectCompute[" <> formKey <> "]",
             		"Theorema`Language`" -> "Theorema`Computation`Language`",
             		"Theorema`Knowledge`" -> "Theorema`Computation`Knowledge`"}
             ]

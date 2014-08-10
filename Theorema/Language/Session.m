@@ -228,7 +228,9 @@ getGlobalDeclaration[ file_String, l_List] :=
 getGlobalDeclaration[ args___] := unexpected[ getGlobalDeclaration, {args}]
 
 putGlobalDeclaration[ file_String, id_Integer, decl_] :=
-	Module[{posF, posId},
+	Module[ {posF, posId},
+		(* in case of an extension domain, we must generate the default definition that redirects to the original domain *)
+		processDomainDefinition[ decl, file, id];
 		posF = Position[ $globalDeclarations, file -> _];
 		If[ posF === {},
 			PrependTo[ $globalDeclarations, file -> {{id, decl}}],
@@ -243,10 +245,31 @@ putGlobalDeclaration[ file_String, id_Integer, decl_] :=
 	]
 putGlobalDeclaration[ args___] := unexpected[ putGlobalDeclaration, {args}]
 
+(* For an extension domain, we do something, otherwise nothing needs to be done. There must not be an unexpected[...] *)
+processDomainDefinition[ d:Hold[ domainConstruct$TM][ dom_, RNG$[ DOMEXTRNG$[ VAR$[ new_Hold], base_]]], file_String, id_Integer] := 
+	Module[ {extDef}, 
+		extDef = Forall$TM[ RNG$[ SIMPRNG$[ VAR$[ Theorema`Knowledge`op$TM]]], 
+				notContainedIn[ VAR$[ Theorema`Knowledge`op$TM], opDefInDom[ dom]],
+				Equal$TM[ DomainOperation$TM[ new, VAR$[ Theorema`Knowledge`op$TM]], DomainOperation$TM[ base, VAR$[ Theorema`Knowledge`op$TM]]]];
+		(* we store it to be finalized with the first real def that goes into the environment -> updateKnowledgeBase 
+		   Still, we prepare the formula here, because here is exactly the time to be sure that we have a domain extension.
+		   If we would do all in updateKnowledgeBase, we'd have to fiddle around to find out whether we have a domain def or not.
+		   On the other hand, we don't finalize the process here, because there may be aouter global quantifiers that need to be applied,
+		   which would be difficult to find out here. We don't want to apply declarations to declarations ... *)
+		$tmaDefaultDomainDef[ d] = {extDef, cellIDLabel[ id], sourceLabel[ file]};
+		(* we should set the CellTags to cellID *)
+	]
+
+$tmaDefaultDomainDef[_] := {}
+SetAttributes[ notContainedIn, HoldAll];
+	
 SetAttributes[ processGlobalDeclaration, HoldAll];
 processGlobalDeclaration[ x_] := 
-	Module[ {},
-		putGlobalDeclaration[ CurrentValue[ "NotebookFullFileName"], CurrentValue[ "CellID"], ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]]];
+	Module[ {nb = EvaluationNotebook[], id = CurrentValue[ "CellID"], file = CurrentValue[ "NotebookFullFileName"]},
+		SelectionMove[ nb, All, EvaluationCell];
+		SetOptions[ NotebookSelection[ nb], CellTags -> {cellIDLabel[ id], sourceLabel[ file]}, ShowCellTags -> False];
+		putGlobalDeclaration[ file, id, ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]]];
+		SelectionMove[ nb, After, Cell];
 	]
 processGlobalDeclaration[ args___] := unexpected[ processGlobalDeclaration, {args}]
 
@@ -280,7 +303,7 @@ evaluationPosition[ nb_NotebookObject, raw_Notebook] :=
 	]
 evaluationPosition[ args___] := unexpected[ evaluationPosition, {args}]
 
-adjustFormulaLabel[nb_NotebookObject] := 
+adjustFormulaLabel[ nb_NotebookObject] := 
 	Module[{ cellTags = CurrentValue[ "CellTags"], cellID = CurrentValue[ "CellID"], cleanCellTags, key},
 		(*
 		 * Make sure we have a list of CellTags (could also be a plain string)
@@ -294,7 +317,7 @@ adjustFormulaLabel[nb_NotebookObject] :=
         (*
          * Replace unlabeled formula with counter.
          *)
-         If[cleanCellTags === {},
+         If[ cleanCellTags === {},
          	cleanCellTags = automatedFormulaLabel[ nb]
          ];
         (*
@@ -357,8 +380,8 @@ relabelCell[nb_NotebookObject, cellTags_List, cellID_Integer] :=
 		newFrameLabel = With[ {key = autoTags}, 
 			Cell[ BoxData[ RowBox[{
 				StyleBox[ makeLabel[ cellTagsToString[ cellTags]], "FrameLabel"], "  ",
-				ButtonBox["\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeFormula[ key]]}]]]];
-		SetOptions[ NotebookSelection[nb], CellFrameLabels -> {{None, newFrameLabel}, {None, None}}, CellTags -> newCellTags, ShowCellTags -> False];
+				ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeFormula[ key]]}]]]];
+		SetOptions[ NotebookSelection[ nb], CellFrameLabels -> {{None, newFrameLabel}, {None, None}}, CellTags -> newCellTags, ShowCellTags -> False];
 		(* return autoTags to be used as key for formula in KB *)
 		autoTags
 	]
@@ -412,6 +435,7 @@ cellIDLabel[ args___] := unexpected[ cellIDLabel, {args}]
 
 sourceLabel[ nb_NotebookObject] /; inArchive[] := cellLabel[ currentArchiveName[], "Source"]
 sourceLabel[ nb_NotebookObject] := cellLabel[ CurrentValue[ nb, "NotebookFullFileName"], "Source"]
+sourceLabel[ file_String] := cellLabel[ file, "Source"]
 sourceLabel[ args___] := unexpected[ sourceLabel, {args}]
 	
 ensureNotebookIntegrity[ nb_NotebookObject, rawNotebook_Notebook, cellTags_List] :=
@@ -505,13 +529,27 @@ displayGlobalDeclarations[ args___] := unexpected[ displayGlobalDeclarations, {a
 
 occursBelow[ {a___, p_}, {a___, q_, ___}] /; q > p := True
 occursBelow[ x_, y_] := False
-occursBelow[args___] := unexpected[ occursBelow, {args}]
+occursBelow[ args___] := unexpected[ occursBelow, {args}]
 
 (* 
 	form and glob still carry Holds around fresh symbols. After globals have been applied, ReleaseHold will remove them.
 *)
 updateKnowledgeBase[ form_, k_, glob_, tags_String] :=
-    Module[ {newForm = ReleaseHold[ applyGlobalDeclaration[ form, glob]], fml},
+    Module[ {newForm, fml, inDomDef = Cases[ glob, Hold[ domainConstruct$TM][_,_], {1}, 1], defDef},
+    	If[ inDomDef =!= {} && (defDef = $tmaDefaultDomainDef[ inDomDef[[1]]]) =!= {},
+    		(* we are in a domain definition and there is a pending default for this domain *)
+    		$tmaDefaultDomainDef[ inDomDef[[1]]] = {};
+    		newForm = ReleaseHold[ applyGlobalDeclaration[ defDef[[1]], glob]];
+    		fml = makeFML[ key -> Rest[ defDef], formula -> newForm, 
+    			label -> StringReplace[ ToString[ ReleaseHold[ inDomDef[[1,1]]]], "$TM" -> ""] <> ".defOp", simplify -> False];
+    		transferToComputation[ fml];
+    		$tmaEnv = Append[ DeleteCases[ $tmaEnv, _[ First[ fml], ___]], fml];
+        	If[ inArchive[],
+            	$tmaArch = Append[ DeleteCases[ $tmaArch, _[ First[ fml], ___]], fml];
+        	]
+    	];
+    	(* for the actual formula we proceed in the same way *)
+    	newForm = ReleaseHold[ applyGlobalDeclaration[ form, glob]];
     	fml = makeFML[ key -> k, formula -> newForm, label -> tags, simplify -> False];
     	transferToComputation[ fml];
     	(* If new formulae are appended rather than prepended, the old formulae with the same label
@@ -521,14 +559,14 @@ updateKnowledgeBase[ form_, k_, glob_, tags_String] :=
             $tmaArch = Append[ DeleteCases[ $tmaArch, _[ First[ fml], ___]], fml];
         ]
     ]
-updateKnowledgeBase[args___] := unexpected[ updateKnowledgeBase, {args}]
+updateKnowledgeBase[ args___] := unexpected[ updateKnowledgeBase, {args}]
 
 findSelectedFormula[ Cell[ _, ___, CellTags -> t_, ___]] :=
 	Module[ { key = getKeyTags[ t]},
 		Cases[ $tmaEnv, FML$[ key, _, __], {1}, 1]
 	]	
 findSelectedFormula[ sel_] := {}
-findSelectedFormula[args___] := unexpected[ findSelectedFormula, {args}]
+findSelectedFormula[ args___] := unexpected[ findSelectedFormula, {args}]
 
 (*
 	The global declarations have all symbols still wrapped in Hold (from freshSymbols) 

@@ -23,6 +23,9 @@
 	2) with "Theorema`Computation`Language`" in the context path so that the respective global symbols are taken from that context.
 *)
 
+(* Default value for operations defined in a domain. Necessary for extension domains. *)
+opDefInDom[ _] := {}
+
 (* ::Section:: *)
 (* Language classification *)
 

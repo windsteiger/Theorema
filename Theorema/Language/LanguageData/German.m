@@ -125,6 +125,8 @@ With[ {lang = "German"},
 
 	MessageName[ Not$TM, "usage", lang] = "";
 
+	MessageName[ opDefInDom, "usage", lang] = "opDefInDom[ d] ist eine Liste der in d definierten Operationen.";
+	MessageName[ OperatorChain$TM, "usage", lang] = "";
 	MessageName[ Or$TM, "usage", lang] = "";
 	MessageName[ OverScript$TM, "usage", lang] = "";
 
