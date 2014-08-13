@@ -245,7 +245,7 @@ openTheoremaCommander[ ] /; $Notebooks :=
         				Dynamic[ Refresh[ displayKBBrowser[ "prove"], TrackedSymbols :> {$kbFilterKW, $tcKBBrowseSelection, $kbStruct, kbSelectProve}]],
         				Dynamic[ Refresh[ displayBuiltinBrowser[ "prove"], TrackedSymbols :> {buiActProve}]],
         				Dynamic[ Refresh[ selectProver[], TrackedSymbols :> {$selectedRuleSet, $selectedStrategy, $ruleFilterKW}]],
-        				Dynamic[ Refresh[ submitProveTask[ ], TrackedSymbols :> {$selectedProofGoal, $selectedProofKB, $selectedSearchDepth, $selectedSearchTime}]],
+        				Dynamic[ Refresh[ submitProveTask[], TrackedSymbols :> {$selectedProofGoal, $selectedProofKB, $selectedSearchDepth, $selectedSearchTime}]],
         				Dynamic[ Refresh[ proofNavigation[ $TMAproofTree], TrackedSymbols :> {$TMAproofTree, $TMAproofSearchRunning, $TMAproofNotebook, ruleTextActive, $proofTreeScale, $selectedProofStep}]]},
         			(* compute *){compNew[],
         				Dynamic[ Refresh[ displayKBBrowser[ "compute"], TrackedSymbols :> {$kbFilterKW, $tcKBBrowseSelection, $kbStruct}]],
@@ -1444,35 +1444,36 @@ proofNavigation[ args___] := unexpected[ proofNavigation, {args}]
 
 (* this function is called during a computation (see processComputation[])
    effect: print a cell containg information about the environment settings for that computation *)
-  
+
 printComputationInfo[ cellID_Integer, cache_, cTime_] := 
-	Module[ {nbDir, file},
+	Module[ {nbDir, file, fileID},
 		nbDir = createPerNotebookDirectory[ CurrentValue[ "NotebookFullFileName"]];
 		(* Generate cache only in plain .m format, since this allows sharing notebooks with users on different platforms.
 			Also, loading a .m-file allows dynamic objects to react to new settings, whereas loading a .mx-file has no effect on dynamics.
 			I assume the speed gain from using mx is neglectable *)
-		file = FileNameJoin[ {nbDir, "c" <> ToString[ cellID]}];
+		fileID = "c" <> ToString[ cellID];
+		file = FileNameJoin[ {nbDir, fileID}];
 		If[ cache,
 			(* we generate new cache files only if needed *)
 			saveComputationCacheDisplay[ cellID, file, cTime]
 		];
 		(* the comp info has to be written in any case, otherwise the old info is removed (GeneratedCell, CellAutoOverwrite) *)
-		With[ {fnco = file <> "-co.m", fnd = file <> "-display.m"},
+		With[ {fnco = makeRelFilename[ fileID, "co.m"], fnd = makeRelFilename[ fileID, "display.m"]},
 			CellPrint[ Cell[ 
 				If[ TrueQ[ $traceUserDef],
 					BoxData[ ToBoxes[ Button[ Style[ translate["ShowComputation"], FontVariations -> {"Underline" -> True}], 
-						displayComputation[ fnco], ImageSize -> Automatic, Appearance -> None, Method -> "Queued"]]], 
+						displayComputation[ ToExpression[ fnco]], ImageSize -> Automatic, Appearance -> None, Method -> "Queued"]]], 
 					(* else *)
 					""],
 				"ComputationInfo",
 				CellFrameLabels -> {
 					{None, Cell[ BoxData[ ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, 
-						With[ {f = file}, ButtonFunction :> removeGroup[ ButtonNotebook[], f]]]]]},
+						With[ {f = fileID}, ButtonFunction :> removeGroup[ ButtonNotebook[], f]]]]]},
 					{None, None}}]];
 			(* This needs to be done in that complicated way, because saving formatted Theorema expressions to the file would result in syntax errors
 			   when reading in the file later (Theorema MakeExpressions are not applied when reading from a file!).
 			   Therefore, we must write something to the file, which is syntactically OK on the plain Mma-level and format it after reading the file *)
-			CellPrint[ Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ Get[ fnd] /. {FORM -> displayFormulaFromKey, RESULT -> theoremaDisplay},
+			CellPrint[ Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ Get[ ToExpression[ fnd]] /. {FORM -> displayFormulaFromKey, RESULT -> theoremaDisplay},
 				TrackedSymbols :> {$tmaEnv}]]]], "ComputationInfoBody"]]
 		];
 	]
@@ -1554,12 +1555,19 @@ evalFormulaFromKey[ k_List] :=
        ]
 evalFormulaFromKey[ args___] := unexpected[ evalFormulaFromKey, {args}]
 
+makeRelFilename[ base_String, id_String] :=
+	ToString[ StringForm[ 
+		"FileNameJoin[{CurrentValue[\"NotebookDirectory\"], FileBaseName[CurrentValue[\"NotebookFileName\"]], \"``-``\"}]", base, id]
+	]
+makeRelFilename[ args___] := unexpected[ makeRelFilename, {args}]
+
+
 (* ::Subsubsection:: *)
 (* printProofInfo *)
 
 
 printProveInfo[ kbKeysLabels_, pVal_, pTime_, sTime_, replP_] := 
-	Module[ {nbDir, subsP = replP, cellID = getCellIDFromKey[ key@$selectedProofGoal], file},
+	Module[ {nbDir, subsP = replP, cellID = getCellIDFromKey[ key@$selectedProofGoal], file, fileID},
 		nbDir = createPerNotebookDirectory[ CurrentValue[ $proofInitNotebook, "NotebookFullFileName"]];
 		(* Generate cache only in plain .m format, since this allows sharing notebooks with users on different platforms.
 			Also, loading a .m-file allows dynamic objects to react to new settings, whereas loading a .mx-file has no effect on dynamics.
@@ -1568,7 +1576,8 @@ printProveInfo[ kbKeysLabels_, pVal_, pTime_, sTime_, replP_] :=
 			(* This may occur if the prover tab has been skipped and $replexistProof still has init val 0 *)
 			subsP = findNumExistingProofs[ $proofInitNotebook, $selectedProofGoal] + 1;
 		];
-		file = FileNameJoin[ {nbDir, "p" <> cellID <> "-" <> ToString[ subsP]}];
+		fileID = "p" <> cellID <> "-" <> ToString[ subsP];
+		file = FileNameJoin[ {nbDir, fileID}];
 		saveProveCacheDisplay[ kbKeysLabels, pTime, sTime, file];
         If[ NotebookFind[ $proofInitNotebook, makeProofIDTag[ $selectedProofGoal] <> "-" <> ToString[ subsP], All, CellTags] === $Failed,
         	(* no replacement of existing proof -> new proof *)
@@ -1585,24 +1594,26 @@ printProveInfo[ kbKeysLabels_, pVal_, pTime_, sTime_, replP_] :=
 			SelectionMove[ $proofInitNotebook, All, CellGroup]
 		];
 		SetSelectedNotebook[ $proofInitNotebook];
-		With[ {fnpo = file <> "-po.m", fnd = file <> "-display.m"},
+		With[ {fnpo = makeRelFilename[ fileID, "po.m"], fnd = makeRelFilename[ fileID, "display.m"]},
         	NotebookWrite[ $proofInitNotebook, Cell[ TextData[ {Cell[ BoxData[ ToBoxes[ proofStatusIndicator[ pVal]]]], " " <> translate[ "Proof of"] <> " ",
         		formulaReference[ $selectedProofGoal], " #" <> ToString[ subsP] <> ":   ",
 				Cell[ BoxData[ ToBoxes[ Button[ Style[ translate["ShowProof"], FontVariations -> {"Underline" -> True}], 
-					displayProof[ fnpo], ImageSize -> Automatic, Appearance -> None, Method -> "Queued"]]]]}],
+					displayProof[ ToExpression[ fnpo]], ImageSize -> Automatic, Appearance -> None, Method -> "Queued"]]]]}],
         		"ProofInfo",
         		CellTags -> With[ {pTag = makeProofIDTag[ $selectedProofGoal]}, {pTag, pTag <> "-" <> ToString[ subsP]}],
         		CellFrameLabels -> {{None, Cell[ BoxData[ ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, 
-        			With[ {f = file}, ButtonFunction :> removeGroup[ ButtonNotebook[], f]]]]]}, {None, None}}]];
-			NotebookWrite[ $proofInitNotebook, Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ Get[ fnd] /. FORM -> displayFormulaFromKey, TrackedSymbols :> {$tmaEnv}]]]], "ProofInfoBody"]]
+        			With[ {f = fileID}, ButtonFunction :> removeGroup[ ButtonNotebook[], f]]]]]}, {None, None}}]];
+			NotebookWrite[ $proofInitNotebook, Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ Get[ ToExpression[ fnd]] /. FORM -> displayFormulaFromKey, TrackedSymbols :> {$tmaEnv}]]]], "ProofInfoBody"]]
 		]
 	]
 
 printProveInfo[args___] := unexcpected[ printProveInfo, {args}]
 
-removeGroup[ nb_NotebookObject, file_String] :=
-	Module[{},
-		DeleteFile[ FileNames[ file <> "*.m"]];
+removeGroup[ nb_NotebookObject, base_String] :=
+	Module[ {},
+		(* remove .m and .mx . 
+		   Could be specified more precisely using string patterns or regexp, but this crashes under Linux (at least in Mma 8) *)
+		DeleteFile[ FileNames[ FileNameJoin[ {CurrentValue[ nb, "NotebookDirectory"], FileBaseName[ CurrentValue[ nb, "NotebookFileName"]], base <> "*.m*"}]]];
 		SelectionMove[ nb, All, ButtonCell];
 		SelectionMove[ nb, All, CellGroup];
 		NotebookDelete[ nb];
