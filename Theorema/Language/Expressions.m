@@ -240,7 +240,7 @@ MakeBoxes[ Radical$TM[ e_, r_], TheoremaForm] :=
 	RadicalBox[ MakeBoxes[ e, TheoremaForm], MakeBoxes[ r, TheoremaForm]]
 
 MakeBoxes[ Set$TM[ arg__], TheoremaForm] := MakeBoxes[ {arg}, TheoremaForm]
-MakeBoxes[ Set$TM[ ], TheoremaForm] := MakeBoxes[ "\[EmptySet]", TheoremaForm]
+MakeBoxes[ Set$TM[ ], TheoremaForm] := "\[EmptySet]"
 (* An unevaluated 'makeSet' will turn into makeSet$TM when renaming back to standard context ... *)
 MakeBoxes[ Theorema`Common`makeSet$TM[ arg__], TheoremaForm] := StyleBox[ MakeBoxes[ {arg}, TheoremaForm], "ExpressionVariable"]
 
