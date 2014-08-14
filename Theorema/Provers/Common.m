@@ -223,18 +223,19 @@ isOptComponent[ args___] := unexpected[ isOptComponent, {args}]
 
 (*
 	simplifyProof[ PRFOBJ$[ pi_, sub_, proved], simp_List] simplifies the proof object according to the settings given in simp.
-	*)
-simplifyProof[ PRFOBJ$[ pi_, sub_, proved], simp_List /; Apply[ Or, simp]] := 
-(*	We call the function only if at least one of the simplification settings is True
-	*)
+*)
+simplifyProof[ PRFOBJ$[ pi_, sub_, pv_], simp_List /; Apply[ Or, simp]] := 
+(*	
+	We call the function only if at least one of the simplification settings is True
+*)
 	Module[{simpPo, sn, used, spi, startTime = SessionTime[]},
 		{sn, used} = simpNodes[ sub, simp];
-		If[ simp[[3]],
+		If[ simp[[3]] && used =!= {}, (* used=={} indicates that only failing branches are there *)
 			(* simplify formulae *)
 			spi = eliminateUnusedInit[ pi, used];
-			simpPo = PRFOBJ$[ spi, sn, proved],
+			simpPo = PRFOBJ$[ spi, sn, pv],
 			(* else *)
-			simpPo = PRFOBJ$[ pi, sn, proved]
+			simpPo = PRFOBJ$[ pi, sn, pv]
 		];		
 		$TMAproofTree = poToTree[ simpPo];
 		{simpPo, SessionTime[] - startTime}
@@ -246,7 +247,7 @@ simplifyProof[ args___] := unexpected[ simplifyProof, {args}]
 	simpNodes[ tree] computes {simpTree, used}, where
 		simpTree is the simplified proof tree and
 		used is a list of formula keys that are used within the simplified tree
-	*)
+*)
 simpNodes[ ORNODE$[ pi_, ___, p_ /; proofValue@p === proved, ___, proved], simp:{True, _, _}] :=
 	simpNodes[ p, simp]
 simpNodes[ ORNODE$[ pi_, a___, p_ /; proofValue@p === proved, b___, proved], simp:{False, _, _}] :=
@@ -254,25 +255,31 @@ simpNodes[ ORNODE$[ pi_, a___, p_ /; proofValue@p === proved, b___, proved], sim
 		{sn, used} = simpNodes[ p, simp];
 		{ORNODE$[ pi, a, sn, b, proved], used}
 	]
-(* AndNode with only one successor 
-	*)
+simpNodes[ node_ORNODE$, simp_] := {node, {}}
+
+(* AndNode with only one successor *)
 simpNodes[ ANDNODE$[ pi_, sub_, proved], simp:{sBranches_, sSteps_, sFormulae_}] :=
-	Module[{sn, u, propUsed, thinnedGenerated},
+	Module[{sn, u, propUsed, thinnedGenerated, allUsed},
 		{sn, u} = simpNodes[ sub, simp];
 		propUsed = propagateUsed[ pi, u];
+		allUsed = DeleteDuplicates[ Join[ u, propUsed]];
 		Which[
 			sSteps && propUsed === {}, (* eliminate whole step *)
 			{sn, u},
 			sFormulae, (* eliminate unused formulae *)
 			thinnedGenerated = eliminateUnused[ pi, u];
-			{ANDNODE$[ thinnedGenerated, sn, proved], propUsed},
+			{ANDNODE$[ thinnedGenerated, sn, proved], allUsed},
 			True,
-			{ANDNODE$[ pi, sn, proved], propUsed}
+			{ANDNODE$[ pi, sn, proved], allUsed}
 		]
 	]
-(*	AndNode (proved) with more than one successor: if the generated formulae are not used afterwards, the
-	node can be substituted by one of its successful successors, e.g. the first one *)
-simpNodes[ ANDNODE$[ pi_, fsub_, rsub__, proved], simp:{sBranches_, sSteps_, sFormulae_}] :=
+simpNodes[ node:ANDNODE$[ pi_, sub_, pv_], simp_] := {node, {}}
+
+(*
+	AndNode (proved) with more than one successor: if the generated formulae are not used afterwards, the
+	node can be substituted by one of its successful successors, e.g. the first one
+*)
+simpNodes[ ANDNODE$[ pi_, fsub_, rsub__, pv_], simp:{sBranches_, sSteps_, sFormulae_}] :=
 	Module[{sn, u, allUsed, propUsed},
 		{sn, u} = Transpose[ Map[ simpNodes[ #, simp]&, {fsub, rsub}]];
 		allUsed = Apply[ Union, u];
@@ -281,14 +288,15 @@ simpNodes[ ANDNODE$[ pi_, fsub_, rsub__, proved], simp:{sBranches_, sSteps_, sFo
 			(* No formula used in the subproofs has been generated in this step: we eliminate the node and use the first successor node instead *)
 			{sn[[1]], u[[1]]},
 			(* Otherwise, we collect the simplified subproofs and union the keys used in this step to those used in the successors *)
-			{Apply[ ANDNODE$[ pi, ##, proved]&, sn], Union[ propUsed, allUsed]}
+			{Apply[ ANDNODE$[ pi, ##, pv]&, sn], Union[ propUsed, allUsed]}
 		]		
 	]
-simpNodes[ node:TERMINALNODE$[ pi_, proved], simp_List] := {node, Map[ key, Flatten[ used@pi]]}
+simpNodes[ node:TERMINALNODE$[ pi_, pv_], simp_List] := {node, Map[ key, Flatten[ used@pi]]}
 simpNodes[ node:PRFSIT$[ g_, kb_, ___], simp_List] := {node, Map[ key, Prepend[ kb, g]]}
 simpNodes[ args___] := unexpected[ simpNodes, {args}]
 
-(*	propagateUsed[ pi_PRFINFO$, u_List] computes a list of keys, which are used to generate all the keys in u.
+(*
+	propagateUsed[ pi_PRFINFO$, u_List] computes a list of keys, which are used to generate all the keys in u.
 	This is used in the proof simplification of a node having prfinfo pi: u are the keys used in the subproofs.
 	We check, which of them are generated in the current step and collect the keys used to generate these.
 	Finally take the union of all these.
@@ -297,16 +305,13 @@ propagateUsed[ pi_PRFINFO$, u_List] :=
 	Module[{gen = generated@pi, pUsed},
 		(* The first entry in the position lists tells, in which component the formula is generated *)
 		pUsed = Map[ Take[ #, 1]&, DeleteCases[ Map[ Position[ gen, #]&, u], {}], {2}];
-		(* Extract the respective positions from used to get all formulae used und form their union *)
+		(* Extract the respective positions from used to get all formulae used and form their union *)
 		DeleteDuplicates[ Map[ key, Flatten[ Extract[ used@pi, pUsed]]]]
 	]
 propagateUsed[ args___] := unexpected[ propagateUsed, {args}]
 
 (* 
 	Eliminate unused formulae from generated formulae
-*)
-(* amaletzk: BUGFIX
-	Replaced formal argument "used" by "u", because otherwise "used@pi" causes an error
 *)
 eliminateUnused[ pi_PRFINFO$, u_List] :=
 	Module[{gen = generated@pi, thinned, p},

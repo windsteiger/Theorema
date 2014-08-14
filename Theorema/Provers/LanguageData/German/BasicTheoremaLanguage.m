@@ -126,18 +126,19 @@ proofStepText[ contradictionUniv2, lang, {{u_, c_}}, {}, ___, "instantiation" ->
 (* ::Subsection:: *)
 (* E *)
 
-proofStepText[ elementarySubstitution, lang, u_, g_, ___, "usedSubst" -> subs_List, ___] := 
+proofStepText[ elementarySubstitution, lang, u_, g_, ___, "goalRewrite" -> gr_, "usedSubst" -> subs_List, ___] := 
 	(* u, g, and subs have same length.
 	   u is a list of singleton lists, u[[i,1]] are the formulae that are rewritten
 	   g is a list of singleton lists, g[[i,1]] are the new formulae
 	   subs is an auxliliary list containing lists of formulae, namely subs[[i]] are the formulae used when rewriting u[[i,1]] to g[[i,1]] *)
-	Module[ {stepText = {}, j, repl},
+	Module[ {stepText = {}, j, repl, startKB = 1, suffix},
 		(* If the first in u and g are the same, then the goal has not been rewritten *)
-		If[ u[[1]] =!= g[[1]],
+		If[ gr,
 			repl = subs[[1]];
-			stepText = { textCell[ "Um ", formulaReference[ u[[1, 1]]], " zu zeigen, m\[UDoubleDot]ssen wir wegen ", 
-				formulaReferenceSequence[ repl, lang], " zeigen"],
-				goalCell[ g[[1, 1]], "."]}
+			stepText = { textCell[ "Um ", formulaReference[ u[[1, 1]]], " zu zeigen, zeigen wir wegen ", 
+				formulaReferenceSequence[ repl, lang]],
+				goalCell[ g[[1, 1]], "."]};
+			startKB = 2 (* the first generated is the rewritten goal, kb rewriting starts from the second generated onwards *)
 		];
 		PrependTo[ stepText, textCell[ "Wir wenden Substitutionen an:"]];
 		(* Each of the remaining is an expansion in the KB. Produce a line of text for each of them *)
@@ -147,7 +148,7 @@ proofStepText[ elementarySubstitution, lang, u_, g_, ___, "usedSubst" -> subs_Li
 			stepText = Join[ stepText, 
 				{textCell[ "Aus ", formulaReference[ u[[j, 1]]], " folgt, wegen ", formulaReferenceSequence[ repl, lang], ","], 
 				assumptionCell[ g[[j, 1]]]}],
-			{j, 2, Length[g]}
+			{j, startKB, Length[g]}
 		];
 		stepText
 	];
@@ -183,20 +184,20 @@ proofStepText[ existsKB, lang, {{g_}}, {{simpG_}}, ___] := {textCell[ "Die zu be
 	goalCell[ simpG, "."]
 	};
 
-proofStepText[ expandDef, lang, u:{___, {}}, g:{___, {True}}, ___, "usedDefs" -> defs_List, ___] := 
+proofStepText[ expandDef, lang, u_List, g_List, ___, "defCond" -> False, "usedDefs" -> defs_List, ___] := 
 	(* u, g, and defs have same length.
-	   Except for the last element, u is a list of singleton lists, u[[i,1]] are the formulae that are rewritten
-	   Except for the last element, g is a list of singleton lists, g[[i,1]] are the new formulae
+	   u is a list of singleton lists, u[[i,1]] are the formulae that are rewritten
+	   g is a list of singleton lists, g[[i,1]] are the new formulae
 	   defs is an auxliliary list containing lists of definition formulae, namely defs[[i]] are the definitions used when rewriting u[[i,1]] to g[[i,1]].
-	   According to the input pattern, this is the case, where NO CONDITIONS need to be checked.
+	   According to the "defCond" -> False, this is the case, where NO CONDITIONS need to be checked.
 	*)
 	Module[ {stepText = {}, j, repl, suffix},
 		(* If the first in u and g are the same, then the goal has not been rewritten *)
 		If[ u[[1]] =!= g[[1]],
 			repl = defs[[1]];
 			suffix = If[ Length[ repl] == 1, "", "en"];
-			stepText = { textCell[ "Um ", formulaReference[ u[[1, 1]]], " zu beweisen, muss aufgrund der Definition" <> suffix <> " ", 
-				formulaReferenceSequence[ repl, lang], " gezeigt werden"],
+			stepText = { textCell[ "Um ", formulaReference[ u[[1, 1]]], " zu beweisen, reicht es aufgrund der Definition" <> suffix <> " ", 
+				formulaReferenceSequence[ repl, lang], " aus zu zeigen"],
 				goalCell[ g[[1, 1]], "."]}
 		];
 		PrependTo[ stepText, textCell[ "Wir expandieren Definitionen:"]];
@@ -207,21 +208,21 @@ proofStepText[ expandDef, lang, u:{___, {}}, g:{___, {True}}, ___, "usedDefs" ->
 			stepText = Join[ stepText, 
 				{textCell[ "Aus ", formulaReference[ u[[j, 1]]], " folgt aufgrund der Definition" <> suffix <> " ", formulaReferenceSequence[ repl, lang]], 
 				assumptionCell[ g[[j, 1]]]}],
-			{j, 2, Length[g]-1}
+			{j, 2, Length[ g]}
 		];
 		stepText
 	];
 
-proofStepText[ expandDef, lang, u_, g:_, ___, "usedDefs" -> defs_List, ___] := {textCell[ "Wir expandieren Definitionen:"]};
+proofStepText[ expandDef, lang, u_, g_, ___, "defCond" -> True, "usedDefs" -> defs_List, ___] := {textCell[ "Wir expandieren Definitionen:"]};
 
-subProofHeader[ expandDef, lang, u_, g_, ___, "usedDefs" -> defs_List, ___, {1}] := 
+subProofHeader[ expandDef, lang, u_, g_, ___, "defCond" -> True, "usedDefs" -> defs_List, ___, {1}] := 
 	Module[ {stepText = {}, j, repl, suffix},
 		(* If the first in u and g are the same, then the goal has not been rewritten *)
 		If[ u[[1]] =!= g[[1]],
 			repl = defs[[1]];
 			suffix = If[ Length[ repl] == 1, "", "en"];
-			stepText = {textCell[ "Um ", formulaReference[ u[[1, 1]]], " zu beweisen, muss aufgrund der Definition" <> suffix <> " ", 
-				formulaReferenceSequence[ repl, lang], " gezeigt werden"],
+			stepText = {textCell[ "Um ", formulaReference[ u[[1, 1]]], " zu beweisen, reicht es aufgrund der Definition" <> suffix <> " ", 
+				formulaReferenceSequence[ repl, lang], " aus zu zeigen"],
 				goalCell[ g[[1, 1]], "."]}
 		];
 		(* Each of the remaining is an expansion in the KB. Produce a line of text for each of them *)
@@ -231,12 +232,13 @@ subProofHeader[ expandDef, lang, u_, g_, ___, "usedDefs" -> defs_List, ___, {1}]
 			stepText = Join[ stepText, 
 				{textCell[ "Aus ", formulaReference[ u[[j, 1]]], " folgt aufgrund der Definition" <> suffix <> " ", formulaReferenceSequence[ repl, lang]], 
 				assumptionCell[ g[[j, 1]]]}],
-			{j, 2, Length[g]-1} (* the last is the new goal for a condition in the rewrite or True if no condition is there -> we go only to Length-1 *)
+			{j, 2, Length[ g] - 1} (* the last is the new goal for a condition in the rewrite or True if no condition is there -> we go only to Length-1 *)
 		];
 		stepText
 	];
 
-subProofHeader[ expandDef, lang, u_, {___, {cond_}}, ___, "usedDefs" -> defs_List, ___, {2}] := {textCell[ "Um obige Definitionen anwenden zu k\[ODoubleDot]nnen, muss gepr\[UDoubleDot]ft werden"],
+subProofHeader[ expandDef, lang, u_, {___, {cond_}}, ___, "defCond" -> True, "usedDefs" -> defs_List, ___, {2}] := {
+	textCell[ "Um obige Definitionen anwenden zu k\[ODoubleDot]nnen, muss gepr\[UDoubleDot]ft werden"],
 	goalCell[ cond, "."]
 	};	
 

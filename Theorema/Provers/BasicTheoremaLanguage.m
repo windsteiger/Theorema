@@ -494,7 +494,7 @@ posInKB[ args___] := unexpected[ posInKB, {args}]
 (* We should generate rules in both directions for equalities. As soon as one is applied, remove the other one. *)
 inferenceRule[ elementarySubstitution] = 
 this:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
-	Module[ {rules, usedSubst, cond, newForm, newG, substCond = {}, usedInCond = {}, newK = {}, substApplied = False, j, usedForms, genForms, replBy = {}},
+	Module[ {rules, usedSubst, cond, newForm, newG, substCond = {}, usedInCond = {}, newK = {}, substApplied = False, j, usedForms = {}, genForms = {}, replBy = {}, gr = True},
 		rules = substRules@this;
 		If[ rules === {},
 			(* There are no substitutions available -> rule does not apply *)
@@ -508,14 +508,16 @@ this:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
 					AppendTo[ substCond, cond];
 					AppendTo[ usedInCond, g]
 				];
+				With[ {used = DeleteDuplicates[ usedSubst]},
+					AppendTo[ usedForms, Prepend[ used, g]];
+					AppendTo[ replBy, used]
+				];
+				AppendTo[ genForms, {newG}];
 				substApplied = True,
 				(* else: no subst in goal *)
-				newG = g
+				newG = g;
+				gr = False
 			];
-			(* The first used and generated are old/new goal. If they are identical, then the proof header won't print any text for the goal part *)
-			usedForms = {{g}};
-			genForms = {{newG}};
-			AppendTo[ replBy, Union[ usedSubst]];
 			Do[
                 {newForm, usedSubst, cond} = replaceRepeatedAndTrack[ formula@k[[j]], filterRules[ rules, key@k[[j]]]];
                 If[ usedSubst =!= {},
@@ -526,9 +528,11 @@ this:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
 						AppendTo[ usedInCond, k[[j]]]
 					];
                     appendToKB[ newK, newForm];
-                    AppendTo[ usedForms, {k[[j]]}];
+                    With[ {used = DeleteDuplicates[ usedSubst]},
+                    	AppendTo[ usedForms, Prepend[ used, k[[j]]]];
+						AppendTo[ replBy, used]
+                    ];
                     AppendTo[ genForms, {newForm}];
-					AppendTo[ replBy, Union[ usedSubst]];
                     substApplied = True,
                     (* else: no subst in this formula *)
                     Block[ {$autoGenerateRules = False}, appendToKB[ newK, k[[j]]]] (* rewrite rules from this formula are already there *)
@@ -538,7 +542,7 @@ this:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
             (* Proof goals for checking the conditions are still missing *)
             If[ substApplied,
             	(* We have to explicitly specify generated-> because we need the proper nesting *)
-            	makeANDNODE[ makePRFINFO[ name -> elementarySubstitution, used -> usedForms, generated -> genForms, "usedSubst" -> replBy], 
+            	makeANDNODE[ makePRFINFO[ name -> elementarySubstitution, used -> usedForms, generated -> genForms, "goalRewrite" -> gr, "usedSubst" -> replBy], 
 					toBeProved[ goal -> newG, kb -> newK, substRules -> DeleteCases[ rules, {_, _FIX$ :> _}], rest]],
 				$Failed
             ]
@@ -597,23 +601,24 @@ this:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
             If[ defExpand,
             	newGoals = {toBeProved[ goal -> newG, kb -> newK, "AuxiliaryKB" -> Join[ auxKB, Flatten[ usedForms]], rest]};
             	If[ defCond =!= {},
+            		(* conditions generated *)
             		(* To be done: When we are in a proof by contradiction we have to take care. Verifying conditions should not be done on the basis of a contradictiong KB.
             		   At the moment: no contradiction proof and the only termination rule active is goalInKB, maybe this is good enough. *)
             		newForm = makeGoalFML[ formula -> makeConjunction[ defCond, And$TM]];
             		AppendTo[ newGoals, 
             			Apply[ toBeProved[ goal -> newForm, kb -> newK, "AuxiliaryKB" -> Join[ auxKB, Flatten[ usedForms]], ##]&, 
-            				setRuleActivity[ {contradiction -> False, contradictionKB -> False, contradictionUniv1 -> False, contradictionUniv2 -> False, falseInKB -> False}, rest]]],
-            		(* else *)
-            		newForm = True
+            				setRuleActivity[ {contradiction -> False, contradictionKB -> False, contradictionUniv1 -> False, contradictionUniv2 -> False, falseInKB -> False}, rest]]];
+            		AppendTo[ usedForms, usedInCond];
+            		AppendTo[ genForms, {newForm}];
+            		(* otherwise do nothing *)
             	];
             	(*
-            		If no conditions have been generated, then newGoals contains only ONE SUBGOAL and the last element of usedForms is {}.
-            		Otherwise, we have TWO SUBGOALS, and the last element of usedForms is non-empty. We can rely on this when generating the proof text.
+            		If no conditions have been generated, then newGoals contains only ONE SUBGOAL, otherwise we have TWO SUBGOALS.
+            		In the latter case, the last element of usedForms is non-empty and the last element in genForms is a singleton list containing the condition. 
+            		We pass an optional "defCond" -> True/False such that the proof text can be generated accordingly.
             	*)
-            	AppendTo[ usedForms, usedInCond];
-            	AppendTo[ genForms, {newForm}];
             	(* We have to explicitly specify generated-> because we need the proper nesting *)
-            	makeANDNODE[ makePRFINFO[ name -> expandDef, used -> usedForms, generated -> genForms, "usedDefs" -> replBy], 
+            	makeANDNODE[ makePRFINFO[ name -> expandDef, used -> usedForms, generated -> genForms, "defCond" -> (defCond =!= {}), "usedDefs" -> replBy], 
 					newGoals],
 				$Failed
             ]
