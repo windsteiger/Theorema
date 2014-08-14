@@ -457,7 +457,7 @@ this:PRFSIT$[ g_FML$, k_List, id_, rest___?OptionQ] :> performProofStep[
 			(* walk through newForms and join them to the newKB *)
 			Do[
 				pos = {};
-				If[ TrueQ[ conds[[i]]] || !MemberQ[ pos = posInKB[ Map[ formula, Join[ k, auxKB]], Apply[ List, conds[[i]]]], {}],
+				If[ TrueQ[ conds[[i]]] || !MemberQ[ pos = posInKB[ Map[ formula, Join[ k, auxKB]], conds[[i]]], {}],
 					(* conditions are True or all fulfilled in k *)
 					AppendTo[ newKB, {makeAssumptionFML[ formula -> newForms[[i]]]}];
 					(* pos contains a list of positions of plain formulas in the list of plain formulas. 
@@ -485,7 +485,8 @@ this:PRFSIT$[ g_FML$, k_List, id_, rest___?OptionQ] :> performProofStep[
 	]
 ]
 
-posInKB[ kb_List, forms_List] := Map[ Position[ kb, #, {1}]&, forms]
+posInKB[ kb_List, And$TM[ f__]] := Map[ Position[ kb, #, {1}]&, {f}]
+posInKB[ kb_List, f_] := Map[ Position[ kb, #, {1}]&, {f}]
 posInKB[ args___] := unexpected[ posInKB, {args}]
 	
 (* ::Section:: *)
@@ -839,9 +840,9 @@ ps:PRFSIT$[ g:FML$[ _, a_And$TM, lab_, ___] /; MemberQ[ a, e_Equal$TM /; !FreeQ[
 ]
 
 inferenceRule[ partSolveMetaMatching] = 
-ps:PRFSIT$[ g:FML$[ _, a:And$TM[ pre___, x_ /; !FreeQ[ x, _META$], post], lab_, ___], K_List, id_, rest___?OptionQ] :> performProofStep[
+ps:PRFSIT$[ g:FML$[ _, a:And$TM[ pre___, x_ /; !FreeQ[ x, _META$], post___], lab_, ___], K_List, id_, rest___?OptionQ] :> performProofStep[
 	Module[ {inst = Map[ instantiation[ x, formula@#]&, K], posInst, newGoalsAlt},
-		posInst = Position[ inst, _List];
+		posInst = Position[ inst, _List, {1}];
 		If[ posInst === {},
 			Throw[ $Failed],
 			(* else *)
@@ -902,6 +903,7 @@ registerRuleSet[ "Quantifier Rules", quantifierRules, {
 	{existsGoal, True, True, 10},
 	{existsGoalInteractive, False, True, 12},
 	{existsKB, True, True, 11},
+	{partSolveMetaMatching, True, True, 8},
 	{solveMetaUnification, True, True, 9}
 	}]
 
