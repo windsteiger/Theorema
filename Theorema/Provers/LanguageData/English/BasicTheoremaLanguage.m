@@ -411,7 +411,7 @@ subProofHeader[ orKB, lang, _, {generated_List}, ___, pVal_, {p_}] := {textCell[
 (* P *)
 
 proofStepText[ partSolveMetaMatching, lang, {{u_}}, {{g_}}, ___, "instantiation" -> inst_List, ___] := {
-	textCell[ "Let now ", inlineTheoremaExpressionSeq[ inst[[ 1]], lang], ". In order to prove ", formulaReference[ u], " we now have to show"],
+	textCell[ "Let now ", inlineTheoremaExpressionSeq[ inst[[ 1]], lang], ". In order to prove ", formulaReference[ u], " it suffices to show"],
 	goalCell[ g, "."]
 	};
 
@@ -419,7 +419,7 @@ proofStepText[ partSolveMetaMatching, lang, {{u_}}, {{g_}}, ___, "instantiation"
 (* S *)
 
 proofStepText[ solveMetaUnification, lang, {{u_}}, {{g_}}, ___, "instantiation" -> inst_List, ___] := {
-	textCell[ "Let now ", inlineTheoremaExpressionSeq[ inst[[ 1]], lang], ". In order to prove ", formulaReference[ u], " we now have to show"],
+	textCell[ "Let now ", inlineTheoremaExpressionSeq[ inst[[ 1]], lang], ". In order to prove ", formulaReference[ u], " it suffices to show"],
 	goalCell[ g, "."]
 	};
 
@@ -427,7 +427,7 @@ proofStepText[ solveMetaUnification, lang, {{u_}}, {g_List}, ___, "instantiation
 	{textCell[ "We can instantiate."]};
 
 subProofHeader[ solveMetaUnification, lang, {{u_}}, {g_List}, ___, "instantiation" -> inst_List, ___, {i_}] := {
-	textCell[ "Let now ", inlineTheoremaExpressionSeq[ inst[[i]], lang], ". In order to prove ", formulaReference[ u], " we now have to show"],
+	textCell[ "Let now ", inlineTheoremaExpressionSeq[ inst[[i]], lang], ". In order to prove ", formulaReference[ u], " it suffices to show"],
 	goalCell[ g[[i]], "."]
 	};	
 

@@ -413,7 +413,7 @@ subProofHeader[ orKB, lang, _, {generated_List}, ___, pVal_, {p_}] := {textCell[
 (* P *)
 
 proofStepText[ partSolveMetaMatching, lang, {{u_}}, {{g_}}, ___, "instantiation" -> inst_List, ___] := {
-	textCell[ "Sei nun ", inlineTheoremaExpressionSeq[ inst[[ 1]], lang], ". Um die Aussage ", formulaReference[ u], " zu beweisen, m\[UDoubleDot]ssen wir zeigen"],
+	textCell[ "Sei nun ", inlineTheoremaExpressionSeq[ inst[[ 1]], lang], ". Um die Aussage ", formulaReference[ u], " zu beweisen, zeigen wir nun"],
 	goalCell[ g, "."]
 	};
 
@@ -421,7 +421,7 @@ proofStepText[ partSolveMetaMatching, lang, {{u_}}, {{g_}}, ___, "instantiation"
 (* S *)
 
 proofStepText[ solveMetaUnification, lang, {{u_}}, {{g_}}, ___, "instantiation" -> inst_List, ___] := {
-	textCell[ "Sei nun ", inlineTheoremaExpressionSeq[ inst[[ 1]], lang], ". Um die Aussage ", formulaReference[ u], " zu beweisen, m\[UDoubleDot]ssen wir zeigen"],
+	textCell[ "Sei nun ", inlineTheoremaExpressionSeq[ inst[[ 1]], lang], ". Um die Aussage ", formulaReference[ u], " zu beweisen, zeigen wir nun"],
 	goalCell[ g, "."]
 	};
 
@@ -429,7 +429,7 @@ proofStepText[ solveMetaUnification, lang, {{u_}}, {g_List}, ___, "instantiation
 	{textCell[ "Man kann Werte f\[UDoubleDot]r die zu bestimmenden Variablen einsetzen."]};
 
 subProofHeader[ solveMetaUnification, lang, {{u_}}, {g_List}, ___, "instantiation" -> inst_List, ___, {i_}] := {
-	textCell[ "Sei nun ", inlineTheoremaExpressionSeq[ inst[[i]], lang], ". Um die Aussage ", formulaReference[ u], " zu beweisen, m\[UDoubleDot]ssen wir zeigen"],
+	textCell[ "Sei nun ", inlineTheoremaExpressionSeq[ inst[[i]], lang], ". Um die Aussage ", formulaReference[ u], " zu beweisen, zeigen wir nun"],
 	goalCell[ g[[i]], "."]
 	};	
 
