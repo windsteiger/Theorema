@@ -503,19 +503,19 @@ execLeft[ e_Hold, var_List] :=
 	Module[ {s, bound = boundVariables[ e]},
 		s = substituteFree[ e, Map[ varToPattern, var]];
 		s = substituteBound[ s, Map[ varToPattern, bound]];
-		ReleaseHold[ Map[ Function[ expr, toInputString[ Hold[ expr], False], {HoldAll}], s]]
+		ReleaseHold[ Map[ Function[ expr, toInputString[ Hold[ expr], True], {HoldAll}], s]]
 	]
 execLeft[ args___] := unexpected[ execLeft, {args}]
 
-(* execCondition does precisely the same what execRight previously did, i.e. it leaves symbols
-	with suffix "$M" unchanged. *)
+(* Since "\[Wolf]"-symbols are renamed everywhere, 'execCondition' and 'execRight' do now precisely the same.
+	Therefore, one of them could in principle be removed. *)
 execCondition[ e_Hold, var_List] := 
 	Module[ {s},
 		s = substituteFree[ e, Map[ stripVar, var]] /. {Theorema`Language`Assign$TM -> Set,
 			Theorema`Language`SetDelayed$TM -> SetDelayed, 
 			Theorema`Language`CompoundExpression$TM -> CompoundExpression,
 			Theorema`Language`List$TM -> List};
-		ReleaseHold[ Map[ Function[ expr, toInputString[ Hold[ expr], False], {HoldAll}], s]]
+		ReleaseHold[ Map[ Function[ expr, toInputString[ Hold[ expr], True], {HoldAll}], s]]
 	]
 execCondition[ args___] := unexpected[ execCondition, {args}]
 
@@ -529,17 +529,17 @@ execRight[ e_Hold, var_List] :=
 	]
 execRight[ args___] := unexpected[ execRight, {args}]
 
-toInputString[ x_Hold, b_] := First[ toInputStringAux[ x, b]]
+toInputString[ x_Hold, dropWolf_] := First[ toInputStringAux[ x, dropWolf]]
 toInputStringAux[ Hold[ s_Symbol], True] :=
 	Module[ {name},
-		{StringDrop[ name, -2]} /; StringLength[ name = SymbolName[ Unevaluated[ s]]] > 2 && StringTake[ name, -2] === "$M"
+		{StringDrop[ name, 1]} /; StringLength[ name = SymbolName[ Unevaluated[ s]]] >= 2 && StringTake[ name, 1] === "\[Wolf]"
 	]
 toInputStringAux[ Hold[ s_Symbol], False] := {ToString[ Unevaluated[ s]]}
-toInputStringAux[ Hold[ head_[ args___]], b_] :=
-	{StringJoin[ toInputStringAux[ Hold[ head], b], "[", StringJoin[ Riffle[ toInputStringAux[ Hold[ args], b], ","]], "]"]}
+toInputStringAux[ Hold[ head_[ args___]], dropWolf_] :=
+	{StringJoin[ toInputStringAux[ Hold[ head], dropWolf], "[", StringJoin[ Riffle[ toInputStringAux[ Hold[ args], dropWolf], ","]], "]"]}
 toInputStringAux[ Hold[ s_String], _] := {ToString[ s, InputForm]}
 toInputStringAux[ Hold[ s_], _] := {ToString[ Unevaluated[ s]]}
-toInputStringAux[ Hold[ first_, rest__], b_] := Join[ toInputStringAux[ Hold[ first], b], toInputStringAux[ Hold[ rest], b]]
+toInputStringAux[ Hold[ first_, rest__], dropWolf_] := Join[ toInputStringAux[ Hold[ first], dropWolf], toInputStringAux[ Hold[ rest], dropWolf]]
 toInputStringAux[ Hold[ ], _] := {}
 
 stripVar[ v:Theorema`Language`VAR$[Theorema`Language`SEQ0$[a_]]] := v -> ToExpression[ "SEQ0$" <> ToString[a]]
