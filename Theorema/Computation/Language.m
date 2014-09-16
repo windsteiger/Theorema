@@ -281,18 +281,54 @@ Equal$TM[ h:(\[DoubleStruckCapitalC]$TM|\[DoubleStruckCapitalC]P$TM), _?mathemat
 Equal$TM[ a_?mathematicalConstantQ, b_?mathematicalConstantQ] /; buiActive["Equal"] := SameQ[ a, b]
 Equal$TM[ a_?tmaAtomQ, b_?tmaAtomQ] /; buiActive["Equal"] := a == b
 
-Plus$TM[ a___] /; buiActive["Plus"] := Module[ {res = Plus[ a]}, res /; Head[ res] =!= Plus]
-Minus$TM[ a_] /; buiActive["Minus"] := Minus[ a]
-Subtract$TM[ a_, b_] /; buiActiveArithmetic["Subtract"] := Subtract[ a, b] (* "Subtract" requires exactly 2 arguments. *)
-Times$TM[ a___] /; buiActive["Times"] := Times[ a]
-Divide$TM[ a_, b_] /; buiActiveArithmetic["Divide"] := Divide[ a, b] (* "Divide" requires exactly 2 arguments. *)
-Power$TM[ a_, b_] /; buiActivePower[ b] := Module[ {res = Power[ a, b]}, res /; Head[ res] =!= Power]
-Radical$TM[ a_, b_] /; buiActive["Radical"] := Power[ a, 1/b]
-Factorial$TM[ a_] /; buiActive["Factorial"] := a!
-Less$TM[ a__] /; buiActive["Less"] := Less[ a]
-LessEqual$TM[ a__] /; buiActive["LessEqual"] := LessEqual[ a]
-Greater$TM[ a__] /; buiActive["Greater"] := Greater[ a]
-GreaterEqual$TM[ a__] /; buiActive["GreaterEqual"] := GreaterEqual[ a]
+Plus$TM[ a___] /; buiActive["Plus"] :=
+	Module[ {res = Plus[ a]},
+		res /; (Head[ res] =!= Plus || Hold[ a] =!= Apply[ Hold, res])
+	]
+Minus$TM[ a_] /; buiActive["Minus"] :=
+	Module[ {res = Minus[ a]},
+		res /; !MatchQ[ res, Times[ _?Negative, __]]
+	]
+Subtract$TM[ a_, b___] /; buiActiveArithmetic["Subtract"] :=
+	Module[ {args = Apply[ Hold, Prepend[ Map[ Times[ -1, #]&, { b}], a]], res},
+		res /; (res = Apply[ Plus, args]; Head[ res] =!= Plus || args =!= Apply[ Hold, res])
+	]
+Times$TM[ a___] /; buiActive["Times"] :=
+	Module[ {res = Times[ a]},
+		res /; (Head[ res] =!= Times || Hold[ a] =!= Apply[ Hold, res])
+	]
+Divide$TM[ a_, b___] /; buiActiveArithmetic["Divide"] :=
+	Module[ {args = Apply[ Hold, Prepend[ Map[ Power[ #, -1]&, { b}], a]], res},
+		res /; (res = Apply[ Times, args]; Head[ res] =!= Times || args =!= Apply[ Hold, res])
+	]
+Power$TM[ a_, b_] /; buiActivePower[ b] :=
+	Module[ {res = Power[ a, b]},
+		res /; (Head[ res] =!= Power || Hold[ a, b] =!= Apply[ Hold, res])
+	]
+Radical$TM[ a_, b_] /; buiActive["Radical"] :=
+	Module[ {res = Power[ a, Power[ b, -1]]},
+		res /; (Head[ res] =!= Power || Hold[ a, Power[ b, -1]] =!= Apply[ Hold, res])
+	]
+Factorial$TM[ a_] /; buiActive["Factorial"] :=
+	Module[ {res = a!},
+		res /; Head[ res] =!= Factorial
+	]
+Less$TM[ a__] /; buiActive["Less"] :=
+	Module[ {res = Less[ a]},
+		res /; (Head[ res] =!= Less || Hold[ a] =!= Apply[ Hold, res])
+	]
+LessEqual$TM[ a__] /; buiActive["LessEqual"] :=
+	Module[ {res = LessEqual[ a]},
+		res /; (Head[ res] =!= LessEqual || Hold[ a] =!= Apply[ Hold, res])
+	]
+Greater$TM[ a__] /; buiActive["Greater"] :=
+	Module[ {res = Greater[ a]},
+		res /; (Head[ res] =!= Greater || Hold[ a] =!= Apply[ Hold, res])
+	]
+GreaterEqual$TM[ a__] /; buiActive["GreaterEqual"] :=
+	Module[ {res = GreaterEqual[ a]},
+		res /; (Head[ res] =!= GreaterEqual || Hold[ a] =!= Apply[ Hold, res])
+	]
 BracketingBar$TM[ a:(_Integer|_Rational|_Real|_Complex|_DirectedInfinity)] /; buiActive["AbsValue"] := Abs[ a]
 BracketingBar$TM[ a:(Pi|E|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaisher)] /; buiActive["AbsValue"] := a
 
