@@ -532,7 +532,7 @@ execRight[ args___] := unexpected[ execRight, {args}]
 toInputString[ x_Hold, dropWolf_] := First[ toInputStringAux[ x, dropWolf]]
 toInputStringAux[ Hold[ s_Symbol], True] :=
 	Module[ {name},
-		{StringDrop[ name, 1]} /; StringLength[ name = SymbolName[ Unevaluated[ s]]] >= 2 && StringTake[ name, 1] === "\[Wolf]"
+		{StringTake[ name, {2, -4}]} /; StringLength[ name = SymbolName[ Unevaluated[ s]]] >= 5 && StringTake[ name, 1] === "\[Wolf]" && StringTake[ name, -3] === "$TM"
 	]
 toInputStringAux[ Hold[ s_Symbol], False] := {ToString[ Unevaluated[ s]]}
 toInputStringAux[ Hold[ head_[ args___]], dropWolf_] :=
