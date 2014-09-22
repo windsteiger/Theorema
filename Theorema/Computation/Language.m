@@ -234,6 +234,7 @@ chainToConjunction[ l_List, {accumulator___}] := And$TM[ accumulator]
 DoubleLeftArrow$TM[ a_, b_] := Implies$TM[ b, a]
 DoubleLeftArrow$TM[ a_, b___] := Fold[ Implies$TM[ #2, #1]&, a, {b}]
 
+SetAttributes[ NotExists$TM, HoldRest];
 NotExists$TM[ r_RNG$, cond_, form_] := Not$TM[ Exists$TM[ r, cond, form]]
 	
 
