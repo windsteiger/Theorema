@@ -10,19 +10,41 @@
 
     Theorema 2.0 is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    along with this program. If not, see <http://www.gnu.org/licenses/>.
 *)
 
+(*
+   *********************************************************************************************
+   -- IMPORTANT -- IMPORTANT -- IMPORTANT -- IMPORTANT -- IMPORTANT -- IMPORTANT -- IMPORTANT -- 
+   *********************************************************************************************
+ 
+     If you modify this file, then insert the new translation in correct alphabetical 
+     order (case-insensitive).
+
+     ALSO, YOU MUST add a corresponding entry for each other language, either
+      1) in the section named "UNTRANSLATED" at the end of the language file 
+         (in case you cannot or do not want to provide a translation) or
+      2) in correct alphabetical order (case-insensitive) in case you immediately provide 
+         a translation.
+      
+   *********************************************************************************************
+   -- IMPORTANT -- IMPORTANT -- IMPORTANT -- IMPORTANT -- IMPORTANT -- IMPORTANT -- IMPORTANT -- 
+   *********************************************************************************************
+ *)
+ 
 With[ {lang = "English"},
     translate[ "0ANNOPTooltip", lang] = "\[SmallCircle] \[Ellipsis] operator symbol";
     translate[ "1ANNOPTooltip", lang] = "\[SmallCircle] \[Ellipsis] operator symbol\nA \[Ellipsis] annotation";
     translate[ "2ANNOPTooltip", lang] = "\[SmallCircle] \[Ellipsis] operator symbol\nA \[Ellipsis] annotation\nB \[Ellipsis] annotation";
 
 	translate[ "abort", lang] = "Abort proof";
+	translate[ "aboutTheorema", lang] = "Theorema was conceived and initiated around 1995 by Bruno Buchberger and reflects his view of \"doing mathematics\". \
+It is being developed under his guidance by the Theorema Working Group at the Research Institute for Symbolic Computation, Johannes Kepler University, Linz-Hagenberg, Austria. \
+Theorema 2.0 is a major re-launch mainly developed by Wolfgang Windsteiger.";
     translate[ "ambiguousRange", lang] = "The range `` does not unambiguously mark one variable.";
     translate[ "AND2", lang] = "\!\(\*FormBox[FrameBox[\"left\"], SelectionPlaceholder]\) and \!\(\*FormBox[FrameBox[\"right\"], SelectionPlaceholder]\)";   	
     translate[ "AND3", lang] = "\!\(\*FormBox[FrameBox[\"e1\"], SelectionPlaceholder]\) and \[Ellipsis] and \!\(\*FormBox[FrameBox[\"en\"], SelectionPlaceholder]\)";
@@ -48,6 +70,7 @@ With[ {lang = "English"},
     translate[ "Computation", lang] = "Computation";
 	translate[ "computationTime", lang] = "Computation time";
     translate[ "CONN2Tooltip", lang] = "left, right \[Ellipsis] formula";   	
+	translate[ "connArgM", lang] = "Connective \"`1`\" applied on `2` arguments; Exactly `3` arguments are expected.";
     translate[ "CONNTooltip", lang] = "e1, \[Ellipsis], en \[Ellipsis] formula";
 
     translate[ "Declarations", lang] = "Globals";
@@ -83,7 +106,15 @@ With[ {lang = "English"},
 
     translate[ "GABBREVTooltip", lang] = "Global abbreviation";   	
     translate[ "GCONDTooltip", lang] = "Global condition";   	
-    translate[ "Global Declarations"] = "Globals valid at this cell";
+    translate[ "Global Declarations", lang] = "Globals valid at this cell";
+    translate[ "GNULicense", lang] = StringForm[ "Copyright (\[Copyright]) 1995-`` The Theorema Group\n\n\
+Theorema 2.0 is free software: you can redistribute it and/or modify it under the terms of the GNU General \
+Public License as published by the Free Software Foundation, either version 3 of the License, or \
+(at your option) any later version.\n\n\
+Theorema 2.0 is distributed in the hope that it will be useful, but WITHOUT ANY WARRANTY; without even \
+the implied warranty of MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public \
+License for more details.\n\nYou should have received a copy of the GNU General Public License \
+along with this program. If not, see <http://www.gnu.org/licenses/>.", ToString[ Date[][[1]]]];
     translate[ "GoalProve", lang] = "Proof goal";
 	translate[ "group/ungroup", lang] = "Group / Ungroup";
     translate[ "GVARCONDTooltip", lang] = "Global universally quantified variable with condition";   	
@@ -140,6 +171,7 @@ With[ {lang = "English"},
 
 	translate[ "pending", lang] = "pending";
 	translate[ "pInteractive", lang] = "Interactive Proving";
+	translate[ "predArgN", lang] = "Predicate \"`1`\" applied on `2` arguments; At most `3` arguments are expected.";
 	translate[ "preferences last saved", lang] = "Preferences last saved";
     translate[ "Programming", lang] = "Mathematica Programming";
 	translate[ "proofCellStatus", lang] = "Proof Cells";
@@ -193,6 +225,10 @@ With[ {lang = "English"},
     translate[ "tcComputeTabLabel", lang] = "Compute";
     translate[ "tcComputeTabNewTabLabel", lang] = "new";
     translate[ "tcComputeTabSetupTabLabel", lang] = "setup";
+    translate[ "tcInformTabAboutTabLabel", lang] = "about";
+    translate[ "tcInformTabLabel", lang] = "Inform";
+    translate[ "tcInformTabLicenseTabLabel", lang] = "license";
+    translate[ "tcInformTabSetupTabLabel", lang] = "setup";   	
     translate[ "tcLangTabArchTabButtonCloseLabel", lang] = "End";
     translate[ "tcLangTabArchTabButtonInfoLabel", lang] = "Archive Info";
     translate[ "tcLangTabArchTabButtonLoadLabel", lang] = "Load";
@@ -206,7 +242,6 @@ With[ {lang = "English"},
 	translate[ "tcPrefAppearSuppressWelcome", lang] = "Suppress welcome screen";
 	translate[ "tcPrefAppearWelcome", lang] = "Welcome Screen";
 	translate[ "tcPrefArchiveDir", lang] = "Archive Directory";
-    translate[ "tcPreferencesTabLabel", lang] = "Preferences";
 	translate[ "tcPrefLanguage", lang] = "Language";
     translate[ "tcProveTabBuiltinTabLabel", lang] = "built-in";
     translate[ "tcProveTabGoalTabLabel", lang] = "goal";
@@ -215,7 +250,7 @@ With[ {lang = "English"},
     translate[ "tcProveTabLabel", lang] = "Prove";
     translate[ "tcProveTabProverTabLabel", lang] = "prover";
     translate[ "tcProveTabSubmitTabLabel", lang] = "submit";
-    translate[ "tcSessionTabLabel", lang] = "Session";
+    translate[ "tcSessionTabLabel", lang] = "Prepare";
     translate[ "tcSessTabArchTabLabel", lang] = "archives";
     translate[ "tcSessTabComposeTabLabel", lang] = "compose";
     translate[ "tcSessTabEnvTabButtonAlgLabel", lang] = "Algorithm";
@@ -263,9 +298,5 @@ With[ {lang = "English"},
 	translate[ "{{}}", lang] = "Double braced expression";
 	translate[ "()", lang] = "Parenthesized expression";
 	translate[ "(())", lang] = "Double parenthesized expression";
-
-(* Theorema`Computation`Language` *)
-	translate["predArgN", lang] = "Predicate \"`1`\" applied on `2` arguments; At most `3` arguments are expected.";
-	translate["connArgM", lang] = "Connective \"`1`\" applied on `2` arguments; Exactly `3` arguments are expected.";
 
 ]

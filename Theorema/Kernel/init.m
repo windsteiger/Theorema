@@ -93,7 +93,7 @@ $TheoremaArchivePath = {$TheoremaArchiveDirectory, $HomeDirectory};
 
 
 `priv`bottomright = {TMAcolor[4], 
-   Text["Version " <> Riffle[{$TheoremaVersion, $TheoremaRelease}, "."] <> " \[Copyright] 2010-" <> 
+   Text["Version " <> Riffle[{$TheoremaVersion, $TheoremaRelease}, "."] <> " \[Copyright] 1995-" <> 
      ToString[Date[][[1]]], {230, -202}, {1, 0}, 
     BaseStyle -> {FontFamily -> "Helvetica", FontSize -> 12}]};
 
