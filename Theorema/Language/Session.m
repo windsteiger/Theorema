@@ -32,7 +32,10 @@ Begin["`Private`"]
 (* amaletzk: Define "freshNames[]", "freshNamesProg[]" in the way below, because otherwise parts with "Program" don't work.
 	Maybe the case "Theorema`Computation`Language`Program" should also be included, such that "Program"-constructs
 	work in computation cells as well. *)
-freshNames[expr_Hold] :=
+(* 'dropWolf' specifies whether suffix "\[Wolf]" should be dropped from symbols for getting the corresponding Mma function.
+	This should in fact only happen in computation-cells but not in formula cells, in order to prevent evaluation.
+	Function 'transferToComputation' takes care of dropping "\[Wolf]" in function definitions that originate from formulas. *)
+freshNames[ expr_Hold, dropWolf_:False] :=
 	Module[ {symPos, repl, progPos, progSymPos},
 		progPos = Position[ expr, Program[_]];
 		(* There are certain expressions, into which we do not want to go deeper for substituting fresh names. 
@@ -42,8 +45,8 @@ freshNames[expr_Hold] :=
 		   positions are computed. *)
 		symPos = DeleteCases[ Position[ expr /. {META$[__] -> META$[]}, _Symbol], {0}, {1}, 1];
 		progSymPos = Cases[ symPos, x_ /; isSubPositionOfAny[ x, progPos]];
-		repl = Join[Map[ # -> freshSymbol[ Extract[ expr, #, Hold]]&, Complement[symPos, progSymPos]],
-					Map[ # -> freshSymbolProg[ Extract[ expr, #, Hold]]&, progSymPos]];		
+		repl = Join[Map[ # -> freshSymbol[ Extract[ expr, #, Hold], dropWolf]&, Complement[symPos, progSymPos]],
+					Map[ # -> freshSymbolProg[ Extract[ expr, #, Hold], dropWolf]&, progSymPos]];		
 		(* amaletzk: The "FlattenAt" simply replaces every "Program[p]" by "p". *)
 		FlattenAt[ReplacePart[ expr, repl], progPos]
 	]
@@ -63,7 +66,7 @@ Hold (using ToExpression[..., Hold]) and process the resulting expression
 with the expectation that all symbols are wrapped in Hold. (-> markVariables, etc.)
 *)
 
-freshSymbol[ Hold[ s_Symbol]] :=
+freshSymbol[ Hold[ s_Symbol], dropWolf_] :=
     Module[ {name},
         Switch[ Unevaluated[ s],
             (* We use ToExpression in order to have the symbol generated in the right context
@@ -90,16 +93,20 @@ freshSymbol[ Hold[ s_Symbol]] :=
         	AngleBracket, makeTuple,
         	Inequality, ToExpression[ "OperatorChain$TM"],
         	_,
-        	name = ToString[ Unevaluated[s]];
-        	If[ StringTake[ name, -1] === "$" || (StringLength[ name] >= 3 && StringTake[ name, -3] === "$TM"),
-        		s,
-            	ToExpression[ name <> "$TM", InputForm, Hold]
+        	name = ToString[ Unevaluated[ s]];
+        	Which[
+    			StringTake[ name, -1] === "$" || (StringLength[ name] >= 3 && StringTake[ name, -3] === "$TM"),
+    			s,
+    			StringLength[ name] >= 2 && StringTake[ name, 1] === "\[Wolf]" && dropWolf,
+    			ToExpression[ StringDrop[ name, 1], InputForm, Hold],
+    			True,
+    			ToExpression[ name <> "$TM", InputForm, Hold]
         	]
         ]
     ]
 freshSymbol[ args___] := unexpected[ freshSymbol, {args}]
 
-freshSymbolProg[ Hold[ s_Symbol]] :=
+freshSymbolProg[ Hold[ s_Symbol], dropWolf_] :=
     Module[ {name},
         Switch[ Unevaluated[ s],
             _?isMathematicalConstant, s,
@@ -114,14 +121,14 @@ freshSymbolProg[ Hold[ s_Symbol]] :=
         	Set, ToExpression[ "Assign$TM"],
         	Inequality, ToExpression[ "OperatorChain$TM"],
         	_,
-        	name = ToString[s];
+        	name = ToString[ Unevaluated[ s]];
         	Which[
-        			StringTake[ name, -1] === "$" || (StringLength[ name] >= 3 && StringTake[ name, -3] === "$TM"),
-        			s,
-        			StringLength[ name] >= 3 && StringTake[ name, -2] === "$M",
-        			Hold[ s],
-        			True,
-        			ToExpression[ name <> "$TM", InputForm, Hold]
+    			StringTake[ name, -1] === "$" || (StringLength[ name] >= 3 && StringTake[ name, -3] === "$TM"),
+    			s,
+    			StringLength[ name] >= 2 && StringTake[ name, 1] === "\[Wolf]" && dropWolf,
+    			ToExpression[ StringDrop[ name, 1], InputForm, Hold],
+    			True,
+    			ToExpression[ name <> "$TM", InputForm, Hold]
         	]
         ]
     ]
@@ -964,7 +971,7 @@ processComputation[ x:Theorema`Computation`Language`nE] :=
 	]
 processComputation[ x_] := Module[ { procSynt, res},
 	(* Remove the inner Holds around fresh symbols *)
-	procSynt = Replace[ markVariables[ freshNames[ Hold[ x]]], Hold[ s_] -> s, Infinity, Heads -> True];
+	procSynt = Replace[ markVariables[ freshNames[ Hold[ x], True]], Hold[ s_] -> s, Infinity, Heads -> True];
 	(* As an initial computation object, we start with the box form of the input cell *)
 	$TmaComputationObject = {ToExpression[ InString[ $Line]]};
 	$TmaCompInsertPos = {2}; 
@@ -1012,7 +1019,7 @@ displayBoxes[ args___] := unexpected[ displayBoxes, {args}]
 renameToStandardContext[ expr_] :=
 	Block[{$ContextPath = {"System`"}, $Context = "System`", stringExpr},
 		(* BUGFIX amaletzk: added FullForm[], otherwise doesn't work if outermost symbol is built-in Power *)
-		(* The result of $M functions may be Lists; They have to be transformed into tuples BEFORE freshNames[]
+		(* The result of \[Wolf] functions may be Lists; They have to be transformed into tuples BEFORE freshNames[]
 			is applied, because otherwise they are transformed into sets.
 			We don't use makeTuple[] here, because otherwise we get problems with contexts. *)
 		(* Do not substitute into a META$, because a META$ has a list of a.b.f. constants at pos. 3 *)
