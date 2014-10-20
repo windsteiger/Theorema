@@ -78,6 +78,130 @@ applyOnceAndLevelSaturation[ ps_PRFSIT$] :=
 	]
 applyOnceAndLevelSaturation[ args___] := unexpected[ applyOnceAndLevelSaturation, {args}]
 
+
+(* ::Subsection:: *)
+(* Priority-Interactive Strategy *)
+
+priorityInteractiveSaturation[ ps_PRFSIT$] :=
+	Module[ {satps = ps, allRules, interactiveNames, act, prio, rule,
+		sat1 = getActiveRulesType[ ps, "levelSat1"], 
+		sat2 = getActiveRulesType[ ps, "levelSat2"],
+		
+		(* 'upperPriority' and 'lowerPriority' should be set in the GUI in the future *)
+		lowerPriority = 5,
+		upperPriority = 90,
+		
+		newNodes, reSat},
+		
+		If[ id@ps === "InitialPS",
+			satps = levelSaturation[ ps, sat1, sat2];
+			If[ isProofNode[ satps],
+				Return[ satps]
+			]			
+		];
+		allRules = getActiveRulesPartitionedFilter[ ps, "term"|"levelSat1"|"levelSat2"|"interactive", lowerPriority, upperPriority];
+		newNodes = applyAllRulesOnce[ satps, First[ allRules]];
+		Which[ newNodes === {},
+			newNodes = applyAllRulesOnce[ satps, allRules[[2]]];
+			If[ newNodes === {},
+				newNodes = applyAllRulesOnce[ satps, Last[ allRules]];
+				If[ newNodes === {},
+					{allRules, act, prio} = ruleSetup@satps;
+					interactiveNames = Flatten[ Cases[ allRules, {r_ /; Replace[ r, act], _, _, _Integer, "interactive"} -> r, Infinity]];
+					interactiveNames = Sort[ DeleteDuplicates[ interactiveNames], Replace[ #1, prio] < Replace[ #2, prio] &];
+					interactiveNames = Select[ interactiveNames, (rule = inferenceRule[ #]; MatchQ[ rule, (Rule|RuleDelayed)[ _, _]] && MatchQ[ satps, First[ rule]])&];
+					allRules = Map[ inferenceRule, interactiveNames];
+					Which[ Length[ interactiveNames] === 1,
+						newNodes = applyAllRulesOnce[ satps, allRules],
+						Length[ interactiveNames] > 1,
+						rule = selectInteractiveRuleDialog[ interactiveNames, satps];
+						NotebookClose[ $TMAproofNotebook];
+						If[ IntegerQ[ rule] && rule >= 1 && rule <= Length[ interactiveNames],
+							newNodes = applyAllRulesOnce[ satps, {allRules[[rule]]}];
+							If[ newNodes === {},
+								newNodes = {makeANDNODE[ makePRFINFO[ name -> failedInteractiveRule, used -> {{}}, generated -> {{}}], satps]},
+								AppendTo[ newNodes, satps]
+							]
+						]
+						(* if 'interactiveNames' is empty, we leave 'newNodes' empty as well *)
+					]
+				]
+			],
+			Length[ newNodes] > 1,
+			newNodes = {First[ newNodes]}
+		];
+		If[ newNodes === {},
+			(* no rule applied *)
+			reSat = levelSaturation[ satps, sat1, sat2];
+			If[ !MatchQ[ reSat, _PRFSIT$],
+				(* levelSaturation generated new formulae and returned an ANDNODE *)
+				newNodes = {reSat}
+				(* otherwise, levelSaturation returned a PRFSIT and we do nothing, i.e. newNodes stays {} *)
+			],
+			(* at least one proof rule applied, and we saturate all pending PRFSITs *)
+			newNodes = MapAt[ levelSaturation[ #, sat1, sat2]&, newNodes, Position[ newNodes, _PRFSIT$]]
+		];
+		Switch[ Length[ newNodes],
+			0,
+			makeTERMINALNODE[ makePRFINFO[ name -> noApplicableRule, used -> Prepend[ kb@ps, goal@ps], "openPS" -> Drop[ Apply[ List, ps], 2]], failed],
+			1,
+			First[ newNodes],
+			_,
+			makeORNODE[ 
+				makePRFINFO[ name -> proofAlternatives, used -> used@newNodes, generated -> generated@newNodes],
+				newNodes]
+		]
+	]
+priorityInteractiveSaturation[ args___] := unexpected[ priorityInteractiveSaturation, {args}]
+
+applyAllRulesOnce[ ps_PRFSIT$, rules_List] :=
+	DeleteCases[ Map[ Replace[ ps, #]&, rules], $Failed|ps]
+
+getActiveRulesPartitionedFilter[ ps_PRFSIT$, filter_, lower_Integer, upper_Integer] := 
+	Module[{rules, act, prio, names, partition = {{}, {}, {}}},
+		(* Select names of active rules, delete rules of type filter, strings (category names) and inactive rules, finally apply op *)
+		{rules, act, prio} = ruleSetup@ps;
+		names = DeleteDuplicates[ Flatten[ rules /. {{r_, _, _, _Integer, filter} -> Sequence[],
+			{r_ /; Replace[ r, act], _, _, _Integer, ___} -> r, _String | {r_Symbol, _, _, _Integer, ___} -> Sequence[]}]];
+			
+		partition[[1]] = Select[ names, (Replace[ #, prio] < lower)&];
+		partition[[2]] = Select[ names, (lower <= Replace[ #, prio] <= upper)&];
+		partition[[3]] = Select[ names, (upper < Replace[ #, prio])&];
+		partition = Map[ Sort[ #, Function[ {x, y}, Replace[ x, prio] < Replace[ y, prio]]]&, partition];
+		DeleteCases[ Map[ inferenceRule, partition, {2}], _inferenceRule, {2}]
+	]	
+getActiveRulesPartitionedFilter[ args___] := unexpected[ getActiveRulesPartitionedFilter, {args}]
+
+selectInteractiveRuleDialog[ names:{_, __}, ps_PRFSIT$] :=
+    Module[ {proofCells, showProof = False, buttonRow},
+        buttonRow = {CancelButton[ translate[ "!selectInteractiveRule"], DialogReturn[ $Failed]], DefaultButton[ translate[ "OK"], DialogReturn[ $selectedRule]]};
+        $selectedRule = 1;
+        proofCells = pObjCells[];
+        $TMAproofNotebook = tmaNotebookPut[ Notebook[ proofCells], "Proof", Visible -> Dynamic[ showProof]];
+        tmaDialogInput[ Notebook[ 
+        	Join[
+        		{Cell[ BoxData[ ToBoxes[ 
+                    Toggler[ Dynamic[ showProof], 
+                        {False -> Tooltip[ translate[ "more"], translate[ "showProofProgress"]], 
+                         True -> Tooltip[ translate[ "hide proof"], translate[ "hideProofProgress"]]}]]], 
+                    "Hint"],
+                Cell[ translate[ "selectInteractiveRuleHeader"], "Subsection"],
+        		pSitCells[ ps],
+        		Cell[ translate[ "possibleRules"], "Subsubsection"]},
+        		MapIndexed[ ruleChoiceButtons, names], 
+        		{Cell[ BoxData[ RowBox[ Map[ ToBoxes, buttonRow]]], "Text"]}
+        		]
+        	],
+        	"Dialog"
+        ]
+    ]
+
+ruleChoiceButtons[ r_, {num_Integer}] :=
+	Cell[ TextData[ MessageName[ r, "usage"]], "Text",
+		CellDingbat -> Cell[ BoxData[ ToBoxes[ RadioButton[ Dynamic[ $selectedRule], num]]], "Assumption"]
+	]
+	
+
 (* ::Section:: *)
 (* Level saturation *)
 
@@ -179,6 +303,7 @@ registerStrategy[ "Apply once + Level saturation", applyOnceAndLevelSaturation]
 (*
 registerStrategy[ "Try several", trySeveral]
 *)
+registerStrategy[ "Priority-Interactive Strategy + Level Saturation", priorityInteractiveSaturation]
 
 End[]
 
