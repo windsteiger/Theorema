@@ -1,5 +1,5 @@
 (* Theorema 
-    Copyright (C) 2010 The Theorema Group
+    Copyright (C) 1995-2014 The Theorema Group
 
     This file is part of Theorema 2.0
     
@@ -10,12 +10,31 @@
 
     Theorema 2.0 is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    along with this program. If not, see <http://www.gnu.org/licenses/>.
 *)
+
+(*
+   *********************************************************************************************
+   -- IMPORTANT -- IMPORTANT -- IMPORTANT -- IMPORTANT -- IMPORTANT -- IMPORTANT -- IMPORTANT -- 
+   *********************************************************************************************
+ 
+     If you modify this file, then a new entry must have been added to the file "English"
+     in this directory already.
+
+     In this file, either
+      1) copy the english entry into the section named "UNTRANSLATED" at the end of this file 
+	       or
+      2) translate the english entry and add it in correct alphabetical order here 
+         (case-insensitive).
+      
+   *********************************************************************************************
+   -- IMPORTANT -- IMPORTANT -- IMPORTANT -- IMPORTANT -- IMPORTANT -- IMPORTANT -- IMPORTANT -- 
+   *********************************************************************************************
+ *)
 
 With[ {lang = "German"},
 
@@ -25,6 +44,10 @@ With[ {lang = "German"},
     translate[ "2ANNOPTooltip", lang] = "\[SmallCircle] \[Ellipsis] Operatorsymbol\nA \[Ellipsis] Annotation\nB \[Ellipsis] Annotation";
 
 	translate[ "abort", lang] = "Beweis abbrechen";
+	translate[ "aboutTheorema", lang] = "Theorema wurde um 1995 von Bruno Buchberger konzipiert und initiiert und reflektiert seine Sicht, \"Mathematik \
+zu betreiben\". Entwickelt wird es unter seiner Leitung durch die Theorema-Gruppe am Research Institute for Symbolic Computation (RISC), Johannes Kepler \
+Universit\[ADoubleDot]t, Linz-Hagenberg, Austria. \
+Theorema 2.0 ist eine wesentliche Weiterentwicklung, die haupts\[ADoubleDot]chlich durch Wolfgang Windsteiger vorangetrieben wird.";
     translate[ "ambiguousRange", lang] = "Der Bereich `` bezeichnet keine Variable in eindeutiger Weise.";
     translate[ "AND2", lang] = "\!\(\*FormBox[FrameBox[\"links\"], SelectionPlaceholder]\) und \!\(\*FormBox[FrameBox[\"rechts\"], SelectionPlaceholder]\)";   	
     translate[ "AND3", lang] = "\!\(\*FormBox[FrameBox[\"e1\"], SelectionPlaceholder]\) und \[Ellipsis] und \!\(\*FormBox[FrameBox[\"en\"], SelectionPlaceholder]\)";
@@ -49,6 +72,7 @@ With[ {lang = "German"},
     translate[ "Computation", lang] = "Berechnung";
 	translate[ "computationTime", lang] = "Rechenzeit";
     translate[ "CONN2Tooltip", lang] = "links, rechts \[Ellipsis] Aussage";   	
+	translate[ "connArgM", lang] = "Junktor \"`1`\" wird auf `2` Argumente angewendet; es werden genau `3` Argumente erwartet.";
     translate[ "CONNTooltip", lang] = "e1, \[Ellipsis], en \[Ellipsis] Aussage";
 
     translate[ "Declarations", lang] = "Globale";
@@ -84,7 +108,16 @@ With[ {lang = "German"},
 
     translate[ "GABBREVTooltip", lang] = "Globale Abk\[UDoubleDot]rzung";   	
     translate[ "GCONDTooltip", lang] = "Globale Bedingung";   	
-    translate[ "Global Declarations"] = "In dieser Zelle g\[UDoubleDot]ltige Globale";
+    translate[ "Global Declarations", lang] = "In dieser Zelle g\[UDoubleDot]ltige Globale";
+    translate[ "GNULicense", lang] = StringForm[ "Copyright (\[Copyright]) 1995-`` Die Theorema-Gruppe\n\n\
+Theorema 2.0 ist freie Software: es darf unter Einhaltung der Bedingungen der GNU General \
+Public License wie von der Free Software Foundation publiziert, entweder Version 3 der Lizenz oder \
+wahlweise jede sp\[ADoubleDot]tere Version, weitergegeben und/oder modifiziert werden.\n\n\
+Theorema 2.0 wird in der Hoffnung weitergegeben, dass es n\[UDoubleDot]tzlich ist, es gibt allerdings \
+keinerlei Garantie, nicht einmal eine Zusicherung allgemeiner Gebrauchstauglichkeit oder einer \
+Eignung f\[UDoubleDot]r einen bestimmten Zweck. F\[UDoubleDot]r weiter Details verweisen wir auf \
+die GNU General Public License.\n\nEine Kopie der Lizenz sollten Sie mit dem Programm erhalten haben, \
+falls nicht, siehe <http://www.gnu.org/licenses/>.", ToString[ Date[][[1]]]];
     translate[ "GoalProve", lang] = "Beweisziel";
 	translate[ "group/ungroup", lang] = "Gruppieren / Gruppierung aufheben";
     translate[ "GVARCONDTooltip", lang] = "Global universal gebundene Variable mit Bedingung";   	
@@ -141,6 +174,7 @@ With[ {lang = "German"},
 
 	translate[ "pending", lang] = "unerledigt";
 	translate[ "pInteractive", lang] = "Interaktives Beweisen";
+	translate[ "predArgN", lang] = "Pr\[ADoubleDot]dikat \"`1`\" wird auf `2` Argumente angewendet; H\[ODoubleDot]chstens `3` Argumente erwartet.";
 	translate[ "preferences last saved", lang] = "Einstellungen zuletzt gesichert";
     translate[ "Programming", lang] = "Mathematica Programmierung";
 	translate[ "proofCellStatus", lang] = "Beweiszellen";
@@ -194,6 +228,10 @@ With[ {lang = "German"},
     translate[ "tcComputeTabLabel", lang] = "Berechnen";
     translate[ "tcComputeTabNewTabLabel", lang] = "neu";
     translate[ "tcComputeTabSetupTabLabel", lang] = "einstellungen";
+    translate[ "tcInformTabAboutTabLabel", lang] = "\[UDoubleDot]ber";
+    translate[ "tcInformTabLabel", lang] = "informieren";
+    translate[ "tcInformTabLicenseTabLabel", lang] = "lizenz";
+    translate[ "tcInformTabSetupTabLabel", lang] = "einstellungen";   	
     translate[ "tcLangTabArchTabButtonCloseLabel", lang] = "Ende";
     translate[ "tcLangTabArchTabButtonInfoLabel", lang] = "Archiv Info";
     translate[ "tcLangTabArchTabButtonLoadLabel", lang] = "Laden";
@@ -207,7 +245,6 @@ With[ {lang = "German"},
 	translate[ "tcPrefAppearSuppressWelcome", lang] = "Willkommensschirm nicht anzeigen";
 	translate[ "tcPrefAppearWelcome", lang] = "Willkommensschirm";
 	translate[ "tcPrefArchiveDir", lang] = "Archivverzeichnis";
-    translate[ "tcPreferencesTabLabel", lang] = "Einstellungen";
 	translate[ "tcPrefLanguage", lang] = "Sprache";
     translate[ "tcProveTabBuiltinTabLabel", lang] = "built-in";
     translate[ "tcProveTabGoalTabLabel", lang] = "ziel";
@@ -216,7 +253,7 @@ With[ {lang = "German"},
     translate[ "tcProveTabLabel", lang] = "Beweisen";
     translate[ "tcProveTabProverTabLabel", lang] = "beweiser";
     translate[ "tcProveTabSubmitTabLabel", lang] = "absenden";
-    translate[ "tcSessionTabLabel", lang] = "Sitzung";
+    translate[ "tcSessionTabLabel", lang] = "vorbereiten";
     translate[ "tcSessTabArchTabLabel", lang] = "archive";
     translate[ "tcSessTabComposeTabLabel", lang] = "erstellen";
     translate[ "tcSessTabEnvTabButtonAlgLabel", lang] = "Algorithmus";

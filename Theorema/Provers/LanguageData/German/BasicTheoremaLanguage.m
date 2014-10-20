@@ -1,5 +1,5 @@
 (* Theorema 
-    Copyright (C) 2010 The Theorema Group
+    Copyright (C) 1995-2014 The Theorema Group
 
     This file is part of Theorema 2.0
     
@@ -10,12 +10,32 @@
 
     Theorema 2.0 is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    along with this program. If not, see <http://www.gnu.org/licenses/>.
 *)
+
+(*
+   *********************************************************************************************
+   -- IMPORTANT -- IMPORTANT -- IMPORTANT -- IMPORTANT -- IMPORTANT -- IMPORTANT -- IMPORTANT -- 
+   *********************************************************************************************
+ 
+     If you modify this file, then a new entry must have been added to the respective file in
+     the "English" directory already.
+
+     In this file, either
+      1) copy the english entry into the corresponding section named "UNTRANSLATED" (there are
+         several in this file 
+	       or
+      2) translate the english entry and add it in correct alphabetical order here 
+         (case-insensitive).
+      
+   *********************************************************************************************
+   -- IMPORTANT -- IMPORTANT -- IMPORTANT -- IMPORTANT -- IMPORTANT -- IMPORTANT -- IMPORTANT -- 
+   *********************************************************************************************
+ *)
 
 (* ::Section:: *)
 (* Public Declaration Part: executes in Theorema`Provers` *)

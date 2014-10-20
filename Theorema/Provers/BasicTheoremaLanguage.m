@@ -820,8 +820,14 @@ compatibleRange[ args___] := unexpected[ compatibleRange, {args}]
 (* in both cases: check used and generated more thoroughly, whether they are correctly passed *)
 
 inferenceRule[ solveMetaUnification] = 
-ps:PRFSIT$[ g:FML$[ _, a_And$TM, lab_, ___] /; MemberQ[ a, e_Equal$TM /; !FreeQ[ e, _META$]], K_List, id_, rest___?OptionQ] :> performProofStep[
-	Module[ {eq = Cases[ a, s_Equal$TM /; !FreeQ[ s, _META$], {1}, 1], com, inst, newGoalsAlt}, 
+ps:(PRFSIT$[ g:FML$[ _, a_And$TM, lab_, ___] /; MemberQ[ a, e_Equal$TM /; !FreeQ[ e, _META$]], K_List, id_, rest___?OptionQ]|
+PRFSIT$[ g:FML$[ _, a:e_Equal$TM /; !FreeQ[ e, _META$], lab_, ___], K_List, id_, rest___?OptionQ]) :> performProofStep[
+	Module[ {eq, com, inst, newGoalsAlt},
+		If[ a === e,
+		  eq = {e},
+		  (* else *)
+		  eq = Cases[ a, s_Equal$TM /; !FreeQ[ s, _META$], {1}, 1]
+		];
 		{com, inst} = Apply[ unification, eq[[1]]];
 		If[ com === $Failed,
 			Throw[ $Failed]
@@ -840,7 +846,8 @@ ps:PRFSIT$[ g:FML$[ _, a_And$TM, lab_, ___] /; MemberQ[ a, e_Equal$TM /; !FreeQ[
 ]
 
 inferenceRule[ partSolveMetaMatching] = 
-ps:PRFSIT$[ g:FML$[ _, a:And$TM[ pre___, x_ /; !FreeQ[ x, _META$], post___], lab_, ___], K_List, id_, rest___?OptionQ] :> performProofStep[
+ps:(PRFSIT$[ g:FML$[ _, a:And$TM[ pre___, x_ /; !FreeQ[ x, _META$], post___], lab_, ___], K_List, id_, rest___?OptionQ]|
+PRFSIT$[ g:FML$[ _, a:x_ /; !FreeQ[ x, _META$], lab_, ___], K_List, id_, rest___?OptionQ]) :> performProofStep[
 	Module[ {inst = Map[ instantiation[ x, formula@#]&, K], posInst, newGoalsAlt},
 		posInst = Position[ inst, _List, {1}];
 		If[ posInst === {},
@@ -860,6 +867,7 @@ ps:PRFSIT$[ g:FML$[ _, a:And$TM[ pre___, x_ /; !FreeQ[ x, _META$], post___], lab
 		]
 	]
 ]
+
 (* ::Section:: *)
 (* Rule composition *)
 

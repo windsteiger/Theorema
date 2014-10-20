@@ -1,14 +1,7 @@
 Resources[
     Version[1],
-    Sources[
-        Directory["~"]
-    ],
-    StyleSheets[
-        Directory["Theorema/FrontEnd/StyleSheets"]
-    ],
     ExecutionBuildCommand["<<Theorema`"],
     Paclet[
-        PacletFolder["Theorema"],
         FunctionPaclet[False]
     ]
 ]

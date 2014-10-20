@@ -228,7 +228,8 @@ openTheoremaCommander[ ] /; $Notebooks :=
         	Refresh[
         	activitiesView[
         		(* activities buttons *)
-        		{translate["tcSessionTabLabel"], translate["tcProveTabLabel"], translate["tcComputeTabLabel"], translate["tcSolveTabLabel"], translate["tcPreferencesTabLabel"]},
+        		{translate["tcSessionTabLabel"], translate["tcProveTabLabel"], translate["tcComputeTabLabel"], translate["tcSolveTabLabel"], 
+        			translate["tcInformTabLabel"]},
         		(* for each activity the respective action buttons *)
         		{
         			(* session *){translate["tcSessTabComposeTabLabel"], translate["tcSessTabInspectTabLabel"], translate["tcSessTabArchTabLabel"]},
@@ -236,7 +237,8 @@ openTheoremaCommander[ ] /; $Notebooks :=
         				translate["tcProveTabProverTabLabel"], translate["tcProveTabSubmitTabLabel"], translate["tcProveTabInspectTabLabel"]},
         			(* compute *){translate["tcComputeTabNewTabLabel"], translate["tcComputeTabKBTabLabel"], translate["tcComputeTabBuiltinTabLabel"], translate["tcComputeTabSetupTabLabel"]},
         			(* solve *)  {translate["tcSolveTabKBTabLabel"], translate["tcSolveTabBuiltinTabLabel"], translate["tcSolveTabSetupTabLabel"]},
-        			(* prefs *)  {(*, , *)}
+        			(* inform *)  {translate["tcInformTabLicenseTabLabel"], translate["tcInformTabAboutTabLabel"], translate["tcInformTabSetupTabLabel"]},
+        			(* setup *)  { }
         		},
         		(* for each activity and each action the respective content *)
         		{
@@ -254,7 +256,7 @@ openTheoremaCommander[ ] /; $Notebooks :=
         			(* solve *)  {Dynamic[Refresh[ displayKBBrowser[ "solve"], TrackedSymbols :> {$kbFilterKW, $tcKBBrowseSelection, $kbStruct}]],
         				Dynamic[ Refresh[ displayBuiltinBrowser[ "solve"], TrackedSymbols :> {buiActSolve}]],
         				solveSetup[]},
-        			(* prefs *)  {setPreferences[ ]}
+        			(* inform *)  {licenseTab[], aboutTab[], setPreferences[]}
         		}
         	], TrackedSymbols :> {$TmaLanguage}]],
         	StyleDefinitions -> makeColoredStylesheet[ "GUI"],
@@ -287,7 +289,7 @@ activitiesView[ activitiesLab:{__String}, actionLabs:{{___String}..}, views:{{__
         	{Column[ MapIndexed[
                 Button[ Mouseover[ Style[ #1, "TabLabel1"], Style[ #1, "TabLabel1Over"]], ($tcActionView = 1; $tcActivitiesView = #2[[1]]),
                 	Background -> If[ $tcActivitiesView === #2[[1]], TMAcolor[0], TMAcolor[5]]] &,
-                activitiesLab], Center, 0],
+                activitiesLab], Center, Spacings -> {0, {0, {2 -> 1, -2 -> 5}}}],
                 Pane[ views[[$tcActivitiesView, $tcActionView]], {400, 600}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic,
                     ImageMargins -> 0, FrameMargins -> 10]}},
             Alignment -> {{Center, Left}, {Center, Top}}, Spacings -> {0, 0}, Background -> TMAcolor[1]]
@@ -2667,6 +2669,18 @@ proofSitChoiceButtons[ ps_PRFSIT$, {num_Integer}] :=
 	]
 proofSitChoiceButtons[ args___] := unexpected[ proofSitChoiceButtons, {args}]
 
+
+(* ::Section:: *)
+(* licenseTab *)
+
+licenseTab[ ] := Text[ Style[ translate[ "GNULicense"], ParagraphIndent -> 0, LineIndent -> 0, TextJustification -> 1]]
+licenseTab[ args___] := unexpected[ licenseTab, {args}]
+
+
+(* ::Section:: *)
+(* aboutTab *)
+aboutTab[ ] := Text[ Style[ translate[ "aboutTheorema"], ParagraphIndent -> 0, LineIndent -> 0, TextJustification -> 1]]
+aboutTab[ args___] := unexpected[ aboutTab, {args}]
 
 (* ::Section:: *)
 (* end of package *)
