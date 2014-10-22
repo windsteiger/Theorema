@@ -1,5 +1,12 @@
 Resources[
     Version[1],
+    Sources[
+        Directory["~"]
+    ],
+    StyleSheets[
+        Directory["Theorema/FrontEnd/StyleSheets"],
+        Directory["Theorema/FrontEnd/StyleSheets/Theorema"]
+    ],
     ExecutionBuildCommand["<<Theorema`"],
     Paclet[
         FunctionPaclet[False]
