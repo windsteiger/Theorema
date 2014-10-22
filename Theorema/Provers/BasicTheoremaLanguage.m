@@ -821,9 +821,9 @@ compatibleRange[ args___] := unexpected[ compatibleRange, {args}]
 
 inferenceRule[ solveMetaUnification] = 
 ps:(PRFSIT$[ g:FML$[ _, a_And$TM, lab_, ___] /; MemberQ[ a, e_Equal$TM /; !FreeQ[ e, _META$]], K_List, id_, rest___?OptionQ]|
-PRFSIT$[ g:FML$[ _, a:e_Equal$TM /; !FreeQ[ e, _META$], lab_, ___], K_List, id_, rest___?OptionQ]) :> performProofStep[
+PRFSIT$[ g:FML$[ _, e_Equal$TM /; !FreeQ[ e, _META$], lab_, ___], K_List, id_, rest___?OptionQ]) :> performProofStep[
 	Module[ {eq, com, inst, newGoalsAlt},
-		If[ a === e,
+		If[ Head[ formula@g] === Equal$TM,
 		  eq = {e},
 		  (* else *)
 		  eq = Cases[ a, s_Equal$TM /; !FreeQ[ s, _META$], {1}, 1]
