@@ -84,6 +84,7 @@ With[ {lang = "English"},
 	MessageName[ orKB, "usage", lang] = "Case distinction based on a disjunction in the knowledge base";
 
 	MessageName[ partSolveMetaMatching, "usage", lang] = "Instantiate meta-variables by matching";
+	MessageName[ partSolveMetaMultiMatching, "usage", lang] = "Instantiate meta-variables by matching (multiple matching)";
 
 	MessageName[ quantifierRules, "usage", lang] = "Rules for quantifiers";
 
@@ -431,8 +432,17 @@ subProofHeader[ orKB, lang, _, {generated_List}, ___, pVal_, {p_}] := {textCell[
 (* P *)
 
 proofStepText[ partSolveMetaMatching, lang, {{u_}}, {{g_}}, ___, "instantiation" -> inst_List, ___] := {
-	textCell[ "Let now ", inlineTheoremaExpressionSeq[ inst[[ 1]], lang], ". In order to prove ", formulaReference[ u], " it suffices to show"],
+	textCell[ "Let now ", inlineTheoremaExpressionSeq[ inst[[1]], lang], ". In order to prove ", formulaReference[ u], " it suffices to show"],
 	goalCell[ g, "."]
+	};
+
+proofStepText[ partSolveMetaMultiMatching, lang, {{u_}}, {{g__}}, ___, "instantiation" -> inst_List, ___] := {
+	textCell[ "We have several choices."]
+	};
+
+subProofHeader[ partSolveMetaMultiMatching, lang, {{u_}}, {g_List}, ___, "instantiation" -> inst_List, ___, pVal_, {p_}] := {
+	textCell[ "Let now ", inlineTheoremaExpressionSeq[ inst[[p]], lang], ". In order to prove ", formulaReference[ u], " it suffices to show"],
+	goalCell[ g[[p]], "."]
 	};
 
 (* ::Subsection:: *)

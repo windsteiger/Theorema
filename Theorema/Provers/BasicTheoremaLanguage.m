@@ -861,7 +861,7 @@ PRFSIT$[ g:FML$[ _, a:x_ /; !FreeQ[ x, _META$], lab_, ___], K_List, id_, rest___
             	toBeProved[ goal -> newGoalsAlt[[1]], kb -> K, rest]
         	],
         	(* else *)
-        	makeORNODE[ makePRFINFO[ name -> partSolveMetaMatching, used -> g, "instantiation" -> inst], 
+        	makeORNODE[ makePRFINFO[ name -> partSolveMetaMultiMatching, used -> g, "instantiation" -> inst], 
             	Map[ toBeProved[ goal -> #, kb -> K, rest]&, newGoalsAlt]
         	]
 		]
