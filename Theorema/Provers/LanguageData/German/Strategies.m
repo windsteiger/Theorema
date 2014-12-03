@@ -45,6 +45,8 @@ With[ {lang = "German"},
 	MessageName[ applyOnce, "usage", lang] = "applyOnce[ prfsit] wendet eine passende Beweisregel einmal auf eine Beweissituation an.";
 	MessageName[ applyOnceAndLevelSaturation, "usage", lang] = "applyOnceAndLevelSaturation[ prfsit] wendet eine passende Beweisregel einmal auf eine Beweissituation an und verwendet dann Level-Saturation Techniken.";
 
+	MessageName[ priorityInteractiveSaturation, "usage", lang] = "priorityInteractiveSaturation[ prfsit] wendet entweder die erste oder all passenden Beweisregeln auf die Beweissituation prfsit an (abhaengig von deren Prioritaeten), oder erlaubt dem Benutzer, eine Interaktive Regel anzuwenden.";
+	
 	MessageName[ trySeveral, "usage", lang] = "trySeveral[ prfsit] is not serious, it just duplicates the proof situation into two children. Should be a test case for exhaustive search until search depth is reached.";
 
 (* UNTRANSLATED *)
@@ -61,8 +63,15 @@ With[ {lang = "German"},
 (* TRANSLATED *)
 	translate[ "Apply once", lang] = "Einmal anwenden";
 	translate[ "Apply once + Level saturation", lang] = "Einmal anwenden + Level Saturation";
+	
+	translate[ "Priority-Interactive Strategy + Level Saturation", lang] = "Prioritaet-Interactive Strategie + Level Saturation";
+	translate[ "possibleRules", lang] = "Moegliche Regeln";
+
+	translate[ "selectInteractiveRuleHeader", lang] = "Waehle eine interactive Regel";
 
 	translate[ "Try several", lang] = "Mehrere probieren";
+	
+	translate[ "!selectInteractiveRule", lang] = "keine Regel anwenden";
 
 (* UNTRANSLATED *)
 

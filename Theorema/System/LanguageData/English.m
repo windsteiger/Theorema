@@ -112,6 +112,7 @@ With[ {lang = "English"},
 	MessageName[ isGround, "usage", lang] = "";
 	MessageName[ isLiteralExpression, "usage", lang] = "isLiteralExpression[ e] is true iff e is an atomic or a negated atomic expression.";	
 	MessageName[ isLogQuantifierFree, "usage", lang] = "";	
+	MessageName[ isMathematicalConstant, "usage", lang] = "";
 	MessageName[ isNonNumberAtomicTerm, "usage", lang] = "isAtomicTerm[ t] is true iff t is an atomic term but not a number.";	
 	MessageName[ isProofNode, "usage", lang] = "isProofNode[ p] is True iff p is a valid node to be inserted into a proof tree.";
 	MessageName[ isQuantifierFormula, "usage", lang] = "isQuantifierFormula[ e] is true iff e is built up by a logical quantifier.";	
