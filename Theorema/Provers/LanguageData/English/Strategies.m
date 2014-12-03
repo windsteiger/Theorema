@@ -44,7 +44,9 @@ With[ {lang = "English"},
 
 	MessageName[ applyOnce, "usage", lang] = "applyOnce[ prfsit] applies a matching inference rule from rules to the proof situation prfsit once.";
 	MessageName[ applyOnceAndLevelSaturation, "usage", lang] = "applyOnceAndLevelSaturation[ prfsit] applies a matching inference rule to the proof situation prfsit once and then applies level saturation techniques.";
+	
 	MessageName[ priorityInteractiveSaturation, "usage", lang] = "priorityInteractiveSaturation[ prfsit] applies either the first or all matching inference rules to the proof situation prfsit (depending on their priorities), or allows the user to choose an interactive rule.";
+	
 	MessageName[ trySeveral, "usage", lang] = "trySeveral[ prfsit] tries several rules from rules to the proof situation prfsit at the same time.";
 
 ] (* With *)
@@ -59,14 +61,15 @@ With[ {lang = "English"},
 
 	translate[ "Apply once", lang] = "Apply once";
 	translate[ "Apply once + Level saturation", lang] = "Apply once + Level saturation";
+	
+	translate[ "Priority-Interactive Strategy + Level Saturation", lang] = "Priority-Interactive Strategy + Level Saturation";
+	translate[ "possibleRules", lang] = "Possible Rules";
 
+	translate[ "selectInteractiveRuleHeader", lang] = "Choose an Interactive Rule";
+	
 	translate[ "Try several", lang] = "Try several";
 	
 	translate[ "!selectInteractiveRule", lang] = "do not apply any rule";
-	translate[ "Priority-Interactive Strategy + Level Saturation", lang] = "Priority-Interactive Strategy + Level Saturation";
-	translate[ "possibleRules", lang] = "Possible Rules";
-	translate[ "selectInteractiveRuleHeader", lang] = "Choose an Interactive Rule";
-
 ] (* With *)
 
 End[]

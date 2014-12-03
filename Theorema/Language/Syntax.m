@@ -62,6 +62,79 @@ initParser[args___] := unexpected[ initParser, {args}]
 (* ::Section:: *)
 (* Language classification *)
 
+SetAttributes[ isMathematicalConstant, HoldAll];
+isMathematicalConstant[ Indeterminate|True|False|I|Pi|E|Infinity|DirectedInfinity|Complex|Rational|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaisher] := True
+isMathematicalConstant[ _] := False
+
+(* "$symbolTranslator" translates Mma symbols to Tma symbols corresponding to them in a 1-1 way.
+	This, for instance, is not the case for "Wedge", since "Wedge" should only be turned into "And$TM" BUT NOT VICE VERSA! *)
+$symbolTranslator = {"SetDelayed" -> "EqualDef", "Inequality" -> "OperatorChain", "Max" -> "max", "Min" -> "min"};
+
+(* Every symbol in "System`" context is registered in the two "Theorema`Language`" contexts,
+	and two dispatch tables for fast conversion between Theorema and Mathematica are generated. *)
+{Theorema`MmaToTma, Theorema`TmaToMma, Theorema`TmaCompToMma} =
+	Transpose[
+		DeleteCases[
+			Map[
+				(* We add the same exceptions as in "freshSymbol", and treat them separately below.
+					Otherwise, some rules would appear multiple times. *)
+				Switch[ #,
+					"DoubleRightArrow"|"DoubleLongRightArrow"|"DoubleLeftRightArrow"|"DoubleLongLeftRightArrow"|
+					"Set"|"Wedge"|"Vee"|"List"|"AngleBracket"|"Complement",
+					Null,
+					_,
+					With[ {n = ToExpression[ #, InputForm, Hold], tm = Replace[ #, $symbolTranslator] <> "$TM"},
+						If[ isMathematicalConstant@@n,
+							Null,
+							{HoldPattern@@n :> ToExpression[ tm], (* With "ToExpression" the symbol automatically goes to the right context. "HoldPattern" is needed because otherwise some symbols, e.g. "$Context", would immediately evaluate. *)
+							 RuleDelayed@@Prepend[ n, ToExpression[ "Theorema`Language`" <> tm]],
+							 RuleDelayed@@Prepend[ n, ToExpression[ "Theorema`Computation`Language`" <> tm]]}
+						]
+					]
+				]&,
+				Names[ "System`*"]
+			],
+		Null]
+	];
+	
+(* The dispatch tables "MmaToTma" and "Tma(Comp)ToMma" allow for a neat integration of Mathematica functions into
+	Theorema sessions. They translate Mathematica expressions to their Theorema counterparts, and vice versa.
+	Of course, not all Theorema expressions have Mathematica counterparts;
+	For instance, Mathematica has no built-in concept of integer/rational intervals. *)
+Theorema`MmaToTma = Dispatch[
+			Join[ Theorema`MmaToTma,
+				{HoldPattern[ DoubleRightArrow]|HoldPattern[ DoubleLongRightArrow] :> ToExpression[ "Implies$TM"],
+				HoldPattern[ DoubleLeftRightArrow]|HoldPattern[ DoubleLongLeftRightArrow]|HoldPattern[ Equivalent] :> ToExpression[ "Iff$TM"],
+				HoldPattern[ Set] :> ToExpression[ "Equal$TM"],
+				HoldPattern[ Wedge] :> ToExpression[ "And$TM"],
+				HoldPattern[ Vee] :> ToExpression[ "Or$TM"],
+				HoldPattern[ Complement] :> ToExpression[ "Backslash$TM"],
+				HoldPattern[ List]|HoldPattern[ AngleBracket] :> makeTuple (* We turn "List" into "Tuple", because that's actually what a Mathematica list is. *)}
+			]
+		   ];
+Theorema`TmaToMma = Dispatch[
+			Join[ Theorema`TmaToMma,
+				{Theorema`Language`Iff$TM :> Equivalent,
+				Theorema`Language`IffDef$TM :> Equivalent,
+				Theorema`Language`Set$TM :> List,
+				Theorema`Language`Tuple$TM :> List,
+				Theorema`Language`Backslash$TM :> Complement,
+				Theorema`Language`Radical$TM[ x_, y_] :> Power[ x, 1/y]}
+				(* "Theorema`Language`AngleBracket$TM", "Theorema`Language`Equivalent$TM" etc. are not translated,
+					because they should not appear in Theorema expressions anyway ... *)
+			]
+		   ];
+Theorema`TmaCompToMma = Dispatch[
+			Join[ Theorema`TmaCompToMma,
+				{Theorema`Computation`Language`Iff$TM :> Equivalent,
+				Theorema`Computation`Language`IffDef$TM :> Equivalent,
+				Theorema`Computation`Language`Set$TM :> List,
+				Theorema`Computation`Language`Tuple$TM :> List,
+				Theorema`Computation`Language`Backslash$TM :> Complement,
+				Theorema`Computation`Language`Radical$TM[ x_, y_] :> Power[ x, 1/y]}
+			]
+		   ];
+
 
 (* To add a new quantifier, just add a pair to this list *)	
 $tmaQuantifiers =
@@ -278,9 +351,8 @@ $tmaOperators = {
 	{"\:293a", {Infix}, "appendElem"}, {"\:293b", {Infix}, "prependElem"}};
 	
 $tmaOperatorSymbols = Map[ First, $tmaOperators];
-(* We must not add contexts (like "Theorema`Knowledge`" etc.) to the operator names, as it is done with quantifiers,
-	because some of them (like "Plus") appear in context "Theorema`Language`". Copying each of the more than 200
-	operator names 4 times (for the 4 possible contexts) seems to be a bit too inefficient. *)
+(* We must not add contexts (like "Theorema`Language`" etc.) to the operator names, as it is done with quantifiers,
+	because copying each of the more than 200 operator names twice (for the two possible contexts) seems to be a bit too inefficient. *)
 $tmaOperatorNames = Map[ (Last[#] <> "$TM")&, $tmaOperators];
 $tmaOperatorToName = Dispatch[ Map[ Rule[ First[#], Last[#]] &, $tmaOperators]];
 $tmaNameToOperator = Dispatch[ MapThread[ Rule, {$tmaOperatorNames, $tmaOperatorSymbols}]];

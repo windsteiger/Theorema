@@ -134,10 +134,6 @@ freshSymbolProg[ Hold[ s_Symbol], dropWolf_] :=
     ]
 freshSymbolProg[ args___] := unexpected[ freshSymbolProg, {args}]
 
-SetAttributes[ isMathematicalConstant, HoldAll];
-isMathematicalConstant[ Indeterminate|True|False|I|Pi|E|Infinity|DirectedInfinity|Complex|Rational|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaisher] := True
-isMathematicalConstant[ _] := False
-
 markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
     Module[ {s, seq, vars},
         (* all symbols sym specified as variables in r are translated into VAR$[sym]
