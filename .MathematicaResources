@@ -9,6 +9,7 @@ Resources[
     ],
     ExecutionBuildCommand["<<Theorema`"],
     Paclet[
+        DocumentationFolder["Theorema/Documentation"],
         FunctionPaclet[False]
     ]
 ]
