@@ -548,10 +548,10 @@ stripVar[ v:Theorema`Language`VAR$[a_]] := v -> ToExpression[ "VAR$" <> ToString
 stripVar[ v:Theorema`Language`META$[a_, n_, ___]] := v -> ToExpression[ "META$" <> ToString[a] <> ToString[n]]
 stripVar[ args___] := unexpected[ stripVar, {args}]
 
-varToPattern[ v:Theorema`Language`VAR$[Theorema`Language`SEQ0$[a_]]] := With[ {new = ToExpression[ "SEQ0$" <> ToString[a]]}, v :> Apply[ Pattern, {new, BlankNullSequence[]}]]
-varToPattern[ v:Theorema`Language`VAR$[Theorema`Language`SEQ1$[a_]]] := With[ {new = ToExpression[ "SEQ1$" <> ToString[a]]}, v :> Apply[ Pattern, {new, BlankSequence[]}]]
-varToPattern[ v:Theorema`Language`VAR$[a_]] := With[ {new = ToExpression[ "VAR$" <> ToString[a]]}, v :> Apply[ Pattern, {new, Blank[]}]]
-varToPattern[ v:Theorema`Language`META$[a_, n_, ___]] := With[ {new = ToExpression[ "META$" <> ToString[a] <> ToString[n]]}, v :> Apply[ Pattern, {new, Blank[]}]]
+varToPattern[ v:Theorema`Language`VAR$[Theorema`Language`SEQ0$[a_]]] := With[ {new = ToExpression[ "SEQ0$" <> ToString[a]]}, v -> Pattern[ new, BlankNullSequence[]]]
+varToPattern[ v:Theorema`Language`VAR$[Theorema`Language`SEQ1$[a_]]] := With[ {new = ToExpression[ "SEQ1$" <> ToString[a]]}, v -> Pattern[ new, BlankSequence[]]]
+varToPattern[ v:Theorema`Language`VAR$[a_]] := With[ {new = ToExpression[ "VAR$" <> ToString[a]]}, v -> Pattern[ new, Blank[]]]
+varToPattern[ v:Theorema`Language`META$[a_, n_, ___]] := With[ {new = ToExpression[ "META$" <> ToString[a] <> ToString[n]]}, v -> Pattern[ new, Blank[]]]
 varToPattern[ args___] := unexpected[ varToPattern, {args}]
 
 (* ::Subsubsection:: *)
