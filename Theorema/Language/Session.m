@@ -178,18 +178,53 @@ markVariables[ Hold[e_]] := Hold[ e]
 
 markVariables[ args___] := unexpected[ markVariables, {args}]
 
+(* "addAbbrevPositions[ expr ]" adds the positions of the free occurrences of all ABBREV-variables in 'expr' to their respective ABBRVRNG$-ranges.
+	Note that multiranges are temporarily split into individual ranges, and that an invisible 'Hold' is assumed to be wrapped around the quantified expressions,
+	such that later in computation the positions are just what they should be. *)
+addAbbrevPositions[ expr_Hold] :=
+	Module[ {p = Position[ expr, (Abbrev$TM|Theorema`Computation`Language`Abbrev$TM)[ _, _]], repl},
+		repl = MapThread[ (#2 -> newAbbrev[ #1])&, {Extract[ expr, p, Hold], p}];
+		Delete[ ReplacePart[ expr, repl], Map[ Append[ #, 0]&, p]] (* We have to remove all the newly introduced Holds. *)
+	]
+addAbbrevPositions[ expr_] := ReleaseHold[ addAbbrevPositions[ Hold[ expr]]]
+
+newAbbrev[ Hold[ (q:(Abbrev$TM|Theorema`Computation`Language`Abbrev$TM))[ (rng:(RNG$|Theorema`Computation`Language`RNG$))[ (ar:(ABBRVRNG$|Theorema`Computation`Language`ABBRVRNG$))[ l_, r_], rest__], expr_]]] :=
+	Module[ {tmp = newAbbrev[ Hold[ q[ rng[ rest], expr]]]},
+		With[ {pos = getFreePositions[ l, tmp]},
+			ReplacePart[ Insert[ tmp, Hold[ l, r, pos], {1, 1, 1}], {1, 1, 1, 0} -> ar]
+		]
+	]
+newAbbrev[ Hold[ (q:(Abbrev$TM|Theorema`Computation`Language`Abbrev$TM))[ (rng:(RNG$|Theorema`Computation`Language`RNG$))[ (ar:(ABBRVRNG$|Theorema`Computation`Language`ABBRVRNG$))[ l_, r_]], expr_]]] :=
+	With[ {pos = getFreePositions[ l, Hold[ expr]]},
+		Hold[ q[ rng[ ar[ l, r, pos]], expr]]
+	]
+newAbbrev[ expr_Hold] := expr
+
+getFreePositions[ var_, Hold[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[ x___], rest__]], pos:{p___}] :=
+	Module[ {i = Position[ rngVariables[ Hold[ r]], var, {1}, 1]},
+		Switch[ i,
+			{},
+			Join[ getFreePositions[ var, Hold[ q], {p, 0}], getFreePositions[ var, Hold[ {{x}, rest}], pos]],
+			{_},
+			getFreePositions[ var, List@@@Hold@@{Take[ Hold[ x], First[ First[ i]] - 1]}, {p, 1}]
+		]
+	]
+getFreePositions[ var_, Hold[ var_], pos_List] := {pos}
+getFreePositions[ var_, Hold[ f_[x___]], {p___}] :=
+	Join[ getFreePositions[ var, Hold[ f], {p, 0}], Join@@MapIndexed[ getFreePositions[ var, #1, {p, First[ #2]}]&, Map[ Hold, Hold[ x]]]]
+getFreePositions[ _, Hold[ _]|Hold[ ], _List] := {}
+getFreePositions[ var_, expr_Hold] := getFreePositions[ var, expr, {1}]
+getFreePositions[ var_, expr:Except[ _Hold]] := getFreePositions[ var, Hold[ expr], {}]
+
 (*
 	makeTmaExpression[ e] is the combination of functions that we export to be used in other places if needed.
 *)
 SetAttributes[ makeTmaExpression, HoldAll]
 makeTmaExpression[ e_Hold] := Block[ {$ContextPath},
 	$ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
-	removeHold[ markVariables[ freshNames[ e]]]
+	ReleaseHold[ addAbbrevPositions[ Replace[ markVariables[ freshNames[ e]], Hold[ x_] :> x, Infinity, Heads -> True]]]
 ]
-makeTmaExpression[ e_] := Block[ {$ContextPath},
-	$ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
-	removeHold[ markVariables[ freshNames[ Hold[ e]]]]
-]
+makeTmaExpression[ e_] := makeTmaExpression[ Hold[ e]]
 makeTmaExpression[ args___] := unexpected[ makeTmaExpression, {args}]
 
 (* processing Theorema expressions essentially works on Hold-expressions, where symbols inside are again
@@ -272,6 +307,7 @@ processGlobalDeclaration[ x_] :=
 		SelectionMove[ nb, All, EvaluationCell];
 		SetOptions[ NotebookSelection[ nb], CellTags -> {cellIDLabel[ id], sourceLabel[ file]}, ShowCellTags -> False];
 		putGlobalDeclaration[ file, id, ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]]];
+		(* "Abbrev" cannot appear in global declarations, hence no need to call "addAbbrevPositions". *)
 		SelectionMove[ nb, After, Cell];
 	]
 processGlobalDeclaration[ args___] := unexpected[ processGlobalDeclaration, {args}]
@@ -300,6 +336,7 @@ processEnvironment[ x_] :=
 		(* process the expression according the Theorema syntax rules and add it to the KB 
 		   ReleaseHold will remove the outer Hold but leave the Holds around fresh symbols *)
         Catch[ updateKnowledgeBase[ ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]], key, globDec, cellTagsToString[ tags]]];
+        (* Positions of abbreviations are added in "updateKnowledgeBase". *)
         SelectionMove[ nb, After, Cell];
     ]
 processEnvironment[args___] := unexcpected[ processEnvironment, {args}]
@@ -591,7 +628,7 @@ updateKnowledgeBase[ form_, k_, glob_, tags_String] :=
         	]
     	];
     	(* for the actual formula we proceed in the same way *)
-    	newForm = ReleaseHold[ applyGlobalDeclaration[ form, glob]];
+    	newForm = addAbbrevPositions[ ReleaseHold[ applyGlobalDeclaration[ form, glob]]];
     	fml = makeFML[ key -> k, formula -> newForm, label -> tags, simplify -> False];
     	transferToComputation[ fml];
     	(* If new formulae are appended rather than prepended, the old formulae with the same label
@@ -1048,7 +1085,7 @@ processComputation[ x:Theorema`Computation`Language`nE] :=
 	]
 processComputation[ x_] := Module[ { procSynt, res},
 	(* Remove the inner Holds around fresh symbols *)
-	procSynt = Replace[ markVariables[ freshNames[ Hold[ x], True]], Hold[ s_] -> s, Infinity, Heads -> True];
+	procSynt = addAbbrevPositions[ Replace[ markVariables[ freshNames[ Hold[ x], True]], Hold[ s_] -> s, Infinity, Heads -> True]];
 	(* As an initial computation object, we start with the box form of the input cell *)
 	$TmaComputationObject = {ToExpression[ InString[ $Line]]};
 	$TmaCompInsertPos = {2}; 
