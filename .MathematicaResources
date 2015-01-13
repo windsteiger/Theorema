@@ -4,8 +4,7 @@ Resources[
         Directory["~"]
     ],
     StyleSheets[
-        Directory["Theorema/FrontEnd/StyleSheets"],
-        Directory["Theorema/FrontEnd/StyleSheets/Theorema"]
+        Directory["Theorema/FrontEnd/StyleSheets"]
     ],
     ExecutionBuildCommand["<<Theorema`"],
     Paclet[

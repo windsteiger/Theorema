@@ -10,11 +10,11 @@
 
     Theorema 2.0 is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    along with this program. If not, see <http://www.gnu.org/licenses/>.
 *)
 
 BeginPackage[ "Theorema`Interface`GUI`"];
@@ -250,10 +250,10 @@ openTheoremaCommander[ ] /; $Notebooks :=
         				Dynamic[ Refresh[ submitProveTask[], TrackedSymbols :> {$selectedProofGoal, $selectedProofKB, $selectedSearchDepth, $selectedSearchTime}]],
         				Dynamic[ Refresh[ proofNavigation[ $TMAproofTree], TrackedSymbols :> {$TMAproofTree, $TMAproofSearchRunning, $TMAproofNotebook, ruleTextActive, $proofTreeScale, $selectedProofStep}]]},
         			(* compute *){compNew[],
-        				Dynamic[ Refresh[ displayKBBrowser[ "compute"], TrackedSymbols :> {$kbFilterKW, $tcKBBrowseSelection, $kbStruct}]],
+        				Dynamic[ Refresh[ displayKBBrowser[ "compute"], TrackedSymbols :> {$kbFilterKW, $kbStruct, $tcKBBrowseSelection}]],
         				displayBuiltinBrowser[ "compute"](*Dynamic[ Refresh[ displayBuiltinBrowser[ "compute"], TrackedSymbols :> {buiActComputation}]]*),
         				compSetup[]},
-        			(* solve *)  {Dynamic[Refresh[ displayKBBrowser[ "solve"], TrackedSymbols :> {$kbFilterKW, $tcKBBrowseSelection, $kbStruct}]],
+        			(* solve *)  {Dynamic[Refresh[ displayKBBrowser[ "solve"], TrackedSymbols :> {$kbFilterKW, $kbStruct, $tcKBBrowseSelection}]],
         				Dynamic[ Refresh[ displayBuiltinBrowser[ "solve"], TrackedSymbols :> {buiActSolve}]],
         				solveSetup[]},
         			(* inform *)  {licenseTab[], aboutTab[], setPreferences[]}
@@ -261,6 +261,7 @@ openTheoremaCommander[ ] /; $Notebooks :=
         	], TrackedSymbols :> {$TmaLanguage}]],
         	StyleDefinitions -> makeColoredStylesheet[ "GUI"],
         	WindowTitle -> translate["Theorema Commander"],
+        	WindowFloating -> False,
         	WindowElements -> {"StatusArea"}]
     ]
 openTheoremaCommander[ args___] := unexpected[ openTheoremaCommander, {args}]
@@ -755,7 +756,7 @@ structView[ file_, Cell[ content_, "FormalTextInputFormula", a___, CellTags -> c
         (* keyTags are those cell tags that are used to uniquely identify the formula in the KB *)
         keyTags = getKeyTags[ cellTags];
         (* check whether cell has been evaluated -> formula is in KB? *)
-        formPos = Position[ $tmaEnv, FML$[ keyTags, _, __], 1, 1];
+        formPos = Position[ {$tmaEnv, $tmaArch}, FML$[ keyTags, _, __], {2}, 1];
         isEval = formPos =!= {};
         (* Join list of CellTags, use $labelSeparator. *)
         If[ cleanCellTags === {},
@@ -781,8 +782,15 @@ structView[ file_, Cell[ content_, "FormalTextInputFormula", a___, CellTags -> c
                                                        "FormalTextInputFormulaUneval"
                                                    ]], {file, idLabel}, Enabled -> nbAvail, ActiveStyle -> If[ nbAvail, "HyperlinkActive", None]],
                              If[ isEval,
-                             	theoremaDisplay[ Extract[ $tmaEnv, Append[ formPos[[1]], 2]]],
+                             	theoremaDisplay[ Extract[ {$tmaEnv, $tmaArch}, Append[ formPos[[1]], 2]]],
                              	displayCellContent[ content]]
+                    ],
+                    If[ isEval, 
+                    	"", 
+                    	(* else: unevaluated -> put remoteEval button *)
+                    	With[ {tag = idLabel}, 
+                    		Button[ Style[ "\[ReturnIndicator]", "FormalTextInputFormulaUneval", FontSlant -> "Plain"], remoteEvalFormula[ file, tag], Appearance -> None]
+                    	]
                     ]},
                 Spacer[10]],
             "compute",
@@ -792,8 +800,15 @@ structView[ file_, Cell[ content_, "FormalTextInputFormula", a___, CellTags -> c
                                                        "FormalTextInputFormulaUneval"
                                                    ]], {file, idLabel}, Enabled -> nbAvail, ActiveStyle -> If[ nbAvail, "HyperlinkActive", None]],
                              If[ isEval,
-                             	theoremaDisplay[ Extract[ $tmaEnv, Append[ formPos[[1]], 2]]],
+                             	theoremaDisplay[ Extract[ {$tmaEnv, $tmaArch}, Append[ formPos[[1]], 2]]],
                              	displayCellContent[ content]]
+                    ],
+                    If[ isEval, 
+                    	"", 
+                    	(* else: unevaluated -> put remoteEval button *)
+                    	With[ {tag = idLabel}, 
+                    		Button[ Style[ "\[ReturnIndicator]", "FormalTextInputFormulaUneval", FontSlant -> "Plain"], remoteEvalFormula[ file, tag], Appearance -> None]
+                    	]
                     ]},
                 Spacer[10]],
             "solve",
@@ -803,8 +818,15 @@ structView[ file_, Cell[ content_, "FormalTextInputFormula", a___, CellTags -> c
                                                        "FormalTextInputFormulaUneval"
                                                    ]], {file, idLabel}, Enabled -> nbAvail, ActiveStyle -> If[ nbAvail, "HyperlinkActive", None]],
                              If[ isEval,
-                             	theoremaDisplay[ Extract[ $tmaEnv, Append[ formPos[[1]], 2]]],
+                             	theoremaDisplay[ Extract[ {$tmaEnv, $tmaArch}, Append[ formPos[[1]], 2]]],
                              	displayCellContent[ content]]
+                    ],
+                    If[ isEval, 
+                    	"", 
+                    	(* else: unevaluated -> put remoteEval button *)
+                    	With[ {tag = idLabel}, 
+                    		Button[ Style[ "\[ReturnIndicator]", "FormalTextInputFormulaUneval", FontSlant -> "Plain"], remoteEvalFormula[ file, tag], Appearance -> None]
+                    	]
                     ]},
                 Spacer[10]]    
             ], {keyTags}}
@@ -813,8 +835,7 @@ structView[ file_, Cell[ content_, "FormalTextInputFormula", a___, CellTags -> c
 (* input cell without cell tags -> ignore *)
 structView[ file_, Cell[ content_, "FormalTextInputFormula", ___], tags_, headers_List, task_] := {}
 
-structView[ args___] :=
-    unexpected[ structView, {args}]
+structView[ args___] := unexpected[ structView, {args}]
 
 (* header view *)
 headerView[ file_, Cell[ content_String, style_, ___], tags_, task_] :=
@@ -850,6 +871,13 @@ textDataToString[ Cell[ BoxData[ b_], ___]] := "\!\(" <> ToString[ InputForm[ b]
 textDataToString[ _] := "\[DownQuestion]?"
 textDataToString[ args___] := unexpected[ textDataToString, {args}]
 
+remoteEvalFormula[ file_, tag_] :=
+	Module[{nb},
+		NotebookLocate[ {file, tag}];
+		nb = Select[ Notebooks[], CurrentValue[ #, "NotebookFullFileName"] === file &, 1];
+		Scan[ SelectionEvaluate, nb]
+	]
+remoteEvalFormula[ args___] := unexpected[ remoteEvalFormula, {args}]
 
 
 (* ::Subsubsection:: *)
@@ -861,11 +889,17 @@ textDataToString[ args___] := unexpected[ textDataToString, {args}]
    filename -> struct, where
    filename is the full filename of the notebook and
    struct is the nested cell structure containing the cells at those positions obtained by extractKBStruct *)
-updateKBBrowser[] :=
-    Module[ {file = CurrentValue[ "NotebookFullFileName"], pos, new},
+updateKBBrowser[ file_] :=
+    Module[ {pos, new, nbExpr},
         pos = Position[ $kbStruct, file -> _];
         (* We don't extract the entire cells, we throw away all options except CellTags and CellID in order to not blow up $kbStruct too much *)
-        new = file -> With[ {nb = $TMAcurrentEvalNB},
+        nbExpr = Cases[ $TMAcurrentEvalNB, {file, e_} -> e];
+        If[ nbExpr === {},
+        	(* the corresponding notebook has not been evaluated yet *)
+        	Return[]
+        ];
+        $tmaNbUpdateQueue = DeleteCases[ $tmaNbUpdateQueue, {file, _}];
+        new = file -> With[ {nb = First[ nbExpr]},
                           extractKBStruct[ nb] /. l_?VectorQ :> (Extract[ nb, l] /. {c:Cell[ _, _, ___] :> DeleteCases[ c, Except[ CellTags|CellID] -> _]})
                       ];
         (* if there is already an entry for that notebook then replace the structure,
@@ -883,12 +917,10 @@ updateKBBrowser[args___] := unexpected[ updateKBBrowser, {args}]
 (* ::Subsubsection:: *)
 (* displayKBBrowser *)
 
-
-   
 displayKBBrowser[ task_String] :=
     Module[ {cells, view, allNB},
         If[ $kbStruct === {} || !ValueQ[ $tcKBBrowseSelection[ task]],
-            emptyPane[ translate[ "noKnowl"]],
+            Row[ {emptyPane[ translate[ "noKnowl"]], makeUpdateArea[]}, Spacer[3]],
             (* generate tabs for each notebook,
                tab label contains a short form of the filename, tab contains a Pane containing the structured view *)
             allNB = Map[ First, $kbStruct];
@@ -904,7 +936,7 @@ displayKBBrowser[ task_String] :=
                 $selectedProofKB = Select[ $tmaEnv, kbSelectProve[ #[[1]]]&];
             ];
             Column[{
-            	Button[ translate[ "OKnext"], $tcActionView++],
+            	Button[ translate[ "OKnext"], $tcActionView++, ImageSize -> 360],
             	Row[{
             		With[ {label = Row[ {translate[ "FilteredBy"] <> ": ", InputField[ $kbFilterKW, String]}]},
 						Button[ label,
@@ -921,13 +953,17 @@ displayKBBrowser[ task_String] :=
 				],
 				If[ Apply[ Plus, Map[ StringLength[ FileBaseName[ #]]&, allNB]] > 50,
 					(* button labels sum up to more than 50 chars long -> buttons become too wide -> provide a menu *)
-					PopupMenu[ Dynamic[ $tcKBBrowseSelection[ task]], Map[ First[#] -> Tooltip[ FileBaseName[ First[#]], First[#]]&, $kbStruct]],
+					Row[ {PopupMenu[ Dynamic[ $tcKBBrowseSelection[ task]], Map[ First[#] -> Tooltip[ FileBaseName[ First[#]], First[#]]&, $kbStruct]],
+						makeUpdateArea[]}, Spacer[3]],
 					(* else: select with buttons ala TabView *)
-					Row[ Map[ Button[ 
+					Row[{
+						Row[ Map[ Button[ 
 							Tooltip[ Style[ FileBaseName[ #], FontColor -> If[ $tcKBBrowseSelection[ task] === #, TMAcolor[4], TMAcolor[13]]], #], 
 							$tcKBBrowseSelection[ task] = #, 
 							Background -> If[ $tcKBBrowseSelection[ task] === #, TMAcolor[6], TMAcolor[0]], 
 							FrameMargins -> 2, ImageMargins -> 0, ImageSize -> Automatic]&, Map[ First, $kbStruct]]
+						],
+						makeUpdateArea[]}, Spacer[3]
 					]
 				],
 				Pane[ view, ImageSize -> {350, Automatic}]
@@ -946,6 +982,23 @@ TabView[
                    			$kbStruct], 
                   		Appearance -> {"Limited", 10}, FrameMargins->None]
                   		*)
+
+refreshKBstruct[] :=
+	Module[{nbFiles},
+		If[ inEnvironment[], Return[]];
+		(* refresh those that are older than 1.5 sec *)
+		nbFiles = Cases[ $tmaNbUpdateQueue, {f_, _?(SessionTime[] - # > 1.5&)} -> f];
+		Scan[ updateKBBrowser, nbFiles];
+		Scan[ ensureNotebookIntegrity, nbFiles]
+	]
+refreshKBstruct[ args___] := unexpected[ refreshKBstruct, {args}]
+
+(* The update area consists of a "reload-button" which automatically updates and displays as a checkmark if no updates are pending. 
+   Second, it has an invisible field ("") which updates every 10 seconds and triggers regular updates of pending events.
+   *)
+makeUpdateArea[ ] := Row[{Dynamic[ If[ $tmaNbUpdateQueue =!= {}, Button[ Style[ "\:21ba", {Medium}], refreshKBstruct[], Appearance -> None], "\[Checkmark]"]],
+	Dynamic[ Refresh[ (refreshKBstruct[]; ""), UpdateInterval -> 10]]}]
+makeUpdateArea[ args___] := unexpected[ makeUpdateArea, {args}]
 
 (* ::Subsubsection:: *)
 (* structViewBuiltin *)

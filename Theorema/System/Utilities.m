@@ -81,19 +81,19 @@ replaceRepeatedExcept[ args___] := unexpected[ replaceRepeatedExcept, {args}]
 (* ::Subsubsection:: *)
 (* applyHold *)
 
-applyHold[ Hold[a_], Hold[b___]] := Hold[ a[ b]];
+applyHold[ Hold[ a_], Hold[ b___]] := Hold[ a[ b]];
 
 (* ::Subsubsection:: *)
 (* joinHold *)
 
-joinHold[ Hold[a___], Hold[b___]] := Hold[ a, b];
+joinHold[ Hold[ a___], Hold[ b___]] := Hold[ a, b];
 
 (* ::Subsubsection:: *)
 (* notification *)
 
-notification[msg__] /; $Notebooks := MessageDialog[ StringForm[msg]]
-notification[msg__] := Message[ StringForm[msg]]
-notification[args___] := unexpected[ notification, {args}]
+notification[ msg__] /; $Notebooks := MessageDialog[ StringForm[ msg]]
+notification[ msg__] := Message[ StringForm[ msg]]
+notification[ args___] := unexpected[ notification, {args}]
 
 
 (* ::Subsubsection:: *)
@@ -101,7 +101,7 @@ notification[args___] := unexpected[ notification, {args}]
 
 getOptionalComponent[ ds_[ ___, (Rule|RuleDelayed)[ key_String, val_], ___], key_] := val
 getOptionalComponent[ ds_, key_String] := {}
-getOptionalComponent[args___] := unexpected[ getOptionalComponent, {args}]
+getOptionalComponent[ args___] := unexpected[ getOptionalComponent, {args}]
 
 End[]
 

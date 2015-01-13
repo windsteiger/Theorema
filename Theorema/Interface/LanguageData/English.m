@@ -155,7 +155,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.", ToString[
 	translate[ "notEval", lang] = "Formula currently not evaluated. Click to eval.";
     translate[ "NOT", lang] = "not \!\(\*FormBox[FrameBox[\"form\"], SelectionPlaceholder]\)";	
     translate[ "NOTTooltip", lang] = "form \[Ellipsis] formula\nlogical negation";
-    translate[ "notUniqueLabel", lang] = "These labels are not unique in the notebook: ``\n\nThis is just a warning, you can continue,\nbut referencing formulae from this notebook\nmight turn out to be confusing.";
+    translate[ "notUniqueLabel", lang] = "The notebook `` contains non-unique labels: ``\n\nThis is just a warning, you can continue,\nbut referencing formulae from this notebook\nmight turn out to be confusing.";
 
 	translate[ "OK", lang] = "OK";
 	translate[ "OKnext", lang] = "OK, next \[Ellipsis]";
@@ -283,6 +283,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.", ToString[
 
     translate[ "UNDEROVEROP", lang] = "under- and overscripted operator";
 	translate[ "unknown proof node", lang] = "Unknown proof node";
+	translate[ "Updating tags", lang] = "Notebook ``: Updating source tags \[Ellipsis]";
 
 	translate[ "Virtual Keyboard", lang] = "Virtual Keyboard";
 

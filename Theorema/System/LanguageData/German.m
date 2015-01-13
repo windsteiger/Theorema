@@ -74,6 +74,8 @@ With[ {lang = "German"},
 	MessageName[ displayProof, "usage", lang] = "displayProof[ proofObject_] displays proofObject.";
 	MessageName[ disproved, "usage", lang] = "disproved is a possible proof value.";
 
+	MessageName[ ensureNotebookIntegrity, "usage", lang] = "ensureNotebookIntegrity[ file] runs some consistency checks on the notebook file.";
+
 	MessageName[ failed, "usage", lang] = "failed is a possible proof value.";
 	MessageName[ filterRules, "usage", lang] = "";	
 	MessageName[ findSelectedFormula, "usage", lang] = "findSelectedFormula[ sel] ...";
@@ -101,6 +103,7 @@ With[ {lang = "German"},
 
 	MessageName[ id, "usage", lang] = "id is an option for the constructors makePRFINFO/makePRFSIT/toBeProved and a selector for the FML$/PRFINFO$/PRFSIT$ datastructures.";
 	MessageName[ inArchive,"usage",lang] = "inArchive[] returns True when we are currently processing an archive.";
+	MessageName[ inEnvironment,"usage",lang] = "inEnvironment[] returns True when we are currently processing an environment.";
 	MessageName[ inferenceRule, "usage", lang] = "inferenceRule[ name] stores the inference rule named name.";
 	MessageName[ initFormulaLabel, "usage", lang] = "initFormulaLabel[ ] initializes the formula labels used in a proof.";
 	MessageName[ $initLabel, "usage", lang] = "Initial label of each formula. Serves as a hint for user to provide system with her own label.";
@@ -221,6 +224,7 @@ With[ {lang = "German"},
 	MessageName[ substituteFree, "usage", lang] = "";	
 	MessageName[ substRules, "usage", lang] = "substRules is an option for the constructor makePRFSIT/toBeProved and a selector for the PRFSIT$ datastructure.";
 
+	MessageName[ $tcKBBrowseSelection, "usage", lang] = "$tcKBBrowseSelection[ task] gives the filename of the notebook that should be displayed in the kb browser of task.";
 	MessageName[ $TheoremaArchives, "usage", lang] = "List of currently loaded Theorema archives.";
 	MessageName[ theoremaBoxes, "usage", lang] = "theoremaBoxes[expr] generates boxes for expr in Theorema syntax using the definitions for MakeBoxes[ expr, TheoremaForm].";	
 	MessageName[ theoremaDisplay, "usage", lang] = "theoremaDisplay[expr] displays expr in Theorema syntax using the definitions for MakeBoxes[ expr, TheoremaForm].";	
@@ -236,6 +240,7 @@ With[ {lang = "German"},
 	MessageName[ tmaDialogInput, "usage", lang] = "Theorema version of Mathematica's DialogInput.";
 	MessageName[ $tmaEnv, "usage", lang] = "Collection of environments evaluated in the current session, i.e. the knowledge base.";
 	MessageName[ $TmaLanguage, "usage", lang] = "The language used in the Theorema interface.";
+	MessageName[ $tmaNbUpdateQueue, "usage", lang] = "The notebook update queue contains a list of timestamps when a notebook was last evaluated.";
 	MessageName[ tmaNotebookPut, "usage", lang] = "Theorema version of Mathematica's NotebookPut.";
 	MessageName[ $TMAproofObject, "usage", lang] = "$TMAproofObject is the global proof object.";
 	MessageName[ $TMAproofSearchRunning, "usage", lang] = "$TMAproofSearchRunning indicates (by True/False) whether a proof search is currently running.";

@@ -158,7 +158,7 @@ falls nicht, siehe <http://www.gnu.org/licenses/>.", ToString[ Date[][[1]]]];
 	translate[ "notEval", lang] = "Aussage derzeit nicht evaluiert. Zum Auswerten klicken.";
     translate[ "NOT", lang] = "nicht \!\(\*FormBox[FrameBox[\"A\"], SelectionPlaceholder]\)";	
     translate[ "NOTTooltip", lang] = "A \[Ellipsis] Aussage\nlogische Verneinung";
-    translate[ "notUniqueLabel", lang] = "Folgende Labels im Notebook sind nicht eindeutig: ``\n\nDies ist nur eine Warnung, es kann fortgesetzt werden,\nallerdings kann es zu Verwechslungen bei\nReferenzen in diesem Notebook kommen.";
+    translate[ "notUniqueLabel", lang] = "Das Notebook `` enth\[ADoubleDot]lt mehrdeutige Labels: ``\n\nDies ist nur eine Warnung, es kann fortgesetzt werden,\nallerdings kann es zu Verwechslungen bei\nReferenzen in diesem Notebook kommen.";
 
 	translate[ "OK", lang] = "OK";
 	translate[ "OKnext", lang] = "OK, n\[ADoubleDot]chstes \[Ellipsis]";
@@ -286,6 +286,7 @@ falls nicht, siehe <http://www.gnu.org/licenses/>.", ToString[ Date[][[1]]]];
 
     translate[ "UNDEROVEROP", lang] = "unter- und \[UDoubleDot]berskript-Operator";
 	translate[ "unknown proof node", lang] = "Unbekannter Beweisknoten";
+	translate[ "Updating tags", lang] = "Notebook ``: Aktualisiere Source Tags \[Ellipsis]";
 
 	translate[ "Virtual Keyboard", lang] = "Virtuelle Tastatur";
 

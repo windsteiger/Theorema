@@ -10,11 +10,11 @@
 
     Theorema 2.0 is distributed in the hope that it will be useful,
     but WITHOUT ANY WARRANTY; without even the implied warranty of
-    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
     GNU General Public License for more details.
 
     You should have received a copy of the GNU General Public License
-    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+    along with this program. If not, see <http://www.gnu.org/licenses/>.
 *)
 
 BeginPackage["Theorema`Language`Session`"];
@@ -281,15 +281,22 @@ SetAttributes[ processEnvironment, HoldAll];
 processEnvironment[ Theorema`Language`nE] := Null
 
 processEnvironment[ x_] :=
-    Module[ {nb = EvaluationNotebook[], key, tags, globDec},
+    Module[ {nb = EvaluationNotebook[], nbFile, nbExpr, key, tags, globDec},
     	(* select current cell: we need to refer to this selection when we set the cell options *)
 		SelectionMove[ nb, All, EvaluationCell];
     	{key, tags} = adjustFormulaLabel[ nb];
 		(* Perform necessary actions on the whole notebook *)
-        $TMAcurrentEvalNB = NotebookGet[ nb];
-		ensureNotebookIntegrity[ nb, $TMAcurrentEvalNB, tags];
+		nbFile = CurrentValue[ nb, "NotebookFullFileName"];
+		If[ lastEvalTimeAgo[ nbFile] > 1,
+			(* if last evaluation in that file was longer than 1 sec ago: get fresh nbExpr, nb might have changed (been edited) *)
+        	nbExpr = NotebookGet[ nb];
+        	(* For the outside, we also store the filename *)
+        	$TMAcurrentEvalNB = ReplacePart[ $TMAcurrentEvalNB, Position[ $TMAcurrentEvalNB, {nbFile, _}, {1}, 1] -> {nbFile, nbExpr}],
+        	(* else: we are most probably in a multi-cell evaluation. Need not get new nbExpr. Cases MUST find sth, First must work. *)
+        	nbExpr = First[ Cases[ $TMAcurrentEvalNB, {nbFile, e_} -> e]]
+		];
 		(* extract the global declarations that are applicable in the current evaluation *)
-		globDec = applicableGlobalDeclarations[ nb, $TMAcurrentEvalNB, evaluationPosition[ nb, $TMAcurrentEvalNB]];
+		globDec = applicableGlobalDeclarations[ nb, nbExpr, evaluationPosition[ nb, nbExpr]];
 		(* process the expression according the Theorema syntax rules and add it to the KB 
 		   ReleaseHold will remove the outer Hold but leave the Holds around fresh symbols *)
         Catch[ updateKnowledgeBase[ ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]], key, globDec, cellTagsToString[ tags]]];
@@ -298,9 +305,11 @@ processEnvironment[ x_] :=
 processEnvironment[args___] := unexcpected[ processEnvironment, {args}]
 
 evaluationPosition[ nb_NotebookObject, raw_Notebook] :=
-	Module[{pos},
+	Module[{id, pos},
 		SelectionMove[ nb, All, EvaluationCell];
-		pos = Position[ raw, NotebookRead[ nb]];
+		(* find the cell according to CellID *)
+		{id} = Options[ NotebookRead[ nb], CellID];
+		pos = Position[ raw, Cell[ _, ___, id, ___]];
 		pos[[1]]
 		(* we leave the current cell selected, the calling function should decide where to move the selection *)
 	]
@@ -334,13 +343,13 @@ adjustFormulaLabel[ args___] := unexpected[ adjustFormulaLabel, {args}]
 (*
  * Returns all CellTags except the generated tags used for formula identification, i.e. ID<sep>... and Source<sep>...
  *)
-getCleanCellTags[cellTags_List] :=
-    Select[ cellTags, !StringMatchQ[ #, (("ID"<>$cellTagKeySeparator|"Source"<>$cellTagKeySeparator) ~~ __) | $initLabel]&]
-getCleanCellTags[cellTag_String] := getCleanCellTags[{cellTag}]
-getCleanCellTags[args___] := unexpected[getCleanCellTags,{args}]
+getCleanCellTags[ cellTags_List] :=
+    Select[ cellTags, !StringMatchQ[ #, (("ID" <> $cellTagKeySeparator | "Source" <> $cellTagKeySeparator) ~~ __) | $initLabel]&]
+getCleanCellTags[ cellTag_String] := getCleanCellTags[ {cellTag}]
+getCleanCellTags[ args___] := unexpected[ getCleanCellTags,{args}]
 
 getKeyTags[ cellTags_List] :=
-    Select[ cellTags, StringMatchQ[ #, ("ID"<>$cellTagKeySeparator|"Source"<>$cellTagKeySeparator) ~~ __]&]
+    Select[ cellTags, StringMatchQ[ #, ("ID" <> $cellTagKeySeparator | "Source" <> $cellTagKeySeparator) ~~ __]&]
 getKeyTags[ cellTag_String] := getKeyTags[ {cellTag}]
 getKeyTags[ args___] := unexpected[ getKeyTags, {args}]
 
@@ -405,7 +414,7 @@ removeEnvironment[ nb_NotebookObject] :=
 		SelectionMove[ nb, All, Cell];
 		NotebookDelete[ nb];
 		Scan[ removeFromEnv, keys];
-		updateKBBrowser[];	
+		updateKBBrowser[ CurrentValue[ nb, "NotebookFullFileName"]];	
 	]
 removeEnvironment[ args___] := unexpected[ removeEnvironment, {args}]
 
@@ -414,7 +423,7 @@ removeFormula[ key_List] :=
 		SelectionMove[ ButtonNotebook[], All, ButtonCell];
 		NotebookDelete[ ButtonNotebook[]];
 		removeFromEnv[ key];
-		updateKBBrowser[];
+		updateKBBrowser[ CurrentValue[ ButtonNotebook[], "NotebookFullFileName"]];
 	]
 removeFormula[ args___] := unexpected[ removeFormula, {args}]
 
@@ -440,22 +449,39 @@ sourceLabel[ nb_NotebookObject] /; inArchive[] := cellLabel[ currentArchiveName[
 sourceLabel[ nb_NotebookObject] := cellLabel[ CurrentValue[ nb, "NotebookFullFileName"], "Source"]
 sourceLabel[ file_String] := cellLabel[ file, "Source"]
 sourceLabel[ args___] := unexpected[ sourceLabel, {args}]
+
+sourceLabelPattern[ ] := StringExpression[ "Source", $cellTagKeySeparator, __]
+sourceLabelPattern[ args___] := unexpected[ sourceLabelPattern, {args}]
+
+
+ensureNotebookIntegrity[ file_] := 
+	Module[ {nb, nbExpr},
+		nb = Select[ Notebooks[], CurrentValue[ #, "NotebookFullFileName"] === file &, 1];
+		If[ nb === {},
+			nb = NotebookOpen[ file, Visible -> False],
+			(* else *)
+			nb = First[ nb]
+		];
+		nbExpr = Cases[ $TMAcurrentEvalNB, {file, e_} -> e];
+		Assert[ Length[ nbExpr] >= 1];
+		ensureNotebookIntegrity[ nb, nbExpr[[1]]]
+	]
 	
-ensureNotebookIntegrity[ nb_NotebookObject, rawNotebook_Notebook, cellTags_List] :=
-    Module[ {allCellTags, selectedCellTags, duplicateCellTags, srcTags, sl, outdPos, updNb},
+ensureNotebookIntegrity[ nb_NotebookObject, rawNotebook_Notebook] :=
+    Module[ {allCellTags, duplicateCellTags, srcTags, sl, outdPos, updNb, notif, nbFile},
     	sl = sourceLabel[ nb];
+    	nbFile = CurrentValue[ nb, "NotebookFullFileName"];
         (* Collect all CellTags from document. *)
         allCellTags = Flatten[ Cases[ rawNotebook, Cell[ ___, CellTags -> tags_, ___] -> tags, Infinity]];
-        (* We look only for the duplicates to elements of current CellTags list.*)
-        selectedCellTags = Select[ allCellTags, MemberQ[ cellTags, #]&];
-        (* Check if CellTags are unique in current Notebook. *)
-        If[ Length[ selectedCellTags] > Length[ DeleteDuplicates[ selectedCellTags]],
-            (* If not give an appropriate warning *)
-            duplicateCellTags = Cases[ Select[ Tally[ selectedCellTags], duplicateLabel], {cellTag_, _} -> cellTag];
-            notification[ translate["notUniqueLabel"], duplicateCellTags]
+        (* Check if CellTags are unique in current Notebook. Check only the clean tags, neglect the generated ones *)
+        duplicateCellTags = Select[ Tally[ getCleanCellTags[ allCellTags]], duplicateLabel];
+        If[ duplicateCellTags =!= {} && duplicateCellTags =!= $lastDuplicateCellTags,
+            (* If not, give an appropriate warning *)
+            $lastDuplicateCellTags = duplicateCellTags;
+            notification[ translate[ "notUniqueLabel"], nbFile, Map[ First, duplicateCellTags]]
         ];
         (* Check if we have cell tags Source<sep>src with src != current notebook filename *)
-        srcTags = DeleteDuplicates[ Select[ allCellTags, (StringMatchQ[#, "Source" ~~ $cellTagKeySeparator ~~ __] && # =!= sl)&]];
+        srcTags = DeleteDuplicates[ Select[ allCellTags, (StringMatchQ[ #, sourceLabelPattern[ ]] && # =!= sl)&]];
         If[ srcTags =!= {},
         	(* If yes, this indicates that the filename has changed and probably some formulae 
         	are stored in the environment with an outdated key 
@@ -463,27 +489,40 @@ ensureNotebookIntegrity[ nb_NotebookObject, rawNotebook_Notebook, cellTags_List]
         	-> update the cell tags
         	-> remove outdated tab from KBbrowser
         	 *)
+        	notif = CreateWindow[ DocumentNotebook[ {ToString[ StringForm[ translate[ "Updating tags"], nbFile]]}], WindowSize -> All, WindowElements -> {}, WindowFrame -> "Frameless", WindowFloating -> True];
         	updateKeys[ sl, srcTags];
-        	outdPos = Position[ rawNotebook, CellTags -> { ___, s_String /; StringMatchQ[ s, "Source" ~~ $cellTagKeySeparator ~~ __] && s =!= sl, ___}];
-        	updNb = MapAt[ (# /. s_String /; StringMatchQ[ s, "Source" ~~ $cellTagKeySeparator ~~ __] -> sl)&, rawNotebook, outdPos];
+        	outdPos = Position[ rawNotebook, CellTags | CellFrameLabels -> _];
+        	updNb = MapAt[ updateSourceTags[ #, sl]&, rawNotebook, outdPos];
+        	NotebookPut[ updNb, nb];
+        	$TMAcurrentEvalNB = ReplacePart[ $TMAcurrentEvalNB, Position[ $TMAcurrentEvalNB, {nbFile, _}, {1}, 1] -> {nbFile, updNb}];
+        	NotebookClose[ notif];
         ]
     ]
 ensureNotebookIntegrity[ args___] := unexpected[ ensureNotebookIntegrity, {args}]
+
+updateSourceTags[ o_ -> l_, new_] :=
+	Module[ {strPos},
+		strPos = Position[ l, s_String /; StringMatchQ[ s, sourceLabelPattern[ ]]];
+		o -> ReplacePart[ l, strPos -> new]
+	]
+updateSourceTags[ args___] := unexpected[ updateSourceTags, {args}]
+
 
 duplicateLabel[{_, occurences_Integer}] := occurences > 1
 duplicateLabel[args___] := unexpected[ duplicateLabel, {args}]
 
 updateKeys[ new_String, srcTags_List] := Fold[ updateSingleKey, new, srcTags]
-updateKeys[args___] := unexpected[updateKeys, {args}]
+updateKeys[args___] := unexpected[ updateKeys, {args}]
 
 updateSingleKey[ new_String, old_String] :=
     Module[ {},
-        $tmaEnv = Map[ Replace[ #, {id_,old}:>{id,new}]&, $tmaEnv, {2}];
-        DownValues[kbSelectProve] = DownValues[kbSelectProve] /. {id_,old} :> {id,new};
-        DownValues[kbSelectCompute] = DownValues[kbSelectCompute] /. {id_,old} :> {id,new};
+        $tmaEnv = Map[ Replace[ #, {id_, old} :> {id, new}]&, $tmaEnv, {2}];
+        DownValues[ kbSelectProve] = DownValues[ kbSelectProve] /. {id_, old} :> {id, new};
+        DownValues[ kbSelectCompute] = DownValues[ kbSelectCompute] /. {id_, old} :> {id, new};
+        DownValues[ kbSelectSolve] = DownValues[ kbSelectSolve] /. {id_, old} :> {id, new};
         new
     ]
-updateSingleKey[args___] := unexpected[updateSingleKey, {args}]
+updateSingleKey[args___] := unexpected[ updateSingleKey, {args}]
 
 
 automatedFormulaLabel[nb_NotebookObject] := 
@@ -735,6 +774,8 @@ initSession[] :=
         $globalDeclarations = {};
         $tmaArchNeeds = {};
         $formulaCounterName = "TheoremaFormulaCounter";
+        $TMAcurrentEvalNB = {};
+        $tmaNbUpdateQueue = {};
         $Pre=.;
         $PreRead=.;
     ]
@@ -780,26 +821,46 @@ closeEnvironment[] :=
 		If[ !inArchive[] && $Context === "Theorema`Knowledge`", End[]];
 		(* Restore context path that has been modified in openEnvironment *)
 		$ContextPath = DeleteCases[ $ContextPath, Apply[ Alternatives, Join[ {"Theorema`Language`"}, $TheoremaArchives]]];
-		$parseTheoremaExpressions = False; 
-        updateKBBrowser[];
+		$parseTheoremaExpressions = False;
+		putToUpdateQueue[ CurrentValue[ EvaluationNotebook[], "NotebookFullFileName"]];
 	]
 closeEnvironment[args___] := unexpected[ closeEnvironment, {args}]
+
+inEnvironment[] := TrueQ[ $parseTheoremaExpressions]
+inEnvironment[ args___] := unexpected[ inEnvironment, {args}]
+
+lastEvalTimeAgo[ file_] :=
+	Module[{t = Cases[ $tmaNbUpdateQueue, {file, timestamp_} -> timestamp]},
+		If[ t === {},
+			Infinity,
+			(* else *)
+			SessionTime[] - t[[1]]
+		]
+	]
+lastEvalTimeAgo[ args___] := unexpected[ lastEvalTimeAgo, {args}]
+
+putToUpdateQueue[ file_] := 
+	Module[ {},
+		$tmaNbUpdateQueue = DeleteDuplicates[ Prepend[ $tmaNbUpdateQueue, {file, SessionTime[]}],
+								#1[[1]] === #2[[1]]&]
+	]
+putToUpdateQueue[ args___] := unexpected[ putToUpdateQueue, {args}]
 
 (* ::Section:: *)
 (* Archives *)
 
-getArchivePath[arch_String] :=
+getArchivePath[ arch_String] :=
     Module[ {fn, absfn},
-        Which[ FileExtension[arch]==="ta",
+        Which[ FileExtension[ arch] === "ta",
             fn = arch,
-            StringQ[fn = Quiet[ContextToFileName[ arch]]],
+            StringQ[ fn = Quiet[ ContextToFileName[ arch]]],
             fn = StringReplacePart[ Last[ FileNameSplit[ fn]], "ta", -1],
             True,
             notification[ Theorema::archiveName, context];
-            Return[$Failed]
+            Return[ $Failed]
         ];
         absfn = Block[ {$Path = $TheoremaArchivePath},
-                    FindFile[fn]
+                    FindFile[ fn]
                 ];
         If[ absfn === $Failed,
             absfn = FileNameJoin[ {$TheoremaArchiveDirectory, fn}]
@@ -808,57 +869,77 @@ getArchivePath[arch_String] :=
     ]
 getArchivePath[args___] := unexpected[ getArchivePath, {args}]
 
-getArchiveNotebookPath[arch_String] := StringReplacePart[getArchivePath[arch],"nb",{-2,-1}]
+getArchiveNotebookPath[arch_String] := StringReplacePart[ getArchivePath[ arch], "nb", {-2,-1}]
 getArchiveNotebookPath[args___] := unexpected[ getArchiveNotebookPath, {args}]
 
-openArchive[name_String] :=
-    Module[ {nb = EvaluationNotebook[], archiveNotebookPath, posBrowser},
+openArchive[ name_String] :=
+    Module[ {nb = EvaluationNotebook[], nbFile, archiveNotebookPath, posBrowser},
         archiveNotebookPath = getArchiveNotebookPath[ name];
+        nbFile = CurrentValue[ nb, "NotebookFullFileName"];
         (* Create the directory for an archive if does not exist. *)
         If[ !DirectoryQ[ DirectoryName[ archiveNotebookPath]],
             CreateDirectory[ DirectoryName[ archiveNotebookPath]]
         ];
-        posBrowser = Position[ $kbStruct, CurrentValue["NotebookFullFileName"] -> _, 1, 1];
-        If[ !FileExistsQ[ archiveNotebookPath],
-        	NotebookSave[ nb, archiveNotebookPath];
-        ];
-        (* If the notebook was originally Untitled-n and has now been saved under the archive name
-           then replace the name in the KB browser *)
-        If[ Length[posBrowser] === 1,
-            $kbStruct = ReplacePart[ $kbStruct, Append[posBrowser[[1]],1] -> CurrentValue["NotebookFullFileName"]]
+        If[ nbFile =!= archiveNotebookPath,
+        	(* In the presence of symlinks nbFile and archiveNotebookPath might point to the same file.
+        	   In this case we get a warning telling us to save to an open notebook. There is no easy way to check this.
+        	   As a workaround, we save the notebook only if no notebook with the same name exists
+        	   in the archive path. This will do the job in the "normal cases", i.e. when turning a new 
+        	   notebook Untitled-n or an existing notebook from outside the archive path into an archive. *)
+        	Block[ {$Path = $TheoremaArchivePath},
+        		If[ FindFile[ CurrentValue[ nb, "NotebookFileName"]] === $Failed,
+        			NotebookSave[ nb, archiveNotebookPath]
+        		]
+        	];        	
+        	posBrowser = Position[ $kbStruct, nbFile -> _, 1, 1];
+        	If[ Length[ posBrowser] === 1, 
+		        (* If the notebook has now been saved under the archive name
+           		   then replace the name in the KB browser and update $tcKBBrowseSelection correspondingly *)
+            	$kbStruct = ReplacePart[ $kbStruct, Append[ posBrowser[[1]], 1] -> archiveNotebookPath];
+        		Scan[ ($tcKBBrowseSelection[ #] = archiveNotebookPath)&, {"prove", "compute", "solve"}]
+        	]
         ];
         NotebookFind[ nb, "ArchiveInfo", All, CellStyle];
         (* We memorize the setting of loaded archives *)
         $globalArchivesList = $TheoremaArchives;
         BeginPackage[ "Theorema`Knowledge`" <> name, {"Theorema`"}];
-        SelectionEvaluate[nb];
+        SelectionEvaluate[ nb];
     ]
-openArchive[args___] := unexpected[openArchive, {args}]
+openArchive[ args___] := unexpected[ openArchive, {args}]
 
-inArchive[] := StringLength[$Context] >= 9 && StringTake[$Context,-9]==="`private`"
-inArchive[args___] := unexpected[inArchive, {args}]
+inArchive[] := StringLength[ $Context] >= 9 && StringTake[ $Context, -9] === "`private`"
+inArchive[ args___] := unexpected[ inArchive, {args}]
 
 currentArchiveName[] := StringDrop[$Context,-8]
-currentArchiveName[args___] := unexpected[currentArchiveName, {args}]
+currentArchiveName[ args___] := unexpected[ currentArchiveName, {args}]
 
 SetAttributes[ processArchiveInfo, HoldAll];
 
 processArchiveInfo[ a_] :=
-	Module[{cf},
+	Module[ {cf},
+		If[ inArchive[],
+			(* The archive info cells are evaluated automatically when opening the archive, see openArchive.
+			   If they are evaluated again manually, we exit immediately in order not to mess up the contexts. *)
+			Return[]
+		];
 		cf = CurrentValue[ "CellFrameLabels"];
 		Switch[ cf[[1,1]],
 			translate[ "archLabelNeeds"],
 			$tmaArchNeeds = a; Scan[ loadArchive, a], (* Remember and load current dependencies. *)
-			translate["archLabelPublic"],
+			translate[ "archLabelPublic"],
 			removeHold[ freshNames[ Hold[ a]]];
 			Begin[ "`private`"];     
 		];
 	]
-processArchiveInfo[args___] := unexpected[processArchiveInfo, {args}]
+processArchiveInfo[ args___] := unexpected[ processArchiveInfo, {args}]
 
-closeArchive[_String] :=
+closeArchive[ _String] :=
     Module[ {nb = EvaluationNotebook[], currNB, archName, archFile, archivePath},
-        End[];
+    	If[ inArchive[],
+        	End[],
+        	(* The contexts do not fit, leave the function without action *)
+        	Return[ "Null"]
+    	];
         currNB = CurrentValue[ nb, "NotebookFullFileName"];
         archName = $Context;
         archivePath = getArchivePath[ archName];
@@ -894,7 +975,7 @@ loadArchive[ name_String, globalDecl_:{}] :=
     Module[ {archivePath, cxt, archiveContent, archiveNotebookPath, pos},
         (* Save Current Settings into the local Variables *)
         archivePath = getArchivePath[ name];
-        If[ !FileExistsQ[archivePath],
+        If[ !FileExistsQ[ archivePath],
             notification[ Theorema::archiveNotFound, archivePath];
             Return[]
         ];
@@ -916,7 +997,7 @@ loadArchive[ name_String, globalDecl_:{}] :=
             Scan[ updateKnowledgeBase[ #[[2]], #[[1]], globalDecl, #[[3]]]&, $tmaArch]
         ];
         $TheoremaArchives = DeleteDuplicates[ Prepend[ $TheoremaArchives, cxt]];
-        If[ !FileExistsQ[archiveNotebookPath = getArchiveNotebookPath[ name]],
+        If[ !FileExistsQ[ archiveNotebookPath = getArchiveNotebookPath[ name]],
             archiveNotebookPath = archivePath
         ];
         If[ (pos = Position[ $kbStruct, archiveNotebookPath -> _]) === {},
@@ -953,7 +1034,7 @@ archiveName[ f_String] :=
         ]
     ]
 archiveName[ f_String, Short] := StringReplace[ archiveName[ f], "Theorema`Knowledge`" -> ""]
-archiveName[ args___] := unexpected[archiveName, {args}]
+archiveName[ args___] := unexpected[ archiveName, {args}]
 
 
 (* ::Section:: *)
@@ -1056,7 +1137,7 @@ computeInProof[ args___] := unexpected[ computeInProof, {args}]
 (* Notebook operations *)
 
 createNbRememberLocation[ opts___?OptionQ] :=
-	Module[{file, dir, fpMode},
+	Module[{file, dir, fpMode, nb},
 		If[ ValueQ[ $dirLastOpened],
 			dir = $dirLastOpened,
 			dir = $HomeDirectory
@@ -1070,11 +1151,12 @@ createNbRememberLocation[ opts___?OptionQ] :=
 			   at the same time. Once this bug is corrected, we can just NotebookSave[ NotebookCreate[ ...]]. *)
 			fpMode = Replace[ Global`FileChangeProtection, Options[ $FrontEnd, Global`FileChangeProtection]];
 			SetOptions[ $FrontEnd, Global`FileChangeProtection -> None];
-			NotebookSave[
-				NotebookCreate[ opts, StyleDefinitions -> makeColoredStylesheet[ "Notebook"]],
-				file
-			];
+			nb = CreateDocument[ {}, opts, StyleDefinitions -> makeColoredStylesheet[ "Notebook"]];
+			NotebookSave[ nb, file];
 			SetOptions[ $FrontEnd, Global`FileChangeProtection -> fpMode];
+			putToUpdateQueue[ file];
+			$TMAcurrentEvalNB = DeleteDuplicates[ Prepend[ $TMAcurrentEvalNB, {file, NotebookGet[ nb]}],
+					#1[[1]] === #2[[1]]&];
 			createPerNotebookDirectory[ file];
 		]
 	]
@@ -1096,7 +1178,7 @@ trustNotebookDirectory[ dir_String] :=
 trustNotebookDirectory[ args___] := unexpected[ trustNotebookDirectory, {args}]
 
 openNbRememberLocation[ opts___?OptionQ] :=
-	Module[{file, dir},
+	Module[{file, dir, nb},
 		If[ ValueQ[ $dirLastOpened],
 			dir = $dirLastOpened,
 			dir = $HomeDirectory
@@ -1105,7 +1187,11 @@ openNbRememberLocation[ opts___?OptionQ] :=
 		If[ StringQ[ file] && FileExistsQ[ file],
 			$dirLastOpened = DirectoryName[ file];
 			trustNotebookDirectory[ $dirLastOpened];
-			NotebookOpen[ file, opts, StyleDefinitions -> makeColoredStylesheet[ "Notebook"]]
+			If[ (nb = NotebookOpen[ file, opts, StyleDefinitions -> makeColoredStylesheet[ "Notebook"]]) =!= $Failed,
+				putToUpdateQueue[ file];
+				$TMAcurrentEvalNB = DeleteDuplicates[ Prepend[ $TMAcurrentEvalNB, {file, NotebookGet[ nb]}],
+					#1[[1]] === #2[[1]]&]
+			]
 		]
 	]
 openNbRememberLocation[ args___] := unexpected[ openNbRememberLocation, {args}]
