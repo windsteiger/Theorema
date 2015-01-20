@@ -1601,7 +1601,7 @@ Set$TM /: Annotated$TM[ Element$TM, SubScript$TM[dom_]][ p_, a_Set$TM] /; buiAct
 	Module[ {res},
 		res /; (res = ElementOf[ p, a, DomainOperation$TM[ dom, Equal$TM]]; MatchQ[ res, True|False])
 	]
-Set$TM /: \[ScriptCapitalP]$TM[ a_Set$TM] /; buiActive["PowerSet"] := Subsets[ a] /. List -> Set$TM
+Set$TM /: \[ScriptCapitalP]$TM[ a_Set$TM] /; buiActive["PowerSet"] := Set$TM@@Subsets[ a]
 Set$TM /: BracketingBar$TM[ a_Set$TM?isSequenceFree] /; buiActive["Cardinality"] && pairwiseDistinct[ a, Equal$TM] :=
 	Length[ a]
 Set$TM /: max$TM[ Set$TM[ e__]] /; buiActive["MaximumElementSet"] :=
@@ -2401,7 +2401,9 @@ Tuple$TM /: Replace$TM[ a_Tuple$TM?isGround, s:Tuple$TM[_?isGround, _]..] /; bui
 	Fold[ ReplaceAll, a, Replace[ {s}, Tuple$TM[ l_, r_] :> Rule[ l, r], {1}]]
 
 Tuple$TM /: Subscript$TM[ a_Tuple$TM, p__Integer] /; buiActive["Subscript"] := Subscript$TM[ a, Tuple$TM[ p]]
-Tuple$TM /: Subscript$TM[ a_Tuple$TM?isSequenceFree, p_?isPositionSpec] /; buiActive["Subscript"] := Extract[ a, p /. Tuple$TM -> List] /. List -> Tuple$TM
+Tuple$TM /: Subscript$TM[ (Tuple$TM[ a___])?isSequenceFree, p_?isPositionSpec] /; buiActive["Subscript"] :=
+	ReleaseHold[ Extract[ Hold[ a] /. List -> List$dummy, p /. Tuple$TM -> List, Hold] /. {List -> Tuple$TM, List$dummy -> List}]
+	(* The expression must not be evaluated while we have "List$dummy" instead of "List". *)
 
 isPositionSpec[ 0] := False	(* The head of an expression must not be accessible *)
 isPositionSpec[ _Integer] := True
