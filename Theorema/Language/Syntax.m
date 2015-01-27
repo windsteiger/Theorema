@@ -1270,8 +1270,10 @@ MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
     		Not,
     		RowBox[{ "\[Not]", parenthesize[ arg]}],
     		Plus,
-    		RowBox[ makeSummands[ HoldComplete[ arg]]],
-    		Times|Power|Subscript|BracketingBar,
+    		RowBox[ makeSummands[ HoldComplete[ arg], True]],
+    		Subtract,
+    		RowBox[ makeSummands[ HoldComplete[ arg], False]],
+    		Times|Divide|Power|Subscript|BracketingBar,	(* If we put "Divide" here, we get a nice-looking FractionBox. *)
     		MakeBoxes[ b[ arg], TheoremaForm],
     		_,
     		If[ isTmaOperatorName[ op],
@@ -1302,38 +1304,64 @@ MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
     ]
 	]
 	
-makeSummands[ HoldComplete[ a_, rest___]] := makeSummands[ HoldComplete[ rest], {MakeBoxes[ a, TheoremaForm]}]
-makeSummands[ HoldComplete[ a_?isNegative, rest___], {summands__}] :=
-	makeSummands[ HoldComplete[ rest], {summands, "-", neg[ a]}]
-makeSummands[ HoldComplete[ a_, rest___], {summands__}] :=
-	makeSummands[ HoldComplete[ rest], {summands, "+", MakeBoxes[ a, TheoremaForm]}]
-makeSummands[ HoldComplete[ ], summands_List] := summands
+makeSummands[ HoldComplete[ a_, rest___], positive_] :=
+	makeSummands[ HoldComplete[ rest], {MakeBoxes[ a, TheoremaForm]}, If[ TrueQ[ positive], {"+", "-"}, {"-", "+"}]]
+makeSummands[ HoldComplete[ a_?isNegative, rest___], {summands__}, symbols:{_, sym_String}] :=
+	Module[ {a0, p},
+		{a0, p} = neg[ a];
+		a0 = makeTmaBoxes@@a0;
+		Switch[ p,
+			True,
+			a0 = RowBox[ {"(", a0, ")"}],
+			Invisible,
+			a0 = RowBox[ {TagBox[ "(", "AutoParentheses"], a0, TagBox[ ")", "AutoParentheses"]}]
+		];
+		makeSummands[ HoldComplete[ rest], {summands, sym, a0}, symbols]
+	]
+makeSummands[ HoldComplete[ a_, rest___], {summands__}, symbols:{sym_String, _}] :=
+	Module[ {a0 = MakeBoxes[ a, TheoremaForm]},
+		If[ sym === "-",
+			Switch[ Head[ a],
+				Theorema`Language`Plus$TM|Theorema`Computation`Language`Plus$TM|Theorema`Language`Subtract$TM|Theorema`Computation`Language`Subtract$TM,
+				a0 = RowBox[ {"(", a0, ")"}],
+				Complex,
+				a0 = RowBox[ {TagBox[ "(", "AutoParentheses"], a0, TagBox[ ")", "AutoParentheses"]}]
+			]
+		];
+		makeSummands[ HoldComplete[ rest], {summands, sym, a0}, symbols]
+	]
+makeSummands[ HoldComplete[ ], summands_List, _List] := summands
 
 SetAttributes[ isNegative, HoldAllComplete];
-isNegative[ Complex[ _?Negative, _]] := True
-isNegative[ Complex[ 0, _?Negative]] := True
+isNegative[ Complex[ 0, (_Integer|_Rational|_Real)?Negative]] := True
+isNegative[ Complex[ (_Integer|_Rational|_Real)?Negative, _Integer|_Rational|_Real]] := True
 isNegative[ (Theorema`Language`Minus$TM|Theorema`Computation`Language`Minus$TM)[ _]] := True
-isNegative[ (Theorema`Language`Times$TM|Theorema`Computation`Language`Times$TM)[ a_, ___]] := isNegative[ a]
-isNegative[ a_] := Negative[ Unevaluated[ a]]
+isNegative[ (Theorema`Language`Times$TM|Theorema`Computation`Language`Times$TM)[ _?isNegative, ___]] := True
+isNegative[ a:(_Integer|_Rational|_Real)] := Negative[ a]
+isNegative[ _] := False
 
 SetAttributes[ neg, HoldAllComplete];
-neg[ Complex[ a_?Negative, b_]] :=
-	With[ {out = Complex[ -a, -b]},
-		RowBox[ {TagBox[ "(", "AutoParentheses"], MakeBoxes[ out, TheoremaForm], TagBox[ ")", "AutoParentheses"]}]
-	]
-neg[ Complex[ 0, -1]] := MakeBoxes[ I, TheoremaForm]
-neg[ Complex[ 0, b_]] :=
+neg[ Complex[ 0, b:(_Integer|_Rational|_Real)]] :=
 	With[ {b0 = -b},
-		MakeBoxes[ b0*I, TheoremaForm]
+		{HoldComplete[ b0*I], False}
 	]
-neg[ (Theorema`Language`Minus$TM|Theorema`Computation`Language`Minus$TM)[ a_]] := MakeBoxes[ a, TheoremaForm]
-neg[ (Theorema`Language`Times$TM|Theorema`Computation`Language`Times$TM)[ -1, a_]] := MakeBoxes[ a, TheoremaForm]
-neg[ (h:(Theorema`Language`Times$TM|Theorema`Computation`Language`Times$TM))[ -1, a__]] := MakeBoxes[ h[ a], TheoremaForm]
+neg[ Complex[ a:(_Integer|_Rational|_Real), b:(_Integer|_Rational|_Real)]] :=
+	With[ {out = Complex[ -a, -b]},
+		{HoldComplete[ out], True}
+	]
+neg[ Theorema`Language`Minus$TM[ a:((_[ _])|((Theorema`Language`Times$TM|Theorema`Computation`Language`Times$TM)[ _?isNegative, __]))]] :=
+	{HoldComplete[ a], Invisible}
+neg[ Theorema`Language`Minus$TM[ a:(h_[ _, __])]] :=
+	{HoldComplete[ a], !MemberQ[ {Theorema`Language`Times$TM, Theorema`Computation`Language`Times$TM, Theorema`Language`Power$TM, Theorema`Computation`Language`Power$TM}, h]}
+neg[ Theorema`Language`Minus$TM[ a_]] := {HoldComplete[ a], False}
+neg[ Theorema`Computation`Language`Minus$TM[ a_]] := neg[ Theorema`Language`Minus$TM[ a]]
+neg[ (Theorema`Language`Times$TM|Theorema`Computation`Language`Times$TM)[ -1, a_]] := neg[ Theorema`Language`Minus$TM[ a]]
+neg[ (h:(Theorema`Language`Times$TM|Theorema`Computation`Language`Times$TM))[ -1, a__]] := {HoldComplete[ h[ a]], False}
 neg[ (h:(Theorema`Language`Times$TM|Theorema`Computation`Language`Times$TM))[ a_, b__]] :=
-	With[ {a0 = neg[ a]},
-		RowBox[ Prepend[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ b]]], a0]]
+	With[ {a0 = Join[ First[ neg[ a]], HoldComplete[ b]]},
+		{ReplacePart[ HoldComplete[ a0], {1, 0} -> h], False}
 	]
-neg[ a_] := With[ {a0 = -a}, MakeBoxes[ a0, TheoremaForm]]
+neg[ a_] := With[ {a0 = -a}, {HoldComplete[ a0], False}]
 
 
 SetAttributes[ parenthesize, HoldAllComplete]; (* otherwise evaluation might happen *)
