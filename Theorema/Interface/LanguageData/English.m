@@ -131,6 +131,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.", ToString[
 	translate[ "interactiveInstantiate", lang] = "Instantiate quantifiers interactively";
 	translate[ "interactiveNewProofSitFilter", lang] = "Filter new proof situations interactively";
 	translate[ "interactiveProofSitSel", lang] = "Select next proof situation interactively";
+	translate[ "invalidRange", lang] = "Every variable bound by a quantifier may appear only once in the respective range; This is violated by ``.";
 
     translate[ "KBcomp", lang] = "Knowledge used in computation";
     translate[ "KBprove", lang] = "Knowledge used in proof";

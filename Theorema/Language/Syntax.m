@@ -1385,9 +1385,13 @@ MakeBoxes[ s_?isTmaOperatorName[], TheoremaForm] :=
     
 MakeBoxes[ s_Symbol, TheoremaForm] := 
 	(* We have to use "Unevaluated" here, because "I" is a symbol, but evaluates to "Complex[0, 1]" *)
-	Module[ {n = SymbolName[ Unevaluated[ s]]},
-		If[ StringLength[ n] > 3 && StringTake[ n, -3] === "$TM",
-			StringDrop[ n, -3],
+	Module[ {n = SymbolName[ Unevaluated[ s]], l},
+		l = StringLength[ n];
+		If[ l > 3 && StringTake[ n, -3] === "$TM",
+			If[ l > 7 && StringTake[ n, 4] === "VAR$", (* Prefix "VAR$" is only dropped in presence of suffix "$TM" *)
+				StringTake[ n, {5, l - 3}],
+				StringDrop[ n, -3]
+			],
 			n
 		]
 	]
