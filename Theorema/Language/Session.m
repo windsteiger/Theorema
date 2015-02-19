@@ -259,29 +259,50 @@ closeGlobalDeclaration[] :=
 closeGlobalDeclaration[ args___] := unexpected[ closeGlobalDeclaration, {args}]
 
 getGlobalDeclaration[ file_String] := Replace[ file, $globalDeclarations]
-getGlobalDeclaration[ file_String, id_Integer] := Cases[ getGlobalDeclaration[ file], {id, d_} -> d]
+getGlobalDeclaration[ file_String, id_Integer] := Cases[ getGlobalDeclaration[ file], {id, _, d_} -> d, {1}, 1]
 getGlobalDeclaration[ file_String, l_List] := 
 	(* Mapping over l ensures the order of extracted definitions to match the order of ids in l *)
 	Apply[ Join, Map[ getGlobalDeclaration[ file, #]&, l]]
 getGlobalDeclaration[ args___] := unexpected[ getGlobalDeclaration, {args}]
 
-putGlobalDeclaration[ file_String, id_Integer, decl_] :=
-	Module[ {posF, posId},
+putGlobalDeclaration[ file_String, id_Integer, pos_List, nb_Notebook, decl_] :=
+	Module[ {posF, posId, allDeclFile, allDeclPos},
 		(* in case of an extension domain, we must generate the default definition that redirects to the original domain *)
 		processDomainDefinition[ decl, file, id];
-		posF = Position[ $globalDeclarations, file -> _];
+		posF = Position[ $globalDeclarations, file -> _, {1}, 1];
 		If[ posF === {},
-			PrependTo[ $globalDeclarations, file -> {{id, decl}}],
-			posId = Position[ Extract[ $globalDeclarations, posF[[1]]], {id, _}];
+			PrependTo[ $globalDeclarations, file -> {{id, pos, decl}}],
+			allDeclPos = Append[ posF[[1]], 2];
+			allDeclFile = Extract[ $globalDeclarations, allDeclPos];
+			posId = Position[ allDeclFile, {id, __}, {1}, 1];
 			If[ posId === {},
-				$globalDeclarations = With[ {posDecl = Append[ posF[[1]], 2]}, 
-					ReplacePart[ $globalDeclarations, posDecl -> Append[ Extract[ $globalDeclarations, posDecl], {id, decl}]]],
-				$globalDeclarations = With[ {posDecl = Append[ Join[ posF[[1]], posId[[1]]], 2]}, 
-					ReplacePart[ $globalDeclarations, posDecl -> decl]]
+				(* before we add the new one, we have to update positions in the existing declarations *)
+				allDeclFile = updateGlobalDeclarations[ allDeclFile, pos, nb];
+				$globalDeclarations = ReplacePart[ $globalDeclarations, allDeclPos -> Append[ allDeclFile, {id, pos, decl}]],
+				(* else: an entry for id already exists *)
+				If[ Extract[ allDeclFile, Append[ posId[[1]], 2]] =!= pos,
+					(* the new position is NOT the same as the original one: update positions in the existing declarations *)
+					allDeclFile = updateGlobalDeclarations[ allDeclFile, pos, nb]
+				];
+				allDeclFile = ReplacePart[ allDeclFile, posId[[1]] -> {id, pos, decl}];
+				$globalDeclarations = ReplacePart[ $globalDeclarations, allDeclPos -> allDeclFile]
 			]
 		]
 	]
 putGlobalDeclaration[ args___] := unexpected[ putGlobalDeclaration, {args}]
+
+updateGlobalDeclarations[ decl_List, pos_List, nb_Notebook] :=
+	Module[{declCellPos},
+		declCellPos = Select[ Position[ nb, Cell[ _, "GlobalDeclaration", ___]], occursBelow[ pos, #]&];
+		declCellPos = Map[ {#, Options[ Extract[ nb, #], CellID]}&, declCellPos];
+		Map[ updateCachedGlobalPos[ declCellPos, #]&, decl]
+	]
+updateGlobalDeclarations[ args___] := unexpected[ updateGlobalDeclarations, {args}]
+
+updateCachedGlobalPos[ {___, {posNew_, {CellID -> id_}}, ___}, {id_, _, decl_}] := {id, posNew, decl}
+updateCachedGlobalPos[ _List, orig_List] := orig
+updateCachedGlobalPos[ args___] := unexpected[ updateCachedGlobalPos, {args}]
+
 
 (* For an extension domain, we do something, otherwise nothing needs to be done. There must not be an unexpected[...] *)
 processDomainDefinition[ d:Hold[ domainConstruct$TM][ dom_, RNG$[ DOMEXTRNG$[ VAR$[ new_Hold], base_]]], file_String, id_Integer] := 
@@ -303,10 +324,13 @@ SetAttributes[ notContainedIn, HoldAll];
 	
 SetAttributes[ processGlobalDeclaration, HoldAll];
 processGlobalDeclaration[ x_] := 
-	Module[ {nb = EvaluationNotebook[], id = CurrentValue[ "CellID"], file = CurrentValue[ "NotebookFullFileName"]},
+	Module[ {nb = EvaluationNotebook[], id, file, nbExpr},
 		SelectionMove[ nb, All, EvaluationCell];
+		id = CurrentValue[ "CellID"];
+		file = CurrentValue[ nb, "NotebookFullFileName"];
 		SetOptions[ NotebookSelection[ nb], CellTags -> {cellIDLabel[ id], sourceLabel[ file]}, ShowCellTags -> False];
-		putGlobalDeclaration[ file, id, ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]]];
+		nbExpr = NotebookGet[ nb];
+		putGlobalDeclaration[ file, id, evaluationPosition[ nb, nbExpr, id], nbExpr, ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]]];
 		(* "Abbrev" cannot appear in global declarations, hence no need to call "addAbbrevPositions". *)
 		SelectionMove[ nb, After, Cell];
 	]
@@ -342,18 +366,25 @@ processEnvironment[ x_] :=
 processEnvironment[args___] := unexcpected[ processEnvironment, {args}]
 
 evaluationPosition[ nb_NotebookObject, raw_Notebook] :=
-	Module[{id, pos},
+	Module[ {id, pos},
 		SelectionMove[ nb, All, EvaluationCell];
 		(* find the cell according to CellID *)
-		{id} = Options[ NotebookRead[ nb], CellID];
-		pos = Position[ raw, Cell[ _, ___, id, ___]];
+		id = CurrentValue[ "CellID"];
+		pos = Position[ raw, Cell[ _, ___, CellID -> id, ___], Infinity, 1];
 		pos[[1]]
 		(* we leave the current cell selected, the calling function should decide where to move the selection *)
 	]
+evaluationPosition[ nb_NotebookObject, raw_Notebook, id_Integer] :=
+	Module[ {pos},
+		pos = Position[ raw, Cell[ _, ___, CellID -> id, ___], Infinity, 1];
+		pos[[1]]
+	]
+evaluationPosition[ nb_NotebookObject, id_Integer] := evaluationPosition[ nb, NotebookGet[ nb], id]
+
 evaluationPosition[ args___] := unexpected[ evaluationPosition, {args}]
 
 adjustFormulaLabel[ nb_NotebookObject] := 
-	Module[{ cellTags = CurrentValue[ "CellTags"], cellID = CurrentValue[ "CellID"], cleanCellTags, key},
+	Module[ {cellTags = CurrentValue[ "CellTags"], cellID = CurrentValue[ "CellID"], cleanCellTags, key},
 		(*
 		 * Make sure we have a list of CellTags (could also be a plain string)
 		 *)
@@ -573,14 +604,13 @@ automatedFormulaLabel[nb_NotebookObject] :=
 automatedFormulaLabel[args___] := unexpected[ automatedFormulaLabel, {args}]
 
 applicableGlobalDeclarations[ nb_NotebookObject, raw_Notebook, pos_List] :=
-	Module[{ globDeclID},
-		(* Find global declarations that apply to the cell at position pos, i.e. those that occur "above" (incl. nesting)
-		   from those cells collect the CellIDs *)
-		globDeclID = Cases[ raw, c:Cell[ _, "GlobalDeclaration", ___, CellID -> id_, ___] /; occursBelow[ Position[ raw, c][[1]], pos] -> id, Infinity];
-		(* Lookup the ids in the global declarations in the current notebook
-		   Due to the way the ids are searched, they are sorted by the order how they occur in the notebook
-		   -> this is how they have to be applied to the expression *)
-		getGlobalDeclaration[ CurrentValue[ nb, "NotebookFullFileName"], globDeclID]
+	Module[{ file = CurrentValue[ nb, "NotebookFullFileName"]},
+		(* Find global declarations that apply to the cell at position pos, i.e. those at a position p, where pos occur "below" p (incl. nesting).
+		   The stored global declarations have their position cached, we use the cached positions to find the relevant declarations.
+		   It is important to keep the cached positions up to date when the notebook is edited, in particular when new declarations are added or removed.
+		   Originally (before we cached positions) we searched through the raw notebook expression for declaration cells, computed their position, and
+		   chose the relevant ones using "occursBelow". For big notebooks, this really makes a difference. *)
+		Map[ Last, Sort[ Cases[ getGlobalDeclaration[ file], {_, p_, d_} /; occursBelow[ p, pos], {1}], occursBelow[ #1[[2]], #2[[2]]]&]]
 	]
 applicableGlobalDeclarations[ args___] := unexpected[ applicableGlobalDeclarations, {args}]
 
