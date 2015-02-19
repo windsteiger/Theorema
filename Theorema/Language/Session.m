@@ -324,17 +324,49 @@ SetAttributes[ notContainedIn, HoldAll];
 	
 SetAttributes[ processGlobalDeclaration, HoldAll];
 processGlobalDeclaration[ x_] := 
-	Module[ {nb = EvaluationNotebook[], id, file, nbExpr},
+	Module[ {nb = EvaluationNotebook[], id, file, nbExpr, newFrameLabel},
 		SelectionMove[ nb, All, EvaluationCell];
 		id = CurrentValue[ "CellID"];
 		file = CurrentValue[ nb, "NotebookFullFileName"];
-		SetOptions[ NotebookSelection[ nb], CellTags -> {cellIDLabel[ id], sourceLabel[ file]}, ShowCellTags -> False];
+		newFrameLabel = With[ {fid = {file, id}},
+			Cell[ BoxData[
+				ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeGlobalDeclaration[ fid]]]]
+		];
+		SetOptions[ NotebookSelection[ nb], 
+			CellTags -> {cellIDLabel[ id], sourceLabel[ file]}, ShowCellTags -> False,
+			CellFrameLabels -> {{None, newFrameLabel}, {None, None}}];
 		nbExpr = NotebookGet[ nb];
 		putGlobalDeclaration[ file, id, evaluationPosition[ nb, nbExpr, id], nbExpr, ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]]];
 		(* "Abbrev" cannot appear in global declarations, hence no need to call "addAbbrevPositions". *)
 		SelectionMove[ nb, After, Cell];
 	]
 processGlobalDeclaration[ args___] := unexpected[ processGlobalDeclaration, {args}]
+
+removeGlobalDeclaration[ {file_, id_}] :=
+	Module[ {posF, pos, nb, allDeclPos, allDeclFile},
+		(* we search for the position in the notebook, thus we find a position regardless whether the declaration
+		   has been evaluated or not. It would be faster to use the cached position but this would not work if we delete a
+		   declaration that has not been evaluated yet. *)
+		nb = NotebookGet[ ButtonNotebook[]];
+		pos = evaluationPosition[ ButtonNotebook[], nb, id];
+		(* we remove the cell *)
+		SelectionMove[ ButtonNotebook[], All, ButtonCell];
+		NotebookDelete[ ButtonNotebook[]];
+		posF = Position[ $globalDeclarations, file -> _, {1}, 1];
+		If[ posF =!= {},
+			(* we only need to update something if the current file has evaluated declarations *)
+			allDeclPos = Append[ posF[[1]], 2];
+			allDeclFile = DeleteCases[ Extract[ $globalDeclarations, allDeclPos], {id, __}, {1}, 1];
+			(* the positions of those below pos will be updated. In fact, these cells just move up by one position *)
+			allDeclFile = Map[ shiftUp[ pos, #]&, allDeclFile];
+			$globalDeclarations = ReplacePart[ $globalDeclarations, allDeclPos -> allDeclFile]
+		]		
+	]
+removeGlobalDeclaration[ args___] := unexpected[ removeGlobalDeclaration, {args}]
+
+shiftUp[ {pre___, x_}, {id_, {pre___, y_, post___}, decl_}] /; x < y := {id, {pre, y-1, post}, decl}
+shiftUp[ l_List, orig_List] := orig
+shiftUp[ args___] := unexpected[ shiftUp, {args}]
 
 
 SetAttributes[ processEnvironment, HoldAll];
