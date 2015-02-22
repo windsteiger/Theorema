@@ -330,7 +330,7 @@ processGlobalDeclaration[ x_] :=
 		file = CurrentValue[ nb, "NotebookFullFileName"];
 		newFrameLabel = With[ {fid = {file, id}},
 			Cell[ BoxData[
-				ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeGlobalDeclaration[ fid]]]]
+				ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeGlobal[ fid]]]]
 		];
 		SetOptions[ NotebookSelection[ nb], 
 			CellTags -> {cellIDLabel[ id], sourceLabel[ file]}, ShowCellTags -> False,
@@ -341,33 +341,6 @@ processGlobalDeclaration[ x_] :=
 		SelectionMove[ nb, After, Cell];
 	]
 processGlobalDeclaration[ args___] := unexpected[ processGlobalDeclaration, {args}]
-
-removeGlobalDeclaration[ {file_, id_}] :=
-	Module[ {posF, pos, nb, allDeclPos, allDeclFile},
-		(* we search for the position in the notebook, thus we find a position regardless whether the declaration
-		   has been evaluated or not. It would be faster to use the cached position but this would not work if we delete a
-		   declaration that has not been evaluated yet. *)
-		nb = NotebookGet[ ButtonNotebook[]];
-		pos = evaluationPosition[ ButtonNotebook[], nb, id];
-		(* we remove the cell *)
-		SelectionMove[ ButtonNotebook[], All, ButtonCell];
-		NotebookDelete[ ButtonNotebook[]];
-		posF = Position[ $globalDeclarations, file -> _, {1}, 1];
-		If[ posF =!= {},
-			(* we only need to update something if the current file has evaluated declarations *)
-			allDeclPos = Append[ posF[[1]], 2];
-			allDeclFile = DeleteCases[ Extract[ $globalDeclarations, allDeclPos], {id, __}, {1}, 1];
-			(* the positions of those below pos will be updated. In fact, these cells just move up by one position *)
-			allDeclFile = Map[ shiftUp[ pos, #]&, allDeclFile];
-			$globalDeclarations = ReplacePart[ $globalDeclarations, allDeclPos -> allDeclFile]
-		]		
-	]
-removeGlobalDeclaration[ args___] := unexpected[ removeGlobalDeclaration, {args}]
-
-shiftUp[ {pre___, x_}, {id_, {pre___, y_, post___}, decl_}] /; x < y := {id, {pre, y-1, post}, decl}
-shiftUp[ l_List, orig_List] := orig
-shiftUp[ args___] := unexpected[ shiftUp, {args}]
-
 
 SetAttributes[ processEnvironment, HoldAll];
 processEnvironment[ Theorema`Language`nE] := Null
@@ -417,32 +390,21 @@ evaluationPosition[ args___] := unexpected[ evaluationPosition, {args}]
 
 adjustFormulaLabel[ nb_NotebookObject] := 
 	Module[ {cellTags = CurrentValue[ "CellTags"], cellID = CurrentValue[ "CellID"], cleanCellTags, key},
-		(*
-		 * Make sure we have a list of CellTags (could also be a plain string)
-		 *)
+		(* Make sure we have a list of CellTags (could also be a plain string) *)
 		cellTags = Flatten[ {cellTags}];
-		(*
-		 * Remove any automated labels (begins with "ID<sep>" or "Source<sep>").
-		 * Remove initLabel.
-		 *)
+		(* Remove any automated labels (begins with "ID<sep>" or "Source<sep>"). Remove initLabel *)
 		cleanCellTags = getCleanCellTags[ cellTags];
-        (*
-         * Replace unlabeled formula with counter.
-         *)
+        (* Replace unlabeled formula with counter *)
          If[ cleanCellTags === {},
          	cleanCellTags = automatedFormulaLabel[ nb]
          ];
-        (*
-         * Relabel Cell and hide CellTags.
-         *)
+        (* Relabel Cell and hide CellTags *)
         key = relabelCell[ nb, cleanCellTags, cellID];
         {key, cleanCellTags}
 	]
 adjustFormulaLabel[ args___] := unexpected[ adjustFormulaLabel, {args}]
 
-(*
- * Returns all CellTags except the generated tags used for formula identification, i.e. ID<sep>... and Source<sep>...
- *)
+(* getCleanCellTags returns all CellTags except the generated tags used for formula identification, i.e. ID<sep>... and Source<sep>...*)
 getCleanCellTags[ cellTags_List] :=
     Select[ cellTags, !StringMatchQ[ #, (("ID" <> $cellTagKeySeparator | "Source" <> $cellTagKeySeparator) ~~ __) | $initLabel]&]
 getCleanCellTags[ cellTag_String] := getCleanCellTags[ {cellTag}]
@@ -500,12 +462,11 @@ relabelCell[nb_NotebookObject, cellTags_List, cellID_Integer] :=
 relabelCell[args___] := unexpected[ relabelCell,{args}]
 
 removeEnvironment[ nb_NotebookObject] :=
-	Module[{keys},
+	Module[ {cells, file = CurrentValue[ nb, "NotebookFullFileName"]},
 		SelectionMove[ nb, All, ButtonCell];
 		SelectionMove[ nb, All, CellGroup];
-		keys = Map[ getKeyTags,
-			Cases[ NotebookRead[ nb],
-				Cell[_, "FormalTextInputFormula", ___, CellTags -> tags_, ___] -> tags, Infinity]];
+		(* The selection is Cell[ CellGroupData[ {cell1, ..., celln}]]], so we have to search on level 3 *)
+		cells = Cases[ NotebookRead[ nb], Cell[ _, "FormalTextInputFormula"|"GlobalDeclaration", ___], {3}];
 		NotebookDelete[ nb];
 		NotebookFind[ nb, "CloseEnvironment", Next, CellStyle];
 		SelectionMove[ nb, All, Cell];
@@ -513,19 +474,14 @@ removeEnvironment[ nb_NotebookObject] :=
 		NotebookFind[ nb, "OpenEnvironment", Previous, CellStyle];
 		SelectionMove[ nb, All, Cell];
 		NotebookDelete[ nb];
-		Scan[ removeFromEnv, keys];
-		updateKBBrowser[ CurrentValue[ nb, "NotebookFullFileName"]];	
+		Scan[ removeFromSession[ file, #]&, cells];
+		updateKBBrowser[ file];	
 	]
 removeEnvironment[ args___] := unexpected[ removeEnvironment, {args}]
 
-removeFormula[ key_List] :=
-	Module[{},
-		SelectionMove[ ButtonNotebook[], All, ButtonCell];
-		NotebookDelete[ ButtonNotebook[]];
-		removeFromEnv[ key];
-		updateKBBrowser[ CurrentValue[ ButtonNotebook[], "NotebookFullFileName"]];
-	]
-removeFormula[ args___] := unexpected[ removeFormula, {args}]
+removeFromSession[ file_, Cell[ _, "FormalTextInputFormula", ___, CellTags -> t_, ___]] := removeFromEnv[ getKeyTags[ t]]
+removeFromSession[ file_, Cell[ _, "GlobalDeclaration", ___, CellID -> id_, ___]] := removeFromGlobals[ {file, id}]
+removeFromSession[ args___] := unexpected[ removeFromSession, {args}]
 
 removeFromEnv[ key_List] :=
 	Module[{p},
@@ -538,6 +494,57 @@ removeFromEnv[ key_List] :=
 			Unset[ kbSelectCompute[ key]]];			
 	]
 removeFromEnv[ args___] := unexpected[ removeFromEnv, {args}]
+
+removeFormula[ key_List] :=
+	Module[ {},
+		SelectionMove[ ButtonNotebook[], All, ButtonCell];
+		NotebookDelete[ ButtonNotebook[]];
+		removeFromEnv[ key];
+		updateKBBrowser[ CurrentValue[ ButtonNotebook[], "NotebookFullFileName"]];
+	]
+removeFormula[ args___] := unexpected[ removeFormula, {args}]
+
+removeGlobal[ {file_, id_}] :=
+	Module[ {posF, pos, nb, allDeclPos, allDeclFile},
+		(* we search for the position in the notebook, thus we find a position regardless whether the declaration
+		   has been evaluated or not. It would be faster to use the cached position but this would not work if we delete a
+		   declaration that has not been evaluated yet. *)
+		nb = NotebookGet[ ButtonNotebook[]];
+		pos = evaluationPosition[ ButtonNotebook[], nb, id];
+		(* we remove the cell *)
+		SelectionMove[ ButtonNotebook[], All, ButtonCell];
+		NotebookDelete[ ButtonNotebook[]];
+		posF = Position[ $globalDeclarations, file -> _, {1}, 1];
+		If[ posF =!= {},
+			(* we only need to update something if the current file has evaluated declarations *)
+			allDeclPos = Append[ posF[[1]], 2];
+			allDeclFile = DeleteCases[ Extract[ $globalDeclarations, allDeclPos], {id, __}, {1}, 1];
+			(* the positions of those below pos will be updated. In fact, these cells just move up by one position.
+			   we do not use occursBelow because using pattern matching in shiftUp (similar to occursBelow) allows
+			   to do everything at once. *)
+			allDeclFile = Map[ shiftUp[ pos, #]&, allDeclFile];
+			$globalDeclarations = ReplacePart[ $globalDeclarations, allDeclPos -> allDeclFile]
+		]		
+	]
+removeGlobal[ args___] := unexpected[ removeGlobal, {args}]
+
+shiftUp[ {pre___, x_}, {id_, {pre___, y_, post___}, decl_}] /; x < y := {id, {pre, y-1, post}, decl}
+shiftUp[ l_List, orig_List] := orig
+shiftUp[ args___] := unexpected[ shiftUp, {args}]
+
+removeFromGlobals[ {file_, id_}] :=
+	Module[ {posF, allDeclPos, allDeclFile},
+		(* we need not update any other cached positions when we remove an entire environment *)
+		posF = Position[ $globalDeclarations, file -> _, {1}, 1];
+		If[ posF =!= {},
+			(* we only need to update something if the current file has evaluated declarations *)
+			allDeclPos = Append[ posF[[1]], 2];
+			allDeclFile = DeleteCases[ Extract[ $globalDeclarations, allDeclPos], {id, __}, {1}, 1];
+			$globalDeclarations = ReplacePart[ $globalDeclarations, allDeclPos -> allDeclFile]
+		]		
+	]
+removeFromGlobals[ args___] := unexpected[ removeFromGlobals, {args}]
+
 
 cellLabel[ l_, key_String] := key <> $cellTagKeySeparator <> ToString[l]
 cellLabel[ args___] := unexpected[ cellLabel, {args}]
