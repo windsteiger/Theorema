@@ -200,6 +200,8 @@ falls nicht, siehe <http://www.gnu.org/licenses/>.", ToString[ Date[][[1]]]];
     translate[ "restoreSettingsBeforeComp", lang] = "Vor jeder Berechnung die Einstellungen zur\[UDoubleDot]cksetzen";
     translate[ "RestoreSettingsLong", lang] = "Einstellungen wirklich auf die Werte zur\[UDoubleDot]cksetzen, die bei letzmaliger Ausf\[UDoubleDot]hrung dieser Aktion verwendet wurden?";
     translate[ "result", lang] = "Resultat";
+    translate[ "resyncGlobal", lang] = "Re-sync globals";
+    translate[ "resyncGlobalTooltip", lang] = "Globale im aktiven Notebook neu synchronisieren. Kann nach manuellem Bearbeiten im Notebook notwendig werden.";
 	translate[ "ruleActive", lang] = "Aktivieren/Deaktivieren der Beweisregel";
 	translate[ "rulePriority", lang] = "Priorit\[ADoubleDot]t der Regel ist eine ganze Zahl zwischen 1 und 100. Niedriger Wert bedeutet hohe Priorit\[ADoubleDot]t";
 

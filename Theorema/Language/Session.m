@@ -303,6 +303,18 @@ updateCachedGlobalPos[ {___, {posNew_, {CellID -> id_}}, ___}, {id_, _, decl_}] 
 updateCachedGlobalPos[ _List, orig_List] := orig
 updateCachedGlobalPos[ args___] := unexpected[ updateCachedGlobalPos, {args}]
 
+resyncGlobals[ file_String] :=
+	Module[ {nb, pos, updDecl},
+		nb = Select[ Notebooks[], CurrentValue[ #, "NotebookFullFileName"] === file&, 1];
+		pos = Position[ $globalDeclarations, file -> _, {1}, 1];
+		If[ nb =!= {} && pos =!= {},
+			pos = Append[ pos[[1]], 2];
+			updDecl = updateGlobalDeclarations[ Extract[ $globalDeclarations, pos], {0}, NotebookGet[ nb[[1]]]];
+			$globalDeclarations = ReplacePart[ $globalDeclarations, pos -> updDecl]
+		];
+	]
+resyncGlobals[ args___] := unexpected[ resyncGlobals, {args}]
+
 
 (* For an extension domain, we do something, otherwise nothing needs to be done. There must not be an unexpected[...] *)
 processDomainDefinition[ d:Hold[ domainConstruct$TM][ dom_, RNG$[ DOMEXTRNG$[ VAR$[ new_Hold], base_]]], file_String, id_Integer] := 
@@ -882,6 +894,7 @@ initSession[] :=
         $formulaCounterName = "TheoremaFormulaCounter";
         $TMAcurrentEvalNB = {};
         $tmaNbUpdateQueue = {};
+        $tmaAllNotebooks = {};
         $Pre=.;
         $PreRead=.;
     ]
@@ -1263,6 +1276,7 @@ createNbRememberLocation[ opts___?OptionQ] :=
 			putToUpdateQueue[ file];
 			$TMAcurrentEvalNB = DeleteDuplicates[ Prepend[ $TMAcurrentEvalNB, {file, NotebookGet[ nb]}],
 					#1[[1]] === #2[[1]]&];
+			$tmaAllNotebooks = DeleteDuplicates[ Prepend[ $tmaAllNotebooks, file]];
 			createPerNotebookDirectory[ file];
 		]
 	]
@@ -1296,7 +1310,8 @@ openNbRememberLocation[ opts___?OptionQ] :=
 			If[ (nb = NotebookOpen[ file, opts, StyleDefinitions -> makeColoredStylesheet[ "Notebook"]]) =!= $Failed,
 				putToUpdateQueue[ file];
 				$TMAcurrentEvalNB = DeleteDuplicates[ Prepend[ $TMAcurrentEvalNB, {file, NotebookGet[ nb]}],
-					#1[[1]] === #2[[1]]&]
+					#1[[1]] === #2[[1]]&];
+				$tmaAllNotebooks = DeleteDuplicates[ Prepend[ $tmaAllNotebooks, file]];
 			]
 		]
 	]
@@ -1345,6 +1360,9 @@ saveNbRememberLocation[ nb_NotebookObject] :=
 		file
 	]
 saveNbRememberLocation[ args___] := unexpected[ saveNbRememberLocation, {args}]
+
+allTmaNotebooks[ ] := $tmaAllNotebooks
+allTmaNotebooks[ args___] := unexpected[ allTmaNotebooks, {args}]
 
 
 (* ::Section:: *)

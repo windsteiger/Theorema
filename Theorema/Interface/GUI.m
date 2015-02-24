@@ -1858,10 +1858,15 @@ makeDeclButtons[] := Row[ Map[ makeDeclBut, {"VAR", "VARCOND", "COND", "ABBREV"}
 makeDeclButtons[args___] := unexpected[ makeDeclButtons, {args}]
 
 displayDecl[ ] :=
-	Row[ {
-		Pane[ $TMAactDecl, {350, {10, 100}}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic],
-		Tooltip[ Button[ Style[ "\:21ba", {Medium}], $TMAactDecl = displayGlobalDeclarations[ InputNotebook[]]], translate[ "tcSessTabEnvTabButtonDeclLabel"]]
-		}, Spacer[3]]
+	Column[{
+		Row[ {
+			Pane[ $TMAactDecl, {350, {10, 100}}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic],
+			Tooltip[ Button[ Style[ "\:21ba", {Medium}], $TMAactDecl = displayGlobalDeclarations[ InputNotebook[]]], translate[ "tcSessTabEnvTabButtonDeclLabel"]]
+			}, Spacer[3]],
+		Row[ {
+			PopupMenu[ Dynamic[ $activeNB], Map[ # -> FileNameTake[ #]&, allTmaNotebooks[]]],
+			Tooltip[ Button[ translate[ "resyncGlobal"], resyncGlobals[ $activeNB]], translate[ "resyncGlobalTooltip"]]}, Spacer[3]]
+	}]
 displayDecl[ args___] := unexpected[ displayDecl, {args}]
 
 declButtonData["VAR"] := 

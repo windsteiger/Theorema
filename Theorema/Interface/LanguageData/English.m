@@ -197,6 +197,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.", ToString[
     translate[ "restoreSettingsBeforeComp", lang] = "Restore settings before each computation";
     translate[ "RestoreSettingsLong", lang] = "Really restore all relevant settings to the values they had when this action was performed last time?";
     translate[ "result", lang] = "Result";
+    translate[ "resyncGlobal", lang] = "Re-sync globals";
+    translate[ "resyncGlobalTooltip", lang] = "Re-synchronize globals in the active notebook. Might be necessary after manual notebook editing.";
 	translate[ "ruleActive", lang] = "Activate/deactivate the inference rule";
 	translate[ "rulePriority", lang] = "The priority of the rule as an integer between 1 and 100. Lower value means higher priority";
 

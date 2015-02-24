@@ -41,6 +41,7 @@ With[ {lang = "German"},
 (* TRANSLATED *)
 
 (* UNTRANSLATED *)	
+	MessageName[ allTmaNotebooks, "usage", lang] = "allTmaNotebooks[] returns a list of all Theorema Notebooks in the current session.";
 	MessageName[ appendKB, "usage", lang] = "appendKB[ kb_List, fml] appends fml to the knowledge base kb and deletes duplicate entries.";
 	MessageName[ appendToKB, "usage", lang] = "appendToKB[ sym, fml] sets sym to the result of appending fml to sym and deleting duplicate entries.";
 	MessageName[ applyAllRules, "usage", lang] = "applyAllRules[ ...] .";
@@ -196,6 +197,7 @@ With[ {lang = "German"},
 	MessageName[ replaceListAndTrack, "usage", lang] = "";	
 	MessageName[ replaceRepeatedAndTrack, "usage", lang] = "";	
 	MessageName[ replaceRepeatedExcept, "usage", lang] = "replaceRepeatedExcept[ expr, rules, expt] applies rule(s) repeatedly to all subparts of 'expr' except those contained in the list 'expt'.";
+	MessageName[ resyncGlobals, "usage", lang] = "resyncGlobals[ nb] re-synchronizes globals in notebook nb.";
 	MessageName[ $rewriteRules, "usage", lang] = "is a global variable used to accumulate newly generated rewrite rules corresponding to formulas in the KB.";
 	MessageName[ rngConstants, "usage", lang] = "";	
 	MessageName[ rngToCondition, "usage", lang] = "rngToCondition[rng] transforms the range specification rng into a list of conditions.";
