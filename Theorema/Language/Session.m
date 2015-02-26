@@ -358,7 +358,7 @@ SetAttributes[ processEnvironment, HoldAll];
 processEnvironment[ Theorema`Language`nE] := Null
 
 processEnvironment[ x_] :=
-    Module[ {nb = EvaluationNotebook[], nbFile, nbExpr, key, tags, globDec},
+    Module[ {nb = EvaluationNotebook[], nbFile, nbExpr, key, tags, globDec, pos},
     	(* select current cell: we need to refer to this selection when we set the cell options *)
 		SelectionMove[ nb, All, EvaluationCell];
     	{key, tags} = adjustFormulaLabel[ nb];
@@ -368,9 +368,16 @@ processEnvironment[ x_] :=
 			(* if last evaluation in that file was longer than 1 sec ago: get fresh nbExpr, nb might have changed (been edited) *)
         	nbExpr = NotebookGet[ nb];
         	(* For the outside, we also store the filename *)
-        	$TMAcurrentEvalNB = ReplacePart[ $TMAcurrentEvalNB, Position[ $TMAcurrentEvalNB, {nbFile, _}, {1}, 1] -> {nbFile, nbExpr}],
+        	pos = Position[ $TMAcurrentEvalNB, {nbFile, _}, {1}, 1];
+        	If[ pos === {},
+        		(* usually, if the notebook has been opened regulary, this should never be the case.
+        		   But e.g. after a kernel quit and restart it might be empty ... *)
+        		$TMAcurrentEvalNB = {{nbFile, nbExpr}},
+        		(* else *)
+        		$TMAcurrentEvalNB = ReplacePart[ $TMAcurrentEvalNB, pos -> {nbFile, nbExpr}]
+        	],
         	(* else: we are most probably in a multi-cell evaluation. Need not get new nbExpr. Cases MUST find sth, First must work. *)
-        	nbExpr = First[ Cases[ $TMAcurrentEvalNB, {nbFile, e_} -> e]]
+        	nbExpr = First[ Cases[ $TMAcurrentEvalNB, {nbFile, e_} -> e, {1}, 1]]
 		];
 		(* extract the global declarations that are applicable in the current evaluation *)
 		globDec = applicableGlobalDeclarations[ nb, nbExpr, evaluationPosition[ nb, nbExpr]];
@@ -581,7 +588,7 @@ ensureNotebookIntegrity[ file_] :=
 			(* else *)
 			nb = First[ nb]
 		];
-		nbExpr = Cases[ $TMAcurrentEvalNB, {file, e_} -> e];
+		nbExpr = Cases[ $TMAcurrentEvalNB, {file, e_} -> e, {1}, 1];
 		Assert[ Length[ nbExpr] >= 1];
 		ensureNotebookIntegrity[ nb, nbExpr[[1]]]
 	]
@@ -894,6 +901,7 @@ initSession[] :=
         $formulaCounterName = "TheoremaFormulaCounter";
         $TMAcurrentEvalNB = {};
         $tmaNbUpdateQueue = {};
+        $tmaNbEval = {};
         $tmaAllNotebooks = {};
         $Pre=.;
         $PreRead=.;
@@ -925,7 +933,12 @@ getFormulaCounter[args___] := unexpected[ getFormulaCounter, {args}]
 	In order not to mess up the contexts, we do some checks.
 *) 
 openEnvironment[ expr_] :=
-    Module[{},
+    Module[ {t = lastEvalTimeAgo[ CurrentValue[ EvaluationNotebook[], "NotebookFullFileName"]]},
+    	If[ t > 1.5,
+    		$refreshBrowser = True,
+    		(* else *)
+    		$refreshBrowser = False
+    	];
 		$parseTheoremaExpressions = True;
         $ContextPath = DeleteDuplicates[ Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath]];
         (* Set default context when not in an archive *)
@@ -935,21 +948,26 @@ openEnvironment[ expr_] :=
 openEnvironment[args___] := unexpected[ openEnvironment, {args}]
 
 closeEnvironment[] := 
-	Module[{},
+	Module[ {file = CurrentValue[ EvaluationNotebook[], "NotebookFullFileName"]},
 		(* Leave "Theorema`Knowledge`" context when not in an archive *)
 		If[ !inArchive[] && $Context === "Theorema`Knowledge`", End[]];
 		(* Restore context path that has been modified in openEnvironment *)
 		$ContextPath = DeleteCases[ $ContextPath, Apply[ Alternatives, Join[ {"Theorema`Language`"}, $TheoremaArchives]]];
 		$parseTheoremaExpressions = False;
-		putToUpdateQueue[ CurrentValue[ EvaluationNotebook[], "NotebookFullFileName"]];
+		If[ $refreshBrowser,
+			updateKBBrowser[ file],
+			(* else *)
+			putToUpdateQueue[ file]
+		];
+		putToEvalTime[ file]
 	]
 closeEnvironment[args___] := unexpected[ closeEnvironment, {args}]
 
-inEnvironment[] := TrueQ[ $parseTheoremaExpressions]
+inEnvironment[] := TrueQ[ $parseTheoremaExpressions || $parseTheoremaGlobals]
 inEnvironment[ args___] := unexpected[ inEnvironment, {args}]
 
 lastEvalTimeAgo[ file_] :=
-	Module[{t = Cases[ $tmaNbUpdateQueue, {file, timestamp_} -> timestamp]},
+	Module[{t = Cases[ $tmaNbEval, {file, timestamp_} -> timestamp, {1}, 1]},
 		If[ t === {},
 			Infinity,
 			(* else *)
@@ -959,11 +977,24 @@ lastEvalTimeAgo[ file_] :=
 lastEvalTimeAgo[ args___] := unexpected[ lastEvalTimeAgo, {args}]
 
 putToUpdateQueue[ file_] := 
-	Module[ {},
-		$tmaNbUpdateQueue = DeleteDuplicates[ Prepend[ $tmaNbUpdateQueue, {file, SessionTime[]}],
-								#1[[1]] === #2[[1]]&]
+	Module[ {pos = Position[ $tmaNbUpdateQueue, {file, _}, {1}, 1]},
+		If[ pos === {},
+			$tmaNbUpdateQueue = Prepend[ $tmaNbUpdateQueue, {file, SessionTime[]}],
+			(* else *)
+			$tmaNbUpdateQueue = ReplacePart[ $tmaNbUpdateQueue, Append[ pos[[1]], 2] -> SessionTime[]]
+		]
 	]
 putToUpdateQueue[ args___] := unexpected[ putToUpdateQueue, {args}]
+
+putToEvalTime[ file_] :=
+	Module[ {pos = Position[ $tmaNbEval, {file, _}, {1}, 1]},
+		If[ pos === {},
+			$tmaNbEval = Prepend[ $tmaNbEval, {file, SessionTime[]}],
+			(* else *)
+			$tmaNbEval = ReplacePart[ $tmaNbEval, Append[ pos[[1]], 2] -> SessionTime[]]
+		]
+	]
+putToEvalTime[ args___] := unexpected[ putToEvalTime, {args}]
 
 (* ::Section:: *)
 (* Archives *)

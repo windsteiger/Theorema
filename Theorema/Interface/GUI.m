@@ -891,22 +891,25 @@ remoteEvalFormula[ args___] := unexpected[ remoteEvalFormula, {args}]
    struct is the nested cell structure containing the cells at those positions obtained by extractKBStruct *)
 updateKBBrowser[ file_] :=
     Module[ {pos, new, nbExpr},
-        pos = Position[ $kbStruct, file -> _];
+        pos = Position[ $kbStruct, file -> _, {1}, 1];
         (* We don't extract the entire cells, we throw away all options except CellTags and CellID in order to not blow up $kbStruct too much *)
-        nbExpr = Cases[ $TMAcurrentEvalNB, {file, e_} -> e];
+        nbExpr = Cases[ $TMAcurrentEvalNB, {file, e_} -> e, {1}, 1];
         If[ nbExpr === {},
         	(* the corresponding notebook has not been evaluated yet *)
         	Return[]
         ];
-        $tmaNbUpdateQueue = DeleteCases[ $tmaNbUpdateQueue, {file, _}];
-        new = file -> With[ {nb = First[ nbExpr]},
+        $tmaNbUpdateQueue = DeleteCases[ $tmaNbUpdateQueue, {file, _}, {1}, 1];
+        new = With[ {nb = First[ nbExpr]},
                           extractKBStruct[ nb] /. l_?VectorQ :> (Extract[ nb, l] /. {c:Cell[ _, _, ___] :> DeleteCases[ c, Except[ CellTags|CellID] -> _]})
                       ];
         (* if there is already an entry for that notebook then replace the structure,
            otherwise add new entry *)
         If[ pos === {},
-            AppendTo[ $kbStruct, new],
-            $kbStruct[[ pos[[1,1]]]] = new
+            AppendTo[ $kbStruct, file -> new],
+            (* For some strange reasons, using 
+               $kbStruct = ReplacePart[ $kbStruct, Append[ pos[[1]], 2] -> new]
+               does not trigger the commander to refresh although it should listen to $kbStruct. Using the indexed assignment works ... *)
+            $kbStruct[[pos[[1,1]],2]] = new;
         ];
         (* set $tcKBBrowseSelection such that the tab corresponding ot this notebook will be displayed in the knowledge browser *)
         Scan[ ($tcKBBrowseSelection[ #] = file)&, {"prove", "compute", "solve"}]
@@ -987,7 +990,7 @@ refreshKBstruct[] :=
 	Module[{nbFiles},
 		If[ inEnvironment[], Return[]];
 		(* refresh those that are older than 1.5 sec *)
-		nbFiles = Cases[ $tmaNbUpdateQueue, {f_, _?(SessionTime[] - # > 1.5&)} -> f];
+		nbFiles = Cases[ $tmaNbUpdateQueue, {f_, _?(SessionTime[] - # > 1.5&)} -> f, {1}, 1];
 		Scan[ updateKBBrowser, nbFiles];
 		Scan[ ensureNotebookIntegrity, nbFiles]
 	]
