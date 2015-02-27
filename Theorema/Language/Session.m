@@ -364,8 +364,10 @@ processEnvironment[ x_] :=
     	{key, tags} = adjustFormulaLabel[ nb];
 		(* Perform necessary actions on the whole notebook *)
 		nbFile = CurrentValue[ nb, "NotebookFullFileName"];
-		If[ lastEvalTimeAgo[ nbFile] > 1,
-			(* if last evaluation in that file was longer than 1 sec ago: get fresh nbExpr, nb might have changed (been edited) *)
+		If[ $refreshBrowser,
+			(* $refreshBrowser is set in openEnvironment, it basically depends on how long ago the last evaluation has been.
+			   If browser need not refresh then this indicates that we are in a multi-cell evaluation. In this case we do not get a fresh 
+			   nbExpr, otherwise yes, because nb might have changed (been edited) *)
         	nbExpr = NotebookGet[ nb];
         	(* For the outside, we also store the filename *)
         	pos = Position[ $TMAcurrentEvalNB, {nbFile, _}, {1}, 1];
@@ -581,16 +583,21 @@ sourceLabelPattern[ args___] := unexpected[ sourceLabelPattern, {args}]
 
 
 ensureNotebookIntegrity[ file_] := 
-	Module[ {nb, nbExpr},
+	Module[ {nbExpr},
+		nbExpr = Cases[ $TMAcurrentEvalNB, {file, e_} -> e, {1}, 1];
+		Assert[ Length[ nbExpr] == 1];
+		ensureNotebookIntegrity[ file, nbExpr]
+	]
+
+ensureNotebookIntegrity[ file_, {nbExpr_Notebook}] := 
+	Module[ {nb},
 		nb = Select[ Notebooks[], CurrentValue[ #, "NotebookFullFileName"] === file &, 1];
 		If[ nb === {},
 			nb = NotebookOpen[ file, Visible -> False],
 			(* else *)
 			nb = First[ nb]
 		];
-		nbExpr = Cases[ $TMAcurrentEvalNB, {file, e_} -> e, {1}, 1];
-		Assert[ Length[ nbExpr] >= 1];
-		ensureNotebookIntegrity[ nb, nbExpr[[1]]]
+		ensureNotebookIntegrity[ nb, nbExpr]
 	]
 	
 ensureNotebookIntegrity[ nb_NotebookObject, rawNotebook_Notebook] :=
@@ -710,9 +717,9 @@ updateKnowledgeBase[ form_, k_, glob_, tags_String] :=
     		fml = makeFML[ key -> Rest[ defDef], formula -> newForm, 
     			label -> StringReplace[ ToString[ ReleaseHold[ inDomDef[[1,1]]]], "$TM" -> ""] <> ".defOp", simplify -> False];
     		transferToComputation[ fml];
-    		$tmaEnv = Append[ DeleteCases[ $tmaEnv, _[ First[ fml], ___]], fml];
+    		$tmaEnv = Append[ DeleteCases[ $tmaEnv, _[ First[ fml], ___], {1}, 1], fml];
         	If[ inArchive[],
-            	$tmaArch = Append[ DeleteCases[ $tmaArch, _[ First[ fml], ___]], fml];
+            	$tmaArch = Append[ DeleteCases[ $tmaArch, _[ First[ fml], ___], {1}, 1], fml];
         	]
     	];
     	(* for the actual formula we proceed in the same way *)
@@ -721,9 +728,9 @@ updateKnowledgeBase[ form_, k_, glob_, tags_String] :=
     	transferToComputation[ fml];
     	(* If new formulae are appended rather than prepended, the old formulae with the same label
     		have to be deleted first, because "DeleteDuplicates" would delete the new ones. *)
-		$tmaEnv = Append[ DeleteCases[ $tmaEnv, _[ First[ fml], ___]], fml];
+		$tmaEnv = Append[ DeleteCases[ $tmaEnv, _[ First[ fml], ___], {1}, 1], fml];
         If[ inArchive[],
-            $tmaArch = Append[ DeleteCases[ $tmaArch, _[ First[ fml], ___]], fml];
+            $tmaArch = Append[ DeleteCases[ $tmaArch, _[ First[ fml], ___], {1}, 1], fml];
         ]
     ]
 updateKnowledgeBase[ args___] := unexpected[ updateKnowledgeBase, {args}]
@@ -773,8 +780,8 @@ applyGlobalDeclaration[ args___] := unexpected[ applyGlobalDeclaration, {args}]
 *)
 analyzeQuantifiedExpression[ globalForall$TM[ r:RNG$[ __], c_, e_]] :=
 	Module[ {freeE, rc, thinnedRange, freerc},
-		(* take the free vars in e *)
-		freeE = freeVariables[ e];
+		(* take the free vars in e and free variables in the ranges *)
+		freeE = freeVariables[ {Map[ Rest, r], e}];
 		(* watch out for all conditions involving the free variables in e ... *)
 		{rc, freerc} = thinnedConnect[ c, freeE];
 		(* ... and collect all free variables therein: these are the variables that require the quantifiers, the others can be dropped *)
@@ -1214,12 +1221,12 @@ processComputation[ x_] := Module[ { procSynt, res},
 processComputation[ args___] := unexcpected[ processComputation, {args}]
 
 openComputation[] := 
-	Module[ {fileCache, fileEvalNb},
+	Module[ {fileCache},
 		$evalCellID = CurrentValue[ "CellID"];
 		$cacheComp = True;
+		$fileEvalNb = CurrentValue[ EvaluationNotebook[], "NotebookFullFileName"];
 		If[ TrueQ[ $TMAcomputationDemoMode],
-			fileEvalNb = CurrentValue[ EvaluationNotebook[], "NotebookFullFileName"];
-			fileCache = FileNameJoin[ {DirectoryName[ fileEvalNb], FileBaseName[ fileEvalNb], "c" <> ToString[ $evalCellID]}];
+			fileCache = FileNameJoin[ {DirectoryName[ $fileEvalNb], FileBaseName[ fileEvalNb], "c" <> ToString[ $evalCellID]}];
 			$cacheComp = setComputationEnvironment[ fileCache];
 		];
 		$parseTheoremaExpressions = True;
@@ -1236,7 +1243,7 @@ closeComputation[] :=
         End[];
 		$ContextPath = Select[ $ContextPath, (!StringMatchQ[ #, "Theorema`Computation`" ~~ __])&];
 		$parseTheoremaExpressions = False;
-		printComputationInfo[ $evalCellID, $cacheComp, $compTime];
+		printComputationInfo[ $evalCellID, $cacheComp, $fileEvalNb, $compTime];
     ]
 closeComputation[args___] := unexcpected[ closeComputation, {args}]
 

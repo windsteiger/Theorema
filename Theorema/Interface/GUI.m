@@ -898,6 +898,9 @@ updateKBBrowser[ file_] :=
         	(* the corresponding notebook has not been evaluated yet *)
         	Return[]
         ];
+        (* This is a good place to check for well-formedness of the notebook (multiple labels, etc.).
+           We can be sure that nbExpr is a singleton list. *)
+        ensureNotebookIntegrity[ file, nbExpr];
         $tmaNbUpdateQueue = DeleteCases[ $tmaNbUpdateQueue, {file, _}, {1}, 1];
         new = With[ {nb = First[ nbExpr]},
                           extractKBStruct[ nb] /. l_?VectorQ :> (Extract[ nb, l] /. {c:Cell[ _, _, ___] :> DeleteCases[ c, Except[ CellTags|CellID] -> _]})
@@ -907,9 +910,9 @@ updateKBBrowser[ file_] :=
         If[ pos === {},
             AppendTo[ $kbStruct, file -> new],
             (* For some strange reasons, using 
-               $kbStruct = ReplacePart[ $kbStruct, Append[ pos[[1]], 2] -> new]
+               $kbStruct = ReplacePart[ $kbStruct, pos[[1]] -> )(file -> new)]
                does not trigger the commander to refresh although it should listen to $kbStruct. Using the indexed assignment works ... *)
-            $kbStruct[[pos[[1,1]],2]] = new;
+            $kbStruct[[pos[[1,1]]]] = file -> new;
         ];
         (* set $tcKBBrowseSelection such that the tab corresponding ot this notebook will be displayed in the knowledge browser *)
         Scan[ ($tcKBBrowseSelection[ #] = file)&, {"prove", "compute", "solve"}]
@@ -988,11 +991,10 @@ TabView[
 
 refreshKBstruct[] :=
 	Module[{nbFiles},
-		If[ inEnvironment[], Return[]];
+		If[ inEnvironment[], Return[ ]];
 		(* refresh those that are older than 1.5 sec *)
 		nbFiles = Cases[ $tmaNbUpdateQueue, {f_, _?(SessionTime[] - # > 1.5&)} -> f, {1}, 1];
-		Scan[ updateKBBrowser, nbFiles];
-		Scan[ ensureNotebookIntegrity, nbFiles]
+		Scan[ updateKBBrowser, nbFiles]
 	]
 refreshKBstruct[ args___] := unexpected[ refreshKBstruct, {args}]
 
@@ -1503,9 +1505,9 @@ proofNavigation[ args___] := unexpected[ proofNavigation, {args}]
 (* this function is called during a computation (see processComputation[])
    effect: print a cell containg information about the environment settings for that computation *)
 
-printComputationInfo[ cellID_Integer, cache_, cTime_] := 
+printComputationInfo[ cellID_Integer, cache_, fn_String, cTime_] := 
 	Module[ {nbDir, file, fileID},
-		nbDir = createPerNotebookDirectory[ CurrentValue[ "NotebookFullFileName"]];
+		nbDir = createPerNotebookDirectory[ fn];
 		(* Generate cache only in plain .m format, since this allows sharing notebooks with users on different platforms.
 			Also, loading a .m-file allows dynamic objects to react to new settings, whereas loading a .mx-file has no effect on dynamics.
 			I assume the speed gain from using mx is neglectable *)
