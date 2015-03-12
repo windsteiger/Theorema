@@ -72,10 +72,13 @@ With[ {lang = "English"},
 	MessageName[ implGoalDirect, "usage", lang] = "Prove implication directly";
 	MessageName[ implicitDef, "usage", lang] = "Handle implicit function definitions";
 	MessageName[ implKBCases, "usage", lang] = "Case distinction based on an implication in the knowledge base";
+	MessageName[ inequality1, "usage", lang] = "Inequality rules";
 	MessageName[ instantiate, "usage", lang] = "Instantiate universally quantified knowledge with new constants";
 
 	MessageName[ knowledgeRewriting, "usage", lang] = "Knowledge rewriting based on (quantified) implications and equivalences in the knowledge base";
 
+	MessageName[ maxTuples1, "usage", lang] = "Maximum rules for tuples";
+	MessageName[ memberCases, "usage", lang] = "Case distinction based on membership";
 	MessageName[ multipleGoalRewriting, "usage", lang] = "Goal can be rewritten in several ways";
 
 	MessageName[ notGoal, "usage", lang] = "Prove negation by contradiction";
@@ -89,6 +92,7 @@ With[ {lang = "English"},
 	MessageName[ quantifierRules, "usage", lang] = "Rules for quantifiers";
 
 	MessageName[ solveMetaUnification, "usage", lang] = "Instantiate meta-variables by unification";
+	MessageName[ specialArithmeticRules, "usage", lang] = "Rules for special arithmetic constructs";
 
 	MessageName[ trueGoal, "usage", lang] = "The proof goal is True";
 
@@ -108,6 +112,7 @@ With[ {lang = "English"},
 	translate[ "Equality Rules", lang] = "Rules for Equality";
 	translate[ "Quantifier Rules", lang] = "Quantifier Rules";
 	translate[ "Rewriting Rules", lang] = "Rules based on Rewriting";
+	translate[ "Special Arithmetic", lang] = "Special Arithmetic";
 	translate[ "Termination Rules", lang] = "Rules for Proof Termination";
 
 (* ::Subsection:: *)
@@ -191,7 +196,7 @@ proofStepText[ existsGoalInteractive, lang, {{g_}}, {{newG_}}, ___, "instantiati
 
 proofStepText[ existsKB, lang, {{e_}}, {new_List}, ___, "abf" -> v_List, ___] := {textCell[ "From ", formulaReference[ e], " we know "], 
 	assumptionListCells[ new, ",", ""],
-	textCell[ " for arbitrary but fixed ", inlineTheoremaExpressionSeq[ v, lang], "."]
+	textCell[ " for some ", inlineTheoremaExpressionSeq[ v, lang], "."]
 	};
 
 proofStepText[ existsKB, lang, {{g_}}, {{simpG_}}, ___] := {textCell[ "The universally quantified goal ", formulaReference[ g], " simplifies to"],
@@ -358,6 +363,9 @@ proofStepText[ implKBCases, lang, {{g_}}, {{_, _}}, ___] := {textCell[ "Based on
 subProofHeader[ implKBCases, lang, _, {generated:{_, _}}, ___, pVal_, {p_}] := {textCell[ "Case ", ToString[ p], ": we assume"],
 	assumptionCell[ Part[ generated, p], "."]
 	};
+
+proofStepText[ inequality1, lang, {{g_, k_}}, {}, ___] := 
+	{textCell[ "Due to ", formulaReference[ k], " the goal ", formulaReference[ g], " is true."]};	
 	
 proofStepText[ instantiate, lang, u_, {}, ___] := 
 	(* Instantiation has been tried, but none of them could be successfully applied *)
@@ -400,6 +408,18 @@ proofStepText[ knowledgeRewriting, lang, u_, g_, ___] :=
 
 (* ::Subsection:: *)
 (* M *)
+
+proofStepText[ maxTuples1, lang, {{g_}}, {}, ___, "comp" -> {t1_, t2_, e_, m_}, ___] := 
+	{textCell[ "The tuple ", inlineTheoremaExpression[ t1], 
+		" contains the same elements like ", inlineTheoremaExpression[ t2], ", plus one more, namely ",
+		inlineTheoremaExpression[ e], ". Hence, ", inlineTheoremaExpression[ m], 
+		", which proves ", formulaReference[ g], "."]};
+
+proofStepText[ memberCases, lang, {{k1_, k2_}, _}, _, ___] := {textCell[ "Based on ", formulaReference[ k1], " and ", formulaReference[ k2], " we distinguish two cases:"]};
+
+subProofHeader[ memberCases, lang, _, {generated_List}, ___, pVal_, {p_}] := {textCell[ "Case ", ToString[ p], ": we assume"],
+	assumptionCell[ Part[ generated, p], "."]
+	};
 	
 proofStepText[ multipleGoalRewriting, lang, ___] := {textCell[ "We have several possibilities to rewrite the goal."]};
 
@@ -424,7 +444,7 @@ proofStepText[ orGoal, lang, {{g_}}, {{negAssum__, newG_}}, ___] := {textCell[ "
 
 proofStepText[ orKB, lang, {{g_}}, {generated_List}, ___] := {textCell[ "Based on the assumption ", formulaReference[ g], " we distinguish several cases:"]};
 
-subProofHeader[ orKB, lang, _, {generated_List}, ___, pVal_, {p_}] := {textCell[ "Case ", ToString[p], ": we assume"],
+subProofHeader[ orKB, lang, _, {generated_List}, ___, pVal_, {p_}] := {textCell[ "Case ", ToString[ p], ": we assume"],
 	assumptionCell[ Part[ generated, p], "."]
 	};
 

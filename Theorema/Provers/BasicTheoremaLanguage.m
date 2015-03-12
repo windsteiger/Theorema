@@ -577,9 +577,11 @@ this:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
 				newG = g
 			];
 			(* The first used and generated are old/new goal. If they are identical, then the proof header won't print any text for the goal part *)
-			usedForms = {{g}};
 			genForms = {{newG}};
-			AppendTo[ replBy, Union[ usedDefs]];
+			With[ {defs = Union[ usedDefs]},
+				usedForms = {Prepend[ defs, g]};
+				AppendTo[ replBy, defs]
+			];
 			Do[
                 {new, usedDefs, cond} = replaceAllAndTrack[ formula@k[[j]], filterRules[ rules, None]];
                 If[ usedDefs =!= {} && freeVariables[ cond] === {},
@@ -590,9 +592,11 @@ this:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
 						AppendTo[ usedInCond, k[[j]]]
 					];
                     appendToKB[ newK, newForm];
-                    AppendTo[ usedForms, {k[[j]]}];
                     AppendTo[ genForms, {newForm}];
-					AppendTo[ replBy, Union[ usedDefs]];
+                    With[ {defs = Union[ usedDefs]},
+                    	AppendTo[ usedForms, Prepend[ defs, k[[j]]]];
+						AppendTo[ replBy, defs]
+                    ];
                     defExpand = True,
                     (* else: no def expansion in this formula *)
                     Block[ {$autoGenerateRules = False}, appendToKB[ newK, k[[j]]]] (* rewrite rules from this formula are already there *)
@@ -868,6 +872,38 @@ PRFSIT$[ g:FML$[ _, a:x_ /; !FreeQ[ x, _META$], lab_, ___], K_List, id_, rest___
 	]
 ]
 
+inferenceRule[ maxTuples1] = 
+ps:PRFSIT$[ g:FML$[ _, GreaterEqual$TM[ Subtract$TM[ 
+	m1:max$TM[ t1:ReplacePart$TM[ s_, Tuple$TM[ i_, a_]]], 
+    m2:max$TM[ t2:DeleteAt$TM[ s_, i_]]], 0], lab_, ___], K_List, id_, rest___?OptionQ] :> performProofStep[
+	Module[ {},
+		makeTERMINALNODE[ makePRFINFO[ name -> maxTuples1, used -> g, "comp" -> {t1, t2, a, GreaterEqual$TM[ m1, m2]}], proved]
+	]
+]
+
+inferenceRule[ inequality1] = 
+ps:PRFSIT$[ g:FML$[ _, GreaterEqual$TM[ 0, Subtract$TM[ x_, y_]], ___], 
+	{___, k:FML$[ _, LessEqual$TM[ x_, y_], ___], ___}, id_, rest___?OptionQ] :> performProofStep[
+	Module[ {},
+		makeTERMINALNODE[ makePRFINFO[ name -> inequality1, used -> {g, k}], proved]
+	]
+]
+
+inferenceRule[ memberCases] = 
+ps:PRFSIT$[ g_, 
+	{pre___, k1:FML$[ _, Theorema`Language`Element$TM[ x_, A_], ___], mid___, k2:FML$[ _, Theorema`Language`Element$TM[ y_, A_], ___], post___}, id_, rest___?OptionQ] :> performProofStep[
+	Module[ {case1, case2},
+		case1 = makeAssumptionFML[ formula -> Equal$TM[ x, y]];
+		case2 = makeAssumptionFML[ formula -> Unequal$TM[ x, y]];
+		makeANDNODE[ makePRFINFO[ name -> memberCases, used -> {{k1, k2}, {k1, k2}}], 
+			{Block[ {$rewriteRules = {}}, toBeProved[ goal -> g, kb -> prependKB[{pre, mid, post}, case1], rest]],
+			 Block[ {$rewriteRules = {}}, toBeProved[ goal -> g, kb -> prependKB[{pre, mid, post, k2}, case2], rest]]}
+		]
+	]
+]
+
+
+
 (* ::Section:: *)
 (* Rule composition *)
 
@@ -915,13 +951,20 @@ registerRuleSet[ "Quantifier Rules", quantifierRules, {
 	{solveMetaUnification, True, True, 9}
 	}]
 
+registerRuleSet[ "Special Arithmetic", specialArithmeticRules, {
+	{inequality1, True, True, 2, "term"},
+	{maxTuples1, True, True, 2, "term"},
+	{memberCases, True, True, 30}
+	}]
+
 registerRuleSet[ "Basic Theorema Language Rules", basicTheoremaLanguageRules, {
 	terminationRules,
 	quantifierRules, 
 	connectiveRules, 
 	equalityRules,
 	rewritingRules,
-	{contradiction, True, True, 100}
+	specialArithmeticRules,
+	{contradiction, False, True, 100}
 	}]
 
 End[]

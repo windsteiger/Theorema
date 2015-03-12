@@ -1001,8 +1001,13 @@ refreshKBstruct[ args___] := unexpected[ refreshKBstruct, {args}]
 (* The update area consists of a "reload-button" which automatically updates and displays as a checkmark if no updates are pending. 
    Second, it has an invisible field ("") which updates every 10 seconds and triggers regular updates of pending events.
    *)
-makeUpdateArea[ ] := Row[{Dynamic[ If[ $tmaNbUpdateQueue =!= {}, Button[ Style[ "\:21ba", {Medium}], refreshKBstruct[], Appearance -> None], "\[Checkmark]"]],
-	Dynamic[ Refresh[ (refreshKBstruct[]; ""), UpdateInterval -> 10]]}]
+makeUpdateArea[ ] := Dynamic[ 
+	If[ $tmaNbUpdateQueue =!= {}, 
+		Button[ Style[ "\:21ba", {Medium}], refreshKBstruct[], Appearance -> None], 
+		(* else *)
+		"\[Checkmark]"
+		]
+	]
 makeUpdateArea[ args___] := unexpected[ makeUpdateArea, {args}]
 
 (* ::Subsubsection:: *)

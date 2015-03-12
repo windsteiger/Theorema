@@ -410,7 +410,8 @@ evaluationPosition[ nb_NotebookObject, id_Integer] := evaluationPosition[ nb, No
 evaluationPosition[ args___] := unexpected[ evaluationPosition, {args}]
 
 adjustFormulaLabel[ nb_NotebookObject] := 
-	Module[ {cellTags = CurrentValue[ "CellTags"], cellID = CurrentValue[ "CellID"], cleanCellTags, key},
+	Module[ {cellTags, cellID, cleanCellTags, key},
+		{cellTags, cellID} = {CellTags, CellID} /. Options[ NotebookSelection[ nb], {CellTags, CellID}];
 		(* Make sure we have a list of CellTags (could also be a plain string) *)
 		cellTags = Flatten[ {cellTags}];
 		(* Remove any automated labels (begins with "ID<sep>" or "Source<sep>"). Remove initLabel *)
@@ -427,7 +428,7 @@ adjustFormulaLabel[ args___] := unexpected[ adjustFormulaLabel, {args}]
 
 (* getCleanCellTags returns all CellTags except the generated tags used for formula identification, i.e. ID<sep>... and Source<sep>...*)
 getCleanCellTags[ cellTags_List] :=
-    Select[ cellTags, !StringMatchQ[ #, (("ID" <> $cellTagKeySeparator | "Source" <> $cellTagKeySeparator) ~~ __) | $initLabel]&]
+    Select[ cellTags, !StringMatchQ[ #, (("ID" <> $cellTagKeySeparator | "Source" <> $cellTagKeySeparator | "Proof|ID" <> $cellTagKeySeparator) ~~ __) | $initLabel]&]
 getCleanCellTags[ cellTag_String] := getCleanCellTags[ {cellTag}]
 getCleanCellTags[ args___] := unexpected[ getCleanCellTags,{args}]
 
@@ -466,7 +467,7 @@ cellTagsToString[ args___] := unexpected[cellTagsToString, {args}]
 makeLabel[ s_String] := "(" <> s <> ")"
 makeLabel[ args___] := unexpected[ makeLabel, {args}]
 
-relabelCell[nb_NotebookObject, cellTags_List, cellID_Integer] :=
+relabelCell[ nb_NotebookObject, cellTags_List, cellID_Integer] :=
 	Module[{ newFrameLabel, newCellTags, autoTags},
 		(* Keep cleaned CellTags and add identification (ID) *)
 		autoTags = {cellIDLabel[ cellID], sourceLabel[ nb]};
@@ -480,7 +481,7 @@ relabelCell[nb_NotebookObject, cellTags_List, cellID_Integer] :=
 		(* return autoTags to be used as key for formula in KB *)
 		autoTags
 	]
-relabelCell[args___] := unexpected[ relabelCell,{args}]
+relabelCell[ args___] := unexpected[ relabelCell, {args}]
 
 removeEnvironment[ nb_NotebookObject] :=
 	Module[ {cells, file = CurrentValue[ nb, "NotebookFullFileName"]},
@@ -602,8 +603,8 @@ ensureNotebookIntegrity[ file_, {nbExpr_Notebook}] :=
 	
 ensureNotebookIntegrity[ nb_NotebookObject, rawNotebook_Notebook] :=
     Module[ {allCellTags, duplicateCellTags, srcTags, sl, outdPos, updNb, notif, nbFile},
-    	sl = sourceLabel[ nb];
     	nbFile = CurrentValue[ nb, "NotebookFullFileName"];
+    	sl = sourceLabel[ nbFile];
         (* Collect all CellTags from document. *)
         allCellTags = Flatten[ Cases[ rawNotebook, Cell[ ___, CellTags -> tags_, ___] -> tags, Infinity]];
         (* Check if CellTags are unique in current Notebook. Check only the clean tags, neglect the generated ones *)
@@ -641,11 +642,11 @@ updateSourceTags[ o_ -> l_, new_] :=
 updateSourceTags[ args___] := unexpected[ updateSourceTags, {args}]
 
 
-duplicateLabel[{_, occurences_Integer}] := occurences > 1
-duplicateLabel[args___] := unexpected[ duplicateLabel, {args}]
+duplicateLabel[ {_, occurences_Integer}] := occurences > 1
+duplicateLabel[ args___] := unexpected[ duplicateLabel, {args}]
 
 updateKeys[ new_String, srcTags_List] := Fold[ updateSingleKey, new, srcTags]
-updateKeys[args___] := unexpected[ updateKeys, {args}]
+updateKeys[ args___] := unexpected[ updateKeys, {args}]
 
 updateSingleKey[ new_String, old_String] :=
     Module[ {},

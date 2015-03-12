@@ -72,10 +72,12 @@ With[ {lang = "German"},
 	MessageName[ implGoalDirect, "usage", lang] = "Beweise Implikation direkt";
 	MessageName[ implicitDef, "usage", lang] = "Behandle implizite Funktionsdefinitionen";
 	MessageName[ implKBCases, "usage", lang] = "Fallunterscheidung basierend auf Implikation in der Wissensbasis";
+	MessageName[ inequality1, "usage", lang] = "Ungleichungsregeln";
 	MessageName[ instantiate, "usage", lang] = "Instanzieren Allaussagen in der Wissensbasis mit neuen Konstanten";
 
 	MessageName[ knowledgeRewriting, "usage", lang] = "Umformen der Wissensbasis basierend auf (quantifizierten) Implikationen und \[CapitalADoubleDot]quivalenzen in der Wissensbasis";
 
+	MessageName[ maxTuples1, "usage", lang] = "Maximum Regeln f\[UDoubleDot]r Tupel";
 	MessageName[ multipleGoalRewriting, "usage", lang] = "Beweisziel kann auf verschiedene Arten umgeformt werden";
 
 	MessageName[ notGoal, "usage", lang] = "Beweise Negation indirekt";
@@ -88,6 +90,7 @@ With[ {lang = "German"},
 	MessageName[ quantifierRules, "usage", lang] = "Regeln f\[UDoubleDot]r Quantoren";
 
 	MessageName[ solveMetaUnification, "usage", lang] = "Instanzieren von Meta-Variablen durch Unifikation";
+	MessageName[ specialArithmeticRules, "usage", lang] = "Regeln f\[UDoubleDot]r spezielle arithmetische Konstrukte";
 
 	MessageName[ trueGoal, "usage", lang] = "Das Beweisziel ist True";
 (* UNTRANSLATED *)
@@ -108,6 +111,7 @@ With[ {lang = "German"},
 	translate[ "Equality Rules", lang] = "Gleichheitsregeln";
 	translate[ "Quantifier Rules", lang] = "Quantorenregeln";
 	translate[ "Rewriting Rules", lang] = "Umformungsregeln";
+	translate[ "Special Arithmetic", lang] = "Spezielle Arithmetik";
 	translate[ "Termination Rules", lang] = "Regeln, die den Beweis beenden";
 (* UNTRANSLATED *)
 
@@ -359,7 +363,16 @@ proofStepText[ implicitDef, lang, u_, g_, ___, "introConstFor" -> termConst_List
 		];
 		stepText
 	];
-	
+
+proofStepText[ implKBCases, lang, {{g_}}, {{_, _}}, ___] := {textCell[ "Basierend auf der Annahme ", formulaReference[ g], " unterscheiden wir zwei F\[ADoubleDot]lle:"]};
+
+subProofHeader[ implKBCases, lang, _, {generated:{_, _}}, ___, pVal_, {p_}] := {textCell[ "Fall ", ToString[ p], ": wir nehmen an"],
+	assumptionCell[ Part[ generated, p], "."]
+	};
+
+proofStepText[ inequality1, lang, {{g_, k_}}, {}, ___] := 
+	{textCell[ "Aufgrund von ", formulaReference[ k], " ist ", formulaReference[ g], " wahr."]};	
+		
 proofStepText[ instantiate, lang, u_, {}, ___] := 
 	(* Instantiation has been tried, but none of them could be successfully applied *)
 	{textCell[ "Neue Konstante stehen bereit, es konnte aber keine Instanzierung durchgef\[UDoubleDot]hrt werden."]};
@@ -401,6 +414,12 @@ proofStepText[ knowledgeRewriting, lang, u_, g_, ___] :=
 
 (* ::Subsection:: *)
 (* M *)
+
+proofStepText[ maxTuples1, lang, {{g_}}, {}, ___, "comp" -> {t1_, t2_, e_, m_}, ___] := 
+	{textCell[ "Das Tupel ", inlineTheoremaExpression[ t1], 
+		" enth\[ADoubleDot]lt die gleichen Elemente wie ", inlineTheoremaExpression[ t2], ", und eines zus\[ADoubleDot]tzlich, n\[ADoubleDot]mlich ",
+		inlineTheoremaExpression[ e], ". Daher ist ", inlineTheoremaExpression[ m], 
+		", womit ", formulaReference[ g], " bewiesen ist."]};
 	
 proofStepText[ multipleGoalRewriting, lang, ___] := {textCell[ "Das Beweisziel kann auf verschiedene Arten umgeformt werden."]};
 

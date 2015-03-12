@@ -124,6 +124,9 @@ negateRelation[ op_Symbol] :=
 	]
 
 Equal$TM[ a_, b__, c_] /; isPosRelation["Equal"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Equal$TM[ #1, #2]]&, {{a, b}, {b, c}}]], 1, Hold]
+
+(*Unequal$TM[ a_, b_] /; a=!=b := Module[ {u = Union[ {a, b}]}, Apply[ Unequal$TM, u] /; u =!= {a, b}]*)
+SetAttributes[ Unequal$TM, Orderless]
 Unequal$TM[ a_] /; isNegRelation["Unequal"] := Not$TM[ Equal$TM[ a]]
 Unequal$TM[ a_, b_] /; isNegRelation["Unequal"] := Not$TM[ Equal$TM[ a, b]]
 Unequal$TM[ a_, b__, c_] /; isNegRelation["Unequal"] := Flatten[ Apply[ And$TM, MapThread[ Hold[ Not$TM[ Equal$TM[ #1, #2]]]&, {{a, b}, {b, c}}]], 1, Hold]
@@ -318,18 +321,26 @@ Less$TM[ a__] /; buiActive["Less"] :=
 	Module[ {res = Less[ a]},
 		res /; (Head[ res] =!= Less || Hold[ a] =!= Apply[ Hold, res])
 	]
+Less$TM[ a_, a_] /; buiActive["Less"] := False
+
 LessEqual$TM[ a__] /; buiActive["LessEqual"] :=
 	Module[ {res = LessEqual[ a]},
 		res /; (Head[ res] =!= LessEqual || Hold[ a] =!= Apply[ Hold, res])
 	]
+LessEqual$TM[ a_, a_] /; buiActive["LessEqual"] := True
+
 Greater$TM[ a__] /; buiActive["Greater"] :=
 	Module[ {res = Greater[ a]},
 		res /; (Head[ res] =!= Greater || Hold[ a] =!= Apply[ Hold, res])
 	]
+Greater$TM[ a_, a_] /; buiActive["Greater"] := False
+
 GreaterEqual$TM[ a__] /; buiActive["GreaterEqual"] :=
 	Module[ {res = GreaterEqual[ a]},
 		res /; (Head[ res] =!= GreaterEqual || Hold[ a] =!= Apply[ Hold, res])
 	]
+GreaterEqual$TM[ a_, a_] /; buiActive["GreaterEqual"] := True
+
 BracketingBar$TM[ a:(_Integer|_Rational|_Real|_Complex|_DirectedInfinity)] /; buiActive["AbsValue"] := Abs[ a]
 BracketingBar$TM[ a:(Pi|E|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaisher)] /; buiActive["AbsValue"] := a
 
@@ -2324,6 +2335,9 @@ Tuple$TM /: Insert$TM[ a_Tuple$TM?isSequenceFree, p_, q_?isPositionSpec] /; buiA
 (* Delete elements at one or more positions *)
 Tuple$TM /: DeleteAt$TM[ a_Tuple$TM?isSequenceFree, b_?isPositionSpec] /; buiActive["DeleteAt"] := Delete[ a, b //. Tuple$TM -> List]
 
+DeleteAt$TM[ ReplacePart$TM[ a_, Tuple$TM[ i_, _]], i_] /; buiActive["ReplacePart"] && buiActive["DeleteAt"] :=
+	DeleteAt$TM[ a, i]
+
 (* Delete elements of a certain shape. Multiple deletions are not possible, because it would need
 	special syntax how to specify multiple shapes. Tuples cannot be used because for this *)
 Tuple$TM /: Delete$TM[a_Tuple$TM?isGround, d__?isGround] /; buiActive["Delete"] := Fold[ DeleteCases[ #1, #2]&, a, {d}] 
@@ -2402,6 +2416,9 @@ Tuple$TM /: Replace$TM[ a_Tuple$TM?isGround, s:Tuple$TM[_?isGround, _]..] /; bui
 
 Tuple$TM /: Subscript$TM[ a_Tuple$TM, p__Integer] /; buiActive["Subscript"] := Subscript$TM[ a, Tuple$TM[ p]]
 Tuple$TM /: Subscript$TM[ a_Tuple$TM?isSequenceFree, p_?isPositionSpec] /; buiActive["Subscript"] := Extract[ a, p /. Tuple$TM -> List] /. List -> Tuple$TM
+
+Subscript$TM[ ReplacePart$TM[ a_, Tuple$TM[ i_, new_]], i_] /; buiActive["ReplacePart"] && buiActive["Subscript"] := new
+Subscript$TM[ ReplacePart$TM[ a_, Tuple$TM[ i_, _]], j_] /; buiActive["ReplacePart"] && buiActive["Subscript"] := Subscript$TM[ a, j]
 
 isPositionSpec[ 0] := False	(* The head of an expression must not be accessible *)
 isPositionSpec[ _Integer] := True
