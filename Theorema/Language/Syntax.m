@@ -199,6 +199,21 @@ tmaToInputOperator[ op_Symbol] :=
     ]
 tmaToInputOperator[ args___] := unexpected[ tmaToInputOperator, {args}]	
 
+SetAttributes[ removeVar, HoldAllComplete];
+removeVar[ (h:(Theorema`Language`SEQ0$|Theorema`Language`SEQ1$|Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$))[ op_Symbol]] :=
+	With[ {n = SymbolName[ Unevaluated[ op]]},
+		ReplacePart[ HoldComplete@@{ToExpression[ removeVar[ n], InputForm, HoldComplete]}, {1, 0} -> h]
+	]
+removeVar[ op_Symbol] :=
+	With[ {n = SymbolName[ Unevaluated[ op]]},
+		ToExpression[ removeVar[ n], InputForm, HoldComplete]
+	]
+removeVar[ op_String] :=
+	If[ StringLength[ op] > 4 && StringTake[ op, 4] === "VAR$",
+		StringDrop[ op, 4],
+		op
+	]
+
 
 isLeftDelimiter[ s_] :=
 	MemberQ[ {"[", "(", "{", "\[LeftAngleBracket]", "\[LeftBracketingBar]",
@@ -221,6 +236,7 @@ isRightDelimiter[ s_] :=
 	*)
 $tmaOperators = {
 	{"@", {Infix}, "Componentwise"}, {"/@", {Infix}, "Map"}, {"//@", {Infix}, "MapAll"},
+	{">>", {Infix}, "Put"}, {">>>", {Infix}, "PutAppend"}, {"<<", {Prefix}, "Get"},
 	{"@@", {Infix}, "Apply"}, {";;", {Infix}, "Span"},
 	{"\[Rule]", {Infix}, "Rule"}, {"\[RuleDelayed]", {Infix}, "RuleDelayed"},
 	{"\[UndirectedEdge]", {Infix}, "UndirectedEdge"}, {"\[DirectedEdge]", {Infix}, "DirectedEdge"},
@@ -359,18 +375,25 @@ $tmaNameToOperator = Dispatch[ MapThread[ Rule, {$tmaOperatorNames, $tmaOperator
 
 (* We need this attribute, because otherwise expressions (not only operator symbols!) are evaluated when "MakeBoxes" is called. *)	
 SetAttributes[ isTmaOperatorName, HoldAllComplete];
-isTmaOperatorName[ op_Symbol] := Quiet[ Check[ MemberQ[ $tmaOperatorNames, SymbolName[ op]], False]]
+isTmaOperatorName[ op_Symbol] := Quiet[ Check[ isTmaOperatorString[ SymbolName[ op], True], False]]
 
-(* "getTmaOperatorName" returns the string form (without "$TM") of the Theorema operator name 'op',
+isTmaOperatorString[ op_String, False] := MemberQ[ $tmaOperatorNames, op]
+isTmaOperatorString[ op_String, True] := MemberQ[ $tmaOperatorNames, removeVar[ op]]
+
+(* "getTmaOperatorName" returns the string form (without suffix "$TM" and prefix "$VAR") of the Theorema operator name 'op',
 	even if it occurs inside nested "Annotated$TM"-, "DomainOperation$TM"- and "VAR$"-expressions.
 	If 'op' is no Theorema operator name, $Failed is returned. *)
 SetAttributes[ getTmaOperatorName, HoldAllComplete];
-getTmaOperatorName[ op_Symbol] := Quiet[ Check[ If[ MemberQ[ $tmaOperatorNames, SymbolName[ op]], StringDrop[ SymbolName[ op], -3], $Failed], $Failed]]
-getTmaOperatorName[ (Theorema`Language`VAR$|Theorema`Computation`Language`VAR$)[ op_Symbol]] := getTmaOperatorName[ op]
-getTmaOperatorName[ (Theorema`Language`FIX$|Theorema`Computation`Language`FIX$)[ op_Symbol, 0]] := getTmaOperatorName[ op]
+getTmaOperatorName[ op_Symbol] := Quiet[ Check[ getTmaOperatorNameFromString[ SymbolName[ op]], $Failed]]
+getTmaOperatorName[ (Theorema`Language`VAR$|Theorema`Computation`Language`VAR$)[ op_Symbol]] :=
+	Quiet[ Check[ getTmaOperatorNameFromString[ removeVar[ SymbolName[ op]]], $Failed]]
+getTmaOperatorName[ (Theorema`Language`FIX$|Theorema`Computation`Language`FIX$)[ op_Symbol, 0]] :=
+	Quiet[ Check[ getTmaOperatorNameFromString[ removeVar[ SymbolName[ op]]], $Failed]]
 getTmaOperatorName[ (Theorema`Language`Annotated$TM|Theorema`Computation`Language`Annotated$TM)[ op_, __]] := getTmaOperatorName[ op]
 getTmaOperatorName[ (Theorema`Language`DomainOperation$TM|Theorema`Computation`Language`DomainOperation$TM)[ _, op_]] := getTmaOperatorName[ op]
 getTmaOperatorName[ _] := $Failed
+
+getTmaOperatorNameFromString[ op_String] := If[ MemberQ[ $tmaOperatorNames, op], StringDrop[ op, -3], $Failed]
 
 isTmaOperatorSymbol[ op_String] := MemberQ[ $tmaOperatorSymbols, op]
 isTmaOperatorBox[ (OverscriptBox|SubscriptBox)[ op_, __], fullName_:False] := isTmaOperatorBox[ op, fullName]
