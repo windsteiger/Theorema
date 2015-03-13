@@ -37,25 +37,6 @@ $tmaNonStandardOperators = Join[ $tmaNonStandardOperators,
     }];
 
 (* ::Section:: *)
-(* MakeExpression *)
-
-(* ::Subsection:: *)
-(* Auxiliary parsing functions *)
-
-(* The default cases for non-SequenceOf are in Syntax.m, otherwise the defs are in wrong order when
-   this file is loaded twice
-*)
-(* The alternatives without Hold wrapped around SequenceOf$TM are most probably superfluous *)
-makeSet[ (SequenceOf$TM|Hold[SequenceOf$TM])[ s__]] := ToExpression[ "SetOf$TM"][ s]
-
-makeTuple[ (SequenceOf$TM|Hold[SequenceOf$TM])[ r:RNG$[ __STEPRNG$], c_, e_]] := ToExpression[ "TupleOf$TM"][ r, c, e]
-makeTuple[ (SequenceOf$TM|Hold[SequenceOf$TM])[ r_, __]] := 
-	Module[ {},
-		notification[ translate[ "tupleOfRange"], DisplayForm[ makeRangeBox[ r, TheoremaForm]]];
-		Throw[ $Failed]
-	]
-
-(* ::Section:: *)
 (* MakeBoxes *)
 
 (* ::Subsection:: *)
@@ -241,8 +222,6 @@ MakeBoxes[ Radical$TM[ e_, r_], TheoremaForm] :=
 
 MakeBoxes[ Set$TM[ arg__], TheoremaForm] := MakeBoxes[ {arg}, TheoremaForm]
 MakeBoxes[ Set$TM[ ], TheoremaForm] := "\[EmptySet]"
-(* An unevaluated 'makeSet' will turn into makeSet$TM when renaming back to standard context ... *)
-MakeBoxes[ Theorema`Common`makeSet$TM[ arg__], TheoremaForm] := StyleBox[ MakeBoxes[ {arg}, TheoremaForm], "ExpressionVariable"]
 
 MakeBoxes[ SequenceOf$TM[ rng:RNG$[ SETRNG$[ v_, _]], cond_, v_], TheoremaForm] :=
 	RowBox[ {makeRangeBox[ rng, TheoremaForm], "|", MakeBoxes[ cond, TheoremaForm]}]

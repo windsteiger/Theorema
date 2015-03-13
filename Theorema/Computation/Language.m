@@ -820,8 +820,6 @@ sequenceOfIteration[ $Failed, _, _] := $Failed
 sequenceOfIteration[ args___] := 
  unexpected[ sequenceOfIteration, {args}]
 
-(* amaletzk: If we use 'makeSet' and 'makeTuple', then we get problems with contexts in proofs:
-	'Set$TM' and 'Tuple$TM' appear without any context then ... *)
 SetOf$TM[ RNG$[ r__], cond_, form_] :=
 	Module[ {s},
 		Apply[ Set$TM, s] /; (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
@@ -957,7 +955,7 @@ MaximumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, form_] /; buiActive["
 	]
 MaximumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["MaximumOf"] :=
 	Module[ {v},
-		max$TM[ Apply[ makeSet, v]] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+		max$TM[ Set$TM@@v] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
 MaximumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, ord_, form_] /; buiActive["MaximumOf"] :=
  	Module[ {splitC},
@@ -970,7 +968,7 @@ MaximumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, ord_, form_] /; buiAc
 	]
 MaximumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, ord_, form_] /; buiActive["MaximumOf"] :=
 	Module[ {v},
-		Subscript$TM[ max$TM, ord][ Apply[ makeSet, v]] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+		Subscript$TM[ max$TM, ord][ Set$TM@@v] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
 	
 MinimumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, form_] /; buiActive["MinimumOf"] :=
@@ -984,7 +982,7 @@ MinimumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, form_] /; buiActive["
 	]
 MinimumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["MinimumOf"] :=
 	Module[ {v},
-		min$TM[ Apply[ makeSet, v]] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+		min$TM[ Set$TM@@v] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
 MinimumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, ord_, form_] /; buiActive["MinimumOf"] :=
  	Module[ {splitC},
@@ -997,7 +995,7 @@ MinimumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, ord_, form_] /; buiAc
 	]
 MinimumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, ord_, form_] /; buiActive["MinimumOf"] :=
 	Module[ {v},
-		Subscript$TM[ min$TM, ord][ Apply[ makeSet, v]] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+		Subscript$TM[ min$TM, ord][ Set$TM@@v] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
 	
 UnionOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, form_] /; buiActive["UnionOf"] :=
@@ -2538,7 +2536,7 @@ pw[ Hold[], unknown_Hold] := unknown
 
 (* We assume that all lists not treated by the above constructs should in fact be sets *)
 SetAttributes[ List$TM, HoldAll]
-List$TM[ l___] := makeSet[l]
+List$TM[ l___] := Set$TM[l]
 
 cleanupComputation[]
     

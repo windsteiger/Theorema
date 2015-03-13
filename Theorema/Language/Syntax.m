@@ -109,7 +109,7 @@ Theorema`MmaToTma = Dispatch[
 				HoldPattern[ Wedge] :> ToExpression[ "And$TM"],
 				HoldPattern[ Vee] :> ToExpression[ "Or$TM"],
 				HoldPattern[ Complement] :> ToExpression[ "Backslash$TM"],
-				HoldPattern[ List]|HoldPattern[ AngleBracket] :> makeTuple (* We turn "List" into "Tuple", because that's actually what a Mathematica list is. *)}
+				HoldPattern[ List]|HoldPattern[ AngleBracket] :> ToExpression[ "Tuple$TM"] (* We turn "List" into "Tuple", because that's actually what a Mathematica list is. *)}
 			]
 		   ];
 Theorema`TmaToMma = Dispatch[
@@ -424,18 +424,6 @@ isTmaRelationBox[ SubscriptBox[ op_String, _]] :=
 	MemberQ[ $tmaSetRelations, Replace[ op, $tmaOperatorToName]]
 
 (* ::Section:: *)
-(* Set and tuple constructor *)
-
-(*
-	Expression specific parts -> Expression.m
-	The default cases go here, otherwise it is not save that these are put at the end (if they have conditions,
-	they could stay in front of the rules loaded in "Computation`". Keep in mind that Expression.m is loaded twice!
-*)
-
-makeSet[ x___] := Apply[ ToExpression[ "Set$TM"], Union[ {x}]]
-makeTuple[ x___] := ToExpression[ "Tuple$TM"][x]
-
-(* ::Section:: *)
 (* MakeExpression *)
 
 
@@ -474,22 +462,73 @@ MakeExpression[ RowBox[{UnderscriptBox[ q_?isQuantifierSymbol, rng_], form_}], f
 MakeExpression[ RowBox[{UnderscriptBox[ UnderscriptBox[ q_?isQuantifierSymbol, rng_], cond_], form_}], fmt_] :=
     standardQuantifier[ Replace[ q, $tmaQuantifierToName], rng, cond, form, fmt] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{form_, UnderscriptBox[ "|"|":", rng_]}], fmt_] :=
-    standardQuantifier[ "SequenceOf", rng, "True", form, fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {"{", RowBox[{form_, UnderscriptBox[ "|"|":", rng_]}], "}"}], fmt_] :=
+    standardQuantifier[ "SetOf", rng, "True", form, fmt] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{form_, UnderscriptBox[ "|"|":", rng_], cond_}], fmt_] :=
-    standardQuantifier[ "SequenceOf", rng, cond, form, fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {"{", RowBox[{form_, UnderscriptBox[ "|"|":", rng_], cond_}], "}"}], fmt_] :=
+    standardQuantifier[ "SetOf", rng, cond, form, fmt] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{form_, UnderscriptBox[ UnderscriptBox[ "|"|":", rng_], cond_]}], fmt_] :=
-    standardQuantifier[ "SequenceOf", rng, cond, form, fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {"{", RowBox[{form_, UnderscriptBox[ UnderscriptBox[ "|"|":", rng_], cond_]}], "}"}], fmt_] :=
+    standardQuantifier[ "SetOf", rng, cond, form, fmt] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{rng_, "|"|":", cond_}], fmt_] :=
+MakeExpression[ RowBox[ {"{", RowBox[{rng_, "|"|":", cond_}], "}"}], fmt_] :=
     With[ { v = getSingleRangeVar[ rng]},
         If[ v =!= $Failed,
-            standardQuantifier[ "SequenceOf", rng, cond, v, fmt],
+            standardQuantifier[ "SetOf", rng, cond, v, fmt],
             MakeExpression[ "nE", fmt]
         ]
     ] /; $parseTheoremaExpressions
+    
+MakeExpression[ RowBox[ {"{", RowBox[ l:{Except[ ","], PatternSequence[ ",", Except[ ","]]..}], "}"}], fmt_] :=
+    Module[ {elements = Union[ Map[ MakeExpression[ #, fmt]&, DeleteCases[ l, ","]]]},
+    	With[ {aux = Flatten[ HoldComplete@@elements, 2]},
+    		ReplacePart[ HoldComplete[ aux], {1, 0} -> List]
+    		(* Sets of individual elements (no "SetOf"-quantifier) cannot be parsed directly as "Set",
+    			because "freshNames" turns "Set" into "Assign".
+    			Therefore, we keep "List", *but only for SET and not for SETOF* ! *)
+    	]
+    ] /; $parseTheoremaExpressions
+    
+MakeExpression[ RowBox[ {"\[LeftAngleBracket]", RowBox[{form_, UnderscriptBox[ "|"|":", rng_]}], "\[RightAngleBracket]"}], fmt_] :=
+    If[ isSingleStepRange[ rng],
+    	standardQuantifier[ "TupleOf", rng, "True", form, fmt],
+    	notification[ translate[ "tupleOfRange"], DisplayForm[ rng]];
+	    MakeExpression[ "nE", fmt]
+    ] /; $parseTheoremaExpressions
+
+MakeExpression[ RowBox[ {"\[LeftAngleBracket]", RowBox[{form_, UnderscriptBox[ "|"|":", rng_], cond_}], "\[RightAngleBracket]"}], fmt_] :=
+    If[ isSingleStepRange[ rng],
+    	standardQuantifier[ "TupleOf", rng, cond, form, fmt],
+    	notification[ translate[ "tupleOfRange"], DisplayForm[ rng]];
+	    MakeExpression[ "nE", fmt]
+    ] /; $parseTheoremaExpressions
+
+MakeExpression[ RowBox[ {"\[LeftAngleBracket]", RowBox[{form_, UnderscriptBox[ UnderscriptBox[ "|"|":", rng_], cond_]}], "\[RightAngleBracket]"}], fmt_] :=
+    If[ isSingleStepRange[ rng],
+    	standardQuantifier[ "TupleOf", rng, cond, form, fmt],
+    	notification[ translate[ "tupleOfRange"], DisplayForm[ rng]];
+	    MakeExpression[ "nE", fmt]
+    ] /; $parseTheoremaExpressions
+
+MakeExpression[ RowBox[ {"\[LeftAngleBracket]", RowBox[{rng_, "|"|":", cond_}], "\[RightAngleBracket]"}], fmt_] :=
+	If[ isSingleStepRange[ rng],
+	    With[ { v = getSingleRangeVar[ rng]},
+	        If[ v =!= $Failed,
+	            standardQuantifier[ "TupleOf", rng, cond, v, fmt],
+	            MakeExpression[ "nE", fmt]
+	        ]
+	    ],
+	    notification[ translate[ "tupleOfRange"], DisplayForm[ rng]];
+	    MakeExpression[ "nE", fmt]
+	] /; $parseTheoremaExpressions
+    
+isSingleStepRange[ rng_] :=
+	With [{s = {makeRangeSequence[ rng]}},
+		Length[ s] === 1 && MatchQ[ First[ s], RowBox[ {"STEPRNG$", "[", _, "]"}]]
+	]
+    
+MakeExpression[ RowBox[ {"\[LeftAngleBracket]", x___, "\[RightAngleBracket]"}], fmt_] :=
+    MakeExpression[ RowBox[ {"Tuple", "[", x, "]"}], fmt] /; $parseTheoremaExpressions
 
 MakeExpression[ RowBox[{UnderscriptBox[ SubscriptBox[ q_?isQuantifierSymbol, dom_], rng_], form_}], fmt_] :=
     subscriptedQuantifier[ Replace[ q, $tmaQuantifierToName], rng, "True", dom, form, fmt]/; $parseTheoremaExpressions

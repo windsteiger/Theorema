@@ -88,8 +88,7 @@ freshSymbol[ Hold[ s_Symbol], dropWolf_] :=
         	Set, ToExpression[ "Assign$TM"],
         	Wedge, ToExpression[ "And$TM"],
         	Vee, ToExpression[ "Or$TM"],
-        	List, makeSet,
-        	AngleBracket, makeTuple,
+        	List, ToExpression[ "Set$TM"],	(* This cannot be removed, since a set of individual elements (no SetOf) still has to be parsed as "List". *)
         	Inequality, ToExpression[ "OperatorChain$TM"],
         	_,
         	name = ToString[ Unevaluated[ s]];
@@ -1182,8 +1181,7 @@ renameToStandardContext[ expr_, lhs_:Null] :=
 	Block[{$ContextPath = {"System`"}, $Context = "System`", stringExpr, cp},
 		(* BUGFIX amaletzk: added FullForm[], otherwise doesn't work if outermost symbol is built-in Power *)
 		(* The result of \[Wolf] functions may be Lists; They have to be transformed into tuples BEFORE freshNames[]
-			is applied, because otherwise they are transformed into sets.
-			We don't use makeTuple[] here, because otherwise we get problems with contexts. *)
+			is applied, because otherwise they are transformed into sets. *)
 		(* Do not substitute into a META$, because a META$ has a list of a.b.f. constants at pos. 3 *)
 		stringExpr = ToString[ replaceAllExcept[ FullForm[ Hold[ expr]], {List -> Tuple$TM}, {}, Heads -> {Theorema`Computation`Language`META$}]];
 		If[ lhs =!= Null,
@@ -1203,8 +1201,7 @@ renameToStandardContext[ args___] := unexpected[ renameToStandardContext, {args}
 
 (* We have to use "SetDelayed", because "expr" might evaluate. *)
 assign[ Hold[ s_Symbol], Hold[ expr_]] := (s := expr)
-(* We still have "makeTuple" in the left-hand-side, rather than just "Tuple$TM". *)
-assign[ Hold[ Theorema`Common`makeTuple[ elems___]], Hold[ Theorema`Computation`Language`Tuple$TM[ expr___]]] :=
+assign[ Hold[ Theorema`Computation`Language`Tuple$TM[ elems___]], Hold[ Theorema`Computation`Language`Tuple$TM[ expr___]]] :=
 	Module[ {l, r},
 		Scan[ Apply[ assign, #]&, Transpose[ {l, r}]] /; 
 			Length[ l = List@@Map[ Hold, Hold[ elems]]] === Length[ r = List@@Map[ Hold, Hold[ expr]]]
