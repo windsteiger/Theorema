@@ -41,6 +41,7 @@ With[ {lang = "German"},
 (* TRANSLATED *)
 
 (* UNTRANSLATED *)	
+	MessageName[ addKnowledgeWhileProving, "usage", lang] = "addKnowledgeWhileProving[ new_List] adds all formulas in new to the list of formulas to be written in the proof info/file of the current proof.";
 	MessageName[ appendKB, "usage", lang] = "appendKB[ kb_List, fml] appends fml to the knowledge base kb and deletes duplicate entries.";
 	MessageName[ appendToKB, "usage", lang] = "appendToKB[ sym, fml] sets sym to the result of appending fml to sym and deleting duplicate entries.";
 	MessageName[ applyAllRules, "usage", lang] = "applyAllRules[ ...] .";
