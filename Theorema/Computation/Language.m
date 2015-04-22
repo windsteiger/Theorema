@@ -579,8 +579,8 @@ Componentwise$TM[ P_, args___] /; buiActive["Componentwise"] := Apply[ And, Map[
 SetAttributes[ Abbrev$TM, HoldAll]
 Abbrev$TM[ RNG$[ f_ABBRVRNG$, r__ABBRVRNG$], expr_] /; buiActive["Let"] :=
 	Abbrev$TM[ RNG$[ f], Abbrev$TM[ RNG$[ r], expr]]
-Abbrev$TM[ RNG$[ ABBRVRNG$[ _, r_, pos:{___List}]], expr_] /; buiActive["Let"] :=
-	ReleaseHold[ ReplacePart[ Hold[ expr], pos -> r]]
+Abbrev$TM[ RNG$[ ABBRVRNG$[ _, r_, _[ pos___]]], expr_] /; buiActive["Let"] :=
+	ReleaseHold[ ReplacePart[ Hold[ expr], List@@@{pos} -> r]]	(* The position specification might be a tuple. *)
 (* The following definition of "Abbrev$TM" should not be needed any longer, but still we keep it (just in case). *)
 Abbrev$TM[ RNG$[ ABBRVRNG$[ l_, r_]], expr_] /; buiActive["Let"] :=
 	ReleaseHold[ substituteFree[ Hold[ expr], {l -> r}]]
