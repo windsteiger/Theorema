@@ -828,9 +828,14 @@ Options[ makeFML] = {key :> defKey[], formula -> True, label :> defLabel[], simp
 makeFML[ data___?OptionQ] :=
 	Module[{k, f, l, s, fs},
 		{k, f, l, s} = {key, formula, label, simplify} /. {data} /. Options[ makeFML];
-		If[ TrueQ[ s],
+		Switch[ s,
+			True,
 			fs = computeInProof[ f],
-			fs = f
+			False,
+			fs = f,
+			_,
+			fs = s[ f];
+			If[ Head[ fs] === s, fs = f];	(* Security check: If the head of the new formula is still 's', no simplification happened. *)
 		];
 		makeTmaFml[ k, standardFormQuantifier[ fs], l, f]
 	]
@@ -996,10 +1001,12 @@ singleRngToCondition[ Theorema`Language`STEPRNG$[ v_, l_Integer, h_, 1]] :=
 	{Theorema`Language`Element$TM[ v, Theorema`Language`IntegerInterval$TM[ l, h, True, True]]}
 singleRngToCondition[ Theorema`Language`STEPRNG$[ v_, l_, h_, s_]] := 
 	Module[ {new, step},
-		step = If[ s === 1, new, Theorema`Language`Times$TM[ new, s]];
-		{Theorema`Language`Exists$TM[ Theorema`Language`RNG$[ Theorema`Language`SETRNG$[ new, Theorema`Language`IntegerInterval$TM[ 0, Infinity, True, False]]], True, 
-			Theorema`Language`And$TM[ Theorema`Language`Equal$TM[ v, Theorema`Language`Plus$TM[ l, step]],
-				If[ TrueQ[ Negative[ s]], Theorema`Language`GreaterEqual$TM, Theorema`Language`LessEqual$TM][ v, h]]]}
+		With[ {n = Theorema`Language`VAR$[ new]},
+			step = If[ s === 1, n, Theorema`Language`Times$TM[ n, s]];
+			{Theorema`Language`Exists$TM[ Theorema`Language`RNG$[ Theorema`Language`SETRNG$[ n, Theorema`Language`IntegerInterval$TM[ 0, Infinity, True, False]]], True, 
+				Theorema`Language`And$TM[ Theorema`Language`Equal$TM[ v, Theorema`Language`Plus$TM[ l, step]],
+					If[ TrueQ[ Negative[ s]], Theorema`Language`GreaterEqual$TM, Theorema`Language`LessEqual$TM][ v, h]]]}
+		]
 	]
 singleRngToCondition[ Theorema`Language`PREDRNG$[ v_, P_]] := {P[ v]}
 singleRngToCondition[ u_] := {$Failed}
