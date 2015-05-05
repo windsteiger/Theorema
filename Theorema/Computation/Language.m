@@ -2513,10 +2513,10 @@ SetAttributes[ Do$TM, HoldAll]
 Do$TM[ body_, l_[v___]] /; buiActive["Do"] := Apply[ Do, Hold[ body, {v}]]
 
 SetAttributes[ Piecewise$TM, HoldAll]
-Piecewise$TM[ Tuple$TM[ Tuple$TM[ expr_, True], ___Tuple$TM]] := expr
-Piecewise$TM[ Tuple$TM[ clauses__Tuple$TM]] :=
+Piecewise$TM[ Tuple$TM[ Tuple$TM[ expr_, True], ___Tuple$TM]] /; buiActive[ "CaseDistinction"] := expr
+Piecewise$TM[ Tuple$TM[ clauses__Tuple$TM]] /; buiActive[ "CaseDistinction"] :=
 	Module[ {res},
-		Replace[ res, {Hold[ c___]:>Piecewise$TM[ Tuple$TM[ c]]}] /; (res = pw[ Hold[ clauses], Hold[]]; res =!= Hold[ clauses])	
+		Replace[ res, {Hold[ c___] :> Piecewise$TM[ Tuple$TM[ c]]}] /; (res = pw[ Hold[ clauses], Hold[]]; res =!= Hold[ clauses])	
 	]
 	
 pw[ Hold[ Tuple$TM[ expr_, cond_], clauses___Tuple$TM], unknown:Hold[ u___]] :=
