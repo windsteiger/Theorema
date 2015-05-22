@@ -590,8 +590,8 @@ Componentwise$TM[ P_, args___] /; buiActive["Componentwise"] := Apply[ And, Map[
 SetAttributes[ Abbrev$TM, HoldAll]
 Abbrev$TM[ RNG$[ f_ABBRVRNG$, r__ABBRVRNG$], expr_] /; buiActive["Let"] :=
 	Abbrev$TM[ RNG$[ f], Abbrev$TM[ RNG$[ r], expr]]
-Abbrev$TM[ RNG$[ ABBRVRNG$[ _, r_, pos:{___List}]], expr_] /; buiActive["Let"] :=
-	ReleaseHold[ ReplacePart[ Hold[ expr], pos -> r]]
+Abbrev$TM[ RNG$[ ABBRVRNG$[ _, r_, _[ pos___]]], expr_] /; buiActive["Let"] :=
+	ReleaseHold[ ReplacePart[ Hold[ expr], List@@@{pos} -> r]]	(* The position specification might be a tuple. *)
 (* The following definition of "Abbrev$TM" should not be needed any longer, but still we keep it (just in case). *)
 Abbrev$TM[ RNG$[ ABBRVRNG$[ l_, r_]], expr_] /; buiActive["Let"] :=
 	ReleaseHold[ substituteFree[ Hold[ expr], {l -> r}]]
@@ -831,8 +831,6 @@ sequenceOfIteration[ $Failed, _, _] := $Failed
 sequenceOfIteration[ args___] := 
  unexpected[ sequenceOfIteration, {args}]
 
-(* amaletzk: If we use 'makeSet' and 'makeTuple', then we get problems with contexts in proofs:
-	'Set$TM' and 'Tuple$TM' appear without any context then ... *)
 SetOf$TM[ RNG$[ r__], cond_, form_] :=
 	Module[ {s},
 		Apply[ Set$TM, s] /; (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
@@ -968,7 +966,7 @@ MaximumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, form_] /; buiActive["
 	]
 MaximumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["MaximumOf"] :=
 	Module[ {v},
-		max$TM[ Apply[ makeSet, v]] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+		max$TM[ Set$TM@@v] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
 MaximumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, ord_, form_] /; buiActive["MaximumOf"] :=
  	Module[ {splitC},
@@ -981,7 +979,7 @@ MaximumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, ord_, form_] /; buiAc
 	]
 MaximumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, ord_, form_] /; buiActive["MaximumOf"] :=
 	Module[ {v},
-		Subscript$TM[ max$TM, ord][ Apply[ makeSet, v]] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+		Subscript$TM[ max$TM, ord][ Set$TM@@v] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
 	
 MinimumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, form_] /; buiActive["MinimumOf"] :=
@@ -995,7 +993,7 @@ MinimumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, form_] /; buiActive["
 	]
 MinimumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["MinimumOf"] :=
 	Module[ {v},
-		min$TM[ Apply[ makeSet, v]] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+		min$TM[ Set$TM@@v] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
 MinimumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, ord_, form_] /; buiActive["MinimumOf"] :=
  	Module[ {splitC},
@@ -1008,7 +1006,7 @@ MinimumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, ord_, form_] /; buiAc
 	]
 MinimumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, ord_, form_] /; buiActive["MinimumOf"] :=
 	Module[ {v},
-		Subscript$TM[ min$TM, ord][ Apply[ makeSet, v]] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+		Subscript$TM[ min$TM, ord][ Set$TM@@v] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
 	
 UnionOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, form_] /; buiActive["UnionOf"] :=
@@ -1612,7 +1610,7 @@ Set$TM /: Annotated$TM[ Element$TM, SubScript$TM[dom_]][ p_, a_Set$TM] /; buiAct
 	Module[ {res},
 		res /; (res = ElementOf[ p, a, DomainOperation$TM[ dom, Equal$TM]]; MatchQ[ res, True|False])
 	]
-Set$TM /: \[ScriptCapitalP]$TM[ a_Set$TM] /; buiActive["PowerSet"] := Subsets[ a] /. List -> Set$TM
+Set$TM /: \[ScriptCapitalP]$TM[ a_Set$TM] /; buiActive["PowerSet"] := Set$TM@@Subsets[ a]
 Set$TM /: BracketingBar$TM[ a_Set$TM?isSequenceFree] /; buiActive["Cardinality"] && pairwiseDistinct[ a, Equal$TM] :=
 	Length[ a]
 Set$TM /: max$TM[ Set$TM[ e__]] /; buiActive["MaximumElementSet"] :=
@@ -2415,7 +2413,9 @@ Tuple$TM /: Replace$TM[ a_Tuple$TM?isGround, s:Tuple$TM[_?isGround, _]..] /; bui
 	Fold[ ReplaceAll, a, Replace[ {s}, Tuple$TM[ l_, r_] :> Rule[ l, r], {1}]]
 
 Tuple$TM /: Subscript$TM[ a_Tuple$TM, p__Integer] /; buiActive["Subscript"] := Subscript$TM[ a, Tuple$TM[ p]]
-Tuple$TM /: Subscript$TM[ a_Tuple$TM?isSequenceFree, p_?isPositionSpec] /; buiActive["Subscript"] := Extract[ a, p /. Tuple$TM -> List] /. List -> Tuple$TM
+Tuple$TM /: Subscript$TM[ (Tuple$TM[ a___])?isSequenceFree, p_?isPositionSpec] /; buiActive["Subscript"] :=
+	ReleaseHold[ Extract[ Hold[ a] /. List -> List$dummy, p /. Tuple$TM -> List, Hold] /. {List -> Tuple$TM, List$dummy -> List}]
+	(* The expression must not be evaluated while we have "List$dummy" instead of "List". *)
 
 Subscript$TM[ ReplacePart$TM[ a_, Tuple$TM[ i_, new_]], i_] /; buiActive["ReplacePart"] && buiActive["Subscript"] := new
 Subscript$TM[ ReplacePart$TM[ a_, Tuple$TM[ i_, _]], j_] /; buiActive["ReplacePart"] && buiActive["Subscript"] := Subscript$TM[ a, j]
@@ -2530,10 +2530,10 @@ SetAttributes[ Do$TM, HoldAll]
 Do$TM[ body_, l_[v___]] /; buiActive["Do"] := Apply[ Do, Hold[ body, {v}]]
 
 SetAttributes[ Piecewise$TM, HoldAll]
-Piecewise$TM[ Tuple$TM[ Tuple$TM[ expr_, True], ___Tuple$TM]] := expr
-Piecewise$TM[ Tuple$TM[ clauses__Tuple$TM]] :=
+Piecewise$TM[ Tuple$TM[ Tuple$TM[ expr_, True], ___Tuple$TM]] /; buiActive[ "CaseDistinction"] := expr
+Piecewise$TM[ Tuple$TM[ clauses__Tuple$TM]] /; buiActive[ "CaseDistinction"] :=
 	Module[ {res},
-		Replace[ res, {Hold[ c___]:>Piecewise$TM[ Tuple$TM[ c]]}] /; (res = pw[ Hold[ clauses], Hold[]]; res =!= Hold[ clauses])	
+		Replace[ res, {Hold[ c___] :> Piecewise$TM[ Tuple$TM[ c]]}] /; (res = pw[ Hold[ clauses], Hold[]]; res =!= Hold[ clauses])	
 	]
 	
 pw[ Hold[ Tuple$TM[ expr_, cond_], clauses___Tuple$TM], unknown:Hold[ u___]] :=
@@ -2553,7 +2553,7 @@ pw[ Hold[], unknown_Hold] := unknown
 
 (* We assume that all lists not treated by the above constructs should in fact be sets *)
 SetAttributes[ List$TM, HoldAll]
-List$TM[ l___] := makeSet[l]
+List$TM[ l___] := Set$TM[l]
 
 cleanupComputation[]
     

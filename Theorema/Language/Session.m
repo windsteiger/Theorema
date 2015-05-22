@@ -84,13 +84,11 @@ freshSymbol[ Hold[ s_Symbol], dropWolf_] :=
             	ToExpression[ "RealInterval$TM[ -Infinity, Infinity, False, False]"],
             DoubleLongRightArrow|DoubleRightArrow, ToExpression[ "Implies$TM"],
             DoubleLongLeftRightArrow|DoubleLeftRightArrow|Equivalent, ToExpression[ "Iff$TM"],
-        	SetDelayed, ToExpression[ "EqualDef$TM"], 
-        	(* we don't encourage to use =, but in case it appears we interpret it as Equal *)
-        	Set, ToExpression[ "Equal$TM"],
+        	SetDelayed, ToExpression[ "EqualDef$TM"],
+        	Set, ToExpression[ "Assign$TM"],
         	Wedge, ToExpression[ "And$TM"],
         	Vee, ToExpression[ "Or$TM"],
-        	List, makeSet,
-        	AngleBracket, makeTuple,
+        	List, ToExpression[ "Set$TM"],	(* This cannot be removed, since a set of individual elements (no SetOf) still has to be parsed as "List". *)
         	Inequality, ToExpression[ "OperatorChain$TM"],
         	_,
         	name = ToString[ Unevaluated[ s]];
@@ -135,7 +133,7 @@ freshSymbolProg[ Hold[ s_Symbol], dropWolf_] :=
 freshSymbolProg[ args___] := unexpected[ freshSymbolProg, {args}]
 
 markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
-    Module[ {s, seq, vars},
+    Module[ {s, seq, vars, violating},
         (* all symbols sym specified as variables in r are translated into VAR$[sym]
            we substitute all symbols with matching "base name" (neglecting the context!) so that also
            symbols in different context get substituted. This is important when processing archives, because
@@ -149,16 +147,26 @@ markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
         vars = specifiedVariables[ r];
         seq = Cases[vars, (SEQ0$|SEQ1$)[ _]];
         vars = Complement[ vars, seq];
+        violating = checkForValidRange[ seq, vars, Hold[ r], SEQ0$|SEQ1$];
+        If[ violating =!= {},
+        	notification[ translate[ "invalidRange"], DisplayForm[ ToBoxes[ violating /. Hold -> HoldForm, TheoremaForm]]];
+			Throw[ $Failed]
+        ];
         s = Join[ Map[ (h:(SEQ0$|SEQ1$))[ Hold[ sym_Symbol]] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> VAR$[ h[ #]]&, seq[[All, 1]]],
         		  Map[ Hold[ sym_Symbol] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> VAR$[ #]&, vars]];
         replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {SEQ0$, SEQ1$, VAR$, FIX$}]
     ]
 
 markVariables[ Hold[ Theorema`Computation`Language`QU$[ r_Theorema`Computation`Language`RNG$, expr_]]] :=
-    Module[ {s, seq, vars},
+    Module[ {s, seq, vars, violating},
     	vars = specifiedVariables[ Hold[ r]];
         seq = Cases[vars, (Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$)[ _]];
         vars = Complement[ vars, seq];
+        violating = checkForValidRange[ seq, vars, Hold[ r], Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$];
+        If[ violating =!= {},
+        	notification[ translate[ "invalidRange"], DisplayForm[ ToBoxes[ violating /. Hold -> HoldForm, TheoremaForm]]];
+			Throw[ $Failed]
+        ];
         s = Join[ Map[ (h:(Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$))[ Hold[ sym_Symbol]] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> Theorema`Computation`Language`VAR$[ h[ #]]&, seq[[All, 1]]],
         		  Map[ Hold[ sym_Symbol] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> Theorema`Computation`Language`VAR$[ #]&, vars]];
         replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {Theorema`Computation`Language`SEQ0$, Theorema`Computation`Language`SEQ1$, Theorema`Computation`Language`VAR$, Theorema`Computation`Language`FIX$}]
@@ -178,13 +186,50 @@ markVariables[ Hold[e_]] := Hold[ e]
 
 markVariables[ args___] := unexpected[ markVariables, {args}]
 
+(* "checkForValidRange[ seq, vars, r, patt ]" collects all variables which appear more than once in the range "r". If there are any, the range is invalid. *)
+checkForValidRange[ seq_List, vars_List, r_Hold, patt_] :=
+	Module[ {out = {}, tmp},
+        Scan[ With[ {h = Head[ #], name = symbolNameHold[ First[ #]]},
+        		If[ Count[ r, h[ Hold[ sym_Symbol]] /; SymbolName[ Unevaluated[ sym]] === name, {0, Infinity}, Heads -> True] > 1,
+        			AppendTo[ out, #]
+        		]
+        	]&,
+        	seq
+        ];
+        tmp = r /. (h:patt)[ _] :> h; (* Sequence variables are different from individual variables, even if they have the same name. *)
+        Scan[ With[ {name = symbolNameHold[ #]},
+        		If[ Count[ tmp, Hold[ sym_Symbol] /; SymbolName[ Unevaluated[ sym]] === name, {0, Infinity}, Heads -> True] > 1,
+        			AppendTo[ out, #]
+        		]
+        	]&,
+        	vars
+        ];
+        out
+	]
+	
+addVarPrefixes[ expr_] :=
+	Module[ {vp = Position[ expr, (VAR$|Theorema`Computation`Language`VAR$)[ _]], repl},
+		repl = MapThread[ (#1 -> addSinglePrefix[ #2])&, {vp, Extract[ expr, vp, Hold]}];
+		ReplacePart[ expr, repl]
+	]
+addSinglePrefix[ Hold[ sym_Symbol]] :=
+	Module[ {n = SymbolName[ Unevaluated[ sym]]},
+		If[ StringLength[ n] < 5 || StringTake[ n, 4] =!= "VAR$",
+			ToExpression[ "VAR$" <> n, InputForm, Hold],
+			Hold[ sym]
+		]
+	]
+addSinglePrefix[ Hold[ (h:(VAR$|SEQ0$|SEQ1$|Theorema`Computation`Language`VAR$|Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$))[ x_]]] :=
+	h[ addSinglePrefix[ Hold[ x]]]
+addSinglePrefix[ Hold[ x_Hold]] := addSinglePrefix[ x]
+
 (* "addAbbrevPositions[ expr ]" adds the positions of the free occurrences of all ABBREV-variables in 'expr' to their respective ABBRVRNG$-ranges.
 	Note that multiranges are temporarily split into individual ranges, and that an invisible 'Hold' is assumed to be wrapped around the quantified expressions,
 	such that later in computation the positions are just what they should be. *)
 addAbbrevPositions[ expr_Hold] :=
-	Module[ {p = Position[ expr, (Abbrev$TM|Theorema`Computation`Language`Abbrev$TM)[ _, _]], repl},
-		repl = MapThread[ (#2 -> newAbbrev[ #1])&, {Extract[ expr, p, Hold], p}];
-		Delete[ ReplacePart[ expr, repl], Map[ Append[ #, 0]&, p]] (* We have to remove all the newly introduced Holds. *)
+	Module[ {p = Position[ expr, (Abbrev$TM|Theorema`Computation`Language`Abbrev$TM)[ _, _]], new = expr},
+		Scan[ (new = Delete[ ReplacePart[ new, # -> newAbbrev[ Extract[ new, #, Hold]]], Append[ #, 0]])&, p];
+		new
 	]
 addAbbrevPositions[ expr_] := ReleaseHold[ addAbbrevPositions[ Hold[ expr]]]
 
@@ -201,12 +246,10 @@ newAbbrev[ Hold[ (q:(Abbrev$TM|Theorema`Computation`Language`Abbrev$TM))[ (rng:(
 newAbbrev[ expr_Hold] := expr
 
 getFreePositions[ var_, Hold[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[ x___], rest__]], pos:{p___}] :=
-	Module[ {i = Position[ rngVariables[ Hold[ r]], var, {1}, 1]},
-		Switch[ i,
+	Join[ getFreePositions[ var, Hold[ q], {p, 0}],
+		If[ MemberQ[ rngVariables[ Hold[ r]], var],
 			{},
-			Join[ getFreePositions[ var, Hold[ q], {p, 0}], getFreePositions[ var, Hold[ {{x}, rest}], pos]],
-			{_},
-			getFreePositions[ var, List@@@Hold@@{Take[ Hold[ x], First[ First[ i]] - 1]}, {p, 1}]
+			getFreePositions[ var, Hold[ {{x}, rest}], pos]
 		]
 	]
 getFreePositions[ var_, Hold[ var_], pos_List] := {pos}
@@ -222,7 +265,7 @@ getFreePositions[ var_, expr:Except[ _Hold]] := getFreePositions[ var, Hold[ exp
 SetAttributes[ makeTmaExpression, HoldAll]
 makeTmaExpression[ e_Hold] := Block[ {$ContextPath},
 	$ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
-	ReleaseHold[ addAbbrevPositions[ Replace[ markVariables[ freshNames[ e]], Hold[ x_] :> x, Infinity, Heads -> True]]]
+	ReleaseHold[ addAbbrevPositions[ Replace[ addVarPrefixes[ markVariables[ freshNames[ e]]], Hold[ x_] :> x, Infinity, Heads -> True]]]
 ]
 makeTmaExpression[ e_] := makeTmaExpression[ Hold[ e]]
 makeTmaExpression[ args___] := unexpected[ makeTmaExpression, {args}]
@@ -336,7 +379,7 @@ SetAttributes[ notContainedIn, HoldAll];
 	
 SetAttributes[ processGlobalDeclaration, HoldAll];
 processGlobalDeclaration[ x_] := 
-	Module[ {nb = EvaluationNotebook[], id, file, nbExpr, newFrameLabel},
+	Module[ {nb = EvaluationNotebook[], id, file, nbExpr, newFrameLabel, decl},
 		SelectionMove[ nb, All, EvaluationCell];
 		id = CurrentValue[ "CellID"];
 		file = CurrentValue[ nb, "NotebookFullFileName"];
@@ -348,7 +391,10 @@ processGlobalDeclaration[ x_] :=
 			CellTags -> {cellIDLabel[ id], sourceLabel[ file]}, ShowCellTags -> False,
 			CellFrameLabels -> {{None, newFrameLabel}, {None, None}}];
 		nbExpr = NotebookGet[ nb];
-		putGlobalDeclaration[ file, id, evaluationPosition[ nb, nbExpr, id], nbExpr, ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]]];
+		decl = ReleaseHold[ Catch[ markVariables[ freshNames[ Hold[ x]]]]];
+		If[ decl =!= $Failed, 
+			putGlobalDeclaration[ file, id, evaluationPosition[ nb, nbExpr, id], nbExpr, decl];
+		];
 		(* "Abbrev" cannot appear in global declarations, hence no need to call "addAbbrevPositions". *)
 		SelectionMove[ nb, After, Cell];
 	]
@@ -714,7 +760,7 @@ updateKnowledgeBase[ form_, k_, glob_, tags_String] :=
     	If[ inDomDef =!= {} && (defDef = $tmaDefaultDomainDef[ inDomDef[[1]]]) =!= {},
     		(* we are in a domain definition and there is a pending default for this domain *)
     		$tmaDefaultDomainDef[ inDomDef[[1]]] = {};
-    		newForm = ReleaseHold[ applyGlobalDeclaration[ defDef[[1]], glob]];
+    		newForm = addAbbrevPositions[ ReleaseHold[ addVarPrefixes[ applyGlobalDeclaration[ defDef[[1]], glob]]]];
     		fml = makeFML[ key -> Rest[ defDef], formula -> newForm, 
     			label -> StringReplace[ ToString[ ReleaseHold[ inDomDef[[1,1]]]], "$TM" -> ""] <> ".defOp", simplify -> False];
     		transferToComputation[ fml];
@@ -724,7 +770,7 @@ updateKnowledgeBase[ form_, k_, glob_, tags_String] :=
         	]
     	];
     	(* for the actual formula we proceed in the same way *)
-    	newForm = addAbbrevPositions[ ReleaseHold[ applyGlobalDeclaration[ form, glob]]];
+    	newForm = addAbbrevPositions[ ReleaseHold[ addVarPrefixes[ applyGlobalDeclaration[ form, glob]]]];
     	fml = makeFML[ key -> k, formula -> newForm, label -> tags, simplify -> False];
     	transferToComputation[ fml];
     	(* If new formulae are appended rather than prepended, the old formulae with the same label
@@ -772,8 +818,8 @@ applyGlobalDeclaration[ expr_, Hold[ domainConstruct$TM][ lhs_, rng:RNG$[ SIMPRN
 	substituteFree[ ReleaseHold[ markVariables[ Hold[ QU$[ rng, expr]]]], {v -> lhs}]
 applyGlobalDeclaration[ expr_, Hold[ domainConstruct$TM][ lhs_, rng:RNG$[ DOMEXTRNG$[ v_, d_]]]] :=
 	substituteFree[ ReleaseHold[ markVariables[ Hold[ QU$[ rng, expr]]]], {v -> lhs}]
-applyGlobalDeclaration[ expr_, Hold[ globalAbbrev$TM][ rng:RNG$[ a__ABBRVRNG$]]] := substituteFree[ ReleaseHold[ markVariables[ Hold[ QU$[ rng, expr]]]], 
-	Apply[ Rule, {a}, {1}]]
+applyGlobalDeclaration[ expr_, Hold[ globalAbbrev$TM][ rng:RNG$[ a__ABBRVRNG$]]] :=
+	substituteFree[ ReleaseHold[ markVariables[ Hold[ QU$[ rng, expr]]]], Apply[ Rule, {a}, {1}]]
 applyGlobalDeclaration[ args___] := unexpected[ applyGlobalDeclaration, {args}]
 
 (*
@@ -1204,9 +1250,13 @@ processComputation[ x:Theorema`Computation`Language`nE] :=
 	Module[{},
 		$Failed
 	]
-processComputation[ x_] := Module[ { procSynt, res},
-	(* Remove the inner Holds around fresh symbols *)
-	procSynt = addAbbrevPositions[ Replace[ markVariables[ freshNames[ Hold[ x], True]], Hold[ s_] -> s, Infinity, Heads -> True]];
+processComputation[ x_] := Module[ { procSynt, res, lhs = Null},
+	(* Remove the inner Holds around fresh symbols, and note that we have to catch parsing-errors (e.g. invalid multi ranges). *)
+	procSynt = addAbbrevPositions[ Replace[ addVarPrefixes[ Catch[ markVariables[ freshNames[ Hold[ x], True]]]], Hold[ s_] -> s, Infinity, Heads -> True]];
+	If[ MatchQ[ procSynt, _[ Theorema`Computation`Language`Assign$TM[ _, _]]],
+		lhs = Extract[ procSynt, {1, 1}, Hold];
+		procSynt = Extract[ procSynt, {1, 2}, Hold]
+	];
 	(* As an initial computation object, we start with the box form of the input cell *)
 	$TmaComputationObject = {ToExpression[ InString[ $Line]]};
 	$TmaCompInsertPos = {2}; 
@@ -1217,7 +1267,7 @@ processComputation[ x_] := Module[ { procSynt, res},
 	(* We force the MakeBoxes[ ..., TheoremaForm] to apply by setting $PrePrint in the CellProlog of a computation cell.
 	   Unsetting $PrePrint in the CellEpilog ensures this behaviour only for Theorema computation *)
 	AppendTo[ $TmaComputationObject, res]; 
-	renameToStandardContext[ res]
+	renameToStandardContext[ res, lhs]
 ]
 processComputation[ args___] := unexcpected[ processComputation, {args}]
 
@@ -1251,19 +1301,36 @@ closeComputation[args___] := unexcpected[ closeComputation, {args}]
 displayBoxes[ expr_] := RawBoxes[ theoremaBoxes[ expr]]
 displayBoxes[ args___] := unexpected[ displayBoxes, {args}]
 
-renameToStandardContext[ expr_] :=
-	Block[{$ContextPath = {"System`"}, $Context = "System`", stringExpr},
+renameToStandardContext[ expr_, lhs_:Null] :=
+	Block[{$ContextPath = {"System`"}, $Context = "System`", stringExpr, cp},
 		(* BUGFIX amaletzk: added FullForm[], otherwise doesn't work if outermost symbol is built-in Power *)
 		(* The result of \[Wolf] functions may be Lists; They have to be transformed into tuples BEFORE freshNames[]
-			is applied, because otherwise they are transformed into sets.
-			We don't use makeTuple[] here, because otherwise we get problems with contexts. *)
+			is applied, because otherwise they are transformed into sets. *)
 		(* Do not substitute into a META$, because a META$ has a list of a.b.f. constants at pos. 3 *)
 		stringExpr = ToString[ replaceAllExcept[ FullForm[ Hold[ expr]], {List -> Tuple$TM}, {}, Heads -> {Theorema`Computation`Language`META$}]];
+		If[ lhs =!= Null,
+			(* The assignment needs to be carried out with "expr" in Computation`-context! *)
+			cp = $ContextPath;
+			$ContextPath = Join[ {"Theorema`Computation`Language`"}, $TheoremaArchives, $ContextPath];
+			(* We must not remove the outermost "Hold", for otherwise some of the Computation`-symbols would be immediately replaced by Mathematica-symbols again.
+				Also, the tuples which are introduced by "replaceAllExcept" above are in Theorema`Language`-conext, and thus have to be moved to Computation`-context. *)
+			assign[ lhs, Replace[ freshNames[ ToExpression[ stringExpr]] /. Theorema`Language`Tuple$TM -> Theorema`Computation`Language`Tuple$TM, Hold[ x_] -> x, Infinity, Heads -> True]];
+			$ContextPath = cp
+		];
 		stringExpr = StringReplace[ stringExpr, "Theorema`Computation`" -> "Theorema`"];
 		$ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
         removeHold[ freshNames[ ToExpression[ stringExpr]]]
 	]
 renameToStandardContext[ args___] := unexpected[ renameToStandardContext, {args}]
+
+(* We have to use "SetDelayed", because "expr" might evaluate. *)
+assign[ Hold[ s_Symbol], Hold[ expr_]] := (s := expr)
+assign[ Hold[ Theorema`Computation`Language`Tuple$TM[ elems___]], Hold[ Theorema`Computation`Language`Tuple$TM[ expr___]]] :=
+	Module[ {l, r},
+		Scan[ Apply[ assign, #]&, Transpose[ {l, r}]] /; 
+			Length[ l = List@@Map[ Hold, Hold[ elems]]] === Length[ r = List@@Map[ Hold, Hold[ expr]]]
+	]
+assign[ args___] := unexpected[ assign, {args}]
 
 (* ::Section:: *)
 (* Computation within proving *)

@@ -134,7 +134,8 @@ falls nicht, siehe <http://www.gnu.org/licenses/>.", ToString[ Date[][[1]]]];
 	translate[ "interactiveInstantiate", lang] = "Quantoren interaktiv instanzieren";
 	translate[ "interactiveNewProofSitFilter", lang] = "Neue Beweissituationen interaktiv instanzieren";
 	translate[ "interactiveProofSitSel", lang] = "N\[ADoubleDot]chste Beweissituation interaktiv w\[ADoubleDot]hlen";
-
+	translate[ "invalidRange", lang] = "Jede gebundene Variable darf nur einmal unter dem Quantor vorkommen, der sie bindet; Diese Bedingung wird verletzt von ``.";
+    
     translate[ "KBcomp", lang] = "In der Berechnung verwendetes Wissen";
     translate[ "KBprove", lang] = "Im Beweis verwendetes Wissen";
 	translate[ "Keyword", lang] = "Schl\[UDoubleDot]sselwort";

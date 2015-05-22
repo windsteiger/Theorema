@@ -39,6 +39,7 @@
 With[ {lang = "English"},
 	
 	MessageName[ allTmaNotebooks, "usage", lang] = "allTmaNotebooks[] returns a list of all Theorema Notebooks in the current session.";
+	MessageName[ addKnowledgeWhileProving, "usage", lang] = "addKnowledgeWhileProving[ new_List] adds all formulas in new to the list of formulas to be written in the proof info/file of the current proof.";
 	MessageName[ appendKB, "usage", lang] = "appendKB[ kb_List, fml] appends fml to the knowledge base kb and deletes duplicate entries.";
 	MessageName[ appendToKB, "usage", lang] = "appendToKB[ sym, fml] sets sym to the result of appending fml to sym and deleting duplicate entries.";
 	MessageName[ applyAllRules, "usage", lang] = "applyAllRules[ ...] .";
@@ -150,10 +151,8 @@ With[ {lang = "English"},
 	MessageName[ makeORNODE, "usage", lang] = "makeORNODE[ info_, {branches_}] constructs a node in the proof tree using proofinfo info to prove at least one of the given branches.";
 	MessageName[ makePRFINFO, "usage", lang] = "makePRFINFO[ ...] constructor for PRFINFO$ data staructure.";
 	MessageName[ makePRFSIT, "usage", lang] = "makePRFSIT[ ...] constructor for PRFSIT$ data staructure.";
-	MessageName[ makeSet, "usage", lang] = "makeSet[s] constructs a set from s during the phase of parsing an expression.";	
 	MessageName[ makeTERMINALNODE, "usage", lang] = "makeTERMINALNODE[ info_, v_] constructs a terminal node with info and value v.";
 	MessageName[ makeTmaExpression, "usage", lang] = "makeTmaExpression[ e] turns e into an expression in Theorema language.";
-	MessageName[ makeTuple, "usage", lang] = "makeTuple[t] constructs a tuple from t during the phase of parsing an expression.";	
 	MessageName[ markVariables, "usage", lang] = "";	
 	MessageName[ matches, "usage", lang] = "";
 	MessageName[ maximumUnifiers, "usage", lang] = "";

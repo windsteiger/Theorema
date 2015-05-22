@@ -56,6 +56,7 @@ callProver[ ruleSetup:{_Hold, _List, _List}, strategy_, goal_FML$, kb_List, sear
 		$TMAcheckSuccess = True;
 		Clear[ $TMAproofNotebook];
 		initFormulaLabel[];
+		$lastChoice = {};
 		timeElapsed = proofSearch[ searchDepth, searchTime];
 		$TMAproofSearchRunning = False;
 		{proofValue@$TMAproofObject, $TMAproofObject, timeElapsed}
@@ -165,11 +166,53 @@ stillRelevant[ pos_List, po_PRFOBJ$] :=
 	]
 stillRelevant[ args___] := unexpected[ stillRelevant, {args}]
 
+chooseNextPS[ allPending:{pendingPos_, ___}] /; $interactiveProofSitSel && MatchQ[ $lastChoice, {___Integer}] && Length[ allPending] > 1 :=
+	Module[ {node, pos = $lastChoice},
+		Switch[ $lastChoice,
+			{},
+			findNextPendingSit[ $TMAproofObject, allPending, {}],
+			_,
+			node = Extract[ $TMAproofObject, $lastChoice];
+			Switch[ node,
+				_PRFSIT$,
+				{node, $lastChoice},
+				_ANDNODE$|_ORNODE$|_TERMINALNODE$,
+				Switch[ proofValue@node,
+					pending,
+					findNextPendingSit[ node, allPending, $lastChoice],
+					_,
+					pos = Most[ $lastChoice];
+					node = Extract[ $TMAproofObject, pos];
+					While[ proofValue@node =!= pending && pos =!= {},
+						pos = Most[ pos];
+						node = Extract[ $TMAproofObject, pos]
+					];
+					Switch[ proofValue@node,
+						pending,
+						$lastChoice = pos;
+						findNextPendingSit[ node, allPending, $lastChoice],
+						_,
+						{Extract[ $TMAproofObject, pendingPos], pendingPos} (* Should not happen *)
+					]
+				],
+				_,
+				{Extract[ $TMAproofObject, pendingPos], pendingPos} (* Should not happen *)
+			]
+		]
+	]
+chooseNextPS[ psPos_List] /; $interactiveProofSitSel && !MatchQ[ $lastChoice, {___Integer}] :=
+	(
+		(* If $lastChoice not a list of integers, we assume it is the id of a node. *)
+		$lastChoice = Position[ $TMAproofObject, (_PRFSIT$|_PRFOBJ$|_ANDNODE$|_ORNODE$|_TERMINALNODE$)?(id[ #] === $lastChoice &), {0, Infinity}, 1, Heads -> False];
+		If[ $lastChoice =!= {}, $lastChoice = First[ $lastChoice]];
+		chooseNextPS[ psPos]
+	)
 chooseNextPS[ psPos_List] :=
 	Module[{openPS},
         openPS = Extract[ $TMAproofObject, psPos];
 		Map[ First, {openPS, psPos}]
 	]
+(*
 chooseNextPS[ psPos_List] /; $interactiveProofSitSel && Length[ psPos] > 1 :=
 	Module[{ openPS, psSel},
 		openPS = Extract[ $TMAproofObject, psPos];
@@ -179,7 +222,38 @@ chooseNextPS[ psPos_List] /; $interactiveProofSitSel && Length[ psPos] > 1 :=
 		{psSel} = Position[ openPS, _?(id[#] === $selectedProofStep&), {1}, Heads -> False];
 		Map[ Extract[ #, psSel]&, {openPS, psPos}]
 	]
+*)
 chooseNextPS[ args___] := unexpected[ chooseNextPS, {args}]
+
+findNextPendingSit[ (PRFOBJ$|ANDNODE$)[ _PRFINFO$, b__, pending], psPos_List, pos_List] :=
+	Module[ {p},
+		(
+			p = p[[1, 1]];
+			findNextPendingSit[ Part[ {b}, p], psPos, Append[ pos, p + 1]]
+		) /; (p = Position[ {b}, _?(proofValue[ #] === pending &), {1}, 1, Heads -> False]) =!= {}
+	]
+findNextPendingSit[ ORNODE$[ _PRFINFO$, b__, pending], psPos_List, pos_List] :=
+	Module[ {p, openPS, psSel},
+		Switch[ p,
+			{_},
+			(* If there is only one pending branch left, we do not ask the user. *)
+			p = p[[1, 1]];
+			findNextPendingSit[ Part[ {b}, p], psPos, Append[ pos, p + 1]],
+			_,
+			openPS = Extract[ $TMAproofObject, psPos];
+			With[ {l = Length[ pos]},
+				$selectedProofStep = id@Extract[ openPS, First[ Position[ psPos, _?(Length[ #] > l && Take[ #, l] === pos &), {1}, 1, Heads -> False]]]
+			];
+			nextProofSitDialog[ openPS];
+			NotebookClose[ $TMAproofNotebook];
+			{psSel} = Position[ openPS, _?(id[ #] === $selectedProofStep&), {1}, Heads -> False];
+			$lastChoice = Extract[ psPos, psSel];
+			{Extract[ openPS, psSel], $lastChoice}
+		] /; (p = Position[ {b}, _?(proofValue[ #] === pending &), {1}, Heads -> False]) =!= {}
+	]
+findNextPendingSit[ ps_PRFSIT$, _List, pos_List] :=
+	{ps, pos}
+findNextPendingSit[ args___] := unexpected[ findNextPendingSit, {args}]
        	
 replaceProofSit[ po_PRFOBJ$, pos_ -> p_PRFSIT$] :=
 	(* 

@@ -545,16 +545,44 @@ toInputStringAux[ Hold[ s_], _] := {ToString[ Unevaluated[ s]]}
 toInputStringAux[ Hold[ first_, rest__], dropWolf_] := Join[ toInputStringAux[ Hold[ first], dropWolf], toInputStringAux[ Hold[ rest], dropWolf]]
 toInputStringAux[ Hold[ ], _] := {}
 
-stripVar[ v:Theorema`Language`VAR$[Theorema`Language`SEQ0$[a_]]] := v -> ToExpression[ "SEQ0$" <> ToString[a]]
-stripVar[ v:Theorema`Language`VAR$[Theorema`Language`SEQ1$[a_]]] := v -> ToExpression[ "SEQ1$" <> ToString[a]]
-stripVar[ v:Theorema`Language`VAR$[a_]] := v -> ToExpression[ "VAR$" <> ToString[a]]
-stripVar[ v:Theorema`Language`META$[a_, n_, ___]] := v -> ToExpression[ "META$" <> ToString[a] <> ToString[n]]
+(* We use 'SymbolName', because 'ToString' also returns the context. *)
+stripVar[ v:Theorema`Language`VAR$[ Theorema`Language`SEQ0$[ a_Symbol]]] :=
+	v -> ToExpression[ "Theorema`Knowledge`SEQ0$" <> SymbolName[ a]]
+stripVar[ v:Theorema`Language`VAR$[ Theorema`Language`SEQ1$[ a_Symbol]]] :=
+	v -> ToExpression[ "Theorema`Knowledge`SEQ1$" <> SymbolName[ a]]
+stripVar[ v:Theorema`Language`VAR$[ a_Symbol]] := v -> a	(* no need to add prefix "VAR$", since it is already there *)
+stripVar[ v:Theorema`Language`META$[ Theorema`Language`SEQ0$[ a_Symbol], n_, ___]] :=
+	v -> ToExpression[ "Theorema`Knowledge`SEQ0$META$" <> SymbolName[ a] <> ToString[ n]]
+stripVar[ v:Theorema`Language`META$[ Theorema`Language`SEQ1$[ a_Symbol], n_, ___]] :=
+	v -> ToExpression[ "Theorema`Knowledge`SEQ1$META$" <> SymbolName[ a] <> ToString[ n]]
+stripVar[ v:Theorema`Language`META$[ a_Symbol, n_, ___]] :=
+	v -> ToExpression[ "Theorema`Knowledge`META$" <> SymbolName[ a] <> ToString[ n]]
 stripVar[ args___] := unexpected[ stripVar, {args}]
 
-varToPattern[ v:Theorema`Language`VAR$[Theorema`Language`SEQ0$[a_]]] := With[ {new = ToExpression[ "SEQ0$" <> ToString[a]]}, v -> Pattern[ new, BlankNullSequence[]]]
-varToPattern[ v:Theorema`Language`VAR$[Theorema`Language`SEQ1$[a_]]] := With[ {new = ToExpression[ "SEQ1$" <> ToString[a]]}, v -> Pattern[ new, BlankSequence[]]]
-varToPattern[ v:Theorema`Language`VAR$[a_]] := With[ {new = ToExpression[ "VAR$" <> ToString[a]]}, v -> Pattern[ new, Blank[]]]
-varToPattern[ v:Theorema`Language`META$[a_, n_, ___]] := With[ {new = ToExpression[ "META$" <> ToString[a] <> ToString[n]]}, v -> Pattern[ new, Blank[]]]
+varToPattern[ v:Theorema`Language`VAR$[ Theorema`Language`SEQ0$[ a_Symbol]]] :=
+	With[ {new = ToExpression[ "Theorema`Knowledge`SEQ0$" <> SymbolName[ a], InputForm, Hold]},
+		v -> Pattern@@Append[ new, BlankNullSequence[]]
+	]
+varToPattern[ v:Theorema`Language`VAR$[ Theorema`Language`SEQ1$[ a_Symbol]]] :=
+	With[ {new = ToExpression[ "Theorema`Knowledge`SEQ1$" <> SymbolName[ a], InputForm, Hold]},
+		v -> Pattern@@Append[ new, BlankSequence[]]
+	]
+varToPattern[ v:Theorema`Language`VAR$[ a_Symbol]] :=
+	With[ {rhs = Hold[ a, Blank[]]},
+		v -> Pattern@@rhs
+	]
+varToPattern[ v:Theorema`Language`META$[ Theorema`Language`SEQ0$[ a_Symbol], n_, ___]] :=
+	With[ {new = ToExpression[ "Theorema`Knowledge`SEQ0$META$" <> SymbolName[ a] <> ToString[ n], InputForm, Hold]},
+		v -> Pattern@@Append[ new, BlankNullSequence[]]
+	]
+varToPattern[ v:Theorema`Language`META$[ Theorema`Language`SEQ1$[ a_Symbol], n_, ___]] :=
+	With[ {new = ToExpression[ "Theorema`Knowledge`SEQ1$META$" <> SymbolName[ a] <> ToString[ n], InputForm, Hold]},
+		v -> Pattern@@Append[ new, BlankSequence[]]
+	]
+varToPattern[ v:Theorema`Language`META$[ a_Symbol, n_, ___]] :=
+	With[ {new = ToExpression[ "Theorema`Knowledge`META$" <> SymbolName[ a] <> ToString[ n], InputForm, Hold]},
+		v -> Pattern@@Append[ new, Blank[]]
+	]
 varToPattern[ args___] := unexpected[ varToPattern, {args}]
 
 (* ::Subsubsection:: *)
@@ -807,9 +835,14 @@ Options[ makeFML] = {key :> defKey[], formula -> True, label :> defLabel[], simp
 makeFML[ data___?OptionQ] :=
 	Module[{k, f, l, s, fs},
 		{k, f, l, s} = {key, formula, label, simplify} /. {data} /. Options[ makeFML];
-		If[ TrueQ[ s],
+		Switch[ s,
+			True,
 			fs = computeInProof[ f],
-			fs = f
+			False,
+			fs = f,
+			_,
+			fs = s[ f];
+			If[ Head[ fs] === s, fs = f];	(* Security check: If the head of the new formula is still 's', no simplification happened. *)
 		];
 		makeTmaFml[ k, standardFormQuantifier[ fs], l, f]
 	]
@@ -975,10 +1008,12 @@ singleRngToCondition[ Theorema`Language`STEPRNG$[ v_, l_Integer, h_, 1]] :=
 	{Theorema`Language`Element$TM[ v, Theorema`Language`IntegerInterval$TM[ l, h, True, True]]}
 singleRngToCondition[ Theorema`Language`STEPRNG$[ v_, l_, h_, s_]] := 
 	Module[ {new, step},
-		step = If[ s === 1, new, Theorema`Language`Times$TM[ new, s]];
-		{Theorema`Language`Exists$TM[ Theorema`Language`RNG$[ Theorema`Language`SETRNG$[ new, Theorema`Language`IntegerInterval$TM[ 0, Infinity, True, False]]], True, 
-			Theorema`Language`And$TM[ Theorema`Language`Equal$TM[ v, Theorema`Language`Plus$TM[ l, step]],
-				If[ TrueQ[ Negative[ s]], Theorema`Language`GreaterEqual$TM, Theorema`Language`LessEqual$TM][ v, h]]]}
+		With[ {n = Theorema`Language`VAR$[ new]},
+			step = If[ s === 1, n, Theorema`Language`Times$TM[ n, s]];
+			{Theorema`Language`Exists$TM[ Theorema`Language`RNG$[ Theorema`Language`SETRNG$[ n, Theorema`Language`IntegerInterval$TM[ 0, Infinity, True, False]]], True, 
+				Theorema`Language`And$TM[ Theorema`Language`Equal$TM[ v, Theorema`Language`Plus$TM[ l, step]],
+					If[ TrueQ[ Negative[ s]], Theorema`Language`GreaterEqual$TM, Theorema`Language`LessEqual$TM][ v, h]]]}
+		]
 	]
 singleRngToCondition[ Theorema`Language`PREDRNG$[ v_, P_]] := {P[ v]}
 singleRngToCondition[ u_] := {$Failed}

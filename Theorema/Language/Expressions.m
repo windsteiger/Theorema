@@ -37,25 +37,6 @@ $tmaNonStandardOperators = Join[ $tmaNonStandardOperators,
     }];
 
 (* ::Section:: *)
-(* MakeExpression *)
-
-(* ::Subsection:: *)
-(* Auxiliary parsing functions *)
-
-(* The default cases for non-SequenceOf are in Syntax.m, otherwise the defs are in wrong order when
-   this file is loaded twice
-*)
-(* The alternatives without Hold wrapped around SequenceOf$TM are most probably superfluous *)
-makeSet[ (SequenceOf$TM|Hold[SequenceOf$TM])[ s__]] := ToExpression[ "SetOf$TM"][ s]
-
-makeTuple[ (SequenceOf$TM|Hold[SequenceOf$TM])[ r:RNG$[ __STEPRNG$], c_, e_]] := ToExpression[ "TupleOf$TM"][ r, c, e]
-makeTuple[ (SequenceOf$TM|Hold[SequenceOf$TM])[ r_, __]] := 
-	Module[ {},
-		notification[ translate[ "tupleOfRange"], DisplayForm[ makeRangeBox[ r, TheoremaForm]]];
-		Throw[ $Failed]
-	]
-
-(* ::Section:: *)
 (* MakeBoxes *)
 
 (* ::Subsection:: *)
@@ -241,8 +222,6 @@ MakeBoxes[ Radical$TM[ e_, r_], TheoremaForm] :=
 
 MakeBoxes[ Set$TM[ arg__], TheoremaForm] := MakeBoxes[ {arg}, TheoremaForm]
 MakeBoxes[ Set$TM[ ], TheoremaForm] := "\[EmptySet]"
-(* An unevaluated 'makeSet' will turn into makeSet$TM when renaming back to standard context ... *)
-MakeBoxes[ Theorema`Common`makeSet$TM[ arg__], TheoremaForm] := StyleBox[ MakeBoxes[ {arg}, TheoremaForm], "ExpressionVariable"]
 
 MakeBoxes[ SequenceOf$TM[ rng:RNG$[ SETRNG$[ v_, _]], cond_, v_], TheoremaForm] :=
 	RowBox[ {makeRangeBox[ rng, TheoremaForm], "|", MakeBoxes[ cond, TheoremaForm]}]
@@ -298,25 +277,37 @@ makeReplacePartBoxes[ Tuple$TM[ l_, r_]] := RowBox[ {MakeBoxes[ l, TheoremaForm]
 
 MakeBoxes[ SEQ0$[ v_], TheoremaForm] := RowBox[ {MakeBoxes[ v, TheoremaForm], "..."}]
 MakeBoxes[ SEQ1$[ v_], TheoremaForm] := RowBox[ {MakeBoxes[ v, TheoremaForm], ".."}]
-MakeBoxes[ VAR$[ v_?isTmaOperatorName][args___], TheoremaForm] := MakeBoxes[ v[args], TheoremaForm]
-MakeBoxes[ VAR$[ v_], TheoremaForm] := StyleBox[ MakeBoxes[ v, TheoremaForm], "ExpressionVariable"]
+MakeBoxes[ VAR$[ v_Symbol][ args___], TheoremaForm] :=
+	Module[ {n},
+		MakeBoxes@@Append[ applyHold[ ToExpression[ n, InputForm, Hold], Hold[ args]], TheoremaForm] /;
+		With[ {m = Quiet[ Check[ SymbolName[ v], $Failed]]},
+			m =!= $Failed && isTmaOperatorString[ n = removeVar[ m], False]
+		]
+	]
+MakeBoxes[ VAR$[ v_], TheoremaForm] := StyleBox[ MakeBoxes@@Append[ removeVar[ v], TheoremaForm], "ExpressionVariable"]
 abfAnnotations = {
 	{OverscriptBox, {"_", "^", "~"}}, 
 	{SuperscriptBox, {"\[Prime]", "\[Prime]\[Prime]", "\[Prime]\[Prime]\[Prime]"}},
 	{UnderscriptBox, {"_", "~"}}};
 (* We only convert the 0-th a.b.f. operator into Infix/Prefix/Postifx form, because otherwise the abfAnnotations don't work. *)
-MakeBoxes[ FIX$[ c_?isTmaOperatorName, 0][args___], TheoremaForm] := MakeBoxes[ c[args], TheoremaForm]
-MakeBoxes[ FIX$[ c_, 0], TheoremaForm] := StyleBox[ MakeBoxes[ c, TheoremaForm], "ExpressionABF"]
+MakeBoxes[ FIX$[ c_Symbol, 0][args___], TheoremaForm] :=
+	Module[ {n},
+		MakeBoxes@@Append[ applyHold[ ToExpression[ n, InputForm, Hold], Hold[ args]], TheoremaForm] /;
+		With[ {m = Quiet[ Check[ SymbolName[ c], $Failed]]},
+			m =!= $Failed && isTmaOperatorString[ n = removeVar[ m], False]
+		]
+	]
+MakeBoxes[ FIX$[ c_, 0], TheoremaForm] := StyleBox[ MakeBoxes@@Append[ removeVar[ c], TheoremaForm], "ExpressionABF"]
 MakeBoxes[ FIX$[ c_, n_Integer] /; n<9, TheoremaForm] := 
 	Module[{i,j},
 		{i,j} = QuotientRemainder[ n-1, 3];
-		StyleBox[ abfAnnotations[[i+1,1]][MakeBoxes[ c, TheoremaForm], abfAnnotations[[i+1, 2, j+1]]], "ExpressionABF"]
+		StyleBox[ abfAnnotations[[i+1,1]][ MakeBoxes@@Append[ removeVar[ c], TheoremaForm], abfAnnotations[[i+1, 2, j+1]]], "ExpressionABF"]
 	]
-MakeBoxes[ FIX$[ c_, n_Integer], TheoremaForm] := StyleBox[ SuperscriptBox[ MakeBoxes[ c, TheoremaForm], RowBox[{"(", MakeBoxes[ n, StandardForm], ")"}]], "ExpressionABF"]
+MakeBoxes[ FIX$[ c_, n_Integer], TheoremaForm] := StyleBox[ SuperscriptBox[ MakeBoxes@@Append[ removeVar[ c], TheoremaForm], RowBox[{"(", MakeBoxes[ n, StandardForm], ")"}]], "ExpressionABF"]
 
 metaAnnotations = {"*", "**", "***", "\[Dagger]", "\[DoubleDagger]"};
-MakeBoxes[ META$[ c_, n_Integer, dep_List] /; n<5, TheoremaForm] := StyleBox[ SuperscriptBox[ MakeBoxes[ c, TheoremaForm], metaAnnotations[[n+1]]], "ExpressionMeta"]
-MakeBoxes[ META$[ c_, n_Integer, dep_List], TheoremaForm] := StyleBox[ SuperscriptBox[ MakeBoxes[ c, TheoremaForm], RowBox[{"(", MakeBoxes[ n, StandardForm], ")"}]], "ExpressionMeta"]
+MakeBoxes[ META$[ c_, n_Integer, dep_List] /; n<5, TheoremaForm] := StyleBox[ SuperscriptBox[ MakeBoxes@@Append[ removeVar[ c], TheoremaForm], metaAnnotations[[n+1]]], "ExpressionMeta"]
+MakeBoxes[ META$[ c_, n_Integer, dep_List], TheoremaForm] := StyleBox[ SuperscriptBox[ MakeBoxes@@Append[ removeVar[ c], TheoremaForm], RowBox[{"(", MakeBoxes[ n, StandardForm], ")"}]], "ExpressionMeta"]
 
 MakeBoxes[ r_RNG$, TheoremaForm] := makeRangeBox[ r, TheoremaForm]
 makeRangeBox[ RNG$[ s__SIMPRNG$], fmt_] := RowBox[ Riffle[ Map[ makeRangeBox[ #, fmt]&, {s}], ","]]

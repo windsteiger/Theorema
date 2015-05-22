@@ -1467,14 +1467,25 @@ submitProveTask[ args___] := unexpected[ submitProveTask, {args}]
 
 execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, strategy_, searchDepth_, searchTime_, simplification_List, repl_Integer] :=
 	Module[{po, pv, pt, st},
+		$addProofKB = {};
 		{pv, po, pt} = callProver[ rules, strategy, goal, kb, searchDepth, searchTime];
 		(* At this point po is equal to the global $TMAproofObject and $TMAproofTree is the corresponding tree *)
 		{po, st} = simplifyProof[ po, simplification];
 		(* po is the simplified proof object and $TMAproofTree is the corresponding simplified tree, but $TMAproofObject is still the unsimplified object *)
 		$TMAproofObject = po;
-		printProveInfo[ Map[ {key[#], label[#]}&, kb], pv, pt, st, repl];
+		printProveInfo[ DeleteDuplicates[ Join[ Map[ {key[#], label[#]}&, kb], Map[ {key[#], label[#]}&, $addProofKB]]], pv, pt, st, repl];
 	]
 execProveCall[ args___] := unexpected[ execProveCall, {args}]
+
+addKnowledgeWhileProving[ new_List] :=
+	Module[ {},
+		(* All of '$selectedProofKB', '$addProofKB' and 'kbSelectProve' are needed for printing the correct proof info
+			and writing the correct settings to the file. *)
+		$selectedProofKB = DeleteDuplicates[ Join[ $selectedProofKB, new]];
+		$addProofKB = DeleteDuplicates[ Join[ $addProofKB, new]];
+		Scan[ With[ {fkey = key[ #]}, kbSelectProve[ fkey] = True]&, new];
+	]
+addKnowledgeWhileProving[ args___] := unexpected[ addKnowledgeWhileProving, {args}]
 
 proofNavigation[ po_] :=
     Module[ {proofTree, geom, addControl},
