@@ -412,6 +412,14 @@ transferToComputation[ args___] := unexpected[ transferToComputation, {args}]
 *)
 Clear[ stripUniversalQuantifiers]
 
+(*
+  To be done: stripUniversalQuantifiers should produce alternatives, e.g. P=>Q=>R could produce
+  1) P :> Q=>R
+  2) Q /; P :> R
+  
+  (see AuctionTheory: the proof using assumtion (2): allocation[] => forall i,j: ... => i=j
+*)
+
 stripUniversalQuantifiers[ Theorema`Language`Forall$TM[ r_, c_, f_]] :=
 	Module[ {rc, vars, cond, inner},
 		rc = rngToCondition[ r];
@@ -419,8 +427,10 @@ stripUniversalQuantifiers[ Theorema`Language`Forall$TM[ r_, c_, f_]] :=
 		cond = Join[ rc, cond];
 		{inner, If[ !TrueQ[ c], joinConditions[ cond, c], cond], Join[ rngVariables[ r], vars]}
 	]
-(* Implies with Foralll on the right side will be treated in makeRules *)
+(* 
 stripUniversalQuantifiers[ Theorema`Language`Implies$TM[ l_, r_ /; Head[ r] =!= Theorema`Language`Forall$TM]] :=
+*)
+stripUniversalQuantifiers[ Theorema`Language`Implies$TM[ l_, r_]] :=
 	Module[ {vars, cond, inner},
 		{inner, cond, vars} = stripUniversalQuantifiers[ r];
 		{inner, joinConditions[ cond, l], vars}
@@ -620,8 +630,6 @@ Clear[ makeRules]
 
 makeRules[ {(Theorema`Language`IffDef$TM|Theorema`Language`EqualDef$TM)[ l_, r_], c_List, var_List}, ref_] := 
 	{{}, {}, {makeSingleRule[ {l, r, c, var}, ref]}}
-makeRules[ {Theorema`Language`Implies$TM[ l_, r_Theorema`Language`Forall$TM], c_List, var_List}, ref_] := 
-	{{makeSingleRule[ {l, r, c, var}, ref]}, {}, {}}
 makeRules[ {Theorema`Language`Iff$TM[ l_, r_], c_List, var_List}, ref_] := 
 	MapThread[ Join, {makeRules[ {r, joinConditions[ c, l], var}, ref], makeRules[ {l, joinConditions[ c, r], var}, ref]}]
 (* Special case equality: we can rewrite left to right and right to left, but we can also rewrite the equality as a whole. *)
