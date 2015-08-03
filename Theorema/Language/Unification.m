@@ -63,7 +63,7 @@ unification[ s_, t_, opt___?OptionQ] :=
     	(* The output might contain mappings for variables introduced at run-time. 
     	   They should be discarded from the final result. Only meta variables and
     	   free variables of s and t are relevant. *)
-    	metaVariables = Cases[ {s,t}, META$[_, _, _], {0, Infinity}];
+    	metaVariables = Cases[ {s,t}, META$[_, _, _], {0, Infinity}, Heads -> True];
     	{output[[1]], restrictSubstitutions[ output[[2]], Join[ freeVariables[{s, t}], metaVariables]]}
     ]
 unification[ args___] := unexpected[ unification, {args}]
@@ -499,7 +499,7 @@ transform[ up[{{_, _, _}, ___}, _, _, _, _, _], _, _] := {}
 
 
 (*  Checking whether a term contains an arbitrary but fixed constant, which does not appear in the input list   *)
-containsExtraFixedConstant[ term_, fixedConstantList_] := Complement[ Cases[ term, FIX$[_], {0, Infinity}], fixedConstantList] =!= {}
+containsExtraFixedConstant[ term_, fixedConstantList_] := Complement[ Cases[ term, FIX$[_, _], {0, Infinity}, Heads -> True], fixedConstantList] =!= {}
 
 (* 
    Decomposition of two expressions l and r with the same commutative head, marked by commutativeWrapper.
