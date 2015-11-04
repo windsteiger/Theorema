@@ -201,12 +201,14 @@ tmaToInputOperator[ args___] := unexpected[ tmaToInputOperator, {args}]
 
 SetAttributes[ removeVar, HoldAllComplete];
 removeVar[ (h:(Theorema`Language`SEQ0$|Theorema`Language`SEQ1$|Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$))[ op_Symbol]] :=
-	With[ {n = SymbolName[ Unevaluated[ op]]},
-		ReplacePart[ HoldComplete@@{ToExpression[ removeVar[ n], InputForm, HoldComplete]}, {1, 0} -> h]
-	]
+	ReplacePart[ HoldComplete@@{removeVar[ op]}, {1, 0} -> h]
 removeVar[ op_Symbol] :=
 	With[ {n = SymbolName[ Unevaluated[ op]]},
-		ToExpression[ removeVar[ n], InputForm, HoldComplete]
+		Block[ {$Context = "Theorema`Knowledge`", $ContextPath = Prepend[ $ContextPath, "Theorema`Language`"]},
+			(* Names of variables shall stay in Theorema` context!
+				Otherwise, 'x$TM' would go to Global`-context. *)
+			ToExpression[ removeVar[ n], InputForm, HoldComplete]
+		]
 	]
 removeVar[ op_String] :=
 	If[ StringLength[ op] > 4 && StringTake[ op, 4] === "VAR$",

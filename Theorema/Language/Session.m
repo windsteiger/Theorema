@@ -88,6 +88,7 @@ freshSymbol[ Hold[ s_Symbol], dropWolf_] :=
         	Set, ToExpression[ "Assign$TM"],
         	Wedge, ToExpression[ "And$TM"],
         	Vee, ToExpression[ "Or$TM"],
+        	AngleBracket, ToExpression[ "Tuple$TM"],
         	List, ToExpression[ "Set$TM"],	(* This cannot be removed, since a set of individual elements (no SetOf) still has to be parsed as "List". *)
         	Inequality, ToExpression[ "OperatorChain$TM"],
         	_,
