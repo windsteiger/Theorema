@@ -2283,7 +2283,7 @@ langButtonData[ "EQUIVDEF"] :=
 				RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}],
 				TagBox[ FrameBox[ "right"], "Placeholder"]}]]],
 		RowBox[ {"\[SelectionPlaceholder]",
-			TagBox[ RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], Identity, SyntaxForm->"a\[DoubleLongLeftRightArrow]b"], "\[Placeholder]"}],
+			TagBox[ RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], Identity, SyntaxForm->"a:=b"], "\[Placeholder]"}],
 		translate[ "EQUIVDEFTooltip"],
 		":equiv"
 	}
