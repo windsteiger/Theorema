@@ -261,7 +261,7 @@ openTheoremaCommander[ ] /; $Notebooks :=
         	], TrackedSymbols :> {$TmaLanguage}]],
         	StyleDefinitions -> makeColoredStylesheet[ "GUI"],
         	WindowTitle -> translate["Theorema Commander"],
-        	WindowFloating -> False,
+        	WindowFloating -> Automatic,
         	WindowElements -> {"StatusArea"}]
     ]
 openTheoremaCommander[ args___] := unexpected[ openTheoremaCommander, {args}]
