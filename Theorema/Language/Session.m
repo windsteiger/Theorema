@@ -1118,8 +1118,20 @@ inArchive[ args___] := unexpected[ inArchive, {args}]
 currentArchiveName[] := StringDrop[$Context,-8]
 currentArchiveName[ args___] := unexpected[ currentArchiveName, {args}]
 
-SetAttributes[ processArchiveInfo, HoldAll];
+openArchiveInfo[ s_] :=
+	Module[{},
+		AppendTo[ $ContextPath, "Theorema`Language`"];
+		s
+	]
+openArchiveInfo[ args___] := unexpected[ openArchiveInfo, {args}]
 
+closeArchiveInfo[ ] :=
+	Module[{},
+		$ContextPath = Most[ $ContextPath];
+	]
+closeArchiveInfo[ args___] := unexpected[ closeArchiveInfo, {args}]
+
+SetAttributes[ processArchiveInfo, HoldAll];
 processArchiveInfo[ a_] :=
 	Module[ {cf},
 		If[ inArchive[],
@@ -1130,9 +1142,11 @@ processArchiveInfo[ a_] :=
 		cf = CurrentValue[ "CellFrameLabels"];
 		Switch[ cf[[1,1]],
 			translate[ "archLabelNeeds"],
-			$tmaArchNeeds = a; Scan[ loadArchive, a], (* Remember and load current dependencies. *)
+			(* The {} in the input are interpreted as Set$TM, therefore the Apply[ List, ...] *)
+			$tmaArchNeeds = Apply[ List, a]; Scan[ loadArchive, a], (* Remember and load current dependencies. *)
 			translate[ "archLabelPublic"],
-			removeHold[ freshNames[ Hold[ a]]];
+			(* The {} in the input are interpreted as Set$TM, therefore the Apply[ List, ...] *)
+			$tmaArchExports = Apply[ List, removeHold[ freshNames[ Hold[ a]]]];
 			Begin[ "`private`"];     
 		];
 	]
@@ -1168,6 +1182,10 @@ closeArchive[ _String] :=
             Write[ archFile, Definition[$tmaArch]];
             Write[ archFile, Definition[$tmaArchTree]];
             Close[ archFile];
+        ];
+        (* export to OmDoc *)
+        If[ $omdocExport,
+       		exportArchiveOmDoc[ archivePath, $tmaArch];
         ];
         (* Reset archive related variables. *)
         $tmaArch = {};
@@ -1240,6 +1258,145 @@ archiveName[ f_String] :=
     ]
 archiveName[ f_String, Short] := StringReplace[ archiveName[ f], "Theorema`Knowledge`" -> ""]
 archiveName[ args___] := unexpected[ archiveName, {args}]
+
+exportArchiveOmDoc[ archive_String, arch_List] :=
+	Module[{expFile},
+		expFile = OpenWrite[ StringReplacePart[ archive, "omdoc", -2]];
+		convert2OmDocConst[ expFile, $tmaArchExports];
+		convert2OmDoc[ expFile, FileBaseName[ archive], arch];
+        Close[ expFile];
+	]
+exportArchiveOmDoc[ args___] := unexpected[ exportArchiveOmDoc, {args}]
+
+convert2OmDocConst[ file_, e_] := 
+	Scan[ WriteString[ file, makeTag[ {"constant", genAttr[ "name", dropContext[ #]]}]]&, e]
+convert2OmDocConst[ args___] := unexpected[ convert2OmDocConst, {args}]
+
+convert2OmDoc[ file_, name_String, l_List] := 
+	Module[ {},
+		Scan[ convert2OmDoc[ file, #]&, l];
+		WriteString[ file, openTag[ {"theory", genAttr[ "name", name], genAttr[ "meta", "?Theorema"]}]];
+		Scan[ WriteString[ file, makeTag[ {"imports", genAttr[ "from", #]}]]&, $tmaArchNeeds];
+		WriteString[ file, closeTag[ "theory"]];
+	]
+convert2OmDoc[ file_, f_FML$] := 
+	Module[ {def},
+		def = Cases[ formula@f, _EqualDef$TM|_IffDef$TM, {0, Infinity}, 1];
+		If[ def =!= {},
+			WriteString[ file, openTag[ {"constant", genAttr[ "name", id@f]}]];
+			writeMetadata[ file, id@f, def];
+			WriteString[ file, openTag[ {"type"}]]
+		];
+		convert2OmDoc[ file, id@f, source@f, {}, formula@f];
+		If[ def =!= {},
+			WriteString[ file, closeTag[ "type"]];
+			WriteString[ file, closeTag[ "constant"]];
+		]
+	]
+convert2OmDoc[ file_, id_, src_, pos_, VAR$[ x_]] := 
+	Module[ {},
+		WriteString[ file, makeTag[ {"OMV", genAttr[ "name", dropContext[ x]], srcrefAttr[ src, id, pos]}]];
+	]
+convert2OmDoc[ file_, id_, src_, pos_, Q_[ r_RNG$, c_, b_]] := 
+	Module[ {},
+		WriteString[ file, openTag[ {"OMBIND", srcrefAttr[ src, id, pos]}]];
+		WriteString[ file, makeTag[ {"OMS", genAttr[ "name", dropContext[ Q]], genAttr[ "cd", "Theorema"]}]];
+		MapIndexed[ convert2OmDoc[ file, id, src, Join[ pos, {1}, #2], #1]&, r];
+		convert2OmDoc[ file, id, src, Join[ pos, {2}], c];
+		convert2OmDoc[ file, id, src, Join[ pos, {3}], b];
+		WriteString[ file, closeTag[ "OMBIND"]]
+	]
+convert2OmDoc[ file_, id_, src_, pos_, SIMPRNG$[ v_]] := 
+	Module[ {},
+		WriteString[ file, openTag[ {"OMBVAR"}]];
+		convert2OmDoc[ file, id, src, pos, v];
+		WriteString[ file, closeTag[ "OMBVAR"]]
+	]
+convert2OmDoc[ file_, id_, src_, pos_, SETRNG$[ v_, A_]] := 
+	Module[ {},
+		WriteString[ file, openTag[ {"OMBVAR"}]];
+		convert2OmDoc[ file, id, src, pos, v];
+		WriteString[ file, closeTag[ "OMBVAR"]]
+	]
+convert2OmDoc[ file_, id_, src_, pos_, PREDRNG$[ v_, P_]] := 
+	Module[ {},
+		WriteString[ file, openTag[ {"OMBVAR"}]];
+		convert2OmDoc[ file, id, src, pos, v];
+		WriteString[ file, closeTag[ "OMBVAR"]]
+	]
+convert2OmDoc[ file_, id_, src_, pos_, STEPRNG$[ v_, l_, h_, s_]] := 
+	Module[ {},
+		WriteString[ file, openTag[ {"OMBVAR"}]];
+		convert2OmDoc[ file, id, src, pos, v];
+		WriteString[ file, closeTag[ "OMBVAR"]]
+	]
+convert2OmDoc[ file_, id_, src_, pos_, f_[ x___]] := 
+	Module[ {},
+		WriteString[ file, openTag[ {"OMA", srcrefAttr[ src, id, pos]}]];
+		convert2OmDoc[ file, id, src, Join[ pos, {0}], f];
+		MapIndexed[ convert2OmDoc[ file, id, src, Join[ pos, #2], #1]&, {x}];
+		WriteString[ file, closeTag[ "OMA"]]
+	]
+convert2OmDoc[ file_, id_, src_, pos_, s:True|False] := 
+	Module[ {},
+		WriteString[ file, makeTag[ {"OMS", genAttr[ "name", ToString[ s]], genAttr[ "cd", "Theorema"]}]];
+	]
+convert2OmDoc[ file_, id_, src_, pos_, s_Symbol] := 
+	Module[ {},
+		WriteString[ file, makeTag[ {"OMS", genAttr[ "name", dropContext[ s]], genAttr[ "cd", "Theorema"]}]];
+	]
+convert2OmDoc[ file_, id_, src_, pos_, s_?NumberQ] := 
+	Module[ {t},
+		t = Switch[ s,
+			_Integer, "INT",
+			_Rational, "RAT",
+			_Real, "REAL",
+			_Complex, "COMPLEX"
+		];
+		WriteString[ file, makeTag[ {"OMLIT", genAttr[ "value", ToString[ s]], genAttr[ "type", "?Numbers?" <> t], srcrefAttr[ src, id, pos]}]];
+	]
+convert2OmDoc[ args___] := unexpected[ convert2OmDoc, {args}]
+
+openTag[ l_List] := "<" <> Apply[ StringJoin, Riffle[ l, " "]] <> ">\n"
+openTag[ args___] := unexpected[ openTag, {args}]
+
+closeTag[ t_String] := "</" <> t <> ">\n"
+closeTag[ args___] := unexpected[ closeTag, {args}]
+
+makeTag[ l_List] := "<" <> Apply[ StringJoin, Riffle[ l, " "]] <> "/>\n"
+makeTag[ args___] := unexpected[ makeTag, {args}]
+
+srcrefAttr[ src_, id_String, pos_List] := "srcref=\"" <> src <> "#" <> id <> "@" <> ToString[ pos] <> "\""
+srcrefAttr[ args___] := unexpected[ srcrefAttr, {args}]
+
+genAttr[ t_String, x_] := t <> "=\"" <> x <> "\""
+genAttr[ args___] := unexpected[ genAttr, {args}]
+
+dropContext[ name_] := 
+	With[ { n = ToString[ name], c = Context[ name]},
+		If[ StringMatchQ[ c, "Theorema`" ~~ __], 
+			StringDrop[ n, StringLength[ c]],
+			(* else *)
+			n
+		]
+	]
+dropContext[ args___] := unexpected[ dropContext, {args}]
+
+writeMetadata[ file_, id_String, {def_}] :=
+	Module[ {},
+		WriteString[ file, openTag[ {"metadata"}]];
+		WriteString[ file, makeTag[ {"link", genAttr[ "rel", "theory:srcref"], genAttr[ "resource", id]}]];
+		WriteString[ file, makeTag[ {"link", genAttr[ "rel", "omdoc:defines"], genAttr[ "resource", "??" <> definedSymbol[ def]]}]];
+		WriteString[ file, closeTag[ "metadata"]];
+
+	]
+writeMetadata[ args___] := unexpected[ writeMetadata, {args}]
+
+definedSymbol[ (EqualDef$TM|IffDef$TM)[ left_, _]] := definedSymbol[ left]
+definedSymbol[ (Overscript$TM|Subscript$TM|Subsuperscript$TM|Superscript$TM|Underoverscript$TM|Underscript$TM)[ f_, __]] := definedSymbol[ f];
+definedSymbol[ f_[ ___]] := definedSymbol[ f]
+definedSymbol[ f_Symbol] := dropContext[ f];
+definedSymbol[ args___] := unexpected[ definedSymbol, {args}]
 
 
 (* ::Section:: *)

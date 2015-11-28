@@ -160,6 +160,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.", ToString[
 
 	translate[ "OK", lang] = "OK";
 	translate[ "OKnext", lang] = "OK, next \[Ellipsis]";
+    translate[ "OmDoc", lang] = "OmDoc";   	
 	translate[ "open", lang] = "all open";
 	translate[ "Open", lang] = "Open";
 	translate[ "open proof situation", lang] = "Open proof situation";
@@ -239,6 +240,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.", ToString[
     translate[ "tcLangTabArchTabButtonSelectLabel", lang] = "Select Archives \[Ellipsis]";
     translate[ "tcLangTabArchTabNoArchSel", lang] = "No archives selected";
     translate[ "tcLangTabArchTabSectionCreate", lang] = "Creating Archives";
+    translate[ "tcLangTabArchTabSectionExport", lang] = "Exporting Archives";
     translate[ "tcLangTabArchTabSectionLoad", lang] = "Loading Archives";
 	translate[ "tcPrefAppearColorSchemes", lang] = "Color Schemes";
 	translate[ "tcPrefAppear", lang] = "Appearance";

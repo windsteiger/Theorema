@@ -164,6 +164,7 @@ With[ {lang = "German"},
 	MessageName[ nextProofSitDialog, "usage", lang] = "The dialog window for choosing the next proof situation.";
 	MessageName[ notification, "usage", lang] = "notification[text] displays 'text' as a user notification.";
 
+	MessageName[ $omdocExport, "usage", lang] = "$omdocExport tells whether an archive is exported to OmDoc when saved.";
 	MessageName[ openNbRememberLocation, "usage", lang] = "openNbRememberLocation[] opens a notebook and stores the location for the next notebook operation.";
 
 	MessageName[ $parseTheoremaExpressions, "usage", lang] = "whether to parse expressions with their Theorema meaning ...";

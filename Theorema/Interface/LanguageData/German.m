@@ -163,6 +163,7 @@ falls nicht, siehe <http://www.gnu.org/licenses/>.", ToString[ Date[][[1]]]];
 
 	translate[ "OK", lang] = "OK";
 	translate[ "OKnext", lang] = "OK, n\[ADoubleDot]chstes \[Ellipsis]";
+    translate[ "OmDoc", lang] = "OmDoc";   	
 	translate[ "open", lang] = "alle offen";
 	translate[ "Open", lang] = "\[ODoubleDot]ffnen";
 	translate[ "open proof situation", lang] = "Offene Beweissituation";
@@ -242,6 +243,7 @@ falls nicht, siehe <http://www.gnu.org/licenses/>.", ToString[ Date[][[1]]]];
     translate[ "tcLangTabArchTabButtonSelectLabel", lang] = "Archive ausw\[ADoubleDot]hlen \[Ellipsis]";
     translate[ "tcLangTabArchTabNoArchSel", lang] = "Keine Archive ausgew\[ADoubleDot]hlt";
     translate[ "tcLangTabArchTabSectionCreate", lang] = "Archive erstellen";
+    translate[ "tcLangTabArchTabSectionExport", lang] = "Archive exportieren";
     translate[ "tcLangTabArchTabSectionLoad", lang] = "Archive laden";
 	translate[ "tcPrefAppearColorSchemes", lang] = "Farbschemata";
 	translate[ "tcPrefAppear", lang] = "Erscheinung";

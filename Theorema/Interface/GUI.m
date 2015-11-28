@@ -261,7 +261,7 @@ openTheoremaCommander[ ] /; $Notebooks :=
         	], TrackedSymbols :> {$TmaLanguage}]],
         	StyleDefinitions -> makeColoredStylesheet[ "GUI"],
         	WindowTitle -> translate["Theorema Commander"],
-        	WindowFloating -> False,
+        	WindowFloating -> Automatic,
         	WindowElements -> {"StatusArea"}]
     ]
 openTheoremaCommander[ args___] := unexpected[ openTheoremaCommander, {args}]
@@ -1980,7 +1980,9 @@ sessionArchive[] :=
             Row[ {makeArchCreateButton[], makeArchNewButton[]}, Spacer[2]],
             Row[ {makeArchInfoButton[], makeArchCloseButton[]}, Spacer[2]]}], translate[ "tcLangTabArchTabSectionCreate"], {{Top, Left}}],
         Labeled[ Column[{
-            makeArchLoadButton[]}], translate[ "tcLangTabArchTabSectionLoad"], {{Top, Left}}]
+            makeArchLoadButton[]}], translate[ "tcLangTabArchTabSectionLoad"], {{Top, Left}}],
+        Labeled[ Column[{
+            makeArchExportSelection[]}], translate[ "tcLangTabArchTabSectionExport"], {{Top, Left}}]
     }]
 sessionArchive[args___] := unexpected[sessionArchive, {args}]
 
@@ -2068,6 +2070,9 @@ loadArchiveInPlace[ arch_List] :=
 	]
 loadArchiveInPlace[ args___] := unexpected[ loadArchiveInPlace, {args}]
 
+makeArchExportSelection[ ] :=
+	Row[ {Checkbox[ Dynamic[ $omdocExport]], translate[ "OmDoc"]}, Spacer[2]]
+makeArchExportSelection[ args___] := unexpected[ makeArchExportSelection, {args}]
 
 (* ::Section:: *)
 (* Preferences Tab *)
@@ -2278,7 +2283,7 @@ langButtonData[ "EQUIVDEF"] :=
 				RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}],
 				TagBox[ FrameBox[ "right"], "Placeholder"]}]]],
 		RowBox[ {"\[SelectionPlaceholder]",
-			TagBox[ RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], Identity, SyntaxForm->"a\[DoubleLongLeftRightArrow]b"], "\[Placeholder]"}],
+			TagBox[ RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], Identity, SyntaxForm->"a:=b"], "\[Placeholder]"}],
 		translate[ "EQUIVDEFTooltip"],
 		":equiv"
 	}

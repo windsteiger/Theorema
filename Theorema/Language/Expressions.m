@@ -243,7 +243,7 @@ MakeBoxes[ Abbrev$TM[ rng_, form_], TheoremaForm] :=
 
 MakeBoxes[ IffDef$TM[ l_, r_], TheoremaForm] :=
     RowBox[ {MakeBoxes[ l, TheoremaForm],
-        TagBox[ RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], Identity, SyntaxForm->"a\[Implies]b"], 
+        TagBox[ RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], Identity, SyntaxForm->"a:=b"], 
         MakeBoxes[ r, TheoremaForm]}]
         
 MakeBoxes[ Componentwise$TM[ P_, args___], TheoremaForm] :=
