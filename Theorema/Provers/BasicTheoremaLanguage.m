@@ -101,6 +101,36 @@ PRFSIT$[ g:FML$[ _, a_, __] /; !TrueQ[ !a] && FreeQ[ g, _META$], k_List, id_, re
 		]
 	]
 ]
+
+inferenceRule[ deMorganKB] = 
+PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
+	Module[ {newKB, changed},
+		newKB = Map[ applyDeMorgan[ #1, makeAssumptionFML]&, k];
+		changed = Cases[ newKB, {new_, False, orig_} -> {new, orig}];
+		If[ changed === {},
+			Throw[ $Failed]
+		];
+		makeANDNODE[ makePRFINFO[ name -> deMorganKB, used -> Map[ Drop[ #, 1]&, changed],
+			generated -> Map[ Drop[ #, -1]&, changed]], 
+			toBeProved[ goal -> g, kb -> Map[ Part[ #, 1]&, newKB], rest]
+		]
+	]
+]
+
+applyDeMorgan[ orig:FML$[ _, fml_, __], mkFml_] :=
+Module[
+	{
+		deMorgan = {Not$TM[ And$TM[ x_, y__]] :> Map[ Not$TM, Or$TM[ x, y]],
+		Not$TM[ Or$TM[ x_, y__]] :> Map[ Not$TM, And$TM[ x, y]],
+		Not$TM[ Implies$TM[ x_, y_]] :> And$TM[ x, Not$TM[y]],
+		Not$TM[ Iff$TM[ x_, y_]] :> Or$TM[ And$TM[ x, Not$TM[y]], And$TM[ y, Not$TM[x]]],
+		Not$TM[ Forall$TM[ r_, c_, f_]] :> Exists$TM[ r, c, Not$TM[f]],
+		Not$TM[ Exists$TM[ r_, c_, f_]] :> Forall$TM[ r, c, Not$TM[f]]}
+	},
+	With[ {dm = fml //. deMorgan},
+		{mkFml[ formula -> dm], fml === dm, orig}
+	]
+]
 	
 (* ::Subsection:: *)
 (* AND *)
@@ -918,6 +948,7 @@ terminationRules = {"Termination Rules",
 
 connectiveRules = {"Connectives Rules", 
 	{notGoal, True, True, 30},
+	{deMorganKB, True, True, 5},
 	{andGoal, True, True, 6},
 	{andKB, True, False, 5},
 	{orGoal, True, True, 5},

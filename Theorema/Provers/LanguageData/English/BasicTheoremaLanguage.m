@@ -52,6 +52,8 @@ With[ {lang = "English"},
 	MessageName[ contradictionUniv2, "usage", lang] = "Knowledge base contains two contradicting universally quantified formulas.";
 	MessageName[ contradiction, "usage", lang] = "Prove by contradiction";
 
+	MessageName[ deMorganKB, "usage", lang] = "Apply de'Morgan's law";
+
 	MessageName[ elementarySubstitution, "usage", lang] = "Elementary substitution based on equalities and equivalences in the knowledge base";
 	MessageName[ eqGoal, "usage", lang] = "Prove equalities";
 	MessageName[ equivGoal, "usage", lang] = "Prove equivalence by double implication";
@@ -143,6 +145,15 @@ proofStepText[ contradictionUniv1, lang, {{u_, c_}}, {}, ___, "instantiation" ->
 
 proofStepText[ contradictionUniv2, lang, {{u_, c_}}, {}, ___, "instantiation" -> inst_List, ___, pVal_] := {textCell[ "This part of the proof is herewith finished, because instantiating ", formulaReference[ u], 
 	" and ", formulaReference[ c], " by ", inlineTheoremaExpressionSeq[ inst, lang], " gives a contradiction."]
+    };
+
+(* ::Subsection:: *)
+(* D *)
+
+proofStepText[ deMorganKB, lang, used_, generated_, ___, pVal_] := {textCell[ "Using de'Morgan's law, the formulas ", 
+	formulaReferenceSequence[ Flatten[ used], lang],
+	" can be transformed into"],
+	assumptionListCells[ Flatten[ generated], ",", "."]
     };
 
 (* ::Subsection:: *)

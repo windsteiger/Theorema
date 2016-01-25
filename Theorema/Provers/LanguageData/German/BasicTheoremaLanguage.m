@@ -52,6 +52,8 @@ With[ {lang = "German"},
 	MessageName[ contradictionUniv2, "usage", lang] = "Zwei universal quantifizierte Aussagen in der Wissensbasis widersprechen einander.";
 	MessageName[ contradiction, "usage", lang] = "Widerspruchsbeweis";
 
+	MessageName[ deMorganKB, "usage", lang] = "De'Morgans Regel";
+
 	MessageName[ elementarySubstitution, "usage", lang] = "Elementare Substitutionen basierend auf Gleichheiten und \[CapitalADoubleDot]quivalenzen in der Wissensbasis";
 	MessageName[ eqGoal, "usage", lang] = "Beweise Gleichheiten";
 	MessageName[ equivGoal, "usage", lang] = "Beweise \[CapitalADoubleDot]quivalenz durch Implikation in beide Richtungen";
@@ -145,6 +147,15 @@ proofStepText[ contradictionUniv1, lang, {{u_, c_}}, {}, ___, "instantiation" ->
 
 proofStepText[ contradictionUniv2, lang, {{u_, c_}}, {}, ___, "instantiation" -> inst_List, ___, pVal_] := {textCell[ "Dieser Teil des Beweises ist damit fertig, weil ", formulaReference[ u], 
 	" und ", formulaReference[ c], " instanziert mit ", inlineTheoremaExpressionSeq[ inst, lang], " einander widersprechen."]
+    };
+
+(* ::Subsection:: *)
+(* D *)
+
+proofStepText[ deMorganKB, lang, used_, generated_, ___, pVal_] := {textCell[ "Mithilfe der Gesetze von de'Morgan k\[ODoubleDot]nnen die Formeln ", 
+	formulaReferenceSequence[ Flatten[ used], lang],
+	" umgeformt werden zu"],
+	assumptionListCells[ Flatten[ generated], ",", "."]
     };
 
 (* ::Subsection:: *)
