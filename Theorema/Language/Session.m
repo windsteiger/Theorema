@@ -432,7 +432,7 @@ processEnvironment[ x_] :=
 		globDec = applicableGlobalDeclarations[ nb, nbExpr, evaluationPosition[ nb, nbExpr]];
 		(* process the expression according the Theorema syntax rules and add it to the KB 
 		   ReleaseHold will remove the outer Hold but leave the Holds around fresh symbols *)
-        Catch[ updateKnowledgeBase[ ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]], key, globDec, cellTagsToString[ tags]]];
+        Catch[ updateKnowledgeBase[ ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]], key, globDec, cellTagsToString[ tags], cellTagsToFmlTags[ tags]]];
         (* Positions of abbreviations are added in "updateKnowledgeBase". *)
         SelectionMove[ nb, After, Cell];
     ]
@@ -507,9 +507,26 @@ getCellIDFromKey[ args___] := unexpected[ getCellIDFromKey, {args}]
 getCellSourceLabel[ cellTags_] := getCellLabel[ cellTags, "Source"]
 getCellSourceLabel[ args___] := unexpected[ getCellSourceLabel, {args}]
 
-cellTagsToString[ cellTags_ /; VectorQ[ cellTags, StringQ]] := Apply[ StringJoin, Riffle[ cellTags, $labelSeparator]]
+(*
+ cellTagsToString[ tags] extracts the formula label from a list of cell tags. It does so by first
+ looking for tags starting with "Label<sep>"; if it finds some, the first of them is returned (without "Label<sep>").
+ Otherwise, simply the first element of tags is returned.
+*)
+cellTagsToString[ {___, l_String?(StringMatchQ[ #, ("Label" <> $cellTagKeySeparator) ~~ __]&), ___}] :=
+	StringDrop[ l, 5 + StringLength[ $cellTagKeySeparator]]
+cellTagsToString[ {l_String, ___}] := l
 cellTagsToString[ ct_String] := ct
-cellTagsToString[ args___] := unexpected[cellTagsToString, {args}]
+cellTagsToString[ args___] := unexpected[ cellTagsToString, {args}]
+
+(*
+ cellTagsToFmlTags[ tags] extracts the formula tags from a list of cell tags. The formula tags are simply
+ all elements of tags except the one that is taken as the label of the formula, according to cellTagsToString.
+*)
+cellTagsToFmlTags[ _String|{}] := {}
+cellTagsToFmlTags[ {pre___, _String?(StringMatchQ[ #, ("Label" <> $cellTagKeySeparator) ~~ __]&), post___}] :=
+	{pre, post}
+cellTagsToFmlTags[ {_String, rest___}] := {rest}
+cellTagsToFmlTags[ args___] := unexpected[ cellTagsToFmlTags, {args}]
 
 makeLabel[ s_String] := "(" <> s <> ")"
 makeLabel[ args___] := unexpected[ makeLabel, {args}]
@@ -712,7 +729,7 @@ automatedFormulaLabel[nb_NotebookObject] :=
 		(* Find highest value of any automatically counted formula. *)
 		formulaCounter = getFormulaCounter[nb];
 		(* Construct new CellTags with value of the incremented formulaCounter as a list. *)
-		newCellTags = {ToString[formulaCounter]}
+		newCellTags = {"Label" <> $cellTagKeySeparator <> ToString[formulaCounter]}
 	]
 automatedFormulaLabel[args___] := unexpected[ automatedFormulaLabel, {args}]
 
@@ -756,7 +773,9 @@ occursBelow[ args___] := unexpected[ occursBelow, {args}]
 (* 
 	form and glob still carry Holds around fresh symbols. After globals have been applied, ReleaseHold will remove them.
 *)
-updateKnowledgeBase[ form_, k_, glob_, tags_String] :=
+updateKnowledgeBase[ form_, k_, glob_, l_String] :=
+	updateKnowledgeBase[ form, k, glob, l, {}]
+updateKnowledgeBase[ form_, k_, glob_, l_String, tags_List] :=
     Module[ {newForm, fml, inDomDef = Cases[ glob, Hold[ domainConstruct$TM][_,_], {1}, 1], defDef},
     	If[ inDomDef =!= {} && (defDef = $tmaDefaultDomainDef[ inDomDef[[1]]]) =!= {},
     		(* we are in a domain definition and there is a pending default for this domain *)
@@ -772,7 +791,10 @@ updateKnowledgeBase[ form_, k_, glob_, tags_String] :=
     	];
     	(* for the actual formula we proceed in the same way *)
     	newForm = addAbbrevPositions[ ReleaseHold[ addVarPrefixes[ applyGlobalDeclaration[ form, glob]]]];
-    	fml = makeFML[ key -> k, formula -> newForm, label -> tags, simplify -> False];
+    	fml = makeFML[ key -> k, formula -> newForm, label -> l, simplify -> False];
+    	If[ tags =!= {},
+    		AppendTo[ fml, "tags" -> tags]
+    	];
     	transferToComputation[ fml];
     	(* If new formulae are appended rather than prepended, the old formulae with the same label
     		have to be deleted first, because "DeleteDuplicates" would delete the new ones. *)
@@ -1217,7 +1239,7 @@ loadArchive[ name_String, globalDecl_:{}] :=
                to overwrite $tmaArch when loading an archive from within another one ... *)
             (* we use updateKnowledgeBase: this applies global declarations appropriately and 
                translates to computational form ... *)
-            Scan[ updateKnowledgeBase[ #[[2]], #[[1]], globalDecl, #[[3]]]&, $tmaArch]
+            Scan[ updateKnowledgeBase[ #[[2]], #[[1]], globalDecl, #[[3]], Flatten[ Cases[ #, ("tags" -> t_List) :> t, {1}, 1], 1]]&, $tmaArch]
         ];
         $TheoremaArchives = DeleteDuplicates[ Prepend[ $TheoremaArchives, cxt]];
         If[ !FileExistsQ[ archiveNotebookPath = getArchiveNotebookPath[ name]],
