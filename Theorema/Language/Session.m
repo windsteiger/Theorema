@@ -246,19 +246,8 @@ newAbbrev[ Hold[ (q:(Abbrev$TM|Theorema`Computation`Language`Abbrev$TM))[ (rng:(
 	]
 newAbbrev[ expr_Hold] := expr
 
-getFreePositions[ var_, Hold[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[ x___], rest__]], pos:{p___}] :=
-	Join[ getFreePositions[ var, Hold[ q], {p, 0}],
-		If[ MemberQ[ rngVariables[ Hold[ r]], var],
-			{},
-			getFreePositions[ var, Hold[ {{x}, rest}], pos]
-		]
-	]
-getFreePositions[ var_, Hold[ var_], pos_List] := {pos}
-getFreePositions[ var_, Hold[ f_[x___]], {p___}] :=
-	Join[ getFreePositions[ var, Hold[ f], {p, 0}], Join@@MapIndexed[ getFreePositions[ var, #1, {p, First[ #2]}]&, Map[ Hold, Hold[ x]]]]
-getFreePositions[ _, Hold[ _]|Hold[ ], _List] := {}
-getFreePositions[ var_, expr_Hold] := getFreePositions[ var, expr, {1}]
-getFreePositions[ var_, expr:Except[ _Hold]] := getFreePositions[ var, Hold[ expr], {}]
+getFreePositions[ var_, expr_] :=
+	Replace[ Replace[ var, analyzeVars[ expr, "FreeOnly" -> True, "Pattern" -> var]], var -> {}]
 
 (*
 	makeTmaExpression[ e] is the combination of functions that we export to be used in other places if needed.

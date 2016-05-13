@@ -38,8 +38,10 @@
  
 With[ {lang = "English"},
 	
-	MessageName[ allTmaNotebooks, "usage", lang] = "allTmaNotebooks[] returns a list of all Theorema Notebooks in the current session.";
 	MessageName[ addKnowledgeWhileProving, "usage", lang] = "addKnowledgeWhileProving[ new_List] adds all formulas in new to the list of formulas to be written in the proof info/file of the current proof.";
+	MessageName[ allTmaNotebooks, "usage", lang] = "allTmaNotebooks[] returns a list of all Theorema Notebooks in the current session.";
+	MessageName[ alphaEquivalent, "usage", lang] = "alphaEquivalent[ a, b] checks whether 'a' and 'b' are \[Alpha]-equivalent to each other.";
+	MessageName[ analyzeVars, "usage", lang] = "analyzeVars[ expr] analyzes the occurrences of all variables appearing in 'expr' (free and bound).";
 	MessageName[ appendKB, "usage", lang] = "appendKB[ kb_List, fml] appends fml to the knowledge base kb and deletes duplicate entries.";
 	MessageName[ appendToKB, "usage", lang] = "appendToKB[ sym, fml] sets sym to the result of appending fml to sym and deleting duplicate entries.";
 	MessageName[ applyAllRules, "usage", lang] = "applyAllRules[ ...] .";
@@ -84,7 +86,8 @@ With[ {lang = "English"},
 	MessageName[ formulaReference, "usage", lang] = "formulaReference[ fml] gives a hyperlink to the formula.";
 	MessageName[ formulaToRules, "usage", lang] = "";	
 	MessageName[ formula, "usage", lang] = "formula is an option for the formula constructor makeFML and a selector for the FML$ datastructure.";
-	MessageName[ freeVariables, "usage", lang] = "";	
+	MessageName[ freeVariables, "usage", lang] = "freeVariables[ expr] returns all variables appearing free in 'expr'.";
+	MessageName[ freshName, "usage", lang] = "freshName[ base, ex] returns either 'base' or a symbol with name 'base~~i' (where 'i' is a non-negative integer), such that the return value is not a member of list 'ex'. If 'base' is a list of symbols, a list of distinct new symbols is generated.";
 
 	MessageName[ generated, "usage", lang] = "generated is an option for the constructor makePRFINFO and a selector for the PRFINFO$ datastructure.";
 	MessageName[ $generated, "usage", lang] = "is a global variable used to accumulate newly generated rewrite rules corresponding to formulas in the KB.";
@@ -114,6 +117,7 @@ With[ {lang = "English"},
 	MessageName[ isAtomicExpression, "usage", lang] = "isAtomicExpression[ e] is true iff e is neither a quantifier nor a connective formula.";	
 	MessageName[ isAtomicTerm, "usage", lang] = "isAtomicTerm[ t] is true iff t is a variable or a constant.";	
 	MessageName[ isConnectiveFormula, "usage", lang] = "isConnectiveFormula[ e] is true iff e is built up by a logical connective.";	
+	MessageName[ isFree, "usage", lang] = "isFree[ var, expr] returns True iff 'var' appears free in 'expr'.";
 	MessageName[ isGround, "usage", lang] = "";
 	MessageName[ isLiteralExpression, "usage", lang] = "isLiteralExpression[ e] is true iff e is an atomic or a negated atomic expression.";	
 	MessageName[ isLogQuantifierFree, "usage", lang] = "";	

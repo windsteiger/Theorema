@@ -139,24 +139,195 @@ thinnedExpression[ args___] := unexpected[ thinnedExpression, {args}]
 
 
 (* ::Subsubsection:: *)
-(* freeVariables *)
+(* analyzeVars *)
 
 
-(* Some quantifiers (e.g. "Sum") can be used together with subscripts. *)
-freeVariables[ Hold[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[x__], cond_, sub_, expr_]]] := 
-	Complement[ freeVariables[ {Hold[ x], Hold[ cond], Hold[ sub], Hold[ expr]}], rngVariables[ Hold[ r]]]
-freeVariables[ Hold[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[x__], cond_, expr_]]] := 
-	Complement[ freeVariables[ {Hold[ x], Hold[ cond], Hold[ expr]}], rngVariables[ Hold[ r]]]
-(* Some quantifiers (e.g. "Let") don't have a condition. *)
-freeVariables[ Hold[q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[x__], expr_]]] := 
-	Complement[ freeVariables[ {Hold[ x], Hold[ expr]}], rngVariables[ Hold[ r]]]
-freeVariables[ Hold[ v:(Theorema`Language`VAR$|Theorema`Computation`Language`VAR$)[_]]] := {v}
-freeVariables[ Hold[ f_[x___]]] := Union[ freeVariables[ Hold[ f]], freeVariables[ Hold[ x]]]
-freeVariables[ Hold[ _]|Hold[ ]] := {}
-freeVariables[ l:Hold[ _, __]] := freeVariables[ Apply[ Union, Map[ freeVariables, Map[ Hold, l]]]]
-freeVariables[ l_List] := Apply[ Union, Map[ freeVariables, l]]
-freeVariables[ expr:Except[ _Hold]] := freeVariables[ Hold[ expr]]
+(* 'analyzeVars[ expr]' returns the list of all variables occurring in 'expr', together with their positions.
+	More precisely, every element of the output is of the form 'x -> {fp, {bp1 -> bl1, bp2 -> bl2, ...}}',
+	where
+	- 'x' is a variable,
+	- 'fp' is the list of positions of all free occurrences of 'x' in 'expr',
+	- the 'bpi' are those positions of occurrences of 'x' that are bound in the range of a variable-binder, and
+	- the 'bli' are the lists of positions of all bound occurrences of 'x' in the scope of the respective 'bpi' (without 'bpi' itself).
+	If the optional parameter "FreeOnly" is set to 'True', only the positions of the free occurrences of the variables are returned, i.e.
+	the elements in the output are of the form 'x -> fp'.
+	The optional parameter "Pattern" specifies the pattern of variables to consider. By default, all variables are considered,
+	but one can tell the function to only analyze the positions of a particular variable by simply adjusting the value of "Pattern".
+*)
+Options[ analyzeVars] = {"FreeOnly" -> False, "Pattern" -> (_Theorema`Language`VAR$|_Theorema`Computation`Language`VAR$)};
+analyzeVars[ expr_, opts___?OptionQ] :=
+	Module[ {freeOnly, patt, varpos, pos, bp, fp},
+		{freeOnly, patt} = {"FreeOnly", "Pattern"} /. {opts} /. Options[ analyzeVars];
+		varpos = Position[ expr, patt];
+		Replace[
+			GatherBy[ MapThread[ Rule, {Extract[ expr, varpos], varpos}], First],
+			all:{x_ -> _, ___} :>
+			(
+				pos = all[[All, 2]];
+				(* 'x' is a variable occurring in 'expr', and 'pos' is the list of the positions of all its occurrences. *)
+				
+				bp = Sort[ Cases[ pos, {p__, _, 1} /; MatchQ[ Extract[ expr, {p, 0}, Hold], Hold[ Theorema`Language`RNG$|Theorema`Computation`Language`RNG$]]], OrderedQ[ {#2, #1}]&];
+				(* 'bp' is the list of all positions of occurrences of 'x' that are bound in the range of a variable-binder.
+					Sorting the list in reverse order ensures that any element 'p1' of 'bp' appearing in the scope of
+					another element 'p2' of 'bp' comes *before* 'p2' in 'bp'. *)
+				
+				pos = Select[ pos, (!MemberQ[ bp, #])&];
+				(* All elements of 'bp' are removed from 'pos'. *)
+				
+				If[ TrueQ[ freeOnly],
+					(* The free occurrences of 'x' are precisely those that are not in the scope of any element of 'bp'. *)
+					x -> Select[ pos, (!MemberQ[ bp, p_ /; inScope[ #, p]])&],
+					
+					pos = Map[ (# -> Cases[ bp, p_ /; inScope[ #, p], {1}, 1])&, pos];
+					(* The elements of 'pos' are now of the form 'p -> {bpi}' or 'p -> {}',
+						where the 'p' are the original elements of 'pos' and the 'bpi' are the elements of 'bp' in whose scope 'p' appears. *)
+						
+					fp = Cases[ pos, (p_ -> {}) :> p];
+					(* The positions of the free occurrences of 'x' are precisely those that are not in the scope of any element of 'bp'. *)
+					
+					pos = Replace[ GatherBy[ Cases[ pos, (p_ -> {p0_}) :> (p0 -> p)], First], all0:{p0_ -> _, ___} :> (p0 -> all0[[All, 2]]), {1}];
+					(* 'pos' is now precisely the list of bound occurrences of 'x', as described in the specification of the function, with the
+						only exception that positions of bindings that do not have any other bound occurrences in their scope are still missing. *)
+						
+					bp = Join[ Cases[ bp, p_ /; !MemberQ[ pos, p -> _] :> (p -> {})], pos];
+					
+					x -> {fp, bp}
+				]
+			),
+			{1}
+		]
+	]
+analyzeVars[ args___] := unexpected[ analyzeVars, {args}]
+
+
+(* ::Subsubsection:: *)
+(* Auxiliary functions (private) *)
+
+	
+(* 'inScope[ p1, p2]' checkes whether the expression at position 'p1' appears in the scope of the variable
+	bound at position 'p2', i.e. 'p2' is supposed to refer to the position of some variable 'x' in
+	'RNG$[ ___, (SOMERNG$)[ x, rc___], ___]', meaning that the last element of 'p2' must be '1'.
+	Note that occurrences of 'x' in 'rc' are still regarded free! *)
+inScope[ p_List, p_List] := True
+inScope[ {a___, b_, c___}, {a___, 1}] := (b === 1 && {c} === {})
+inScope[ {a___, b_, ___}, {a___, c_, 1}] := b > c
+inScope[ {a___, b_, ___}, {a___, 1, _, 1}] := b =!= 1
+inScope[ _, _] := False
+inScope[ args___] := unexpected[ inScope, {args}]
+
+(* Each of the three functions below is defined for seemingly strange arguments of the 'VAR$'-symbol.
+	This is because in higher-order rewriting ("HORewriting.m"), names of variables are made unique
+	by adding additional indices, tags, etc. Although higher-order rewriting is not yet integrated
+	into the system, the extended definitions given below certainly do not do any harm. *)
+	
+(* 'varType[ v_VAR$]' returns the type of the given variable, i.e.
+	- symbol "Symbol" if 'v' is an individual variable,
+	- symbol "SEQ0$" (in either "Language`"- or "Computation`"-context) if 'v' is a projectable sequence variable, and
+	- symbol "SEQ1$" (in either "Language`"- or "Computation`"-context) if 'v' is a non-projectable sequence variable. *)
+varType[ (Theorema`Language`VAR$|Theorema`Computation`Language`VAR$)[ (_Symbol)|{___, _Symbol}, ___]] := Symbol
+varType[ (Theorema`Language`VAR$|Theorema`Computation`Language`VAR$)[ ((h:Except[ List])[ ___])|{___, h_[ ___]}, ___]] := h
+varType[ _] := $Failed
+varType[ args___] := unexpected[ varType, {args}]
+
+(* 'varName[ v_VAR$]' returns the base name of the given variable as a plain symbol. *)
+varName[ (Theorema`Language`VAR$|Theorema`Computation`Language`VAR$)[ (n_Symbol)|{___, n_Symbol}, ___]] := n
+varName[ (Theorema`Language`VAR$|Theorema`Computation`Language`VAR$)[ ((Except[ List])[ n_Symbol, ___])|{___, _[ n_Symbol, ___]}, ___]] := n
+varName[ _] := $Failed
+varName[ args___] := unexpected[ varName, {args}]
+
+(* 'renameVar[ v_VAR$, new_Symbol]' renames the given variable, taking care of any 'SEQ0$' or 'SEQ1$'. *)
+renameVar[ (v:(Theorema`Language`VAR$|Theorema`Computation`Language`VAR$))[ _Symbol, rest___], new_Symbol] :=
+	v[ new, rest]
+renameVar[ (v:(Theorema`Language`VAR$|Theorema`Computation`Language`VAR$))[ {pre___, _Symbol}, rest___], new_Symbol] :=
+	v[ {pre, new}, rest]
+renameVar[ (v:(Theorema`Language`VAR$|Theorema`Computation`Language`VAR$))[ ((h:Except[ List])[ _Symbol, rest1___]), rest2___], new_Symbol] :=
+	v[ h[ new, rest1], rest2]
+renameVar[ (v:(Theorema`Language`VAR$|Theorema`Computation`Language`VAR$))[ {pre___, h_[ _Symbol, rest1___]}, rest2___], new_Symbol] :=
+	v[ {pre, h[ new, rest1]}, rest2]
+renameVar[ old_, _] := old
+renameVar[ args___] := unexpected[ renameVar, {args}]
+
+
+(* ::Subsubsection:: *)
+(* freeVariables and isFree *)
+
+
+(* 'freeVariables[ expr]' returns the list of all variables appearing free in 'expr'. If 'expr' is wrapped
+	in 'Hold', no unwanted simplification happens.
+	In multi-ranges, every bound variable appears only once (this is enforced when inputting formulas).
+	However, we do not rely on that in 'alphaEquivalent', 'freeVariables' and 'substituteFree'.
+	In a variable-range '(SOMERNG$)[ x_VAR$, rest___]', the variable 'x' is still regarded free in 'rest';
+	only afterward, in subsequent ranges and subsequent arguments of the enclosing binder (condition, matrix, ...)
+	it is regarded bounded. *)
+freeVariables[ expr_] :=
+	Cases[ analyzeVars[ expr, "FreeOnly" -> True], (x_ -> {__}) :> x]
 freeVariables[ args___] := unexpected[ freeVariables, {args}]
+
+(* 'isFree[ var, expr]' is equivalent to, but in general more efficient than, 'MemberQ[ freeVars[ expr], var]'. *)
+isFree[ var_, expr_] :=
+	MemberQ[ analyzeVars[ expr, "FreeOnly" -> True, "Pattern" -> var], var -> {__}]
+isFree[ args___] := unexpected[ isFree, {args}]
+
+
+(* ::Subsubsection:: *)
+(* alphaEquivalent *)
+
+
+(* 'alphaEquivalent[ a, b]' checks whether the two given expressions 'a' and 'b' are alpha-equivalent
+	to each other, i.e. identical up to renaming bound variables. If 'a' and 'b' are wrapped in 'Hold',
+	no unwanted simplification happens.
+	As in 'freeVariables', we do not rely on bound variables occurring only once in multi-ranges. *)
+alphaEquivalent[ a_, b_] :=
+	alphaEquivalent[ a, b, {}]
+alphaEquivalent[ Theorema`Common`FML$[ _, a_, __], Theorema`Common`FML$[ _, b_, __], subst_List] :=
+	alphaEquivalent[ a, b, subst]
+alphaEquivalent[ Hold[ v1:(_Theorema`Language`VAR$|_Theorema`Computation`Language`VAR$)], Hold[ v2:(_Theorema`Language`VAR$|_Theorema`Computation`Language`VAR$)], repl_List] :=
+	Replace[ v1, repl] === v2
+alphaEquivalent[ a_, a_, _] := True
+alphaEquivalent[
+		Hold[ q1_[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[ r___], a___]],
+		Hold[ q2_[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[ s___], b___]],
+		repl_List] :=
+	Module[ {newRules = repl, r0, s0},
+		If[ Length[ Hold[ a]] === Length[ Hold[ b]] && alphaEquivalent[ Hold[ q1], Hold[ q2], repl],
+			r0 = List @@ Hold /@ Hold[ r];
+			s0 = List @@ Hold /@ Hold[ s];
+			
+			Length[ r0] === Length[ s0] &&
+			Catch[
+				MapThread[
+					Function[ {r1, s1},
+						With[ {x = r1[[1, 1]], y = s1[[1, 1]]},
+							(* We rely on the fact that EVERY variable-range is of the form '(SIMPRNG$|SETRNG$|...)[ _VAR$, ___]'. *)
+							If[ varType[ x] === varType[ y] && alphaEquivalent[ Delete[ r1, {1, 1}], Delete[ s1, {1, 1}], newRules],
+								PrependTo[ newRules, x -> y];
+								Null,
+								
+								Throw[ False]
+							]
+						]
+					],
+					{r0, s0}
+				];
+				MapThread[
+					If[ alphaEquivalent[ #1, #2, newRules], Null, Throw[ False]]&,
+					{List @@ Hold /@ Hold[ a], List @@ Hold /@ Hold[ b]}
+				];
+				Throw[ True]
+			],
+			
+			False
+		]
+	]
+alphaEquivalent[ Hold[ g_[ a___]], Hold[ h_[ b___]], repl_List] :=
+	Length[ Hold[ a]] === Length[ Hold[ b]] &&
+	alphaEquivalent[ Hold[ g], Hold[ h], repl] &&
+	Catch[ MapThread[ If[ alphaEquivalent[ #1, #2, repl], Null, Throw[ False]]&, {List @@ Hold /@ Hold[ a], List @@ Hold /@ Hold[ b]}]; Throw[ True]]
+alphaEquivalent[ a:Except[ _Hold], b_, repl_List] :=
+	alphaEquivalent[ Hold[ a], Hold[ b], repl]
+alphaEquivalent[ _, _, _] :=
+	False
+alphaEquivalent[ args___] := unexpected[ alphaEquivalent, {args}]
 
 
 (* ::Subsubsection:: *)
@@ -196,6 +367,118 @@ boundVariables[ args___] := unexpected[ boundVariables, {args}]
 
 
 (* ::Subsubsection:: *)
+(* freshName *)
+
+
+(* 'freshName[ x, ex]' returns a fresh name for variable 'base', which is guaranteed to be distinct from all names in 'ex'.
+	If 'x' is a list of variables, a fresh name for each of the elements in 'x' is returned; all new names are distinct from each other.
+	NOTE: 'x' (or its elements) may be a variable with head 'VAR$' (possibly sequence variables) *or* a plain symbol *or* a string,
+	whereas the elements of 'ex' may be plain symbols or strings, but no variables. *)
+freshName[ x_List, ex_List] :=
+	Module[ {ex0 = Replace[ ex, s_Symbol :> SymbolName[ s], {1}], tmp},
+		Replace[ x,
+			{
+				v:(_Theorema`Language`VAR$|_Theorema`Computation`Language`VAR$) :>
+				With[ {n = varName[ v]},
+					tmp = freshName[ SymbolName[ n], Context[ n], ex0];
+					AppendTo[ ex0, tmp];
+					renameVar[ v, Symbol[ tmp]]
+				],
+				s_Symbol :>
+				(
+					tmp = freshName[ SymbolName[ s], Context[ s], ex0];
+					AppendTo[ ex0, tmp];
+					Symbol[ tmp]
+				),
+				s_String :>
+				(
+					tmp = freshName[ s, "", ex0];
+					AppendTo[ ex0, tmp];
+					tmp
+				)
+			},
+			{1}
+		]
+	]
+freshName[ x_Symbol, ex:{___Symbol}] :=
+	If[ MemberQ[ ex, x],
+		Symbol[ freshName[ SymbolName[ x], Context[ x], SymbolName /@ ex]],
+		x
+	]
+freshName[ x_Symbol, ex:{___String}] :=
+	Symbol[ freshName[ SymbolName[ x], Context[ x], ex]]
+freshName[ x_Symbol, ex_List] :=
+	Symbol[ freshName[ SymbolName[ x], Context[ x], Replace[ ex, s_Symbol :> SymbolName[ s], {1}]]]
+freshName[ x_String, ex:{___, _Symbol, ___}] :=
+	freshName[ SymbolName[ x], "", Replace[ ex, s_Symbol :> SymbolName[ s], {1}]]
+freshName[ x_String, ctxt_String, ln:{___String}] :=
+	Module[ {xn = x, tmp, all, lxn, suffix = "", lsx},
+		If[ MemberQ[ ln, x],
+			lxn = StringLength[ xn];
+			If[ lxn > 1,
+				Which[
+					lxn > 3 && StringTake[ xn, -3] === "$TM",
+					suffix = "$TM";
+					xn = StringDrop[ xn, -3],
+					
+					StringTake[ xn, -1] === "$",
+					suffix = "$";
+					xn = StringDrop[ xn, -1]
+				]
+			];
+			lsx = StringLength[ suffix];
+			tmp = StringCases[ xn, Longest[ DigitCharacter..]~~EndOfString, 1];
+			xn = Switch[ tmp,
+				{},
+				xn,
+				{_},
+				StringDrop[ xn, -StringLength[ First[ tmp]]]
+			];
+			lxn = StringLength[ xn];
+			all = If[ lsx > 0,
+				Cases[ ln, n_String :>
+							Module[ {n0},
+								ToExpression[n0] /;
+								(
+									StringLength[ n] > lxn + lsx &&
+									StringTake[ n, lxn] === xn &&
+									StringTake[ n, -lsx] === suffix &&
+									(
+										n0 = StringTake[ n, {lxn + 1, StringLength[ n] - lsx}];
+										StringMatchQ[ n0, DigitCharacter..]
+									)
+								)
+							]
+				],
+				Cases[ ln, n_String :>
+							Module[ {n0},
+								ToExpression[n0] /;
+								(
+									StringLength[ n] > lxn &&
+									StringTake[ n, lxn] === xn &&
+									(
+										n0 = StringDrop[ n, lxn];
+										StringMatchQ[ n0, DigitCharacter..]
+									)
+								)
+							]
+				]
+			];
+			ctxt <> xn <> Switch[ all,
+				{},
+				"0",
+				_,
+				ToString[ Max[ all] + 1]
+				] <> suffix,
+			
+			x
+		]
+	]
+freshName[ x:Except[ _List|_Symbol|_String], ex_] := First[ freshName[ {x}, ex]]
+freshName[ args___] := unexpected[ freshName, {args}]
+
+
+(* ::Subsubsection:: *)
 (* substituteBound *)
 
 (* We assume that we don't have nested quantifiers binding the same variable *)
@@ -218,39 +501,66 @@ substituteBound[ expr_, rule_?OptionQ] := substituteBound[ expr, {rule}]
 substituteBound[ expr_, rules_List] := ReleaseHold[ substituteBound[ Hold[ expr], rules]]
 substituteBound[ args___] := unexpected[ substituteBound, {args}]
 
+
 (* ::Subsubsection:: *)
 (* substituteFree *)
 
-Clear[ substituteFree]
-substituteFree[ expr_Hold, {}] := expr
-substituteFree[ Hold[], _] := Hold[]
-(* Some quantifiers (e.g. "Sum") can be used together with subscripts. *)
-substituteFree[ Hold[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[ rng__], cond_, sub_, form_]], rules_List] :=
-	Module[ {qvars = rngVariables[ Hold[ r]], vars},
-		vars = Select[ rules, !MemberQ[ qvars, #[[1]]]&];
-		applyHold[ Hold[q], joinHold[ substituteFree[ Hold[r], vars], joinHold[ substituteFree[ Hold[cond], vars], joinHold[ substituteFree[ Hold[sub], vars], substituteFree[ Hold[form], vars]]]]]
+
+(* 'substituteFree[ expr, rules]' substitutes every free occurrence of a variable appearing as the LHS of a rule
+	in 'rules' in 'expr' by the corresponding RHS, renaming bound variables to avoid variable capture if necessary.
+	If 'expr' is wrapped in 'Hold', no unwanted simplification happens (and the result is wrapped in 'Hold' as well);
+	this also applies to the RHSs of the given rules.
+	As in 'freeVariables', we do not rely on bound variables occurring only once in multi-ranges. *)
+substituteFree[ expr_, {}] := expr
+substituteFree[ expr_, rule:(_Rule|_RuleDelayed)] := substituteFree[ expr, {rule}]
+substituteFree[ expr_, rules_List] :=
+	Module[ {newRules, varStruct = analyzeVars[ expr], varNames, rename = {}, rn = {}, bp},
+		varNames = varStruct[[All, 1]];
+		newRules = DeleteCases[
+			Replace[ rules,
+				_[ l_, r_] :>
+				With[ {fp = First[ Replace[ Replace[ l, varStruct], l -> {{}, {}}]],
+						rhs = Switch[ Hold[ r], Hold[ _Hold|_HoldComplete], r, _, Hold[ r]],
+						fv = freeVariables[ Hold[ r]]},
+					varNames = Join[ varNames, Cases[ Hold[ r], _Theorema`Language`VAR$|_Theorema`Language`VAR$, {0, Infinity}, Heads -> True]];
+					If[ fp === {},
+						Null,
+						
+						Scan[
+							Function[ x,
+								bp = Last[ Replace[ Replace[ x, varStruct], x -> {{}, {}}]];
+								bp = Select[ bp, With[ {q = First[ #]}, MemberQ[ fp, p_ /; inScope[ p, q]]]&];
+								(* 'bp' is the list of all binding-positions of variable 'x' that need to be
+									renamed in order to avoid variable capture. *)
+								If[ bp =!= {},
+									rename = Join[ rename, (x -> Prepend[ Last[ #], First[ #]])& /@ bp];
+									AppendTo[ rn, x]
+								]
+							],
+							fv
+						];
+						RuleDelayed @@ Prepend[ rhs, fp]
+					]
+				],
+				{1}
+			],
+			Null
+		];
+		rn = DeleteDuplicates[ rn];
+		rn = MapThread[ Rule, {rn, freshName[ rn, varName /@ DeleteDuplicates[ varNames]]}];
+		rename =
+			Replace[
+				GatherBy[ rename, First],
+				all:{x_ -> _, ___} :>
+				With[ {xn = Replace[ x, rn]},
+					DeleteDuplicates[ Flatten[ all[[All, 2]], 1]] :> xn
+				],
+				{1}
+			];
+		ReplacePart[ expr, Join[ newRules, rename]]
 	]
-substituteFree[ Hold[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[ rng__], cond_, form_]], rules_List] :=
-	Module[ {qvars = rngVariables[ Hold[ r]], vars},
-		vars = Select[ rules, !MemberQ[ qvars, #[[1]]]&];
-		applyHold[ Hold[q], joinHold[ substituteFree[ Hold[r], vars], joinHold[ substituteFree[ Hold[cond], vars], substituteFree[ Hold[form], vars]]]]
-	]
-(* Some quantifiers (e.g. "Let") don't have a condition. *)
-substituteFree[ Hold[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[ rng__], form_]], rules_List] :=
-	Module[ {qvars = rngVariables[ Hold[ r]], vars},
-		vars = Select[ rules, !MemberQ[ qvars, #[[1]]]&];
-		applyHold[ Hold[q], joinHold[ substituteFree[ Hold[r], vars], substituteFree[ Hold[form], vars]]]
-	]
-substituteFree[ Hold[ f_[x___]], rules_List] :=
-	Module[ { sx = Map[ substituteFree[ #, rules]&, Map[ Hold, Hold[x]]]},
-		sx = Fold[ joinHold, Hold[], {ReleaseHold[ sx]}];
-		applyHold[ substituteFree[ Hold[f], rules], sx]
-	]
-substituteFree[ x:Hold[ (Theorema`Language`VAR$|Theorema`Computation`Language`VAR$)[_]], rules_List] := x /. rules
-substituteFree[ x:Hold[_], rules_List] := x
-substituteFree[ expr_, rule_?OptionQ] := substituteFree[ expr, {rule}]
-substituteFree[ expr_, rules_List] := ReleaseHold[ substituteFree[ Hold[ expr], rules]]
 substituteFree[ args___] := unexpected[ substituteFree, {args}]
+
 
 (* ::Section:: *)
 (* Expression categories *)
@@ -513,9 +823,12 @@ executableForm[ expr_, f_FML$] := "$Failed"
 executableForm[ args___] := unexpected[ executableForm, {args}]
 
 execLeft[ e_Hold, var_List] := 
-	Module[ {s, bound = boundVariables[ e]},
+	Module[ {s, bound},
 		s = substituteFree[ e, Map[ varToPattern, var]];
-		s = substituteBound[ s, Map[ varToPattern, bound]];
+		(* All remaining variables are clearly bound. *)
+		bound = DeleteDuplicates[ Cases[ s, (_Theorema`Language`VAR$|_Theorema`Computation`Language`VAR$), Infinity]];
+		(* We assume that there are no nested binders binding the same variables. *)
+		s = s /. Map[ bvarToPattern, bound];
 		ReleaseHold[ Map[ Function[ expr, toInputString[ Hold[ expr], True], {HoldAll}], s]]
 	]
 execLeft[ args___] := unexpected[ execLeft, {args}]
@@ -594,6 +907,22 @@ varToPattern[ v:Theorema`Language`META$[ a_Symbol, n_, ___]] :=
 		v -> Pattern@@Append[ new, Blank[]]
 	]
 varToPattern[ args___] := unexpected[ varToPattern, {args}]
+
+bvarToPattern[ v:Theorema`Language`VAR$[ Theorema`Language`SEQ0$[ a_Symbol]]] :=
+	With[ {new = ToExpression[ "Theorema`Knowledge`SEQ0$" <> SymbolName[ a], InputForm, Hold]},
+		v -> Pattern@@Append[ new, Theorema`Language`VAR$[ Blank[ Theorema`Language`SEQ0$]]]
+		(* A bound sequence variable may only be "instantiated" by a sequence variable, but not by an individual variable. *)
+	]
+bvarToPattern[ v:Theorema`Language`VAR$[ Theorema`Language`SEQ1$[ a_Symbol]]] :=
+	With[ {new = ToExpression[ "Theorema`Knowledge`SEQ1$" <> SymbolName[ a], InputForm, Hold]},
+		v -> Pattern@@Append[ new, Theorema`Language`VAR$[ Blank[ Theorema`Language`SEQ1$]]]
+	]
+bvarToPattern[ v:Theorema`Language`VAR$[ a_Symbol]] :=
+	With[ {rhs = Hold[ a, Theorema`Language`VAR$[ Blank[ Symbol]]]},
+		v -> Pattern@@rhs
+	]
+(* There are no bound meta-variables ... *)
+bvarToPattern[ args___] := unexpected[ bvarToPattern, {args}]
 
 (* ::Subsubsection:: *)
 (* formulaListToRules *)
