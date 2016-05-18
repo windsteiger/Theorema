@@ -362,7 +362,7 @@ extractVar[ args___] := unexpected[ extractVar, {args}]
 (* boundVariables *)
 
 boundVariables[ expr_] :=
-		Apply[ Union, Map[ rngVariables, Cases[ expr, _Theorema`Language`RNG$|_Theorema`Computation`Language`RNG$, Infinity]]]
+		Apply[ Union, Map[ rngVariables, Cases[ expr, _Theorema`Language`RNG$|_Theorema`Computation`Language`RNG$, Infinity, Heads -> True]]]
 boundVariables[ args___] := unexpected[ boundVariables, {args}]
 
 
@@ -380,19 +380,19 @@ freshName[ x_List, ex_List] :=
 			{
 				v:(_Theorema`Language`VAR$|_Theorema`Computation`Language`VAR$) :>
 				With[ {n = varName[ v]},
-					tmp = freshName[ SymbolName[ n], Context[ n], ex0];
+					tmp = freshName[ SymbolName[ n], ex0];
 					AppendTo[ ex0, tmp];
-					renameVar[ v, Symbol[ tmp]]
+					renameVar[ v, Symbol[ Context[ n] <> tmp]]
 				],
 				s_Symbol :>
 				(
-					tmp = freshName[ SymbolName[ s], Context[ s], ex0];
+					tmp = freshName[ SymbolName[ s], ex0];
 					AppendTo[ ex0, tmp];
-					Symbol[ tmp]
+					Symbol[ Context[ s] <> tmp]
 				),
 				s_String :>
 				(
-					tmp = freshName[ s, "", ex0];
+					tmp = freshName[ s, ex0];
 					AppendTo[ ex0, tmp];
 					tmp
 				)
@@ -402,16 +402,16 @@ freshName[ x_List, ex_List] :=
 	]
 freshName[ x_Symbol, ex:{___Symbol}] :=
 	If[ MemberQ[ ex, x],
-		Symbol[ freshName[ SymbolName[ x], Context[ x], SymbolName /@ ex]],
+		Symbol[ Context[ x] <> freshName[ SymbolName[ x], SymbolName /@ ex]],
 		x
 	]
 freshName[ x_Symbol, ex:{___String}] :=
-	Symbol[ freshName[ SymbolName[ x], Context[ x], ex]]
+	Symbol[ Context[ x] <> freshName[ SymbolName[ x], ex]]
 freshName[ x_Symbol, ex_List] :=
-	Symbol[ freshName[ SymbolName[ x], Context[ x], Replace[ ex, s_Symbol :> SymbolName[ s], {1}]]]
+	Symbol[ Context[ x] <> freshName[ SymbolName[ x], Replace[ ex, s_Symbol :> SymbolName[ s], {1}]]]
 freshName[ x_String, ex:{___, _Symbol, ___}] :=
-	freshName[ SymbolName[ x], "", Replace[ ex, s_Symbol :> SymbolName[ s], {1}]]
-freshName[ x_String, ctxt_String, ln:{___String}] :=
+	freshName[ x, Replace[ ex, s_Symbol :> SymbolName[ s], {1}]]
+freshName[ x_String, ln:{___String}] :=
 	Module[ {xn = x, tmp, all, lxn, suffix = "", lsx},
 		If[ MemberQ[ ln, x],
 			lxn = StringLength[ xn];
@@ -452,7 +452,7 @@ freshName[ x_String, ctxt_String, ln:{___String}] :=
 				],
 				Cases[ ln, n_String :>
 							Module[ {n0},
-								ToExpression[n0] /;
+								ToExpression[ n0] /;
 								(
 									StringLength[ n] > lxn &&
 									StringTake[ n, lxn] === xn &&
@@ -464,7 +464,7 @@ freshName[ x_String, ctxt_String, ln:{___String}] :=
 							]
 				]
 			];
-			ctxt <> xn <> Switch[ all,
+			xn <> Switch[ all,
 				{},
 				"0",
 				_,
