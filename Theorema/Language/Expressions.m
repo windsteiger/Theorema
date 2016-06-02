@@ -126,10 +126,15 @@ MakeBoxes[ Annotated$TM[ op_, UnderScript$TM[ un__], OverScript$TM[ ov__]], Theo
 (* annotated operators with arguments *)
 
 MakeBoxes[ aop_Annotated$TM[], TheoremaForm] :=
-	Module[ {sym = MakeBoxes[ aop, TheoremaForm]},
-		RowBox[
-			{RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}], "[", "]"}
-		] /; getTmaOperatorName[ aop] =!= $Failed
+	Module[ {opName, sym = MakeBoxes[ aop, TheoremaForm]},
+		(
+		If[ getTmaOperatorForms[ opName] === {},
+			RowBox[ {sym, "[", "]"}],
+			RowBox[
+				{RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}], "[", "]"}
+			]
+		]
+		) /; (opName = getTmaOperatorName[ aop]) =!= $Failed
 	]
 MakeBoxes[ aop_Annotated$TM[ a_], TheoremaForm] :=
 	Module[ {opName, form, sym = MakeBoxes[ aop, TheoremaForm]},
@@ -140,9 +145,11 @@ MakeBoxes[ aop_Annotated$TM[ a_], TheoremaForm] :=
 			RowBox[ {sym, MakeBoxes[ a, TheoremaForm]}],
 			MemberQ[ form, Postfix],
 			RowBox[ {MakeBoxes[ a, TheoremaForm], sym}],
-			True,
+			form =!= {},
 			RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}],
-				"[", MakeBoxes[ a, TheoremaForm], "]"}]
+				"[", MakeBoxes[ a, TheoremaForm], "]"}],
+			True,
+			RowBox[ {sym, "[", MakeBoxes[ a, TheoremaForm], "]"}]
 		]
 		) /; (opName = getTmaOperatorName[ aop]) =!= $Failed
 	]
@@ -150,9 +157,14 @@ MakeBoxes[ aop_Annotated$TM[ a__], TheoremaForm] :=
 	Module[ {opName, form, sym = MakeBoxes[ aop, TheoremaForm]},
 		(
 		form = getTmaOperatorForms[ opName];
-		If[ MemberQ[ form, Infix],
+		Which[
+			MemberQ[ form, Infix],
 			tmaInfixBox[ {a}, sym],
+			form =!= {},
 			RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}], "[",
+								RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ a]]], ","]], "]"}],
+			True,
+			RowBox[ {sym, "[",
 								RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ a]]], ","]], "]"}]
 		]
 		) /; (opName = getTmaOperatorName[ aop]) =!= $Failed

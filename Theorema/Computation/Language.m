@@ -979,7 +979,7 @@ MaximumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, ord_, form_] /; buiAc
 	]
 MaximumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, ord_, form_] /; buiActive["MaximumOf"] :=
 	Module[ {v},
-		Subscript$TM[ max$TM, ord][ Set$TM@@v] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+		Annotated$TM[ max$TM, SubScript$TM[ ord]][ Set$TM@@v] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
 	
 MinimumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, form_] /; buiActive["MinimumOf"] :=
@@ -1006,7 +1006,7 @@ MinimumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, ord_, form_] /; buiAc
 	]
 MinimumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, ord_, form_] /; buiActive["MinimumOf"] :=
 	Module[ {v},
-		Subscript$TM[ min$TM, ord][ Set$TM@@v] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+		Annotated$TM[ min$TM, SubScript$TM[ ord]][ Set$TM@@v] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
 	
 UnionOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, form_] /; buiActive["UnionOf"] :=
@@ -1617,19 +1617,19 @@ Set$TM /: max$TM[ Set$TM[ e__]] /; buiActive["MaximumElementSet"] :=
 	Module[ {s},
 		(s /. Max -> max$TM /. {max$TM[x_Set$TM] :> max$TM[x], max$TM[x___] :> max$TM[Set$TM[x]]}) /; (s = Max[ e]; Apply[ Hold, {s}] =!= Hold[ Max[ e]])
 	]
-Set$TM /: Subscript$TM[ max$TM, _][ Set$TM[ e_]] /; buiActive["MaximumElementSet"] := e
-Set$TM /: Subscript$TM[ max$TM, ord_][ Set$TM[ e__]] /; buiActive["MaximumElementSet"] :=
+Set$TM /: Annotated$TM[ max$TM, SubScript$TM[ _]][ Set$TM[ e_]] /; buiActive["MaximumElementSet"] := e
+Set$TM /: Annotated$TM[ max$TM, s:SubScript$TM[ ord_]][ Set$TM[ e__]] /; buiActive["MaximumElementSet"] :=
 	Module[ {res},
-		Subscript$TM[ max$TM, ord][ Apply[ Set$TM, res]] /; (res = max[ {e}, ord]; Length[ res] < Length[ Hold[ e]])
+		Annotated$TM[ max$TM, s][ Set$TM @@ res] /; (res = max[ {e}, ord]; Length[ res] < Length[ Hold[ e]])
 	]
 Set$TM /: min$TM[ Set$TM[ e__]] /; buiActive["MinimumElementSet"] :=
 	Module[ {s},
 		(s /. Min -> min$TM /. {min$TM[x_Set$TM] :> min$TM[x], min$TM[x___] :> min$TM[Set$TM[x]]}) /; (s = Min[ e]; Apply[ Hold, {s}] =!= Hold[ Min[ e]])
 	]
-Set$TM /: Subscript$TM[ min$TM, _][ Set$TM[ e_]] /; buiActive["MinimumElementSet"] := e
-Set$TM /: Subscript$TM[ min$TM, ord_][ Set$TM[ e__]] /; buiActive["MinimumElementSet"] :=
+Set$TM /: Annotated$TM[ min$TM, SubScript$TM[ _]][ Set$TM[ e_]] /; buiActive["MinimumElementSet"] := e
+Set$TM /: Annotated$TM[ min$TM, s:SubScript$TM[ ord_]][ Set$TM[ e__]] /; buiActive["MinimumElementSet"] :=
 	Module[ {res},
-		Subscript$TM[ min$TM, ord][ Apply[ Set$TM, res]] /; (res = min[ {e}, ord]; Length[ res] < Length[ Hold[ e]])
+		Annotated$TM[ min$TM, s][ Set$TM @@ res] /; (res = min[ {e}, ord]; Length[ res] < Length[ Hold[ e]])
 	]
 Set$TM /: \[AE]$TM[ Set$TM[ a_, ___]] /; buiActive["AnElement"] := a
 	
@@ -2389,19 +2389,19 @@ Tuple$TM /: max$TM[ Tuple$TM[ e__]] /; buiActive["Max"] :=
 	Module[ {s},
 		(s /. Max -> max$TM /. {max$TM[x_Tuple$TM] :> max$TM[x], max$TM[x___] :> max$TM[Tuple$TM[x]]}) /; (s = Max[ e]; Apply[ Hold, {s}] =!= Hold[ Max[ e]])
 	]
-Tuple$TM /: Subscript$TM[ max$TM, _][ Tuple$TM[ e_]] /; buiActive["Max"] := e
-Tuple$TM /: Subscript$TM[ max$TM, ord_][ Tuple$TM[ e__]] /; buiActive["Max"] :=
+Tuple$TM /: Annotated$TM[ max$TM, SubScript$TM[ _]][ Tuple$TM[ e_]] /; buiActive["Max"] := e
+Tuple$TM /: Annotated$TM[ max$TM, s:SubScript$TM[ ord_]][ Tuple$TM[ e__]] /; buiActive["Max"] :=
 	Module[ {res},
-		Subscript$TM[ max$TM, ord][ Apply[ Tuple$TM, res]] /; (res = max[ {e}, ord]; Length[ res] < Length[ Hold[ e]])
+		Annotated$TM[ max$TM, s][ Tuple$TM @@ res] /; (res = max[ {e}, ord]; Length[ res] < Length[ Hold[ e]])
 	]
 Tuple$TM /: min$TM[ Tuple$TM[ e__]] /; buiActive["Min"] :=
 	Module[ {s},
 		(s /. Min -> min$TM /. {min$TM[x_Tuple$TM] :> min$TM[x], min$TM[x___] :> min$TM[Tuple$TM[x]]}) /; (s = Min[ e]; Apply[ Hold, {s}] =!= Hold[ Min[ e]])
 	]
-Tuple$TM /: Subscript$TM[ min$TM, _][ Tuple$TM[ e_]] /; buiActive["Min"] := e
-Tuple$TM /: Subscript$TM[ min$TM, ord_][ Tuple$TM[ e__]] /; buiActive["Min"] :=
+Tuple$TM /: Annotated$TM[ min$TM, SubScript$TM[ _]][ Tuple$TM[ e_]] /; buiActive["Min"] := e
+Tuple$TM /: Annotated$TM[ min$TM, s:SubScript$TM[ ord_]][ Tuple$TM[ e__]] /; buiActive["Min"] :=
 	Module[ {res},
-		Subscript$TM[ min$TM, ord][ Apply[ Tuple$TM, res]] /; (res = min[ {e}, ord]; Length[ res] < Length[ Hold[ e]])
+		Annotated$TM[ min$TM, s][ Tuple$TM @@ res] /; (res = min[ {e}, ord]; Length[ res] < Length[ Hold[ e]])
 	]
 
 Tuple$TM /: BracketingBar$TM[ a_Tuple$TM?isSequenceFree] /; buiActive["Length"] := Length[ a]

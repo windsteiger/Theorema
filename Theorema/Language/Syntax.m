@@ -235,8 +235,10 @@ isRightDelimiter[ s_] :=
 	- the third element is the full name of the operator.
 	Note that Infix/Prefix/Postfix are, up to now, only used for correct output but not for parsing -
 	They do not affect parsing in any way!
+	ALSO NOTE THAT THE FIRST AND THE THIRD ELEMENT OF EACH ENTRY MUST BE DISTINCT!
 	*)
 $tmaOperators = {
+	{"", {}, "min"}, {"", {}, "max"},
 	{"@", {Infix}, "Componentwise"}, {"/@", {Infix}, "Map"}, {"//@", {Infix}, "MapAll"},
 	{">>", {Infix}, "Put"}, {">>>", {Infix}, "PutAppend"}, {"<<", {Prefix}, "Get"},
 	{"@@", {Infix}, "Apply"}, {";;", {Infix}, "Span"},
@@ -373,7 +375,7 @@ $tmaOperatorSymbols = Map[ First, $tmaOperators];
 	because copying each of the more than 200 operator names twice (for the two possible contexts) seems to be a bit too inefficient. *)
 $tmaOperatorNames = Map[ (Last[#] <> "$TM")&, $tmaOperators];
 $tmaOperatorToName = Dispatch[ Map[ Rule[ First[#], Last[#]] &, $tmaOperators]];
-$tmaNameToOperator = Dispatch[ MapThread[ Rule, {$tmaOperatorNames, $tmaOperatorSymbols}]];
+$tmaNameToOperator = Dispatch[ Replace[ Thread[ $tmaOperatorNames -> $tmaOperatorSymbols], (s_ -> "") :> (s -> StringDrop[ s, -3]), {1}]];
 
 (* We need this attribute, because otherwise expressions (not only operator symbols!) are evaluated when "MakeBoxes" is called. *)	
 SetAttributes[ isTmaOperatorName, HoldAllComplete];
@@ -1368,6 +1370,8 @@ MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
 						RowBox[ {sym, MakeBoxes[ arg, TheoremaForm]}],
 						MemberQ[ form, Postfix],
 						RowBox[ {MakeBoxes[ arg, TheoremaForm], sym}],
+						form === {},
+						RowBox[ {sym, "[", MakeBoxes[ arg, TheoremaForm], "]"}],
 						True,
 						RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}], "[", MakeBoxes[ arg, TheoremaForm], "]"}]
 					],
@@ -1461,8 +1465,13 @@ parenthesize[ args___] := unexpected[ parenthesize, {args}]
 	definition with "isStandardOperatorSymbol". Annotated operators as well as domain operators
 	are treated in 'Expressions.m'. *)
 MakeBoxes[ s_?isTmaOperatorName, TheoremaForm] := Replace[ SymbolName[ s], $tmaNameToOperator]
-MakeBoxes[ s_?isTmaOperatorName[], TheoremaForm] :=
-	RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], Replace[ SymbolName[ s], $tmaNameToOperator], TagBox[ ")", "AutoParentheses"]}], "[", "]"}]
+MakeBoxes[ (s_?isTmaOperatorName)[], TheoremaForm] :=
+	With[ {sym = Replace[ SymbolName[ s], $tmaNameToOperator]},
+		If[ getTmaOperatorForms[ s] === {},
+			RowBox[ {sym, "[", "]"}],
+			RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}], "[", "]"}]
+		]
+	]
     
 MakeBoxes[ s_Symbol, TheoremaForm] := 
 	(* We have to use "Unevaluated" here, because "I" is a symbol, but evaluates to "Complex[0, 1]" *)
