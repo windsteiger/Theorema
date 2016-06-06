@@ -136,7 +136,10 @@ Theorema`TmaCompToMma = Dispatch[
 		   ];
 
 
-(* To add a new quantifier, just add a pair to this list *)	
+(* To add a new quantifier, just add a pair to this list *)
+(* If the sub-script of a quantifier shall be interpreted as a domain
+	(i.e. result should be "DomainOperation[ dom, q][ ...]" instead of default "Annotated[ q, SubScript[ sub]][ ...]"),
+	the definition of "subscriptedQuantifier" must be updated as well, just as for "SumOf" and "ProductOf". *)
 $tmaQuantifiers =
     {{"\[ForAll]", "Forall"},
      {"\[Exists]", "Exists"},
@@ -1032,10 +1035,16 @@ standardQuantifier[ name_, rng_, cond_, expr_, fmt_] :=
 standardQuantifier[ args___] := unexpected[ standardQuantifier, {args}]
 
 SetAttributes[ subscriptedQuantifier, HoldRest]
+subscriptedQuantifier[ name:("SumOf"|"ProductOf"), rng_, cond_, dom_, expr_, fmt_] :=
+    With[ {r = toRangeBox[ rng]},
+        MakeExpression[ RowBox[{"QU$", "[",
+            RowBox[{ r, ",", RowBox[{ makeDomainOperation[ dom, name], "[", RowBox[{ r, ",", cond, ",", expr}], "]"}]}],
+             "]"}], fmt]
+    ]
 subscriptedQuantifier[ name_, rng_, cond_, sub_, expr_, fmt_] :=
     With[ {r = toRangeBox[ rng]},
-        MakeExpression[ RowBox[{"QU$", "[", 
-            RowBox[{ r, ",", RowBox[{ name, "[", RowBox[{ r, ",", cond, ",", sub, ",", expr}], "]"}]}],
+        MakeExpression[ RowBox[{"QU$", "[",
+            RowBox[{ r, ",", RowBox[{ makeAnnotation[ SubscriptBox, name, sub], "[", RowBox[{ r, ",", cond, ",", expr}], "]"}]}],
              "]"}], fmt]
     ]
 subscriptedQuantifier[ args___] := unexpected[ subscriptedQuantifier, {args}]
@@ -1315,16 +1324,8 @@ MakeBoxes[ (q_?isQuantifierName)[ rng_, cond_, form_], TheoremaForm] :=
 	RowBox[ {UnderscriptBox[ UnderscriptBox[ Replace[ q, $tmaNameToQuantifier], makeRangeBox[ rng, TheoremaForm]], MakeBoxes[ cond, TheoremaForm]],
 		MakeBoxes[ form, TheoremaForm]}
 	]
-
-MakeBoxes[ (q_?isQuantifierName)[ rng_, True, sub_, form_], TheoremaForm] := 
-	RowBox[ {UnderscriptBox[ SubscriptBox[ Replace[ q, $tmaNameToQuantifier], MakeBoxes[ sub, TheoremaForm]], makeRangeBox[ rng, TheoremaForm]],
-		MakeBoxes[ form, TheoremaForm]}
-	]
-
-MakeBoxes[ (q_?isQuantifierName)[ rng_, cond_, sub_, form_], TheoremaForm] := 
-	RowBox[ {UnderscriptBox[ UnderscriptBox[ SubscriptBox[ Replace[ q, $tmaNameToQuantifier], MakeBoxes[ sub, TheoremaForm]], makeRangeBox[ rng, TheoremaForm]],
-		MakeBoxes[ cond, TheoremaForm]], MakeBoxes[ form, TheoremaForm]}
-	]
+	
+(* DomainOperation$TM- and Annotated$TM-quantifiers are treated in "Expression.m" *)
 
 MakeBoxes[ (op_?isNonStandardOperatorName)[ arg___], TheoremaForm] :=
     With[ {b = Replace[ op, $tmaNonStandardOperatorToBuiltin]},

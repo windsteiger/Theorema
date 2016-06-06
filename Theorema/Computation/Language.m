@@ -685,6 +685,17 @@ splitAnd[ expr_, v_List, sub_:True] :=
     ]
 splitAnd[ args___] := unexpected[ splitAnd, {args}]
 
+splitQuantifier[ h_, RNG$[ r : _SETRNG$|_STEPRNG$, s__], cond_, form_] :=
+ 	Module[ {splitC},
+ 		(* The condition MUST be kept unevaluated! *)
+ 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
+ 		With[ {rc = First[ splitC], sc = Last[ splitC]},
+ 			With[ {tmp = Delete[ Hold[ h[ RNG$[ s], sc, form]], {1, 2, 0}]},
+	 			h @@ Flatten[ Hold[ RNG$[ r], rc, tmp], 1, Hold]
+ 			]
+   		]
+	]
+
 
 ClearAll[ Forall$TM, Exists$TM, SequenceOf$TM, SumOf$TM, ProductOf$TM,
 	SetOf$TM, TupleOf$TM, MaximumOf$TM, MinimumOf$TM, UnionOf$TM, IntersectionOf$TM, Such$TM, SuchUnique$TM,
@@ -694,22 +705,12 @@ Scan[ SetAttributes[ #, HoldRest] &, {Forall$TM, Exists$TM,
   UnionOf$TM, IntersectionOf$TM, Such$TM, SuchUnique$TM, ArgMin$TM, ArgMax$TM, TheArgMin$TM, TheArgMax$TM}]
 Scan[ SetAttributes[ #, HoldFirst] &, {SETRNG$, STEPRNG$}]
 
-Forall$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, form_] /; buiActive["Forall"] := 
- 	Module[ {splitC},
- 		(* The condition MUST be kept unevaluated! Same in all other quantifiers. *)
- 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = First[ splitC], sc = Last[ splitC]},
- 			With[ {tmp = Delete[ Hold[ Forall$TM[ RNG$[ s], sc, form]], {1, 2, 0}]},
-	 			Apply[ Forall$TM, Flatten[ Hold[ RNG$[ r], rc, tmp], 1, Hold]]
- 			]
-   		]
-  	]
+Forall$TM[ rng:RNG$[ _SETRNG$|_STEPRNG$, __], cond_, form_] /; buiActive["Forall"] :=
+	splitQuantifier[ Forall$TM, rng, cond, form]
 
-Forall$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; 
-  buiActive["Forall"] :=
+Forall$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["Forall"] :=
  	Module[ {iter},
-     		forallIteration[ iter, cond, 
-    form] /; (iter = rangeToIterator[ r]) =!= $Failed
+    	forallIteration[ iter, cond, form] /; (iter = rangeToIterator[ r]) =!= $Failed
   	]
 
 (* We introduce local variables for the iteration so that we can \
@@ -746,21 +747,12 @@ forallIteration[ {x_, iter__}, cond_, form_] :=
 	] (*end catch*)
  ]
     
-Exists$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, form_] /; buiActive["Exists"] := 
- 	Module[ {splitC},
- 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
-   		With[ {rc = First[ splitC], sc = Last[ splitC]},
- 			With[ {tmp = Delete[ Hold[ Exists$TM[ RNG$[ s], sc, form]], {1, 2, 0}]},
-	 			Apply[ Exists$TM, Flatten[ Hold[ RNG$[ r], rc, tmp], 1, Hold]]
- 			]
-   		]
-  	]
+Exists$TM[ rng:RNG$[ _SETRNG$|_STEPRNG$, __], cond_, form_] /; buiActive["Exists"] :=
+ 	splitQuantifier[ Exists$TM, rng, cond, form]
 
-Exists$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; 
-  buiActive["Exists"] :=
+Exists$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["Exists"] :=
  	Module[ {iter},
-     		existsIteration[ iter, cond, 
-    form] /; (iter = rangeToIterator[ r]) =!= $Failed
+    	existsIteration[ iter, cond, form] /; (iter = rangeToIterator[ r]) =!= $Failed
   	]
 
 SetAttributes[ existsIteration, HoldRest]
@@ -844,56 +836,28 @@ TupleOf$TM[ RNG$[ r__], cond_, form_] :=
 (* We have to split several summations into individual ones,
 	because the various ranges may depend on each other, and this does not work in connection with
 	"sequenceOfIteration". Same with "ProductOf", "MaximumOf", etc. *)
-SumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, form_] /; buiActive["SumOf"] :=
- 	Module[ {splitC},
- 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = First[ splitC], sc = Last[ splitC]},
- 			With[ {tmp = Delete[ Hold[ SumOf$TM[ RNG$[ s], sc, form]], {1, 2, 0}]},
-	 			Apply[ SumOf$TM, Flatten[ Hold[ RNG$[ r], rc, tmp], 1, Hold]]
- 			]
-   		]
-	]
+SumOf$TM[ rng:RNG$[ _SETRNG$ | _STEPRNG$, __], cond_, form_] /; buiActive["SumOf"] :=
+	splitQuantifier[ SumOf$TM, rng, cond, form]
 SumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["SumOf"] :=
 	Module[ {v},
 		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Plus$TM, 0]) =!= $Failed
 	]
-SumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, dom_, form_] /; buiActive["SumOf"] :=
- 	Module[ {splitC},
- 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = First[ splitC], sc = Last[ splitC]},
- 			With[ {tmp = Delete[ Hold[ SumOf$TM[ RNG$[ s], sc, dom, form]], {1, 2, 0}]},
-	 			Apply[ SumOf$TM, Flatten[ Hold[ RNG$[ r], rc, dom, tmp], 1, Hold]]
- 			]
-   		]
-	]
-SumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, dom_, form_] /; buiActive["SumOf"] :=
+(h:DomainOperation$TM[ _, SumOf$TM])[ rng:RNG$[ _SETRNG$ | _STEPRNG$, __], cond_, form_] /; buiActive["SumOf"] :=
+ 	splitQuantifier[ h, rng, cond, form]
+DomainOperation$TM[ dom_, SumOf$TM][ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["SumOf"] :=
 	Module[ {v},
 		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, DomainOperation$TM[ dom, Plus$TM], DomainOperation$TM[ dom, 0]]) =!= $Failed
 	]
 	
-ProductOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, form_] /; buiActive["ProductOf"] :=
- 	Module[ {splitC},
- 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = First[ splitC], sc = Last[ splitC]},
- 			With[ {tmp = Delete[ Hold[ ProductOf$TM[ RNG$[ s], sc, form]], {1, 2, 0}]},
-	 			Apply[ ProductOf$TM, Flatten[ Hold[ RNG$[ r], rc, tmp], 1, Hold]]
- 			]
-   		]
-	]
+ProductOf$TM[ rng:RNG$[ _SETRNG$ | _STEPRNG$, __], cond_, form_] /; buiActive["ProductOf"] :=
+ 	splitQuantifier[ ProductOf$TM, rng, cond, form]
 ProductOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["ProductOf"] :=
 	Module[ {v},
 		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Times$TM, 1]) =!= $Failed
 	]
-ProductOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, dom_, form_] /; buiActive["ProductOf"] :=
- 	Module[ {splitC},
- 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = First[ splitC], sc = Last[ splitC]},
- 			With[ {tmp = Delete[ Hold[ ProductOf$TM[ RNG$[ s], sc, dom, form]], {1, 2, 0}]},
-	 			Apply[ ProductOf$TM, Flatten[ Hold[ RNG$[ r], rc, dom, tmp], 1, Hold]]
- 			]
-   		]
-	]
-ProductOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, dom_, form_] /; buiActive["ProductOf"] :=
+(h:DomainOperation$TM[ _, ProductOf$TM])[ rng:RNG$[ _SETRNG$ | _STEPRNG$, __], cond_, form_] /; buiActive["ProductOf"] :=
+ 	splitQuantifier[ h, rng, cond, form]
+DomainOperation$TM[ dom_, ProductOf$TM][ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["ProductOf"] :=
 	Module[ {v},
 		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, DomainOperation$TM[ dom, Times$TM], DomainOperation$TM[ dom, 1]]) =!= $Failed
 	]
@@ -955,112 +919,56 @@ valueIteration[ $Failed, _, _] := $Failed
 valueIteration[ args___] := unexpected[ valueIteration, {args}]
 
 
-MaximumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, form_] /; buiActive["MaximumOf"] :=
- 	Module[ {splitC},
- 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = First[ splitC], sc = Last[ splitC]},
- 			With[ {tmp = Delete[ Hold[ MaximumOf$TM[ RNG$[ s], sc, form]], {1, 2, 0}]},
-	 			Apply[ MaximumOf$TM, Flatten[ Hold[ RNG$[ r], rc, tmp], 1, Hold]]
- 			]
-   		]
-	]
+MaximumOf$TM[ rng:RNG$[ _SETRNG$ | _STEPRNG$, __], cond_, form_] /; buiActive["MaximumOf"] :=
+ 	splitQuantifier[ MaximumOf$TM, rng, cond, form]
 MaximumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["MaximumOf"] :=
 	Module[ {v},
-		max$TM[ Set$TM@@v] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+		max$TM[ Set$TM @@ v] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
-MaximumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, ord_, form_] /; buiActive["MaximumOf"] :=
- 	Module[ {splitC},
- 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = First[ splitC], sc = Last[ splitC]},
- 			With[ {tmp = Delete[ Hold[ MaximumOf$TM[ RNG$[ s], sc, ord, form]], {1, 2, 0}]},
-	 			Apply[ MaximumOf$TM, Flatten[ Hold[ RNG$[ r], rc, ord, tmp], 1, Hold]]
- 			]
-   		]
-	]
-MaximumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, ord_, form_] /; buiActive["MaximumOf"] :=
+(h:Annotated$TM[ MaximumOf$TM, _SubScript$TM])[ rng:RNG$[ _SETRNG$ | _STEPRNG$, __], cond_, form_] /; buiActive["MaximumOf"] :=
+ 	splitQuantifier[ h, rng, cond, form]
+Annotated$TM[ MaximumOf$TM, sub_SubScript$TM][ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["MaximumOf"] :=
 	Module[ {v},
-		Annotated$TM[ max$TM, SubScript$TM[ ord]][ Set$TM@@v] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+		Annotated$TM[ max$TM, sub][ Set$TM @@ v] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
 	
-MinimumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, form_] /; buiActive["MinimumOf"] :=
- 	Module[ {splitC},
- 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = First[ splitC], sc = Last[ splitC]},
- 			With[ {tmp = Delete[ Hold[ MinimumOf$TM[ RNG$[ s], sc, form]], {1, 2, 0}]},
-	 			Apply[ MinimumOf$TM, Flatten[ Hold[ RNG$[ r], rc, tmp], 1, Hold]]
- 			]
-   		]
-	]
+MinimumOf$TM[ rng:RNG$[ _SETRNG$ | _STEPRNG$, __], cond_, form_] /; buiActive["MinimumOf"] :=
+ 	splitQuantifier[ MinimumOf$TM, rng, cond, form]
 MinimumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["MinimumOf"] :=
 	Module[ {v},
-		min$TM[ Set$TM@@v] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+		min$TM[ Set$TM @@ v] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
-MinimumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, ord_, form_] /; buiActive["MinimumOf"] :=
- 	Module[ {splitC},
- 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = First[ splitC], sc = Last[ splitC]},
- 			With[ {tmp = Delete[ Hold[ MinimumOf$TM[ RNG$[ s], sc, ord, form]], {1, 2, 0}]},
-	 			Apply[ MinimumOf$TM, Flatten[ Hold[ RNG$[ r], rc, ord, tmp], 1, Hold]]
- 			]
-   		]
-	]
-MinimumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, ord_, form_] /; buiActive["MinimumOf"] :=
+(h:Annotated$TM[ MinimumOf$TM, _SubScript$TM])[ rng:RNG$[ _SETRNG$ | _STEPRNG$, __], cond_, form_] /; buiActive["MinimumOf"] :=
+ 	splitQuantifier[ h, rng, cond, form]
+Annotated$TM[ MinimumOf$TM, sub_SubScript$TM][ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["MinimumOf"] :=
 	Module[ {v},
-		Annotated$TM[ min$TM, SubScript$TM[ ord]][ Set$TM@@v] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+		Annotated$TM[ min$TM, sub][ Set$TM @@ v] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
 	
-UnionOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, form_] /; buiActive["UnionOf"] :=
- 	Module[ {splitC},
- 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = First[ splitC], sc = Last[ splitC]},
- 			With[ {tmp = Delete[ Hold[ UnionOf$TM[ RNG$[ s], sc, form]], {1, 2, 0}]},
-	 			Apply[ UnionOf$TM, Flatten[ Hold[ RNG$[ r], rc, tmp], 1, Hold]]
- 			]
-   		]
-	]
+UnionOf$TM[ rng:RNG$[ _SETRNG$ | _STEPRNG$, __], cond_, form_] /; buiActive["UnionOf"] :=
+ 	splitQuantifier[ UnionOf$TM, rng, cond, form]
 UnionOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["UnionOf"] :=
 	Module[ {v},
 		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Union$TM, Set$TM[]]) =!= $Failed
 	]
-UnionOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, dom_, form_] /; buiActive["UnionOf"] :=
- 	Module[ {splitC},
- 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = First[ splitC], sc = Last[ splitC]},
- 			With[ {tmp = Delete[ Hold[ UnionOf$TM[ RNG$[ s], sc, dom, form]], {1, 2, 0}]},
-	 			Apply[ UnionOf$TM, Flatten[ Hold[ RNG$[ r], rc, dom, tmp], 1, Hold]]
- 			]
-   		]
-	]
-UnionOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, dom_, form_] /; buiActive["UnionOf"] :=
+(h:Annotated$TM[ UnionOf$TM, _SubScript$TM])[ rng:RNG$[ _SETRNG$ | _STEPRNG$, __], cond_, form_] /; buiActive["UnionOf"] :=
+ 	splitQuantifier[ h, rng, cond, form]
+Annotated$TM[ UnionOf$TM, sub_SubScript$TM][ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["UnionOf"] :=
 	Module[ {v},
-		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Annotated$TM[ Union$TM, SubScript$TM[ dom]], Set$TM[]]) =!= $Failed
+		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Annotated$TM[ Union$TM, sub], Set$TM[]]) =!= $Failed
 	]
 	
-IntersectionOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, form_] /; buiActive["IntersectionOf"] :=
- 	Module[ {splitC},
- 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = First[ splitC], sc = Last[ splitC]},
- 			With[ {tmp = Delete[ Hold[ IntersectionOf$TM[ RNG$[ s], sc, form]], {1, 2, 0}]},
-	 			Apply[ IntersectionOf$TM, Flatten[ Hold[ RNG$[ r], rc, tmp], 1, Hold]]
- 			]
-   		]
-	]
+IntersectionOf$TM[ rng:RNG$[ _SETRNG$ | _STEPRNG$, __], cond_, form_] /; buiActive["IntersectionOf"] :=
+ 	splitQuantifier[ IntersectionOf$TM, rng, cond, form]
 IntersectionOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["IntersectionOf"] :=
 	Module[ {v},
 		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Intersection$TM, $Failed]) =!= $Failed
 	]
-IntersectionOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$, s__], cond_, dom_, form_] /; buiActive["IntersectionOf"] :=
- 	Module[ {splitC},
- 		splitC = splitAnd[ Hold[ cond], {Hold[ r][[1, 1]]}];
- 		With[ {rc = First[ splitC], sc = Last[ splitC]},
- 			With[ {tmp = Delete[ Hold[ IntersectionOf$TM[ RNG$[ s], sc, dom, form]], {1, 2, 0}]},
-	 			Apply[ IntersectionOf$TM, Flatten[ Hold[ RNG$[ r], rc, dom, tmp], 1, Hold]]
- 			]
-   		]
-	]
-IntersectionOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, dom_, form_] /; buiActive["IntersectionOf"] :=
+(h:Annotated$TM[ IntersectionOf$TM, _SubScript$TM])[ rng:RNG$[ _SETRNG$ | _STEPRNG$, __], cond_, form_] /; buiActive["IntersectionOf"] :=
+ 	splitQuantifier[ h, rng, cond, form]
+Annotated$TM[ IntersectionOf$TM, sub_SubScript$TM][ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["IntersectionOf"] :=
 	Module[ {v},
-		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Annotated$TM[ Intersection$TM, SubScript$TM[ dom]], $Failed]) =!= $Failed
+		v /; (v = valueIteration[ rangeToIterator[ r], cond, form, Annotated$TM[ Intersection$TM, sub], $Failed]) =!= $Failed
 	]
 	
 (* ::Subsection:: *)
@@ -1319,7 +1227,7 @@ ArgMin$TM[ r:RNG$[ __], cond_, term_] /; buiActive["ArgMin"] :=
 			]
  			)
 	]
-ArgMin$TM[ r_RNG$, cond_, ord_, term_] /; buiActive["ArgMin"] :=
+Annotated$TM[ ArgMin$TM, SubScript$TM[ ord_]][ r_RNG$, cond_, term_] /; buiActive["ArgMin"] :=
 	Module[ {res, rcList, m},
 		(
 		If[ Length[ res] === 1,
@@ -1359,7 +1267,7 @@ ArgMax$TM[ r:RNG$[ __], cond_, term_] /; buiActive["ArgMax"] :=
 			]
  			)
 	]
-ArgMax$TM[ r_RNG$, cond_, ord_, term_] /; buiActive["ArgMax"] :=
+Annotated$TM[ ArgMax$TM, SubScript$TM[ ord_]][ r_RNG$, cond_, term_] /; buiActive["ArgMax"] :=
 	Module[ {res, rcList, m},
 		(
 		If[ Length[ res] === 1,
@@ -1403,7 +1311,7 @@ TheArgMin$TM[ r:RNG$[ __], cond_, term_] /; buiActive["TheArgMin"] :=
 			]
  			)
 	]
-TheArgMin$TM[ r:RNG$[ __], cond_, ord_, term_] /; buiActive["TheArgMin"] :=
+Annotated$TM[ TheArgMin$TM, SubScript$TM[ ord_]][ r:RNG$[ __], cond_, term_] /; buiActive["TheArgMin"] :=
 	Module[ {res, rcList, m, v},
 		(
 		If[ Length[ res] === 1,
@@ -1448,7 +1356,7 @@ TheArgMax$TM[ r:RNG$[ __], cond_, term_] /; buiActive["TheArgMax"] :=
 			]
  			)
 	]
-TheArgMax$TM[ r:RNG$[ __], cond_, ord_, term_] /; buiActive["TheArgMax"] :=
+Annotated$TM[ TheArgMax$TM, SubScript$TM[ ord_]][ r:RNG$[ __], cond_, term_] /; buiActive["TheArgMax"] :=
 	Module[ {res, rcList, m, v},
 		(
 		If[ Length[ res] === 1,

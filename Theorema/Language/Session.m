@@ -134,7 +134,7 @@ freshSymbolProg[ Hold[ s_Symbol], dropWolf_] :=
 freshSymbolProg[ args___] := unexpected[ freshSymbolProg, {args}]
 
 markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
-    Module[ {s, seq, vars, violating},
+    Module[ {s, seq, vars, violating, out},
         (* all symbols sym specified as variables in r are translated into VAR$[sym]
            we substitute all symbols with matching "base name" (neglecting the context!) so that also
            symbols in different context get substituted. This is important when processing archives, because
@@ -142,8 +142,8 @@ markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
            lives in the context of the loading notebook/archive. With the substitution below, the private`sym becomes 
            a VAR$[loading`sym] *)
            
-        (* amaletz: We have to keep the distinction between sequence variables and individual variables,
-        			because "SymbolName[]" would give an error if applied to compound expressions.
+        (* We have to keep the distinction between sequence variables and individual variables,
+           because "SymbolName[]" would give an error if applied to compound expressions.
         *)
         vars = specifiedVariables[ r];
         seq = Cases[vars, (SEQ0$|SEQ1$)[ _]];
@@ -155,11 +155,18 @@ markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
         ];
         s = Join[ Map[ (h:(SEQ0$|SEQ1$))[ Hold[ sym_Symbol]] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> VAR$[ h[ #]]&, seq[[All, 1]]],
         		  Map[ Hold[ sym_Symbol] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> VAR$[ #]&, vars]];
-        replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {SEQ0$, SEQ1$, VAR$, FIX$}]
+        out = markVariables[ Hold[ expr]];
+        Switch[ out,
+        	Hold[ _[ ___]],
+        	(* We must NOT replace in the head! Otherwise, funny things would happen if a variable bound by a quantifier has the same name as the quantifier ... *)
+        	applyHold[ Extract[ out, {1, 0}, Hold], replaceAllExcept[ Delete[ out, {1, 0}], s, {}, Heads -> {SEQ0$, SEQ1$, VAR$, FIX$}]],
+        	_,
+        	replaceAllExcept[ out, s, {}, Heads -> {SEQ0$, SEQ1$, VAR$, FIX$}]
+        ]
     ]
 
 markVariables[ Hold[ Theorema`Computation`Language`QU$[ r_Theorema`Computation`Language`RNG$, expr_]]] :=
-    Module[ {s, seq, vars, violating},
+    Module[ {s, seq, vars, violating, out},
     	vars = specifiedVariables[ Hold[ r]];
         seq = Cases[vars, (Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$)[ _]];
         vars = Complement[ vars, seq];
@@ -170,7 +177,16 @@ markVariables[ Hold[ Theorema`Computation`Language`QU$[ r_Theorema`Computation`L
         ];
         s = Join[ Map[ (h:(Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$))[ Hold[ sym_Symbol]] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> Theorema`Computation`Language`VAR$[ h[ #]]&, seq[[All, 1]]],
         		  Map[ Hold[ sym_Symbol] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> Theorema`Computation`Language`VAR$[ #]&, vars]];
-        replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {Theorema`Computation`Language`SEQ0$, Theorema`Computation`Language`SEQ1$, Theorema`Computation`Language`VAR$, Theorema`Computation`Language`FIX$}]
+       	out = markVariables[ Hold[ expr]];
+       	Switch[ out,
+        	Hold[ _[ ___]],
+        	applyHold[
+        		Extract[ out, {1, 0}, Hold],
+        		replaceAllExcept[ Delete[ out, {1, 0}], s, {}, Heads -> {Theorema`Computation`Language`SEQ0$, Theorema`Computation`Language`SEQ1$, Theorema`Computation`Language`VAR$, Theorema`Computation`Language`FIX$}]
+        	],
+        	_,
+        	replaceAllExcept[ out, s, {}, Heads -> {Theorema`Computation`Language`SEQ0$, Theorema`Computation`Language`SEQ1$, Theorema`Computation`Language`VAR$, Theorema`Computation`Language`FIX$}]
+        ]
     ]
     
 markVariables[ Hold[ h_[ e___]]] := applyHold[

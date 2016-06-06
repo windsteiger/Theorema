@@ -125,6 +125,16 @@ MakeBoxes[ Annotated$TM[ op_, UnderScript$TM[ un__], OverScript$TM[ ov__]], Theo
 (* ::Subsubsection:: *)
 (* annotated operators with arguments *)
 
+(* Quantifiers must come before all other Annotated$TM-expressions. *)
+MakeBoxes[ Annotated$TM[ q_?isQuantifierName, SubScript$TM[ sub_]][ rng_, True, form_], TheoremaForm] :=
+	RowBox[ {UnderscriptBox[ SubscriptBox[ Replace[ q, $tmaNameToQuantifier], MakeBoxes[ sub, TheoremaForm]], makeRangeBox[ rng, TheoremaForm]],
+		MakeBoxes[ form, TheoremaForm]}
+	]
+MakeBoxes[ Annotated$TM[ q_?isQuantifierName SubScript$TM[ sub_]][ rng_, cond_, form_], TheoremaForm] :=
+	RowBox[ {UnderscriptBox[ UnderscriptBox[ SubscriptBox[ Replace[ q, $tmaNameToQuantifier], MakeBoxes[ sub, TheoremaForm]], makeRangeBox[ rng, TheoremaForm]],
+		MakeBoxes[ cond, TheoremaForm]], MakeBoxes[ form, TheoremaForm]}
+	]
+
 MakeBoxes[ aop_Annotated$TM[], TheoremaForm] :=
 	Module[ {opName, sym = MakeBoxes[ aop, TheoremaForm]},
 		(
@@ -173,7 +183,17 @@ MakeBoxes[ aop_Annotated$TM[ a__], TheoremaForm] :=
 (* ::Subsection:: *)
 (* Domain underscripts *)
 
-(* We treat the case of domain-element separately, because although "Element" is no prefix operator we don't
+(* Quantifiers must come before all other DomainOperation$TM-expressions. *)
+MakeBoxes[ DomainOperation$TM[ dom_, q_?isQuantifierName][ rng_, True, form_], TheoremaForm] :=
+	RowBox[ {UnderscriptBox[ SubscriptBox[ Replace[ q, $tmaNameToQuantifier], MakeBoxes[ dom, TheoremaForm]], makeRangeBox[ rng, TheoremaForm]],
+		MakeBoxes[ form, TheoremaForm]}
+	]
+MakeBoxes[ DomainOperation$TM[ dom_, q_?isQuantifierName][ rng_, cond_, form_], TheoremaForm] :=
+	RowBox[ {UnderscriptBox[ UnderscriptBox[ SubscriptBox[ Replace[ q, $tmaNameToQuantifier], MakeBoxes[ dom, TheoremaForm]], makeRangeBox[ rng, TheoremaForm]],
+		MakeBoxes[ cond, TheoremaForm]], MakeBoxes[ form, TheoremaForm]}
+	]
+	
+(* We treat the case of domain-element separately, because although "Element" is an infix operator we don't
 	want any parentheses wrapped around it. *)
 MakeBoxes[ (d:(DomainOperation$TM[ dom_, Element$TM]))[ a_], TheoremaForm] :=
 	RowBox[ {MakeBoxes[ d, TheoremaForm], "[", MakeBoxes[ a, TheoremaForm], "]"}]
