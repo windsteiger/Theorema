@@ -193,15 +193,11 @@ MakeBoxes[ DomainOperation$TM[ dom_, q_?isQuantifierName][ rng_, cond_, form_], 
 		MakeBoxes[ cond, TheoremaForm]], MakeBoxes[ form, TheoremaForm]}
 	]
 	
-(* We treat the case of domain-element separately, because although "Element" is an infix operator we don't
-	want any parentheses wrapped around it. *)
-MakeBoxes[ (d:(DomainOperation$TM[ dom_, Element$TM]))[ a_], TheoremaForm] :=
-	RowBox[ {MakeBoxes[ d, TheoremaForm], "[", MakeBoxes[ a, TheoremaForm], "]"}]
 MakeBoxes[ (d:(DomainOperation$TM[ dom_, op_]))[ a_], TheoremaForm] :=
 	Module[ {opName = getTmaOperatorName[ op], form,
 			opBox = MakeBoxes[ d, TheoremaForm],
 			aBox = MakeBoxes[ a, TheoremaForm]},
-		If[ opName === $Failed,
+		If[ opName === $Failed || op === Element$TM,	(* we don't want to wrap parentheses around the domain-membership predicate *)
 		(* no (annotated) Theorema operator *)
 			RowBox[ {opBox, "[", aBox, "]"}],
 		(* (annotated) Theorema operator *)
@@ -211,6 +207,8 @@ MakeBoxes[ (d:(DomainOperation$TM[ dom_, op_]))[ a_], TheoremaForm] :=
 				RowBox[ {opBox, aBox}],
 				MemberQ[ form, Postfix],
 				RowBox[ {aBox, opBox}],
+				form === {},
+				RowBox[ {opBox, "[", aBox, "]"}],
 				True,
 				RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], opBox, TagBox[ ")", "AutoParentheses"]}], "[", aBox, "]"}]
 			]
@@ -223,8 +221,12 @@ MakeBoxes[ (d:(DomainOperation$TM[ dom_, op_]))[ a__], TheoremaForm] :=
 			RowBox[ {box, "[", RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ a]]], ","]], "]"}],
 		(* (annotated) Theorema operator *)
 			form = getTmaOperatorForms[ opName];
-			If[ MemberQ[ form, Infix],
+			Which[
+				MemberQ[ form, Infix],
 				tmaInfixBox[ {a}, box],
+				form === {},
+				RowBox[ {box, "[", RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ a]]], ","]], "]"}],
+				True,
 				RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], box, TagBox[ ")", "AutoParentheses"]}], "[",
 					RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ a]]], ","]], "]"}]
 			]
@@ -236,7 +238,10 @@ MakeBoxes[ (d:(DomainOperation$TM[ dom_, op_]))[], TheoremaForm] :=
 		(* no (annotated) Theorema operator *)
 			RowBox[ {box, "[", "]"}],
 		(* (annotated) Theorema operator *)
-			RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], box, TagBox[ ")", "AutoParentheses"]}], "[", "]"}]
+			If[ getTmaOperatorForms[ opName] === {},
+				RowBox[ {box, "[", "]"}],
+				RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], box, TagBox[ ")", "AutoParentheses"]}], "[", "]"}]
+			]
 		]
 	]
 MakeBoxes[ DomainOperation$TM[ dom_, op_], TheoremaForm] :=

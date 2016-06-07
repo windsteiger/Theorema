@@ -562,6 +562,38 @@ substituteFree[ expr_, rules_List] :=
 substituteFree[ args___] := unexpected[ substituteFree, {args}]
 
 
+(* ::Subsubsection:: *)
+(* renameBound *)
+
+renameBound[ q_[ (rh:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$))[ rng___], form___], new_List] /; Length[ Hold[ rng]] === Length[ new] :=
+	Module[ {repl = {}, newRng},
+		newRng =
+			ReplacePart[
+				Hold @@ {
+					Flatten[
+						Replace[
+							Thread[{Hold[ rng], Hold @@ new}, Hold],
+							{r_[ x_, rest___], v_} :>
+								With[ {tmp = With[ {old = repl},
+												repl = Prepend[ DeleteCases[ repl, x -> _], x -> v];
+												ReplacePart[ Hold @@ {Prepend[ substituteFree[ Hold[ rest], old], v]}, {1, 0} -> r]
+											]
+										},
+									tmp /; True
+								],
+							{1}
+						],
+						1,
+						Hold
+					]
+				},
+				{1, 0} -> rh
+			];
+		q @@ Join[ newRng, substituteFree[ Hold[ form], repl]]
+	]
+renameBound[ args___] := unexpected[ renameBound, {args}]
+
+
 (* ::Section:: *)
 (* Expression categories *)
 
@@ -869,11 +901,13 @@ toInputStringAux[ Hold[ first_, rest__], dropWolf_] := Join[ toInputStringAux[ H
 toInputStringAux[ Hold[ ], _] := {}
 
 (* We use 'SymbolName', because 'ToString' also returns the context. *)
+(* The reason for adding "PATT$" is to distinguish free- from bound variables. *)
 stripVar[ v:Theorema`Language`VAR$[ Theorema`Language`SEQ0$[ a_Symbol]]] :=
-	v -> ToExpression[ "Theorema`Knowledge`SEQ0$" <> SymbolName[ a]]
+	v -> ToExpression[ "Theorema`Knowledge`PATT$SEQ0$" <> SymbolName[ a]]
 stripVar[ v:Theorema`Language`VAR$[ Theorema`Language`SEQ1$[ a_Symbol]]] :=
-	v -> ToExpression[ "Theorema`Knowledge`SEQ1$" <> SymbolName[ a]]
-stripVar[ v:Theorema`Language`VAR$[ a_Symbol]] := v -> a	(* no need to add prefix "VAR$", since it is already there *)
+	v -> ToExpression[ "Theorema`Knowledge`PATT$SEQ1$" <> SymbolName[ a]]
+stripVar[ v:Theorema`Language`VAR$[ a_Symbol]] :=
+	v -> ToExpression[ "Theorema`Knowledge`PATT$" <> SymbolName[ a]]
 stripVar[ v:Theorema`Language`META$[ Theorema`Language`SEQ0$[ a_Symbol], n_, ___]] :=
 	v -> ToExpression[ "Theorema`Knowledge`SEQ0$META$" <> SymbolName[ a] <> ToString[ n]]
 stripVar[ v:Theorema`Language`META$[ Theorema`Language`SEQ1$[ a_Symbol], n_, ___]] :=
@@ -883,16 +917,16 @@ stripVar[ v:Theorema`Language`META$[ a_Symbol, n_, ___]] :=
 stripVar[ args___] := unexpected[ stripVar, {args}]
 
 varToPattern[ v:Theorema`Language`VAR$[ Theorema`Language`SEQ0$[ a_Symbol]]] :=
-	With[ {new = ToExpression[ "Theorema`Knowledge`SEQ0$" <> SymbolName[ a], InputForm, Hold]},
+	With[ {new = ToExpression[ "Theorema`Knowledge`PATT$SEQ0$" <> SymbolName[ a], InputForm, Hold]},
 		v -> Pattern@@Append[ new, BlankNullSequence[]]
 	]
 varToPattern[ v:Theorema`Language`VAR$[ Theorema`Language`SEQ1$[ a_Symbol]]] :=
-	With[ {new = ToExpression[ "Theorema`Knowledge`SEQ1$" <> SymbolName[ a], InputForm, Hold]},
+	With[ {new = ToExpression[ "Theorema`Knowledge`PATT$SEQ1$" <> SymbolName[ a], InputForm, Hold]},
 		v -> Pattern@@Append[ new, BlankSequence[]]
 	]
 varToPattern[ v:Theorema`Language`VAR$[ a_Symbol]] :=
-	With[ {rhs = Hold[ a, Blank[]]},
-		v -> Pattern@@rhs
+	With[ {new = ToExpression[ "Theorema`Knowledge`PATT$" <> SymbolName[ a], InputForm, Hold]},
+		v -> Pattern@@Append[ new, Blank[]]
 	]
 varToPattern[ v:Theorema`Language`META$[ Theorema`Language`SEQ0$[ a_Symbol], n_, ___]] :=
 	With[ {new = ToExpression[ "Theorema`Knowledge`SEQ0$META$" <> SymbolName[ a] <> ToString[ n], InputForm, Hold]},
