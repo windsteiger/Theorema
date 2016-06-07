@@ -40,10 +40,12 @@ With[ {lang = "English"},
 	
 	MessageName[ addKnowledgeWhileProving, "usage", lang] = "addKnowledgeWhileProving[ new_List] adds all formulas in new to the list of formulas to be written in the proof info/file of the current proof.";
 	MessageName[ allTmaNotebooks, "usage", lang] = "allTmaNotebooks[] returns a list of all Theorema Notebooks in the current session.";
+	MessageName[ allTrue, "usage", lang] = "allTrue[ l, f] checks whether f always yields True when applied to the elements of list l.";
 	MessageName[ alphaEquivalent, "usage", lang] = "alphaEquivalent[ a, b] checks whether 'a' and 'b' are \[Alpha]-equivalent to each other.";
 	MessageName[ analyzeVars, "usage", lang] = "analyzeVars[ expr] analyzes the occurrences of all variables appearing in 'expr' (free and bound).";
 	MessageName[ appendKB, "usage", lang] = "appendKB[ kb_List, fml] appends fml to the knowledge base kb and deletes duplicate entries.";
 	MessageName[ appendToKB, "usage", lang] = "appendToKB[ sym, fml] sets sym to the result of appending fml to sym and deleting duplicate entries.";
+	MessageName[ $applyAllPossibleInferences, lang, "usage"] = "Indicates whether inference rules should be applied in all possible ways or not in an interactive proof.";
 	MessageName[ applyAllRules, "usage", lang] = "applyAllRules[ ...] .";
 	MessageName[ applyHold, "usage", lang] = "applyHold[Hold[a],Hold[b]] produces Hold[a[b]].";
 	MessageName[ arbitraryButFixed, "usage", lang] = "arbitraryButFixed[ expr, rng] substitutes all free occurrences of variables specified by the range rng in expr by a new constant.";
@@ -82,6 +84,7 @@ With[ {lang = "English"},
 	MessageName[ findSelectedFormula, "usage", lang] = "findSelectedFormula[ sel] ...";
 	MessageName[ FML$, "usage", lang] = "FML$[ key, form, lab, opt] represents a Theorema formula including its key, label, and optional components.";
 	MessageName[ $formulaCounterName,"usage", lang] = "Name of formulaCounter in the notebook options in CounterAssignments parameter.";
+	MessageName[ $formulaLabel, "usage", lang] = "Internal counter for automatically-generated formula labels in proofs; not to be confused with the counter for formula labels in notebooks!";
 	MessageName[ formulaListToRules, "usage", lang] = "";	
 	MessageName[ formulaReference, "usage", lang] = "formulaReference[ fml] gives a hyperlink to the formula.";
 	MessageName[ formulaToRules, "usage", lang] = "";	
@@ -100,6 +103,8 @@ With[ {lang = "English"},
 	MessageName[ getExistGoalInstanceDialog, "usage", lang] = "The dialog window asking for an instantiation.";
 	MessageName[ getKeyTags,"usage", lang] = "getKeyTags[cellTags] returns all CellTags used as cell/formula keys in cell/formula identification.";
 	MessageName[ getOptionalComponent, "usage", lang] = "getOptionalComponent[ ds, key] is a generic accessor function for optional components in a datastructure.";
+	MessageName[ getTheoremaCommander, "usage", lang] = "getTheoremaCommander[] returns the Theorema commander notebook.";
+	MessageName[ $goalActivated, lang, "usage"] = "Indicates whether the goal of the current proof situation is activated in an interactive proof.";
 	MessageName[ goalRules, "usage", lang] = "goalRules is an option for the constructor makePRFSIT/toBeProved and a selector for the PRFSIT$ datastructure.";
 	MessageName[ goal, "usage", lang] = "goal is an option for the constructors makePRFSIT/toBeProved and a selector for the PRFSIT$ datastructure.";
 
@@ -139,9 +144,11 @@ With[ {lang = "English"},
 	MessageName[ $kbStruct, "usage", lang] = "Structured knowledge base to be displayed in the KB browser";
 	MessageName[ kb, "usage", lang] = "kb is an option for the constructor makePRFSIT/toBeProved and a selector for the PRFSIT$ datastructure.";
 	MessageName[ key, "usage", lang] = "key is an option for the formula constructor makeFML and a selector for the FML$ datastructure.";
+	MessageName[ $knowledgeActivated, lang, "usage"] = "List of keys of formulas in the knowledge base of the current proof situation which are activated in an interactive proof.";
 
 	MessageName[ $labelSeparator, "usage", lang] = "Separator between different labels assigned to one formula.";
 	MessageName[ label, "usage", lang] = "label is an option for the formula constructor makeFML and a selector for the FML$ datastructure.";
+	MessageName[ $lastChoice, "usage", lang] = "The position of the node in the current proof tree the user interactively chose to continue with last.";
 	MessageName[ loadArchive, "usage", lang] = "loadArchive[name] loads the specified archive into the current session.";
 
 	MessageName[ makeANDNODE, "usage", lang] = "makeANDNODE[ info_, {branches_}] constructs a node in the proof tree using proofinfo info to prove all the given branches.";
@@ -174,6 +181,7 @@ With[ {lang = "English"},
 	MessageName[ pending, "usage", lang] = "pending is a possible proof value.";
 	MessageName[ performProofStep, "usage", lang] = "performProofStep[ prog_] is a wrapper to be used on the rhs of an inference rule, where prog is the actual program that performs the step.";
 	MessageName[ pObjCells, "usage", lang] = "pObjCells[ po] generates a cell representation of the proof object po (default: $TMAproofObject) to be rendered in a notebook.";
+	MessageName[ positionRelevantSits, "usage", lang] = "positionRelevantSits[ po] returns the positions of all relevant pending proof situations in po.";
 	MessageName[ prependKB, "usage", lang] = "prependKB[ kb_List, fml] prepends fml to the knowledge base kb and deletes duplicate entries.";
 	MessageName[ prependToKB, "usage", lang] = "prependToKB[ sym, fml] sets sym to the result of prepending fml to sym and deleting duplicate entries.";
 	MessageName[ PRFOBJ$, "usage", lang] = "PRFOBJ$[ ...] represents a Theorema proof object.";
@@ -185,6 +193,8 @@ With[ {lang = "English"},
 	MessageName[ $proofCellStatus, "usage", lang] = "$proofCellStatus determines the status (open/closed) of nested cells in the proof notebook.";
 	MessageName[ proofStatusIndicator, "usage", lang] = "proofStatusIndicator[ status, name] gives a graphical indication of the proof status. If name is given, it is interpreted as the name of a proof rule, and its description is given in a tooltip.";
 	MessageName[ proofStepTextId, "usage", lang] = "proofStepTextId[ stepID_, lang_, data___] generates the cell expression explaining the proof step stepID in language lang.";
+	MessageName[ proofValue, "usage", lang] = "proofValue[ obj] returns the proof value (i.e. pending, failed or proved) of the given proof-object, -situation or -node.";
+	MessageName[ propagateProofValues, "usage", lang] = "propagateProofValues[ node] propagates the proof values of node's successors to node itself, depending on the type of node (ANDNODE, ORNODE).";
 	MessageName[ proved, "usage", lang] = "proved is a possible proof value.";
 	MessageName[ pSitCells, "usage", lang] = "pSitCells[ ps] generates a cell representation of the proof situation ps to be rendered in a notebook.";
 
@@ -212,6 +222,7 @@ With[ {lang = "English"},
 	MessageName[ ruleTextActive, "usage", lang] = "Specifies, whether the proof text for the rule will be activated. (ruleTextActive)";
 
 	MessageName[ $selectedProofStep, "usage", lang] = "$selectedProofStep refers to the id of the proof step that is selected in the current proof notebook.";
+	MessageName[ setAll, "usage", lang] = "setAll[ l, f, val] sets the value of function f at each element of list l to val.";
 	MessageName[ setComputationContext, "usage", lang] = "setComputationContext[ c] sets the context for the next computation to c.";
 	MessageName[ setComputationEnvironment, "usage", lang] = "setComputationEnvironment[ f] sets the environment values for sa computation from the values stored in file f.";
 	MessageName[ showProofNavigation, "usage", lang] = "showProofNavigation[ proofObject_] shows a tree navigation through a proof.";

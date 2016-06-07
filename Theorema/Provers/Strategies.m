@@ -120,6 +120,7 @@ priorityInteractiveSaturation[ ps_PRFSIT$] :=
 							newNodes = applyAllRulesOnce[ satps, {allRules[[rule]]}];
 							If[ newNodes === {},
 								newNodes = {makeANDNODE[ makePRFINFO[ name -> failedInteractiveRule, used -> {{}}, generated -> {{}}], satps]},
+								If[ Length[ newNodes] === 1, $lastChoice = id@First[ newNodes]];
 								AppendTo[ newNodes, satps]
 							]
 						]
@@ -143,19 +144,22 @@ priorityInteractiveSaturation[ ps_PRFSIT$] :=
 		];
 		Switch[ Length[ newNodes],
 			0,
-			makeTERMINALNODE[ makePRFINFO[ name -> noApplicableRule, used -> Prepend[ kb@ps, goal@ps], "openPS" -> Drop[ Apply[ List, ps], 2]], failed],
+			makeTERMINALNODE[ makePRFINFO[ name -> noApplicableRule, used -> {List@@ps}], failed],
 			1,
 			First[ newNodes],
 			_,
 			makeORNODE[ 
 				makePRFINFO[ name -> proofAlternatives, used -> used@newNodes, generated -> generated@newNodes],
-				newNodes]
+				newNodes
+			]
 		]
 	]
 priorityInteractiveSaturation[ args___] := unexpected[ priorityInteractiveSaturation, {args}]
 
+(* It is better to explicitly replace 'ps' by '$Failed' if a rule is not applicable,
+instead of deleting all elements matching 'ps' in the resulting list, because 'ps' could contain patterns itself! *)
 applyAllRulesOnce[ ps_PRFSIT$, rules_List] :=
-	DeleteCases[ Map[ Replace[ ps, #]&, rules], $Failed|ps]
+	DeleteCases[ Map[ Replace[ ps, {#, _ -> $Failed}]&, rules], $Failed]
 
 getActiveRulesPartitionedFilter[ ps_PRFSIT$, filter_, lower_Integer, upper_Integer] := 
 	Module[{rules, act, prio, names, partition = {{}, {}, {}}},
