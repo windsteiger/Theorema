@@ -749,7 +749,7 @@ proofStepNode[ pos_List, node:{ id_String, status_, type_, name_}, font_] :=
         				TERMINALNODE$, proofStatusIndicator[ status, name],
          				PRFOBJ$, proofStatusIndicator[ status],
        					_, proofNodeIndicator[ status, type, name]], 
-					{CurrentValue[ $TMAproofNotebook, "NotebookFileName"], id},
+					{$TMAproofNotebook, id},
 					BaseStyle -> {FontSize -> font}, Active -> ValueQ[ $TMAproofNotebook] && ruleTextActive[ name]],
 					{"MouseClicked" :> If[ !$interactiveProofSitSel || type === PRFSIT$, $selectedProofStep = id]}, PassEventsDown -> True], pos]]}
 			}
