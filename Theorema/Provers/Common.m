@@ -171,11 +171,14 @@ chooseNextPS[ allPending:{pendingPos_, ___}] /; $interactiveProofSitSel && Match
 		Switch[ $lastChoice,
 			{},
 			findNextPendingSit[ $TMAproofObject, allPending, {}],
+			
 			_,
 			node = Extract[ $TMAproofObject, $lastChoice];
 			Switch[ node,
 				_PRFSIT$,
+				$selectedProofStep = id@node;
 				{node, $lastChoice},
+				
 				_ANDNODE$|_ORNODE$|_TERMINALNODE$,
 				Switch[ proofValue@node,
 					pending,
@@ -195,6 +198,7 @@ chooseNextPS[ allPending:{pendingPos_, ___}] /; $interactiveProofSitSel && Match
 						{Extract[ $TMAproofObject, pendingPos], pendingPos} (* Should not happen *)
 					]
 				],
+				
 				_,
 				{Extract[ $TMAproofObject, pendingPos], pendingPos} (* Should not happen *)
 			]
@@ -252,7 +256,7 @@ findNextPendingSit[ ORNODE$[ _PRFINFO$, b__, pending], psPos_List, pos_List] :=
 		] /; (p = Position[ {b}, _?(proofValue[ #] === pending &), {1}, Heads -> False]) =!= {}
 	]
 findNextPendingSit[ ps_PRFSIT$, _List, pos_List] :=
-	{ps, pos}
+	($selectedProofStep = id@ps; {ps, pos})
 findNextPendingSit[ args___] := unexpected[ findNextPendingSit, {args}]
        	
 replaceProofSit[ po_PRFOBJ$, pos_ -> p_PRFSIT$] :=

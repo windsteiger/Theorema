@@ -88,6 +88,7 @@ freshSymbol[ Hold[ s_Symbol], dropWolf_] :=
         	Set, ToExpression[ "Assign$TM"],
         	Wedge, ToExpression[ "And$TM"],
         	Vee, ToExpression[ "Or$TM"],
+        	AngleBracket, ToExpression[ "Tuple$TM"],
         	List, ToExpression[ "Set$TM"],	(* This cannot be removed, since a set of individual elements (no SetOf) still has to be parsed as "List". *)
         	Inequality, ToExpression[ "OperatorChain$TM"],
         	_,
@@ -133,7 +134,7 @@ freshSymbolProg[ Hold[ s_Symbol], dropWolf_] :=
 freshSymbolProg[ args___] := unexpected[ freshSymbolProg, {args}]
 
 markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
-    Module[ {s, seq, vars, violating},
+    Module[ {s, seq, vars, violating, out},
         (* all symbols sym specified as variables in r are translated into VAR$[sym]
            we substitute all symbols with matching "base name" (neglecting the context!) so that also
            symbols in different context get substituted. This is important when processing archives, because
@@ -141,8 +142,8 @@ markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
            lives in the context of the loading notebook/archive. With the substitution below, the private`sym becomes 
            a VAR$[loading`sym] *)
            
-        (* amaletz: We have to keep the distinction between sequence variables and individual variables,
-        			because "SymbolName[]" would give an error if applied to compound expressions.
+        (* We have to keep the distinction between sequence variables and individual variables,
+           because "SymbolName[]" would give an error if applied to compound expressions.
         *)
         vars = specifiedVariables[ r];
         seq = Cases[vars, (SEQ0$|SEQ1$)[ _]];
@@ -154,11 +155,18 @@ markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
         ];
         s = Join[ Map[ (h:(SEQ0$|SEQ1$))[ Hold[ sym_Symbol]] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> VAR$[ h[ #]]&, seq[[All, 1]]],
         		  Map[ Hold[ sym_Symbol] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> VAR$[ #]&, vars]];
-        replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {SEQ0$, SEQ1$, VAR$, FIX$}]
+        out = markVariables[ Hold[ expr]];
+        Switch[ out,
+        	Hold[ _[ ___]],
+        	(* We must NOT replace in the head! Otherwise, funny things would happen if a variable bound by a quantifier has the same name as the quantifier ... *)
+        	applyHold[ Extract[ out, {1, 0}, Hold], replaceAllExcept[ Delete[ out, {1, 0}], s, {}, Heads -> {SEQ0$, SEQ1$, VAR$, FIX$}]],
+        	_,
+        	replaceAllExcept[ out, s, {}, Heads -> {SEQ0$, SEQ1$, VAR$, FIX$}]
+        ]
     ]
 
 markVariables[ Hold[ Theorema`Computation`Language`QU$[ r_Theorema`Computation`Language`RNG$, expr_]]] :=
-    Module[ {s, seq, vars, violating},
+    Module[ {s, seq, vars, violating, out},
     	vars = specifiedVariables[ Hold[ r]];
         seq = Cases[vars, (Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$)[ _]];
         vars = Complement[ vars, seq];
@@ -169,7 +177,16 @@ markVariables[ Hold[ Theorema`Computation`Language`QU$[ r_Theorema`Computation`L
         ];
         s = Join[ Map[ (h:(Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$))[ Hold[ sym_Symbol]] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> Theorema`Computation`Language`VAR$[ h[ #]]&, seq[[All, 1]]],
         		  Map[ Hold[ sym_Symbol] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> Theorema`Computation`Language`VAR$[ #]&, vars]];
-        replaceAllExcept[ markVariables[ Hold[ expr]], s, {}, Heads -> {Theorema`Computation`Language`SEQ0$, Theorema`Computation`Language`SEQ1$, Theorema`Computation`Language`VAR$, Theorema`Computation`Language`FIX$}]
+       	out = markVariables[ Hold[ expr]];
+       	Switch[ out,
+        	Hold[ _[ ___]],
+        	applyHold[
+        		Extract[ out, {1, 0}, Hold],
+        		replaceAllExcept[ Delete[ out, {1, 0}], s, {}, Heads -> {Theorema`Computation`Language`SEQ0$, Theorema`Computation`Language`SEQ1$, Theorema`Computation`Language`VAR$, Theorema`Computation`Language`FIX$}]
+        	],
+        	_,
+        	replaceAllExcept[ out, s, {}, Heads -> {Theorema`Computation`Language`SEQ0$, Theorema`Computation`Language`SEQ1$, Theorema`Computation`Language`VAR$, Theorema`Computation`Language`FIX$}]
+        ]
     ]
     
 markVariables[ Hold[ h_[ e___]]] := applyHold[
@@ -245,19 +262,8 @@ newAbbrev[ Hold[ (q:(Abbrev$TM|Theorema`Computation`Language`Abbrev$TM))[ (rng:(
 	]
 newAbbrev[ expr_Hold] := expr
 
-getFreePositions[ var_, Hold[ q_[ r:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[ x___], rest__]], pos:{p___}] :=
-	Join[ getFreePositions[ var, Hold[ q], {p, 0}],
-		If[ MemberQ[ rngVariables[ Hold[ r]], var],
-			{},
-			getFreePositions[ var, Hold[ {{x}, rest}], pos]
-		]
-	]
-getFreePositions[ var_, Hold[ var_], pos_List] := {pos}
-getFreePositions[ var_, Hold[ f_[x___]], {p___}] :=
-	Join[ getFreePositions[ var, Hold[ f], {p, 0}], Join@@MapIndexed[ getFreePositions[ var, #1, {p, First[ #2]}]&, Map[ Hold, Hold[ x]]]]
-getFreePositions[ _, Hold[ _]|Hold[ ], _List] := {}
-getFreePositions[ var_, expr_Hold] := getFreePositions[ var, expr, {1}]
-getFreePositions[ var_, expr:Except[ _Hold]] := getFreePositions[ var, Hold[ expr], {}]
+getFreePositions[ var_, expr_] :=
+	Replace[ Replace[ var, analyzeVars[ expr, "FreeOnly" -> True, "Pattern" -> var]], var -> {}]
 
 (*
 	makeTmaExpression[ e] is the combination of functions that we export to be used in other places if needed.
@@ -431,7 +437,7 @@ processEnvironment[ x_] :=
 		globDec = applicableGlobalDeclarations[ nb, nbExpr, evaluationPosition[ nb, nbExpr]];
 		(* process the expression according the Theorema syntax rules and add it to the KB 
 		   ReleaseHold will remove the outer Hold but leave the Holds around fresh symbols *)
-        Catch[ updateKnowledgeBase[ ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]], key, globDec, cellTagsToString[ tags]]];
+        Catch[ updateKnowledgeBase[ ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]], key, globDec, cellTagsToString[ tags], cellTagsToFmlTags[ tags]]];
         (* Positions of abbreviations are added in "updateKnowledgeBase". *)
         SelectionMove[ nb, After, Cell];
     ]
@@ -506,9 +512,26 @@ getCellIDFromKey[ args___] := unexpected[ getCellIDFromKey, {args}]
 getCellSourceLabel[ cellTags_] := getCellLabel[ cellTags, "Source"]
 getCellSourceLabel[ args___] := unexpected[ getCellSourceLabel, {args}]
 
-cellTagsToString[ cellTags_ /; VectorQ[ cellTags, StringQ]] := Apply[ StringJoin, Riffle[ cellTags, $labelSeparator]]
+(*
+ cellTagsToString[ tags] extracts the formula label from a list of cell tags. It does so by first
+ looking for tags starting with "Label<sep>"; if it finds some, the first of them is returned (without "Label<sep>").
+ Otherwise, simply the first element of tags is returned.
+*)
+cellTagsToString[ {___, l_String?(StringMatchQ[ #, ("Label" <> $cellTagKeySeparator) ~~ __]&), ___}] :=
+	StringDrop[ l, 5 + StringLength[ $cellTagKeySeparator]]
+cellTagsToString[ {l_String, ___}] := l
 cellTagsToString[ ct_String] := ct
-cellTagsToString[ args___] := unexpected[cellTagsToString, {args}]
+cellTagsToString[ args___] := unexpected[ cellTagsToString, {args}]
+
+(*
+ cellTagsToFmlTags[ tags] extracts the formula tags from a list of cell tags. The formula tags are simply
+ all elements of tags except the one that is taken as the label of the formula, according to cellTagsToString.
+*)
+cellTagsToFmlTags[ _String|{}] := {}
+cellTagsToFmlTags[ {pre___, _String?(StringMatchQ[ #, ("Label" <> $cellTagKeySeparator) ~~ __]&), post___}] :=
+	{pre, post}
+cellTagsToFmlTags[ {_String, rest___}] := {rest}
+cellTagsToFmlTags[ args___] := unexpected[ cellTagsToFmlTags, {args}]
 
 makeLabel[ s_String] := "(" <> s <> ")"
 makeLabel[ args___] := unexpected[ makeLabel, {args}]
@@ -711,7 +734,7 @@ automatedFormulaLabel[nb_NotebookObject] :=
 		(* Find highest value of any automatically counted formula. *)
 		formulaCounter = getFormulaCounter[nb];
 		(* Construct new CellTags with value of the incremented formulaCounter as a list. *)
-		newCellTags = {ToString[formulaCounter]}
+		newCellTags = {"Label" <> $cellTagKeySeparator <> ToString[formulaCounter]}
 	]
 automatedFormulaLabel[args___] := unexpected[ automatedFormulaLabel, {args}]
 
@@ -755,7 +778,9 @@ occursBelow[ args___] := unexpected[ occursBelow, {args}]
 (* 
 	form and glob still carry Holds around fresh symbols. After globals have been applied, ReleaseHold will remove them.
 *)
-updateKnowledgeBase[ form_, k_, glob_, tags_String] :=
+updateKnowledgeBase[ form_, k_, glob_, l_String] :=
+	updateKnowledgeBase[ form, k, glob, l, {}]
+updateKnowledgeBase[ form_, k_, glob_, l_String, tags_List] :=
     Module[ {newForm, fml, inDomDef = Cases[ glob, Hold[ domainConstruct$TM][_,_], {1}, 1], defDef},
     	If[ inDomDef =!= {} && (defDef = $tmaDefaultDomainDef[ inDomDef[[1]]]) =!= {},
     		(* we are in a domain definition and there is a pending default for this domain *)
@@ -771,7 +796,10 @@ updateKnowledgeBase[ form_, k_, glob_, tags_String] :=
     	];
     	(* for the actual formula we proceed in the same way *)
     	newForm = addAbbrevPositions[ ReleaseHold[ addVarPrefixes[ applyGlobalDeclaration[ form, glob]]]];
-    	fml = makeFML[ key -> k, formula -> newForm, label -> tags, simplify -> False];
+    	fml = makeFML[ key -> k, formula -> newForm, label -> l, simplify -> False];
+    	If[ tags =!= {},
+    		AppendTo[ fml, "tags" -> tags]
+    	];
     	transferToComputation[ fml];
     	(* If new formulae are appended rather than prepended, the old formulae with the same label
     		have to be deleted first, because "DeleteDuplicates" would delete the new ones. *)
@@ -1216,7 +1244,7 @@ loadArchive[ name_String, globalDecl_:{}] :=
                to overwrite $tmaArch when loading an archive from within another one ... *)
             (* we use updateKnowledgeBase: this applies global declarations appropriately and 
                translates to computational form ... *)
-            Scan[ updateKnowledgeBase[ #[[2]], #[[1]], globalDecl, #[[3]]]&, $tmaArch]
+            Scan[ updateKnowledgeBase[ #[[2]], #[[1]], globalDecl, #[[3]], Flatten[ Cases[ #, ("tags" -> t_List) :> t, {1}, 1], 1]]&, $tmaArch]
         ];
         $TheoremaArchives = DeleteDuplicates[ Prepend[ $TheoremaArchives, cxt]];
         If[ !FileExistsQ[ archiveNotebookPath = getArchiveNotebookPath[ name]],

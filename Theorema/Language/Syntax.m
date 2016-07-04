@@ -136,7 +136,10 @@ Theorema`TmaCompToMma = Dispatch[
 		   ];
 
 
-(* To add a new quantifier, just add a pair to this list *)	
+(* To add a new quantifier, just add a pair to this list *)
+(* If the sub-script of a quantifier shall be interpreted as a domain
+	(i.e. result should be "DomainOperation[ dom, q][ ...]" instead of default "Annotated[ q, SubScript[ sub]][ ...]"),
+	the definition of "subscriptedQuantifier" must be updated as well, just as for "SumOf" and "ProductOf". *)
 $tmaQuantifiers =
     {{"\[ForAll]", "Forall"},
      {"\[Exists]", "Exists"},
@@ -201,12 +204,14 @@ tmaToInputOperator[ args___] := unexpected[ tmaToInputOperator, {args}]
 
 SetAttributes[ removeVar, HoldAllComplete];
 removeVar[ (h:(Theorema`Language`SEQ0$|Theorema`Language`SEQ1$|Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$))[ op_Symbol]] :=
-	With[ {n = SymbolName[ Unevaluated[ op]]},
-		ReplacePart[ HoldComplete@@{ToExpression[ removeVar[ n], InputForm, HoldComplete]}, {1, 0} -> h]
-	]
+	ReplacePart[ HoldComplete@@{removeVar[ op]}, {1, 0} -> h]
 removeVar[ op_Symbol] :=
 	With[ {n = SymbolName[ Unevaluated[ op]]},
-		ToExpression[ removeVar[ n], InputForm, HoldComplete]
+		Block[ {$Context = "Theorema`Knowledge`", $ContextPath = Prepend[ $ContextPath, "Theorema`Language`"]},
+			(* Names of variables shall stay in Theorema` context!
+				Otherwise, 'x$TM' would go to Global`-context. *)
+			ToExpression[ removeVar[ n], InputForm, HoldComplete]
+		]
 	]
 removeVar[ op_String] :=
 	If[ StringLength[ op] > 4 && StringTake[ op, 4] === "VAR$",
@@ -233,8 +238,10 @@ isRightDelimiter[ s_] :=
 	- the third element is the full name of the operator.
 	Note that Infix/Prefix/Postfix are, up to now, only used for correct output but not for parsing -
 	They do not affect parsing in any way!
+	ALSO NOTE THAT THE FIRST AND THE THIRD ELEMENT OF EACH ENTRY MUST BE DISTINCT!
 	*)
 $tmaOperators = {
+	{"", {}, "min"}, {"", {}, "max"},
 	{"@", {Infix}, "Componentwise"}, {"/@", {Infix}, "Map"}, {"//@", {Infix}, "MapAll"},
 	{">>", {Infix}, "Put"}, {">>>", {Infix}, "PutAppend"}, {"<<", {Prefix}, "Get"},
 	{"@@", {Infix}, "Apply"}, {";;", {Infix}, "Span"},
@@ -269,7 +276,7 @@ $tmaOperators = {
 	{"\[DoubleRightArrow]", {Infix}, "DoubleRightArrow"}, {"\[DoubleLeftArrow]", {Infix}, "DoubleLeftArrow"},
 	{"\[DoubleLeftRightArrow]", {Infix}, "DoubleLeftRightArrow"}, {"\[DoubleLongRightArrow]", {Infix}, "DoubleLongRightArrow"},
 	{"\[DoubleLongLeftArrow]", {Infix}, "DoubleLongLeftArrow"}, {"\[DoubleLongLeftRightArrow]", {Infix}, "DoubleLongLeftRightArrow"},
-	{"\[DownArrow]", {Infix}, "DownArrow"}, {"\[UpDownArrow]", {Infix}, "UpDownArrow"},
+	{"\[DownArrow]", {Infix}, "DownArrow"}, {"\[UpArrow]", {Infix}, "UpArrow"}, {"\[UpDownArrow]", {Infix}, "UpDownArrow"},
 	{"\[UpTeeArrow]", {Infix}, "UpTeeArrow"}, {"\[DownTeeArrow]", {Infix}, "DownTeeArrow"},
 	{"\[UpArrowBar]", {Infix}, "UpArrowBar"}, {"\[DownArrowBar]", {Infix}, "DownArrowBar"},
 	{"\[DoubleUpArrow]", {Infix}, "DoubleUpArrow"}, {"\[DoubleDownArrow]", {Infix}, "DoubleDownArrow"},
@@ -371,7 +378,7 @@ $tmaOperatorSymbols = Map[ First, $tmaOperators];
 	because copying each of the more than 200 operator names twice (for the two possible contexts) seems to be a bit too inefficient. *)
 $tmaOperatorNames = Map[ (Last[#] <> "$TM")&, $tmaOperators];
 $tmaOperatorToName = Dispatch[ Map[ Rule[ First[#], Last[#]] &, $tmaOperators]];
-$tmaNameToOperator = Dispatch[ MapThread[ Rule, {$tmaOperatorNames, $tmaOperatorSymbols}]];
+$tmaNameToOperator = Dispatch[ Replace[ Thread[ $tmaOperatorNames -> $tmaOperatorSymbols], (s_ -> "") :> (s -> StringDrop[ s, -3]), {1}]];
 
 (* We need this attribute, because otherwise expressions (not only operator symbols!) are evaluated when "MakeBoxes" is called. *)	
 SetAttributes[ isTmaOperatorName, HoldAllComplete];
@@ -1028,10 +1035,16 @@ standardQuantifier[ name_, rng_, cond_, expr_, fmt_] :=
 standardQuantifier[ args___] := unexpected[ standardQuantifier, {args}]
 
 SetAttributes[ subscriptedQuantifier, HoldRest]
+subscriptedQuantifier[ name:("SumOf"|"ProductOf"), rng_, cond_, dom_, expr_, fmt_] :=
+    With[ {r = toRangeBox[ rng]},
+        MakeExpression[ RowBox[{"QU$", "[",
+            RowBox[{ r, ",", RowBox[{ makeDomainOperation[ dom, name], "[", RowBox[{ r, ",", cond, ",", expr}], "]"}]}],
+             "]"}], fmt]
+    ]
 subscriptedQuantifier[ name_, rng_, cond_, sub_, expr_, fmt_] :=
     With[ {r = toRangeBox[ rng]},
-        MakeExpression[ RowBox[{"QU$", "[", 
-            RowBox[{ r, ",", RowBox[{ name, "[", RowBox[{ r, ",", cond, ",", sub, ",", expr}], "]"}]}],
+        MakeExpression[ RowBox[{"QU$", "[",
+            RowBox[{ r, ",", RowBox[{ makeAnnotation[ SubscriptBox, name, sub], "[", RowBox[{ r, ",", cond, ",", expr}], "]"}]}],
              "]"}], fmt]
     ]
 subscriptedQuantifier[ args___] := unexpected[ subscriptedQuantifier, {args}]
@@ -1311,16 +1324,8 @@ MakeBoxes[ (q_?isQuantifierName)[ rng_, cond_, form_], TheoremaForm] :=
 	RowBox[ {UnderscriptBox[ UnderscriptBox[ Replace[ q, $tmaNameToQuantifier], makeRangeBox[ rng, TheoremaForm]], MakeBoxes[ cond, TheoremaForm]],
 		MakeBoxes[ form, TheoremaForm]}
 	]
-
-MakeBoxes[ (q_?isQuantifierName)[ rng_, True, sub_, form_], TheoremaForm] := 
-	RowBox[ {UnderscriptBox[ SubscriptBox[ Replace[ q, $tmaNameToQuantifier], MakeBoxes[ sub, TheoremaForm]], makeRangeBox[ rng, TheoremaForm]],
-		MakeBoxes[ form, TheoremaForm]}
-	]
-
-MakeBoxes[ (q_?isQuantifierName)[ rng_, cond_, sub_, form_], TheoremaForm] := 
-	RowBox[ {UnderscriptBox[ UnderscriptBox[ SubscriptBox[ Replace[ q, $tmaNameToQuantifier], MakeBoxes[ sub, TheoremaForm]], makeRangeBox[ rng, TheoremaForm]],
-		MakeBoxes[ cond, TheoremaForm]], MakeBoxes[ form, TheoremaForm]}
-	]
+	
+(* DomainOperation$TM- and Annotated$TM-quantifiers are treated in "Expression.m" *)
 
 MakeBoxes[ (op_?isNonStandardOperatorName)[ arg___], TheoremaForm] :=
     With[ {b = Replace[ op, $tmaNonStandardOperatorToBuiltin]},
@@ -1366,6 +1371,8 @@ MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
 						RowBox[ {sym, MakeBoxes[ arg, TheoremaForm]}],
 						MemberQ[ form, Postfix],
 						RowBox[ {MakeBoxes[ arg, TheoremaForm], sym}],
+						form === {},
+						RowBox[ {sym, "[", MakeBoxes[ arg, TheoremaForm], "]"}],
 						True,
 						RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}], "[", MakeBoxes[ arg, TheoremaForm], "]"}]
 					],
@@ -1459,8 +1466,13 @@ parenthesize[ args___] := unexpected[ parenthesize, {args}]
 	definition with "isStandardOperatorSymbol". Annotated operators as well as domain operators
 	are treated in 'Expressions.m'. *)
 MakeBoxes[ s_?isTmaOperatorName, TheoremaForm] := Replace[ SymbolName[ s], $tmaNameToOperator]
-MakeBoxes[ s_?isTmaOperatorName[], TheoremaForm] :=
-	RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], Replace[ SymbolName[ s], $tmaNameToOperator], TagBox[ ")", "AutoParentheses"]}], "[", "]"}]
+MakeBoxes[ (s_?isTmaOperatorName)[], TheoremaForm] :=
+	With[ {sym = Replace[ SymbolName[ s], $tmaNameToOperator]},
+		If[ getTmaOperatorForms[ s] === {},
+			RowBox[ {sym, "[", "]"}],
+			RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}], "[", "]"}]
+		]
+	]
     
 MakeBoxes[ s_Symbol, TheoremaForm] := 
 	(* We have to use "Unevaluated" here, because "I" is a symbol, but evaluates to "Complex[0, 1]" *)
