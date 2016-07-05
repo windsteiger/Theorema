@@ -258,6 +258,7 @@ With[ {lang = "English"},
 	MessageName[ $TmaLanguage, "usage", lang] = "The language used in the Theorema interface.";
 	MessageName[ $tmaNbUpdateQueue, "usage", lang] = "The notebook update queue contains a list of timestamps when a notebook was last evaluated.";
 	MessageName[ tmaNotebookPut, "usage", lang] = "Theorema version of Mathematica's NotebookPut.";
+	MessageName[ $TMAproofNotebook, "usage", lang] = "$TMAproofNotebook is the notebook object containing the current proof.";
 	MessageName[ $TMAproofObject, "usage", lang] = "$TMAproofObject is the global proof object.";
 	MessageName[ $TMAproofSearchRunning, "usage", lang] = "$TMAproofSearchRunning indicates (by True/False) whether a proof search is currently running.";
 	MessageName[ $TMAproofTree, "usage", lang] = "$TMAproofTree is the global proof tree for visualization.";
