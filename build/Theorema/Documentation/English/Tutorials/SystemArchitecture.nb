@@ -1,0 +1,1032 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 8.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       157,          7]
+NotebookDataLength[     37564,       1022]
+NotebookOptionsPosition[     30786,        806]
+NotebookOutlinePosition[     33349,        870]
+CellTagsIndexPosition[     33264,        865]
+WindowTitle->System Architecture - Wolfram Mathematica
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[" ", "TutorialColorBar",
+ CellMargins->{{Inherited, Inherited}, {-5, 0}}],
+
+Cell[TextData[{
+ ButtonBox["Mathematica",
+  BaseStyle->{"Link", "LinkTrail"},
+  ButtonData->"paclet:Theorema/guide/Theorema"],
+ StyleBox[" > ", "LinkTrailSeparator"]
+}], "LinkTrail"],
+
+Cell[BoxData[GridBox[{
+   {Cell["THEOREMA TUTORIAL", "PacletNameCell"], Cell[TextData[Cell[BoxData[
+     ActionMenuBox[
+      FrameBox["\<\"URL \[RightGuillemet]\"\>",
+       StripOnInput->False], {"\<\"Theorema/tutorial/SystemArchitecture\"\>":>
+      None, "\<\"Copy Mathematica url\"\>":>
+      Module[{DocumentationSearch`Private`nb$}, 
+       DocumentationSearch`Private`nb$ = NotebookPut[
+          Notebook[{
+            Cell["Theorema/tutorial/SystemArchitecture"]}, Visible -> False]]; 
+       SelectionMove[DocumentationSearch`Private`nb$, All, Notebook]; 
+       FrontEndTokenExecute[DocumentationSearch`Private`nb$, "Copy"]; 
+       NotebookClose[DocumentationSearch`Private`nb$]; Null], 
+      Delimiter, "\<\"Copy web url\"\>":>
+      Module[{DocumentationSearch`Private`nb$}, 
+       DocumentationSearch`Private`nb$ = NotebookPut[
+          Notebook[{
+            Cell[
+             BoxData[
+              MakeBoxes[
+               Hyperlink[
+               "http://reference.wolfram.com/mathematica/Theorema/tutorial/\
+SystemArchitecture.html"], StandardForm]], "Input", TextClipboardType -> 
+             "PlainText"]}, Visible -> False]]; 
+       SelectionMove[DocumentationSearch`Private`nb$, All, Notebook]; 
+       FrontEndTokenExecute[DocumentationSearch`Private`nb$, "Copy"]; 
+       NotebookClose[DocumentationSearch`Private`nb$]; 
+       Null], "\<\"Go to web url\"\>":>FrontEndExecute[{
+        NotebookLocate[{
+          URL[
+           StringJoin[
+           "http://reference.wolfram.com/mathematica/", 
+            "Theorema/tutorial/SystemArchitecture", ".html"]], None}]}]},
+      Appearance->None,
+      MenuAppearance->Automatic]],
+     LineSpacing->{1.4, 0}]], "AnchorBar"]}
+  }]], "AnchorBarGrid",
+ GridBoxOptions->{GridBoxItemSize->{"Columns" -> {
+     Scaled[0.65], {
+      Scaled[0.34]}}, "ColumnsIndexed" -> {}, "Rows" -> {{1.}}, 
+   "RowsIndexed" -> {}}},
+ CellID->1],
+
+Cell[CellGroupData[{
+
+Cell["System Architecture", "Title",
+ CellID->509267359],
+
+Cell[CellGroupData[{
+
+Cell["Major System Components", "Section",
+ CellID->1368142877],
+
+Cell[TextData[{
+ "The major components of the Theorema system are reflected in the top-level \
+directory structure of the Theorema installation. The directories \
+\[OpenCurlyDoubleQuote]Documentation\[CloseCurlyDoubleQuote], \
+\[OpenCurlyDoubleQuote]FrontEnd\[CloseCurlyDoubleQuote], and \
+\[OpenCurlyDoubleQuote]Kernel\[CloseCurlyDoubleQuote] are standard \
+directories expected to be present in every ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " package, they are required in order to guarantee smooth integration of \
+Theorema into ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ ", e.g. system documentation will be available through the ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " Documentation Center."
+}], "Text",
+ CellID->306469654],
+
+Cell[CellGroupData[{
+
+Cell["Computation", "Subsection",
+ CellID->119181558],
+
+Cell["Language.m", "Subsubsubsubsection",
+ CellID->1786863627],
+
+Cell["\<\
+Implements computational semantics of the Theorema built-in language \
+constructs, e.g. numbers, tuples, finite sets, logical connectives, \
+quantifiers with finite ranges, etc.\
+\>", "Text",
+ CellID->171401208]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Interface", "Subsection",
+ CellID->1529585361],
+
+Cell["ColorSchemes.m", "Subsubsubsubsection",
+ CellID->454861262],
+
+Cell["Color definitions for GUI components and notebooks.", "Text",
+ CellID->496326574],
+
+Cell["GUI.m", "Subsubsubsubsection",
+ CellID->1598231819],
+
+Cell["\<\
+Implements the whole graphical user interface displayed in the Theorema \
+commander.\
+\>", "Text",
+ CellID->787946467],
+
+Cell["Language.m", "Subsubsubsubsection",
+ CellID->2050811126],
+
+Cell["\<\
+Implements the mechanisms that allow setting up the system interface in \
+different languages.\
+\>", "Text",
+ CellID->1635985201]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Knowledge", "Subsection",
+ CellID->379393505],
+
+Cell["\<\
+This directory and its subdirectories collect user-supplied mathematical \
+theories.\
+\>", "Text",
+ CellID->558587616]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Theorema Language", "Subsection",
+ CellID->540609734],
+
+Cell["Expressions.m", "Subsubsubsubsection",
+ CellID->1110611709],
+
+Cell[TextData[{
+ "Here are the definitions for formatting Theorema expressions, which can \
+occur both in computations and outside of computations. The rest of the \
+definitions for formatting expressions is in ",
+ ButtonBox["Syntax.m",
+  BaseStyle->"Link",
+  ButtonData->"paclet:Theorema/Tutorials/SystemArchitecture#984237588"],
+ ", see ",
+ ButtonBox["below",
+  BaseStyle->"Link",
+  ButtonData->"paclet:Theorema/Tutorials/SystemArchitecture#984237588"],
+ "."
+}], "Text",
+ CellID->960188248],
+
+Cell["\<\
+This file is special, it is not a package for itself, it is a plain file, \
+which is loaded twice during the system startup process. Once it is loaded \
+inside the context Theorema`Language` and once it is loaded in the context \
+Theorema`Computation`Language`, so that all definitions collected in \
+Expressions.m are available in both contexts.\
+\>", "Text",
+ CellID->81310061],
+
+Cell["FormulaManipulation.m", "Subsubsubsubsection",
+ CellID->1282217458],
+
+Cell[TextData[{
+ "This package collects functions for manipulating Theorema expressions, e.g. \
+substitution of free variables, converting universally quantified equalities \
+into ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " rewrite rules, etc."
+}], "Text",
+ CellID->970568858],
+
+Cell["Session.m", "Subsubsubsubsection",
+ CellID->96220053],
+
+Cell["\<\
+This package defines functions used for organizing the Theorema session, e.g. \
+storing definitions and theorems, processing of global declarations, etc.\
+\>", "Text",
+ CellID->1319111323],
+
+Cell["Syntax.m", "Subsubsubsubsection",
+ CellID->984237588],
+
+Cell[TextData[{
+ "This package defines the syntax of the Theorema language, both for input \
+(",
+ ButtonBox["MakeExpression",
+  BaseStyle->"Link",
+  ButtonData->"paclet:ref/MakeExpression"],
+ " and related) and for output (",
+ ButtonBox["MakeBoxes",
+  BaseStyle->"Link",
+  ButtonData->"paclet:ref/MakeBoxes"],
+ " and related). Regarding output, only a fragment of the language is defined \
+here, the rest is in ",
+ ButtonBox["Expressions.m",
+  BaseStyle->"Link",
+  ButtonData->"paclet:Theorema/Tutorials/SystemArchitecture#1110611709"],
+ ", see ",
+ ButtonBox["above",
+  BaseStyle->"Link",
+  ButtonData->"paclet:Theorema/Tutorials/SystemArchitecture#1110611709"],
+ "."
+}], "Text",
+ CellID->1026706244]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Provers", "Subsection",
+ CellID->865236243],
+
+Cell["Common.m", "Subsubsubsubsection",
+ CellID->1574014704],
+
+Cell["\<\
+This packages defines the general proving mechanism and everything needed for \
+it, e.g. the overall proof search procedure, datastructures for proof \
+objects, inference rule handling, etc.\
+\>", "Text",
+ CellID->399461088],
+
+Cell["Strategies.m", "Subsubsubsubsection",
+ CellID->1781962606]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["System", "Subsection",
+ CellID->1229030743],
+
+Cell["Utilities.m", "Subsubsubsubsection",
+ CellID->853032964]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Common.m", "Subsection",
+ CellID->1161984883],
+
+Cell["\<\
+This is a special package on the top-level of the hierarchy. Its purpose is \
+to collect all public symbols to be exported. All packages that use symbols \
+from other packages need to include only this package in order to have all \
+exported symbols available.\
+\>", "Text",
+ CellID->909480822]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Directories & Packages", "Section",
+ CellID->1263115968],
+
+Cell[TextData[{
+ "The Theorema system consists of a multitude of packages. In the standard \
+package layout in ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ ", every package has a \"public context\" corresponding to the filename path \
+and a \"private context\" (typically the public context with \"`Private`\" \
+appended). The public contexts contain the names of symbols that should be \
+visible outside of the package, these symbols are exported and can be used in \
+other packages, due to the standard setup that puts the public context into \
+",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ "'s context path ",
+ Cell[BoxData["$ContextPath"], "InlineFormula"],
+ ". All non-exported symbols are in the respective private contexts and \
+cannot be used in other packages since the private context is not part of the \
+context path."
+}], "Text",
+ CellID->1534169418],
+
+Cell["\<\
+In order to keep the context path within a reasonable size, we setup context \
+differently. Not every package corresponds to a context in the context path. \
+Instead, we provide several contexts for symbols that should be shared \
+between different packages of the system. These contexts typically do not \
+correspond to a file in the system, they rather correspond to directories, \
+although this must not be considered a strict rule of any significance.\
+\>", "Text",
+ CellID->954933595],
+
+Cell[BoxData[GridBox[{
+   {"Theorema`", Cell["\<\
+The context for some special system symbols. This context will be found in \
+the context path after loading the system.\
+\>", "TableText"]},
+   {"Theorema`Common`", Cell["\<\
+The context for functions and global variables making up the Theorema system \
+implementation. This context is relevant for system developers mostly, \
+Theorema users should not get in touch with this context.\
+\>", "TableText"]},
+   {"Theorema`Language`", Cell["\<\
+The context for symbols making up the Theorema mathematical language. The \
+symbols identifying Theorema language constructs (e.g. quantifiers, logical \
+connectives, etc.) live in this context. None of these symbols has \
+computational semantics attached to it, one can rely on the fact that \
+expressions in this context do not evaluate in any way, these symbols are \
+guaranteed to be uninterpreted.\
+\>", "TableText"]},
+   {"Theorema`Computation`", Cell[TextData[{
+     "The context for symbols making up the computable fragment of the \
+Theorema mathematical language. Some Theorema language constructs (e.g. \
+quantifiers, logical connectives, etc.) have computational semantics for \
+special finite cases. For these constructs, the uninterpretable symbol in ",
+     Cell[BoxData["Theorema`Language`"], "InlineFormula"],
+     " corresponds uniquely to a symbol with the same name in ",
+     Cell[BoxData["Theorema`Computation`"], "InlineFormula"],
+     ". Typically all symbols in this context have ",
+     StyleBox["Mathematica",
+      FontSlant->"Italic"],
+     " defintions representing the computational semantics attached to it."
+    }], "TableText"]},
+   {"Theorema`Knowledge`", Cell[TextData[{
+     "The context for user-defined symbols. Constants, variables, functions, \
+or predicates introduced by the user are stored in this context. No \
+Theorema-internal symbols go into this context, it plays the role of the ",
+     Cell[BoxData["Global`"], "InlineFormula"],
+     "-context in a standard ",
+     StyleBox["Mathematica",
+      FontSlant->"Italic"],
+     " session."
+    }], "TableText"]},
+   {"Theorema`Computation`Knowledge`", Cell[TextData[{
+     "The computable counterparts of symbols in ",
+     Cell[BoxData["Theorema`Knowledge`"], "InlineFormula"],
+     " are put inot this context."
+    }], "TableText"]},
+   {"Theorema`Knowledge`\[Ellipsis]", Cell[TextData[{
+     "User-defined theories store their symbols in subcontexts of ",
+     Cell[BoxData["Theorema`Knowledge`"], "InlineFormula"],
+     "."
+    }], "TableText"]},
+   {"Theorema`Computation`Knowledge`\[Ellipsis]", Cell[TextData[{
+     "The computable counterparts of theory symbols are organized in \
+respective subcontexts of ",
+     Cell[BoxData["Theorema`Computation`Knowledge`"], "InlineFormula"],
+     "."
+    }], "TableText"]},
+   {"Theorema`Provers`", Cell["\<\
+The context for symbols used in the provers, typically e.g. the symbols \
+referring to the inference rules of the provers.\
+\>", "TableText"]}
+  }]], "DefinitionBox",
+ CellID->2096742444],
+
+Cell["\<\
+Important contexts for shared symbols in the Theorema system.\
+\>", "Caption",
+ CellID->1891092685],
+
+Cell["The symbols defined in some of the above mentioned contexts.", \
+"MathCaption",
+ CellID->836781195],
+
+Cell[CellGroupData[{
+
+Cell[BoxData["$ContextPath"], "Input",
+ CellLabel->"In[9]:=",
+ CellID->2058623809],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"\<\"Theorema`\"\>", ",", "\<\"DocumentationTools`\"\>", 
+   ",", "\<\"PacletManager`\"\>", ",", "\<\"WebServices`\"\>", 
+   ",", "\<\"System`\"\>", ",", "\<\"Global`\"\>"}], "}"}]], "Output",
+ ImageSize->{380, 33},
+ ImageMargins->{{0, 0}, {0, 0}},
+ ImageRegion->{{0, 1}, {0, 1}},
+ CellLabel->"Out[11]=",
+ CellID->590174174]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Names", "[", "\"\<Theorema`*\>\"", "]"}]], "Input",
+ CellLabel->"In[12]:=",
+ CellID->1836791445],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"\<\"lang\"\>", ",", "\<\"n\"\>", ",", "\<\"name\"\>", 
+   ",", "\<\"name$\"\>", ",", "\<\"n$\"\>", ",", "\<\"openTheoremaGUI\"\>", 
+   ",", "\<\"opts\"\>", ",", "\<\"showWelcomeScreen\"\>", 
+   ",", "\<\"Theorema\"\>", ",", "\<\"TMAcolor\"\>", 
+   ",", "\<\"TMAcolorScheme\"\>", ",", "\<\"$availableColorSchemes\"\>", 
+   ",", "\<\"$suppressWelcomeScreen\"\>", 
+   ",", "\<\"$TheoremaArchiveDirectory\"\>", 
+   ",", "\<\"$TheoremaArchivePath\"\>", ",", "\<\"$TheoremaColorScheme\"\>", 
+   ",", "\<\"$TheoremaDirectory\"\>", ",", "\<\"$TheoremaRelease\"\>", 
+   ",", "\<\"$TheoremaVersion\"\>"}], "}"}]], "Output",
+ ImageSize->{567, 84},
+ ImageMargins->{{0, 0}, {0, 0}},
+ ImageRegion->{{0, 1}, {0, 1}},
+ CellLabel->"Out[12]=",
+ CellID->416113451]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Names", "[", "\"\<Theorema`Language`*\>\"", "]"}]], "Input",
+ CellLabel->"In[21]:=",
+ CellID->490813747],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"\<\"Theorema`Language`Abbrev$TM\"\>", 
+   ",", "\<\"Theorema`Language`ABBRVRNG$\"\>", 
+   ",", "\<\"Theorema`Language`And$TM\"\>", 
+   ",", "\<\"Theorema`Language`Assign$TM\"\>", 
+   ",", "\<\"Theorema`Language`Backslash$TM\"\>", 
+   ",", "\<\"Theorema`Language`BracketingBar$TM\"\>", 
+   ",", "\<\"Theorema`Language`Cap$TM\"\>", 
+   ",", "\<\"Theorema`Language`CaseDistinction$TM\"\>", 
+   ",", "\<\"Theorema`Language`Clause$TM\"\>", 
+   ",", "\<\"Theorema`Language`CompoundExpression$TM\"\>", 
+   ",", "\<\"Theorema`Language`Cross$TM\"\>", 
+   ",", "\<\"Theorema`Language`CupCap$TM\"\>", 
+   ",", "\<\"Theorema`Language`Cup$TM\"\>", 
+   ",", "\<\"Theorema`Language`Divide$TM\"\>", 
+   ",", "\<\"Theorema`Language`domainConstruct$TM\"\>", 
+   ",", "\<\"Theorema`Language`DOMEXTRNG$\"\>", 
+   ",", "\<\"Theorema`Language`Do$TM\"\>", 
+   ",", "\<\"Theorema`Language`Element$TM\"\>", 
+   ",", "\<\"Theorema`Language`EmptyUpTriangle$TM\"\>", 
+   ",", "\<\"Theorema`Language`EqualDef$TM\"\>", 
+   ",", "\<\"Theorema`Language`Equal$TM\"\>", 
+   ",", "\<\"Theorema`Language`Exists$TM\"\>", 
+   ",", "\<\"Theorema`Language`Factorial$TM\"\>", 
+   ",", "\<\"Theorema`Language`FIX$\"\>", 
+   ",", "\<\"Theorema`Language`Forall$TM\"\>", 
+   ",", "\<\"Theorema`Language`For$TM\"\>", 
+   ",", "\<\"Theorema`Language`globalAbbrev$TM\"\>", 
+   ",", "\<\"Theorema`Language`globalForall$TM\"\>", 
+   ",", "\<\"Theorema`Language`globalImplies$TM\"\>", 
+   ",", "\<\"Theorema`Language`GreaterEqual$TM\"\>", 
+   ",", "\<\"Theorema`Language`Greater$TM\"\>", 
+   ",", "\<\"Theorema`Language`IffDef$TM\"\>", 
+   ",", "\<\"Theorema`Language`Iff$TM\"\>", 
+   ",", "\<\"Theorema`Language`If$TM\"\>", 
+   ",", "\<\"Theorema`Language`Implies$TM\"\>", 
+   ",", "\<\"Theorema`Language`IntegerRange$TM\"\>", 
+   ",", "\<\"Theorema`Language`IntegralOf$TM\"\>", 
+   ",", "\<\"Theorema`Language`IntersectionOf$TM\"\>", 
+   ",", "\<\"Theorema`Language`Intersection$TM\"\>", 
+   ",", "\<\"Theorema`Language`isComplex$TM\"\>", 
+   ",", "\<\"Theorema`Language`isInteger$TM\"\>", 
+   ",", "\<\"Theorema`Language`isRational$TM\"\>", 
+   ",", "\<\"Theorema`Language`isReal$TM\"\>", 
+   ",", "\<\"Theorema`Language`isSet$TM\"\>", 
+   ",", "\<\"Theorema`Language`isTuple$TM\"\>", 
+   ",", "\<\"Theorema`Language`LeftArrowBar$TM\"\>", 
+   ",", "\<\"Theorema`Language`LeftArrow$TM\"\>", 
+   ",", "\<\"Theorema`Language`LessEqual$TM\"\>", 
+   ",", "\<\"Theorema`Language`Less$TM\"\>", 
+   ",", "\<\"Theorema`Language`List$TM\"\>", 
+   ",", "\<\"Theorema`Language`MaximumOf$TM\"\>", 
+   ",", "\<\"Theorema`Language`max$TM\"\>", 
+   ",", "\<\"Theorema`Language`META$\"\>", 
+   ",", "\<\"Theorema`Language`MinimumOf$TM\"\>", 
+   ",", "\<\"Theorema`Language`min$TM\"\>", 
+   ",", "\<\"Theorema`Language`Module$TM\"\>", 
+   ",", "\<\"Theorema`Language`nE\"\>", 
+   ",", "\<\"Theorema`Language`Not$TM\"\>", 
+   ",", "\<\"Theorema`Language`Or$TM\"\>", 
+   ",", "\<\"Theorema`Language`Plus$TM\"\>", 
+   ",", "\<\"Theorema`Language`Power$TM\"\>", 
+   ",", "\<\"Theorema`Language`PREDRNG$\"\>", 
+   ",", "\<\"Theorema`Language`ProductOf$TM\"\>", 
+   ",", "\<\"Theorema`Language`Program\"\>", 
+   ",", "\<\"Theorema`Language`QU$\"\>", 
+   ",", "\<\"Theorema`Language`Radical$TM\"\>", 
+   ",", "\<\"Theorema`Language`RationalRange$TM\"\>", 
+   ",", "\<\"Theorema`Language`RealRange$TM\"\>", 
+   ",", "\<\"Theorema`Language`RNG$\"\>", 
+   ",", "\<\"Theorema`Language`Rule$TM\"\>", 
+   ",", "\<\"Theorema`Language`SEQ0$\"\>", 
+   ",", "\<\"Theorema`Language`SEQ1$\"\>", 
+   ",", "\<\"Theorema`Language`SequenceOf$TM\"\>", 
+   ",", "\<\"Theorema`Language`SetDelayed$TM\"\>", 
+   ",", "\<\"Theorema`Language`SetEqual$TM\"\>", 
+   ",", "\<\"Theorema`Language`SetOf$TM\"\>", 
+   ",", "\<\"Theorema`Language`SETRNG$\"\>", 
+   ",", "\<\"Theorema`Language`Set$TM\"\>", 
+   ",", "\<\"Theorema`Language`SIMPRNG$\"\>", 
+   ",", "\<\"Theorema`Language`STEPRNG$\"\>", 
+   ",", "\<\"Theorema`Language`Subscript$TM\"\>", 
+   ",", "\<\"Theorema`Language`SubsetEqual$TM\"\>", 
+   ",", "\<\"Theorema`Language`Subset$TM\"\>", 
+   ",", "\<\"Theorema`Language`Subtract$TM\"\>", 
+   ",", "\<\"Theorema`Language`SuchUnique$TM\"\>", 
+   ",", "\<\"Theorema`Language`Such$TM\"\>", 
+   ",", "\<\"Theorema`Language`SumOf$TM\"\>", 
+   ",", "\<\"Theorema`Language`SupersetEqual$TM\"\>", 
+   ",", "\<\"Theorema`Language`Superset$TM\"\>", 
+   ",", "\<\"Theorema`Language`Switch$TM\"\>", 
+   ",", "\<\"Theorema`Language`Times$TM\"\>", 
+   ",", "\<\"Theorema`Language`TupleOf$TM\"\>", 
+   ",", "\<\"Theorema`Language`Tuple$TM\"\>", 
+   ",", "\<\"Theorema`Language`UnionOf$TM\"\>", 
+   ",", "\<\"Theorema`Language`Union$TM\"\>", 
+   ",", "\<\"Theorema`Language`VAR$\"\>", 
+   ",", "\<\"Theorema`Language`Which$TM\"\>", 
+   ",", "\<\"Theorema`Language`While$TM\"\>", 
+   ",", "\<\"Theorema`Language`\[ScriptCapitalP]$TM\"\>", 
+   ",", "\<\"Theorema`Language`\[DoubleStruckCapitalC]$TM\"\>"}], 
+  "}"}]], "Output",
+ ImageSize->{570, 849},
+ ImageMargins->{{0, 0}, {0, 0}},
+ ImageRegion->{{0, 1}, {0, 1}},
+ CellLabel->"Out[21]=",
+ CellID->1422523005]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Names", "[", "\"\<Theorema`Computation`Language`*\>\"", 
+  "]"}]], "Input",
+ CellLabel->"In[22]:=",
+ CellID->1723186421],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"\<\"Theorema`Computation`Language`Abbrev$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`ABBRVRNG$\"\>", 
+   ",", "\<\"Theorema`Computation`Language`And$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Assign$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Backslash$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`BracketingBar$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Cap$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`CaseDistinction$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Clause$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`CompoundExpression$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Cross$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`CupCap$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Cup$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Divide$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`domainConstruct$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`DOMEXTRNG$\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Do$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Element$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`EmptyUpTriangle$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`EqualDef$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Equal$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Exists$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Factorial$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`FIX$\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Forall$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`For$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`globalAbbrev$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`globalForall$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`globalImplies$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`GreaterEqual$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Greater$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`IffDef$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Iff$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`If$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Implies$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`IntegerRange$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`IntegralOf$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`IntersectionOf$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Intersection$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`isComplex$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`isInteger$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`isRational$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`isReal$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`isSet$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`isTuple$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`LeftArrowBar$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`LeftArrow$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`LessEqual$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Less$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`List$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`MaximumOf$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`max$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`META$\"\>", 
+   ",", "\<\"Theorema`Computation`Language`MinimumOf$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`min$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Module$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`nE\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Not$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Or$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Plus$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Power$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`PREDRNG$\"\>", 
+   ",", "\<\"Theorema`Computation`Language`ProductOf$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Program\"\>", 
+   ",", "\<\"Theorema`Computation`Language`QU$\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Radical$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`RationalRange$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`RealRange$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`RNG$\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Rule$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`SEQ0$\"\>", 
+   ",", "\<\"Theorema`Computation`Language`SEQ1$\"\>", 
+   ",", "\<\"Theorema`Computation`Language`SequenceOf$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`SetDelayed$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`SetEqual$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`SetOf$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`SETRNG$\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Set$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`SIMPRNG$\"\>", 
+   ",", "\<\"Theorema`Computation`Language`STEPRNG$\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Subscript$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`SubsetEqual$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Subset$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Subtract$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`SuchUnique$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Such$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`SumOf$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`SupersetEqual$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Superset$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Switch$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Times$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`TupleOf$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Tuple$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`UnionOf$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Union$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`VAR$\"\>", 
+   ",", "\<\"Theorema`Computation`Language`Which$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`While$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`\[ScriptCapitalP]$TM\"\>", 
+   ",", "\<\"Theorema`Computation`Language`\[DoubleStruckCapitalC]$TM\"\>"}], 
+  "}"}]], "Output",
+ ImageSize->{578, 1665},
+ ImageMargins->{{0, 0}, {0, 0}},
+ ImageRegion->{{0, 1}, {0, 1}},
+ CellLabel->"Out[22]=",
+ CellID->1250581385]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"??", "Theorema`Computation`Language`Plus$TM"}]], "Input",
+ CellLabel->"In[25]:=",
+ CellID->1563251527],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ StyleBox["\<\"\"\>", "MSG"]], "Print", "PrintUsage",
+ CellTags->"Info3591872283-7698688",
+ CellID->629176869],
+
+Cell[BoxData[
+ InterpretationBox[GridBox[{
+    {GridBox[{
+       {
+        RowBox[{
+         RowBox[{
+          RowBox[{
+          "Theorema`Computation`Language`Plus$TM", "[", 
+           "Theorema`Computation`Language`Private`a___", "]"}], "/;", 
+          RowBox[{
+          "Theorema`Computation`Language`Private`buiActive", 
+           "[", "\<\"Plus\"\>", "]"}]}], ":=", 
+         RowBox[{"+", "Theorema`Computation`Language`Private`a"}]}]}
+      },
+      BaselinePosition->{Baseline, {1, 1}},
+      GridBoxAlignment->{
+       "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+        "RowsIndexed" -> {}},
+      GridBoxItemSize->{"Columns" -> {{
+           Scaled[0.999]}}, "ColumnsIndexed" -> {}, "Rows" -> {{1.}}, 
+        "RowsIndexed" -> {}}]}
+   },
+   BaselinePosition->{Baseline, {1, 1}},
+   GridBoxAlignment->{
+    "Columns" -> {{Left}}, "ColumnsIndexed" -> {}, "Rows" -> {{Baseline}}, 
+     "RowsIndexed" -> {}}],
+  Definition[Theorema`Computation`Language`Plus$TM],
+  Editable->False]], "Print",
+ CellTags->"Info3591872283-7698688",
+ CellID->1813426837]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"Names", "[", "\"\<Theorema`Provers`*\>\"", "]"}]], "Input",
+ CellLabel->"In[26]:=",
+ CellID->969990550],
+
+Cell[BoxData[
+ RowBox[{"{", 
+  RowBox[{"\<\"Theorema`Provers`andGoal\"\>", 
+   ",", "\<\"Theorema`Provers`andKB\"\>", 
+   ",", "\<\"Theorema`Provers`applyOnce\"\>", 
+   ",", "\<\"Theorema`Provers`applyOnceAndLevelSaturation\"\>", 
+   ",", "\<\"Theorema`Provers`basicTheoremaLanguageRules\"\>", 
+   ",", "\<\"Theorema`Provers`contradiction\"\>", 
+   ",", "\<\"Theorema`Provers`contradictionKB\"\>", 
+   ",", "\<\"Theorema`Provers`elementarySubstitution\"\>", 
+   ",", "\<\"Theorema`Provers`eqGoal\"\>", 
+   ",", "\<\"Theorema`Provers`equivGoal\"\>", 
+   ",", "\<\"Theorema`Provers`existsGoal\"\>", 
+   ",", "\<\"Theorema`Provers`existsGoalInteractive\"\>", 
+   ",", "\<\"Theorema`Provers`existsKB\"\>", 
+   ",", "\<\"Theorema`Provers`expandDef\"\>", 
+   ",", "\<\"Theorema`Provers`falseInKB\"\>", 
+   ",", "\<\"Theorema`Provers`forallGoal\"\>", 
+   ",", "\<\"Theorema`Provers`forallKB\"\>", 
+   ",", "\<\"Theorema`Provers`forallKBInteractive\"\>", 
+   ",", "\<\"Theorema`Provers`goalInKB\"\>", 
+   ",", "\<\"Theorema`Provers`goalRewriting\"\>", 
+   ",", "\<\"Theorema`Provers`implGoalCP\"\>", 
+   ",", "\<\"Theorema`Provers`implGoalDirect\"\>", 
+   ",", "\<\"Theorema`Provers`implicitDef\"\>", 
+   ",", "\<\"Theorema`Provers`initialProofSituation\"\>", 
+   ",", "\<\"Theorema`Provers`instantiate\"\>", 
+   ",", "\<\"Theorema`Provers`invalidProofNode\"\>", 
+   ",", "\<\"Theorema`Provers`knowledgeRewriting\"\>", 
+   ",", "\<\"Theorema`Provers`levelSat\"\>", 
+   ",", "\<\"Theorema`Provers`multipleGoalRewriting\"\>", 
+   ",", "\<\"Theorema`Provers`noApplicableRule\"\>", 
+   ",", "\<\"Theorema`Provers`notGoal\"\>", 
+   ",", "\<\"Theorema`Provers`openProofSituation\"\>", 
+   ",", "\<\"Theorema`Provers`orGoal\"\>", 
+   ",", "\<\"Theorema`Provers`orKB\"\>", 
+   ",", "\<\"Theorema`Provers`proofAlternatives\"\>", 
+   ",", "\<\"Theorema`Provers`quantifierRules\"\>", 
+   ",", "\<\"Theorema`Provers`searchDepthLimit\"\>", 
+   ",", "\<\"Theorema`Provers`trueGoal\"\>", 
+   ",", "\<\"Theorema`Provers`trySeveral\"\>"}], "}"}]], "Output",
+ ImageSize->{578, 356},
+ ImageMargins->{{0, 0}, {0, 0}},
+ ImageRegion->{{0, 1}, {0, 1}},
+ CellLabel->"Out[26]=",
+ CellID->1352775370]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Language Support", "Section",
+ CellID->113771787],
+
+Cell["\<\
+The Theorema system is designed in such a way that language-dependent \
+portions of the implementation are grouped in well-defined places. In this \
+way, we try to support the translation of the entire system into different \
+languages.\
+\>", "Text",
+ CellID->793667782],
+
+Cell[BoxData[GridBox[{
+   {
+    RowBox[{
+    "Help", " ", "texts", " ", "for", " ", "Theorema", " ", "system", " ", 
+     "functions"}], "\[SpanFromLeft]"},
+   {"\[Placeholder]", "\[Placeholder]"}
+  }]], "DefinitionBox",
+ CellID->1846301135],
+
+Cell["XXXX.", "Caption",
+ CellID->430696019]
+}, Open  ]]
+}, Open  ]],
+
+Cell[" ", "FooterCell"]
+},
+Saveable->False,
+ScreenStyleEnvironment->"Working",
+WindowSize->{725, 750},
+WindowMargins->{{0, Automatic}, {Automatic, 0}},
+WindowTitle->"System Architecture - Wolfram Mathematica",
+TaggingRules->{
+ "ModificationHighlight" -> False, 
+  "Metadata" -> {
+   "built" -> "{2014, 12, 3, 10, 40, 9.243582}", "context" -> "Theorema`", 
+    "keywords" -> {}, "index" -> True, "label" -> "Theorema Tutorial", 
+    "language" -> "en", "paclet" -> "Theorema", "status" -> "None", "summary" -> 
+    "The major components of the Theorema system are reflected in the \
+top-level directory structure of the Theorema installation. The directories \
+'Documentation', 'FrontEnd', and 'Kernel' are standard directories expected \
+to be present in every Mathematica package, they are required in order to \
+guarantee smooth integration of Theorema into Mathematica, e.g. system \
+documentation will be available through the Mathematica Documentation Center. \
+Implements computational semantics of the Theorema built-in language \
+constructs, e.g. numbers, tuples, finite sets, logical connectives, \
+quantifiers with finite ranges, etc. Color definitions for GUI components and \
+notebooks.", "synonyms" -> {}, "title" -> "System Architecture", "type" -> 
+    "Tutorial", "uri" -> "Theorema/tutorial/SystemArchitecture"}, 
+  "LinkTrails" -> "", "SearchTextTranslated" -> ""},
+FrontEndVersion->"8.0 for Linux x86 (32-bit) (February 23, 2011)",
+StyleDefinitions->Notebook[{
+   Cell[
+    StyleData[
+    StyleDefinitions -> FrontEnd`FileName[{"Wolfram"}, "Reference.nb"]]], 
+   Cell[
+    StyleData["Input"], CellContext -> "Global`"], 
+   Cell[
+    StyleData["Output"], CellContext -> "Global`"], 
+   Cell[
+    StyleData["TutorialMoreAboutSection"], 
+    CellGroupingRules -> {"SectionGrouping", 30}], 
+   Cell[
+    StyleData["RelatedTutorialsSection"], 
+    CellGroupingRules -> {"SectionGrouping", 30}], 
+   Cell[
+    StyleData["TutorialRelatedLinksSection"], 
+    CellGroupingRules -> {"SectionGrouping", 30}]}, Visible -> False, 
+  FrontEndVersion -> "8.0 for Linux x86 (32-bit) (February 23, 2011)", 
+  StyleDefinitions -> "Default.nb"]
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{
+ "Info3591872283-7698688"->{
+  Cell[26491, 683, 124, 3, 41, "Print",
+   CellTags->"Info3591872283-7698688",
+   CellID->629176869],
+  Cell[26618, 688, 1091, 29, 75, "Print",
+   CellTags->"Info3591872283-7698688",
+   CellID->1813426837]}
+ }
+*)
+(*CellTagsIndex
+CellTagsIndex->{
+ {"Info3591872283-7698688", 33033, 855}
+ }
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[612, 21, 78, 1, 3, "TutorialColorBar"],
+Cell[693, 24, 182, 5, 19, "LinkTrail"],
+Cell[878, 31, 1908, 41, 47, "AnchorBarGrid",
+ CellID->1],
+Cell[CellGroupData[{
+Cell[2811, 76, 56, 1, 52, "Title",
+ CellID->509267359],
+Cell[CellGroupData[{
+Cell[2892, 81, 63, 1, 54, "Section",
+ CellID->1368142877],
+Cell[2958, 84, 766, 18, 147, "Text",
+ CellID->306469654],
+Cell[CellGroupData[{
+Cell[3749, 106, 53, 1, 54, "Subsection",
+ CellID->119181558],
+Cell[3805, 109, 62, 1, 24, "Subsubsubsubsection",
+ CellID->1786863627],
+Cell[3870, 112, 221, 5, 76, "Text",
+ CellID->171401208]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4128, 122, 52, 1, 54, "Subsection",
+ CellID->1529585361],
+Cell[4183, 125, 65, 1, 24, "Subsubsubsubsection",
+ CellID->454861262],
+Cell[4251, 128, 87, 1, 32, "Text",
+ CellID->496326574],
+Cell[4341, 131, 57, 1, 24, "Subsubsubsubsection",
+ CellID->1598231819],
+Cell[4401, 134, 128, 4, 32, "Text",
+ CellID->787946467],
+Cell[4532, 140, 62, 1, 24, "Subsubsubsubsection",
+ CellID->2050811126],
+Cell[4597, 143, 139, 4, 54, "Text",
+ CellID->1635985201]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4773, 152, 51, 1, 54, "Subsection",
+ CellID->379393505],
+Cell[4827, 155, 128, 4, 32, "Text",
+ CellID->558587616]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4992, 164, 59, 1, 54, "Subsection",
+ CellID->540609734],
+Cell[5054, 167, 65, 1, 24, "Subsubsubsubsection",
+ CellID->1110611709],
+Cell[5122, 170, 492, 13, 76, "Text",
+ CellID->960188248],
+Cell[5617, 185, 389, 7, 120, "Text",
+ CellID->81310061],
+Cell[6009, 194, 73, 1, 24, "Subsubsubsubsection",
+ CellID->1282217458],
+Cell[6085, 197, 287, 8, 76, "Text",
+ CellID->970568858],
+Cell[6375, 207, 59, 1, 24, "Subsubsubsubsection",
+ CellID->96220053],
+Cell[6437, 210, 198, 4, 54, "Text",
+ CellID->1319111323],
+Cell[6638, 216, 59, 1, 24, "Subsubsubsubsection",
+ CellID->984237588],
+Cell[6700, 219, 700, 21, 98, "Text",
+ CellID->1026706244]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[7437, 245, 49, 1, 54, "Subsection",
+ CellID->865236243],
+Cell[7489, 248, 60, 1, 24, "Subsubsubsubsection",
+ CellID->1574014704],
+Cell[7552, 251, 234, 5, 76, "Text",
+ CellID->399461088],
+Cell[7789, 258, 64, 1, 24, "Subsubsubsubsection",
+ CellID->1781962606]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[7890, 264, 49, 1, 54, "Subsection",
+ CellID->1229030743],
+Cell[7942, 267, 62, 1, 24, "Subsubsubsubsection",
+ CellID->853032964]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[8041, 273, 51, 1, 54, "Subsection",
+ CellID->1161984883],
+Cell[8095, 276, 304, 6, 76, "Text",
+ CellID->909480822]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[8448, 288, 62, 1, 54, "Section",
+ CellID->1263115968],
+Cell[8513, 291, 878, 19, 209, "Text",
+ CellID->1534169418],
+Cell[9394, 312, 499, 8, 142, "Text",
+ CellID->954933595],
+Cell[9896, 322, 3032, 62, 501, "DefinitionBox",
+ CellID->2096742444],
+Cell[12931, 386, 109, 3, 32, "Caption",
+ CellID->1891092685],
+Cell[13043, 391, 105, 2, 32, "MathCaption",
+ CellID->836781195],
+Cell[CellGroupData[{
+Cell[13173, 397, 82, 2, 27, "Input",
+ CellID->2058623809],
+Cell[13258, 401, 363, 9, 54, "Output",
+ CellID->590174174]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[13658, 415, 120, 3, 27, "Input",
+ CellID->1836791445],
+Cell[13781, 420, 785, 16, 105, "Output",
+ CellID->416113451]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[14603, 441, 128, 3, 27, "Input",
+ CellID->490813747],
+Cell[14734, 446, 5092, 107, 870, "Output",
+ CellID->1422523005]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[19863, 558, 144, 4, 27, "Input",
+ CellID->1723186421],
+Cell[20010, 564, 6293, 107, 1686, "Output",
+ CellID->1250581385]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[26340, 676, 126, 3, 27, "Input",
+ CellID->1563251527],
+Cell[CellGroupData[{
+Cell[26491, 683, 124, 3, 41, "Print",
+ CellTags->"Info3591872283-7698688",
+ CellID->629176869],
+Cell[26618, 688, 1091, 29, 75, "Print",
+ CellTags->"Info3591872283-7698688",
+ CellID->1813426837]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[27758, 723, 127, 3, 27, "Input",
+ CellID->969990550],
+Cell[27888, 728, 2166, 45, 377, "Output",
+ CellID->1352775370]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[30103, 779, 55, 1, 54, "Section",
+ CellID->113771787],
+Cell[30161, 782, 280, 6, 76, "Text",
+ CellID->793667782],
+Cell[30444, 790, 241, 7, 71, "DefinitionBox",
+ CellID->1846301135],
+Cell[30688, 799, 44, 1, 32, "Caption",
+ CellID->430696019]
+}, Open  ]]
+}, Open  ]],
+Cell[30759, 804, 23, 0, 42, "FooterCell"]
+}
+]
+*)
+
+(* End of internal cache information *)
+

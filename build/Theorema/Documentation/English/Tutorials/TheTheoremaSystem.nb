@@ -1,0 +1,625 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 8.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       157,          7]
+NotebookDataLength[     19472,        615]
+NotebookOptionsPosition[     13824,        443]
+NotebookOutlinePosition[     16375,        501]
+CellTagsIndexPosition[     16332,        498]
+WindowTitle->The Theorema System (Version 2.0) - Wolfram Mathematica
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[" ", "TutorialColorBar",
+ CellMargins->{{Inherited, Inherited}, {-5, 0}}],
+
+Cell[TextData[{
+ ButtonBox["Mathematica",
+  BaseStyle->{"Link", "LinkTrail"},
+  ButtonData->"paclet:Theorema/guide/Theorema"],
+ StyleBox[" > ", "LinkTrailSeparator"]
+}], "LinkTrail"],
+
+Cell[BoxData[GridBox[{
+   {Cell["THEOREMA TUTORIAL", "PacletNameCell"], Cell[TextData[{
+     Cell[BoxData[
+      ActionMenuBox[
+       FrameBox["\<\"Related Tutorials \[RightGuillemet]\"\>",
+        StripOnInput->False], {"\<\"Theorema: A First Tour\"\>":>
+       Documentation`HelpLookup[
+       "paclet:Theorema/tutorial/FirstTour"], "\<\"Theorema Session\"\>":>
+       Documentation`HelpLookup[
+       "paclet:Theorema/tutorial/TheoremaSession"], "\<\"Theorema Commander\"\
+\>":>Documentation`HelpLookup["paclet:Theorema/tutorial/TheoremaCommander"]},
+       Appearance->None,
+       MenuAppearance->Automatic]],
+      LineSpacing->{1.4, 0}],
+     "\[ThickSpace]\[ThickSpace]\[ThickSpace]\[ThickSpace]\[ThickSpace]\
+\[ThickSpace]",
+     Cell[BoxData[
+      ActionMenuBox[
+       FrameBox["\<\"More About \[RightGuillemet]\"\>",
+        StripOnInput->False], {"\<\"Where to store add-on packages\"\>":>
+       Documentation`HelpLookup[
+       "paclet:tutorial/MathematicaFileOrganization"]},
+       Appearance->None,
+       MenuAppearance->Automatic]],
+      LineSpacing->{1.4, 0}],
+     "\[ThickSpace]\[ThickSpace]\[ThickSpace]\[ThickSpace]\[ThickSpace]\
+\[ThickSpace]",
+     Cell[BoxData[
+      ActionMenuBox[
+       FrameBox["\<\"URL \[RightGuillemet]\"\>",
+        StripOnInput->False], {"\<\"Theorema/tutorial/TheTheoremaSystem\"\>":>
+       None, "\<\"Copy Mathematica url\"\>":>
+       Module[{DocumentationSearch`Private`nb$}, 
+        DocumentationSearch`Private`nb$ = NotebookPut[
+           Notebook[{
+             Cell["Theorema/tutorial/TheTheoremaSystem"]}, Visible -> False]]; 
+        SelectionMove[DocumentationSearch`Private`nb$, All, Notebook]; 
+        FrontEndTokenExecute[DocumentationSearch`Private`nb$, "Copy"]; 
+        NotebookClose[DocumentationSearch`Private`nb$]; Null], 
+       Delimiter, "\<\"Copy web url\"\>":>
+       Module[{DocumentationSearch`Private`nb$}, 
+        DocumentationSearch`Private`nb$ = NotebookPut[
+           Notebook[{
+             Cell[
+              BoxData[
+               MakeBoxes[
+                Hyperlink[
+                "http://reference.wolfram.com/mathematica/Theorema/tutorial/\
+TheTheoremaSystem.html"], StandardForm]], "Input", TextClipboardType -> 
+              "PlainText"]}, Visible -> False]]; 
+        SelectionMove[DocumentationSearch`Private`nb$, All, Notebook]; 
+        FrontEndTokenExecute[DocumentationSearch`Private`nb$, "Copy"]; 
+        NotebookClose[DocumentationSearch`Private`nb$]; 
+        Null], "\<\"Go to web url\"\>":>FrontEndExecute[{
+         NotebookLocate[{
+           URL[
+            StringJoin[
+            "http://reference.wolfram.com/mathematica/", 
+             "Theorema/tutorial/TheTheoremaSystem", ".html"]], None}]}]},
+       Appearance->None,
+       MenuAppearance->Automatic]],
+      LineSpacing->{1.4, 0}]
+    }], "AnchorBar"]}
+  }]], "AnchorBarGrid",
+ CellID->1],
+
+Cell[CellGroupData[{
+
+Cell["The Theorema System (Version 2.0)", "Title",
+ CellID->509267359],
+
+Cell[CellGroupData[{
+
+Cell["What Is Theorema 2.0?", "Section",
+ CellID->1536843519],
+
+Cell[TextData[{
+ "Theorema 2.0 is a ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " package (a collection of packages, in fact) that provides a ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ "l Assistent System (MAS) inside of and based on ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ ". A MAS supports the user in"
+}], "Text",
+ CellID->1534169418],
+
+Cell["formulating and structuring of mathematical knowledge,", "BulletedText",
+ CellID->1051780089],
+
+Cell["proving mathematical statements,", "BulletedText",
+ CellID->816373380],
+
+Cell["formulating and executing mathematical algorithms,", "BulletedText",
+ CellID->115550266],
+
+Cell["performing computations,", "BulletedText",
+ CellID->269976977],
+
+Cell["etc.", "BulletedText",
+ CellID->1548135267]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["When Should You be Interested in Theorema 2.0?", "Section",
+ CellID->430678607],
+
+Cell[CellGroupData[{
+
+Cell["If you know the predecessor version Theorema 1.0.", "Subsection",
+ CellID->1005281005],
+
+Cell[TextData[{
+ "Theorema 2.0 is the successor version, it is completely re-designed and \
+re-implemented. While preserving the key features such as natural-style \
+mathematical input and output of formulas, natural-style automated proofs, \
+combination of proving and computing inside one system, etc., Theorema 2.0 \
+comes with an improved user-interface centered around a graphical user \
+interface (GUI) guiding the user through all phases of their work. ",
+ ButtonBox["More \[Ellipsis]",
+  BaseStyle->"Link",
+  ButtonData->"paclet:Theorema/tutorial/Theorema1-2"]
+}], "Text",
+ CellID->691297121]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+If you write mathematical documents including proofs or algorithms.\
+\>", "Subsection",
+ CellID->685153986],
+
+Cell["\<\
+Theorema 2.0 can help you in generating proofs fully automatically or \
+interactively. The proofs generated by the system are structured like proofs \
+done by a well-educated mathematician and can be displayed on the screen, \
+printed out, or included into the document.\
+\>", "Text",
+ CellID->201071277],
+
+Cell[TextData[{
+ "Theorema 2.0 allows you to express algorithms using the language of \
+predicate logic or parts of the ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " programming language supporting procedural programming, most importantly \
+various forms of loops. Moreover, the algorithms can be executed immediately \
+without any translation to any other system or language. ",
+ ButtonBox["More \[Ellipsis]",
+  BaseStyle->"Link",
+  ButtonData->"paclet:Theorema/tutorial/ProvingAndComputing"]
+}], "Text",
+ CellID->2005491772]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["If you want to develop hierarchies of mathematical theories", \
+"Subsection",
+ CellID->956583128],
+
+Cell[TextData[{
+ "Theorema 2.0 allows you to organize mathematical knowledge as hierarchies \
+of interdependent theories. Once you define a mathematical concept through a \
+formula (expressed in predicate logic), you can \"try out\" the definition \
+immediately on small finite examples, whether the formula \"behaves\" as \
+expected, i.e. whether the formula expresses what you wanted to express with \
+it. Once the definitions are settled, you can continue and try to prove some \
+properties of the newly defined entities. ",
+ ButtonBox["More \[Ellipsis]",
+  BaseStyle->"Link",
+  ButtonData->"paclet:Theorema/tutorial/Archives"]
+}], "Text",
+ CellID->458281791]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["How Can You Use Theorema 2.0?", "Section",
+ CellID->623181546],
+
+Cell[CellGroupData[{
+
+Cell["Theorema Licensing", "Subsection",
+ CellID->1257241288],
+
+Cell[TextData[{
+ "Theorema 2.0 is free software: you can redistribute it and/or modify it \
+under the terms of the ",
+ ButtonBox["GNU General Public License (GPL)",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["http://www.gnu.org/licenses/#GPL"], None}],
+ " as published by the Free Software Foundation, either version 3 of the \
+License, or (at your option) any later version."
+}], "Text",
+ CellID->1565546150]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Installing Theorema 2.0", "Subsection",
+ CellID->1741540549],
+
+Cell[TextData[{
+ "Theorema 2.0 is a standard add-on package for ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " and it is distributed as an archive file in various formats (zip, tar, 7z, \
+etc.), which can be downloaded from the ",
+ ButtonBox["Theorema homepage",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["http://www.risc.jku.at/research/theorema/software/"], None}],
+ ". Installation of the system requires nothing more than unpacking the \
+archive and moving the directory \"Theorema\" into one of the ",
+ ButtonBox["locations for standard add-on packages",
+  BaseStyle->"Link",
+  ButtonData->"paclet:tutorial/MathematicaFileOrganization"],
+ "."
+}], "Text",
+ CellID->1549344858]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Loading Theorema 2.0", "Subsection",
+ CellID->330272324],
+
+Cell[TextData[{
+ "Once the system is properly installed, it is then ",
+ StyleBox["loaded",
+  FontSlant->"Italic"],
+ " into the current ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " session by executing the ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " command"
+}], "Text",
+ CellID->1905121221],
+
+Cell[BoxData[
+ RowBox[{"Needs", "[", "\"\<Theorema`\>\"", "]"}]], "Input",
+ CellID->1257575355],
+
+Cell[TextData[{
+ "Theorema 2.0 requires at least ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " version 8."
+}], "Text",
+ CellID->1378783326]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["How Can You Work with Theorema 2.0", "Section",
+ CellID->1533479522],
+
+Cell[TextData[{
+ "While the system is loading, you see a welcome window on the screen. After \
+this, a new window called ",
+ ButtonBox["Theorema Commander",
+  BaseStyle->"Link",
+  ButtonData->"paclet:Theorema/tutorial/TheoremaCommander"],
+ " opens and marks the completion of the loading process. You are ready to \
+start off."
+}], "Text",
+ CellID->543322432],
+
+Cell[TextData[{
+ "\"Working in Theorema 2.0\" means developing a ",
+ ButtonBox["Theorema session",
+  BaseStyle->"Link",
+  ButtonData->"paclet:Theorema/tutorial/TheoremaSession"],
+ ", i.e."
+}], "Text",
+ CellID->499903409],
+
+Cell[TextData[{
+ "writing structured mathematical documents in ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " notebooks using one of the special Theorema stylesheets and"
+}], "BulletedText",
+ CellID->2117794442],
+
+Cell[CellGroupData[{
+
+Cell[TextData[{
+ "performing certain operations on parts of the notebook using actions \
+supported by the ",
+ ButtonBox["Theorema Commander",
+  BaseStyle->"Link",
+  ButtonData->"paclet:Theorema/tutorial/TheoremaCommander"],
+ " (e.g. prove a theorem)"
+}], "BulletedText",
+ CellID->1300560816],
+
+Cell[TextData[{
+ "For a first introduction to what can be done in a Theorema session we \
+suggest to follow the ",
+ ButtonBox["First Tour in Theorema 2.0",
+  BaseStyle->"Link",
+  ButtonData->"paclet:Theorema/tutorial/FirstTour"],
+ "."
+}], "Text",
+ CellID->447948591]
+}, Open  ]]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["How Can You Contribute to Theorema 2.0?", "Section",
+ CellID->55098215],
+
+Cell[TextData[{
+ "Theorema source code is available as a Git repository from ",
+ ButtonBox["GitHub",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["https://github.com/windsteiger/Theorema"], None}],
+ ". We assume basic knowledge on \"git\" for communicating contributions to \
+the Theorema source code."
+}], "Text",
+ CellID->1286171582],
+
+Cell[TextData[{
+ "If you intend to implement changes or improvements to the Theorema system, \
+we recommend to ",
+ StyleBox[ButtonBox["contact the Theorema Group",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["http://www.risc.jku.at/research/theorema/"], None}],
+  FontSlant->"Italic"],
+ StyleBox[" in advance",
+  FontSlant->"Italic"],
+ " in order to coordinate possible modifications. When you want to contribute \
+code to the system, you need to provide a git repository from which we can \
+pull the modifications. We encourage to use GitHub, but this is not a must."
+}], "Text",
+ CellID->529582062],
+
+Cell[TextData[{
+ "For programming Theorema code, we recommend to use the ",
+ ButtonBox["Wolfram Workbench",
+  BaseStyle->"Hyperlink",
+  ButtonData->{
+    URL["http://www.wolfram.com/products/workbench/"], None}],
+ ". When cloning the git repository you get a local directory that serves as \
+the base directory for a workbench-project. In the workbench, just import the \
+project from that directory into the default workspace. Due to formatting \
+issues with the resulting code, please refrain from editing programs in the \
+",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " notebook frontend. Please read the ",
+ ButtonBox["programmers' guidelines",
+  BaseStyle->"Link",
+  ButtonData->"paclet:Theorema/tutorial/ProgrammersGuidelines"],
+ " before you start implementing."
+}], "Text",
+ CellID->679074924]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["MORE ABOUT", "TutorialMoreAboutSection",
+ CellID->23220180],
+
+Cell[TextData[ButtonBox["Where to store add-on packages",
+ BaseStyle->"Link",
+ ButtonData->
+  "paclet:tutorial/MathematicaFileOrganization"]], "TutorialMoreAbout",
+ CellID->1567025153]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["RELATED TUTORIALS", "RelatedTutorialsSection",
+ CellID->415694126],
+
+Cell[TextData[ButtonBox["Theorema: A First Tour",
+ BaseStyle->"Link",
+ ButtonData->"paclet:Theorema/tutorial/FirstTour"]], "RelatedTutorials",
+ CellID->1628911651],
+
+Cell[TextData[ButtonBox["Theorema Session",
+ BaseStyle->"Link",
+ ButtonData->"paclet:Theorema/tutorial/TheoremaSession"]], "RelatedTutorials",\
+
+ CellID->806871991],
+
+Cell[TextData[ButtonBox["Theorema Commander",
+ BaseStyle->"Link",
+ ButtonData->
+  "paclet:Theorema/tutorial/TheoremaCommander"]], "RelatedTutorials",
+ CellID->1375069557]
+}, Open  ]]
+}, Open  ]],
+
+Cell[" ", "FooterCell"]
+},
+Saveable->False,
+ScreenStyleEnvironment->"Working",
+WindowSize->{725, 750},
+WindowMargins->{{0, Automatic}, {Automatic, 0}},
+WindowTitle->"The Theorema System (Version 2.0) - Wolfram Mathematica",
+TaggingRules->{
+ "ModificationHighlight" -> False, 
+  "Metadata" -> {
+   "built" -> "{2014, 12, 3, 10, 40, 20.397943}", "context" -> "Theorema`", 
+    "keywords" -> {}, "index" -> True, "label" -> "Theorema Tutorial", 
+    "language" -> "en", "paclet" -> "Theorema", "status" -> "None", "summary" -> 
+    "Theorema 2.0 is a Mathematica package (a collection of packages, in \
+fact) that provides a Mathematical Assistent System (MAS) inside of and based \
+on Mathematica. A MAS supports the user in Theorema 2.0 is the successor \
+version, it is completely re-designed and re-implemented. While preserving \
+the key features such as natural-style mathematical input and output of \
+formulas, natural-style automated proofs, combination of proving and \
+computing inside one system, etc., Theorema 2.0 comes with an improved \
+user-interface centered around a graphical user interface (GUI) guiding the \
+user through all phases of their work. More ... Theorema 2.0 can help you in \
+generating proofs fully automatically or interactively. The proofs generated \
+by the system are structured like proofs done by a well-educated \
+mathematician and can be displayed on the screen, printed out, or included \
+into the document.", "synonyms" -> {}, "title" -> 
+    "The Theorema System (Version 2.0)", "type" -> "Tutorial", "uri" -> 
+    "Theorema/tutorial/TheTheoremaSystem"}, "LinkTrails" -> "", 
+  "SearchTextTranslated" -> ""},
+FrontEndVersion->"8.0 for Linux x86 (32-bit) (February 23, 2011)",
+StyleDefinitions->Notebook[{
+   Cell[
+    StyleData[
+    StyleDefinitions -> FrontEnd`FileName[{"Wolfram"}, "Reference.nb"]]], 
+   Cell[
+    StyleData["Input"], CellContext -> "Global`"], 
+   Cell[
+    StyleData["Output"], CellContext -> "Global`"], 
+   Cell[
+    StyleData["TutorialMoreAboutSection"], 
+    CellGroupingRules -> {"SectionGrouping", 30}], 
+   Cell[
+    StyleData["RelatedTutorialsSection"], 
+    CellGroupingRules -> {"SectionGrouping", 30}], 
+   Cell[
+    StyleData["TutorialRelatedLinksSection"], 
+    CellGroupingRules -> {"SectionGrouping", 30}]}, Visible -> False, 
+  FrontEndVersion -> "8.0 for Linux x86 (32-bit) (February 23, 2011)", 
+  StyleDefinitions -> "Default.nb"]
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[626, 21, 78, 1, 3, "TutorialColorBar"],
+Cell[707, 24, 182, 5, 19, "LinkTrail"],
+Cell[892, 31, 2873, 64, 47, "AnchorBarGrid",
+ CellID->1],
+Cell[CellGroupData[{
+Cell[3790, 99, 70, 1, 52, "Title",
+ CellID->509267359],
+Cell[CellGroupData[{
+Cell[3885, 104, 61, 1, 54, "Section",
+ CellID->1536843519],
+Cell[3949, 107, 369, 12, 76, "Text",
+ CellID->1534169418],
+Cell[4321, 121, 99, 1, 24, "BulletedText",
+ CellID->1051780089],
+Cell[4423, 124, 76, 1, 24, "BulletedText",
+ CellID->816373380],
+Cell[4502, 127, 94, 1, 24, "BulletedText",
+ CellID->115550266],
+Cell[4599, 130, 68, 1, 24, "BulletedText",
+ CellID->269976977],
+Cell[4670, 133, 49, 1, 24, "BulletedText",
+ CellID->1548135267]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[4756, 139, 85, 1, 54, "Section",
+ CellID->430678607],
+Cell[CellGroupData[{
+Cell[4866, 144, 92, 1, 54, "Subsection",
+ CellID->1005281005],
+Cell[4961, 147, 600, 11, 148, "Text",
+ CellID->691297121]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[5598, 163, 117, 3, 70, "Subsection",
+ CellID->685153986],
+Cell[5718, 168, 314, 6, 70, "Text",
+ CellID->201071277],
+Cell[6035, 176, 535, 12, 70, "Text",
+ CellID->2005491772]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[6607, 193, 103, 2, 70, "Subsection",
+ CellID->956583128],
+Cell[6713, 197, 662, 12, 70, "Text",
+ CellID->458281791]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[7424, 215, 68, 1, 70, "Section",
+ CellID->623181546],
+Cell[CellGroupData[{
+Cell[7517, 220, 61, 1, 70, "Subsection",
+ CellID->1257241288],
+Cell[7581, 223, 416, 10, 70, "Text",
+ CellID->1565546150]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[8034, 238, 66, 1, 70, "Subsection",
+ CellID->1741540549],
+Cell[8103, 241, 696, 17, 70, "Text",
+ CellID->1549344858]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[8836, 263, 62, 1, 70, "Subsection",
+ CellID->330272324],
+Cell[8901, 266, 311, 12, 70, "Text",
+ CellID->1905121221],
+Cell[9215, 280, 95, 2, 70, "Input",
+ CellID->1257575355],
+Cell[9313, 284, 148, 6, 70, "Text",
+ CellID->1378783326]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[9510, 296, 74, 1, 70, "Section",
+ CellID->1533479522],
+Cell[9587, 299, 359, 9, 70, "Text",
+ CellID->543322432],
+Cell[9949, 310, 220, 7, 70, "Text",
+ CellID->499903409],
+Cell[10172, 319, 219, 6, 70, "BulletedText",
+ CellID->2117794442],
+Cell[CellGroupData[{
+Cell[10416, 329, 291, 8, 70, "BulletedText",
+ CellID->1300560816],
+Cell[10710, 339, 266, 8, 70, "Text",
+ CellID->447948591]
+}, Open  ]]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[11025, 353, 77, 1, 70, "Section",
+ CellID->55098215],
+Cell[11105, 356, 340, 9, 70, "Text",
+ CellID->1286171582],
+Cell[11448, 367, 606, 14, 70, "Text",
+ CellID->529582062],
+Cell[12057, 383, 809, 19, 70, "Text",
+ CellID->679074924]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[12903, 407, 65, 1, 70, "TutorialMoreAboutSection",
+ CellID->23220180],
+Cell[12971, 410, 184, 4, 70, "TutorialMoreAbout",
+ CellID->1567025153]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[13192, 419, 72, 1, 70, "RelatedTutorialsSection",
+ CellID->415694126],
+Cell[13267, 422, 163, 3, 70, "RelatedTutorials",
+ CellID->1628911651],
+Cell[13433, 427, 164, 4, 70, "RelatedTutorials",
+ CellID->806871991],
+Cell[13600, 433, 170, 4, 70, "RelatedTutorials",
+ CellID->1375069557]
+}, Open  ]]
+}, Open  ]],
+Cell[13797, 441, 23, 0, 70, "FooterCell"]
+}
+]
+*)
+
+(* End of internal cache information *)
+

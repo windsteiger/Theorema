@@ -1856,7 +1856,7 @@ makeFormButton[args___] := unexpected[ makeFormButton, {args}]
 
 makeGroupUngroupButton[ ] := Tooltip[ 
 	Button[ translate[ "group/ungroup"],
-		(* ShiftKey is not recognized inside Button in Mma 10.2. on Linux. Worked in Mma 8. Needs to be checked on other platforms. WW 5.7.2016 *)
+		(* ShiftKey is not recognized inside Button in Mma 10 on Linux. Worked in Mma 8/9. Needs to be checked on other platforms. WW 5.7.2016 *)
 		If[ CurrentValue[ "ShiftKey"],
 			FrontEndExecute[ {NotebookWrite[ InputNotebook[], removeAutoParen[ NotebookRead[ InputNotebook[]]], Placeholder]}],
 			(* else *)

@@ -1,0 +1,509 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 8.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       157,          7]
+NotebookDataLength[     23669,        499]
+NotebookOptionsPosition[     20725,        419]
+NotebookOutlinePosition[     22972,        473]
+CellTagsIndexPosition[     22929,        470]
+WindowTitle->The Theorema Session - Wolfram Mathematica
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[" ", "TutorialColorBar",
+ CellMargins->{{Inherited, Inherited}, {-5, 0}}],
+
+Cell[TextData[{
+ ButtonBox["Mathematica",
+  BaseStyle->{"Link", "LinkTrail"},
+  ButtonData->"paclet:Theorema/guide/Theorema"],
+ StyleBox[" > ", "LinkTrailSeparator"]
+}], "LinkTrail"],
+
+Cell[BoxData[GridBox[{
+   {Cell["THEOREMA TUTORIAL", "PacletNameCell"], Cell[TextData[Cell[BoxData[
+     ActionMenuBox[
+      FrameBox["\<\"URL \[RightGuillemet]\"\>",
+       StripOnInput->False], {"\<\"Theorema/tutorial/TheoremaSession\"\>":>
+      None, "\<\"Copy Mathematica url\"\>":>
+      Module[{DocumentationSearch`Private`nb$}, 
+       DocumentationSearch`Private`nb$ = NotebookPut[
+          Notebook[{
+            Cell["Theorema/tutorial/TheoremaSession"]}, Visible -> False]]; 
+       SelectionMove[DocumentationSearch`Private`nb$, All, Notebook]; 
+       FrontEndTokenExecute[DocumentationSearch`Private`nb$, "Copy"]; 
+       NotebookClose[DocumentationSearch`Private`nb$]; Null], 
+      Delimiter, "\<\"Copy web url\"\>":>
+      Module[{DocumentationSearch`Private`nb$}, 
+       DocumentationSearch`Private`nb$ = NotebookPut[
+          Notebook[{
+            Cell[
+             BoxData[
+              MakeBoxes[
+               Hyperlink[
+               "http://reference.wolfram.com/mathematica/Theorema/tutorial/\
+TheoremaSession.html"], StandardForm]], "Input", TextClipboardType -> 
+             "PlainText"]}, Visible -> False]]; 
+       SelectionMove[DocumentationSearch`Private`nb$, All, Notebook]; 
+       FrontEndTokenExecute[DocumentationSearch`Private`nb$, "Copy"]; 
+       NotebookClose[DocumentationSearch`Private`nb$]; 
+       Null], "\<\"Go to web url\"\>":>FrontEndExecute[{
+        NotebookLocate[{
+          URL[
+           StringJoin[
+           "http://reference.wolfram.com/mathematica/", 
+            "Theorema/tutorial/TheoremaSession", ".html"]], None}]}]},
+      Appearance->None,
+      MenuAppearance->Automatic]],
+     LineSpacing->{1.4, 0}]], "AnchorBar"]}
+  }]], "AnchorBarGrid",
+ GridBoxOptions->{GridBoxItemSize->{"Columns" -> {
+     Scaled[0.65], {
+      Scaled[0.34]}}, "ColumnsIndexed" -> {}, "Rows" -> {{1.}}, 
+   "RowsIndexed" -> {}}},
+ CellID->1],
+
+Cell[CellGroupData[{
+
+Cell["The Theorema Session", "Title",
+ CellID->509267359],
+
+Cell["\<\
+Mathematical documents containing Theorema code must use one of the Theorema \
+stylesheets,\
+\>", "Text",
+ CellID->1958807203],
+
+Cell["otherwise the code will not work properly!", "Text",
+ TextAlignment->Center,
+ FontWeight->"Bold",
+ CellID->985214143],
+
+Cell[TextData[{
+ "This is so because, in addition to styling properties, Theorema stylesheets \
+contain information that influences the evaluation of expressions, in \
+particular the parsing of expressions. Also the appropriate grouping of \
+certain cells is vital for correct interpretation. For these reasons, the \
+Theorema session must be demonstrated in a separate notebook carrying a \
+Theorema style as opposed to ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " Tutorial style required for documentation integrated into ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ "'s Help system."
+}], "Text",
+ CellID->927164523],
+
+Cell[CellGroupData[{
+
+Cell["Theorema Notebooks", "Section",
+ CellID->768045407],
+
+Cell[TextData[{
+ "Theorema notebooks are ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " notebooks using one of the specific Theorema stylesheets. The stylesheet \
+is always attached as a private style for every notebook, it is ",
+ StyleBox["not a shared stylesheet",
+  FontSlant->"Italic"],
+ ". This is so because stylesheets are language- and styling-dependent and \
+they are therfore ",
+ StyleBox["generated",
+  FontSlant->"Italic"],
+ " automatically from given templates and attached to the notebook when it is \
+opened or created. Thus, in order to turn certain language- and styling \
+changes into effect, notebooks might need to be re-opened such that the \
+private stylesheets are re-generated."
+}], "Text",
+ CellID->1678406481],
+
+Cell["\<\
+Every Theorema notebook has an associated directory, in which we store files \
+containing additional information for the notebooks to function properly. An \
+example of such additional information are the proof objects representing the \
+proofs contained in the notebook. These are usually rather big \
+datastructures, and we store them in separate files in order to keep the \
+notebook's size reasonably small.\
+\>", "Text",
+ CellID->520165943],
+
+Cell[TextData[{
+ "Theorema Notebooks typically contain dynamic objects, e.g. the environment \
+information for proofs (display of settings when the proof was generated). ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " requires a notebook that automatically updates dynamic objects to be \
+stored in a trusted location and maintains a FrontEnd-option ",
+ ButtonBox["TrustedPath",
+  BaseStyle->"Link",
+  ButtonData->"paclet:tutorial/NotebookSecurity"],
+ ". When creating a new Theorema notebook we add the notebook's directory to \
+the TrustedPath (if it is not already there), resulting in a ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ " warning like"
+}], "Text",
+ CellID->314299674],
+
+Cell[BoxData[
+ GraphicsBox[
+  TagBox[RasterBox[CompressedData["
+1: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
+x+T/uAkb+/QPJOaRsY8+jtYoJ2VG+SVbbnRslSuyts1y3upZpb1VrGVi6Ed8
+VWNhVlfm2tapbypzo+qvim9O+nITL6vxu8mfGyVmbteJSj9O8Ft/igv3Y9AD
+TVFxdzPggda40PxNVHceiZqOE3C+zRTUdJiKU08Mw7H7+uJoy3dQNH0Bdg8Z
+iXUPPYaFN9XH8ptvx65Vqb7GwCqnrcpk89hNeyd7jlGuydi2q6sSD5m+/IyL
+bP9mfnsVN9U8U/HRj3l2G2fV+XUSL7d+3kgx8yJeqn2o4Lf+7Mvbg5H3N8O8
+f2+Ey4/2wvlnv8a57otR1T8F5QPXovTDNSh//XuUPTcd+Y99iZxGb2BL/ZZY
+fUsDrKt/B7a1+DNKYvS5j1HMZfZ7s3KVayAn5bJ7qqwvXvhn9lo86I9VvIxe
+90N/zObByf6r4q9MXdV8ja5rN0Yn8bKr43Y/TfaYqdpONv0RzHmuHYb88nc4
+0nwAat5JRf6QDdjxdTqyRm9B1oiNyO+1BGu7LEZKp8VY/eQojLv5YWy+oyl2
+3XYfCt7q5+v47fLcjf7Y2XZj12ovtLNh5WOy6k/kuawOea0/Xvjm9tyvfHWa
+P3b9y8bUa/1J1pglq/4UbM3GhuWrsG/33jrlhZnZWPBQR0z7ze+wqsFD2NNt
+KtZ+mYHMmbuQPW83csZmomzAKnzX+yeMaTsTXe94HINvegC77u+FgltbofyD
+Yb6OX3bOvMpzP8q92tu98M/KJ6sYxUp/rHz2I25u66i0V7Hvdb46tSOTC27G
+w5jdGPpTuqcQh0aMx+6Wz2DXX1sjt0MnZD3bHuub/BXzG7+GxQ0fxtKbbsXi
+0D3Nd491wfrB32HntxnYNXQFtnefiMF/fBVv/PLf8MIv/hfmPzECGc/NRNGD
+f0fls/1RtiPf1xjIzFn0XEeXydaLLDNrL1NuVccL29Hldrkvm7cyfljFVSa+
+ZuvKyLZTv1TiY2fPzje7sTm1r5rXVuNViZlMPjmxLZOfjJn8epbJSbd4/f5b
+ybLVKLqrCarqN8G+W/6AHQ07YOWjQ/BDk1eReds9SLmrNZbd3Q7TGrTD13d3
+wvCGrfHRvzZDv/9zJwb+38bo//tmGN99Oea9uRJ5Hefj5CPDcPLRd3DonSEo
+n7UI5as3oGLtJhz6fgUOzf0BB9KzfI0PUcdJzvqd5yRxYC7cODHz4/OfsuUp
+OHdvC5xt3BanHxmIPa1nY0PLz5BX/0mkNh2A758YiukvTMXnbcbiveafon+z
+3viy+RsYettTGHjnXzGrTypmd1+GzV0XoeT56TjWpB9ONWiL6kbP4+I9T+F8
+02dwcMDnKF6dhtLC/YHHkNSF+kOcwjy4sWLm1/cPDg4ZjXP3vIrTrachr18a
+srpNxb67emJNm9mY+soijOi6FGM+WIW+nadiwIuTMKbrSHzapAOGNXsJW4Zm
+IK/3UuzrthClHWaE7n+GofreHrh8b3tUteuO/WkbA48bIYQQd/ilP2V5BTj7
+xMeo7LIAaz7fhPxWw1H0xHgs7LkaM/++ERM/SsOoD5diaN85GNp/Pj5+dRJ6
+3tkF4//UHYcnbsWhganY9e5yFPZZjlOtp+JS47dwptfnKMkvDDxmhBBC3OOX
+/pRn7sC5loNQENKbtLfm4/h9fbCjyyLMHbgeyyZnY+2cnZj19TqM+GQehn80
+G31emoi3HnwfXz3wEgq/zcKO8duwccgm7Po4FWfafoOzLw1DaQHfa1PFzWeI
+8X5fH8T7fPEeE6/9jNfxynymH4/xJHXxRX8KS3CqfW+cemgICjrNwNG7WuFY
+00+R22M5Fny0DqvHbMXmuXnYuGwP5k5cj+HvL8TIAcvxVZcp+OLW57Hq7XHY
+MmMXVg3dhD0DUnH+mSk4MmtVzGIS/f0PL3JP9ntVsj456dOpz36vvVjqo2ob
+2e+1OfVf1X6s5t6P8XpJPOhPvMYmkfz0Wn+KMrahvP0rOFG/BaqadMa5xo/g
+3J1tUdV8BAq7L8XSD9KwZuw2FKaWYNdPpUj5JgdzR2bg09eWYELHKZj5QDdM
+vuMpLB68FqmDN+FQ71W43OIrHP/71ISeN7t9RnXfkdUsL3ym/viXE9Qfd35R
+fxJ3DgVe6U9JUSn2jpuM3PseQkH9Rjh+23242uB2XG18Ly41+gvO3f8BDnT+
+ARsHrkPaxCzsXlaENeO3Yem47Zj95RaMf3M5vnlyBObc0RGT//V2zP5jZxx8
+ew0ud/oOlx7qj/MPtENF2sZA5y0652W/Q292bmXbrtyuP9Uyu3Fa3Xc56dsu
+VrLjs4uJ0ZjMxiPrm2p7O1+tfHYzpyp+ysTYrk8nsbCz49aWm7FYxVBlLlTG
+49Q/u3XsxM9Y4IX+lIybiZVtXsKERo0xu+FdWH1rI+T8vgEKb7kH+xs+jkNN
+WqHmrg642HwYinssx/pP1iFlRAZmhe6FZoT4tu9aLGw/F0sb98bCf38Q3/7b
+bzDyf/93pNz6FPY3eRPn720DNHoYl55+BmXbsmMWG7P5tssZu33RKred2FRp
+46S93VqSGatquRdxltEBp+Uq7a32aK/89GucVj7KYhYLu7HIxExlXF7GWWUu
+ZOvIxFp1j3HqZ6zwQn+2LFmK3A3pKMrfh8Jd+diTnoncH1ci44vRSGnWBasf
+HIi1z05C9tMjUfPYcFR0WYTsd1dj/RvLsLlHiHazsPXePsi4uy2WN2mDyXe1
+woj6j+O9f/kV+v3it5j8Lzdj6W9+j7L6DVDd/EkcWJ8ek9iozpvVnqNyLrvm
+ja5vrK6HjOrK5G0Q+uPEnpXvsjohGxs3cyAz5yqxcjKnKuVmfZqNSyXPjOqp
+2FLNYaNnJ/PuJG9lxux0fr3ImSDw+++P7l28Etl3vojsPw3F2lbzkdV8CC7e
+3xcnnpiIyuen4OjTX6GsSU/s/GA2Mr9ajw1vLsO8FlMx/dEhmNbgRYy79Q+Y
+26oTZrzcFaM7vogpj7fA8ocfRcnIcSj1+f9xu9GQyHlWbWvURmavdeo/9cf7
+GFrFR2bOncbK6zmwi7UX82+Fqq6o5oHTeXeStzJjdjq/Xsc9Vvj+/3+25SCv
+cQsU3PkCcu5/Hyufmohj97TDhYbtcbrpmzh++1+x8a0ZSB2fja1DN2Hfe6uw
+74kxWH/Xm0hp3hn5Gdf/fZ1dmzOxfdpM7E1J0z538is2bvVHJQfcnLvd15NJ
+f7yOlVcxlPUz1v6olMvup17Ns0puOplzN756PR7ZmNtdD3gV91jh+/3P2vXY
+dtvdyLrtgdDzX5D6n+9ix/2dcaXRfahp9Aj2thqItM/Ssf2jtSgNac+pzvNw
+4uGPUXjzc8h7+a3A4qKST5FElxnVNWtn17dd/ejXZP21GoeR77J92/ljZt/N
++GT6sfPBiS6o+mg1xyr+yMTfKpdUY2yXh7L5ZOeLrC3ZeMmuLdWxys6Zkzg7
+nS+rchU/Y4Hf+pMxaiwybr0LG29piC0Ph+51numONQ2ewcWGDXDqjodwuONc
+VL22GGfaz0J1y9Govr8fzt7zEipvfwxFbV4JNDZBEXROEEJILPBbf9a0eBpp
+j7VE7oQpKN5T+7dzNn4+EgdvuQMltz+OCw+8hytN++L0KyNwaNQ8HHvvS5x+
+uC1qGj+Kgw+2vCH/vij1hxByI+Cn/mybOhNbur6Boj0Fdcr35+/DhrvvR8Zv
+G+Hn+o/hbNueKI34H9sl6VtR/mZvnG3YBGU/LAs8RoQQQrzHL/0pCenJznkL
+UVJcdv3re4vw/cOP4adf34LLdzZDRdoGQxsVAwcj/9UegceIEEKI9/imP/sP
+mL8W0qQN4ydj9a9vxtFe71naOTR8NPLXrgs8Tk7g+2jEK6w+wyckUfH78x8z
+dm7OxPLb70KRyb1PJCXZO2MaE5nvHJm1szr3098g+k0W/I6XF/Pjl/7Ew3eg
+iP28q76WKASlP0XbcrDpuTYoKSrxvS8nc57I+kPiK35e2Kf+3JhQf3widE+z
+7+NBgY/fal5Vf2tg9BsFp9/djzx30k6lvtH4rX6joPrbBK/iaBcHmTiZzbNM
+jIKcH6sYGp2r5LnZsWrOWNmWnQu7ebSaw3jw2S6mMnMuOwYnazveCEx/4hiz
+nLbLY7v8lF1DVsdO7dmNVdZv2f1cpr3MeOz2RSfz6cW8xXp+Yq0/bvZdL2Lu
+V27G0me/c0Q2b+MZ6o/1vMpcwzjZx+zae9GvVc7bXVfJ2HO7fmXGY6Y/dmvL
+TZzc6I9f82Plg9N9RnavNMtXM3syOiC7l7vJuaB8tnr2KkdU8jaeof5Yz6vM
+ene7P/vVr4q2OPHbrT9u9nn93Av/vfLLz/nxWn+M9meVfdYqf73ay43m2Qt7
+fvpspz9e5Iidn6oxCBLqj/28Os0VN7lG/TGPg9f+J6r+qMREJW5u9jW3OWJn
+1+0cxsJnq3rUn7pQf+zn1ajc6LoxstwuH8zayhyr9GtVN7pcpg+runY2ZPuS
+2efNfJeNk1X84nF+gtQf2Zh7kSN+5VasfJaZIxn/rXLTyJbqmOMF6g+Jxuvc
+TZS1kGjEW1zjzZ9k9TmZoP6QaLxYk4l2HZaIxFts482fZPU5maD+EEIICQLq
+DyGEkCCg/sgRj/fpsfTJ777i5b06WT/iwVdCEh3qjxzxsN/IfPcpEccfD7G1
+8yPI2LsZg5d+8jM94jXUHzniYc1Rf4IbY6LqT6L3Q5Ib6o8xRt/Pl/lNgFGZ
+7G8IZH5X4Man6NfNzs18c9LObgxOxu127E788CL2TsauOn4jP/2II/WHeAH1
+53pk1pvdvm5WX7VcxQcvbZnZ9KNPu703VnF04odTv7z21e9ymVwhRBXqz/Wo
+7hVG15BO1rvVtaidD6q27HwyG48f/nutP7H0Q7Z/u/sLt776US7jDyFuoP5c
+TzzsAzJ+ubFlVt/Oph/+e60/sfRDtX+raxQ/xu+03MhfldwiRAbqz/XEg/6o
++ODEllObfvjvp/4Ecf8j27+XvsYy7wjxCuqPMdHviVit08i6Tusb9Wnll0of
+duO0GrvZPZJb/1WuqWXaxNIPJ/2b+eTGVzubsn4ZjcPKtpt1RUgk1J9g4Xom
+TmDekGSA+hN7ZO9NCDGDuUOSAeoPIYSQIKD+EEIICQLqDyGEkCCg/hBCCAkC
+6g8hhJAgoP4QQggJAuoPIYSQIKD+EEIICQLqDyGEkCCg/hBCCAkC6g8hhJAg
+oP4QQggJAuoPIYSQIKD+EEIICQLqDyGEkCCg/iQHZv8Pxqv/E8P/NxPsPHK+
+4jvesfI1kfyVgfpjPs+xmm8v+oiV/vjpa1CxjJ7vIMdo9P+vZWzx/2S7m6dk
+zOtEgPpjP9d+z30i6U+82fLSdjyM0Ww/tLNH/UncOQ/adpBQf+TmOrLM7rrU
+6trVqFzFnkw/MtfOMtfWRnbMnmX9VImBVV9W86QaXzN7Kv07HaNdnGXzz6p/
+2Tk2G7dVTFT9ke3bybq7kfLay3kIEuqPcX6alcnmikpblXxQtSVj28kYZPcN
+FdtGbWX3JlXbMnGI1RjdzKNsfdU5tupPNSYy2sa8Vvfbi3kIGuqPWt4GoT+R
+1zBe7ltG10uyYzBbD3Z+yvgo09ZuP5Y9d9PWar92Gp9om2a2Ze14kadux6Wi
+P2Z1zPphXsv3Rf1JDOJJf9zacrJOZOyr6Jxq/4mmP5HnbuPjdHxB6o9dPa/0
+x8wnL8ecLHlN/UlcZNaG1TxSf+TWmpO2TuPlR1s31ylOcyLe9Ud23/NC61V9
+k/E3WfKa+pO4iLmJxOp11Vwxa2tnz6idarnKGM3q2K0/q7EZ+WhXRya+Zn7I
+zpfMvNnFRGZOZeIjqwF2MZUZi2rcVeZd9thqjcnm142Q16q5qTIPQUL9IYlE
+vKwbQrzkRs1r6g9JJG7UdUqSmxs1r6k/hBBCgoD6QwghJAioP8mDV/fwfrwX
+cKO+v8D41B2jzDjjNRbxvL7iqT8VqD9y86X63Smv+1dpJ/MdIKv+bmT9idU8
+xiLm8USsYmH2PTUv5jxI/VFp4zaescxF6o9c/BNNf9z4Tv3x3xb1x59YJKv+
+uLFP/UksrPTH7rcXZr8nsMoJo7YyvyMw80elL7v+ZX+rIBMflbHY1XU6Tpl5
+9nMencTcbi5UYmc1b05yxY0vfsTCbBxO4mRVJuuXzFpQyXXZtekmnjJz7BXU
+H/McNpt/2XKVdW/Vv0qfMu1V66v4qLK/qcbBKx9Ux+XVPHo5x37Mj9U4vc4L
+v2NhNBandp22V1kLsrnuZg7s+pKZK6+h/pjPg5OcUs0Bs2uS6HOjaxg7m3bX
+O0Hpj5kPdnu/1Vw50Qgv1q7KPLqxazafKjnkRWxkfJGx72csrHJPduyq6021
+XDXX/cphmXH6CfXHfj24yTWVc5UcU/FFtb7f+mMXe5W1GS/6IzOPTuyq7AV+
+7JUyeeh2HF7Gwiv9cTM2N2vBTle9zGEvcs4t1B/7PHMyZ272dL/yJx71R3af
+82P/8kN/ZObBa5+9yFMvYuMkJ2Mxf16tXT/KVfOf+nNjoOdt9PWI1dxa5bqZ
+TaM+om3J1LPrW2ZcqnueTN9ma05mfGZjNvLDyjeZ8ZvF3ut5lO1HJQ4yY3WS
+M07nRGbd+BkLN+tIduxOYm3no8y4VNemSjzN9gM/of6QRCYWa4QQ4g/UH5LI
+UH8ISVyoP4QQQoKA+kMIISQIqD/2JOt7PLH6jPFGx8sYez1fsvaYJ4mRH4kG
+9Uc+P7zIk6ByTeb7TsS/2HvVVvZ7X6r2nXzHMJZxSLR5i8d+rPqXzTOvof7E
+Nj+CzDWV78MSf+Luti3vf5KPoGNL/Yk/rH4jYXTNKPv9f9nfVFj15TQ/ZH9H
+ofr7C9XfJFiN0843q/5Ufp9hZcONP2Zjcxo3q/yx6tfOX6t4OLVvFX83PtrZ
+V5l3J2tO1r7smpSdU1X/ZeJmlb9O88kN1B/z+bDKS5l9xG4N2rVV3atUxmXV
+XnY8duUyvjjdk93453Xcrdat27ip5ItM7FViJGPfyVhUc9dp37J5aTf3fuS9
+kznxMs/t2rsZowrUH/sckVmDRtcwXuwnsq+pjkt2n3Kis1br3C5GZrF0EjOz
+fUXVhqw/ds9W82C3N6rkptXcyozbap680h+Z/JPJFZl5N5o7r+zL5L1sXNz2
+a5bnKutJJXe9gPpjnyNO54T6oz5OJ2tY1pabvUYlVkHqj9FYVdq7fV01B/ze
+j73In0TRH6O4qvpE/Qket/ojoyFO2sralBmXm33ezlcv9cdrLfNibavGyqlN
+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
+ovWHEEIIiRVB6yAhhJAbl/8PM+6B7g==
+    "], {{0, 225}, {416, 0}}, {0, 255},
+    ColorFunction->RGBColor],
+   BoxForm`ImageTag[
+   "Byte", ColorSpace -> "RGB", ImageSize -> Automatic, Interleaving -> True, 
+    Magnification -> Automatic],
+   Selectable->False],
+  BaseStyle->"ImageGraphics",
+  ImageSize->Automatic,
+  ImageSizeRaw->{416, 225},
+  PlotRange->{{0, 416}, {0, 225}}]], "Picture",
+ CellID->1097005850],
+
+Cell[TextData[{
+ StyleBox["Press \"Yes\"",
+  FontWeight->"Bold"],
+ ", otherwise Theorema notebooks might show restricted functionality."
+}], "Text",
+ CellID->717170223]
+}, Open  ]]
+}, Open  ]],
+
+Cell[" ", "FooterCell"]
+},
+Saveable->False,
+ScreenStyleEnvironment->"Working",
+WindowSize->{725, 750},
+WindowMargins->{{-10, Automatic}, {Automatic, -10}},
+WindowTitle->"The Theorema Session - Wolfram Mathematica",
+TaggingRules->{
+ "ModificationHighlight" -> False, 
+  "Metadata" -> {
+   "built" -> "{2014, 12, 3, 10, 40, 16.857167}", "context" -> "Theorema`", 
+    "keywords" -> {}, "index" -> True, "label" -> "Theorema Tutorial", 
+    "language" -> "en", "paclet" -> "Theorema", "status" -> "None", "summary" -> 
+    "Mathematical documents containing Theorema code must use one of the \
+Theorema stylesheets, otherwise the code will not work properly! This is so \
+because, in addition to styling properties, Theorema stylesheets contain \
+information that influences the evaluation of expressions, in particular the \
+parsing of expressions. Also the appropriate grouping of certain cells is \
+vital for correct interpretation. For these reasons, the Theorema session \
+must be demonstrated in a separate notebook carrying a Theorema style as \
+opposed to Mathematica Tutorial style required for documentation integrated \
+into Mathematica's Help system.", "synonyms" -> {}, "title" -> 
+    "The Theorema Session", "type" -> "Tutorial", "uri" -> 
+    "Theorema/tutorial/TheoremaSession"}, "LinkTrails" -> "", 
+  "SearchTextTranslated" -> ""},
+FrontEndVersion->"8.0 for Linux x86 (32-bit) (February 23, 2011)",
+StyleDefinitions->Notebook[{
+   Cell[
+    StyleData[
+    StyleDefinitions -> FrontEnd`FileName[{"Wolfram"}, "Reference.nb"]]], 
+   Cell[
+    StyleData["Input"], CellContext -> "Global`"], 
+   Cell[
+    StyleData["Output"], CellContext -> "Global`"], 
+   Cell[
+    StyleData["TutorialMoreAboutSection"], 
+    CellGroupingRules -> {"SectionGrouping", 30}], 
+   Cell[
+    StyleData["RelatedTutorialsSection"], 
+    CellGroupingRules -> {"SectionGrouping", 30}], 
+   Cell[
+    StyleData["TutorialRelatedLinksSection"], 
+    CellGroupingRules -> {"SectionGrouping", 30}]}, Visible -> False, 
+  FrontEndVersion -> "8.0 for Linux x86 (32-bit) (February 23, 2011)", 
+  StyleDefinitions -> "Default.nb"]
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[613, 21, 78, 1, 3, "TutorialColorBar"],
+Cell[694, 24, 182, 5, 19, "LinkTrail"],
+Cell[879, 31, 1896, 41, 47, "AnchorBarGrid",
+ CellID->1],
+Cell[CellGroupData[{
+Cell[2800, 76, 57, 1, 52, "Title",
+ CellID->509267359],
+Cell[2860, 79, 136, 4, 54, "Text",
+ CellID->1958807203],
+Cell[2999, 85, 123, 3, 32, "Text",
+ CellID->985214143],
+Cell[3125, 90, 636, 14, 142, "Text",
+ CellID->927164523],
+Cell[CellGroupData[{
+Cell[3786, 108, 57, 1, 54, "Section",
+ CellID->768045407],
+Cell[3846, 111, 743, 17, 164, "Text",
+ CellID->1678406481],
+Cell[4592, 130, 455, 8, 120, "Text",
+ CellID->520165943],
+Cell[5050, 140, 698, 16, 70, "Text",
+ CellID->314299674],
+Cell[5751, 158, 14749, 248, 70, "Picture",
+ CellID->1097005850],
+Cell[20503, 408, 168, 5, 70, "Text",
+ CellID->717170223]
+}, Open  ]]
+}, Open  ]],
+Cell[20698, 417, 23, 0, 70, "FooterCell"]
+}
+]
+*)
+
+(* End of internal cache information *)
+

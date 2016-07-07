@@ -4,6 +4,5 @@ TestSuite/*
 .settings
 .project
 *.orig
-build
 Prototypes
 docbuild.xml

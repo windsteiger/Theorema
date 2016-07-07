@@ -1,0 +1,86 @@
+(* Content-type: application/vnd.wolfram.mathematica *)
+
+(*** Wolfram Notebook File ***)
+(* http://www.wolfram.com/nb *)
+
+(* CreatedBy='Mathematica 8.0' *)
+
+(*CacheID: 234*)
+(* Internal cache information:
+NotebookFileLineBreakTest
+NotebookFileLineBreakTest
+NotebookDataPosition[       157,          7]
+NotebookDataLength[      2179,         76]
+NotebookOptionsPosition[      1055,         42]
+NotebookOutlinePosition[      2048,         70]
+CellTagsIndexPosition[      2005,         67]
+WindowTitle->Theorema Language - Wolfram Mathematica
+WindowFrame->Normal*)
+
+(* Beginning of Notebook Content *)
+Notebook[{
+Cell[" ", "GuideColorBar",
+ CellMargins->{{Inherited, Inherited}, {-5, 0}}],
+
+Cell[TextData[{
+ ButtonBox["Mathematica",
+  BaseStyle->{"Link", "LinkTrail"},
+  ButtonData->"paclet:Theorema/guide/Theorema"],
+ StyleBox[" > ", "LinkTrailSeparator"]
+}], "LinkTrail"],
+
+Cell[CellGroupData[{
+
+Cell["Theorema Language", "GuideTitle",
+ CellID->942062912],
+
+Cell["\[NonBreakingSpace]", "GuideAbstract",
+ CellID->1]
+}, Open  ]],
+
+Cell[" ", "FooterCell"]
+},
+Saveable->False,
+ScreenStyleEnvironment->"Working",
+WindowSize->{725, 750},
+WindowMargins->{{-10, Automatic}, {Automatic, -10}},
+WindowTitle->"Theorema Language - Wolfram Mathematica",
+TaggingRules->{
+ "ModificationHighlight" -> False, 
+  "Metadata" -> {
+   "built" -> "{2014, 12, 3, 10, 39, 1.803529}", "context" -> "Theorema`", 
+    "keywords" -> {}, "index" -> True, "label" -> "Theorema Guide", 
+    "language" -> "en", "paclet" -> "Theorema", "status" -> "None", "summary" -> 
+    " ", "synonyms" -> {}, "title" -> "Theorema Language", "type" -> "Guide", 
+    "uri" -> "Theorema/guide/TheoremaLanguage"}, "LinkTrails" -> "", 
+  "SearchTextTranslated" -> ""},
+FrontEndVersion->"8.0 for Linux x86 (32-bit) (February 23, 2011)",
+StyleDefinitions->FrontEnd`FileName[{"Wolfram"}, "Reference.nb", 
+  CharacterEncoding -> "UTF-8"]
+]
+(* End of Notebook Content *)
+
+(* Internal cache information *)
+(*CellTagsOutline
+CellTagsIndex->{}
+*)
+(*CellTagsIndex
+CellTagsIndex->{}
+*)
+(*NotebookFileOutline
+Notebook[{
+Cell[610, 21, 75, 1, 3, "GuideColorBar"],
+Cell[688, 24, 182, 5, 19, "LinkTrail"],
+Cell[CellGroupData[{
+Cell[895, 33, 59, 1, 67, "GuideTitle",
+ CellID->942062912],
+Cell[957, 36, 56, 1, 64, "GuideAbstract",
+ CellID->1]
+}, Open  ]],
+Cell[1028, 40, 23, 0, 42, "FooterCell"]
+}
+]
+*)
+
+(* End of internal cache information *)
+
