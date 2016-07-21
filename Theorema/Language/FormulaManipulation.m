@@ -739,10 +739,10 @@ transferToComputation[ f_FML$] :=
 		(* if we have a definition in a domain, we need to register the operation, otherwise extension domains will not work *)
 		registerDomainDefinitionSymbol[ stripUniv];
 		exec = executableForm[ stripUniv, f];
-		(* Certain equalities cannot be made executable and generate an error when translated to Mma. 
+		(* Certain equalities cannot be made executable and generate an error when translated to Mma.
 		   Since this operation is part of the preprocesing, we catch the error,
 		   otherwise preprocessing would end in a premature state. *)
-		Quiet[ Check[ ToExpression[ exec], Null], {SetDelayed::nosym}]
+		Quiet[ Check[ ToExpression[ exec], Null], {SetDelayed::nosym, SetDelayed::write}]
 	]
 transferToComputation[ args___] := unexpected[ transferToComputation, {args}]
 
