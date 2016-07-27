@@ -894,6 +894,7 @@ displaySimplified[ file_String, simp_List] :=
 		{po, st} = simplifyProof[ po, simp];
 		fn = simpPoFilename[ file, simp];
 		Put[ po, fn];
+		NotebookClose[ $TMAproofNotebook];
 		displayProof[ file, simp]
 	]
 displaySimplified[ args___] := unexpected[ displaySimplified, {args}]
