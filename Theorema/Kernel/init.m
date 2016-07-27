@@ -115,14 +115,14 @@ showWelcomeScreen[] /; !ValueQ[`priv`welcomeScreen] && !TrueQ[ $suppressWelcomeS
     ];
     Pause[5];
 ]
-(*    		
+   		
 If[ TrueQ[$Notebooks],
     showWelcomeScreen[],
     Print[ "Theorema Version " <> StringJoin[ Riffle[ {$TheoremaVersion, $TheoremaRelease}, "."]] <> " (C) 2010-" <> 
-     ToString[Date[][[1]]] <> " The Theorema Group.\n
+     ToString[ Date[][[1]]] <> " The Theorema Group.\n
     This program comes with ABSOLUTELY NO WARRANTY;\n\n    This is free software, and you are welcome to\n    redistribute it under the conditions of the\n    GNU General Public License, see <http://www.gnu.org/licenses/>."]
 ];
-*)
+
 Get["Theorema`Common`"]
 Get["Theorema`System`"]
 
@@ -140,17 +140,15 @@ BeginPackage["Theorema`"]
 Get["Theorema`Language`"]
 Get["Theorema`Computation`"]
 Get["Theorema`Provers`"]
-Print["6"];
 Get["Theorema`Interface`GUI`"]
-Print["7"];
 
 EndPackage[]
 	
-(*
-If[$Notebooks && MemberQ[Notebooks[], Theorema`priv`welcomeScreen],
+
+If[ $Notebooks && MemberQ[Notebooks[], Theorema`priv`welcomeScreen],
 	NotebookClose[ Theorema`priv`welcomeScreen];
 	Clear[ Theorema`priv`welcomeScreen]];
-*)
+
 (* For documentation generation with Workbench include the following packages,
    so that their symbols appear without context *)
 (*   

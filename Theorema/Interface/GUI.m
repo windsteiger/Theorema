@@ -262,7 +262,7 @@ openTheoremaCommander[ ] /; $Notebooks :=
         	StyleDefinitions -> makeColoredStylesheet[ "GUI"],
         	WindowTitle -> translate["Theorema Commander"],
         	WindowFloating -> Automatic,
-        	WindowElements -> {"StatusArea"}]
+        	WindowElements -> {"StatusArea", "MagnificationPopUp"}]
     ]
 openTheoremaCommander[ args___] := unexpected[ openTheoremaCommander, {args}]
 
@@ -2774,11 +2774,9 @@ aboutTab[ args___] := unexpected[ aboutTab, {args}]
 (* ::Section:: *)
 (* end of package *)
 
-(*
 If[ $Notebooks,
 	openTheoremaCommander[]
 ];
-*)
 
 End[];
 EndPackage[];
