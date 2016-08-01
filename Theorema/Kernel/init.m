@@ -32,13 +32,13 @@ $TheoremaVersion = "2.0";
 $TheoremaRelease = "0";
 
 Which[!ValueQ[$TheoremaDirectory],
-	$TheoremaDirectory=With[{`priv`possibleDirs=Select[$Path,(FileType[FileNameJoin[{#,"Theorema","Kernel","init.m"}]]===File)&]},
-		If[`priv`possibleDirs==={},
-			Print["The Theorema Directory is not installed properly.\nPlease consult the installation guide."];
+	$TheoremaDirectory = With[ {`priv`possibleDirs = Select[ $Path, (FileType[FileNameJoin[{#,"Theorema","Kernel","init.m"}]] === File)&]},
+		If[ `priv`possibleDirs === {},
+			Print[ "The Theorema Directory is not installed properly.\nPlease consult the installation guide."];
 			Exit[],
 			`priv`possibleDirs[[1]]]],
-	FileType[FileNameJoin[{$TheoremaDirectory,"Theorema","Kernel","init.m"}]]=!=File,
-	Print[StringForm["$TheoremaDirectory=``.\nThe Theorema Directory is not installed in this directory.\nPlease consult the installation guide.",$TheoremaDirectory]];
+	FileType[ FileNameJoin[ {$TheoremaDirectory, "Theorema", "Kernel", "init.m"}]] =!= File,
+	Print[ StringForm[ "$TheoremaDirectory=``.\nThe Theorema Directory is not installed in this directory.\nPlease consult the installation guide.",$TheoremaDirectory]];
 	Exit[]
 ];
 
@@ -50,13 +50,13 @@ If[ FreeQ[ $BoxForms, System`TheoremaForm],
 
 Map[ Get, FileNames[ "*.m", FileNameJoin[{$TheoremaDirectory, "Theorema", "Kernel", "LanguageData"}]]];
 
-Protect[$TheoremaDirectory]; 
+Protect[ $TheoremaDirectory]; 
 
 Get[ "Theorema`Interface`ColorSchemes`"];
 
-Map[ Get, FileNames["TheoremaPreferences.m", {
-  FileNameJoin[{$TheoremaDirectory, "Theorema", "Kernel"}],
-  FileNameJoin[{$UserBaseDirectory, "Applications", "Theorema", "Kernel"}]}]];   
+Map[ Get, FileNames[ "TheoremaPreferences.m", {
+  FileNameJoin[ {$TheoremaDirectory, "Theorema", "Kernel"}],
+  FileNameJoin[ {$UserBaseDirectory, "Applications", "Theorema", "Kernel"}]}]];   
     
 $TheoremaArchivePath = {$TheoremaArchiveDirectory, $HomeDirectory};
 
@@ -115,11 +115,11 @@ showWelcomeScreen[] /; !ValueQ[`priv`welcomeScreen] && !TrueQ[ $suppressWelcomeS
     ];
     Pause[5];
 ]
-    		
+   		
 If[ TrueQ[$Notebooks],
     showWelcomeScreen[],
     Print[ "Theorema Version " <> StringJoin[ Riffle[ {$TheoremaVersion, $TheoremaRelease}, "."]] <> " (C) 2010-" <> 
-     ToString[Date[][[1]]] <> " The Theorema Group.\n
+     ToString[ Date[][[1]]] <> " The Theorema Group.\n
     This program comes with ABSOLUTELY NO WARRANTY;\n\n    This is free software, and you are welcome to\n    redistribute it under the conditions of the\n    GNU General Public License, see <http://www.gnu.org/licenses/>."]
 ];
 
@@ -145,7 +145,7 @@ Get["Theorema`Interface`GUI`"]
 EndPackage[]
 	
 
-If[$Notebooks && MemberQ[Notebooks[], Theorema`priv`welcomeScreen],
+If[ $Notebooks && MemberQ[Notebooks[], Theorema`priv`welcomeScreen],
 	NotebookClose[ Theorema`priv`welcomeScreen];
 	Clear[ Theorema`priv`welcomeScreen]];
 

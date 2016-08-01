@@ -262,7 +262,7 @@ openTheoremaCommander[ ] /; $Notebooks :=
         	StyleDefinitions -> makeColoredStylesheet[ "GUI"],
         	WindowTitle -> translate["Theorema Commander"],
         	WindowFloating -> Automatic,
-        	WindowElements -> {"StatusArea"}]
+        	WindowElements -> {"StatusArea", "MagnificationPopUp"}]
     ]
 openTheoremaCommander[ args___] := unexpected[ openTheoremaCommander, {args}]
 
@@ -1281,7 +1281,7 @@ displayBuiltinBrowser[args___] := unexcpected[ displayBuiltinBrowser, {args}]
 $allProveSettings = Hold[ $selectedProofGoal, $selectedProofKB, $selectedRuleSet, $selectedStrategy, $selectedSearchDepth, $selectedSearchTime,
 	$eliminateBranches, $eliminateSteps, $eliminateFormulae,
 	$interactiveProofSitSel, $interactiveNewProofSitFilter, $proofCellStatus,
-	kbSelectProve, buiActProve, ruleActive, $tcKBBrowseSelection];
+	kbSelectProve, buiActProve, ruleActive, rulePriority, $tcKBBrowseSelection];
 
 selectProver[ ] :=
     Column[{
@@ -1473,7 +1473,7 @@ execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, str
 		{po, st} = simplifyProof[ po, simplification];
 		(* po is the simplified proof object and $TMAproofTree is the corresponding simplified tree, but $TMAproofObject is still the unsimplified object *)
 		$TMAproofObject = po;
-		printProveInfo[ DeleteDuplicates[ Join[ Map[ {key[#], label[#]}&, kb], Map[ {key[#], label[#]}&, $addProofKB]]], pv, pt, st, repl];
+		printProveInfo[ DeleteDuplicates[ Join[ Map[ {key[#], label[#]}&, kb], Map[ {key[#], label[#]}&, $addProofKB]]], pv, pt, st, simplification, repl];
 	]
 execProveCall[ args___] := unexpected[ execProveCall, {args}]
 
@@ -1631,9 +1631,13 @@ evalFormulaFromKey[ k_List] :=
        ]
 evalFormulaFromKey[ args___] := unexpected[ evalFormulaFromKey, {args}]
 
-makeRelFilename[ base_String, id_String] :=
+makeRelFilename[ base_String, id_String] := 
 	ToString[ StringForm[ 
 		"FileNameJoin[{CurrentValue[\"NotebookDirectory\"], FileBaseName[CurrentValue[\"NotebookFileName\"]], \"``-``\"}]", base, id]
+	]
+makeRelFilename[ base_String] :=
+	ToString[ StringForm[ 
+		"FileNameJoin[{CurrentValue[\"NotebookDirectory\"], FileBaseName[CurrentValue[\"NotebookFileName\"]], \"``\"}]", base]
 	]
 makeRelFilename[ args___] := unexpected[ makeRelFilename, {args}]
 
@@ -1642,7 +1646,7 @@ makeRelFilename[ args___] := unexpected[ makeRelFilename, {args}]
 (* printProofInfo *)
 
 
-printProveInfo[ kbKeysLabels_, pVal_, pTime_, sTime_, replP_] := 
+printProveInfo[ kbKeysLabels_, pVal_, pTime_, sTime_, simplification_List, replP_] := 
 	Module[ {nbDir, subsP = replP, cellID = getCellIDFromKey[ key@$selectedProofGoal], file, fileID},
 		nbDir = createPerNotebookDirectory[ CurrentValue[ $proofInitNotebook, "NotebookFullFileName"]];
 		(* Generate cache only in plain .m format, since this allows sharing notebooks with users on different platforms.
@@ -1670,11 +1674,11 @@ printProveInfo[ kbKeysLabels_, pVal_, pTime_, sTime_, replP_] :=
 			SelectionMove[ $proofInitNotebook, All, CellGroup]
 		];
 		SetSelectedNotebook[ $proofInitNotebook];
-		With[ {fnpo = makeRelFilename[ fileID, "po.m"], fnd = makeRelFilename[ fileID, "display.m"]},
+		With[ {fnpo = makeRelFilename[ fileID], fnd = makeRelFilename[ fileID, "display.m"]},
         	NotebookWrite[ $proofInitNotebook, Cell[ TextData[ {Cell[ BoxData[ ToBoxes[ proofStatusIndicator[ pVal]]]], " " <> translate[ "Proof of"] <> " ",
         		formulaReference[ $selectedProofGoal], " #" <> ToString[ subsP] <> ":   ",
 				Cell[ BoxData[ ToBoxes[ Button[ Style[ translate["ShowProof"], FontVariations -> {"Underline" -> True}], 
-					displayProof[ ToExpression[ fnpo]], ImageSize -> Automatic, Appearance -> None, Method -> "Queued"]]]]}],
+					displayProof[ ToExpression[ fnpo], simplification], ImageSize -> Automatic, Appearance -> None, Method -> "Queued"]]]]}],
         		"ProofInfo",
         		CellTags -> With[ {pTag = makeProofIDTag[ $selectedProofGoal]}, {pTag, pTag <> "-" <> ToString[ subsP]}],
         		CellFrameLabels -> {{None, Cell[ BoxData[ ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, 

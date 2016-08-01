@@ -862,7 +862,52 @@ displayProof[ file_String] :=
 				"WindowClose" :> ($TMAproofTree = {};), PassEventsDown -> False}]
 		]
 	]
+displayProof[ file_String, simp_List] :=
+	Module[ {p, cells, tree, origDock, newDock},
+		p = Get[ simpPoFilename[ file, simp]];
+		cells = proofObjectToCell[ p];
+		tree = poToTree[ p];
+		$TMAproofObject = p;
+		$TMAproofTree = tree; 
+		$TMAproofNotebook = tmaNotebookPut[ Notebook[ cells], "Proof"];
+		origDock = DockedCells /. Options[ $TMAproofNotebook, DockedCells];
+		{$eliminateBranches, $eliminateSteps, $eliminateFormulae} = simp;
+		newDock = {origDock, 
+  			Cell[ BoxData[ ToBoxes[ OpenerView[ {Style[ translate[ "pSimp"], "Subsubsection"], 
+       			Row[ {Grid[{
+    				{Checkbox[ Dynamic[ $eliminateBranches]], Style[ translate[ "elimBranches"], "Text"]},
+    				{Checkbox[ Dynamic[ $eliminateSteps]], Style[ translate[ "elimSteps"], "Text"]},
+    				{Checkbox[ Dynamic[ $eliminateFormulae]], Style[ translate[ "elimForm"], "Text"]}
+    				}, Alignment -> {Left}], Button["Simplify", displaySimplified[ file, {$eliminateBranches, $eliminateSteps, $eliminateFormulae}]], Spacer[5]}]}]]], "Text", 
+   				TextAlignment -> Right]};
+		$selectedProofStep = "OriginalPS";
+		With[ {nb = $TMAproofNotebook, tr = tree, po = p},
+			SetOptions[ $TMAproofNotebook, NotebookEventActions -> {{"KeyDown", "r"} :> ($TMAproofNotebook = nb; $TMAproofObject = po; $TMAproofTree = tr;),
+				"WindowClose" :> ($TMAproofTree = {};), PassEventsDown -> False}, DockedCells -> newDock]
+		]
+	]
 displayProof[ args___] := unexpected[ displayProof, {args}]
+
+displaySimplified[ file_String, simp_List] :=
+	Module[{po, st, fn},
+		po = Get[ file <> "-po.m"];
+		{po, st} = simplifyProof[ po, simp];
+		fn = simpPoFilename[ file, simp];
+		Put[ po, fn];
+		displayProof[ file, simp]
+	]
+displaySimplified[ args___] := unexpected[ displaySimplified, {args}]
+
+simpPoFilename[ file_String, simp_List] :=
+	Module[{sExt, suff},
+		sExt = FromDigits[ simp /. {True -> 1, False -> 0}, 2];
+		If[ sExt === 0,
+			suff = "",
+			suff = "-" <> ToString[ sExt] 
+		];
+		file <> "-po" <> suff <> ".m"
+	]
+simpPoFilename[ args___] := unexpected[ simpPoFilename, {args}]
 
 
 (* ::Subsubsection:: *)
