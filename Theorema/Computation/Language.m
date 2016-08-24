@@ -127,7 +127,6 @@ Equal$TM[ a_?isIndividual, b__?isIndividual, c_?isIndividual] /; isPosRelation["
 	Flatten[ And$TM @@ MapThread[ Hold[ Equal$TM[ #1, #2]]&, {{a, b}, {b, c}}], 1, Hold]
 
 (*Unequal$TM[ a_, b_] /; a=!=b := Module[ {u = Union[ {a, b}]}, Apply[ Unequal$TM, u] /; u =!= {a, b}]*)
-SetAttributes[ Unequal$TM, Orderless]
 Unequal$TM[ a_?isIndividual] /; isNegRelation["Unequal"] :=
 	Not$TM[ Equal$TM[ a]]
 Unequal$TM[ a_?isIndividual, b_?isIndividual] /; isNegRelation["Unequal"] :=
