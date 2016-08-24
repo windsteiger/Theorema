@@ -150,7 +150,7 @@ markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
         vars = Complement[ vars, seq];
         violating = checkForValidRange[ seq, vars, Hold[ r], SEQ0$|SEQ1$];
         If[ violating =!= {},
-        	(* TODO: Remove old versions of formula from $tmaEnv? *)
+        	(* If this function is called in 'processEnvironment', 'updateKnowledgeBase' will remove the old version of the formula from '$tmaEnv'. *)
         	notification[ translate[ "invalidRange"], DisplayForm[ ToBoxes[ violating /. Hold -> HoldForm, TheoremaForm]]];
 			Throw[ $Failed]
         ];
@@ -173,7 +173,7 @@ markVariables[ Hold[ Theorema`Computation`Language`QU$[ r_Theorema`Computation`L
         vars = Complement[ vars, seq];
         violating = checkForValidRange[ seq, vars, Hold[ r], Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$];
         If[ violating =!= {},
-        	(* TODO: Remove old versions of formula from $tmaEnv? *)
+        	(* If this function is called in 'processEnvironment', 'updateKnowledgeBase' will remove the old version of the formula from '$tmaEnv'. *)
         	notification[ translate[ "invalidRange"], DisplayForm[ ToBoxes[ violating /. Hold -> HoldForm, TheoremaForm]]];
 			Throw[ $Failed]
         ];
@@ -439,7 +439,7 @@ processEnvironment[ x_] :=
 		globDec = applicableGlobalDeclarations[ nb, nbExpr, evaluationPosition[ nb, nbExpr]];
 		(* process the expression according the Theorema syntax rules and add it to the KB 
 		   ReleaseHold will remove the outer Hold but leave the Holds around fresh symbols *)
-        Catch[ updateKnowledgeBase[ ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]], key, globDec, cellTagsToString[ tags], cellTagsToFmlTags[ tags]]];
+        updateKnowledgeBase[ Catch[ ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]]], key, globDec, cellTagsToString[ tags], cellTagsToFmlTags[ tags]];
         (* Positions of abbreviations are added in "updateKnowledgeBase". *)
         SelectionMove[ nb, After, Cell];
     ]
@@ -777,6 +777,13 @@ occursBelow[ {a___, p_}, {a___, q_, ___}] /; q > p := True
 occursBelow[ x_, y_] := False
 occursBelow[ args___] := unexpected[ occursBelow, {args}]
 
+updateKnowledgeBase[ $Failed, k_, ___] :=
+	(
+		$tmaEnv = DeleteCases[ $tmaEnv, _[ k, ___], {1}, 1];
+		If[ inArchive[],
+	        $tmaArch = DeleteCases[ $tmaArch, _[ k, ___], {1}, 1]
+	    ];
+	)
 (* 
 	form and glob still carry Holds around fresh symbols. After globals have been applied, ReleaseHold will remove them.
 *)
@@ -787,39 +794,48 @@ updateKnowledgeBase[ form_, k_, glob_, l_String, tags_List] :=
     	If[ inDomDef =!= {} && (defDef = $tmaDefaultDomainDef[ inDomDef[[1]]]) =!= {},
     		(* we are in a domain definition and there is a pending default for this domain *)
     		$tmaDefaultDomainDef[ inDomDef[[1]]] = {};
-    		newForm = addAbbrevPositions[ ReleaseHold[ addVarPrefixes[ applyGlobalDeclaration[ defDef[[1]], glob]]]];
-    		fml = makeFML[ key -> Rest[ defDef], formula -> newForm, 
-    			label -> StringReplace[ ToString[ ReleaseHold[ inDomDef[[1,1]]]], "$TM" -> ""] <> ".defOp", simplify -> False];
-    		If[ fml === $Failed,
-    			(* TODO: Remove old versions of formula from $tmaEnv? *)
-    			notification[ translate[ "invalidExpr"]];
-    			Null,
-    		(*else*)
-	    		transferToComputation[ fml];
-	    		$tmaEnv = Append[ DeleteCases[ $tmaEnv, _[ First[ fml], ___], {1}, 1], fml];
-	        	If[ inArchive[],
-	            	$tmaArch = Append[ DeleteCases[ $tmaArch, _[ First[ fml], ___], {1}, 1], fml];
-	        	]
-    		]
+    		newForm = Catch[ addAbbrevPositions[ ReleaseHold[ addVarPrefixes[ applyGlobalDeclaration[ defDef[[1]], glob]]]]];
+		    If[ newForm === $Failed,
+		    	updateKnowledgeBase[ $Failed, k],
+		    (*else*)
+		    	fml = makeFML[ key -> Rest[ defDef], formula -> newForm,
+		    			label -> StringReplace[ ToString[ ReleaseHold[ inDomDef[[1,1]]]], "$TM" -> ""] <> ".defOp", simplify -> False];
+	    		If[ fml === $Failed,
+	    			notification[ translate[ "invalidExpr"]];
+	    			updateKnowledgeBase[ $Failed, k],
+	    		(*else*)
+		    		transferToComputation[ fml];
+		    		$tmaEnv = Append[ DeleteCases[ $tmaEnv, _[ First[ fml], ___], {1}, 1], fml];
+		        	If[ inArchive[],
+		            	$tmaArch = Append[ DeleteCases[ $tmaArch, _[ First[ fml], ___], {1}, 1], fml];
+		        	]
+	    		]
+		    ];
     	];
     	(* for the actual formula we proceed in the same way *)
-    	newForm = addAbbrevPositions[ ReleaseHold[ addVarPrefixes[ applyGlobalDeclaration[ form, glob]]]];
-    	fml = makeFML[ key -> k, formula -> newForm, label -> l, simplify -> False];
-    	If[ fml === $Failed,
-    		(* TODO: Remove old versions of formula from $tmaEnv? *)
-    		notification[ translate[ "invalidExpr"]];
-    		Null,
+    	(* Since 'applyGlobalDeclaration' may throw '$Failed' (via 'markVariables'), we have to put it inside a 'Catch'. *)
+    	newForm = Catch[ addAbbrevPositions[ ReleaseHold[ addVarPrefixes[ applyGlobalDeclaration[ form, glob]]]]];
+    	If[ newForm === $Failed,
+    		(*no need to show any notification, has already been done in 'markVariables'*)
+    		updateKnowledgeBase[ $Failed, k],
     	(*else*)
-	    	If[ tags =!= {},
-	    		AppendTo[ fml, "tags" -> tags]
-	    	];
-	    	transferToComputation[ fml];
-	    	(* If new formulae are appended rather than prepended, the old formulae with the same label
-	    		have to be deleted first, because "DeleteDuplicates" would delete the new ones. *)
-			$tmaEnv = Append[ DeleteCases[ $tmaEnv, _[ First[ fml], ___], {1}, 1], fml];
-	        If[ inArchive[],
-	            $tmaArch = Append[ DeleteCases[ $tmaArch, _[ First[ fml], ___], {1}, 1], fml];
-	        ]
+	    	fml = makeFML[ key -> k, formula -> newForm, label -> l, simplify -> False];
+	    	If[ fml === $Failed,
+	    		notification[ translate[ "invalidExpr"]];
+	    		updateKnowledgeBase[ $Failed, k];
+	    		Null,
+	    	(*else*)
+		    	If[ tags =!= {},
+		    		AppendTo[ fml, "tags" -> tags]
+		    	];
+		    	transferToComputation[ fml];
+		    	(* If new formulae are appended rather than prepended, the old formulae with the same label
+		    		have to be deleted first, because "DeleteDuplicates" would delete the new ones. *)
+				$tmaEnv = Append[ DeleteCases[ $tmaEnv, _[ First[ fml], ___], {1}, 1], fml];
+		        If[ inArchive[],
+		            $tmaArch = Append[ DeleteCases[ $tmaArch, _[ First[ fml], ___], {1}, 1], fml];
+		        ]
+	    	]
     	]
     ]
 updateKnowledgeBase[ args___] := unexpected[ updateKnowledgeBase, {args}]
@@ -870,7 +886,7 @@ applyGlobalDeclaration[ args___] := unexpected[ applyGlobalDeclaration, {args}]
 analyzeQuantifiedExpression[ globalForall$TM[ r:RNG$[ __], c_, e_]] :=
 	Module[ {freeE, rc, thinnedRange, freerc},
 		(* take the free vars in e and free variables in the ranges *)
-		freeE = freeVariables[ {Map[ Rest, r], e}];
+		freeE = freeVariables[ {Map[ Rest, List @@ r], e}];		(*if the head of 'r' is 'RNG$', 'freeVariables' produces a wrong result*)
 		(* watch out for all conditions involving the free variables in e ... *)
 		{rc, freerc} = thinnedConnect[ c, freeE];
 		(* ... and collect all free variables therein: these are the variables that require the quantifiers, the others can be dropped *)
