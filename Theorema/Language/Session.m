@@ -150,6 +150,7 @@ markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
         vars = Complement[ vars, seq];
         violating = checkForValidRange[ seq, vars, Hold[ r], SEQ0$|SEQ1$];
         If[ violating =!= {},
+        	(* TODO: Remove old versions of formula from $tmaEnv? *)
         	notification[ translate[ "invalidRange"], DisplayForm[ ToBoxes[ violating /. Hold -> HoldForm, TheoremaForm]]];
 			Throw[ $Failed]
         ];
@@ -172,6 +173,7 @@ markVariables[ Hold[ Theorema`Computation`Language`QU$[ r_Theorema`Computation`L
         vars = Complement[ vars, seq];
         violating = checkForValidRange[ seq, vars, Hold[ r], Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$];
         If[ violating =!= {},
+        	(* TODO: Remove old versions of formula from $tmaEnv? *)
         	notification[ translate[ "invalidRange"], DisplayForm[ ToBoxes[ violating /. Hold -> HoldForm, TheoremaForm]]];
 			Throw[ $Failed]
         ];
@@ -788,25 +790,37 @@ updateKnowledgeBase[ form_, k_, glob_, l_String, tags_List] :=
     		newForm = addAbbrevPositions[ ReleaseHold[ addVarPrefixes[ applyGlobalDeclaration[ defDef[[1]], glob]]]];
     		fml = makeFML[ key -> Rest[ defDef], formula -> newForm, 
     			label -> StringReplace[ ToString[ ReleaseHold[ inDomDef[[1,1]]]], "$TM" -> ""] <> ".defOp", simplify -> False];
-    		transferToComputation[ fml];
-    		$tmaEnv = Append[ DeleteCases[ $tmaEnv, _[ First[ fml], ___], {1}, 1], fml];
-        	If[ inArchive[],
-            	$tmaArch = Append[ DeleteCases[ $tmaArch, _[ First[ fml], ___], {1}, 1], fml];
-        	]
+    		If[ fml === $Failed,
+    			(* TODO: Remove old versions of formula from $tmaEnv? *)
+    			notification[ translate[ "invalidExpr"]];
+    			Null,
+    		(*else*)
+	    		transferToComputation[ fml];
+	    		$tmaEnv = Append[ DeleteCases[ $tmaEnv, _[ First[ fml], ___], {1}, 1], fml];
+	        	If[ inArchive[],
+	            	$tmaArch = Append[ DeleteCases[ $tmaArch, _[ First[ fml], ___], {1}, 1], fml];
+	        	]
+    		]
     	];
     	(* for the actual formula we proceed in the same way *)
     	newForm = addAbbrevPositions[ ReleaseHold[ addVarPrefixes[ applyGlobalDeclaration[ form, glob]]]];
     	fml = makeFML[ key -> k, formula -> newForm, label -> l, simplify -> False];
-    	If[ tags =!= {},
-    		AppendTo[ fml, "tags" -> tags]
-    	];
-    	transferToComputation[ fml];
-    	(* If new formulae are appended rather than prepended, the old formulae with the same label
-    		have to be deleted first, because "DeleteDuplicates" would delete the new ones. *)
-		$tmaEnv = Append[ DeleteCases[ $tmaEnv, _[ First[ fml], ___], {1}, 1], fml];
-        If[ inArchive[],
-            $tmaArch = Append[ DeleteCases[ $tmaArch, _[ First[ fml], ___], {1}, 1], fml];
-        ]
+    	If[ fml === $Failed,
+    		(* TODO: Remove old versions of formula from $tmaEnv? *)
+    		notification[ translate[ "invalidExpr"]];
+    		Null,
+    	(*else*)
+	    	If[ tags =!= {},
+	    		AppendTo[ fml, "tags" -> tags]
+	    	];
+	    	transferToComputation[ fml];
+	    	(* If new formulae are appended rather than prepended, the old formulae with the same label
+	    		have to be deleted first, because "DeleteDuplicates" would delete the new ones. *)
+			$tmaEnv = Append[ DeleteCases[ $tmaEnv, _[ First[ fml], ___], {1}, 1], fml];
+	        If[ inArchive[],
+	            $tmaArch = Append[ DeleteCases[ $tmaArch, _[ First[ fml], ___], {1}, 1], fml];
+	        ]
+    	]
     ]
 updateKnowledgeBase[ args___] := unexpected[ updateKnowledgeBase, {args}]
 
@@ -843,11 +857,11 @@ applyGlobalDeclaration[ expr_, Hold[ globalForall$TM][ r_, c_, d_]] :=
 applyGlobalDeclaration[ expr_, Hold[ globalImplies$TM][ c_]] := globalImplies$TM[ c, expr]
 applyGlobalDeclaration[ expr_, Hold[ globalImplies$TM][ c_, d_]] := globalImplies$TM[ c, applyGlobalDeclaration[ expr, d]]
 applyGlobalDeclaration[ expr_, Hold[ domainConstruct$TM][ lhs_, rng:RNG$[ SIMPRNG$[ v_]]]] :=
-	substituteFree[ ReleaseHold[ markVariables[ Hold[ QU$[ rng, expr]]]], {v -> lhs}]
+	substituteFree[ ReleaseHold[ markVariables[ Hold[ QU$[ rng, expr]]]], {v -> lhs}, "checkTypes" -> False, "postprocessing" -> Identity]	(* sequence-type will be checked in 'makeFML' *)
 applyGlobalDeclaration[ expr_, Hold[ domainConstruct$TM][ lhs_, rng:RNG$[ DOMEXTRNG$[ v_, d_]]]] :=
-	substituteFree[ ReleaseHold[ markVariables[ Hold[ QU$[ rng, expr]]]], {v -> lhs}]
+	substituteFree[ ReleaseHold[ markVariables[ Hold[ QU$[ rng, expr]]]], {v -> lhs}, "checkTypes" -> False, "postprocessing" -> Identity]
 applyGlobalDeclaration[ expr_, Hold[ globalAbbrev$TM][ rng:RNG$[ a__ABBRVRNG$]]] :=
-	substituteFree[ ReleaseHold[ markVariables[ Hold[ QU$[ rng, expr]]]], Apply[ Rule, {a}, {1}]]
+	substituteFree[ ReleaseHold[ markVariables[ Hold[ QU$[ rng, expr]]]], Apply[ Rule, {a}, {1}], "checkTypes" -> False, "postprocessing" -> Identity]
 applyGlobalDeclaration[ args___] := unexpected[ applyGlobalDeclaration, {args}]
 
 (*
@@ -1442,17 +1456,18 @@ processComputation[ x_] := Module[ { procSynt, res, lhs = Null},
 		lhs = Extract[ procSynt, {1, 1}, Hold];
 		procSynt = Extract[ procSynt, {1, 2}, Hold]
 	];
+	procSynt = sequenceFlatten[ procSynt];
 	(* As an initial computation object, we start with the box form of the input cell *)
 	$TmaComputationObject = {ToExpression[ InString[ $Line]]};
-	$TmaCompInsertPos = {2}; 
+	$TmaCompInsertPos = {2};
 	setComputationContext[ "compute"];
 	{$compTime, res} = Timing[ Check[ Catch[ ReleaseHold[ procSynt]], $Failed]];
 	setComputationContext[ "none"];
 	(*NotebookWrite[ EvaluationNotebook[], Cell[ ToBoxes[ res, TheoremaForm], "ComputationResult", CellLabel -> "Out["<>ToString[$Line]<>"]="]];*)
 	(* We force the MakeBoxes[ ..., TheoremaForm] to apply by setting $PrePrint in the CellProlog of a computation cell.
 	   Unsetting $PrePrint in the CellEpilog ensures this behaviour only for Theorema computation *)
-	AppendTo[ $TmaComputationObject, res]; 
-	renameToStandardContext[ res, lhs]
+	AppendTo[ $TmaComputationObject, res];
+	sequenceFlatten[ renameToStandardContext[ res, lhs]]
 ]
 processComputation[ args___] := unexcpected[ processComputation, {args}]
 
@@ -1527,7 +1542,12 @@ computeInProof[ f:FML$[ _, _, _, ___, "origForm" -> _, ___]] := f
 computeInProof[ FML$[ k_, f_, l_, r___]] :=
 	(* computation happens in makeFML, which calls computeInProof[ expr] below.
 	   In presence of optional components r___, we restore them into the final formula. *)
-	Join[ makeFML[ key -> k, formula -> f, label -> l], FML$[ r]]
+	With[ {out = makeFML[ key -> k, formula -> f, label -> l]},
+		If[ out === $Failed,
+			$Failed,
+			Join[ out, FML$[ r]]
+		]
+	]
 
 computeInProof[ expr_] :=
 	Module[{simp},

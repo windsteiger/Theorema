@@ -2574,7 +2574,17 @@ langButtonData[ "(())"] :=
 		MessageName[ doubleParenthesized$TM, "usage", $TmaLanguage],
 		"(())"
 	}
-	
+
+langButtonData[ "\[VerticalEllipsis]\[VerticalEllipsis]"] :=
+	{
+		If[ TrueQ[ $buttonNat],
+			translate[ "\[VerticalEllipsis]\[VerticalEllipsis]"],
+			"\[VerticalEllipsis] \[VerticalEllipsis]"],
+		RowBox[ {TagBox[ "\[VerticalEllipsis]", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\[VerticalEllipsis]", Identity, SyntaxForm -> ")"]}],
+		MessageName[ SEQ$, "usage", $TmaLanguage],
+		"seq"
+	}
+
 langButtonData[ args___] := unexpected[ langButtonData, {args}]
 
 (*
@@ -2624,7 +2634,8 @@ allFormulae = {
 			   	{{"OVEROP", 1}, {"UNDEROVEROP", 1}, {"OVERSUBOP", 1}}, 
 			   	{{"SINGLEOP", 1}}}},
 			   {"Bracketted", {{{"[]", 2}, {"()", 2}, {"<>", 2}, {"{}", 2}}, 
-			   	{{"[[]]", 2}, {"(())", 2}, {"<<>>", 2}, {"{{}}", 2}}}}
+			   	{{"[[]]", 2}, {"(())", 2}, {"<<>>", 2}, {"{{}}", 2}},
+			   	{{"\[VerticalEllipsis]\[VerticalEllipsis]", 2}}}}
 };
 
 makeButtonCategory[ {category_String, buttons_List}, cols_Integer:2] :=

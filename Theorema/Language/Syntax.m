@@ -221,15 +221,19 @@ removeVar[ op_String] :=
 
 
 isLeftDelimiter[ s_] :=
-	MemberQ[ {"[", "(", "{", "\[LeftAngleBracket]", "\[LeftBracketingBar]",
-				"\[LeftFloor]", "\[LeftCeiling]", "\[LeftDoubleBracket]",
-				"\[LeftDoubleBracketingBar]", ",", ";"},
-			s]
+	MemberQ[
+		{"[", "(", "{", "\[LeftAngleBracket]", "\[LeftBracketingBar]",
+			"\[LeftFloor]", "\[LeftCeiling]", "\[LeftDoubleBracket]",
+			"\[LeftDoubleBracketingBar]", ",", ";"},
+		s
+	] || MatchQ[ s, TagBox[ "\[VerticalEllipsis]"|"\:2e28"|"\:fd3e"|"\:2983"|"\:e117"|"\:27ea"|"\:27e8"|"\:27e6"|"\:e114", ___]]
 isRightDelimiter[ s_] :=
-	MemberQ[ {"[", "]", ")", "}", "\[RightAngleBracket]", "\[RightBracketingBar]",
-				"\[RightFloor]", "\[RightCeiling]", "\[RightDoubleBracket]",
-				"\[RightDoubleBracketingBar]", ",", ";"},
-			s]
+	MemberQ[
+		{"[", "]", ")", "}", "\[RightAngleBracket]", "\[RightBracketingBar]",
+			"\[RightFloor]", "\[RightCeiling]", "\[RightDoubleBracket]",
+			"\[RightDoubleBracketingBar]", ",", ";"},
+		s
+	] || MatchQ[ s, TagBox[ "\[VerticalEllipsis]"|"\:2e29"|"\:fd3f"|"\:2984"|"\:e118"|"\:27eb"|"\:27e9"|"\:27e7"|"\:e115", ___]]
 	
 	
 (* In the following list,
@@ -373,6 +377,20 @@ $tmaOperators = {
 	{"\:22ff", {Infix}, "elemTuple"}, {"\:22c8", {Infix}, "joinTuples"},
 	{"\:293a", {Infix}, "appendElem"}, {"\:293b", {Infix}, "prependElem"}};
 	
+(* The following (alphabetically sorted) list contains the names of all symbols that are interpreted as binary relations
+	in Theorema (-> chains of relations). Of course, all symbols may also be annotated and/or domain-underscripted.
+	The names have to be exactly as in '$tmaOperatorSymbols'. *)
+$tmaBinaryRelations =
+	{
+		"Element", "Equal",
+		"Greater", "GreaterEqual",
+		"Less", "LessEqual",
+		"NotElement", "NotGreater", "NotGreaterEqual", "NotLess", "NotLessEqual", "NotSubset", "NotSubsetEqual", "NotSuperset", "NotSupersetEqual", "NotReverseElement",
+		"ReverseElement",
+		"Subset", "SubsetEqual", "Superset", "SupersetEqual",
+		"Unequal"
+	};
+	
 $tmaOperatorSymbols = Map[ First, $tmaOperators];
 (* We must not add contexts (like "Theorema`Language`" etc.) to the operator names, as it is done with quantifiers,
 	because copying each of the more than 200 operator names twice (for the two possible contexts) seems to be a bit too inefficient. *)
@@ -411,24 +429,14 @@ isTmaOperatorBox[ (UnderoverscriptBox|SubsuperscriptBox)[ op_, _, _], fullName_:
 isTmaOperatorBox[ op_String, fullName_:False] := isTmaOperatorSymbol[ op] || (fullName && MemberQ[ $tmaOperatorNames, op <> "$TM"])
 isTmaOperatorBox[ ___] := False
 
+isTmaRelationBox[ (OverscriptBox|SubscriptBox)[ op_, __]] := isTmaRelationBox[ op]
+isTmaRelationBox[ (UnderscriptBox|SuperscriptBox)[ op_, _]] := isTmaRelationBox[ op]
+isTmaRelationBox[ (UnderoverscriptBox|SubsuperscriptBox)[ op_, _, _]] := isTmaRelationBox[ op]
+isTmaRelationBox[ op_String] := MemberQ[ $tmaBinaryRelations, Replace[ op, $tmaOperatorToName]]
+isTmaRelationBox[ ___] := False
+
 getTmaOperatorForms[ op_Symbol] := First[ Cases[ $tmaOperators, {_, forms_, StringDrop[ SymbolName[ op], -3]} -> forms]]
 getTmaOperatorForms[ op_String] := First[ Cases[ $tmaOperators, {_, forms_, op} -> forms]]
-
-(*
-The following two lists contain the names of all built-in Theorema relation symbols, both for numbers and for sets.
-The names have to be exactly as in '$tmaOperatorSymbols'.
-*)
-$tmaArithmeticRelations = {"Equal", "Less", "LessEqual", "Greater", "GreaterEqual",
-	"Unequal", "NotLess", "NotLessEqual", "NotGreater", "NotGreaterEqual"};
-$tmaSetRelations = {"Equal", "Subset", "SubsetEqual", "Superset", "SupersetEqual", "Element", "ReverseElement",
-	"Unequal", "NotSubset", "NotSubsetEqual", "NotSuperset", "NotSupersetEqual", "NotElement", "NotReverseElement"};
-
-isTmaRelationBox[ op_String] :=
-	Module[ {name = Replace[ op, $tmaOperatorToName]},
-		MemberQ[ $tmaArithmeticRelations, name] || MemberQ[ $tmaSetRelations, name]
-	]
-isTmaRelationBox[ SubscriptBox[ op_String, _]] :=
-	MemberQ[ $tmaSetRelations, Replace[ op, $tmaOperatorToName]]
 
 (* ::Section:: *)
 (* MakeExpression *)
@@ -450,13 +458,18 @@ MakeExpression[RowBox[{ TagBox[ "(", "AutoParentheses"], expr_, TagBox[ ")", "Au
 	
 	
 (* ::Subsubsection:: *)
-(* Sequence Variables *)
+(* Sequence Expressions *)
 
 MakeExpression[ RowBox[{a_, "..."}], fmt_] :=
 	MakeExpression[ RowBox[{"SEQ0$", "[", a, "]"}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 	
 MakeExpression[ RowBox[{a_, ".."}], fmt_] :=
 	MakeExpression[ RowBox[{"SEQ1$", "[", a, "]"}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+	
+MakeExpression[ RowBox[ {TagBox[ "\[VerticalEllipsis]", ___], TagBox[ "\[VerticalEllipsis]", ___]}], fmt_] :=
+	MakeExpression[ RowBox[ {"SEQ$", "[", "]"}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+MakeExpression[ RowBox[ {TagBox[ "\[VerticalEllipsis]", ___], expr_, TagBox[ "\[VerticalEllipsis]", ___]}], fmt_] :=
+	MakeExpression[ RowBox[ {"SEQ$", "[", expr, "]"}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 
 
 (* ::Subsubsection:: *)
@@ -588,9 +601,7 @@ MakeExpression[ RadicalBox[ a_, b_], fmt_] := MakeExpression[ RowBox[ {"Radical"
 
 MakeExpression[ RowBox[{left_, RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], right_}], fmt_] :=
     MakeExpression[ RowBox[{"IffDef", "[", RowBox[{left, ",", right}], "]"}], fmt] /; $parseTheoremaExpressions
-    
-MakeExpression[ RowBox[{P_, "@", RowBox[ {"(", RowBox[ {args1:PatternSequence[ _, ","]..., arg_}], ")"}]}], fmt_] :=
-    MakeExpression[ RowBox[{"Componentwise", "[", RowBox[{P, ",", args1, arg}], "]"}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
+
 MakeExpression[ RowBox[{P_, "@", right_}], fmt_] :=
     MakeExpression[ RowBox[{"Componentwise", "[", RowBox[{P, ",", right}], "]"}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 
@@ -653,8 +664,7 @@ MakeExpression[ RowBox[ l:{_, PatternSequence[ _?isTmaRelationBox, _]..}], fmt_]
 		]
 	] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 	
-(* Maybe flattening nested chains of relations should not happen automatically (i.e. regardless of whether the relations are activated or not).
-
+(*
 MakeExpression[ RowBox[ l:{_, PatternSequence[ _?isTmaRelationBox, _]..}], fmt_] :=
 	Module[ {ops, args},
 		{args, ops} = flattenRelations[ l, {}, {}];
@@ -1376,20 +1386,23 @@ MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
 						True,
 						RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}], "[", MakeBoxes[ arg, TheoremaForm], "]"}]
 					],
-					(*else*)
+				(*else*)
 					If[ MemberQ[ form, Infix],
 						tmaInfixBox[ {arg}, sym],
+					(*else*)
 						RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}], "[",
 								RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ arg]]], ","]], "]"}]
 					]
     			],
-    			(*else*)
+    		(*else*)
     			parenthesize[ b[ arg]]
     		]
     	]
     ]
 	]
 	
+makeSummands[ arg:HoldComplete[ a_], True] /; !isIndividual[ arg] :=
+	{"Plus", "[", MakeBoxes[ a, TheoremaForm], "]"}
 makeSummands[ HoldComplete[ a_, rest___], positive_] :=
 	makeSummands[ HoldComplete[ rest], {MakeBoxes[ a, TheoremaForm]}, If[ TrueQ[ positive], {"+", "-"}, {"-", "+"}]]
 makeSummands[ HoldComplete[ a_?isNegative, rest___], {summands__}, symbols:{_, sym_String}] :=

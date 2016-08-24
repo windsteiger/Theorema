@@ -35,6 +35,68 @@ $tmaNonStandardOperators = Join[ $tmaNonStandardOperators,
      {EqualDef$TM, SetDelayed},
      {Tuple$TM, AngleBracket}
     }];
+    
+    
+(* ::Section:: *)
+(* Sequence expressions *)
+
+(* 'sequenceType[ expr]' returns the "sequence-type" of the given expression, as a pair of the form '{n, exact}' (or '$Failed' if the expression is ill-typed).
+	- '{n, True}' means that 'expr' is a sequence of length 'n' (if 'n' is 1, it is an individual expression), and
+	- '{n, False}' means that 'expr' is a sequence of length *at least* 'n'.
+	Remark: This function would probably better fit into "FormulaManipulation.m", but we implement it here because then the various symbols are automatically
+	interpreted in both contexts.
+*)
+sequenceType[ HoldComplete[ VAR$[ (_Symbol)|{___, _Symbol}, ___]]] :=
+	{1, True}
+sequenceType[ HoldComplete[ VAR$[ (SEQ0$[ ___])|{___, SEQ0$[ ___]}, ___]]] :=
+	{0, False}
+sequenceType[ HoldComplete[ VAR$[ (SEQ1$[ ___])|{___, SEQ1$[ ___]}, ___]]] :=
+	{1, False}
+sequenceType[ HoldComplete[ (FIX$|META$)[ _Symbol, ___]]] :=
+	{1, True}
+sequenceType[ HoldComplete[ (FIX$|META$)[ _SEQ0$, ___]]] :=
+	{0, False}
+sequenceType[ HoldComplete[ (FIX$|META$)[ _SEQ1$, ___]]] :=
+	{1, False}
+sequenceType[ HoldComplete[ SEQ$[ exprs___]]] :=
+	Module[ {len = 0, exact = True},
+		Catch[
+			Scan[
+				With[ {t = sequenceType[ #]},
+					If[ t === $Failed,
+						Throw[ $Failed],
+					(*else*)
+						len += First[ t];
+						exact = exact && Last[ t]
+					]
+				]&,
+				HoldComplete /@ HoldComplete[ exprs]
+			];
+			Throw[ {len, exact}]
+		]
+	]
+sequenceType[ HoldComplete[ DomainOperation$TM[ _, op_]]] :=
+	If[ sequenceType[ op] === {1, True},
+		{1, True},
+		$Failed
+	]
+sequenceType[ HoldComplete[ Annotated$TM[ op_, ___]]] :=
+	If[ sequenceType[ op] === {1, True},
+		{1, True},
+		$Failed
+	]
+sequenceType[ HoldComplete[ h_[ args___]]] :=
+	sequenceType[ HoldComplete[ h]]
+sequenceType[ HoldComplete[ FIX$|META$|SEQ$|SEQ0$|SEQ1$|VAR$]] :=
+	$Failed
+sequenceType[ HoldComplete[ _]] :=
+	{1, True}
+sequenceType[ Hold[ expr_]] :=
+	sequenceType[ HoldComplete[ expr]]
+sequenceType[ expr_] :=
+	sequenceType[ HoldComplete[ expr]]
+sequenceType[ args___] := unexpected[ sequenceType, {args}]
+
 
 (* ::Section:: *)
 (* MakeBoxes *)
@@ -284,7 +346,7 @@ MakeBoxes[ IffDef$TM[ l_, r_], TheoremaForm] :=
         MakeBoxes[ r, TheoremaForm]}]
         
 MakeBoxes[ Componentwise$TM[ P_, args___], TheoremaForm] :=
-    RowBox[ {MakeBoxes[ P, TheoremaForm], "@", RowBox[ {"(", RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ args]]], ","]], ")"}]}]
+    RowBox[ {MakeBoxes[ P, TheoremaForm], "@", MakeBoxes[ SEQ$[ args], TheoremaForm]}]
     
 MakeBoxes[ OperatorChain$TM[ args___], TheoremaForm] :=
     RowBox[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ args]]]]
@@ -312,6 +374,16 @@ MakeBoxes[ ReplacePart$TM[ a_, p:Tuple$TM[ _, _]..], TheoremaForm] :=
 SetAttributes[ makeReplacePartBoxes, HoldAllComplete];
 makeReplacePartBoxes[ Tuple$TM[ l_, r_]] := RowBox[ {MakeBoxes[ l, TheoremaForm], "\[LeftArrow]", MakeBoxes[ r, TheoremaForm]}]
 
+MakeBoxes[ SEQ$[], TheoremaForm] :=
+	RowBox[ {TagBox[ "\[VerticalEllipsis]", Identity, SyntaxForm -> "("], TagBox[ "\[VerticalEllipsis]", Identity, SyntaxForm -> ")"]}]
+MakeBoxes[ SEQ$[ a_], TheoremaForm] :=
+	MakeBoxes[ a, TheoremaForm]
+MakeBoxes[ SEQ$[ a_, b__], TheoremaForm] :=
+	RowBox[ {
+		TagBox[ "\[VerticalEllipsis]", Identity, SyntaxForm -> "("],
+		RowBox[ Riffle[ List @@ Replace[ HoldComplete[ a, b], x_ :> MakeBoxes[ x, TheoremaForm], {1}], ","]],
+		TagBox[ "\[VerticalEllipsis]", Identity, SyntaxForm -> ")"]
+	}]
 MakeBoxes[ SEQ0$[ v_], TheoremaForm] := RowBox[ {MakeBoxes[ v, TheoremaForm], "..."}]
 MakeBoxes[ SEQ1$[ v_], TheoremaForm] := RowBox[ {MakeBoxes[ v, TheoremaForm], ".."}]
 MakeBoxes[ VAR$[ v_Symbol][ args___], TheoremaForm] :=

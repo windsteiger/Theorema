@@ -169,6 +169,7 @@ With[ {lang = "English"},
 	MessageName[ RNG$, "usage", lang] = "";
 
     MessageName[ \[ScriptCapitalP]$TM, "usage", lang] = "";
+    MessageName[ SEQ$, "usage", lang] = "SEQ$[ exprs] represents a sequence of expressions, similar to \"Sequence\" in Mathematica.";
 	MessageName[ SEQ0$, "usage", lang] = "";
 	MessageName[ SEQ1$, "usage", lang] = "";
 	MessageName[ SequenceOf$TM, "usage", lang] = "";	

@@ -134,6 +134,7 @@ falls nicht, siehe <http://www.gnu.org/licenses/>.", ToString[ Date[][[1]]]];
 	translate[ "interactiveInstantiate", lang] = "Quantoren interaktiv instanzieren";
 	translate[ "interactiveNewProofSitFilter", lang] = "Neue Beweissituationen interaktiv instanzieren";
 	translate[ "interactiveProofSitSel", lang] = "N\[ADoubleDot]chste Beweissituation interaktiv w\[ADoubleDot]hlen";
+	translate[ "invalidExpr", lang] = "Der eingegebene Ausdruck ist ung\[UDoubleDot]ltig, da sein Sequence-Typ inkorrekt ist oder nicht bestimmt werden kann.";
 	translate[ "invalidRange", lang] = "Jede gebundene Variable darf nur einmal unter dem Quantor vorkommen, der sie bindet; Diese Bedingung wird verletzt von ``.";
     
     translate[ "KBcomp", lang] = "In der Berechnung verwendetes Wissen";
@@ -307,6 +308,7 @@ falls nicht, siehe <http://www.gnu.org/licenses/>.", ToString[ Date[][[1]]]];
 	translate[ "{{}}", lang] = "doppelt geschweift geklammerter Ausdruck";
 	translate[ "()", lang] = "rund geklammerter Ausdruck";
 	translate[ "(())", lang] = "doppelt rund geklammerter Ausdruck";
+	translate[ "\[VerticalEllipsis]\[VerticalEllipsis]", lang] = "Folge von Ausdr\[UDoubleDot]cken";
 
 (* UNTRANSLATED *)
 

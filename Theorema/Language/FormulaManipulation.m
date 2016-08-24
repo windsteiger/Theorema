@@ -28,7 +28,10 @@ makeConjunction[ h_[ x___], a_] :=
             0,
             True,
             1,
-            First[ {x}],
+            If[ isIndividual[ x],
+            	x,
+            	a[ x]
+            ],
             _,
             a[ x]
         ]
@@ -39,7 +42,10 @@ makeDisjunction[ h_[ x___], a_] :=
             0,
             False,
             1,
-            First[ {x}],
+            If[ isIndividual[ x],
+            	x,
+            	a[ x]
+            ],
             _,
             a[ x]
         ]
@@ -55,7 +61,7 @@ simplifiedAnd[ Hold[ h_[ ___, False, ___]]] := Hold[ False]
 simplifiedAnd[ expr_Hold] :=  
 	Module[ {simp = expr //. {(h:(Theorema`Language`And$TM|Theorema`Computation`Language`And$TM))[pre___, True, post___] :> h[pre, post],
 								(h:(Theorema`Language`And$TM|Theorema`Computation`Language`And$TM))[pre___, (Theorema`Language`And$TM|Theorema`Computation`Language`And$TM)[ mid___], post___] :> h[pre, mid, post],
-								(Theorema`Language`And$TM|Theorema`Computation`Language`And$TM)[a_] :> a}},
+								(Theorema`Language`And$TM|Theorema`Computation`Language`And$TM)[a_] /; isIndividual[ HoldComplete[ a]] :> a}},
 		If[ MatchQ[ simp, Hold[ (Theorema`Language`And$TM|Theorema`Computation`Language`And$TM)[]]],
 			Hold[ True],
 			simp
@@ -74,7 +80,7 @@ simplifiedOr[ Hold[ h_[ ___, True, ___]]] := Hold[ True]
 simplifiedOr[ expr_Hold] :=  
 	Module[ {simp = expr //. {(h:(Theorema`Language`Or$TM|Theorema`Computation`Language`Or$TM))[pre___, False, post___] :> h[pre, post],
 								(h:(Theorema`Language`Or$TM|Theorema`Computation`Language`Or$TMM))[pre___, (Theorema`Language`Or$TM|Theorema`Computation`Language`Or$TM)[ mid___], post___] :> h[pre, mid, post],
-								(Theorema`Language`Or$TM|Theorema`Computation`Language`Or$TMM)[a_] :> a}},
+								(Theorema`Language`Or$TM|Theorema`Computation`Language`Or$TMM)[a_] /; isIndividual[ HoldComplete[ a]] :> a}},
 		If[ MatchQ[ simp, Hold[ (Theorema`Language`Or$TM|Theorema`Computation`Language`Or$TM)[]]],
 			Hold[ False],
 			simp
@@ -92,10 +98,10 @@ simplifiedOr[ args___] := unexpected[ simplifiedOr, {args}]
 	defined for symbols in "Theorema`Language`" context, and not for "Theorema`Computation`Language`".
 	If this changes, then they should also get 'Hold'-definitions. *)
 
-simplifiedImplies[ Theorema`Language`Implies$TM[ True, A_]] := A
-simplifiedImplies[ Theorema`Language`Implies$TM[ False, _]] := True
-simplifiedImplies[ Theorema`Language`Implies$TM[ _, True]] := True
-simplifiedImplies[ Theorema`Language`Implies$TM[ A_, Theorema`Language`Implies$TM[ B_, C_]]] := 
+simplifiedImplies[ Theorema`Language`Implies$TM[ True, A_?isIndividual]] := A
+simplifiedImplies[ Theorema`Language`Implies$TM[ False, _?isIndividual]] := True
+simplifiedImplies[ Theorema`Language`Implies$TM[ _?isIndividual, True]] := True
+simplifiedImplies[ Theorema`Language`Implies$TM[ A_?isIndividual, Theorema`Language`Implies$TM[ B_?isIndividual, C_?isIndividual]]] :=
 	simplifiedImplies[ Theorema`Language`Implies$TM[ simplifiedAnd[ Theorema`Language`And$TM[ A, B]], C]]
 simplifiedImplies[ i_Theorema`Language`Implies$TM] := i
 simplifiedImplies[ args___] := unexpected[ simplifiedImplies, {args}]
@@ -103,11 +109,11 @@ simplifiedImplies[ args___] := unexpected[ simplifiedImplies, {args}]
 (* ::Subsubsection:: *)
 (* simplifiedNot *)
 
-simplifiedNot[ Theorema`Language`Not$TM[ Theorema`Language`Not$TM[ A_]]] := A
-simplifiedNot[ Theorema`Language`Not$TM[ Theorema`Language`And$TM[ A__]]] := Apply[ Theorema`Language`Or$TM, Map[ Theorema`Language`Not$TM, {A}]]
-simplifiedNot[ Theorema`Language`Not$TM[ Theorema`Language`Or$TM[ A__]]] := Apply[ Theorema`Language`And$TM, Map[ Theorema`Language`Not$TM, {A}]]
-simplifiedNot[ Theorema`Language`Not$TM[ Theorema`Language`Implies$TM[ A_, B_]]] := Theorema`Language`And$TM[ A, Theorema`Language`Not$TM[ B]]
-simplifiedNot[ Theorema`Language`Not$TM[ Theorema`Language`Iff$TM[ A_, B_]]] := 
+simplifiedNot[ Theorema`Language`Not$TM[ Theorema`Language`Not$TM[ A_?isIndividual]]] := A
+simplifiedNot[ Theorema`Language`Not$TM[ Theorema`Language`And$TM[ A__?isIndividual]]] := Apply[ Theorema`Language`Or$TM, Map[ Theorema`Language`Not$TM, {A}]]
+simplifiedNot[ Theorema`Language`Not$TM[ Theorema`Language`Or$TM[ A__?isIndividual]]] := Apply[ Theorema`Language`And$TM, Map[ Theorema`Language`Not$TM, {A}]]
+simplifiedNot[ Theorema`Language`Not$TM[ Theorema`Language`Implies$TM[ A_?isIndividual, B_?isIndividual]]] := Theorema`Language`And$TM[ A, Theorema`Language`Not$TM[ B]]
+simplifiedNot[ Theorema`Language`Not$TM[ Theorema`Language`Iff$TM[ A_?isIndividual, B_?isIndividual]]] :=
 	Theorema`Language`Or$TM[ Theorema`Language`And$TM[ A, Theorema`Language`Not$TM[ B]], Theorema`Language`And$TM[ B, Theorema`Language`Not$TM[ A]]]
 simplifiedNot[ n_Theorema`Language`Not$TM] := n
 simplifiedNot[ args___] := unexpected[ simplifiedNot, {args}]
@@ -115,7 +121,7 @@ simplifiedNot[ args___] := unexpected[ simplifiedNot, {args}]
 (* ::Subsubsection:: *)
 (* simplifiedForall *)
 
-simplifiedForall[ Theorema`Language`Forall$TM[ Theorema`Language`RNG$[], C_, A_]] := simplifiedImplies[ Theorema`Language`Implies$TM[ C, A]]
+simplifiedForall[ Theorema`Language`Forall$TM[ Theorema`Language`RNG$[], C_?isIndividual, A_?isIndividual]] := simplifiedImplies[ Theorema`Language`Implies$TM[ C, A]]
 simplifiedForall[ f_Theorema`Language`Forall$TM] := f
 simplifiedForall[ args___] := unexpected[ simplifiedForall, {args}]
 
@@ -125,7 +131,7 @@ simplifiedForall[ args___] := unexpected[ simplifiedForall, {args}]
 
 standardFormQuantifier[ Theorema`Language`Forall$TM[ r1_Theorema`Language`RNG$, C1_, Theorema`Language`Forall$TM[ r2_Theorema`Language`RNG$, C2_, body_]]] :=
 	standardFormQuantifier[ Theorema`Language`Forall$TM[ Join[ r1, r2], simplifiedAnd[ Theorema`Language`And$TM[ C1, C2]], body]]
-standardFormQuantifier[ Theorema`Language`Forall$TM[ r_Theorema`Language`RNG$, C_, body_]] :=
+standardFormQuantifier[ Theorema`Language`Forall$TM[ r_Theorema`Language`RNG$, C_?isIndividual, body_?isIndividual]] :=
 	Theorema`Language`Forall$TM[ r, True, simplifiedImplies[ Theorema`Language`Implies$TM[ C, body]]]
 standardFormQuantifier[ f_] := f
 standardFormQuantifier[ args___] := unexpected[ standardFormQuantifier, {args}]
@@ -201,6 +207,72 @@ analyzeVars[ args___] := unexpected[ analyzeVars, {args}]
 
 
 (* ::Subsubsection:: *)
+(* Sequence-related functions *)
+
+
+sequenceFlatten[ expr:(hld:(Hold|HoldComplete))[ _]] :=
+	Module[ {out, myHold, head = Null, rem = False},
+		SetAttributes[ myHold, HoldAllComplete];
+		out = expr //. {
+							(seq:(Theorema`Language`SEQ$|Theorema`Computation`Language`SEQ$))[ s___][ a___] :>
+								With[ {new = (head = seq; rem = True; Replace[ myHold[ s], x_ :> x[ a], {1}])}, new /; True],
+							f_[ pre___, (seq:(Theorema`Language`SEQ$|Theorema`Computation`Language`SEQ$))[ a___], post___] :>
+								f[ pre, a, post] /; (head = seq; True)
+						};
+		If[ head =!= Null,
+			With[ {h = head},
+				If[ rem, out = out /. myHold -> h];
+				Switch[ out,
+					hld[],
+					out = hld[ h[]],
+					hld[ _, __],
+					out = ReplacePart[ hld @@ {out}, {1, 0} -> h]
+				]
+			]
+		];
+		out
+	]
+sequenceFlatten[ expr_] :=
+	ReleaseHold[ sequenceFlatten[ HoldComplete[ expr]]]
+sequenceFlatten[ args___] := unexpected[ sequenceFlatten, {args}]
+
+	
+(* 'isIndividual[ expr]' checks whether the given expression is an individual. *)
+isIndividual[ expr_] := (sequenceType[ expr] === {1, True})
+isIndividual[ args___] := unexpected[ isIndividual, {args}]
+
+
+(* 'isNonEmptySequence[ expr]' checks whether the given expression is a non-empty sequence. *)
+isNonEmptySequence[ expr_] := MatchQ[ sequenceType[ expr], {Except[ 0], _}]
+isNonEmptySequence[ args___] := unexpected[ isNonEmptySequence, {args}]
+
+	
+sequenceTypeEqual[ a_, b_] :=
+	sequenceTypeEqual[ a, b, True]
+sequenceTypeEqual[ a_, b_, True] :=
+	sequenceTypeEqual[ sequenceType[ a], sequenceType[ b], False]
+sequenceTypeEqual[ t_, t_, False] :=
+	t =!= $Failed
+sequenceTypeEqual[ _, _, _] :=
+	False
+sequenceTypeEqual[ args___] := unexpected[ sequenceTypeEqual, {args}]
+
+	
+(* Example: For checking whether variable 'v' can be instantiated by expression 'e', use 'sequenceTypeMatchQ[ e, v]'. *)
+sequenceTypeMatchQ[ a_, b_] :=
+	sequenceTypeMatchQ[ a, b, True]
+sequenceTypeMatchQ[ a_, b_, True] :=
+	sequenceTypeMatchQ[ sequenceType[ a], sequenceType[ b], False]
+sequenceTypeMatchQ[ t_, t_, False] :=
+	t =!= $Failed
+sequenceTypeMatchQ[ {m_Integer, _}, {n_Integer, False}, False] :=
+	m >= n
+sequenceTypeMatchQ[ _, _, _] :=
+	False
+sequenceTypeMatchQ[ args___] := unexpected[ sequenceTypeMatchQ, {args}]
+
+
+(* ::Subsubsection:: *)
 (* Auxiliary functions (private) *)
 
 	
@@ -215,19 +287,10 @@ inScope[ {a___, b_, ___}, {a___, 1, _, 1}] := b =!= 1
 inScope[ _, _] := False
 inScope[ args___] := unexpected[ inScope, {args}]
 
-(* Each of the three functions below is defined for seemingly strange arguments of the 'VAR$'-symbol.
+(* Each of the two functions below is defined for seemingly strange arguments of the 'VAR$'-symbol.
 	This is because in higher-order rewriting ("HORewriting.m"), names of variables are made unique
 	by adding additional indices, tags, etc. Although higher-order rewriting is not yet integrated
 	into the system, the extended definitions given below certainly do not do any harm. *)
-	
-(* 'varType[ v_VAR$]' returns the type of the given variable, i.e.
-	- symbol "Symbol" if 'v' is an individual variable,
-	- symbol "SEQ0$" (in either "Language`"- or "Computation`"-context) if 'v' is a projectable sequence variable, and
-	- symbol "SEQ1$" (in either "Language`"- or "Computation`"-context) if 'v' is a non-projectable sequence variable. *)
-varType[ (Theorema`Language`VAR$|Theorema`Computation`Language`VAR$)[ (_Symbol)|{___, _Symbol}, ___]] := Symbol
-varType[ (Theorema`Language`VAR$|Theorema`Computation`Language`VAR$)[ ((h:Except[ List])[ ___])|{___, h_[ ___]}, ___]] := h
-varType[ _] := $Failed
-varType[ args___] := unexpected[ varType, {args}]
 
 (* 'varName[ v_VAR$]' returns the base name of the given variable as a plain symbol. *)
 varName[ (Theorema`Language`VAR$|Theorema`Computation`Language`VAR$)[ (n_Symbol)|{___, n_Symbol}, ___]] := n
@@ -299,7 +362,7 @@ alphaEquivalent[
 					Function[ {r1, s1},
 						With[ {x = r1[[1, 1]], y = s1[[1, 1]]},
 							(* We rely on the fact that EVERY variable-range is of the form '(SIMPRNG$|SETRNG$|...)[ _VAR$, ___]'. *)
-							If[ varType[ x] === varType[ y] && alphaEquivalent[ Delete[ r1, {1, 1}], Delete[ s1, {1, 1}], newRules],
+							If[ sequenceTypeEqual[ x, y] && alphaEquivalent[ Delete[ r1, {1, 1}], Delete[ s1, {1, 1}], newRules],
 								PrependTo[ newRules, x -> y];
 								Null,
 								
@@ -510,86 +573,148 @@ substituteBound[ args___] := unexpected[ substituteBound, {args}]
 	in 'rules' in 'expr' by the corresponding RHS, renaming bound variables to avoid variable capture if necessary.
 	If 'expr' is wrapped in 'Hold', no unwanted simplification happens (and the result is wrapped in 'Hold' as well);
 	this also applies to the RHSs of the given rules.
-	As in 'freeVariables', we do not rely on bound variables occurring only once in multi-ranges. *)
-substituteFree[ expr_, {}] := expr
-substituteFree[ expr_, rule:(_Rule|_RuleDelayed)] := substituteFree[ expr, {rule}]
-substituteFree[ expr_, rules_List] :=
-	Module[ {newRules, varStruct = analyzeVars[ expr], varNames, rename = {}, rn = {}, bp},
-		varNames = varStruct[[All, 1]];
-		newRules = DeleteCases[
-			Replace[ rules,
-				_[ l_, r_] :>
-				With[ {fp = First[ Replace[ Replace[ l, varStruct], l -> {{}, {}}]],
-						rhs = Switch[ Hold[ r], Hold[ _Hold|_HoldComplete], r, _, Hold[ r]],
-						fv = freeVariables[ Hold[ r]]},
-					varNames = Join[ varNames, Cases[ Hold[ r], _Theorema`Language`VAR$|_Theorema`Language`VAR$, {0, Infinity}, Heads -> True]];
-					If[ fp === {},
-						Null,
-						
-						Scan[
-							Function[ x,
-								bp = Last[ Replace[ Replace[ x, varStruct], x -> {{}, {}}]];
-								bp = Select[ bp, With[ {q = First[ #]}, MemberQ[ fp, p_ /; inScope[ p, q]]]&];
-								(* 'bp' is the list of all binding-positions of variable 'x' that need to be
-									renamed in order to avoid variable capture. *)
-								If[ bp =!= {},
-									rename = Join[ rename, (x -> Prepend[ Last[ #], First[ #]])& /@ bp];
-									AppendTo[ rn, x]
-								]
-							],
-							fv
-						];
-						RuleDelayed @@ Prepend[ rhs, fp]
-					]
-				],
-				{1}
-			],
-			Null
-		];
-		rn = DeleteDuplicates[ rn];
-		rn = MapThread[ Rule, {rn, freshName[ rn, varName /@ DeleteDuplicates[ varNames]]}];
-		rename =
-			Replace[
-				GatherBy[ rename, First],
-				all:{x_ -> _, ___} :>
-				With[ {xn = Replace[ x, rn]},
-					DeleteDuplicates[ Flatten[ all[[All, 2]], 1]] :> xn
-				],
-				{1}
+	As in 'freeVariables', we do not rely on bound variables occurring only once in multi-ranges.
+	Option "checkTypes" specifies whether the sequence-types of the instances shall be checked to match the types of the respective variables.
+	Option "postprocessing" specifies a function that is called on the result after substitution (typically either 'sequenceFlatten' or 'Identity'). *)
+Options[ substituteFree] = {"checkTypes" -> True, "postprocessing" -> sequenceFlatten};
+substituteFree[ expr_, {}, ___] := expr
+substituteFree[ expr_, rule:(_Rule|_RuleDelayed), opts___] := substituteFree[ expr, {rule}, opts]
+substituteFree[ expr_, rules_List, opts___?OptionQ] :=
+	Module[ {newRules, varStruct, varNames, rename = {}, rn = {}, bp, check, post},
+		{check, post} = {"checkTypes", "postprocessing"} /. {opts} /. Options[ substituteFree];
+		Catch[
+			If[ TrueQ[ check],
+				Scan[
+					If[ !sequenceTypeMatchQ[ Last[ #], First[ #]],
+						Throw[ $Failed]
+					]&,
+					rules
+				]
 			];
-		ReplacePart[ expr, Join[ newRules, rename]]
+			varStruct = analyzeVars[ expr];
+			varNames = varStruct[[All, 1]];
+			newRules = DeleteCases[
+				Replace[ rules,
+					_[ l_, r_] :>
+					With[ {fp = First[ Replace[ Replace[ l, varStruct], l -> {{}, {}}]],
+							rhs = Switch[ Hold[ r], Hold[ _Hold|_HoldComplete], r, _, Hold[ r]],
+							fv = freeVariables[ Hold[ r]]},
+						varNames = Join[ varNames, Cases[ Hold[ r], _Theorema`Language`VAR$|_Theorema`Language`VAR$, {0, Infinity}, Heads -> True]];
+						If[ fp === {},
+							Null,
+							
+							Scan[
+								Function[ x,
+									bp = Last[ Replace[ Replace[ x, varStruct], x -> {{}, {}}]];
+									bp = Select[ bp, With[ {q = First[ #]}, MemberQ[ fp, p_ /; inScope[ p, q]]]&];
+									(* 'bp' is the list of all binding-positions of variable 'x' that need to be
+										renamed in order to avoid variable capture. *)
+									If[ bp =!= {},
+										rename = Join[ rename, (x -> Prepend[ Last[ #], First[ #]])& /@ bp];
+										AppendTo[ rn, x]
+									]
+								],
+								fv
+							];
+							RuleDelayed @@ Prepend[ rhs, fp]
+						]
+					],
+					{1}
+				],
+				Null
+			];
+			rn = DeleteDuplicates[ rn];
+			rn = MapThread[ Rule, {rn, freshName[ rn, varName /@ DeleteDuplicates[ varNames]]}];
+			rename =
+				Replace[
+					GatherBy[ rename, First],
+					all:{x_ -> _, ___} :>
+					With[ {xn = Replace[ x, rn]},
+						DeleteDuplicates[ Flatten[ all[[All, 2]], 1]] :> xn
+					],
+					{1}
+				];
+			post[ ReplacePart[ expr, Join[ newRules, rename]]]
+		]
 	]
 substituteFree[ args___] := unexpected[ substituteFree, {args}]
+
+(* In contrast to 'substituteFree', 'instantiateMeta' has option "checkValidity" which specifies whether the validity of the instantiation
+	shall be checked as a whole. In addition to checking the sequence-types of the meta-variables and their instances, this also includes
+	checking that the instance of no variable depends on illegal abf constants. *)
+Options[ instantiateMeta] = {"checkValidity" -> True, "postprocessing" -> sequenceFlatten};
+instantiateMeta[ expr_, rules:{((Rule|RuleDelayed)[ (Theorema`Language`META$|Theorema`Computation`Language`META$)[ _, __], _])...}, opts___?OptionQ] :=
+	Module[ {check, post},
+		{check, post} = {"checkValidity", "postprocessing"} /. {opts} /. Options[ instantiateMeta];
+		Catch[
+			If[ TrueQ[ check],
+				Scan[
+					With[ {fix = #[[1, -1]]},
+						If[ !(
+								FreeQ[ Last[ #], c:(_Theorema`Language`FIX$|_Theorema`Computation`Language`FIX$) /; !MemberQ[ fix, c]] &&
+								sequenceTypeMatchQ[ Last[ #], First[ #]]
+							),
+							Throw[ $Failed]
+						]
+					]&,
+					rules
+				]
+			];
+			post[ expr /. rules]
+		]
+	]
+instantiateMeta[ args___] := unexpected[ instantiateMeta, {args}]
 
 
 (* ::Subsubsection:: *)
 (* renameBound *)
 
-renameBound[ q_[ (rh:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$))[ rng___], form___], new_List] /; Length[ Hold[ rng]] === Length[ new] :=
-	Module[ {repl = {}, newRng},
-		newRng =
-			ReplacePart[
-				Hold @@ {
-					Flatten[
-						Replace[
-							Thread[{Hold[ rng], Hold @@ new}, Hold],
-							{r_[ x_, rest___], v_} :>
-								With[ {tmp = With[ {old = repl},
-												repl = Prepend[ DeleteCases[ repl, x -> _], x -> v];
-												ReplacePart[ Hold @@ {Prepend[ substituteFree[ Hold[ rest], old], v]}, {1, 0} -> r]
-											]
-										},
-									tmp /; True
-								],
-							{1}
-						],
-						1,
-						Hold
+renameBound[ q_[ (rh:(Theorema`Language`RNG$|Theorema`Computation`Language`RNG$))[ rng___], form___], new_List, opts___?OptionQ] /; Length[ Hold[ rng]] === Length[ new] :=
+	With[ {pairs = Thread[ {Hold[ rng], Hold @@ new}, Hold]},
+		Module[ {repl = {}, newRng, check, post},
+			{check, post} = {"checkTypes", "postprocessing"} /. {opts} /. Options[ substituteFree];
+			Catch[
+				If[ TrueQ[ check],
+					Scan[
+						With[ {tmp = HoldComplete /@ #},
+							If[ !sequenceTypeEqual[ First[ tmp], Last[ tmp]],
+								Throw[ $Failed]
+							]
+						]&,
+						List @@ (Hold @@@ pairs)
 					]
-				},
-				{1, 0} -> rh
-			];
-		q @@ Join[ newRng, substituteFree[ Hold[ form], repl]]
+				];
+				newRng =
+					ReplacePart[
+						Hold @@ {
+							Flatten[
+								Replace[
+									pairs,
+									{all:(r_[ x_, rest___]), v_} :>
+										With[ {tmp =
+													If[ repl === {} && x === v,
+														Hold[ all],
+													(*else*)
+														With[ {old = repl},
+															repl = DeleteCases[ repl, x -> _];
+															If[ x =!= v, PrependTo[ repl, x -> v]];
+															ReplacePart[ Hold @@ {Prepend[ substituteFree[ Hold[ rest], old, "checkTypes" -> False, "postprocessing" -> post], v]}, {1, 0} -> r]
+														]
+													]
+												},
+											tmp /; True
+										],
+									{1}
+								],
+								1,
+								Hold
+							]
+						},
+						{1, 0} -> rh
+					];
+				q @@ Join[ newRng, substituteFree[ Hold[ form], repl, "checkTypes" -> False, "postprocessing" -> post]]
+			]
+		]
 	]
 renameBound[ args___] := unexpected[ renameBound, {args}]
 
@@ -644,21 +769,6 @@ isLogQuantifierFree[ expr_] := FreeQ[ expr, _Theorema`Language`Forall$TM|_Theore
 isLogQuantifierFree[ args___] := unexpected[ isLogQuantifierFree, {args}]
 
 (* ::Subsubsection:: *)
-(* sequenceFree *)
-
-isSequenceFree[ expr_, level_:{1}] := 
-	FreeQ[ expr,
-		_Theorema`Language`SEQ0$|
-		_Theorema`Computation`Language`SEQ0$|
-		Theorema`Language`VAR$[_Theorema`Language`SEQ0$]|
-		Theorema`Language`Computation`VAR$[_Theorema`Language`Computation`SEQ0$]|
-		_Theorema`Language`SEQ1$|
-		_Theorema`Computation`Language`SEQ1$|
-		Theorema`Language`VAR$[_Theorema`Language`SEQ1$]|
-		Theorema`Language`Computation`VAR$[_Theorema`Language`Computation`SEQ1$], level]
-isSequenceFree[ args___] := unexpected[ isSequenceFree, {args}]
-
-(* ::Subsubsection:: *)
 (* variableFree *)
 
 isVariableFree[ expr_, level_:{1}] := 
@@ -688,8 +798,12 @@ getDefInstances[ expr_, def_] :=
 	Module[{strip, mmaPatt, defRule, l},
 		strip = stripUniversalQuantifiers[ def];
 		{mmaPatt, defRule} = makePatternRule[ strip];
-		l = Select[ Cases[ expr, mmaPatt, Infinity], freeVariables[#] === {}&];
-		{l, defRule} 
+		If[ mmaPatt =!= $Failed && defRule =!= $Failed,
+			l = Select[ Cases[ expr, mmaPatt, Infinity], freeVariables[#] === {}&];
+			{l, defRule},
+		(*else*)
+			{$Failed, $Failed}
+		]
 	]
 getDefInstances[ args___] := unexpected[ getDefInstances, {args}]
 
@@ -704,14 +818,18 @@ getDefInstances[ args___] := unexpected[ getDefInstances, {args}]
 		pos is a list of positions, where the conditions of the implicit definition occur in K
 *)
 makePatternRule[ {Theorema`Language`EqualDef$TM[ l_, (Theorema`Language`Such$TM|Theorema`Language`SuchUnique$TM)[ rng_, cond_, body_]], c_List, var_List}] :=
-    With[ {left = execLeft[ Hold[l], var], 
+    With[ {left = execLeft[ Hold[l], var],
            newBody = simplifiedAnd[ makeConjunction[ Join[ rngToCondition[ rng], {cond, body}], Theorema`Language`And$TM]]},
-        {ToExpression[ left],
-        ToExpression[ 
-            "RuleDelayed[{" <> left <> ", dummyTMAKB$_}," <> 
-            "Module[ {pos}, If[ (pos=Theorema`Common`checkAllConds[" <> execRight[ Hold[ c], var] <> ", dummyTMAKB$])=!=False, {" <>
-            ToString[ rng] <> "," <>  execRight[ Hold[ newBody], var] <> ",pos}, {}]]]"
-        ]}
+		If[ left =!= $Failed,
+	        {ToExpression[ left],
+	        ToExpression[
+	            "RuleDelayed[{" <> left <> ", dummyTMAKB$_}," <>
+	            "Module[ {pos}, If[ (pos=Theorema`Common`checkAllConds[" <> execRight[ Hold[ c], var] <> ", dummyTMAKB$])=!=False, {" <>
+	            ToString[ rng] <> "," <>  execRight[ Hold[ newBody], var] <> ",pos}, {}]]]"
+	        ]},
+	    (*else*)
+	    	{$Failed, $Failed}
+		]
     ]
 makePatternRule[ args___] := unexpected[ makePatternRule, {args}]
 
@@ -800,15 +918,17 @@ registerDomainDefinitionSymbol[ {(Theorema`Language`EqualDef$TM|Theorema`Languag
 	(Theorema`Language`DomainOperation$TM[ dom_, o_][___])|Theorema`Language`DomainOperation$TM[ dom_, o_], _], c_, var_}] :=
 	Block[ {$ContextPath = {"System`"}, $Context = "Global`", dl, dr, assignString}, 
 		dl = execLeft[ Hold[ dom], var];
-		dr = execRight[ Hold[ dom], var];
-		assignString = "Theorema`Language`opDefInDom[" <> dl <> "] = Union[ Theorema`Language`opDefInDom[" <> dr <> "],{" <>
-			ToString[ o] <> "}]";
-		(* update Theorema`Language`opDefInDom *)
-		ToExpression[ assignString];
-		(* update Theorema`Computation`Language`opDefInDom *)
-		ToExpression[ StringReplace[ assignString, 
-			{"Theorema`Language`" -> "Theorema`Computation`Language`",
-     		 "Theorema`Knowledge`" -> "Theorema`Computation`Knowledge`"}]];
+		If[ dl =!= $Failed,
+			dr = execRight[ Hold[ dom], var];
+			assignString = "Theorema`Language`opDefInDom[" <> dl <> "] = Union[ Theorema`Language`opDefInDom[" <> dr <> "],{" <>
+				ToString[ o] <> "}]";
+			(* update Theorema`Language`opDefInDom *)
+			ToExpression[ assignString];
+			(* update Theorema`Computation`Language`opDefInDom *)
+			ToExpression[ StringReplace[ assignString,
+				{"Theorema`Language`" -> "Theorema`Computation`Language`",
+	     		 "Theorema`Knowledge`" -> "Theorema`Computation`Knowledge`"}]]
+		];
 	]
 
 
@@ -831,15 +951,18 @@ Clear[ executableForm]
 (* The condition must not contain variables other than the variables in the left hand side, since they would not get instanciated *)
 executableForm[ {(Theorema`Language`Iff$TM|Theorema`Language`IffDef$TM|Theorema`Language`Equal$TM|Theorema`Language`EqualDef$TM)[ l_, r_], c_List, var_List}, f_FML$] :=
     Block[ { $ContextPath = {"System`"}, $Context = "Global`", form = ToString[ f, InputForm], formKey = ToString[ key@f, InputForm]},
-        With[ { left = execLeft[ Hold[ l], var], 
-        	right = "Theorema`Common`trackResult[" <> execRight[ Hold[ r], var] <> "," <> form <> "]"},
-        	(* The complicated DUMMY$COND... construction is necessary because the key itself contains strings,
-        	   and we need to get the escaped strings into the Hold *)
-            StringReplace[ left <> "/; DUMMY$COND && " <> execCondition[ Hold[ trackCondition[ c, l]], var] <> ":=" <> right,
-            	{"DUMMY$COND" -> "Theorema`Common`kbSelectCompute[" <> formKey <> "]",
-            		"Theorema`Language`" -> "Theorema`Computation`Language`",
-            		"Theorema`Knowledge`" -> "Theorema`Computation`Knowledge`"}
-            ]
+        With[ {left = execLeft[ Hold[ l], var], right = execRight[ Hold[ r], var]},
+        	If[ left =!= $Failed && right =!= $Failed,
+	        	(* The complicated DUMMY$COND... construction is necessary because the key itself contains strings,
+	        	   and we need to get the escaped strings into the Hold *)
+	            StringReplace[ left <> "/; DUMMY$COND && " <> execCondition[ Hold[ trackCondition[ c, l]], var] <> ":= Theorema`Common`trackResult[" <> right <> "," <> form <> "]",
+	            	{"DUMMY$COND" -> "Theorema`Common`kbSelectCompute[" <> formKey <> "]",
+	            		"Theorema`Language`" -> "Theorema`Computation`Language`",
+	            		"Theorema`Knowledge`" -> "Theorema`Computation`Knowledge`"}
+	            ],
+	        (*else*)
+	        	"$Failed"
+        	]
         ]
     ] /; Complement[ Intersection[ freeVariables[ c], var], Intersection[ freeVariables[ l], var]] === {}
 
@@ -856,12 +979,16 @@ executableForm[ args___] := unexpected[ executableForm, {args}]
 
 execLeft[ e_Hold, var_List] := 
 	Module[ {s, bound},
-		s = substituteFree[ e, Map[ varToPattern, var]];
-		(* All remaining variables are clearly bound. *)
-		bound = DeleteDuplicates[ Cases[ s, (_Theorema`Language`VAR$|_Theorema`Computation`Language`VAR$), Infinity]];
-		(* We assume that there are no nested binders binding the same variables. *)
-		s = s /. Map[ bvarToPattern, bound];
-		ReleaseHold[ Map[ Function[ expr, toInputString[ Hold[ expr], True], {HoldAll}], s]]
+		If[ isIndividual[ e],
+			s = substituteFree[ e, Map[ varToPattern, var], "checkTypes" -> False, "postprocessing" -> Identity];
+			(* All remaining variables are clearly bound. *)
+			bound = DeleteDuplicates[ Cases[ s, (_Theorema`Language`VAR$|_Theorema`Computation`Language`VAR$), Infinity]];
+			(* We assume that there are no nested binders binding the same variables. *)
+			s = s /. Map[ bvarToPattern, bound];
+			ReleaseHold[ Map[ Function[ expr, toInputString[ Hold[ expr], True], {HoldAll}], s]],
+		(*else*)
+			$Failed
+		]
 	]
 execLeft[ args___] := unexpected[ execLeft, {args}]
 
@@ -869,21 +996,29 @@ execLeft[ args___] := unexpected[ execLeft, {args}]
 	Therefore, one of them could in principle be removed. *)
 execCondition[ e_Hold, var_List] := 
 	Module[ {s},
-		s = substituteFree[ e, Map[ stripVar, var]] /. {Theorema`Language`Assign$TM -> Set,
-			Theorema`Language`SetDelayed$TM -> SetDelayed, 
-			Theorema`Language`CompoundExpression$TM -> CompoundExpression,
-			Theorema`Language`List$TM -> List};
-		ReleaseHold[ Map[ Function[ expr, toInputString[ Hold[ expr], True], {HoldAll}], s]]
+		If[ isIndividual[ e],
+			s = substituteFree[ e, Map[ stripVar, var], "checkTypes" -> False, "postprocessing" -> Identity] /. {Theorema`Language`Assign$TM -> Set,
+				Theorema`Language`SetDelayed$TM -> SetDelayed, 
+				Theorema`Language`CompoundExpression$TM -> CompoundExpression,
+				Theorema`Language`List$TM -> List};
+			ReleaseHold[ Map[ Function[ expr, toInputString[ Hold[ expr], True], {HoldAll}], s]],
+		(*else*)
+			$Failed
+		]
 	]
 execCondition[ args___] := unexpected[ execCondition, {args}]
 
 execRight[ e_Hold, var_List] := 
 	Module[ {s},
-		s = substituteFree[ e, Map[ stripVar, var]] /. {Theorema`Language`Assign$TM -> Set,
-			Theorema`Language`SetDelayed$TM -> SetDelayed, 
-			Theorema`Language`CompoundExpression$TM -> CompoundExpression,
-			Theorema`Language`List$TM -> List};
-		ReleaseHold[ Map[ Function[ expr, toInputString[ Hold[ expr], True], {HoldAll}], s]]
+		If[ isIndividual[ e],
+			s = substituteFree[ e, Map[ stripVar, var], "checkTypes" -> False, "postprocessing" -> Identity] /. {Theorema`Language`Assign$TM -> Set,
+				Theorema`Language`SetDelayed$TM -> SetDelayed, 
+				Theorema`Language`CompoundExpression$TM -> CompoundExpression,
+				Theorema`Language`List$TM -> List};
+			ReleaseHold[ Map[ Function[ expr, toInputString[ Hold[ expr], True], {HoldAll}], s]],
+		(*else*)
+			$Failed
+		]
 	]
 execRight[ args___] := unexpected[ execRight, {args}]
 
@@ -1063,15 +1198,19 @@ makeSingleRule[ {l_, r_, c_List, var_List}, ref_] /; With[ {fr = freeVariables[ 
 (* If the condition has additional variables, they can be existentially quantified:
 	forall x,y: P[x,y] => (f[x]=g[x])  <=>  forall x: (exists y: P[x,y]) => (f[x]=g[x]) *)
 makeSingleRule[ {l_, r_, c_List, var_List}, ref_] := 
-	Module[ {addVars = Complement[ freeVariables[ c], freeVariables[ l]], newC},
-		If[ addVars === {},
-			newC = c,
-			(* else *)
-			newC = {Theorema`Language`Exists$TM[ Apply[ Theorema`Language`RNG$, Map[ Theorema`Language`SIMPRNG$, addVars]], True, 
-				makeConjunction[ c, Theorema`Language`And$TM]]}
-		];
-		{key@ref, mmaTransRule[ {l, r, newC, var}, ref]}
+	Module[ {addVars = Complement[ freeVariables[ c], freeVariables[ l]], newC, out},
+		{key@ref, out} /;
+			(
+				If[ addVars === {},
+					newC = c,
+					(* else *)
+					newC = {Theorema`Language`Exists$TM[ Apply[ Theorema`Language`RNG$, Map[ Theorema`Language`SIMPRNG$, addVars]], True,
+						makeConjunction[ c, Theorema`Language`And$TM]]}
+				];
+				(out = mmaTransRule[ {l, r, newC, var}, ref]) =!= $Failed
+			)
 	]
+makeSingleRule[ {_, _, _List, _List}, _] := Sequence[]
 (*
 makeSingleRule[ all:{l_, r_, c_List, var_List}, ref_] := {key@ref, mmaTransRule[ all, ref]}
 *)
@@ -1108,9 +1247,13 @@ mmaTransRule[ {l_, r_, c_List, var_List}, ref_] :=
     With[ {left = execLeft[ Hold[l], var], 
                cond = makeConjunction[ c, Theorema`Language`And$TM],
                right = execRight[ Hold[r], var]},
-            ToExpression[ 
-            	"RuleDelayed[" <> left <> "," <> 
-            	"Sow[" <> ToString[ ref, InputForm] <> ",\"ref\"]; Sow[" <> execCondition[ Hold[ cond], var] <> ",\"cond\"];" <> right <> "]"
+            If[ left =!= $Failed && right =!= $Failed,
+	            ToExpression[
+	            	"RuleDelayed[" <> left <> "," <>
+	            	"Sow[" <> ToString[ ref, InputForm] <> ",\"ref\"]; Sow[" <> execCondition[ Hold[ cond], var] <> ",\"cond\"];" <> right <> "]"
+	            ],
+	        (*else*)
+	        	$Failed
             ]
         ]
         
@@ -1201,11 +1344,11 @@ filterRules[ args___] := unexpected[ filterRules, {args}]
 (* ::Section:: *)
 (* FML$ datastructure *)
 
-Options[ makeFML] = {key :> defKey[], formula -> True, label :> defLabel[], simplify -> True};
+Options[ makeFML] = {key :> defKey[], formula -> True, label :> defLabel[], simplify -> True, sequenceFlatten -> True};
 
 makeFML[ data___?OptionQ] :=
-	Module[{k, f, l, s, fs},
-		{k, f, l, s} = {key, formula, label, simplify} /. {data} /. Options[ makeFML];
+	Module[{k, f, l, s, flatten, fs},
+		{k, f, l, s, flatten} = {key, formula, label, simplify, sequenceFlatten} /. {data} /. Options[ makeFML];
 		Switch[ s,
 			True,
 			fs = computeInProof[ f],
@@ -1215,7 +1358,13 @@ makeFML[ data___?OptionQ] :=
 			fs = s[ f];
 			If[ Head[ fs] === s, fs = f];	(* Security check: If the head of the new formula is still 's', no simplification happened. *)
 		];
-		makeTmaFml[ k, standardFormQuantifier[ fs], l, f]
+		fs = standardFormQuantifier[ fs];
+		fs = If[ TrueQ[ flatten], sequenceFlatten[ fs], fs];
+		If[ isIndividual[ fs],
+			makeTmaFml[ k, fs, l, f],
+		(*else*)
+			$Failed
+		]
 	]
 makeFML[ args___] := unexpected[ makeFML, {args}]
 
@@ -1273,8 +1422,15 @@ makeGoalFML[ data___?OptionQ] :=
 			With[ {sep = If[ StringMatchQ[ l, NumberString], "\[NumberSign]", "\[SpaceIndicator]"]}, "G" <> sep <> l]
 		];
 		form = makeFML[ label -> newLabel, data];
-		AppendTo[ $generated, form];
-		form
+		(* 'makeGoalFML' and 'makeAssumptionFML' are used only in inference rules, i.e. inside 'performProofStep' ==>
+			if the formula is not well-formed, we simply throw '$Failed', which is caught in 'performProofStep'.
+			Only make sure that these constructors are not called inside another 'Catch'! *)
+		If[ form === $Failed,
+			Throw[ $Failed],
+		(*else*)
+			AppendTo[ $generated, form];
+			form
+		]
 	]
 makeGoalFML[ args___] := unexpected[ makeGoalFML, {args}]
 
@@ -1288,8 +1444,12 @@ makeAssumptionFML[ data___?OptionQ] :=
 			With[ {sep = If[ StringMatchQ[ l, NumberString], "\[NumberSign]", "\[SpaceIndicator]"]}, "A" <> sep <> l]
 		];		
 		form = makeFML[ label -> newLabel, data];
-		AppendTo[ $generated, form];
-		form
+		If[ form === $Failed,
+			Throw[ $Failed],
+		(*else*)
+			AppendTo[ $generated, form];
+			form
+		]
 	]
 makeAssumptionFML[ args___] := unexpected[ makeAssumptionFML, {args}]
 
@@ -1311,8 +1471,8 @@ arbitraryButFixed[ expr_, rng_Theorema`Language`RNG$, kb_List:{}] :=
 		from which the constants have been derived. 
 	*)
 	Module[{vars = specifiedVariables[ rng], subs},
-		subs = Map[ Theorema`Language`VAR$[ #] -> Theorema`Language`FIX$[ #, Max[ Cases[ kb, Theorema`Language`FIX$[ #, n_] -> n, Infinity]] + 1]&, vars] /. -Infinity -> 0;
-		{substituteFree[ expr, subs], rng /. subs} 
+		subs = Map[ Theorema`Language`VAR$[ #] -> Theorema`Language`FIX$[ #, Max[ Cases[ kb, Theorema`Language`FIX$[ #, n_] -> n, Infinity, Heads -> True]] + 1]&, vars] /. -Infinity -> 0;
+		{substituteFree[ expr, subs, "checkTypes" -> False, "postprocessing" -> Identity], rng /. subs}
 	]
 arbitraryButFixed[ args___] := unexpected[ arbitraryButFixed, {args}]
 
@@ -1328,9 +1488,9 @@ introduceMeta[ expr_, rng_Theorema`Language`RNG$, forms_List:{}] :=
 		A new meta variable then has the form META$[ v, n'+1, c], hence, we substitute all free VAR$[v] by META$[ v, n'+1, c].
 		If no META$[ v, n, ...] occurs in kb, then n'+1 is -Infinity, we take 0 instead to create the first new meta variable META$[ v, 0, c]. *)
 	Module[{vars = specifiedVariables[ rng], const, subs},
-		const = Union[ Cases[ forms, _Theorema`Language`FIX$, Infinity]];
-		subs = Map[ Theorema`Language`VAR$[ #] -> Theorema`Language`META$[ #, Max[ Cases[ forms, Theorema`Language`META$[ #, n_, ___] -> n, Infinity]] + 1, const]&, vars] /. -Infinity -> 0;
-		{substituteFree[ expr, subs], Map[ Part[ #, 2]&, subs]} 
+		const = Union[ Cases[ forms, _Theorema`Language`FIX$, Infinity, Heads -> True]];
+		subs = Map[ Theorema`Language`VAR$[ #] -> Theorema`Language`META$[ #, Max[ Cases[ forms, Theorema`Language`META$[ #, n_, ___] -> n, Infinity, Heads -> True]] + 1, const]&, vars] /. -Infinity -> 0;
+		{substituteFree[ expr, subs, "checkTypes" -> False, "postprocessing" -> Identity], Map[ Part[ #, 2]&, subs]}
 	]
 introduceMeta[ args___] := unexpected[ introduceMeta, {args}]
 
