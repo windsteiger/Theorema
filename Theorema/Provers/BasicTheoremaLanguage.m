@@ -242,38 +242,41 @@ PRFSIT$[ g:FML$[ _, Iff$TM[ P_, Q_], __], k_List, id_, rest___?OptionQ] :> perfo
 (* ::Subsection:: *)
 (* FORALL *)
 
-inferenceRule[ forallGoal] = 
-ps:PRFSIT$[ g:FML$[ _, u:Forall$TM[ rng_, cond_, A_], __], k_List, id_, rest___?OptionQ] :> performProofStep[
+inferenceRule[ forallGoal] =
+ps:PRFSIT$[ g:FML$[ _, u:Forall$TM[ _, _, _], __], k_List, id_, rest___?OptionQ] :> performProofStep[
 	Module[ {faBui, simp, rc, r, c, f, fix, newConds, newGoal, locC},
 		(* we use computation regardless whether it is activated or not ... *)
 		faBui = buiActProve[ "Forall"];
 		buiActProve[ "Forall"] = True;
-		simp = computeInProof[ u];
+		simp = computeInProof[ standardFormQuantifier[ u]];
 		buiActProve[ "Forall"] = faBui;
-		If[ MatchQ[ simp, _Forall$TM],
+		If[ MatchQ[ simp, Forall$TM[ _, _, _]],
 			(* no simplification *)
-			rc = rngToCondition[ rng];
-			If[ !FreeQ[ rc, $Failed], 
-				$Failed,
-				(* else *)
-				{{r, c, f}, fix} = arbitraryButFixed[ {rc, cond, A}, rng, {g, k}];
-				locC = getOptionalComponent[ ps, "constants"];
-				newGoal = makeGoalFML[ formula -> f];
-				newConds = Map[ makeAssumptionFML[ formula -> #]&, DeleteCases[ Append[ r, c], True]];
-				makeANDNODE[ makePRFINFO[ name -> forallGoal, used -> g, "abf" -> rngConstants[ fix]], 
-					toBeProved[ goal -> newGoal, kb -> joinKB[ newConds, k], "constants" -> Prepend[ locC, fix], rest]]
+			(* note: because of 'standardFormQuantifier' we have to extract 'rng', 'cond' and 'A' from 'simp', not from 'u'! *)
+			With[ {rng = First[ simp], cond = simp[[2]], A = Last[ simp]},
+				rc = rngToCondition[ rng];
+				If[ !FreeQ[ rc, $Failed],
+					$Failed,
+					(* else *)
+					{{r, c, f}, fix} = arbitraryButFixed[ {rc, cond, A}, rng, {g, k}];
+					locC = getOptionalComponent[ ps, "constants"];
+					newGoal = makeGoalFML[ formula -> f];
+					newConds = Map[ makeAssumptionFML[ formula -> #]&, DeleteCases[ Append[ r, c], True]];
+					makeANDNODE[ makePRFINFO[ name -> forallGoal, used -> g, "abf" -> rngConstants[ fix]],
+						toBeProved[ goal -> newGoal, kb -> joinKB[ newConds, k], "constants" -> Prepend[ locC, fix], rest]]
+				]
 			],
 			(* else *)
 			simp = makeGoalFML[ formula -> simp];
-			makeANDNODE[ makePRFINFO[ name -> forallGoal, used -> g], 
+			makeANDNODE[ makePRFINFO[ name -> forallGoal, used -> g],
 				toBeProved[ goal -> simp, kb -> k, rest]]
 		]
 	]
 ]
 
-inferenceRule[ forallKB] = 
-ps:PRFSIT$[ g_, K:{___, f:FML$[ _, _Forall$TM, __], ___}, id_, rest___?OptionQ] :> performProofStep[
-	Module[ {faInst, fk = key@f, newConst, oldConst, inst},
+inferenceRule[ forallKB] =
+ps:PRFSIT$[ g_, K:{___, u:FML$[ fk_, f_Forall$TM, r__], ___}, id_, rest___?OptionQ] :> performProofStep[
+	Module[ {faInst, newConst, oldConst, inst},
 	    faInst = getOptionalComponent[ ps, "forallKB"];
 	    If[ MemberQ[ faInst, fk],
                 (* Rule forallKB has already been applied for those forms *)
@@ -281,29 +284,35 @@ ps:PRFSIT$[ g_, K:{___, f:FML$[ _, _Forall$TM, __], ___}, id_, rest___?OptionQ] 
 	    ];
 	    {newConst, oldConst} = constants[ ps];
         (* we instantiate with the "old" constants only, because the new ones will be treated by the 'instantiate'-rule separately *)
-	    inst = instantiateForall[ f, Apply[ RNG$, oldConst]];
-	    makeANDNODE[ makePRFINFO[ name -> forallKB, used -> f, "instantiation" -> inst[[2]]], 
+	    inst = instantiateForall[ FML$[ fk, standardFormQuantifier[ f], r], Apply[ RNG$, oldConst]];
+	    makeANDNODE[ makePRFINFO[ name -> forallKB, used -> u, "instantiation" -> inst[[2]]], 
 	        toBeProved[ goal -> g, kb -> joinKB[ inst[[1]], K], "forallKB" -> Prepend[ faInst, fk], rest]]
 	]
 ]
 
-inferenceRule[ forallKBInteractive] = 
-ps:PRFSIT$[ g_, K:{___, f:FML$[ _, Forall$TM[ rng_, cond_, A_], __], ___}, id_, rest___?OptionQ] :> performProofStep[
-    Module[ {rc, r, c, Ainst, fInst, inst},
-        rc = rngToCondition[ rng];
-        If[ !FreeQ[ rc, $Failed],
-            $Failed,
-            (* else *)
-            {{r, c, Ainst}, inst} = instantiateUnivKnowInteractive[ {rc, cond, A}, rng, {g, K}];
-            If[ inst === $Failed,
-            	(* interactive dialog has been canceled *)
-                $Failed,
-                (* else *)
-                fInst = makeAssumptionFML[ formula -> Implies$TM[ And$TM[ r, c], Ainst]];
-                makeANDNODE[ makePRFINFO[ name -> forallKBInteractive, used -> f, "instantiation" -> inst], 
-                    toBeProved[ goal -> g, kb -> prependKB[ K, fInst], rest]]
-            ]
-        ]
+inferenceRule[ forallKBInteractive] =
+ps:PRFSIT$[ g_, K:{___, f:FML$[ _, Forall$TM[ _, _, _], __], ___}, id_, rest___?OptionQ] :> performProofStep[
+    Module[ {simp = standardFormQuantifier[ f], rc, r, c, Ainst, fInst, inst},
+    	If[ MatchQ[ simp, Forall$TM[ _, _, _]],
+	    	With[ {rng = First[ simp], cond = simp[[2]], A = Last[ simp]},
+		        rc = rngToCondition[ rng];
+		        If[ !FreeQ[ rc, $Failed],
+		            $Failed,
+		            (* else *)
+		            {{r, c, Ainst}, inst} = instantiateUnivKnowInteractive[ {rc, cond, A}, rng, {g, K}];
+		            If[ inst === $Failed,
+		            	(* interactive dialog has been canceled *)
+		                $Failed,
+		                (* else *)
+		                fInst = makeAssumptionFML[ formula -> Implies$TM[ And$TM[ r, c], Ainst]];
+		                makeANDNODE[ makePRFINFO[ name -> forallKBInteractive, used -> f, "instantiation" -> inst],
+		                    toBeProved[ goal -> g, kb -> prependKB[ K, fInst], rest]]
+		            ]
+		        ]
+	    	],
+	    (*else*)
+	    	$Failed
+    	]
     ]
 ]
 
@@ -800,7 +809,7 @@ ps:PRFSIT$[ g_, K_List, id_, rest___?OptionQ] :> performProofStep[
 			Throw[ $Failed]
 		];
 		univKB = Cases[ K, FML$[ _, _Forall$TM, _]];       
-        instForm = Map[ instantiateForall[ #, newConst]&, univKB];
+        instForm = Replace[ univKB, FML$[ k_, f_, r___] :> instantiateForall[ FML$[ k, standardFormQuantifier[ f], r], newConst], {1}];
         (* for each form in univKB we get a list {forms, inst}, where
             forms is a list of instantiations of form and
             inst is a list of substitutions, such that inst_i applied to form gives forms_i.

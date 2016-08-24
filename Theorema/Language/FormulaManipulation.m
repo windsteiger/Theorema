@@ -1362,7 +1362,6 @@ makeFML[ data___?OptionQ] :=
 			fs = s[ f];
 			If[ Head[ fs] === s, fs = f];	(* Security check: If the head of the new formula is still 's', no simplification happened. *)
 		];
-		fs = standardFormQuantifier[ fs];
 		fs = If[ TrueQ[ flatten], sequenceFlatten[ fs], fs];
 		If[ isIndividual[ fs],
 			makeTmaFml[ k, fs, l, f],
