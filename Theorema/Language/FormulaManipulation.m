@@ -1057,11 +1057,13 @@ varToPattern[ v:Theorema`Language`VAR$[ Theorema`Language`SEQ0$[ a_Symbol]]] :=
 	]
 varToPattern[ v:Theorema`Language`VAR$[ Theorema`Language`SEQ1$[ a_Symbol]]] :=
 	With[ {new = ToExpression[ "Theorema`Knowledge`PATT$SEQ1$" <> SymbolName[ a], InputForm, Hold]},
-		v -> Pattern@@Append[ new, BlankSequence[]]
+		With[ {tmp1 = Pattern@@Append[ new, BlankSequence[]]},
+			v -> Condition[ tmp1, isNonEmptySequence[ new]]
+		]
 	]
 varToPattern[ v:Theorema`Language`VAR$[ a_Symbol]] :=
 	With[ {new = ToExpression[ "Theorema`Knowledge`PATT$" <> SymbolName[ a], InputForm, Hold]},
-		v -> Pattern@@Append[ new, Blank[]]
+		v -> PatternTest[ Pattern@@Append[ new, Blank[]], isIndividual]
 	]
 varToPattern[ v:Theorema`Language`META$[ Theorema`Language`SEQ0$[ a_Symbol], n_, ___]] :=
 	With[ {new = ToExpression[ "Theorema`Knowledge`SEQ0$META$" <> SymbolName[ a] <> ToString[ n], InputForm, Hold]},
@@ -1069,11 +1071,13 @@ varToPattern[ v:Theorema`Language`META$[ Theorema`Language`SEQ0$[ a_Symbol], n_,
 	]
 varToPattern[ v:Theorema`Language`META$[ Theorema`Language`SEQ1$[ a_Symbol], n_, ___]] :=
 	With[ {new = ToExpression[ "Theorema`Knowledge`SEQ1$META$" <> SymbolName[ a] <> ToString[ n], InputForm, Hold]},
-		v -> Pattern@@Append[ new, BlankSequence[]]
+		With[ {tmp1 = Pattern@@Append[ new, BlankSequence[]]},
+			v -> Condition[ tmp1, isNonEmptySequence[ new]]
+		]
 	]
 varToPattern[ v:Theorema`Language`META$[ a_Symbol, n_, ___]] :=
 	With[ {new = ToExpression[ "Theorema`Knowledge`META$" <> SymbolName[ a] <> ToString[ n], InputForm, Hold]},
-		v -> Pattern@@Append[ new, Blank[]]
+		v -> PatternTest[ Pattern@@Append[ new, Blank[]], isIndividual]
 	]
 varToPattern[ args___] := unexpected[ varToPattern, {args}]
 

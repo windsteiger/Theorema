@@ -91,11 +91,14 @@ sequenceType[ HoldComplete[ FIX$|META$|SEQ$|SEQ0$|SEQ1$|VAR$]] :=
 	$Failed
 sequenceType[ HoldComplete[ _]] :=
 	{1, True}
-sequenceType[ Hold[ expr_]] :=
+sequenceType[ HoldComplete[]] :=
+	{0, True}
+sequenceType[ HoldComplete[a_, b__]] :=
+	sequenceType[ HoldComplete[ SEQ$[ a, b]]]
+sequenceType[ Hold[ expr___]] :=
 	sequenceType[ HoldComplete[ expr]]
-sequenceType[ expr_] :=
+sequenceType[ expr___] :=
 	sequenceType[ HoldComplete[ expr]]
-sequenceType[ args___] := unexpected[ sequenceType, {args}]
 
 
 (* ::Section:: *)
