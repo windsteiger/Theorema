@@ -755,7 +755,7 @@ proofStepNode[ pos_List, node:{ id_String, status_, type_, name_}, font_] :=
        					_, proofNodeIndicator[ status, type, name]], 
 					{$TMAproofNotebook, id},
 					BaseStyle -> {FontSize -> font}, Active -> ValueQ[ $TMAproofNotebook] && ruleTextActive[ name]],
-					{"MouseClicked" :> If[ !$interactiveProofSitSel || type === PRFSIT$, $selectedProofStep = id]}, PassEventsDown -> True], pos]]}
+					{"MouseClicked" :> If[ !TrueQ[ $interactiveProofSitSel] || type === PRFSIT$, $selectedProofStep = id]}, PassEventsDown -> True], pos]]}
 			}
 		]
 	]
