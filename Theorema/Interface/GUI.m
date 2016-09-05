@@ -2122,10 +2122,17 @@ makeColoredStylesheet[ type_String, color_:$TheoremaColorScheme] :=
 			Visible -> False];
 		styles = NotebookGet[ tmp];
 		NotebookClose[ tmp];
-		alias = Map[ langButtonData[ #][[4]] -> RowBox[ {autoParenthesis[ "("], langButtonData[ #][[2]], autoParenthesis[ ")"]}]&, 
-			Cases[ Flatten[ Transpose[ allFormulae][[2]]], _String]];
+		alias = Cases[ Flatten[ Transpose[ allFormulae][[2]], 2],
+					{n_String, i_Integer} :>
+						With[ {bd = langButtonData[ n]},
+							If[ i === 1,
+								bd[[4]] -> RowBox[ {autoParenthesis[ "("], bd[[2]], autoParenthesis[ ")"]}],
+								bd[[4]] -> bd[[2]]
+							]
+						]
+				];
 		alias = Join[ alias, {"(" -> autoParenthesis[ "("], ")" -> autoParenthesis[ ")"]}];
-		styles /. Table[Apply[CMYKColor, IntegerDigits[i, 2, 4]] -> TMAcolor[i, color], {i, 0, 15}] 
+		styles /. Table[Apply[CMYKColor, IntegerDigits[i, 2, 4]] -> TMAcolor[i, color], {i, 0, 15}]
 				/. {(InputAliases -> {}) -> (InputAliases -> alias), "DOCKED_HEADER" -> "Theorema " <> If[ type === "Notebook", $TheoremaVersion, translate[ type]]}
 	]
 makeColoredStylesheet[ args___] := unexpected[ makeColoredStylesheet, {args}]
