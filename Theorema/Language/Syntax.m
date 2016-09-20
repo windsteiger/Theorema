@@ -250,6 +250,111 @@ registerQuantifier[ "SequenceOf",
 	{TagBox[ "\[VerticalEllipsis]", Identity, SyntaxForm -> "("], TagBox[ "\[VerticalEllipsis]", Identity, SyntaxForm -> ")"]}
 ]
 
+(* We keep the distinction between built-in- and user-ranges,
+	because built-in ranges provide much more powerful parsing rules for multiple variables. *)
+$tmaUserRangeNames = {};	(* Contains the names of all user-defined variable ranges as *strings* (e.g. "LIMRNG$", ...). *)
+$tmaBoxToUserRange = {};
+$tmaUserRangeToBox = {};
+$tmaUserRangeToCondition = {};
+
+(* 'isVariableRange[ rng]' gives True iff 'rng' is a variable range, either built-in or user-defined.
+	'isVariableRange' works in both "Theorema`" and "Theorema`Computation`" context.
+	This is the default definition; 'registerRange' adds other definitions. *)
+isVariableRange[ rng_] :=
+	MemberQ[
+		{
+			Theorema`Language`SIMPRNG$, Theorema`Computation`Language`SIMPRNG$,
+			Theorema`Language`PREDRNG$, Theorema`Computation`Language`PREDRNG$,
+			Theorema`Language`SETRNG$, Theorema`Computation`Language`SETRNG$,
+			Theorema`Language`STEPRNG$, Theorema`Computation`Language`STEPRNG$,
+			Theorema`Language`ABBRVRNG$, Theorema`Computation`Language`ABBRVRNG$,
+			Theorema`Language`DOMEXTRNG$, Theorema`Computation`Language`DOMEXTRNG$
+		},
+		rng
+	]
+
+(* The following function registers a new user-defined variable-range.
+	In 'registerRange[ name, inputRules, outputRules, conds]'
+	- 'name' is a string representing the name of the range, e.g. "LIMRNG$". Note that such names typically end with "$", but "$" is not added automatically!
+	- 'inputRules' is a list of rules of the form 'box :> params', where
+		> 'box' is a box(-pattern) where precisely once the string "$var" must appear, representing the bound variable, and
+		> 'params' is a list of additional arguments the range depends upon and that may also appear (as named patterns) in 'box',
+	- 'outputRules' is a list of rules of the form 'args :> box', where
+		> 'args' is a list of patterns corresponding to all arguments of the range; in contrast to 'params' in 'inputRules', this also includes the bound variable!
+		> 'box' is the box-expression that shall be constructed when pretty-printing the range with arguments 'args'.
+			Calls to 'MakeBoxes' that do not specify the format (e.g. 'TheoremaForm') are automatically replaced by calls specifying the "right" format.
+	- 'conds' is a list of rules of the form 'args :> cond', where
+		> 'args' has exactly the same meaning as in 'outputRules', and
+		> 'cond' is a list of Theorema expressions (in "Theorema`" context) representing the conditions on the bound variable that can be extracted from the range,
+			or '$Failed' if no conditions can be extracted from the range (this is the default value; think of "limit ranges").
+*)
+registerRange[ _String?(MemberQ[ $tmaUserRangeNames, #]&), ___] :=
+	Null
+registerRange[ name_String, input:(_Rule|_RuleDelayed), rest___] :=
+	registerRange[ name, {input}, rest]
+registerRange[ name_String, input_List, output:(_Rule|_RuleDelayed), rest___] :=
+	registerRange[ name, input, {output}, rest]
+registerRange[ name_String, input_List, output_List] :=
+	registerRange[ name, input, output, {}]
+registerRange[ name_String, input_List, output_List, cond:(_Rule|_RuleDelayed)] :=
+	registerRange[ name, input, output, {cond}]
+registerRange[ name_String, input_List, output_List, cond_List] :=
+	(
+		AppendTo[ $tmaUserRangeNames, name];
+		$tmaBoxToUserRange = Join[ $tmaBoxToUserRange,
+				Cases[ input,
+						(h:(Rule|RuleDelayed))[ box_, expr_] :>
+							With[ {p = Position[ HoldComplete[ box], "$var"]},
+								h @@ Join[
+										ReplacePart[ HoldComplete[ box], First[ p] -> Pattern[ $var, BlankSequence[]]],
+										HoldComplete[ {name, {$var}, expr}]
+									] /; Length[ p] === 1
+							]
+				]
+			];
+		With[ {
+					sym1 = Block[ {$ContextPath = Join[ {"Theorema`Language`"}, If[ ListQ[ $TheoremaArchives], $TheoremaArchives, {}], $ContextPath], $Context = "Theorema`Knowledge`"},
+							ToExpression[ name]
+						],
+					sym2 = Block[ {$ContextPath = Join[ {"Theorema`Computation`Language`"}, If[ ListQ[ $TheoremaArchives], $TheoremaArchives, {}], $ContextPath], $Context = "Theorema`Computation`Knowledge`"},
+							ToExpression[ name]
+						]
+				},
+			isVariableRange[ sym1] = True;
+			isVariableRange[ sym2] = True;
+			$tmaUserRangeToBox = Join[ $tmaUserRangeToBox,
+					Join @@ Cases[ output,
+									(Rule|RuleDelayed)[ expr_List, box_] :>
+										With[ {newBox = HoldComplete[ box] /. HoldPattern[ MakeBoxes[ b_]] :> MakeBoxes[ b, $fmt]},
+											{RuleDelayed @@ Prepend[ newBox, {sym1 @@ expr, $fmt_}], RuleDelayed @@ Prepend[ newBox, {sym2 @@ expr, $fmt_}]}
+										]
+							]
+				];
+			$tmaUserRangeToCondition = Join[ $tmaUserRangeToCondition,
+					Cases[ cond, (Rule|RuleDelayed)[ expr_List, c_] :> (sym1 @@ expr :> c)]
+				]
+		];
+	)
+registerRange[ args___] := unexpected[ registerRange, {args}]
+	
+(*
+The following code would add a new limit-range:
+
+registerRange[
+	"LIMRNG$",
+	{
+		RowBox[ {"$var", "\[Rule]", lim_}] :> {lim, 0},
+		RowBox[ {"$var", "\[UpperRightArrow]", lim_}] :> {lim, 1},	(*approaching the limit from below*)
+		RowBox[ {"$var", "\[LowerRightArrow]", lim_}] :> {lim, -1}	(*approaching the limit from above*)
+	},
+	{
+		{x_, lim_, 0} :> RowBox[ {MakeBoxes[ x], "\[Rule]", MakeBoxes[ lim]}],
+		{x_, lim_, 1} :> RowBox[ {MakeBoxes[ x], "\[UpperRightArrow]", MakeBoxes[ lim]}],
+		{x_, lim_, -1} :> RowBox[ {MakeBoxes[ x], "\[LowerRightArrow]", MakeBoxes[ lim]}]
+	}
+]
+*)
+
 (* $tmaNonStandardOperators is defined in Expression.m *)
 $tmaNonStandardOperatorNames = Transpose[ $tmaNonStandardOperators][[1]];
 $tmaNonStandardOperatorToBuiltin = Dispatch[ Apply[ Rule, $tmaNonStandardOperators, {1}]];
@@ -1120,7 +1225,7 @@ constructQuantifier[ {name_, s_, c_, multi_, ranges_}, rng_, form_, cond_, sub_,
 							If[ MatchQ[ r, {RowBox[ {ranges, "[", _, "]"}]...}],
 								With[ {
 											rb = toRangeBox[ r],
-											newForm = If[ form === Null, getSingleRangeVar[ rng], form]		(* TODO: Instead of accessing 'rng', access 's' directly. *)
+											newForm = If[ form === Null, getSingleRangeVar[ r], form]
 										},
 									If[ newForm =!= $Failed,
 										With[ {expr = Join[ {rb, ","}, newCond, {newForm}]},
@@ -1181,7 +1286,12 @@ toRangeBox[ s_] :=
 	toRangeBox[ makeRangeList[ s]]
 toRangeBox[ args___] := unexpected[ toRangeBox, {args}]
 
-makeRangeList[ RowBox[{v_, "\[Element]", s_}]] :=
+makeRangeList[ b_] :=
+	With[ {r = makeUserRange[ Replace[ b, $tmaBoxToUserRange]]},
+		r /; r =!= $Failed
+	]
+
+makeRangeList[ RowBox[ {v_, "\[Element]", s_}]] :=
 	{makeSingleSetRange[ v, s]}
 
 makeRangeList[ RowBox[ {x___, y_, ",", RowBox[ {v_, "\[Element]", s_}]}]] :=
@@ -1248,16 +1358,28 @@ makeSingleAbbrevRange[ a_, e_] :=
 	RowBox[ {"ABBRVRNG$", "[", RowBox[ {a, ",", e}], "]"}]
 makeSingleAbbrevRange[ args___] := unexpected[ makeSingleAbbrevRange, {args}]
 
-(* TODO: Update. *)
-getSingleRangeVar[ v_String] := v
-getSingleRangeVar[ RowBox[{v_, "\[Element]", _}]] := v
-getSingleRangeVar[ RowBox[{_, "[", v_String, "]"}]] := v
-getSingleRangeVar[ RowBox[{RowBox[{v_, "=", _}], ",", "\[Ellipsis]", ",", _}]] := v
-getSingleRangeVar[ r_] :=
-	Module[ {},
-		notification[ translate[ "ambiguousRange"], DisplayForm[ makeRangeBox[ r, TheoremaForm]]];
-		$Failed
-	]
+makeUserRange[ {name_, vars:{_, PatternSequence[ ",", _]...}, args_List}] :=
+	Join @@ Map[ makeUserRange[ {name, #, args}]&, Part[ vars, 2 * Range[ (Length[ vars] + 1) / 2] - 1]]
+makeUserRange[ {name_, RowBox[ list:{_, PatternSequence[ ",", _]...}], args_List}] :=
+	makeUserRange[ {name, list, args}]
+makeUserRange[ {name_, var_, {}}] :=
+	{RowBox[ {name, "[", var, "]"}]}
+makeUserRange[ {name_, var_, args_List}] :=
+	{RowBox[ {name, "[", RowBox[ Riffle[ Prepend[ args, var], ","]], "]"}]}
+makeUserRange[ ___] := $Failed
+
+getSingleRangeVar[ {r_}] :=
+	getSingleRangeVar[ r]
+getSingleRangeVar[ RowBox[ {_String, "[", v:RowBox[ {_, ".."|"..."}], "]"}]] :=
+	v
+getSingleRangeVar[ RowBox[ {r_String, "[", RowBox[ {v_}], "]"}]] :=
+	getSingleRangeVar[ RowBox[ {r, "[", v, "]"}]]
+getSingleRangeVar[ RowBox[ {r_String, "[", RowBox[ {v_, ",", __}], "]"}]] :=
+	getSingleRangeVar[ RowBox[ {r, "[", v, "]"}]]
+getSingleRangeVar[ RowBox[ {_String, "[", v_, "]"}]] :=
+	v
+getSingleRangeVar[ _] :=
+	$Failed
 getSingleRangeVar[ args___] := unexpected[ getSingleRangeVar, {args}]
 
 

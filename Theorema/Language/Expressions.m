@@ -153,6 +153,41 @@ makeQuantifierBox[ q_, rng_RNG$, form_, cond_, sub_, fmt_] :=
 		]
 	]
 makeQuantifierBox[args___] := unexpected[ makeQuantifierBox, {args}]
+
+MakeBoxes[ r_RNG$, TheoremaForm] :=
+	makeRangeBox[ r, TheoremaForm]
+	
+makeRangeBox[ RNG$[ s_], fmt_] :=
+	makeRangeBox[ s, fmt]
+makeRangeBox[ RNG$[ s__SIMPRNG$], fmt_] :=
+	RowBox[ Riffle[ Map[ makeRangeBox[ #, fmt]&, {s}], ","]]
+makeRangeBox[ RNG$[ s__], fmt_] :=
+	GridBox[ Map[ {makeRangeBox[ #, fmt]}&, {s}]]
+makeRangeBox[ SETRNG$[ v_, s_], fmt_] :=
+	RowBox[ {MakeBoxes[v, fmt], "\[Element]", MakeBoxes[ s, fmt]}]
+makeRangeBox[ PREDRNG$[ v_, p_], fmt_] :=
+	RowBox[ {MakeBoxes[ p, fmt], "[", MakeBoxes[v, fmt], "]"}]
+makeRangeBox[ STEPRNG$[ v_, lower_, upper_, step_], fmt_] :=
+	RowBox[ {RowBox[ {MakeBoxes[v, fmt], "=", MakeBoxes[ lower, fmt]}], ",", makeEllipsisBox[ step, fmt], ",", MakeBoxes[ upper, fmt]}]
+makeRangeBox[ ABBRVRNG$[ a_, e_, ___], fmt_] :=
+	RowBox[ {MakeBoxes[ a, fmt], "=", MakeBoxes[ e, fmt]}]
+makeRangeBox[ DOMEXTRNG$[ v_, d_], fmt_] :=
+	RowBox[ {MakeBoxes[ v, fmt], "\[Superset]", MakeBoxes[ d, fmt]}]
+makeRangeBox[ SIMPRNG$[ v_], fmt_] :=
+	MakeBoxes[ v, fmt]
+makeRangeBox[ r_, fmt_] :=
+	With[ {b = Replace[ {r, fmt}, $tmaUserRangeToBox]},
+		If[ ListQ[ b],
+			MakeBoxes[ r, fmt],
+		(*else*)
+			b
+		]
+	]
+makeRangeBox[ args___] := unexpected[ makeRangeBox, {args}]
+
+makeEllipsisBox[ 1, fmt_] := "\[Ellipsis]"
+makeEllipsisBox[ step_, fmt_] := OverscriptBox[ "\[Ellipsis]", MakeBoxes[ step, fmt]]
+makeEllipsisBox[ args___] := unexpected[ makeEllipsisBox, {args}]
 	
 	
 (* ::Subsection:: *)
@@ -486,22 +521,6 @@ MakeBoxes[ FIX$[ c_, n_Integer], TheoremaForm] := StyleBox[ SuperscriptBox[ Make
 metaAnnotations = {"*", "**", "***", "\[Dagger]", "\[DoubleDagger]"};
 MakeBoxes[ META$[ c_, n_Integer, dep_List] /; n<5, TheoremaForm] := StyleBox[ SuperscriptBox[ MakeBoxes@@Append[ removeVar[ c], TheoremaForm], metaAnnotations[[n+1]]], "ExpressionMeta"]
 MakeBoxes[ META$[ c_, n_Integer, dep_List], TheoremaForm] := StyleBox[ SuperscriptBox[ MakeBoxes@@Append[ removeVar[ c], TheoremaForm], RowBox[{"(", MakeBoxes[ n, StandardForm], ")"}]], "ExpressionMeta"]
-
-MakeBoxes[ r_RNG$, TheoremaForm] := makeRangeBox[ r, TheoremaForm]
-makeRangeBox[ RNG$[ s__SIMPRNG$], fmt_] := RowBox[ Riffle[ Map[ makeRangeBox[ #, fmt]&, {s}], ","]]
-makeRangeBox[ RNG$[ s__], fmt_] := GridBox[ Map[ {makeRangeBox[ #, fmt]}&, {s}]]
-makeRangeBox[ SETRNG$[ v_, s_], fmt_] := RowBox[ {MakeBoxes[v, fmt], "\[Element]", MakeBoxes[ s, fmt]}]
-makeRangeBox[ PREDRNG$[ v_, p_], fmt_] := RowBox[ {MakeBoxes[ p, fmt], "[", MakeBoxes[v, fmt], "]"}]
-makeRangeBox[ STEPRNG$[ v_, lower_, upper_, step_], fmt_] := 
-	RowBox[ {RowBox[ {MakeBoxes[v, fmt], "=", MakeBoxes[ lower, fmt]}], ",", makeEllipsisBox[ step, fmt], ",", MakeBoxes[ upper, fmt]}]
-makeRangeBox[ ABBRVRNG$[ a_, e_, ___], fmt_] := RowBox[ {MakeBoxes[ a, fmt], "=", MakeBoxes[ e, fmt]}]
-makeRangeBox[ DOMEXTRNG$[ v_, d_], fmt_] := RowBox[ {MakeBoxes[ v, fmt], "\[Superset]", MakeBoxes[ d, fmt]}]
-makeRangeBox[ SIMPRNG$[ v_], fmt_] := MakeBoxes[ v, fmt]
-makeRangeBox[ args___] := unexpected[ makeRangeBox, {args}]
-
-makeEllipsisBox[ 1, fmt_] := "\[Ellipsis]"
-makeEllipsisBox[ step_, fmt_] := OverscriptBox[ "\[Ellipsis]", MakeBoxes[ step, fmt]]
-makeEllipsisBox[ args___] := unexpected[ makeEllipsisBox, {args}]
 
 MakeBoxes[ Piecewise$TM[ Tuple$TM[ c__Tuple$TM]], TheoremaForm] :=
     RowBox[ {"\[Piecewise]",

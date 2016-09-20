@@ -1552,7 +1552,14 @@ singleRngToCondition[ Theorema`Language`STEPRNG$[ v_, l_, h_, s_]] :=
 		]
 	]
 singleRngToCondition[ Theorema`Language`PREDRNG$[ v_, P_]] := {P[ v]}
-singleRngToCondition[ u_] := {$Failed}
+singleRngToCondition[ u_] :=
+	With[ {c = Replace[ u, $tmaUserRangeToCondition]},
+		If[ ListQ[ c],
+			c,
+		(*else*)
+			{$Failed}
+		]
+	]
 singleRngToCondition[ args___] := unexpected[ singleRngToCondition, {args}]
 
 
