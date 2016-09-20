@@ -104,6 +104,57 @@ sequenceType[ expr___] :=
 (* ::Section:: *)
 (* MakeBoxes *)
 
+
+(* ::Subsection:: *)
+(* Quantifiers *)
+
+(* Quantifiers without condition are displayed as quantifiers whose condition is 'True'. *)
+MakeBoxes[ q_[ rng_RNG$, form_], TheoremaForm] :=
+	MakeBoxes[ q[ rng, True, form], TheoremaForm]
+
+MakeBoxes[ Annotated$TM[ q_, SubScript$TM[ sub_]][ rng_RNG$, cond_, form_], TheoremaForm] :=
+	makeQuantifierBox[ q, rng, form, cond, sub, TheoremaForm]
+MakeBoxes[ DomainOperation$TM[ dom_, q_][ rng_RNG$, cond_, form_], TheoremaForm] :=
+	makeQuantifierBox[ q, rng, form, cond, dom, TheoremaForm]
+MakeBoxes[ q_[ rng_RNG$, cond_, form_], TheoremaForm] :=
+	makeQuantifierBox[ q, rng, form, cond, Null, TheoremaForm]
+	
+makeQuantifierBox[ q_, rng_RNG$, form_, cond_, sub_, fmt_] :=
+	With[ {b0 = Replace[ q, $tmaNameToQuantifier], r = makeRangeBox[ rng, fmt], f = MakeBoxes[ form, fmt]},
+		With[ {b1 = If[ b0 === q || (MatchQ[ b0, {_, _}] && sub =!= Null), MakeBoxes[ q, fmt], b0]},
+			With[ {b = If[ sub === Null, b1, SubscriptBox[ b1, MakeBoxes[ sub, fmt]]]},
+				Which[
+					MatchQ[ b, {_, _}],
+					RowBox[
+						{
+							First[ b],
+							Which[
+								MatchQ[ {rng, form}, {RNG$[ SETRNG$[ v_, _]], v_}],
+								RowBox[ {r, "|", MakeBoxes[ cond, fmt]}],
+								
+								cond === True,
+								RowBox[ {f, UnderscriptBox[ "|", r]}],
+								
+								True,
+								RowBox[ {f, UnderscriptBox[ "|", r], MakeBoxes[ cond, fmt]}]
+							],
+							Last[ b]
+						}
+					],
+	
+					cond === True,
+					RowBox[ {UnderscriptBox[ b, r], f}],
+					
+					True,
+					RowBox[ {UnderscriptBox[ UnderscriptBox[ b, r], MakeBoxes[ cond, fmt]], f}
+					]
+				]
+			]
+		]
+	]
+makeQuantifierBox[args___] := unexpected[ makeQuantifierBox, {args}]
+	
+	
 (* ::Subsection:: *)
 (* Number domains *)
 
@@ -190,16 +241,6 @@ MakeBoxes[ Annotated$TM[ op_, UnderScript$TM[ un__], OverScript$TM[ ov__]], Theo
 (* ::Subsubsection:: *)
 (* annotated operators with arguments *)
 
-(* Quantifiers must come before all other Annotated$TM-expressions. *)
-MakeBoxes[ Annotated$TM[ q_?isQuantifierName, SubScript$TM[ sub_]][ rng_, True, form_], TheoremaForm] :=
-	RowBox[ {UnderscriptBox[ SubscriptBox[ Replace[ q, $tmaNameToQuantifier], MakeBoxes[ sub, TheoremaForm]], makeRangeBox[ rng, TheoremaForm]],
-		MakeBoxes[ form, TheoremaForm]}
-	]
-MakeBoxes[ Annotated$TM[ q_?isQuantifierName SubScript$TM[ sub_]][ rng_, cond_, form_], TheoremaForm] :=
-	RowBox[ {UnderscriptBox[ UnderscriptBox[ SubscriptBox[ Replace[ q, $tmaNameToQuantifier], MakeBoxes[ sub, TheoremaForm]], makeRangeBox[ rng, TheoremaForm]],
-		MakeBoxes[ cond, TheoremaForm]], MakeBoxes[ form, TheoremaForm]}
-	]
-
 MakeBoxes[ aop_Annotated$TM[], TheoremaForm] :=
 	Module[ {opName, sym = MakeBoxes[ aop, TheoremaForm]},
 		(
@@ -247,16 +288,6 @@ MakeBoxes[ aop_Annotated$TM[ a__], TheoremaForm] :=
 	
 (* ::Subsection:: *)
 (* Domain underscripts *)
-
-(* Quantifiers must come before all other DomainOperation$TM-expressions. *)
-MakeBoxes[ DomainOperation$TM[ dom_, q_?isQuantifierName][ rng_, True, form_], TheoremaForm] :=
-	RowBox[ {UnderscriptBox[ SubscriptBox[ Replace[ q, $tmaNameToQuantifier], MakeBoxes[ dom, TheoremaForm]], makeRangeBox[ rng, TheoremaForm]],
-		MakeBoxes[ form, TheoremaForm]}
-	]
-MakeBoxes[ DomainOperation$TM[ dom_, q_?isQuantifierName][ rng_, cond_, form_], TheoremaForm] :=
-	RowBox[ {UnderscriptBox[ UnderscriptBox[ SubscriptBox[ Replace[ q, $tmaNameToQuantifier], MakeBoxes[ dom, TheoremaForm]], makeRangeBox[ rng, TheoremaForm]],
-		MakeBoxes[ cond, TheoremaForm]], MakeBoxes[ form, TheoremaForm]}
-	]
 	
 MakeBoxes[ (d:(DomainOperation$TM[ dom_, op_]))[ a_], TheoremaForm] :=
 	Module[ {opName = getTmaOperatorName[ op], form,
@@ -378,24 +409,6 @@ MakeBoxes[ Radical$TM[ e_, r_], TheoremaForm] :=
 MakeBoxes[ Set$TM[ arg__], TheoremaForm] := MakeBoxes[ {arg}, TheoremaForm]
 MakeBoxes[ Set$TM[ ], TheoremaForm] := "\[EmptySet]"
 
-MakeBoxes[ SequenceOf$TM[ rng:RNG$[ SETRNG$[ v_, _]], cond_, v_], TheoremaForm] :=
-	RowBox[ {makeRangeBox[ rng, TheoremaForm], "|", MakeBoxes[ cond, TheoremaForm]}]
-
-MakeBoxes[ SequenceOf$TM[ rng_, True, form_], TheoremaForm] :=
-	RowBox[ {MakeBoxes[ form, TheoremaForm], UnderscriptBox[ "|", makeRangeBox[ rng, TheoremaForm]]}]
-
-MakeBoxes[ SequenceOf$TM[ rng_, cond_, form_], TheoremaForm] :=
-	RowBox[ {MakeBoxes[ form, TheoremaForm], UnderscriptBox[ "|", makeRangeBox[ rng, TheoremaForm]], MakeBoxes[ cond, TheoremaForm]}]
-
-MakeBoxes[ SetOf$TM[ rng_, cond_, form_], TheoremaForm] :=
-	RowBox[ { "{", MakeBoxes[ SequenceOf$TM[ rng, cond, form], TheoremaForm], "}"}]
-
-MakeBoxes[ TupleOf$TM[ rng_, cond_, form_], TheoremaForm] :=
-	RowBox[ { "\[LeftAngleBracket]", MakeBoxes[ SequenceOf$TM[ rng, cond, form], TheoremaForm], "\[RightAngleBracket]"}]
-
-MakeBoxes[ Abbrev$TM[ rng_, form_], TheoremaForm] :=
-	RowBox[ {UnderscriptBox[ "let", makeRangeBox[ rng, TheoremaForm]], MakeBoxes[ form, TheoremaForm]}]
-
 MakeBoxes[ IffDef$TM[ l_, r_], TheoremaForm] :=
     RowBox[ {MakeBoxes[ l, TheoremaForm],
         TagBox[ RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], Identity, SyntaxForm->"a:=b"], 
@@ -484,7 +497,7 @@ makeRangeBox[ STEPRNG$[ v_, lower_, upper_, step_], fmt_] :=
 makeRangeBox[ ABBRVRNG$[ a_, e_, ___], fmt_] := RowBox[ {MakeBoxes[ a, fmt], "=", MakeBoxes[ e, fmt]}]
 makeRangeBox[ DOMEXTRNG$[ v_, d_], fmt_] := RowBox[ {MakeBoxes[ v, fmt], "\[Superset]", MakeBoxes[ d, fmt]}]
 makeRangeBox[ SIMPRNG$[ v_], fmt_] := MakeBoxes[ v, fmt]
-makeRangeBox[args___] := unexpected[ makeRangeBox, {args}]
+makeRangeBox[ args___] := unexpected[ makeRangeBox, {args}]
 
 makeEllipsisBox[ 1, fmt_] := "\[Ellipsis]"
 makeEllipsisBox[ step_, fmt_] := OverscriptBox[ "\[Ellipsis]", MakeBoxes[ step, fmt]]

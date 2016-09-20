@@ -135,6 +135,10 @@ falls nicht, siehe <http://www.gnu.org/licenses/>.", ToString[ Date[][[1]]]];
 	translate[ "interactiveNewProofSitFilter", lang] = "Neue Beweissituationen interaktiv instanzieren";
 	translate[ "interactiveProofSitSel", lang] = "N\[ADoubleDot]chste Beweissituation interaktiv w\[ADoubleDot]hlen";
 	translate[ "invalidExpr", lang] = "Der eingegebene Ausdruck ist ung\[UDoubleDot]ltig, da sein Sequence-Typ inkorrekt ist oder nicht bestimmt werden kann.";
+	translate[ "invalidQuCondition", lang] = "Der Quantor \"``\" kann nicht mit einer zus\[ADoubleDot]tzlichen Bedingung verwendet werden.";
+	translate[ "invalidQuRange", lang] = "Der Quantor \"`1`\" kann nicht zusammen mit dem Variablenbereich `2` verwendet werden.";
+	translate[ "invalidQuSubscript", lang] = "Der Quantor \"``\" kann kein Subskript haben.";
+	translate[ "invalidQuVarNum", lang] = "Der Quantor \"``\" kann nicht mit Multi-Variablenbereichen verwendet werden.";
 	translate[ "invalidRange", lang] = "Jede gebundene Variable darf nur einmal unter dem Quantor vorkommen, der sie bindet; Diese Bedingung wird verletzt von ``.";
     
     translate[ "KBcomp", lang] = "In der Berechnung verwendetes Wissen";
@@ -287,7 +291,6 @@ falls nicht, siehe <http://www.gnu.org/licenses/>.", ToString[ Date[][[1]]]];
     translate[ "tooltipButtonParen", lang] = "\nTaste \[ShiftKey] dr\[UDoubleDot]cken, um die Klammern wegzulassen\nTastaturk\[UDoubleDot]rzel";   	
     translate[ "Trace", lang] = "Berechnung verfolgen";
     translate[ "traceUserDef", lang] = "Benutzer-Definitionen verfolgen";
-    translate[ "tupleOfRange", lang] = "Der Tupel-Quantor kann nur mit Schrittbereichen verwendet werden, nicht mit ``.";
     translate[ "Tuples", lang] = "Tupel";
 
     translate[ "UNDEROVEROP", lang] = "unter- und \[UDoubleDot]berskript-Operator";

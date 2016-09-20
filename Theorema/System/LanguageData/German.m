@@ -135,6 +135,7 @@ With[ {lang = "German"},
 	MessageName[ isNonEmptySequence, "usage", lang] = "";
 	MessageName[ isNonNumberAtomicTerm, "usage", lang] = "isAtomicTerm[ t] is true iff t is an atomic term but not a number.";	
 	MessageName[ isProofNode, "usage", lang] = "isProofNode[ p] is True iff p is a valid node to be inserted into a proof tree.";
+	MessageName[ isQuantifier, "usage", lang] = "isQuantifier[ e] is True iff e is a quantifier (e.g. 'Forall$TM').";
 	MessageName[ isQuantifierFormula, "usage", lang] = "isQuantifierFormula[ e] is true iff e is built up by a logical quantifier.";	
 	MessageName[ isQuantifierFree, "usage", lang] = "";
 	MessageName[ isVariableFree, "usage", lang] = "";
@@ -205,6 +206,7 @@ With[ {lang = "German"},
 
 	MessageName[ $registeredRuleSets, "usage", lang] = "$registeredRuleSets is a list of available provers in the Theorema system.";
 	MessageName[ $registeredStrategies, "usage", lang] = "$registeredStrategies is a list of available strategies in the Theorema system.";
+	MessageName[ registerQuantifier, "usage", lang] = "registerQuantifier is a function used to register a new quantifier for parsing and pretty-printing.";
 	MessageName[ registerRuleSet, "usage", lang] = "registerRuleSet[ n_, p_, r_] registers prover p under the name n consisting of rules r.";
 	MessageName[ registerStrategy, "usage", lang] = "registerStrategy[ n_, s_] registers strategy s under the name n.";
 	MessageName[ removeEnvironment,"usage", lang] = "removeEnvironment[ nb] removes an entire environment from the notebook nb.";

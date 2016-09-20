@@ -135,49 +135,120 @@ Theorema`TmaCompToMma = Dispatch[
 			]
 		   ];
 
+$tmaQuantifierNames = {};	(* Contains the names of all registered quantifiers as *strings*, without parameters (e.g. "Forall", "Exists", ...). *)
+$tmaQuantifierToName = {};
+$tmaNameToQuantifier = {};
 
-(* To add a new quantifier, just add a pair to this list *)
-(* If the sub-script of a quantifier shall be interpreted as a domain
-	(i.e. result should be "DomainOperation[ dom, q][ ...]" instead of default "Annotated[ q, SubScript[ sub]][ ...]"),
-	the definition of "subscriptedQuantifier" must be updated as well, just as for "SumOf" and "ProductOf". *)
-$tmaQuantifiers =
-    {{"\[ForAll]", "Forall"},
-     {"\[Exists]", "Exists"},
-     {"\[NotExists]", "NotExists"},
-     {"\[Intersection]", "IntersectionOf"},
-     {"\[Union]", "UnionOf"},
-     {"\[Sum]", "SumOf"},
-     {"\[Product]", "ProductOf"},
-     {"\[Integral]", "IntegralOf"},
-     {"\[CurlyEpsilon]", "Such"},
-     {"such", "Such"},
-     {"the", "SuchUnique"},
-     {"\[Lambda]", "Lambda"},
-     {"max", "MaximumOf"},
-     {"min", "MinimumOf"},
-     {"argmax", "ArgMax"},
-     {"argmin", "ArgMin"},
-     {"theargmax", "TheArgMax"},
-     {"theargmin", "TheArgMin"}
-    };
+(* 'isQuantifier[ expr]' gives True iff 'expr' represents the head (including parameters) of a registered quantifier.
+	'isQuantifier' works in both "Theorema`" and "Theorema`Computation`" context.
+	This is the default definition; 'registerQuantifier' adds other definitions. *)
+isQuantifier[ _] := False
 
-$tmaQuantifierSymbols = Transpose[ $tmaQuantifiers][[1]];
-$tmaQuantifierNames = Flatten[ ToExpression[ 
-	Map[ {"Theorema`Language`" <> # <> "$TM", "Theorema`Computation`Language`" <> # <> "$TM"}&, Transpose[ $tmaQuantifiers][[2]]]]];
-$tmaQuantifierToName = Dispatch[ Join[ Apply[ Rule, $tmaQuantifiers, {1}], 
-	{RowBox[{"\[Exists]",___,"!"}] -> "ExistsUnique"}]];
-$tmaNameToQuantifier = Dispatch[ Join[ MapThread[ Rule, {$tmaQuantifierNames, Flatten[ Map[ {#, #}&, $tmaQuantifierSymbols]]}],
-	{Theorema`Language`ExistsUnique$TM -> RowBox[ {"\[Exists]", "\[NegativeThickSpace]","!"}],
-	Theorema`Computation`Language`ExistsUnique$TM -> RowBox[ {"\[Exists]", "\[NegativeThickSpace]","!"}]}]];
+(* The following function registers a new quantifier.
+	In 'registerRange[ name, inputRules, outputRules]'
+	- 'name' is a string representing the name of the quantifier, e.g. "Forall".
+	- 'inputRules' is a list of rules of the form 'box :> {params, subscript, cond, multi, ranges}', where
+		> 'box' is a box(-pattern),
+		> 'params' is either 'Null' (default) or a list of parameters that shall be added to the name of the quantifier when constructing the quantified expression,
+		> 'subscript' is either 'None', "Annotated" (default) or "DomainOperation", where 'None' means that the quantifier may not be input with subscripts,
+			"Annotated" means that subscripts are turned into annotations, and "DomainOperation" means that subscripts are interpreted as domains (resulting in 'DomainOperation'),
+		> 'cond' is a Boolean value indicating whether the quantifier is allowed to have an additional condition (default is 'True'),
+		> 'multi' is a Boolean value indicating whether the quantifier may bind several variables at once (default is 'True'), and
+		> 'ranges' is a pattern expression specifying the names (strings!) of the variable-ranges that are allowed to appear under the quantifier (default is '_'),
+			e.g. for "TupleOf" it is "STEPRNG$".
+	- 'outputRules' is a list of rules of the form 'params :> box', where
+		> 'params' is either 'Null' (default) or a list of patterns corresponding to the parameters of the quantifier (as in 'inputRules'), and
+		> 'box' is the box-expression that shall be constructed when pretty-printing 'name' or 'name[ params]', respectively.
+*)
+registerQuantifier[ name_String, box:Except[ _Rule|_RuleDelayed|{(_Rule|_RuleDelayed)...}], rest___] :=
+	registerQuantifier[ name, box -> Null, rest]
+registerQuantifier[ name_String, rule:(_Rule|_RuleDelayed), rest___] :=
+	registerQuantifier[ name, {rule}, rest]
+registerQuantifier[ name_String, input:{(Rule|RuleDelayed)[ box_, _], ___}] :=
+	registerQuantifier[ name, input, Null -> box]
+registerQuantifier[ name_String, input_List, box:Except[ _Rule|_RuleDelayed|{(_Rule|_RuleDelayed)...}]] :=
+	registerQuantifier[ name, input, Null -> box]
+registerQuantifier[ name_String, input_List, rule:(_Rule|_RuleDelayed)] :=
+	registerQuantifier[ name, input, {rule}]
+registerQuantifier[ name_String, input_List, output_List] :=
+	If[ !MemberQ[ $tmaQuantifierNames, name],
+		AppendTo[ $tmaQuantifierNames, name];
+		$tmaQuantifierToName =
+			Join[ $tmaQuantifierToName,
+				Cases[ input, (Rule|RuleDelayed)[ l_, r_] :> (l :> getQuantifierSpecification[ name, r])]
+			];
+		With[ {
+					sym1 = Block[ {$ContextPath = Join[ {"Theorema`Language`"}, If[ ListQ[ $TheoremaArchives], $TheoremaArchives, {}], $ContextPath], $Context = "Theorema`Knowledge`"},
+							ToExpression[ name <> "$TM"]
+						],
+					sym2 = Block[ {$ContextPath = Join[ {"Theorema`Computation`Language`"}, If[ ListQ[ $TheoremaArchives], $TheoremaArchives, {}], $ContextPath], $Context = "Theorema`Computation`Knowledge`"},
+							ToExpression[ name <> "$TM"]
+						]
+				},
+			$tmaNameToQuantifier = Join[ $tmaNameToQuantifier,
+					Join @@
+					DeleteCases[
+						Replace[ output,
+							{
+								(Rule|RuleDelayed)[ Null, box_] :>
+									(
+										isQuantifier[ sym1] = True;
+										isQuantifier[ sym2] = True;
+										{sym1 :> box, sym2 :> box}
+									),
+								(Rule|RuleDelayed)[ params_List, box_] :>
+									With[ {expr1 = sym1 @@ params, expr2 = sym2 @@ params},
+										isQuantifier[ expr1] = True;
+										isQuantifier[ expr2] = True;
+										{expr1 :> box, expr2 :> box}
+									],
+								_ -> $Failed
+							},
+							{1}
+						],
+						$Failed
+					]
+				]
+		];
+	]
+registerQuantifier[ args___] := unexpected[ registerQuantifier, {args}]
 
-isQuantifierSymbol[ s_String] := MemberQ[ $tmaQuantifierSymbols, s]
-isQuantifierSymbol[ RowBox[{"\[Exists]",___,"!"}]] := True
-isQuantifierSymbol[ _] := False
-isQuantifierSymbol[ args___] := unexpected[ isQuantifierSymbol, {args}]
+getQuantifierSpecification[ name_, Null] :=
+	getQuantifierSpecification[ name, {"Annotated", True, True, Blank[]}]
+getQuantifierSpecification[ name_, {Null, sub_, cond_, multi_, ranges_}] :=
+	getQuantifierSpecification[ name, {sub, cond, multi, ranges}]
+getQuantifierSpecification[ name_, {params_List, sub_, cond_, multi_, ranges_}] :=
+	getQuantifierSpecification[ RowBox[ {name, "[", RowBox[ Riffle[ params, ","]], "]"}], {sub, cond, multi, ranges}]
+getQuantifierSpecification[ name_, {sub_, cond_, multi_, ranges_}] :=
+	{name, sub, cond, multi, ranges}
+getQuantifierSpecification[ args___] := unexpected[ getQuantifierSpecification, {args}]
 
-isQuantifierName[ f_] := MemberQ[ $tmaQuantifierNames, f]
-isQuantifierName[ Theorema`Language`ExistsUnique$TM|Theorema`Computation`Language`ExistsUnique$TM] := True
-isQuantifierName[ args___] := unexpected[ isQuantifierName, {args}]
+(* To register a new quantifier, just add a call to 'registerQuantifier' below. *)
+registerQuantifier[ "Forall", "\[ForAll]"]
+registerQuantifier[ "Exists", "\[Exists]"]
+registerQuantifier[ "NotExists", "\[NotExists]"]
+registerQuantifier[ "ExistsUnique", RowBox[ {"\[Exists]", "!"}], RowBox[ {"\[Exists]", "\[NegativeThickSpace]", "\[NegativeThinSpace]", "!"}]]
+registerQuantifier[ "IntersectionOf", "\[Intersection]"]
+registerQuantifier[ "UnionOf", "\[Union]"]
+registerQuantifier[ "SumOf", "\[Sum]" -> {"DomainOperation", True, True, _}]
+registerQuantifier[ "ProductOf", "\[Product]" -> {"DomainOperation", True, True, _}]
+registerQuantifier[ "IntegralOf", "\[Integral]"]
+registerQuantifier[ "Such", {"\[CurlyEpsilon]" -> Null, "such" -> Null}]
+registerQuantifier[ "SuchUnique", "the"]
+registerQuantifier[ "MinimumOf", "min"]
+registerQuantifier[ "MaximumOf", "max"]
+registerQuantifier[ "ArgMin", "argmin"]
+registerQuantifier[ "ArgMax", "argmax"]
+registerQuantifier[ "TheArgMin", "theargmin"]
+registerQuantifier[ "TheArgMax", "theargmax"]
+registerQuantifier[ "Lambda", "\[Lambda]"]
+registerQuantifier[ "Abbrev", "let" -> {None, False, True, "ABBRVRNG$"}]
+registerQuantifier[ "SetOf", {"{", "}"} -> {None, True, True, _}]
+registerQuantifier[ "TupleOf", {"\[LeftAngleBracket]", "\[RightAngleBracket]"} -> {None, True, False, "STEPRNG$"}]
+registerQuantifier[ "SequenceOf",
+	{TagBox[ "\[VerticalEllipsis]", ___], TagBox[ "\[VerticalEllipsis]", ___]} -> {None, True, False, "STEPRNG$"},
+	{TagBox[ "\[VerticalEllipsis]", Identity, SyntaxForm -> "("], TagBox[ "\[VerticalEllipsis]", Identity, SyntaxForm -> ")"]}
+]
 
 (* $tmaNonStandardOperators is defined in Expression.m *)
 $tmaNonStandardOperatorNames = Transpose[ $tmaNonStandardOperators][[1]];
@@ -465,117 +536,72 @@ MakeExpression[ RowBox[{a_, "..."}], fmt_] :=
 	
 MakeExpression[ RowBox[{a_, ".."}], fmt_] :=
 	MakeExpression[ RowBox[{"SEQ1$", "[", a, "]"}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
-	
-MakeExpression[ RowBox[ {TagBox[ "\[VerticalEllipsis]", ___], TagBox[ "\[VerticalEllipsis]", ___]}], fmt_] :=
-	MakeExpression[ RowBox[ {"SEQ$", "[", "]"}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
-MakeExpression[ RowBox[ {TagBox[ "\[VerticalEllipsis]", ___], expr_, TagBox[ "\[VerticalEllipsis]", ___]}], fmt_] :=
-	MakeExpression[ RowBox[ {"SEQ$", "[", expr, "]"}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 
 
 (* ::Subsubsection:: *)
 (* Quantifiers *)
 
 
-MakeExpression[ RowBox[{UnderscriptBox[ q_?isQuantifierSymbol, rng_], form_}], fmt_] :=
-    standardQuantifier[ Replace[ q, $tmaQuantifierToName], rng, "True", form, fmt] /; $parseTheoremaExpressions
-
-MakeExpression[ RowBox[{UnderscriptBox[ UnderscriptBox[ q_?isQuantifierSymbol, rng_], cond_], form_}], fmt_] :=
-    standardQuantifier[ Replace[ q, $tmaQuantifierToName], rng, cond, form, fmt] /; $parseTheoremaExpressions
-
-MakeExpression[ RowBox[ {"{", RowBox[{form_, UnderscriptBox[ "|"|":", rng_]}], "}"}], fmt_] :=
-    standardQuantifier[ "SetOf", rng, "True", form, fmt] /; $parseTheoremaExpressions
-
-MakeExpression[ RowBox[ {"{", RowBox[{form_, UnderscriptBox[ "|"|":", rng_], cond_}], "}"}], fmt_] :=
-    standardQuantifier[ "SetOf", rng, cond, form, fmt] /; $parseTheoremaExpressions
-
-MakeExpression[ RowBox[ {"{", RowBox[{form_, UnderscriptBox[ UnderscriptBox[ "|"|":", rng_], cond_]}], "}"}], fmt_] :=
-    standardQuantifier[ "SetOf", rng, cond, form, fmt] /; $parseTheoremaExpressions
-
-MakeExpression[ RowBox[ {"{", RowBox[{rng_, "|"|":", cond_}], "}"}], fmt_] :=
-    With[ { v = getSingleRangeVar[ rng]},
-        If[ v =!= $Failed,
-            standardQuantifier[ "SetOf", rng, cond, v, fmt],
-            MakeExpression[ "nE", fmt]
-        ]
-    ] /; $parseTheoremaExpressions
-    
-MakeExpression[ RowBox[ {"{", RowBox[ l:{Except[ ","], PatternSequence[ ",", Except[ ","]]..}], "}"}], fmt_] :=
-    Module[ {elements = Union[ Map[ MakeExpression[ #, fmt]&, DeleteCases[ l, ","]]]},
-    	With[ {aux = Flatten[ HoldComplete@@elements, 2]},
-    		ReplacePart[ HoldComplete[ aux], {1, 0} -> List]
-    		(* Sets of individual elements (no "SetOf"-quantifier) cannot be parsed directly as "Set",
-    			because "freshNames" turns "Set" into "Assign".
-    			Therefore, we keep "List", *but only for SET and not for SETOF* ! *)
-    	]
-    ] /; $parseTheoremaExpressions
-    
-MakeExpression[ RowBox[ {"\[LeftAngleBracket]", RowBox[{form_, UnderscriptBox[ "|"|":", rng_]}], "\[RightAngleBracket]"}], fmt_] :=
-    If[ isSingleStepRange[ rng],
-    	standardQuantifier[ "TupleOf", rng, "True", form, fmt],
-    	notification[ translate[ "tupleOfRange"], DisplayForm[ rng]];
-	    MakeExpression[ "nE", fmt]
-    ] /; $parseTheoremaExpressions
-
-MakeExpression[ RowBox[ {"\[LeftAngleBracket]", RowBox[{form_, UnderscriptBox[ "|"|":", rng_], cond_}], "\[RightAngleBracket]"}], fmt_] :=
-    If[ isSingleStepRange[ rng],
-    	standardQuantifier[ "TupleOf", rng, cond, form, fmt],
-    	notification[ translate[ "tupleOfRange"], DisplayForm[ rng]];
-	    MakeExpression[ "nE", fmt]
-    ] /; $parseTheoremaExpressions
-
-MakeExpression[ RowBox[ {"\[LeftAngleBracket]", RowBox[{form_, UnderscriptBox[ UnderscriptBox[ "|"|":", rng_], cond_]}], "\[RightAngleBracket]"}], fmt_] :=
-    If[ isSingleStepRange[ rng],
-    	standardQuantifier[ "TupleOf", rng, cond, form, fmt],
-    	notification[ translate[ "tupleOfRange"], DisplayForm[ rng]];
-	    MakeExpression[ "nE", fmt]
-    ] /; $parseTheoremaExpressions
-
-MakeExpression[ RowBox[ {"\[LeftAngleBracket]", RowBox[{rng_, "|"|":", cond_}], "\[RightAngleBracket]"}], fmt_] :=
-	If[ isSingleStepRange[ rng],
-	    With[ { v = getSingleRangeVar[ rng]},
-	        If[ v =!= $Failed,
-	            standardQuantifier[ "TupleOf", rng, cond, v, fmt],
-	            MakeExpression[ "nE", fmt]
-	        ]
-	    ],
-	    notification[ translate[ "tupleOfRange"], DisplayForm[ rng]];
-	    MakeExpression[ "nE", fmt]
+MakeExpression[ RowBox[ {UnderscriptBox[ q_, rng_], form_}], fmt_] :=
+	With[ {qu = constructQuantifier[ Replace[ q, $tmaQuantifierToName], rng, form, fmt]},
+		qu /; qu =!= $Failed
 	] /; $parseTheoremaExpressions
-    
-isSingleStepRange[ rng_] :=
-	With [{s = {makeRangeSequence[ rng]}},
-		Length[ s] === 1 && MatchQ[ First[ s], RowBox[ {"STEPRNG$", "[", _, "]"}]]
-	]
-    
-MakeExpression[ RowBox[ {"\[LeftAngleBracket]", x___, "\[RightAngleBracket]"}], fmt_] :=
-    MakeExpression[ RowBox[ {"Tuple", "[", x, "]"}], fmt] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{UnderscriptBox[ SubscriptBox[ q_?isQuantifierSymbol, dom_], rng_], form_}], fmt_] :=
-    subscriptedQuantifier[ Replace[ q, $tmaQuantifierToName], rng, "True", dom, form, fmt]/; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {UnderscriptBox[ UnderscriptBox[ q_, rng_], cond_], form_}], fmt_] :=
+	With[ {qu = constructQuantifier[ Replace[ q, $tmaQuantifierToName], rng, form, cond, fmt]},
+		qu /; qu =!= $Failed
+	] /; $parseTheoremaExpressions
+	
+MakeExpression[ RowBox[ {left_, RowBox[ {form_, UnderscriptBox[ "|"|":", rng_]}], right_}], fmt_] :=
+	With[ {qu = constructQuantifier[ Replace[ {left, right}, $tmaQuantifierToName], rng, form, fmt]},
+		qu /; qu =!= $Failed
+	] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{UnderscriptBox[ UnderscriptBox[ SubscriptBox[ q_?isQuantifierSymbol, dom_], rng_], cond_], form_}], fmt_] :=
-    subscriptedQuantifier[ Replace[ q, $tmaQuantifierToName], rng, cond, dom, form, fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {left_, RowBox[ {form_, UnderscriptBox[ "|"|":", rng_], cond_}], right_}], fmt_] :=
+    With[ {qu = constructQuantifier[ Replace[ {left, right}, $tmaQuantifierToName], rng, form, cond, fmt]},
+		qu /; qu =!= $Failed
+	] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{UnderoverscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min"|"argmin"|"argmax"|"theargmin"|"theargmax"|"\[Union]"|"\[Intersection]", low:RowBox[{_, "=", _}], high_], form_}], fmt_] :=
-    standardQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[{low, ",", "\[Ellipsis]", ",", high}], "True", form, fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {left_, RowBox[ {form_, UnderscriptBox[ UnderscriptBox[ "|"|":", rng_], cond_]}], right_}], fmt_] :=
+    With[ {qu = constructQuantifier[ Replace[ {left, right}, $tmaQuantifierToName], rng, form, cond, fmt]},
+		qu /; qu =!= $Failed
+	] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{UnderscriptBox[ UnderoverscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min"|"argmin"|"argmax"|"theargmin"|"theargmax"|"\[Union]"|"\[Intersection]", low:RowBox[{_, "=", _}], high_], cond_], form_}], fmt_] :=
-    standardQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[{low, ",", "\[Ellipsis]", ",", high}], cond, form, fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {left_, RowBox[ {rng_, "|"|":", cond_}], right_}], fmt_] :=
+	With[ {qu = constructQuantifier[ Replace[ {left, right}, $tmaQuantifierToName], rng, Null, cond, fmt]},
+		qu /; qu =!= $Failed
+	] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{UnderoverscriptBox[ SubscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min"|"argmin"|"argmax"|"theargmin"|"theargmax"|"\[Union]"|"\[Intersection]", dom_], low:RowBox[{_, "=", _}], high_], form_}], fmt_] :=
-    subscriptedQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[{low, ",", "\[Ellipsis]", ",", high}], "True", dom, form, fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {UnderscriptBox[ SubscriptBox[ q_, sub_], rng_], form_}], fmt_] :=
+	With[ {qu = constructQuantifier[ Replace[ q, $tmaQuantifierToName], rng, form, Null, sub, fmt]},
+		qu /; qu =!= $Failed
+	] /; $parseTheoremaExpressions
 
-MakeExpression[ RowBox[{UnderscriptBox[ UnderoverscriptBox[ SubscriptBox[ q:"\[Sum]"|"\[Product]"|"max"|"min"|"argmin"|"argmax"|"theargmin"|"theargmax"|"\[Union]"|"\[Intersection]", dom_], low:RowBox[{_, "=", _}], high_], cond_], form_}], fmt_] :=
-    subscriptedQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[{low, ",", "\[Ellipsis]", ",", high}], cond, dom, form, fmt] /; $parseTheoremaExpressions
-   
-MakeExpression[ RowBox[{UnderscriptBox[ "let", rng_], form_}], fmt_] :=
-	(* We use the powerful toRangeBox in order to have the many variants, multiranges, etc. However, only ABBRVRNG$ makes sense in a "let",
-	   but we do not consider it a syntax error to use one of the other ranges *)
-     With[ {r = toRangeBox[ rng]},
-		MakeExpression[ RowBox[{"QU$", "[", 
-            RowBox[{ r, ",", RowBox[{ "Abbrev", "[", RowBox[{ r, ",", form}], "]"}]}], "]"}], 
-        fmt]
-     ] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {UnderscriptBox[ UnderscriptBox[ SubscriptBox[ q_, sub_], rng_], cond_], form_}], fmt_] :=
+    With[ {qu = constructQuantifier[ Replace[ q, $tmaQuantifierToName], rng, form, cond, sub, fmt]},
+		qu /; qu =!= $Failed
+	] /; $parseTheoremaExpressions
+
+MakeExpression[ RowBox[ {UnderoverscriptBox[ q_, low:RowBox[ {_, "=", _}], high_], form_}], fmt_] :=
+    With[ {qu = constructQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[ {low, ",", "\[Ellipsis]", ",", high}], form, fmt]},
+		qu /; qu =!= $Failed
+	] /; $parseTheoremaExpressions
+
+MakeExpression[ RowBox[ {UnderscriptBox[ UnderoverscriptBox[ q_, low:RowBox[ {_, "=", _}], high_], cond_], form_}], fmt_] :=
+    With[ {qu = constructQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[ {low, ",", "\[Ellipsis]", ",", high}], form, cond, fmt]},
+		qu /; qu =!= $Failed
+	] /; $parseTheoremaExpressions
+
+MakeExpression[ RowBox[ {UnderoverscriptBox[ SubscriptBox[ q_, sub_], low:RowBox[ {_, "=", _}], high_], form_}], fmt_] :=
+    With[ {qu = constructQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[ {low, ",", "\[Ellipsis]", ",", high}], form, Null, sub, fmt]},
+		qu /; qu =!= $Failed
+	] /; $parseTheoremaExpressions
+
+MakeExpression[ RowBox[ {UnderscriptBox[ UnderoverscriptBox[ SubscriptBox[ q_, sub_], low:RowBox[ {_, "=", _}], high_], cond_], form_}], fmt_] :=
+    With[ {qu = constructQuantifier[ Replace[ q, $tmaQuantifierToName], RowBox[ {low, ",", "\[Ellipsis]", ",", high}], form, cond, sub, fmt]},
+		qu /; qu =!= $Failed
+	] /; $parseTheoremaExpressions
+
 
 (* ::Subsubsection:: *)
 (* Special arithmetic *)
@@ -832,24 +858,42 @@ MakeExpression[ RowBox[ {l_, "\:293b", r_}], fmt_] := MakeExpression[ RowBox[ {"
 MakeExpression[ RowBox[ {l_, "\:22c8", r_}], fmt_] := MakeExpression[ RowBox[ {"joinTuples", "[", RowBox[{ l, ",", r}], "]"}], fmt] /; $parseTheoremaExpressions
 MakeExpression[ RowBox[ {l_, "\:22ff", r_}], fmt_] := MakeExpression[ RowBox[ {"elemTuple", "[", RowBox[{ l, ",", r}], "]"}], fmt] /; $parseTheoremaExpressions
 
+
+(* ::Subsubsection:: *)
 (* Bracketted expressions *)
+
+MakeExpression[ RowBox[ {"{", RowBox[ l:{Except[ ","], PatternSequence[ ",", Except[ ","]]..}], "}"}], fmt_] :=
+    Module[ {elements = Union[ Map[ MakeExpression[ #, fmt]&, DeleteCases[ l, ","]]]},
+    	With[ {aux = Flatten[ HoldComplete@@elements, 2]},
+    		ReplacePart[ HoldComplete[ aux], {1, 0} -> List]
+    		(* Sets of individual elements (no "SetOf"-quantifier) cannot be parsed directly as "Set",
+    			because "freshNames" turns "Set" into "Assign".
+    			Therefore, we keep "List", *but only for Set and not for SetOf* ! *)
+    	]
+    ] /; $parseTheoremaExpressions
+    
+MakeExpression[ RowBox[ {"\[LeftAngleBracket]", x___, "\[RightAngleBracket]"}], fmt_] :=
+    MakeExpression[ RowBox[ {"Tuple", "[", x, "]"}], fmt] /; $parseTheoremaExpressions
+    
 (* amaletzk: Bracketting symbols do not occur at operator positions, therefore TagBoxes have to be used here. *)
-MakeExpression[ RowBox[ {TagBox[ "\:e114", ___], expr_, TagBox[ "\:e115", ___]}], fmt_] := 
-	MakeExpression[ RowBox[ {"squareBracketted", "[", expr, "]"}], fmt] /; $parseTheoremaExpressions
-MakeExpression[ RowBox[ {TagBox[ "\:27e6", ___], expr_, TagBox[ "\:27e7", ___]}], fmt_] := 
-	MakeExpression[ RowBox[ {"doubleSquareBracketted", "[", expr, "]"}], fmt] /; $parseTheoremaExpressions
-MakeExpression[ RowBox[ {TagBox[ "\:27e8", ___], expr_, TagBox[ "\:27e9", ___]}], fmt_] := 
-	MakeExpression[ RowBox[ {"angleBracketted", "[", expr, "]"}], fmt] /; $parseTheoremaExpressions
-MakeExpression[ RowBox[ {TagBox[ "\:27ea", ___], expr_, TagBox[ "\:27eb", ___]}], fmt_] := 
-	MakeExpression[ RowBox[ {"doubleAngleBracketted", "[", expr, "]"}], fmt] /; $parseTheoremaExpressions
-MakeExpression[ RowBox[ {TagBox[ "\:e117", ___], expr_, TagBox[ "\:e118", ___]}], fmt_] := 
-	MakeExpression[ RowBox[ {"braced", "[", expr, "]"}], fmt] /; $parseTheoremaExpressions
-MakeExpression[ RowBox[ {TagBox[ "\:2983", ___], expr_, TagBox[ "\:2984", ___]}], fmt_] := 
-	MakeExpression[ RowBox[ {"doubleBraced", "[", expr, "]"}], fmt] /; $parseTheoremaExpressions
-MakeExpression[ RowBox[ {TagBox[ "\:fd3e", ___], expr_, TagBox[ "\:fd3f", ___]}], fmt_] := 
-	MakeExpression[ RowBox[ {"parenthesized", "[", expr, "]"}], fmt] /; $parseTheoremaExpressions
-MakeExpression[ RowBox[ {TagBox[ "\:2e28", ___], expr_, TagBox[ "\:2e29", ___]}], fmt_] := 
-	MakeExpression[ RowBox[ {"doubleParenthesized", "[", expr, "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {TagBox[ "\[VerticalEllipsis]", ___], x___, TagBox[ "\[VerticalEllipsis]", ___]}], fmt_] :=
+	MakeExpression[ RowBox[ {"SEQ$", "[", x, "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {TagBox[ "\:e114", ___], x___, TagBox[ "\:e115", ___]}], fmt_] :=
+	MakeExpression[ RowBox[ {"squareBracketted", "[", x, "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {TagBox[ "\:27e6", ___], x___, TagBox[ "\:27e7", ___]}], fmt_] :=
+	MakeExpression[ RowBox[ {"doubleSquareBracketted", "[", x, "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {TagBox[ "\:27e8", ___], x___, TagBox[ "\:27e9", ___]}], fmt_] :=
+	MakeExpression[ RowBox[ {"angleBracketted", "[", x, "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {TagBox[ "\:27ea", ___], x___, TagBox[ "\:27eb", ___]}], fmt_] :=
+	MakeExpression[ RowBox[ {"doubleAngleBracketted", "[", x, "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {TagBox[ "\:e117", ___], x___, TagBox[ "\:e118", ___]}], fmt_] :=
+	MakeExpression[ RowBox[ {"braced", "[", x, "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {TagBox[ "\:2983", ___], x___, TagBox[ "\:2984", ___]}], fmt_] :=
+	MakeExpression[ RowBox[ {"doubleBraced", "[", x, "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {TagBox[ "\:fd3e", ___], x___, TagBox[ "\:fd3f", ___]}], fmt_] :=
+	MakeExpression[ RowBox[ {"parenthesized", "[", x, "]"}], fmt] /; $parseTheoremaExpressions
+MakeExpression[ RowBox[ {TagBox[ "\:2e28", ___], x___, TagBox[ "\:2e29", ___]}], fmt_] :=
+	MakeExpression[ RowBox[ {"doubleParenthesized", "[", x, "]"}], fmt] /; $parseTheoremaExpressions
 
 (* ::Subsection:: *)
 (* operator underscript -> domain *)
@@ -977,8 +1021,8 @@ makeDomainOperation[ _, expr_, Expression] := expr
 (* Global Declarations *)
 
 
-MakeExpression[RowBox[{a_, TagBox[ "\[DoubleLongRightArrow]", Identity, ___]}], fmt_] := 
-	MakeExpression[RowBox[{a, "\[DoubleLongRightArrow]"}], fmt] /; $parseTheoremaGlobals
+MakeExpression[ RowBox[ {a_, TagBox[ "\[DoubleLongRightArrow]", Identity, ___]}], fmt_] :=
+	MakeExpression[ RowBox[ {a, "\[DoubleLongRightArrow]"}], fmt] /; $parseTheoremaGlobals
 
 MakeExpression[ UnderscriptBox[ "\[ForAll]", rng_], fmt_] :=
     Block[ {$parseTheoremaExpressions = True},
@@ -991,37 +1035,48 @@ MakeExpression[ UnderscriptBox[ UnderscriptBox[ "\[ForAll]", rng_], cond_], fmt_
     ] /; $parseTheoremaGlobals
 
 MakeExpression[ RowBox[ {UnderscriptBox[ "\[ForAll]", rng_], decl_}], fmt_] :=
-    With[ {r = Block[ {$parseTheoremaExpressions = True}, rng]},
-    	standardQuantifier[ "globalForall", r, "True", decl, fmt]
-    ] /; $parseTheoremaGlobals
+	MakeExpression[ RowBox[ {UnderscriptBox[ UnderscriptBox[ "\[ForAll]", rng], "True"], decl}], fmt] /; $parseTheoremaGlobals
 
 MakeExpression[ RowBox[ {UnderscriptBox[ UnderscriptBox[ "\[ForAll]", rng_], cond_], decl_}], fmt_] :=
-    With[ {r = Block[ {$parseTheoremaExpressions = True}, rng], c = Block[ {$parseTheoremaExpressions = True}, cond]},
-    	standardQuantifier[ "globalForall", r, c, decl, fmt]
-    ] /; $parseTheoremaGlobals
-
-MakeExpression[ RowBox[ {cond_, "\[Implies]"|"\[DoubleLongRightArrow]"|"\[DoubleRightArrow]"}], fmt_] := 
-    Block[ {$parseTheoremaExpressions = True},
-		MakeExpression[ RowBox[{ "globalImplies", "[", cond, "]"}], fmt]
-    ] /; $parseTheoremaGlobals
-
-MakeExpression[ RowBox[{lhs_, ":=", UnderscriptBox[ "\[CapitalDelta]", rng_]}], fmt_] := 
-	(* We don't use the powerful toRangeBox because in this expression, the range does not have the many variants, multiranges, etc.*)
-	With[ {r = toDomSpecRangeBox[ rng]},
-		MakeExpression[ RowBox[{ "domainConstruct", "[", RowBox[{lhs, ",", RowBox[ {"QU$", "[", RowBox[{r, ",", r}], "]"}]}], "]"}], fmt]
+	With[ {a = MakeExpression[ UnderscriptBox[ UnderscriptBox[ "\[ForAll]", rng], cond], fmt], d = MakeExpression[ decl, fmt]},
+	    If[ MatchQ[ a, HoldComplete[ _[ r_, _[ r_, _]]]],
+	    	Delete[ Insert[ a, d, {1, 2, 3}], {1, 2, 3, 0}],
+	    (*else*)
+	    	MakeExpression[ "nE", fmt]
+	    ]
 	] /; $parseTheoremaGlobals
 
-toDomSpecRangeBox[ RowBox[{v_, "\[Superset]", d_}]] := RowBox[ {"RNG$", "[", RowBox[ {"DOMEXTRNG$", "[", RowBox[ {v, ",", d}], "]"}], "]"}]
-toDomSpecRangeBox[ v_String] := RowBox[ {"RNG$", "[", makeRangeSequence[ v], "]"}]
-toDomSpecRangeBox[args___] := unexpected[ toDomSpecRangeBox, {args}]
+MakeExpression[ RowBox[ {cond_, "\[Implies]"|"\[DoubleLongRightArrow]"|"\[DoubleRightArrow]"}], fmt_] :=
+    Block[ {$parseTheoremaExpressions = True},
+		MakeExpression[ RowBox[ {"globalImplies", "[", cond, "]"}], fmt]
+    ] /; $parseTheoremaGlobals
 
-MakeExpression[ UnderscriptBox[ "let", rng_], fmt_] := 
-	(* We the powerful toRangeBox in order to have the many variants, multiranges, etc. However, only ABBRVRNG$ makes sense in a "let",
-	   but we do not consider it a syntax error to use one of the other ranges *)
-	With[ {r = toRangeBox[ rng]},
-		Block[ {$parseTheoremaExpressions = True},
-			MakeExpression[ RowBox[{"QU$", "[", 
-            	RowBox[{ r, ",", RowBox[{ "globalAbbrev", "[", r, "]"}]}], "]"}], fmt]
+MakeExpression[ RowBox[ {lhs_, ":=", UnderscriptBox[ "\[CapitalDelta]", rng_]}], fmt_] :=
+	(* We use 'toDomSpecRangeBox', because of the special 'DOMEXTRNG$'-ranges. *)
+	With[ {r = toDomSpecRangeBox[ rng]},
+		MakeExpression[ RowBox[ {"domainConstruct", "[", RowBox[ {lhs, ",", RowBox[ {"QU$", "[", RowBox[ {r, ",", r}], "]"}]}], "]"}], fmt]
+	] /; $parseTheoremaGlobals
+
+toDomSpecRangeBox[ RowBox[ {v_, "\[Superset]", d_}]] := RowBox[ {"RNG$", "[", RowBox[ {"DOMEXTRNG$", "[", RowBox[ {v, ",", d}], "]"}], "]"}]
+toDomSpecRangeBox[ v_String] := toRangeBox[ v]
+toDomSpecRangeBox[ args___] := unexpected[ toDomSpecRangeBox, {args}]
+
+MakeExpression[ UnderscriptBox[ "let", rng_], fmt_] :=
+	(* We use the powerful 'makeRangeList' in order to have the many variants, multiranges, etc.
+		However, only ABBRVRNG$ makes sense in a "let", and this we check below. *)
+	With[ {s = makeRangeList[ rng]},
+		If[ MatchQ[ s, {RowBox[ {"ABBRVRNG$", "[", _, "]"}]...}],
+			With[ {r = toRangeBox[ s]},
+				Block[ {$parseTheoremaExpressions = True},
+					MakeExpression[
+						RowBox[ {"QU$", "[", RowBox[ {r, ",", RowBox[ {"globalAbbrev", "[", r, "]"}]}], "]"}],
+						fmt
+					]
+				]
+			],
+		(*else*)
+			notification[ translate[ "invalidQuRange"], DisplayForm[ "Abbrev"], DisplayForm[ rng]];
+			MakeExpression[ "nE", fmt]
 		]
 	] /; $parseTheoremaGlobals
 
@@ -1033,38 +1088,80 @@ MakeExpression[ UnderscriptBox[ "let", rng_], fmt_] :=
 (* QU$ is an auxiliary tag introduced in quantifier MakeExpressions, which should be eliminated during expression parsing
 	in markVariables. Any remaining QU$ actually indicates an error, and it will evaluate through this definition and
 	throw an exception. *)
-QU$[args___] := unexpected[ QU$, {args}]
+QU$[ args___] := unexpected[ QU$, {args}]
 
-SetAttributes[ standardQuantifier, HoldRest]
-standardQuantifier[ name_, rng_, cond_, expr_, fmt_] :=
-    With[ {r = toRangeBox[ rng]},
-        MakeExpression[ RowBox[{"QU$", "[", 
-            RowBox[{ r, ",", RowBox[{ name, "[", RowBox[{ r, ",", cond, ",", expr}], "]"}]}],
-             "]"}], fmt]
-    ]
-standardQuantifier[ args___] := unexpected[ standardQuantifier, {args}]
-
-SetAttributes[ subscriptedQuantifier, HoldRest]
-subscriptedQuantifier[ name:("SumOf"|"ProductOf"), rng_, cond_, dom_, expr_, fmt_] :=
-    With[ {r = toRangeBox[ rng]},
-        MakeExpression[ RowBox[{"QU$", "[",
-            RowBox[{ r, ",", RowBox[{ makeDomainOperation[ dom, name], "[", RowBox[{ r, ",", cond, ",", expr}], "]"}]}],
-             "]"}], fmt]
-    ]
-subscriptedQuantifier[ name_, rng_, cond_, sub_, expr_, fmt_] :=
-    With[ {r = toRangeBox[ rng]},
-        MakeExpression[ RowBox[{"QU$", "[",
-            RowBox[{ r, ",", RowBox[{ makeAnnotation[ SubscriptBox, name, sub], "[", RowBox[{ r, ",", cond, ",", expr}], "]"}]}],
-             "]"}], fmt]
-    ]
-subscriptedQuantifier[ args___] := unexpected[ subscriptedQuantifier, {args}]
+SetAttributes[ constructQuantifier, HoldRest]
+constructQuantifier[ spec_, rng_, form_, fmt_] :=
+	constructQuantifier[ spec, rng, form, Null, Null, fmt]
+constructQuantifier[ spec_, rng_, form_, cond_, fmt_] :=
+	constructQuantifier[ spec, rng, form, cond, Null, fmt]
+constructQuantifier[ {name_, s_, c_, multi_, ranges_}, rng_, form_, cond_, sub_, fmt_] :=
+	With[ {newCond = If[ cond === Null,
+						If[ TrueQ[ c], {"True", ","}, {}],
+						If[ TrueQ[ c], {cond, ","}, $Failed]
+					]
+			},
+		If[ ListQ[newCond],
+			With[ {newName = If[ sub === Null,
+								name,
+								Switch[ s,
+									"Annotated",
+									makeAnnotation[ SubscriptBox, name, sub],
+									"DomainOperation",
+									makeDomainOperation[ sub, name],
+									_,
+									$Failed
+								]
+							]
+					},
+				If[ newName =!= $Failed,
+					With[ {r = makeRangeList[ rng]},
+						If[ TrueQ[ multi] || Length[ r] === 1,
+							If[ MatchQ[ r, {RowBox[ {ranges, "[", _, "]"}]...}],
+								With[ {
+											rb = toRangeBox[ r],
+											newForm = If[ form === Null, getSingleRangeVar[ rng], form]		(* TODO: Instead of accessing 'rng', access 's' directly. *)
+										},
+									If[ newForm =!= $Failed,
+										With[ {expr = Join[ {rb, ","}, newCond, {newForm}]},
+											MakeExpression[
+												RowBox[ {"QU$", "[", RowBox[ {rb, ",", RowBox[ {newName, "[", RowBox[ expr], "]"}]}], "]"}],
+												fmt
+											]
+										],
+									(*else*)
+										MakeExpression[ "nE", fmt]
+									]
+								],
+							(*else*)
+								notification[ translate[ "invalidQuRange"], DisplayForm[ name], DisplayForm[ rng]];
+								MakeExpression[ "nE", fmt]
+							],
+						(*else*)
+							notification[ translate[ "invalidQuVarNum"], DisplayForm[ name]];
+							MakeExpression[ "nE", fmt]
+						]
+					],
+				(*else*)
+					notification[ translate[ "invalidQuSubscript"], DisplayForm[ name]];
+					MakeExpression[ "nE", fmt]
+				]
+			],
+		(*else*)
+			notification[ translate[ "invalidQuCondition"], DisplayForm[ name]];
+			MakeExpression[ "nE", fmt]
+		]
+	]
+constructQuantifier[ ___] :=
+	$Failed
     
 SetAttributes[ standardGlobalQuantifier, HoldRest]
 standardGlobalQuantifier[ name_, rng_, cond_, fmt_] :=
     With[ {r = toRangeBox[ rng]},
-        MakeExpression[ RowBox[{"QU$", "[", 
-            RowBox[{ r, ",", RowBox[{ name, "[", RowBox[{ r, ",", cond}], "]"}]}],
-             "]"}], fmt]
+        MakeExpression[
+        	RowBox[ {"QU$", "[", RowBox[ {r, ",", RowBox[ {name, "[", RowBox[ {r, ",", cond}], "]"}]}], "]"}],
+        	fmt
+        ]
     ]
 standardGlobalQuantifier[ args___] := unexpected[ standardGlobalQuantifier, {args}]
 
@@ -1074,69 +1171,72 @@ standardGlobalQuantifier[ args___] := unexpected[ standardGlobalQuantifier, {arg
 (* Ranges *)
 
 
-Clear[ toRangeBox, makeRangeSequence]
+toRangeBox[ {}] :=
+	RowBox[ {"RNG$", "[", "]"}]
+toRangeBox[ {r_}] :=
+	RowBox[ {"RNG$", "[", r, "]"}]
+toRangeBox[ r_List] :=
+    RowBox[ {"RNG$", "[", RowBox[ Riffle[ r, ","]], "]"}]
+toRangeBox[ s_] :=
+	toRangeBox[ makeRangeList[ s]]
+toRangeBox[ args___] := unexpected[ toRangeBox, {args}]
 
-toRangeBox[s_] :=
-    RowBox[{"RNG$", "[", makeRangeSequence[s], "]"}]           
-toRangeBox[args___] := unexpected[ toRangeBox, {args}]
+makeRangeList[ RowBox[{v_, "\[Element]", s_}]] :=
+	{makeSingleSetRange[ v, s]}
 
-makeRangeSequence[ RowBox[{v_, "\[Element]", s_}]] :=
-	makeSingleSetRange[ v, s]
+makeRangeList[ RowBox[ {x___, y_, ",", RowBox[ {v_, "\[Element]", s_}]}]] :=
+    Append[ makeRangeList[ RowBox[ {x, RowBox[ {y, "\[Element]", s}]}]], makeSingleSetRange[ v, s]]
 
-makeRangeSequence[ RowBox[{x___, y_, ",", RowBox[{v_, "\[Element]", s_}]}]] :=
-    Sequence[ makeRangeSequence[ RowBox[{x, RowBox[{y, "\[Element]", s}]}]], ",",
-    	makeSingleSetRange[ v, s]]
-
-makeRangeSequence[ RowBox[{p_, RowBox[ {"[", x__, "]"}]}]] :=
-	makeRangeSequence[ RowBox[ {p, "[", x, "]"}]]
+makeRangeList[ RowBox[ {p_, RowBox[ {"[", x__, "]"}]}]] :=
+	makeRangeList[ RowBox[ {p, "[", x, "]"}]]
 		
-makeRangeSequence[ RowBox[{p_, "[", RowBox[{x__, ",", v_}], "]"}]] :=
-	Sequence[ makeRangeSequence[ RowBox[{p, "[", RowBox[{x}], "]"}]], ",",
-		makeSinglePredRange[ v, p]]
+makeRangeList[ RowBox[ {p_, "[", RowBox[ {x__, ",", v_}], "]"}]] :=
+	Append[ makeRangeList[ RowBox[ {p, "[", RowBox[ {x}], "]"}]], makeSinglePredRange[ v, p]]
 
-makeRangeSequence[ RowBox[{p_, "[", RowBox[{v_}], "]"}]] :=
-	makeSinglePredRange[ v, p]
+makeRangeList[ RowBox[ {p_, "[", RowBox[ {v_}], "]"}]] :=
+	{makeSinglePredRange[ v, p]}
 	
-makeRangeSequence[ RowBox[{p_, "[", v:RowBox[{_, ".."|"..."}], "]"}]] :=
-	makeSinglePredRange[ v, p]
+makeRangeList[ RowBox[ {p_, "[", v:RowBox[ {_, ".."|"..."}], "]"}]] :=
+	{makeSinglePredRange[ v, p]}
 
-makeRangeSequence[ RowBox[{p_, "[", v_String, "]"}]] :=
-	makeSinglePredRange[ v, p]
+makeRangeList[ RowBox[ {p_, "[", v_String, "]"}]] :=
+	{makeSinglePredRange[ v, p]}
 
-makeRangeSequence[ RowBox[{RowBox[{v_, "=", lower_}], ",", "\[Ellipsis]", ",", upper_}]] :=
-    makeSingleStepRange[ v, lower, upper, "1"]
+makeRangeList[ RowBox[ {RowBox[ {v_, "=", lower_}], ",", "\[Ellipsis]", ",", upper_}]] :=
+    {makeSingleStepRange[ v, lower, upper, "1"]}
 
-makeRangeSequence[ RowBox[{x___, y_, ",", RowBox[{v_, "=", lower_}], ",", "\[Ellipsis]", ",", upper_}]] :=
-    Sequence[ makeRangeSequence[ RowBox[{x, RowBox[{y, "=", lower}], ",", "\[Ellipsis]", ",", upper}]], ",",
+makeRangeList[ RowBox[ {x___, y_, ",", RowBox[ {v_, "=", lower_}], ",", "\[Ellipsis]", ",", upper_}]] :=
+    Append[ makeRangeList[ RowBox[ {x, RowBox[ {y, "=", lower}], ",", "\[Ellipsis]", ",", upper}]],
     	makeSingleStepRange[ v, lower, upper, "1"]]
 
-makeRangeSequence[ RowBox[{RowBox[{v_, "=", lower_}], ",", OverscriptBox["\[Ellipsis]", step_], ",", upper_}]] :=
-    makeSingleStepRange[ v, lower, upper, step]
+makeRangeList[ RowBox[ {RowBox[ {v_, "=", lower_}], ",", OverscriptBox[ "\[Ellipsis]", step_], ",", upper_}]] :=
+    {makeSingleStepRange[ v, lower, upper, step]}
 
-makeRangeSequence[ RowBox[{x___, y_, ",", RowBox[{v_, "=", lower_}], ",", OverscriptBox["\[Ellipsis]", step_], ",", upper_}]] :=
-    Sequence[ makeRangeSequence[ RowBox[{x, RowBox[{y, "=", lower}], ",", OverscriptBox["\[Ellipsis]", step], ",", upper}]], ",",
+makeRangeList[ RowBox[ {x___, y_, ",", RowBox[ {v_, "=", lower_}], ",", OverscriptBox[ "\[Ellipsis]", step_], ",", upper_}]] :=
+    Append[ makeRangeList[ RowBox[ {x, RowBox[ {y, "=", lower}], ",", OverscriptBox[ "\[Ellipsis]", step], ",", upper}]],
     	makeSingleStepRange[ v, lower, upper, step]]
 
-makeRangeSequence[ RowBox[{a_, "=", e_}]] :=
-	makeSingleAbbrevRange[ a, e]
+makeRangeList[ RowBox[ {a_, "=", e_}]] :=
+	{makeSingleAbbrevRange[ a, e]}
 
-makeRangeSequence[RowBox[{s_,",",r__}]] :=
-    Sequence[ makeRangeSequence[s], ",", makeRangeSequence[RowBox[{r}]]]
+makeRangeList[ RowBox[ {s_, ",", r__}]] :=
+    Join[ makeRangeList[ s], makeRangeList[ RowBox[ {r}]]]
 
-makeRangeSequence[RowBox[{s_}]] :=
-    makeRangeSequence[s]
+makeRangeList[ RowBox[ {s_}]] :=
+    makeRangeList[ s]
 
-makeRangeSequence[GridBox[ r_List]] := Apply[ Sequence, Riffle[ Map[ makeRangeSequence, Flatten[ r]], ","]]
+makeRangeList[ GridBox[ r_List]] := Join @@ Map[ makeRangeList, Flatten[ r]]
 
-makeRangeSequence[s_] :=
-    RowBox[{"SIMPRNG$","[",s,"]"}]
-makeRangeSequence[args___] := unexpected[ makeRangeSequence, {args}]
+makeRangeList[ s_] :=
+    {RowBox[ {"SIMPRNG$", "[", s, "]"}]}
+    
+makeRangeList[ args___] := unexpected[ makeRangeList, {args}]
 
-makeSingleSetRange[ v_, s_] := 
+makeSingleSetRange[ v_, s_] :=
 	RowBox[ {"SETRNG$", "[", RowBox[ {v, ",", s}], "]"}]
 makeSingleSetRange[args___] := unexpected[ makeSingleSetRange, {args}]
 
-makeSinglePredRange[ v_, p_] := 
+makeSinglePredRange[ v_, p_] :=
 	RowBox[ {"PREDRNG$", "[", RowBox[ {v, ",", p}], "]"}]
 makeSinglePredRange[args___] := unexpected[ makeSinglePredRange, {args}]
 
@@ -1148,6 +1248,7 @@ makeSingleAbbrevRange[ a_, e_] :=
 	RowBox[ {"ABBRVRNG$", "[", RowBox[ {a, ",", e}], "]"}]
 makeSingleAbbrevRange[ args___] := unexpected[ makeSingleAbbrevRange, {args}]
 
+(* TODO: Update. *)
 getSingleRangeVar[ v_String] := v
 getSingleRangeVar[ RowBox[{v_, "\[Element]", _}]] := v
 getSingleRangeVar[ RowBox[{_, "[", v_String, "]"}]] := v
@@ -1323,17 +1424,6 @@ MakeExpression[ UnderscriptBox[ op_, dom_], fmt_] :=
 
 SetAttributes[makeTmaBoxes, HoldAllComplete];
 makeTmaBoxes[ b_] := MakeBoxes[ b, TheoremaForm]
-
-
-MakeBoxes[ (q_?isQuantifierName)[ rng_, True, form_], TheoremaForm] := 
-	RowBox[ {UnderscriptBox[ Replace[ q, $tmaNameToQuantifier], makeRangeBox[ rng, TheoremaForm]],
-		MakeBoxes[ form, TheoremaForm]}
-	]
-
-MakeBoxes[ (q_?isQuantifierName)[ rng_, cond_, form_], TheoremaForm] := 
-	RowBox[ {UnderscriptBox[ UnderscriptBox[ Replace[ q, $tmaNameToQuantifier], makeRangeBox[ rng, TheoremaForm]], MakeBoxes[ cond, TheoremaForm]],
-		MakeBoxes[ form, TheoremaForm]}
-	]
 	
 (* DomainOperation$TM- and Annotated$TM-quantifiers are treated in "Expression.m" *)
 

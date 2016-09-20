@@ -132,6 +132,10 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.", ToString[
 	translate[ "interactiveNewProofSitFilter", lang] = "Filter new proof situations interactively";
 	translate[ "interactiveProofSitSel", lang] = "Select next proof situation interactively";
 	translate[ "invalidExpr", lang] = "The expression is invalid because its sequence-type is incorrect or cannot be determined.";
+	translate[ "invalidQuCondition", lang] = "Quantifier \"``\" cannot have a condition.";
+	translate[ "invalidQuRange", lang] = "Quantifier \"`1`\" cannot be used together with the variable-range `2`.";
+	translate[ "invalidQuSubscript", lang] = "Quantifier \"``\" cannot have a subscript.";
+	translate[ "invalidQuVarNum", lang] = "Quantifier \"``\" cannot have multi-ranges.";
 	translate[ "invalidRange", lang] = "Every variable bound by a quantifier may appear only once in the respective range; This is violated by ``.";
 
     translate[ "KBcomp", lang] = "Knowledge used in computation";
@@ -284,7 +288,6 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.", ToString[
     translate[ "tooltipButtonParen", lang] = "\nPress \[ShiftKey] to omit parentheses\nKeyboard shortcut";   	
     translate[ "Trace", lang] = "Trace Computation";
     translate[ "traceUserDef", lang] = "Trace user-definitions";
-    translate[ "tupleOfRange", lang] = "The tuple quantifier can only be used with step-ranges, not with ``.";
     translate[ "Tuples", lang] = "Tuples";
 
     translate[ "UNDEROVEROP", lang] = "under- and overscripted operator";

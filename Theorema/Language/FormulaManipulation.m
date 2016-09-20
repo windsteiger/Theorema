@@ -433,7 +433,7 @@ boundVariables[ args___] := unexpected[ boundVariables, {args}]
 (* freshName *)
 
 
-(* 'freshName[ x, ex]' returns a fresh name for variable 'base', which is guaranteed to be distinct from all names in 'ex'.
+(* 'freshName[ x, ex]' returns a fresh name for variable 'x', which is guaranteed to be distinct from all names in 'ex'.
 	If 'x' is a list of variables, a fresh name for each of the elements in 'x' is returned; all new names are distinct from each other.
 	NOTE: 'x' (or its elements) may be a variable with head 'VAR$' (possibly sequence variables) *or* a plain symbol *or* a string,
 	whereas the elements of 'ex' may be plain symbols or strings, but no variables. *)
@@ -724,7 +724,9 @@ renameBound[ args___] := unexpected[ renameBound, {args}]
 
 isQuantifierFormula[ e_] := MatchQ[ e, 
 	_Theorema`Language`Forall$TM|_Theorema`Computation`Language`Forall$TM|
-	_Theorema`Language`Exists$TM|_Theorema`Computation`Language`Exists$TM]
+	_Theorema`Language`Exists$TM|_Theorema`Computation`Language`Exists$TM|
+	_Theorema`Language`NotExists$TM|_Theorema`Computation`Language`NotExists$TM|
+	_Theorema`Language`ExistsUnique$TM|_Theorema`Computation`Language`ExistsUnique$TM]
 isQuantifierFormula[ args___] := unexpected[ isQuantifierFormula, {args}]
 
 isConnectiveFormula[ e_] := MatchQ[ e, 
@@ -765,7 +767,7 @@ isQuantifierFree[ args___] := unexpected[ isQuantifierFree, {args}]
 (* ::Subsubsection:: *)
 (* isLogQuantifierFree *)
 
-isLogQuantifierFree[ expr_] := FreeQ[ expr, _Theorema`Language`Forall$TM|_Theorema`Language`Exists$TM]
+isLogQuantifierFree[ expr_] := FreeQ[ expr, _Theorema`Language`Forall$TM|_Theorema`Language`Exists$TM|_Theorema`Language`NotExists$TM|_Theorema`Language`ExistsUnique$TM]
 isLogQuantifierFree[ args___] := unexpected[ isLogQuantifierFree, {args}]
 
 (* ::Subsubsection:: *)
