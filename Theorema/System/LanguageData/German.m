@@ -248,6 +248,7 @@ With[ {lang = "German"},
 	MessageName[ simplify, "usage", lang] = "simplify is an option for the formula constructor makeFML deciding whether the constructed formula should be simplified by computation immediately.";
 	MessageName[ sourceFile, "usage", lang] = "sourceFile is a selector for the FML$ datastructure.";
 	MessageName[ source, "usage", lang] = "source is a selector for the FML$ datastructure.";
+	MessageName[ specialBrackets, "usage", lang] = "specialBrackets is a list of special brackets, used for parsing, pretty-printing and creating buttons in the Commander.";
 	MessageName[ specifiedVariables, "usage", lang] = "";
 	MessageName[ standardFormQuantifier, "usage", lang] = "standardFormQuantifier[ form] merges all leading universal quantifiers in form.";
 	MessageName[ strategy, "usage", lang] = "strategy is an option for the constructor makePRFSIT/toBeProved and a selector for the PRFSIT$ datastructure.";

@@ -382,54 +382,21 @@ MakeBoxes[ DomainOperation$TM[ dom_, op_], TheoremaForm] :=
 (* ::Subsection:: *)
 (* Special brackets *)
 
-MakeBoxes[ squareBracketted$TM[ e___], TheoremaForm] :=
-	RowBox[ {
-		TagBox[ "\:e114", Identity, SyntaxForm -> "("],
-		RowBox[ Riffle[ List @@ Replace[ HoldComplete[ e], x_ :> MakeBoxes[ x, TheoremaForm], {1}], ","]],
-		TagBox[ "\:e115", Identity, SyntaxForm -> ")"]
-	}]
-MakeBoxes[ doubleSquareBracketted$TM[ e___], TheoremaForm] :=
-	RowBox[ {
-		TagBox[ "\:27e6", Identity, SyntaxForm -> "("],
-		RowBox[ Riffle[ List @@ Replace[ HoldComplete[ e], x_ :> MakeBoxes[ x, TheoremaForm], {1}], ","]],
-		TagBox[ "\:27e7", Identity, SyntaxForm -> ")"]
-	}]
-MakeBoxes[ angleBracketted$TM[ e___], TheoremaForm] :=
-	RowBox[ {
-		TagBox[ "\:27e8", Identity, SyntaxForm -> "("],
-		RowBox[ Riffle[ List @@ Replace[ HoldComplete[ e], x_ :> MakeBoxes[ x, TheoremaForm], {1}], ","]],
-		TagBox[ "\:27e9", Identity, SyntaxForm -> ")"]
-	}]
-MakeBoxes[ doubleAngleBracketted$TM[ e___], TheoremaForm] :=
-	RowBox[ {
-		TagBox[ "\:27ea", Identity, SyntaxForm -> "("],
-		RowBox[ Riffle[ List @@ Replace[ HoldComplete[ e], x_ :> MakeBoxes[ x, TheoremaForm], {1}], ","]],
-		TagBox[ "\:27eb", Identity, SyntaxForm -> ")"]
-	}]
-MakeBoxes[ braced$TM[ e___], TheoremaForm] :=
-	RowBox[ {
-		TagBox[ "\:e117", Identity, SyntaxForm -> "("],
-		RowBox[ Riffle[ List @@ Replace[ HoldComplete[ e], x_ :> MakeBoxes[ x, TheoremaForm], {1}], ","]],
-		TagBox[ "\:e118", Identity, SyntaxForm -> ")"]
-	}]
-MakeBoxes[ doubleBraced$TM[ e___], TheoremaForm] :=
-	RowBox[ {
-		TagBox[ "\:2983", Identity, SyntaxForm -> "("],
-		RowBox[ Riffle[ List @@ Replace[ HoldComplete[ e], x_ :> MakeBoxes[ x, TheoremaForm], {1}], ","]],
-		TagBox[ "\:2984", Identity, SyntaxForm -> ")"]
-	}]
-MakeBoxes[ parenthesized$TM[ e___], TheoremaForm] :=
-	RowBox[ {
-		TagBox[ "\:fd3e", Identity, SyntaxForm -> "("],
-		RowBox[ Riffle[ List @@ Replace[ HoldComplete[ e], x_ :> MakeBoxes[ x, TheoremaForm], {1}], ","]],
-		TagBox[ "\:fd3f", Identity, SyntaxForm -> ")"]
-	}]
-MakeBoxes[ doubleParenthesized$TM[ e___], TheoremaForm] :=
-	RowBox[ {
-		TagBox[ "\:2e28", Identity, SyntaxForm -> "("],
-		RowBox[ Riffle[ List @@ Replace[ HoldComplete[ e], x_ :> MakeBoxes[ x, TheoremaForm], {1}], ","]],
-		TagBox[ "\:2e29", Identity, SyntaxForm -> ")"]
-	}]
+Scan[
+	With[ {left = #[[3]], right = #[[4]], name = #[[5]]},
+		With[ {sym = If[ StringMatchQ[ name, __ ~~ ("$"|"$TM")], ToExpression[ name], ToExpression[ name <> "$TM"]]},
+			MakeBoxes[ sym[ e___], TheoremaForm] :=
+				RowBox[
+					{
+						TagBox[ left, Identity, SyntaxForm -> "("],
+						RowBox[ Riffle[ List @@ Replace[ HoldComplete[ e], x_ :> MakeBoxes[ x, TheoremaForm], {1}], ","]],
+						TagBox[ right, Identity, SyntaxForm -> ")"]
+					}
+				]
+		]
+	]&,
+	specialBrackets
+]
 
 
 (* ::Subsection:: *)

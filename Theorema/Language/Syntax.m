@@ -36,6 +36,35 @@ stripOutermostParen[ e_] := e
 stripOutermostParen[ args___] := unexpected[ stripOutermostParen, {args}]
 
 
+(* In order to add a new special bracket, just add the corresponding item to the list below and provide a definition for 'MessageName' and 'translate'.
+	ATTENTION! In contrast to user-defined quantifiers and variable-ranges, this is *not* possible after Theorema has been started! *)
+(* Each special bracket is characterized by 6 strings, namely
+	- an ID, referred to in 'translate',
+	- a string depicting the brackets, used in tool-tips in the GUI,
+	- the left/opening character,
+	- the right/closing character,
+	- the name of the bracket, which becomes the head of the internal representation of a bracketted expression, and
+	- an input alias.
+*)
+specialBrackets =
+	{
+		{"\[VerticalEllipsis]\[VerticalEllipsis]", "\[VerticalEllipsis] \[VerticalEllipsis]", "\[VerticalEllipsis]", "\[VerticalEllipsis]", "SEQ$", "seq"},
+		{"()", "( )", "\:fd3e", "\:fd3f", "parenthesized", "()"},
+		{"(())", "(( ))", "\:2e28", "\:2e29", "doubleParenthesized", "(())"},
+		{"(|)", "\:2987 \:2988", "\:2987", "\:2988", "barParenthesized", "(|)"},
+		{"[]", "[ ]", "\:e114", "\:e115", "squareBracketted", "[]"},
+		{"[[]]", "[[ ]]", "\:27e6", "\:27e7", "doubleSquareBracketted", "[[]]"},
+		{"[|]", "\:27ec \:27ed", "\:27ec", "\:27ed", "barSlantBracketted", "[|]"},
+		{"{}", "{ }", "\:e117", "\:e118", "braced", "{}"},
+		{"{{}}", "{{ }}", "\:2983", "\:2984", "doubleBraced", "{{}}"},
+		{"<>", "\[LeftAngleBracket] \[RightAngleBracket]", "\:27e8", "\:27e9", "angleBracketted", "<>"},
+		{"<<>>", "\[LeftAngleBracket]\[LeftAngleBracket] \[RightAngleBracket]\[RightAngleBracket]", "\:27ea", "\:27eb", "doubleAngleBracketted", "<<>>"},
+		{"<|>", "\:2989 \:298a", "\:2989", "\:298a", "barAngleBracketted", "<|>"},
+		{"<.>", "\:2991 \:2992", "\:2991", "\:2992", "dotAngleBracketted", "<.>"},
+		{"<c>", "\:29fc \:29fd", "\:29fc", "\:29fd", "curveAngleBracketted", "<c>"}
+	};
+
+
 (* $tmaNonStandardOperators is initialized here and gets values added in Expression.m *)
 $tmaNonStandardOperators = {};
 
@@ -395,21 +424,24 @@ removeVar[ op_String] :=
 		op
 	]
 
-
-isLeftDelimiter[ s_] :=
-	MemberQ[
-		{"[", "(", "{", "\[LeftAngleBracket]", "\[LeftBracketingBar]",
-			"\[LeftFloor]", "\[LeftCeiling]", "\[LeftDoubleBracket]",
-			"\[LeftDoubleBracketingBar]", ",", ";"},
-		s
-	] || MatchQ[ s, TagBox[ "\[VerticalEllipsis]"|"\:2e28"|"\:fd3e"|"\:2983"|"\:e117"|"\:27ea"|"\:27e8"|"\:27e6"|"\:e114", ___]]
-isRightDelimiter[ s_] :=
-	MemberQ[
-		{"[", "]", ")", "}", "\[RightAngleBracket]", "\[RightBracketingBar]",
-			"\[RightFloor]", "\[RightCeiling]", "\[RightDoubleBracket]",
-			"\[RightDoubleBracketingBar]", ",", ";"},
-		s
-	] || MatchQ[ s, TagBox[ "\[VerticalEllipsis]"|"\:2e29"|"\:fd3f"|"\:2984"|"\:e118"|"\:27eb"|"\:27e9"|"\:27e7"|"\:e115", ___]]
+With[ {del = Alternatives @@ specialBrackets[[All, 3]]},
+	isLeftDelimiter[ s_] :=
+		MemberQ[
+			{"[", "(", "{", "\[LeftAngleBracket]", "\[LeftBracketingBar]",
+				"\[LeftFloor]", "\[LeftCeiling]", "\[LeftDoubleBracket]",
+				"\[LeftDoubleBracketingBar]", ",", ";"},
+			s
+		] || MatchQ[ s, TagBox[ del, ___]]
+]
+With[ {del = Alternatives @@ specialBrackets[[All, 4]]},
+	isRightDelimiter[ s_] :=
+		MemberQ[
+			{"[", "]", ")", "}", "\[RightAngleBracket]", "\[RightBracketingBar]",
+				"\[RightFloor]", "\[RightCeiling]", "\[RightDoubleBracket]",
+				"\[RightDoubleBracketingBar]", ",", ";"},
+			s
+		] || MatchQ[ s, TagBox[ del, ___]]
+]
 	
 	
 (* In the following list,
@@ -973,26 +1005,15 @@ MakeExpression[ RowBox[ {"{", x___, "}"}], fmt_] :=
 
 MakeExpression[ RowBox[ {"\[LeftAngleBracket]", x___, "\[RightAngleBracket]"}], fmt_] :=
     MakeExpression[ RowBox[ {"Tuple", "[", x, "]"}], fmt] /; $parseTheoremaExpressions
-    
-(* amaletzk: Bracketting symbols do not occur at operator positions, therefore TagBoxes have to be used here. *)
-MakeExpression[ RowBox[ {TagBox[ "\[VerticalEllipsis]", ___], x___, TagBox[ "\[VerticalEllipsis]", ___]}], fmt_] :=
-	MakeExpression[ RowBox[ {"SEQ$", "[", x, "]"}], fmt] /; $parseTheoremaExpressions
-MakeExpression[ RowBox[ {TagBox[ "\:e114", ___], x___, TagBox[ "\:e115", ___]}], fmt_] :=
-	MakeExpression[ RowBox[ {"squareBracketted", "[", x, "]"}], fmt] /; $parseTheoremaExpressions
-MakeExpression[ RowBox[ {TagBox[ "\:27e6", ___], x___, TagBox[ "\:27e7", ___]}], fmt_] :=
-	MakeExpression[ RowBox[ {"doubleSquareBracketted", "[", x, "]"}], fmt] /; $parseTheoremaExpressions
-MakeExpression[ RowBox[ {TagBox[ "\:27e8", ___], x___, TagBox[ "\:27e9", ___]}], fmt_] :=
-	MakeExpression[ RowBox[ {"angleBracketted", "[", x, "]"}], fmt] /; $parseTheoremaExpressions
-MakeExpression[ RowBox[ {TagBox[ "\:27ea", ___], x___, TagBox[ "\:27eb", ___]}], fmt_] :=
-	MakeExpression[ RowBox[ {"doubleAngleBracketted", "[", x, "]"}], fmt] /; $parseTheoremaExpressions
-MakeExpression[ RowBox[ {TagBox[ "\:e117", ___], x___, TagBox[ "\:e118", ___]}], fmt_] :=
-	MakeExpression[ RowBox[ {"braced", "[", x, "]"}], fmt] /; $parseTheoremaExpressions
-MakeExpression[ RowBox[ {TagBox[ "\:2983", ___], x___, TagBox[ "\:2984", ___]}], fmt_] :=
-	MakeExpression[ RowBox[ {"doubleBraced", "[", x, "]"}], fmt] /; $parseTheoremaExpressions
-MakeExpression[ RowBox[ {TagBox[ "\:fd3e", ___], x___, TagBox[ "\:fd3f", ___]}], fmt_] :=
-	MakeExpression[ RowBox[ {"parenthesized", "[", x, "]"}], fmt] /; $parseTheoremaExpressions
-MakeExpression[ RowBox[ {TagBox[ "\:2e28", ___], x___, TagBox[ "\:2e29", ___]}], fmt_] :=
-	MakeExpression[ RowBox[ {"doubleParenthesized", "[", x, "]"}], fmt] /; $parseTheoremaExpressions
+	
+(* Bracketting symbols do not occur at operator positions, therefore TagBoxes have to be used here. *)
+Scan[
+	With[ {left = #[[3]], right = #[[4]], name = #[[5]]},
+		MakeExpression[ RowBox[ {TagBox[ left, ___], x___, TagBox[ right, ___]}], fmt_] :=
+			(MakeExpression[ RowBox[ {name, "[", x, "]"}], fmt] /; $parseTheoremaExpressions)
+	]&,
+	specialBrackets
+]
 
 (* ::Subsection:: *)
 (* operator underscript -> domain *)

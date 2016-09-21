@@ -50,12 +50,16 @@ With[ {lang = "English"},
 	MessageName[ Assign$TM, "usage", lang] = "";	
 
     MessageName[ Backslash$TM, "usage", lang] = "";
-	MessageName[ braced$TM, "usage", lang] = "";	
-	MessageName[ BracketingBar$TM, "usage", lang] = "";	
+    MessageName[ barAngleBracketted$TM, "usage", lang] = "";
+    MessageName[ barParenthesized$TM, "usage", lang] = "";
+    MessageName[ barSlantBracketted$TM, "usage", lang] = "";
+	MessageName[ braced$TM, "usage", lang] = "";
+	MessageName[ BracketingBar$TM, "usage", lang] = "";
 
 	MessageName[ Componentwise$TM, "usage", lang] = "";
-	MessageName[ CompoundExpression$TM, "usage", lang] = "";	
+	MessageName[ CompoundExpression$TM, "usage", lang] = "";
     MessageName[ Cross$TM, "usage", lang] = "";
+    MessageName[ curveAngleBracketted$TM, "usage", lang] = "";
 
 	MessageName[ DeleteAt$TM, "usage", lang] = "";
 	MessageName[ Delete$TM, "usage", lang] = "";
@@ -63,12 +67,13 @@ With[ {lang = "English"},
 	MessageName[ domainConstruct$TM, "usage", lang] = "domainConstruct$TM[ dom, rng] is a datastructure representing a domain constructor for domain dom being 'the rng such that ...'.";
 	MessageName[ DomainOperation$TM, "usage", lang] = "";
 	MessageName[ DOMEXTRNG$, "usage", lang] = "DOMEXTRNG$[ x, dom] denotes that the variable x extends domain dom (in a domain extension definition).";
-	MessageName[ Do$TM, "usage", lang] = "";	
-	MessageName[ doubleAngleBracketted$TM, "usage", lang] = "";	
+	MessageName[ Do$TM, "usage", lang] = "";
+	MessageName[ dotAngleBracketted$TM, "usage", lang] = "";
+	MessageName[ doubleAngleBracketted$TM, "usage", lang] = "";
 	MessageName[ doubleBraced$TM, "usage", lang] = "";
 	MessageName[ DoubleLeftArrow$TM, "usage", lang] = "";
-	MessageName[ doubleParenthesized$TM, "usage", lang] = "";	
-	MessageName[ doubleSquareBracketted$TM, "usage", lang] = "";	
+	MessageName[ doubleParenthesized$TM, "usage", lang] = "";
+	MessageName[ doubleSquareBracketted$TM, "usage", lang] = "";
 	MessageName[ \[DoubleStruckCapitalC]P$TM, "usage", lang] = "";
 	MessageName[ \[DoubleStruckCapitalC]$TM, "usage", lang] = "";	
 	MessageName[ \[DoubleStruckCapitalN], "usage", lang] = "";	

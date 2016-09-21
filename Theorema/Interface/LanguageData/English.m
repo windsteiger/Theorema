@@ -302,12 +302,17 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.", ToString[
     translate[ "?", lang] = "?";
 	translate[ "[]", lang] = "Square bracketted expression";
 	translate[ "[[]]", lang] = "Double square bracketted expression";
+	translate[ "[|]", lang] = "Bar-slant bracketted expression";
 	translate[ "<>", lang] = "Angle bracketted expression";
 	translate[ "<<>>", lang] = "Double angle bracketted expression";
+	translate[ "<|>", lang] = "Bar-angle bracketted expression";
+	translate[ "<.>", lang] = "Dot-angle bracketted expression";
+	translate[ "<c>", lang] = "Curved angle bracketted expression";
 	translate[ "{}", lang] = "Braced expression";
 	translate[ "{{}}", lang] = "Double braced expression";
 	translate[ "()", lang] = "Parenthesized expression";
 	translate[ "(())", lang] = "Double parenthesized expression";
+	translate[ "(|)", lang] = "Bar-parenthesized expression";
 	translate[ "\[VerticalEllipsis]\[VerticalEllipsis]", lang] = "Sequence of expressions";
 
 ]

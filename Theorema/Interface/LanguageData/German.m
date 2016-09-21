@@ -305,12 +305,17 @@ falls nicht, siehe <http://www.gnu.org/licenses/>.", ToString[ Date[][[1]]]];
     translate[ "?", lang] = "?";
 	translate[ "[]", lang] = "eckig geklammerter Ausdruck";
 	translate[ "[[]]", lang] = "doppelt eckig geklammerter Ausdruck";
+	translate[ "[|]", lang] = "schr\[ADoubleDot]g mit Balken geklammerter Ausdruck";
 	translate[ "<>", lang] = "spitz geklammerter Ausdruck";
 	translate[ "<<>>", lang] = "doppelt spitz geklammerter Ausdruck";
+	translate[ "<|>", lang] = "spitz mit Balken geklammerter Ausdruck";
+	translate[ "<.>", lang] = "spitz mit Punkt geklammerter Ausdruck";
+	translate[ "<c>", lang] = "geschwungen-spitz geklammerter Ausdruck";
 	translate[ "{}", lang] = "geschweift geklammerter Ausdruck";
 	translate[ "{{}}", lang] = "doppelt geschweift geklammerter Ausdruck";
 	translate[ "()", lang] = "rund geklammerter Ausdruck";
 	translate[ "(())", lang] = "doppelt rund geklammerter Ausdruck";
+	translate[ "(|)", lang] = "rund mit Balken geklammerter Ausdruck";
 	translate[ "\[VerticalEllipsis]\[VerticalEllipsis]", lang] = "Folge von Ausdr\[UDoubleDot]cken";
 
 (* UNTRANSLATED *)

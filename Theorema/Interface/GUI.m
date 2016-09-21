@@ -2501,97 +2501,23 @@ langButtonData[ "ELEMTUP"] :=
 		MessageName[ elemTuple$TM, "usage", $TmaLanguage],
 		"elemT"
 	}
-
-langButtonData[ "[]"] := 
-	{
-		If[ TrueQ[ $buttonNat], 
-			translate[ "[]"], 
-			"[ ]"],
-		RowBox[ {TagBox[ "\:e114", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:e115", Identity, SyntaxForm -> ")"]}],
-		MessageName[ squareBracketted$TM, "usage", $TmaLanguage],
-		"[]"
-	}
-
-langButtonData[ "[[]]"] := 
-	{
-		If[ TrueQ[ $buttonNat], 
-			translate[ "[[]]"], 
-			"[[ ]]"],
-		RowBox[ {TagBox[ "\:27e6", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:27e7", Identity, SyntaxForm -> ")"]}],
-		MessageName[ doubleSquareBracketted$TM, "usage", $TmaLanguage],
-		"[[]]"
-	}
-
-langButtonData[ "<>"] := 
-	{
-		If[ TrueQ[ $buttonNat], 
-			translate[ "<>"], 
-			"\[LeftAngleBracket] \[RightAngleBracket]"],
-		RowBox[ {TagBox[ "\:27e8", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:27e9", Identity, SyntaxForm -> ")"]}],
-		MessageName[ angleBracketted$TM, "usage", $TmaLanguage],
-		"<>"
-	}
-	
-langButtonData[ "<<>>"] := 
-	{
-		If[ TrueQ[ $buttonNat], 
-			translate[ "<<>>"], 
-			"\[LeftAngleBracket]\[LeftAngleBracket] \[RightAngleBracket]\[RightAngleBracket]"],
-		RowBox[ {TagBox[ "\:27ea", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:27eb", Identity, SyntaxForm -> ")"]}],
-		MessageName[ doubleAngleBracketted$TM, "usage", $TmaLanguage],
-		"<<>>"
-	}
-	
-langButtonData[ "{}"] := 
-	{
-		If[ TrueQ[ $buttonNat], 
-			translate[ "{}"], 
-			"{ }"],
-		RowBox[ {TagBox[ "\:e117", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:e118", Identity, SyntaxForm -> ")"]}],
-		MessageName[ braced$TM, "usage", $TmaLanguage],
-		"{}"
-	}
-	
-langButtonData[ "{{}}"] := 
-	{
-		If[ TrueQ[ $buttonNat], 
-			translate[ "{{}}"], 
-			"{{ }}"],
-		RowBox[ {TagBox[ "\:2983", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:2984", Identity, SyntaxForm -> ")"]}],
-		MessageName[ doubleBraced$TM, "usage", $TmaLanguage],
-		"{{}}"
-	}
-	
-langButtonData[ "()"] := 
-	{
-		If[ TrueQ[ $buttonNat], 
-			translate[ "()"], 
-			"( )"],
-		RowBox[ {TagBox[ "\:fd3e", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:fd3f", Identity, SyntaxForm -> ")"]}],
-		MessageName[ parenthesized$TM, "usage", $TmaLanguage],
-		"()"
-	}
-	
-langButtonData[ "(())"] := 
-	{
-		If[ TrueQ[ $buttonNat], 
-			translate[ "(())"], 
-			"(( ))"],
-		RowBox[ {TagBox[ "\:2e28", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:2e29", Identity, SyntaxForm -> ")"]}],
-		MessageName[ doubleParenthesized$TM, "usage", $TmaLanguage],
-		"(())"
-	}
-
-langButtonData[ "\[VerticalEllipsis]\[VerticalEllipsis]"] :=
-	{
-		If[ TrueQ[ $buttonNat],
-			translate[ "\[VerticalEllipsis]\[VerticalEllipsis]"],
-			"\[VerticalEllipsis] \[VerticalEllipsis]"],
-		RowBox[ {TagBox[ "\[VerticalEllipsis]", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\[VerticalEllipsis]", Identity, SyntaxForm -> ")"]}],
-		MessageName[ SEQ$, "usage", $TmaLanguage],
-		"seq"
-	}
-
+Scan[
+	With[ {id = #[[1]], plain = #[[2]], left = #[[3]], right = #[[4]], name = "Theorema`Language`" <> #[[5]], esc = #[[6]]},
+		With[ {sym = If[ StringMatchQ[ name, __ ~~ ("$"|"$TM")], ToExpression[ name], ToExpression[ name <> "$TM"]]},
+			langButtonData[ id] :=
+				{
+					If[ TrueQ[ $buttonNat],
+						translate[ id],
+						plain
+					],
+					RowBox[ {TagBox[ left, Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ right, Identity, SyntaxForm -> ")"]}],
+					MessageName[ sym, "usage", $TmaLanguage],
+					esc
+				}
+		]
+	]&,
+	specialBrackets
+]
 langButtonData[ args___] := unexpected[ langButtonData, {args}]
 
 (*
@@ -2629,20 +2555,18 @@ autoParenthesis[ c_String] := TagBox[ c, "AutoParentheses"]
 autoParenthesis[ args___] := unexpected[ autoParenthesis, {args}]
 
 allFormulae = {
-			   {"Logic", {{{"AND2", 1}, {"OR2", 1}, {"NOT", 1}, {"IMPL2", 1}}, 
-			   	{{"EQUIV2", 1}, {"EQ", 1}, {"EQUIVDEF", 1}, {"EQDEF", 1}}, 
-			   	{{"AND3", 1}, {"OR3", 1}, {"EQUIV3", 1}, {"CASEDIST", 1}}, 
-			   	{{"FORALL1", 1}, {"EXISTS1", 1}, {"FORALL2", 1}, {"EXISTS2", 1}}, 
+			   {"Logic", {{{"AND2", 1}, {"OR2", 1}, {"NOT", 1}, {"IMPL2", 1}},
+			   	{{"EQUIV2", 1}, {"EQ", 1}, {"EQUIVDEF", 1}, {"EQDEF", 1}},
+			   	{{"AND3", 1}, {"OR3", 1}, {"EQUIV3", 1}, {"CASEDIST", 1}},
+			   	{{"FORALL1", 1}, {"EXISTS1", 1}, {"FORALL2", 1}, {"EXISTS2", 1}},
 			   	{{"LET", 1}}}},
 			   {"Arithmetic", {}},
 			   {"Sets", {}},
 			   {"Tuples", {{{"APPEND", 1}, {"PREPEND", 1}, {"JOIN", 1}, {"ELEMTUP", 1}}}},
-			   {"Operators", {{{"SUBOP", 1}, {"SUPEROP", 1}, {"SUBSUPEROP", 1}}, 
-			   	{{"OVEROP", 1}, {"UNDEROVEROP", 1}, {"OVERSUBOP", 1}}, 
+			   {"Operators", {{{"SUBOP", 1}, {"SUPEROP", 1}, {"SUBSUPEROP", 1}},
+			   	{{"OVEROP", 1}, {"UNDEROVEROP", 1}, {"OVERSUBOP", 1}},
 			   	{{"SINGLEOP", 1}}}},
-			   {"Bracketted", {{{"[]", 2}, {"()", 2}, {"<>", 2}, {"{}", 2}}, 
-			   	{{"[[]]", 2}, {"(())", 2}, {"<<>>", 2}, {"{{}}", 2}},
-			   	{{"\[VerticalEllipsis]\[VerticalEllipsis]", 2}}}}
+			   {"Bracketted", Map[ {First[ #], 2}&, With[ {l = Length[ specialBrackets]}, Append[ Partition[ specialBrackets, 7], Take[ specialBrackets, -Mod[ l, 7]]]], {2}]}
 };
 
 makeButtonCategory[ {category_String, buttons_List}, cols_Integer:2] :=
