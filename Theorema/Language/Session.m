@@ -29,28 +29,44 @@ Begin["`Private`"]
 (* ::Section:: *)
 (* Preprocessing *)
 
-(* amaletzk: Define "freshNames[]", "freshNamesProg[]" in the way below, because otherwise parts with "Program" don't work.
-	Maybe the case "Theorema`Computation`Language`Program" should also be included, such that "Program"-constructs
-	work in computation cells as well. *)
+(* Define "freshNames[]", "freshNamesProg[]" as below, because otherwise parts with "Program" don't work. *)
 (* 'dropWolf' specifies whether suffix "\[Wolf]" should be dropped from symbols for getting the corresponding Mma function.
 	This should in fact only happen in computation-cells but not in formula cells, in order to prevent evaluation.
 	Function 'transferToComputation' takes care of dropping "\[Wolf]" in function definitions that originate from formulas. *)
 freshNames[ expr_Hold, dropWolf_:False] :=
-	Module[ {symPos, repl, progPos, progSymPos},
-		progPos = Position[ expr, Program[_]];
+	Module[ {symPos, repl, progPos, progSymPos, setPos, progSetPos, aux},
+		progPos = Position[ expr, (Theorema`Computation`Language`Program|Program)[ _]];
+		setPos = Position[ expr, _makeSet];
+		progSetPos = Select[ setPos, isSubPositionOfAny[ #, progPos]&];
+		setPos = Complement[ setPos, progSetPos];
 		(* There are certain expressions, into which we do not want to go deeper for substituting fresh names. 
 		   An example is a META$[__] expression representing a meta-variable in a proof, which has a list as
 		   its 3rd parameter. Going into it would turn the list into a Set$TM ... 
 		   If other cases occur in the future, just add a suitable transformation here BEFORE the replaceable
 		   positions are computed. *)
-		symPos = DeleteCases[ Position[ expr /. {META$[__] -> META$[]}, _Symbol], {0}, {1}, 1];
-		progSymPos = Cases[ symPos, x_ /; isSubPositionOfAny[ x, progPos]];
-		repl = Join[Map[ # -> freshSymbol[ Extract[ expr, #, Hold], dropWolf]&, Complement[symPos, progSymPos]],
-					Map[ # -> freshSymbolProg[ Extract[ expr, #, Hold], dropWolf]&, progSymPos]];		
-		(* amaletzk: The "FlattenAt" simply replaces every "Program[p]" by "p". *)
-		FlattenAt[ReplacePart[ expr, repl], progPos]
+		symPos = DeleteCases[ Position[ expr /. {(h:(Theorema`Computation`Language`META$|META$))[ __] -> h[]}, _Symbol], {0}, {1}, 1];
+		progSymPos = Select[ symPos, isSubPositionOfAny[ #, progPos]&];
+		repl = Join[ Map[ # -> freshSymbol[ Extract[ expr, #, Hold], dropWolf]&, Complement[ symPos, progSymPos]],
+					Map[ # -> freshSymbolProg[ Extract[ expr, #, Hold], dropWolf]&, progSymPos]];
+		aux = ReplacePart[ ReplacePart[ expr, repl], Map[ Append[ #, 0]&, progSetPos] -> ToExpression[ "List$TM"]];
+		(* All remaining 'makeSet' must be replaced by 'Set$TM', with their arguments sorted. No unwanted evaluation must happen.
+			Note that it is not possible to simply provide a definition for 'makeSet' that does the job, due to the presence of 'Hold'-attributes. *)
+		With[ {set = ToExpression[ "Set$TM"]},
+			Scan[
+				Function[ pos,
+					With[ {sub = Extract[ aux, pos, Hold]},
+						With[ {a = set @@ Union @@ Map[ Hold, sub, {2}]},
+							aux = ReplacePart[ aux, RuleDelayed @@ Prepend[ FlattenAt[ Hold[ a], Table[ {1, i}, {i, Length[ a]}]], pos]]
+						]
+					]
+				],
+				Sort[ setPos, Length[ #1] > Length[ #2]&]	(* We must replace innermost first. *)
+			]
+		];
+		(* The "FlattenAt" simply replaces every "Program[p]" by "p". *)
+		FlattenAt[ aux, progPos]
 	]
-freshNames[args___] := unexpected[ freshNames, {args}]
+freshNames[ args___] := unexpected[ freshNames, {args}]
 
 
 isSubPositionOfAny[ pos_List, l_List] := Catch[ (Scan[ If[isSubPosition[pos, #], Throw[True]]&, l]; False)]
@@ -88,8 +104,8 @@ freshSymbol[ Hold[ s_Symbol], dropWolf_] :=
         	Set, ToExpression[ "Assign$TM"],
         	Wedge, ToExpression[ "And$TM"],
         	Vee, ToExpression[ "Or$TM"],
-        	AngleBracket, ToExpression[ "Tuple$TM"],
-        	List, ToExpression[ "Set$TM"],	(* This cannot be removed, since a set of individual elements (no SetOf) still has to be parsed as "List". *)
+        	makeSet, makeSet,
+        	AngleBracket|List, ToExpression[ "Tuple$TM"],	(* Attention! If this changes, lists must be turned into tuples in 'renameToStandardContext! *)
         	Inequality, ToExpression[ "OperatorChain$TM"],
         	_,
         	name = ToString[ Unevaluated[ s]];
@@ -118,6 +134,7 @@ freshSymbolProg[ Hold[ s_Symbol], dropWolf_] :=
             Theorema`Computation`Language`\[DoubleStruckCapitalR]|\[DoubleStruckCapitalR],
             	ToExpression[ "RealInterval$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]"],
         	Set, ToExpression[ "Assign$TM"],
+        	makeSet, makeSet,
         	Inequality, ToExpression[ "OperatorChain$TM"],
         	_,
         	name = ToString[ Unevaluated[ s]];
@@ -1519,11 +1536,8 @@ displayBoxes[ args___] := unexpected[ displayBoxes, {args}]
 
 renameToStandardContext[ expr_, lhs_:Null] :=
 	Block[{$ContextPath = {"System`"}, $Context = "System`", stringExpr, cp},
-		(* BUGFIX amaletzk: added FullForm[], otherwise doesn't work if outermost symbol is built-in Power *)
-		(* The result of \[Wolf] functions may be Lists; They have to be transformed into tuples BEFORE freshNames[]
-			is applied, because otherwise they are transformed into sets. *)
-		(* Do not substitute into a META$, because a META$ has a list of a.b.f. constants at pos. 3 *)
-		stringExpr = ToString[ replaceAllExcept[ FullForm[ Hold[ expr]], {List -> Tuple$TM}, {}, Heads -> {Theorema`Computation`Language`META$}]];
+		(* FullForm[] is needed, for otherwise it doesn't work if outermost symbol is built-in Power *)
+		stringExpr = ToString[ FullForm[ Hold[ expr]]];
 		If[ lhs =!= Null,
 			(* The assignment needs to be carried out with "expr" in Computation`-context! *)
 			cp = $ContextPath;

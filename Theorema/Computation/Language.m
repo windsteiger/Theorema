@@ -1023,12 +1023,12 @@ sequenceOfIteration[ args___] :=
 
 SetOf$TM[ RNG$[ r__], cond_, form_] :=
 	Module[ {s},
-		Apply[ Set$TM, s] /; (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
+		Set$TM @@ Union[ s] /; (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
 	]
 
 TupleOf$TM[ RNG$[ r__], cond_, form_] :=
 	Module[ {s},
-		Apply[ Tuple$TM, s] /; (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
+		Tuple$TM @@ s /; (s = sequenceOfIteration[ Map[ rangeToIterator, {r}], cond, form]) =!= $Failed
 	]
   	
 (* We have to split several summations into individual ones,
@@ -1122,26 +1122,26 @@ MaximumOf$TM[ rng:RNG$[ _SETRNG$ | _STEPRNG$, __], cond_, form_] /; buiActive["M
  	splitQuantifier[ MaximumOf$TM, rng, cond, form]
 MaximumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["MaximumOf"] :=
 	Module[ {v},
-		max$TM[ Set$TM @@ v] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+		max$TM[ Set$TM @@ Union[ v]] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
 (h:Annotated$TM[ MaximumOf$TM, _SubScript$TM])[ rng:RNG$[ _SETRNG$ | _STEPRNG$, __], cond_, form_] /; buiActive["MaximumOf"] :=
  	splitQuantifier[ h, rng, cond, form]
 Annotated$TM[ MaximumOf$TM, sub_SubScript$TM][ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["MaximumOf"] :=
 	Module[ {v},
-		Annotated$TM[ max$TM, sub][ Set$TM @@ v] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+		Annotated$TM[ max$TM, sub][ Set$TM @@ Union[ v]] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
 	
 MinimumOf$TM[ rng:RNG$[ _SETRNG$ | _STEPRNG$, __], cond_, form_] /; buiActive["MinimumOf"] :=
  	splitQuantifier[ MinimumOf$TM, rng, cond, form]
 MinimumOf$TM[ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["MinimumOf"] :=
 	Module[ {v},
-		min$TM[ Set$TM @@ v] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+		min$TM[ Set$TM @@ Union[ v]] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
 (h:Annotated$TM[ MinimumOf$TM, _SubScript$TM])[ rng:RNG$[ _SETRNG$ | _STEPRNG$, __], cond_, form_] /; buiActive["MinimumOf"] :=
  	splitQuantifier[ h, rng, cond, form]
 Annotated$TM[ MinimumOf$TM, sub_SubScript$TM][ RNG$[ r : _SETRNG$ | _STEPRNG$], cond_, form_] /; buiActive["MinimumOf"] :=
 	Module[ {v},
-		Annotated$TM[ min$TM, sub][ Set$TM @@ v] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
+		Annotated$TM[ min$TM, sub][ Set$TM @@ Union[ v]] /; (v = valueIteration[ rangeToIterator[ r], cond, form]) =!= $Failed
 	]
 	
 UnionOf$TM[ rng:RNG$[ _SETRNG$ | _STEPRNG$, __], cond_, form_] /; buiActive["UnionOf"] :=

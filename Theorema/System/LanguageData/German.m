@@ -169,6 +169,7 @@ With[ {lang = "German"},
 	MessageName[ makeORNODE, "usage", lang] = "makeORNODE[ info_, {branches_}] constructs a node in the proof tree using proofinfo info to prove at least one of the given branches.";
 	MessageName[ makePRFINFO, "usage", lang] = "makePRFINFO[ ...] constructor for PRFINFO$ data staructure.";
 	MessageName[ makePRFSIT, "usage", lang] = "makePRFSIT[ ...] constructor for PRFSIT$ data staructure.";
+	MessageName[ makeSet, "usage", lang] = "makeSet is an auxiliary symbol needed to create sets and lists in 'freshNames'. It does not do anything by itself.";
 	MessageName[ makeTERMINALNODE, "usage", lang] = "makeTERMINALNODE[ info_, v_] constructs a terminal node with info and value v.";
 	MessageName[ makeTmaExpression, "usage", lang] = "makeTmaExpression[ e] turns e into an expression in Theorema language.";
 	MessageName[ markVariables, "usage", lang] = "";	

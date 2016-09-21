@@ -967,16 +967,9 @@ MakeExpression[ RowBox[ {l_, "\:22ff", r_}], fmt_] := MakeExpression[ RowBox[ {"
 (* ::Subsubsection:: *)
 (* Bracketted expressions *)
 
-MakeExpression[ RowBox[ {"{", RowBox[ l:{Except[ ","], PatternSequence[ ",", Except[ ","]]..}], "}"}], fmt_] :=
-    Module[ {elements = Union[ Map[ MakeExpression[ #, fmt]&, DeleteCases[ l, ","]]]},
-    	With[ {aux = Flatten[ HoldComplete@@elements, 2]},
-    		ReplacePart[ HoldComplete[ aux], {1, 0} -> List]
-    		(* Sets of individual elements (no "SetOf"-quantifier) cannot be parsed directly as "Set",
-    			because "freshNames" turns "Set" into "Assign".
-    			Therefore, we keep "List", *but only for Set and not for SetOf* ! *)
-    	]
-    ] /; $parseTheoremaExpressions
-    
+MakeExpression[ RowBox[ {"{", x___, "}"}], fmt_] :=
+    MakeExpression[ RowBox[ {"Theorema`Common`makeSet", "[", x, "]"}], fmt] /; $parseTheoremaExpressions
+
 MakeExpression[ RowBox[ {"\[LeftAngleBracket]", x___, "\[RightAngleBracket]"}], fmt_] :=
     MakeExpression[ RowBox[ {"Tuple", "[", x, "]"}], fmt] /; $parseTheoremaExpressions
     
