@@ -46,8 +46,9 @@ freshNames[ expr_Hold, dropWolf_:False] :=
 		   positions are computed. *)
 		symPos = DeleteCases[ Position[ expr /. {(h:(Theorema`Computation`Language`META$|META$))[ __] -> h[]}, _Symbol], {0}, {1}, 1];
 		progSymPos = Select[ symPos, isSubPositionOfAny[ #, progPos]&];
-		repl = Join[ Map[ # -> freshSymbol[ Extract[ expr, #, Hold], dropWolf]&, Complement[ symPos, progSymPos]],
-					Map[ # -> freshSymbolProg[ Extract[ expr, #, Hold], dropWolf]&, progSymPos]];
+		(* Use 'Replace' instead of 'Map', otherwise there are problems with 'Slot' appearing in the Theorema expression. *)
+		repl = Join[ Replace[ Complement[ symPos, progSymPos], p_ :> (p -> freshSymbol[ Extract[ expr, p, Hold], dropWolf]), {1}],
+					Replace[ progSymPos, p_ :> (p -> freshSymbolProg[ Extract[ expr, p, Hold], dropWolf]), {1}]];
 		aux = ReplacePart[ ReplacePart[ expr, repl], Map[ Append[ #, 0]&, progSetPos] -> ToExpression[ "List$TM"]];
 		(* All remaining 'makeSet' must be replaced by 'Set$TM', with their arguments sorted. No unwanted evaluation must happen.
 			Note that it is not possible to simply provide a definition for 'makeSet' that does the job, due to the presence of 'Hold'-attributes. *)

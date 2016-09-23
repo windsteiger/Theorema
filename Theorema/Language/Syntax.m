@@ -1594,7 +1594,7 @@ MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
     		RowBox[ makeSummands[ HoldComplete[ arg], True]],
     		Subtract,
     		RowBox[ makeSummands[ HoldComplete[ arg], False]],
-    		Times|Divide|Power|Subscript|BracketingBar,	(* If we put "Divide" here, we get a nice-looking FractionBox. *)
+    		Times|Divide|Power|Subscript|BracketingBar|Slot,	(* If we put "Divide" here, we get a nice-looking FractionBox. *)
     		MakeBoxes[ b[ arg], TheoremaForm],
     		_,
     		If[ isTmaOperatorName[ op],
