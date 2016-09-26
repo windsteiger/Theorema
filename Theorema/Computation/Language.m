@@ -1680,49 +1680,55 @@ Set$TM /: Intersection$TM[ a_Set$TM, b_Set$TM] /; buiActive["Intersection"] :=
 	]
 Set$TM /: Annotated$TM[ Intersection$TM, SubScript$TM[ dom_]][ a_Set$TM, b_Set$TM] /; buiActive["Intersection"] :=
 	Module[ {res = Set$TM[]},
-		res /; (Scan[ If[ elementOf[ #, b, DomainOperation$TM[ dom, Equal$TM]], AppendTo[res, #], Null, res = False; Return[]]&, a]; res =!= False)
+		res /; (Scan[ If[ elementOf[ #, b, DomainOperation$TM[ dom, Equal$TM]], AppendTo[ res, #], Null, res = False; Return[]]&, a]; res =!= False)
 	]
 Set$TM /: Backslash$TM[ a_Set$TM, b___Set$TM] /; buiActive["Difference"] :=
-	Module[ {res = Set$TM[]},
-		res /; (Scan[ If[ elementOf[ #, Union[ b], Equal$TM], Null, AppendTo[res, #], res = False; Return[]] &, a]; res =!= False)
+	With[ {ub = Union[ b]},
+		Module[ {res = Set$TM[]},
+			res /; (Scan[ If[ elementOf[ #, ub, Equal$TM], Null, AppendTo[ res, #], res = False; Return[]] &, a]; res =!= False)
+		]
 	]
 Set$TM /: Annotated$TM[ Backslash$TM, SubScript$TM[ dom_]][ a_Set$TM, b___Set$TM] /; buiActive["Difference"] :=
-	Module[ {res = Set$TM[]},
-		res /; (Scan[ If[ elementOf[ #, Union[ b], DomainOperation$TM[ dom, Equal$TM]], Null, AppendTo[res, #], res = False; Return[]] &, a]; res =!= False)
+	With[ {ub = Union[ b]},
+		Module[ {res = Set$TM[]},
+			res /; (Scan[ If[ elementOf[ #, ub, DomainOperation$TM[ dom, Equal$TM]], Null, AppendTo[ res, #], res = False; Return[]] &, a]; res =!= False)
+		]
 	]
 Set$TM /: EmptyUpTriangle$TM[ a_Set$TM, b_Set$TM] /; buiActive["SymmetricDifference"] :=
 	Module[ {res = Set$TM[]},
 		res /;
-			(Scan[ If[ elementOf[ #, b, Equal$TM], Null, AppendTo[res, #], res = False; Return[]] &, a];
+			(Scan[ If[ elementOf[ #, b, Equal$TM], Null, AppendTo[ res, #], res = False; Return[]] &, a];
 			If[ res === False,
 				False,
-				Scan[ If[ elementOf[ #, a, Equal$TM], Null, AppendTo[res, #], res = False; Return[]] &, b];
+				Scan[ If[ elementOf[ #, a, Equal$TM], Null, AppendTo[ res, #], res = False; Return[]] &, b];
 				res =!= False
 			])
 	]
 Set$TM /: Annotated$TM[ EmptyUpTriangle$TM, SubScript$TM[ dom_]][ a_Set$TM, b_Set$TM] /; buiActive["SymmetricDifference"] :=
 	Module[ {res = Set$TM[]},
 		res /;
-			(Scan[ If[ elementOf[ #, b, DomainOperation$TM[ dom, Equal$TM]], Null, AppendTo[res, #], res = False; Return[]] &, a];
+			(Scan[ If[ elementOf[ #, b, DomainOperation$TM[ dom, Equal$TM]], Null, AppendTo[ res, #], res = False; Return[]] &, a];
 			If[ res === False,
 				False,
-				Scan[ If[ elementOf[ #, a, DomainOperation$TM[ dom, Equal$TM]], Null, AppendTo[res, #], res = False; Return[]] &, b];
+				Scan[ If[ elementOf[ #, a, DomainOperation$TM[ dom, Equal$TM]], Null, AppendTo[ res, #], res = False; Return[]] &, b];
 				res =!= False
 			])
 	]
 Set$TM /: Cross$TM[ a:(Set$TM[ ___?isIndividual]..)] /; buiActive["CartesianProduct"] :=
 	Set$TM @@ Replace[ Tuples[ {a}], List[ x__] :> Tuple$TM[ x], {1}]
 Set$TM /: Element$TM[ p_, a_Set$TM] /; buiActive["IsElement"] :=
-	Module[ {res},
-		res /; (res = elementOf[ p, a, Equal$TM]; MatchQ[ res, True|False])
+	With[ {res = elementOf[ p, a, Equal$TM]},
+		res /; MatchQ[ res, True|False]
 	]
 Set$TM /: Annotated$TM[ Element$TM, SubScript$TM[ dom_]][ p_, a_Set$TM] /; buiActive["IsElement"] :=
-	Module[ {res},
-		res /; (res = elementOf[ p, a, DomainOperation$TM[ dom, Equal$TM]]; MatchQ[ res, True|False])
+	With[ {res = elementOf[ p, a, DomainOperation$TM[ dom, Equal$TM]]},
+		res /; MatchQ[ res, True|False]
 	]
 Set$TM /: \[ScriptCapitalP]$TM[ a:Set$TM[ ___?isIndividual]] /; buiActive["PowerSet"] := Set$TM @@ Subsets[ a]
-Set$TM /: BracketingBar$TM[ a_Set$TM] /; buiActive["Cardinality"] && pairwiseDistinct[ a, Equal$TM] :=	(* 'a' must not contain sequence elements; this is checked in 'pairwiseDistinct'. *)
-	Length[ a]
+Set$TM /: BracketingBar$TM[ a_Set$TM] /; buiActive["Cardinality"] :=
+	With[ {a0 = DeleteDuplicates[ a]},
+		Length[ a0] /; pairwiseDistinct[ a0, Equal$TM]	(* 'a' must not contain sequence elements; this is checked in 'pairwiseDistinct'. *)
+	]
 Set$TM /: max$TM[ Set$TM[ e__]] /; buiActive["MaximumElementSet"] :=
 	Module[ {res = applyFlexOperation[ DeleteDuplicates[ Hold[ e]], max$TM, Max, $Failed, DirectedInfinity[ 1]]},
 		(res /. Max -> max$TM /. {m:(max$TM[ _Set$TM]) :> m, max$TM[ x___] :> max$TM[ Set$TM[ x]]}) /; res =!= $Failed

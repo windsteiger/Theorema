@@ -30,18 +30,15 @@ Begin["`Private`"]
 (* Preprocessing *)
 
 (* Define "freshNames[]", "freshNamesProg[]" as below, because otherwise parts with "Program" don't work. *)
-(* 'dropWolf' specifies whether suffix "\[Wolf]" should be dropped from symbols for getting the corresponding Mma function.
+(* 'dropWolf' specifies whether prefix "\[Wolf]" should be dropped from symbols for getting the corresponding Mma function.
 	This should in fact only happen in computation-cells but not in formula cells, in order to prevent evaluation.
 	Function 'transferToComputation' takes care of dropping "\[Wolf]" in function definitions that originate from formulas. *)
 freshNames[ expr_Hold, dropWolf_:False] :=
-	Module[ {symPos, repl, progPos, progSymPos, setPos, progSetPos, aux},
+	Module[ {symPos, repl, progPos, progSymPos},
 		progPos = Position[ expr, (Theorema`Computation`Language`Program|Program)[ _]];
-		setPos = Position[ expr, _makeSet];
-		progSetPos = Select[ setPos, isSubPositionOfAny[ #, progPos]&];
-		setPos = Complement[ setPos, progSetPos];
-		(* There are certain expressions, into which we do not want to go deeper for substituting fresh names. 
+		(* There are certain expressions, into which we do not want to go deeper for substituting fresh names.
 		   An example is a META$[__] expression representing a meta-variable in a proof, which has a list as
-		   its 3rd parameter. Going into it would turn the list into a Set$TM ... 
+		   its 3rd parameter. Going into it would turn the list into a Set$TM ...
 		   If other cases occur in the future, just add a suitable transformation here BEFORE the replaceable
 		   positions are computed. *)
 		symPos = DeleteCases[ Position[ expr /. {(h:(Theorema`Computation`Language`META$|META$))[ __] -> h[]}, _Symbol], {0}, {1}, 1];
@@ -49,23 +46,8 @@ freshNames[ expr_Hold, dropWolf_:False] :=
 		(* Use 'Replace' instead of 'Map', otherwise there are problems with 'Slot' appearing in the Theorema expression. *)
 		repl = Join[ Replace[ Complement[ symPos, progSymPos], p_ :> (p -> freshSymbol[ Extract[ expr, p, Hold], dropWolf]), {1}],
 					Replace[ progSymPos, p_ :> (p -> freshSymbolProg[ Extract[ expr, p, Hold], dropWolf]), {1}]];
-		aux = ReplacePart[ ReplacePart[ expr, repl], Map[ Append[ #, 0]&, progSetPos] -> ToExpression[ "List$TM"]];
-		(* All remaining 'makeSet' must be replaced by 'Set$TM', with their arguments sorted. No unwanted evaluation must happen.
-			Note that it is not possible to simply provide a definition for 'makeSet' that does the job, due to the presence of 'Hold'-attributes. *)
-		With[ {set = ToExpression[ "Set$TM"]},
-			Scan[
-				Function[ pos,
-					With[ {sub = Extract[ aux, pos, Hold]},
-						With[ {a = set @@ Union @@ Map[ Hold, sub, {2}]},
-							aux = ReplacePart[ aux, RuleDelayed @@ Prepend[ FlattenAt[ Hold[ a], Table[ {1, i}, {i, Length[ a]}]], pos]]
-						]
-					]
-				],
-				Sort[ setPos, Length[ #1] > Length[ #2]&]	(* We must replace innermost first. *)
-			]
-		];
 		(* The "FlattenAt" simply replaces every "Program[p]" by "p". *)
-		FlattenAt[ aux, progPos]
+		FlattenAt[ ReplacePart[ expr, repl], progPos]
 	]
 freshNames[ args___] := unexpected[ freshNames, {args}]
 
@@ -105,7 +87,7 @@ freshSymbol[ Hold[ s_Symbol], dropWolf_] :=
         	Set, ToExpression[ "Assign$TM"],
         	Wedge, ToExpression[ "And$TM"],
         	Vee, ToExpression[ "Or$TM"],
-        	makeSet, makeSet,
+        	makeSet, ToExpression[ "Set$TM"],
         	AngleBracket|List, ToExpression[ "Tuple$TM"],	(* Attention! If this changes, lists must be turned into tuples in 'renameToStandardContext! *)
         	Inequality, ToExpression[ "OperatorChain$TM"],
         	_,
@@ -135,7 +117,7 @@ freshSymbolProg[ Hold[ s_Symbol], dropWolf_] :=
             Theorema`Computation`Language`\[DoubleStruckCapitalR]|\[DoubleStruckCapitalR],
             	ToExpression[ "RealInterval$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]"],
         	Set, ToExpression[ "Assign$TM"],
-        	makeSet, makeSet,
+        	makeSet, ToExpression[ "List$TM"],
         	Inequality, ToExpression[ "OperatorChain$TM"],
         	_,
         	name = ToString[ Unevaluated[ s]];
