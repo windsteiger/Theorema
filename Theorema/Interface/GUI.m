@@ -1549,7 +1549,7 @@ printComputationInfo[ cellID_Integer, cache_, fn_String, cTime_] :=
 			(* This needs to be done in that complicated way, because saving formatted Theorema expressions to the file would result in syntax errors
 			   when reading in the file later (Theorema MakeExpressions are not applied when reading from a file!).
 			   Therefore, we must write something to the file, which is syntactically OK on the plain Mma-level and format it after reading the file *)
-			CellPrint[ Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ Get[ ToExpression[ fnd]] /. {FORM -> displayFormulaFromKey, RESULT -> theoremaDisplay},
+			CellPrint[ Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ Get[ ToExpression[ fnd]] /. FORM -> displayFormulaFromKey,
 				TrackedSymbols :> {$tmaEnv}]]]], "ComputationInfoBody"]]
 		];
 	]
@@ -1597,16 +1597,18 @@ saveComputationCacheDisplay[ cellID_Integer, file_String, cTime_] :=
 saveComputationCacheDisplay[ args___] := unexpected[ saveComputationCacheDisplay, {args}]
 
 summarizeComputationSettings[ cTime_] :=
-	Module[{},
-		TabView[{
+	TabView[
+		{
 			translate[ "input"] -> 	DisplayForm[ $TmaComputationObject[[1]]],
 			(* Out[] is the result of the computation translated to standard context, not anymore Computation`-context.
 			   This ensures that no evaluations will happen even when displaying the result under different built-in settings. *)
-			translate[ "result"] -> RESULT[ Out[]],			
+			translate[ "result"] -> theoremaDisplay[ Out[]],
 			translate[ "statistics"] -> Column[{
     			Labeled[ cTime, translate[ "computationTime"] <> ":", Left]
     			}]
-			}, AutoAction -> True, ControlPlacement -> Left]
+		},
+		AutoAction -> True,
+		ControlPlacement -> Left
 	]
 summarizeComputationSettings[ args___] := unexpected[ summarizeComputationSettings, {args}]
 
