@@ -337,57 +337,74 @@ isFree[ args___] := unexpected[ isFree, {args}]
 
 
 (* 'alphaEquivalent[ a, b]' checks whether the two given expressions 'a' and 'b' are alpha-equivalent
-	to each other, i.e. identical up to renaming bound variables. If 'a' and 'b' are wrapped in 'Hold',
-	no unwanted simplification happens.
+	to each other, i.e. identical up to renaming bound variables. No unwanted simplification happens.
 	As in 'freeVariables', we do not rely on bound variables occurring only once in multi-ranges. *)
-alphaEquivalent[ a_, b_] :=
+alphaEquivalent[ Theorema`Common`FML$[ _, a_, __], Theorema`Common`FML$[ _, b_, __]] :=
+	alphaEquivalent[ Hold[ a], Hold[ b], {}]
+alphaEquivalent[ a_Hold, b_Hold] :=
 	alphaEquivalent[ a, b, {}]
-alphaEquivalent[ Theorema`Common`FML$[ _, a_, __], Theorema`Common`FML$[ _, b_, __], subst_List] :=
-	alphaEquivalent[ a, b, subst]
-alphaEquivalent[ Hold[ v1:(_Theorema`Language`VAR$|_Theorema`Computation`Language`VAR$)], Hold[ v2:(_Theorema`Language`VAR$|_Theorema`Computation`Language`VAR$)], repl_List] :=
-	Replace[ v1, repl] === v2
-alphaEquivalent[ a_, a_, _] := True
-alphaEquivalent[
-		Hold[ q1_[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[ r___], a___]],
-		Hold[ q2_[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[ s___], b___]],
-		repl_List] :=
-	Module[ {newRules = repl, r0, s0},
-		If[ Length[ Hold[ a]] === Length[ Hold[ b]] && alphaEquivalent[ Hold[ q1], Hold[ q2], repl],
-			r0 = List @@ Hold /@ Hold[ r];
-			s0 = List @@ Hold /@ Hold[ s];
-			
-			Length[ r0] === Length[ s0] &&
-			Catch[
-				MapThread[
-					Function[ {r1, s1},
-						With[ {x = r1[[1, 1]], y = s1[[1, 1]]},
-							(* We rely on the fact that EVERY variable-range is of the form '(SIMPRNG$|SETRNG$|...)[ _VAR$, ___]'. *)
-							If[ sequenceTypeEqual[ x, y] && alphaEquivalent[ Delete[ r1, {1, 1}], Delete[ s1, {1, 1}], newRules],
-								PrependTo[ newRules, x -> y];
-								Null,
-								
-								Throw[ False]
+alphaEquivalent[ a_, b_] :=
+	alphaEquivalent[ Hold[ a], Hold[ b], {}]
+alphaEquivalent[ Hold[ v1:(_Theorema`Language`VAR$|_Theorema`Computation`Language`VAR$)], b_, repl_List] :=
+	MatchQ[ b, Hold[ _Theorema`Language`VAR$|_Theorema`Computation`Language`VAR$]] && Replace[ v1, repl] === First[ b]
+alphaEquivalent[ _Hold, Hold[ _Theorema`Language`VAR$|_Theorema`Computation`Language`VAR$], _] :=
+	False
+alphaEquivalent[ Hold[ q1_[ (Theorema`Language`RNG$|Theorema`Computation`Language`RNG$)[ r___], a___]], b_Hold, repl_List] :=
+	Switch[ b,
+		Hold[ _[ _Theorema`Language`RNG$|_Theorema`Computation`Language`RNG$, ___]],
+		With[ {a0 = Hold[ a], b0 = Rest[ First[ Hold @@@ b]]},
+			If[ Length[ a0] === Length[ b0] && alphaEquivalent[ Hold[ q1], Extract[ b, {1, 0}, Hold], repl],
+				With[ {r0 = List @@ Hold /@ Hold[ r], s0 = List @@ Hold /@ Extract[ ReplacePart[ b, {1, 1, 0} -> Hold], {1, 1}]},
+					If[ Length[ r0] === Length[ s0],
+						Module[ {newRules = repl},
+							Catch[
+								MapThread[
+									Function[ {r1, s1},
+										With[ {x = r1[[1, 1]], y = s1[[1, 1]]},
+											(* We rely on the fact that EVERY variable-range is of the form '(SIMPRNG$|SETRNG$|...)[ _VAR$, ___]'. *)
+											If[ sequenceTypeEqual[ x, y] && alphaEquivalent[ Delete[ r1, {1, 1}], Delete[ s1, {1, 1}], newRules],
+												PrependTo[ newRules, x -> y];
+												Null,
+											(*else*)
+												Throw[ False]
+											]
+										]
+									],
+									{r0, s0}
+								];
+								MapThread[
+									If[ alphaEquivalent[ #1, #2, newRules], Null, Throw[ False]]&,
+									{List @@ Hold /@ a0, List @@ Hold /@ b0}
+								];
+								True
 							]
-						]
-					],
-					{r0, s0}
-				];
-				MapThread[
-					If[ alphaEquivalent[ #1, #2, newRules], Null, Throw[ False]]&,
-					{List @@ Hold /@ Hold[ a], List @@ Hold /@ Hold[ b]}
-				];
-				Throw[ True]
-			],
-			
-			False
-		]
+						],
+					(*else*)
+						False
+					]
+				],
+			(*else*)
+				False
+			]
+		],
+		_,
+		False
 	]
-alphaEquivalent[ Hold[ g_[ a___]], Hold[ h_[ b___]], repl_List] :=
-	Length[ Hold[ a]] === Length[ Hold[ b]] &&
-	alphaEquivalent[ Hold[ g], Hold[ h], repl] &&
-	Catch[ MapThread[ If[ alphaEquivalent[ #1, #2, repl], Null, Throw[ False]]&, {List @@ Hold /@ Hold[ a], List @@ Hold /@ Hold[ b]}]; Throw[ True]]
-alphaEquivalent[ a:Except[ _Hold], b_, repl_List] :=
-	alphaEquivalent[ Hold[ a], Hold[ b], repl]
+alphaEquivalent[ _Hold, Hold[ _[ _Theorema`Language`RNG$|_Theorema`Computation`Language`RNG$, ___]], _List] :=
+	False
+alphaEquivalent[ Hold[ g_[ a___]], b_Hold, repl_List] :=
+	Switch[ b,
+		Hold[ _[ ___]],
+		With[ {a0 = Hold[ a], b0 = First[ Hold @@@ b]},
+			Length[ a0] === Length[ b0] &&
+			alphaEquivalent[ Hold[ g], Extract[ b, {1, 0}, Hold], repl] &&
+			Catch[ MapThread[ If[ alphaEquivalent[ #1, #2, repl], Null, Throw[ False]]&, {List @@ Hold /@ a0, List @@ Hold /@ b0}]; True]
+		],
+		_,
+		False
+	]
+alphaEquivalent[ a_Hold, b_Hold, _List] :=
+	a === b
 alphaEquivalent[ _, _, _] :=
 	False
 alphaEquivalent[ args___] := unexpected[ alphaEquivalent, {args}]
