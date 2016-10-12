@@ -219,6 +219,7 @@ falls nicht, siehe <http://www.gnu.org/licenses/>.", ToString[ Date[][[1]]]];
     translate[ "ShowComputation", lang] = "Berechnung anzeigen";
     translate[ "ShowProof", lang] = "Beweis anzeigen";
     translate[ "showProofProgress", lang] = "Bisherigen Beweis anzeigen";
+    translate[ "ShowSimplifiedProof", lang] = "Vereinfachten Beweis anzeigen";
     translate[ "SINGLEOP", lang] = "einfacher Operator";
 	translate[ "sLimits", lang] = "Grenzen der Beweissuche";
 	translate[ "statistics", lang] = "Statistik";

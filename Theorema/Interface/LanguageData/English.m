@@ -216,6 +216,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.", ToString[
     translate[ "ShowComputation", lang] = "Show computation";
     translate[ "ShowProof", lang] = "Show proof";
     translate[ "showProofProgress", lang] = "Show the proof progress so far";
+    translate[ "ShowSimplifiedProof", lang] = "Show simplified proof";
     translate[ "SINGLEOP", lang] = "single operator";
 	translate[ "sLimits", lang] = "Proof Search Limits";
 	translate[ "statistics", lang] = "statistics";

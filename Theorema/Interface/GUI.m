@@ -26,10 +26,7 @@ Needs[ "Theorema`Interface`Language`"]
 
 Begin[ "`Private`"]
 
-If[ $Notebooks,
-	closeTheoremaCommander[]
-];
-
+closeTheoremaCommander[];
 
 (* ::Section:: *)
 (* initGUI *)
@@ -224,7 +221,7 @@ openTheoremaGUI[ args___] := unexpected[ openTheoremaGUI, {args}]
 *)
 openTheoremaCommander[ ] /; $Notebooks :=
     Module[ {},
-        CreatePalette[ Dynamic[
+        $TMAcommander = CreatePalette[ Dynamic[
         	Refresh[
         	activitiesView[
         		(* activities buttons *)
@@ -270,12 +267,14 @@ emptyPane[ text_String:""] := Pane[ text, Alignment -> {Center, Center}]
 emptyPane[ text_String:"", size_] := Pane[ text, size, Alignment -> {Left, Top}]
 emptyPane[ args___] := unexpected[ emptyPane, {args}]
 
-getTheoremaCommander[ ] := 
-	Select[ Notebooks[], (WindowTitle /. Options[ #, WindowTitle]) === translate["Theorema Commander"]&]
+getTheoremaCommander[ ] := $TMAcommander
 getTheoremaCommander[ args___] := unexpected[ getTheoremaCommander, {args}]
 
-closeTheoremaCommander[ ] :=
-	Scan[ NotebookClose, getTheoremaCommander[ ]]
+closeTheoremaCommander[ ] := 
+	If[ ValueQ[ $TMAcommander],
+		NotebookClose[ $TMAcommander];
+		Clear[ $TMAcommander];
+	]
 closeTheoremaCommander[ args___] := unexpected[ closeTheoremaCommander, {args}]
 
 activitiesView[ activitiesLab:{__String}, actionLabs:{{___String}..}, views:{{__}..}] :=
@@ -1466,16 +1465,33 @@ submitProveTask[ ] :=
 submitProveTask[ args___] := unexpected[ submitProveTask, {args}]
 
 execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, strategy_, searchDepth_, searchTime_, simplification_List, repl_Integer] :=
-	Module[{po, pv, pt, st},
+	Module[{po, pv, pt, subsP, fileID, file, st},
 		$addProofKB = {};
 		{pv, po, pt} = callProver[ rules, strategy, goal, kb, searchDepth, searchTime];
 		(* At this point po is equal to the global $TMAproofObject and $TMAproofTree is the corresponding tree *)
-		{po, st} = simplifyProof[ po, simplification];
+		{subsP, fileID, file} = saveProofObject[ po, goal, repl];
+		{po, st} = simplifyProof[ po, simplification, file];
 		(* po is the simplified proof object and $TMAproofTree is the corresponding simplified tree, but $TMAproofObject is still the unsimplified object *)
 		$TMAproofObject = po;
-		printProveInfo[ DeleteDuplicates[ Join[ Map[ {key[#], label[#]}&, kb], Map[ {key[#], label[#]}&, $addProofKB]]], pv, pt, st, simplification, repl];
+		printProveInfo[ DeleteDuplicates[ Join[ Map[ {key[#], label[#]}&, kb], Map[ {key[#], label[#]}&, $addProofKB]]], pv, pt, st, simplification, {subsP, fileID, file}];
 	]
 execProveCall[ args___] := unexpected[ execProveCall, {args}]
+
+saveProofObject[ po_, goal_FML$, repl_Integer] :=
+	Module[{cellID, nbDir, subsP = repl, fileID, file},
+		cellID = getCellIDFromKey[ key@goal];
+		nbDir = createPerNotebookDirectory[ CurrentValue[ $proofInitNotebook, "NotebookFullFileName"]];
+		If[ subsP === 0,
+			(* This may occur if the prover tab has been skipped and $replexistProof still has init val 0 *)
+			subsP = findNumExistingProofs[ $proofInitNotebook, goal] + 1;
+		];
+		fileID = "p" <> cellID <> "-" <> ToString[ subsP];
+		file = FileNameJoin[ {nbDir, fileID}];
+		Put[ po, file <> "-po.m"];		
+		{subsP, fileID, file}
+	]
+saveProofObject[ args___] := unexpected[ saveProofObject, {args}]
+
 
 addKnowledgeWhileProving[ new_List] :=
 	Module[ {},
@@ -1646,18 +1662,8 @@ makeRelFilename[ args___] := unexpected[ makeRelFilename, {args}]
 (* printProofInfo *)
 
 
-printProveInfo[ kbKeysLabels_, pVal_, pTime_, sTime_, simplification_List, replP_] := 
-	Module[ {nbDir, subsP = replP, cellID = getCellIDFromKey[ key@$selectedProofGoal], file, fileID},
-		nbDir = createPerNotebookDirectory[ CurrentValue[ $proofInitNotebook, "NotebookFullFileName"]];
-		(* Generate cache only in plain .m format, since this allows sharing notebooks with users on different platforms.
-			Also, loading a .m-file allows dynamic objects to react to new settings, whereas loading a .mx-file has no effect on dynamics.
-			I assume the speed gain from using mx is neglectable *)
-		If[ subsP === 0,
-			(* This may occur if the prover tab has been skipped and $replexistProof still has init val 0 *)
-			subsP = findNumExistingProofs[ $proofInitNotebook, $selectedProofGoal] + 1;
-		];
-		fileID = "p" <> cellID <> "-" <> ToString[ subsP];
-		file = FileNameJoin[ {nbDir, fileID}];
+printProveInfo[ kbKeysLabels_, pVal_, pTime_, sTime_, simplification_List, {subsP_Integer, fileID_String, file_String}] := 
+	Module[ {},
 		saveProveCacheDisplay[ kbKeysLabels, pTime, sTime, file];
         If[ NotebookFind[ $proofInitNotebook, makeProofIDTag[ $selectedProofGoal] <> "-" <> ToString[ subsP], All, CellTags] === $Failed,
         	(* no replacement of existing proof -> new proof *)
@@ -1677,8 +1683,7 @@ printProveInfo[ kbKeysLabels_, pVal_, pTime_, sTime_, simplification_List, replP
 		With[ {fnpo = makeRelFilename[ fileID], fnd = makeRelFilename[ fileID, "display.m"]},
         	NotebookWrite[ $proofInitNotebook, Cell[ TextData[ {Cell[ BoxData[ ToBoxes[ proofStatusIndicator[ pVal]]]], " " <> translate[ "Proof of"] <> " ",
         		formulaReference[ $selectedProofGoal], " #" <> ToString[ subsP] <> ":   ",
-				Cell[ BoxData[ ToBoxes[ Button[ Style[ translate["ShowProof"], FontVariations -> {"Underline" -> True}], 
-					displayProof[ ToExpression[ fnpo], simplification], ImageSize -> Automatic, Appearance -> None, Method -> "Queued"]]]]}],
+				Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ displayProofButtons[ ToExpression[ fnpo]], UpdateInterval -> 4]]]]]}],
         		"ProofInfo",
         		CellTags -> With[ {pTag = makeProofIDTag[ $selectedProofGoal]}, {pTag, pTag <> "-" <> ToString[ subsP]}],
         		CellFrameLabels -> {{None, Cell[ BoxData[ ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, 
@@ -1689,11 +1694,22 @@ printProveInfo[ kbKeysLabels_, pVal_, pTime_, sTime_, simplification_List, replP
 
 printProveInfo[args___] := unexcpected[ printProveInfo, {args}]
 
+displayProofButtons[ fn_String] :=
+	Module[ {simpFile = Last[ FileNames[ fn <> "-po-*.m"]]},
+		With[ {sl = IntegerDigits[ ToExpression[ First[ StringCases[ simpFile, __ ~~ "-po-" ~~ x_ ~~ ".m" -> x, 1]]], 2] /. {1 -> True, 0 -> False}},
+		    Row[ {Button[ Style[ translate["ShowProof"], FontVariations -> {"Underline" -> True}], 
+					displayProof[ fn, {False, False, False}], ImageSize -> Automatic, Appearance -> None, Method -> "Queued"],
+			      Button[ Style[ translate["ShowSimplifiedProof"], FontVariations -> {"Underline" -> True}], 
+					displayProof[ fn, sl], ImageSize -> Automatic, Appearance -> None, Method -> "Queued"]}, Spacer[3]]
+		]  
+	]
+displayProofButtons[ args___] := unexpected[ displayProofButtons, {args}]
+
 removeGroup[ nb_NotebookObject, base_String] :=
 	Module[ {},
-		(* remove .m and .mx . 
+		(* remove all .m-files. 
 		   Could be specified more precisely using string patterns or regexp, but this crashes under Linux (at least in Mma 8) *)
-		DeleteFile[ FileNames[ FileNameJoin[ {CurrentValue[ nb, "NotebookDirectory"], FileBaseName[ CurrentValue[ nb, "NotebookFileName"]], base <> "*.m*"}]]];
+		DeleteFile[ FileNames[ FileNameJoin[ {CurrentValue[ nb, "NotebookDirectory"], FileBaseName[ CurrentValue[ nb, "NotebookFileName"]], base <> "*.m"}]]];
 		SelectionMove[ nb, All, ButtonCell];
 		SelectionMove[ nb, All, CellGroup];
 		NotebookDelete[ nb];
@@ -1712,7 +1728,9 @@ makeProofIDTag[ args___] := unexpected[ makeProofIDTag, {args}]
 
 saveProveCacheDisplay[ kbKeysLabels_, pTime_, sTime_, file_String] :=
 	With[ {fn = file <> ".m"},
-		Put[ $TMAproofObject, file <> "-po.m"];
+		(* Generate cache only in plain .m format, since this allows sharing notebooks with users on different platforms.
+			Also, loading a .m-file allows dynamic objects to react to new settings, whereas loading a .mx-file has no effect on dynamics.
+			I assume the speed gain from using mx is neglectable *)
 		Apply[ Put[ ##, fn]&, Map[ Definition, $allProveSettings]];
 		PutAppend[ Definition[ $tmaEnv], Definition[ $kbStruct], fn];
 		Put[ 
@@ -1828,13 +1846,13 @@ newCloseEnvCell[ args___] := unexpected[ newCloseEnvCell, {args}]
 
 makeNbNewButton[] :=
 	Button[ translate[ "New"],
-		createNbRememberLocation[ Magnification -> CurrentValue[ First[ getTheoremaCommander[]], Magnification]],
+		createNbRememberLocation[ Magnification -> CurrentValue[ getTheoremaCommander[], Magnification]],
 		Alignment -> {Left, Top}, Method -> "Queued"]
 makeNbNewButton[ args___] := unexpected[ makeNbNewButton, {args}]
 
 makeNbOpenButton[ ] :=
 	Button[ translate["Open"],
-		openNbRememberLocation[ Magnification -> CurrentValue[ First[ getTheoremaCommander[]], Magnification]],
+		openNbRememberLocation[ Magnification -> CurrentValue[ getTheoremaCommander[], Magnification]],
 		Method -> "Queued"
 	]
 makeNbOpenButton[ args___] := unexpected[ makeNbOpenButton, {args}]
@@ -2689,7 +2707,7 @@ tmaNotebookPut[ nb_Notebook, style_String, opts___?OptionQ] :=
 	NotebookPut[ nb, 
 		StyleDefinitions -> makeColoredStylesheet[ style],
 		WindowTitle -> "Theorema " <> translate[ style],
-		Magnification -> CurrentValue[ First[ getTheoremaCommander[]], Magnification],
+		Magnification -> CurrentValue[ getTheoremaCommander[], Magnification],
 		opts
 	]
 tmaNotebookPut[ args___] := unexpected[ tmaNotebookPut, {args}]
@@ -2698,7 +2716,7 @@ tmaDialogInput[ Notebook[ expr_, nbOpts___?OptionQ], style_String, opts___?Optio
 	DialogInput[ 
 		Notebook[ expr, 
 			StyleDefinitions -> makeColoredStylesheet[ style],
-			Magnification -> CurrentValue[ First[ getTheoremaCommander[]], Magnification],
+			Magnification -> CurrentValue[ getTheoremaCommander[], Magnification],
 			ShowCellBracket -> False, Deployed -> True,
 			WindowSize -> All,
 			WindowElements -> {"VerticalScrollBar", "HorizontalScrollBar", "StatusArea"},
