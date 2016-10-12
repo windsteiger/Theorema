@@ -89,7 +89,6 @@ With[ {lang = "English"},
 	MessageName[ orKB, "usage", lang] = "Case distinction based on a disjunction in the knowledge base";
 
 	MessageName[ partSolveMetaMatching, "usage", lang] = "Instantiate meta-variables by matching";
-	MessageName[ partSolveMetaMultiMatching, "usage", lang] = "Instantiate meta-variables by matching (multiple matching)";
 
 	MessageName[ quantifierRules, "usage", lang] = "Rules for quantifiers";
 
@@ -467,13 +466,13 @@ proofStepText[ partSolveMetaMatching, lang, {{u_}}, {{g_}}, ___, "instantiation"
 	goalCell[ g, "."]
 	};
 
-proofStepText[ partSolveMetaMultiMatching, lang, {{u_}}, {{g__}}, ___, "instantiation" -> inst_List, ___] := {
+proofStepText[ partSolveMetaMatching, lang, {{{_}}, {{_}}..}, {{{_}}, {{_}}..}, ___, "instantiation" -> inst_List, ___] := {
 	textCell[ "We have several choices."]
 	};
 
-subProofHeader[ partSolveMetaMultiMatching, lang, {{u_}}, {g_List}, ___, "instantiation" -> inst_List, ___, pVal_, {p_}] := {
-	textCell[ "Let now ", inlineTheoremaExpressionSeq[ inst[[p]], lang], ". In order to prove ", formulaReference[ u], " it suffices to show"],
-	goalCell[ g[[p]], "."]
+subProofHeader[ partSolveMetaMatching, lang, {{{u_}}, {{u_}}..}, g_List, ___, "instantiation" -> inst_List, ___, pVal_, {i_}] := {
+	textCell[ "Let now ", inlineTheoremaExpressionSeq[ inst[[i]], lang], ". In order to prove ", formulaReference[ u], " it suffices to show"],
+	goalCell[ g[[i, 1, 1]], "."]
 	};
 
 (* ::Subsection:: *)
@@ -484,12 +483,12 @@ proofStepText[ solveMetaUnification, lang, {{u_}}, {{g_}}, ___, "instantiation" 
 	goalCell[ g, "."]
 	};
 
-proofStepText[ solveMetaUnification, lang, {{u_}}, {g_List}, ___, "instantiation" -> inst_List, ___] := 
+proofStepText[ solveMetaUnification, lang, {{{_}}..}, {{{_}}..}, ___, "instantiation" -> inst_List, ___] := 
 	{textCell[ "We can instantiate."]};
 
-subProofHeader[ solveMetaUnification, lang, {{u_}}, {g_List}, ___, "instantiation" -> inst_List, ___, {i_}] := {
+subProofHeader[ solveMetaUnification, lang, {{{u_}}..}, g_List, ___, "instantiation" -> inst_List, ___, {i_}] := {
 	textCell[ "Let now ", inlineTheoremaExpressionSeq[ inst[[i]], lang], ". In order to prove ", formulaReference[ u], " it suffices to show"],
-	goalCell[ g[[i]], "."]
+	goalCell[ g[[i, 1, 1]], "."]
 	};	
 
 (* ::Subsection:: *)

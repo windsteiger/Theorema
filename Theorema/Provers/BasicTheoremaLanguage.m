@@ -856,7 +856,7 @@ compatibleRange[ args___] := unexpected[ compatibleRange, {args}]
 inferenceRule[ solveMetaUnification] = 
 ps:(PRFSIT$[ g:FML$[ _, a_And$TM, lab_, ___] /; MemberQ[ a, e_Equal$TM /; !FreeQ[ e, _META$]], K_List, id_, rest___?OptionQ]|
 PRFSIT$[ g:FML$[ _, e_Equal$TM /; !FreeQ[ e, _META$], lab_, ___], K_List, id_, rest___?OptionQ]) :> performProofStep[
-	Module[ {eq, com, inst, newGoalsAlt},
+	Module[ {eq, com, inst, newGoalsAlt, l},
 		If[ Head[ formula@g] === Equal$TM,
 		  eq = {e},
 		  (* else *)
@@ -866,23 +866,29 @@ PRFSIT$[ g:FML$[ _, e_Equal$TM /; !FreeQ[ e, _META$], lab_, ___], K_List, id_, r
 		If[ com === $Failed,
 			Throw[ $Failed]
 		];
-		newGoalsAlt = Map[ makeGoalFML[ formula -> #]&, a /. inst];
-		If[ Length[ com] == 1,
+		newGoalsAlt = Map[ makeGoalFML[ formula -> #]&, formula@g /. inst];
+		l = Length[ newGoalsAlt];
+		If[ l == 1,
 			makeANDNODE[ makePRFINFO[ name -> solveMetaUnification, used -> g, "instantiation" -> inst], 
             	toBeProved[ goal -> newGoalsAlt[[1]], kb -> K, rest]
         	],
         	(* else *)
-        	makeORNODE[ makePRFINFO[ name -> solveMetaUnification, used -> g, "instantiation" -> inst], 
+        	makeORNODE[ makePRFINFO[ name -> solveMetaUnification, used -> Table[ {{g}}, l], generated -> Map[ {{#}}&, newGoalsAlt], "instantiation" -> inst], 
             	Map[ toBeProved[ goal -> #, kb -> K, rest]&, newGoalsAlt]
         	]
 		]
 	]
 ]
 
+simplifiedProofInfo[ pi_, n_Integer] /; name@pi === solveMetaUnification := 
+	Module[ {p = Position[ pi, "instantiation" -> _]},
+		MapAt[ #[[n]]&, pi, Join[ {{2}, {3}}, p]]
+	]
+	
 inferenceRule[ partSolveMetaMatching] = 
 ps:(PRFSIT$[ g:FML$[ _, a:And$TM[ pre___, x_ /; !FreeQ[ x, _META$], post___], lab_, ___], K_List, id_, rest___?OptionQ]|
 PRFSIT$[ g:FML$[ _, a:x_ /; !FreeQ[ x, _META$], lab_, ___], K_List, id_, rest___?OptionQ]) :> performProofStep[
-	Module[ {inst = Map[ instantiation[ x, formula@#]&, K], posInst, newGoalsAlt},
+	Module[ {inst = Map[ instantiation[ x, formula@#]&, K], posInst, newGoalsAlt, l},
 		posInst = Position[ inst, _List, {1}];
 		If[ posInst === {},
 			Throw[ $Failed],
@@ -890,17 +896,24 @@ PRFSIT$[ g:FML$[ _, a:x_ /; !FreeQ[ x, _META$], lab_, ___], K_List, id_, rest___
 			inst = Extract[ inst, posInst];
 		];
 		newGoalsAlt = Map[ makeGoalFML[ formula -> #]&, a /. inst];
-		If[ Length[ posInst] == 1,
+		l = Length[ newGoalsAlt];
+		If[ l == 1,
 			makeANDNODE[ makePRFINFO[ name -> partSolveMetaMatching, used -> g, "instantiation" -> inst], 
             	toBeProved[ goal -> newGoalsAlt[[1]], kb -> K, rest]
         	],
         	(* else *)
-        	makeORNODE[ makePRFINFO[ name -> partSolveMetaMultiMatching, used -> g, "instantiation" -> inst], 
+        	makeORNODE[ makePRFINFO[ name -> partSolveMetaMatching, used -> Table[ {{g}}, l], generated -> Map[ {{#}}&, newGoalsAlt], "instantiation" -> inst], 
             	Map[ toBeProved[ goal -> #, kb -> K, rest]&, newGoalsAlt]
         	]
 		]
 	]
 ]
+
+simplifiedProofInfo[ pi_, n_Integer] /; name@pi === partSolveMetaMatching := 
+	Module[ {p = Position[ pi, "instantiation" -> _]},
+		MapAt[ {#[[n]]}&, MapAt[ #[[n]]&, pi, {{2}, {3}}], Insert[ p, 2, {1, 2}]]
+	]
+	
 
 inferenceRule[ maxTuples1] = 
 ps:PRFSIT$[ g:FML$[ _, GreaterEqual$TM[ Subtract$TM[ 
