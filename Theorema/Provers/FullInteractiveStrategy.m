@@ -100,14 +100,14 @@ fullInteractiveStrategy[ psOrig_PRFSIT$] :=
 				filterString = "";
 				filteredRule = 0;
 				If[ nb === Null,
-					kbS = Table[ False, {Length[kb@ps]}];
+					kbS = Table[ False, {Length[ kb@ps]}];
 					psCells = selectablePSitCells[ ps, goalSelected, kbS];
 					nb = Notebook[ psCells,
 							DockedCells -> {
-								Cell[ BoxData[ ToBoxes[ Row[ actionRow[ ps, "log.txt", Hold[ ruleNames], Hold[ makeAlternatives], Hold[ kbS]], Spacer[ 5]]]], "Hint", Deployed -> True],
+								Cell[ BoxData[ ToBoxes[ Row[ actionRow[ ps, "log.txt", Hold[ ruleNames], Hold[ makeAlternatives], Hold[ kbS]], Spacer[ 5]]]], "Hint", Background -> TMAColor[ 1], Deployed -> True],
 								Cell[ BoxData[ ToBoxes[ Dynamic[ status]]], "Text", ShowStringCharacters -> False, Deployed -> True]
-							}, 
-							StyleDefinitions -> makeColoredStylesheet[ "Dialog"], 
+							},
+							StyleDefinitions -> makeColoredStylesheet[ "Dialog"],
 							Magnification -> CurrentValue[ First[ getTheoremaCommander[]], Magnification],
 							ShowCellBracket -> False,
 							Editable -> False,
@@ -536,7 +536,8 @@ proofsitNB[ i_] :=
 											]
 										}]
 									]],
-									"Hint"
+									"Hint",
+									Background -> TMAColor[ 1]
 								]
 				]
 			]
@@ -673,7 +674,8 @@ thresholdNB[ threshold_List] :=
 											Appearance -> "Frameless", ImageSize -> 70
 										], translate[ "ttOK"]]
 							}]]],
-							"Hint"
+							"Hint",
+							Background -> TMAColor[ 1]
 						]
 		]
 	]
@@ -725,7 +727,8 @@ settingsNB[ PRFSIT$[ _, _List, _String, rest___]] :=
 											Join[ {rs}, toActivityPriorityLists[ allRules, ruleA, ruleP], {strat, selectInter, filterInter, rs =!= rsOrig}]
 										], Appearance -> "Frameless", ImageSize -> 70], translate[ "ttOK"]]
 								}]]],
-								"Hint"
+								"Hint",
+								Background -> TMAColor[ 1]
 							]
 			],
 			
@@ -829,10 +832,10 @@ ruleNB[ k_List, sits_List, Hold[ ma_]] :=
 							{i, ToString[ i] -> proofToBoxes[ #, k]}
 						]&,
 						sits
-					], 
+					],
 					Dynamic[ out]
-				]]]}, 
-				DockedCells -> Cell[ BoxData[ ToBoxes[ Row[ menu, Spacer[ 10]]]], "Hint"]
+				]]]},
+				DockedCells -> Cell[ BoxData[ ToBoxes[ Row[ menu, Spacer[ 10]]]], "Hint", Background -> TMAColor[ 1]]
 			]
 		]
 	]
