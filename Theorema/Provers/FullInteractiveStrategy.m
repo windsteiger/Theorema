@@ -104,7 +104,7 @@ fullInteractiveStrategy[ psOrig_PRFSIT$] :=
 					psCells = selectablePSitCells[ ps, goalSelected, kbS];
 					nb = Notebook[ psCells,
 							DockedCells -> {
-								Cell[ BoxData[ ToBoxes[ Row[ actionRow[ ps, "log.txt", Hold[ ruleNames], Hold[ makeAlternatives], Hold[ kbS]], Spacer[ 5]]]], "Hint", Background -> TMAColor[ 1], Deployed -> True],
+								Cell[ BoxData[ ToBoxes[ Row[ actionRow[ ps, "log.txt", Hold[ ruleNames], Hold[ makeAlternatives], Hold[ kbS]], Spacer[ 5]]]], "Hint", Background -> TMAcolor[ 1], Deployed -> True],
 								Cell[ BoxData[ ToBoxes[ Dynamic[ status]]], "Text", ShowStringCharacters -> False, Deployed -> True]
 							},
 							StyleDefinitions -> makeColoredStylesheet[ "Dialog"],
@@ -537,7 +537,7 @@ proofsitNB[ i_] :=
 										}]
 									]],
 									"Hint",
-									Background -> TMAColor[ 1]
+									Background -> TMAcolor[ 1]
 								]
 				]
 			]
@@ -675,7 +675,7 @@ thresholdNB[ threshold_List] :=
 										], translate[ "ttOK"]]
 							}]]],
 							"Hint",
-							Background -> TMAColor[ 1]
+							Background -> TMAcolor[ 1]
 						]
 		]
 	]
@@ -728,7 +728,7 @@ settingsNB[ PRFSIT$[ _, _List, _String, rest___]] :=
 										], Appearance -> "Frameless", ImageSize -> 70], translate[ "ttOK"]]
 								}]]],
 								"Hint",
-								Background -> TMAColor[ 1]
+								Background -> TMAcolor[ 1]
 							]
 			],
 			
@@ -835,7 +835,7 @@ ruleNB[ k_List, sits_List, Hold[ ma_]] :=
 					],
 					Dynamic[ out]
 				]]]},
-				DockedCells -> Cell[ BoxData[ ToBoxes[ Row[ menu, Spacer[ 10]]]], "Hint", Background -> TMAColor[ 1]]
+				DockedCells -> Cell[ BoxData[ ToBoxes[ Row[ menu, Spacer[ 10]]]], "Hint", Background -> TMAcolor[ 1]]
 			]
 		]
 	]
