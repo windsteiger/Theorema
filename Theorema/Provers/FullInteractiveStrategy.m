@@ -95,6 +95,7 @@ fullInteractiveStrategy[ psOrig_PRFSIT$] :=
 				]
 			];
 			If[ newNodes === {},
+				$currentPS = ps;
 				rules = Last[ allRules];
 				ruleNames = rulesToString[ rules, 80];
 				filterString = "";
@@ -104,7 +105,7 @@ fullInteractiveStrategy[ psOrig_PRFSIT$] :=
 					psCells = selectablePSitCells[ ps, goalSelected, kbS];
 					nb = Notebook[ psCells,
 							DockedCells -> {
-								Cell[ BoxData[ ToBoxes[ Row[ actionRow[ ps, "log.txt", Hold[ ruleNames], Hold[ makeAlternatives], Hold[ kbS]], Spacer[ 5]]]], "Hint", Background -> TMAcolor[ 1], Deployed -> True],
+								Cell[ BoxData[ ToBoxes[ Row[ actionRow[ "log.txt", Hold[ ruleNames], Hold[ makeAlternatives], Hold[ kbS]], Spacer[ 5]]]], "Hint", Background -> TMAcolor[ 1], Deployed -> True],
 								Cell[ BoxData[ ToBoxes[ Dynamic[ status]]], "Text", ShowStringCharacters -> False, Deployed -> True]
 							},
 							StyleDefinitions -> makeColoredStylesheet[ "Dialog"],
@@ -136,22 +137,22 @@ fullInteractiveStrategy[ psOrig_PRFSIT$] :=
 						$Canceled|$Failed,
 						Throw[$Aborted],
 						
-						$tryagain[ _], 
+						$tryagain[ _],
 						status = statusText = Text[ translate[ "psNotAutomatically"] <> " " <> translate[ "makeInfStep"]];
-						If[ TrueQ[ First[ dr]] && Last[ threshold] =!= 100, 
+						If[ TrueQ[ First[ dr]] && Last[ threshold] =!= 100,
 							threshold[[-1]] = 100;
 							updateThreshold[ ps, threshold]
 						];
 						Throw[ Null],
 						
-						$removeKB, 
+						$removeKB,
 						dr = {createNode[ Theorema`Provers`$FullInteractiveStrat$removeKB, toBeProved[ goal -> goal@ps, kb -> Pick[ kb@ps, kbS], Sequence@@Drop[ ps, 3]], psOrig, makeAlternatives]};
 						makeAlternatives = False;
 						Throw[dr],
 						
-						$move, 
+						$move,
 						If[ psNB === Null, psNB = proofsitNB[ id@ps]];
-						If[ psNB === $Failed, 
+						If[ psNB === $Failed,
 							status = statusText = errorText[];
 							filterString = "",
 							$selectedProofStep = id@ps;
@@ -167,7 +168,7 @@ fullInteractiveStrategy[ psOrig_PRFSIT$] :=
 							]
 						],
 						
-						$move[ _, _, _], 
+						$move[ _, _, _],
 						If[ TrueQ[ Last[ dr]] && Last[ threshold] =!= 100,
 							threshold[[-1]] = 100;
 							updateThreshold[ ps, threshold]
@@ -184,9 +185,9 @@ fullInteractiveStrategy[ psOrig_PRFSIT$] :=
 						
 						$adjustSettings,
 						If[ setNB === Null, setNB = settingsNB[ ps]];
-						If[ setNB =!= $Failed, 
+						If[ setNB =!= $Failed,
 							dr = FISDialogInput[ setNB, WindowTitle -> translate[ "changeProverSettings"]];
-							If[ ListQ[ dr] && Length[ dr] === 7, 
+							If[ ListQ[ dr] && Length[ dr] === 7,
 								status = statusText = Text[ translate[ "settingsChanged"] <> " " <> translate[ "makeInfStep"]];
 								ps = Replace[ ps, MapThread[ ((#1 -> _) -> (#1 -> #2)) &, {{Theorema`Common`rules, ruleActivity, rulePriority, strategy}, Drop[dr, -3]}], {1}];
 								$interactiveProofSitSel = dr[[5]];
@@ -342,61 +343,63 @@ selectablePSitCells[ PRFSIT$[ g_FML$, kb_List, ___], gv_, av_] :=
 		}
 	]
 	
-actionRow[ ps:PRFSIT$[ _, kb_List, ___], filename_String, Hold[ ruleNames_], Hold[ ma_], Hold[ av_]] :=
-	{
-		Tooltip[ Toggler[ Dynamic[ ma], {True -> Style[ "\[Or]", Larger, Bold], False -> Style[ "\[Or]", Larger, TMAcolor[ 13]]}], 
-				translate[ "ttMakeAlternatives"]
-		],
-
-		Tooltip[ Button[ "Show Proof",
-					(
-						$TMAproofNotebook = tmaNotebookPut[ Notebook[ pObjCells[]], "Proof"];
-						NotebookLocate[ {CurrentValue[ $TMAproofNotebook, "NotebookFileName"], id@ps}]
-					),
-					Appearance -> "Frameless"
-				],
-				translate[ "showProofProgress"]
-		],
-
-		Tooltip[ Dynamic[ Refresh[ ActionMenu[ translate[ "inferenceRules"], ruleNames, Appearance -> "Frameless", Enabled -> (ruleNames =!= {})], TrackedSymbols :> {ruleNames}]], 
-				translate[ "ttApplyRule"]
-		],
-
-		Tooltip[ ActionMenu[ translate[ "proofSearch"], {"\[LeftArrow] \[And]" :> DialogReturn[ $move[ Previous, And, False]],
-												"\[Rule] \[And]" :> DialogReturn[ $move[ Next, And, False]],
-												"\[LeftArrow] \[Or]" :> DialogReturn[ $move[ Previous, Or, False]],
-												"\[Rule] \[Or]" :> DialogReturn[ $move[ Next, Or, False]],
-												translate[ "choosePSMenuItem"] :> DialogReturn[ $move],
-												translate[ "tryAgain"] :> DialogReturn[ $tryagain[ False]],
-												translate[ "proveNowAuto"] :> DialogReturn[ $tryagain[ True]],
-												translate[ "proveLaterAuto"] :> DialogReturn[ $move[ Next, And, True]]},
-							Appearance -> "Frameless"],
-				translate[ "ttProofSearch"]
-		],
-
-		Tooltip[ ActionMenu[ translate[ "settings"], {translate[ "adjustProver"] :> DialogReturn[ $adjustSettings],
-												translate[ "adjustThresholds"] :> DialogReturn[ $adjustThreshold]},
-							Appearance -> "Frameless"],
-				translate[ "ttSettings"]
-		],
-
-		Tooltip[ ActionMenu[ translate[ "debugging"], {
-											translate[ "inspectPO"] :>
-												CreateDocument[
-													{CellGroup[ {TextCell[ translate[ "curPS"], "Subsubsection"], ps}, 1],
-													CellGroup[ {TextCell[ translate[ "curPO"], "Subsubsection"], $TMAproofObject}, 1]},
-													WindowTitle -> translate[ "PO"]
-												],
-											translate[ "inspectRewriteRules"] :> rewriteRulesDocument[ ps],
-											translate[ "showHiddenKnowledge"] :> knowledgeDocument[ ps],
-											translate[ "psToFile"] :> PutAppend[ ps, filename],
-											translate[ "poToFile"] :> PutAppend[ $TMAproofObject, filename],
-											translate[ "saveProof"] :> saveProof[ id@ps, "TheoremaProof.m"]},
-							Appearance -> "Frameless"],
-				translate[ "ttDebugging"]
-		]
-	}
+actionRow[ filename_String, Hold[ ruleNames_], Hold[ ma_], Hold[ av_]] :=
+	With[ {i = id@$currentPS},
+		{
+			Tooltip[ Toggler[ Dynamic[ ma], {True -> Style[ "\[Or]", Larger, Bold], False -> Style[ "\[Or]", Larger, TMAcolor[ 13]]}],
+					translate[ "ttMakeAlternatives"]
+			],
 	
+			Tooltip[ Button[ "Show Proof",
+						(
+							$TMAproofNotebook = tmaNotebookPut[ Notebook[ pObjCells[]], "Proof"];
+							NotebookLocate[ {CurrentValue[ $TMAproofNotebook, "NotebookFileName"], i}]
+						),
+						Appearance -> "Frameless"
+					],
+					translate[ "showProofProgress"]
+			],
+	
+			Tooltip[ Dynamic[ Refresh[ ActionMenu[ translate[ "inferenceRules"], ruleNames, Appearance -> "Frameless", Enabled -> (ruleNames =!= {})], TrackedSymbols :> {ruleNames}]], 
+					translate[ "ttApplyRule"]
+			],
+	
+			Tooltip[ ActionMenu[ translate[ "proofSearch"], {"\[LeftArrow] \[And]" :> DialogReturn[ $move[ Previous, And, False]],
+													"\[Rule] \[And]" :> DialogReturn[ $move[ Next, And, False]],
+													"\[LeftArrow] \[Or]" :> DialogReturn[ $move[ Previous, Or, False]],
+													"\[Rule] \[Or]" :> DialogReturn[ $move[ Next, Or, False]],
+													translate[ "choosePSMenuItem"] :> DialogReturn[ $move],
+													translate[ "tryAgain"] :> DialogReturn[ $tryagain[ False]],
+													translate[ "proveNowAuto"] :> DialogReturn[ $tryagain[ True]],
+													translate[ "proveLaterAuto"] :> DialogReturn[ $move[ Next, And, True]]},
+								Appearance -> "Frameless"],
+					translate[ "ttProofSearch"]
+			],
+	
+			Tooltip[ ActionMenu[ translate[ "settings"], {translate[ "adjustProver"] :> DialogReturn[ $adjustSettings],
+													translate[ "adjustThresholds"] :> DialogReturn[ $adjustThreshold]},
+								Appearance -> "Frameless"],
+					translate[ "ttSettings"]
+			],
+	
+			Tooltip[ ActionMenu[ translate[ "debugging"], {
+												translate[ "inspectPO"] :>
+													CreateDocument[
+														{CellGroup[ {TextCell[ translate[ "curPS"], "Subsubsection"], $currentPS}, 1],
+														CellGroup[ {TextCell[ translate[ "curPO"], "Subsubsection"], $TMAproofObject}, 1]},
+														WindowTitle -> translate[ "PO"]
+													],
+												translate[ "inspectRewriteRules"] :> rewriteRulesDocument[ $currentPS],
+												translate[ "showHiddenKnowledge"] :> knowledgeDocument[ $currentPS],
+												translate[ "psToFile"] :> PutAppend[ $currentPS, filename],
+												translate[ "poToFile"] :> PutAppend[ $TMAproofObject, filename],
+												translate[ "saveProof"] :> saveProof[ i, "TheoremaProof.m"]},
+								Appearance -> "Frameless"],
+					translate[ "ttDebugging"]
+			]
+		}
+	]
+
 rewriteRulesDocument[ ps_PRFSIT$] :=
 	Module[ {rules, rw = getOptionalComponent[ ps, "rewriting"]},
 		rules = Replace[ rw,
@@ -545,25 +548,27 @@ proofsitNB[ i_] :=
 	]
 
 proofsitButtons[ ps_PRFSIT$, p_List, p_List, _Integer] :=
-	Cell[ CellGroupData[ {Cell[ TextData[ {
-				Cell[ BoxData[ ToBoxes[ RadioButton[ Dynamic[ $selectedProofStep], id@ps]]]], 
-		        "  " <> translate[ "curPS"]
-			}], "Section", ShowGroupOpener -> False],
-			pSitCells[ ps]
-			}, 
-			Dynamic[ If[ $selectedProofStep === id@ps, Open, Closed]]
+	With[ {i = id@ps},
+		Cell[ CellGroupData[ {Cell[ TextData[ {
+					Cell[ BoxData[ ToBoxes[ RadioButton[ Dynamic[ $selectedProofStep], i]]]],
+			        "  " <> translate[ "curPS"]
+				}], "Section", ShowGroupOpener -> False],
+				pSitCells[ ps]
+				},
+				Dynamic[ If[ $selectedProofStep === i, Open, Closed]]
+			]
 		]
 	]
 proofsitButtons[ ps_PRFSIT$, p1_List, p2_List, num_Integer] :=
-	With[ {l1 = Length[ p1], l2 = Length[ p2]}, 
+	With[ {l1 = Length[ p1], l2 = Length[ p2], i = id@ps},
 		Module[ {common, sym}, 
-			If[ l1 >= l2, 
+			If[ l1 >= l2,
 				common = Position[  Transpose[ {Take[ p1, l2], p2}], {x_, y_} /; x =!= y, {1}, 1, Heads -> False];
-				common = If[ common === {}, p2, Take[ p2, common[[1, 1]] - 1]], 
+				common = If[ common === {}, p2, Take[ p2, common[[1, 1]] - 1]],
 				common = Position[ Transpose[ {p1, Take[ p2, l1]}], {x_, y_} /; x =!= y, {1}, 1, Heads -> False];
 				common = If[ common === {}, p1, Take[ p1, common[[1, 1]] - 1]]
 			];
-			sym = Switch[ Extract[ $TMAproofObject, AppendTo[ common, 0]], 
+			sym = Switch[ Extract[ $TMAproofObject, AppendTo[ common, 0]],
 					Theorema`Provers`Common`Private`ANDNODE$,
 					"\[And]",
 					Theorema`Provers`Common`Private`ORNODE$,
@@ -572,13 +577,13 @@ proofsitButtons[ ps_PRFSIT$, p1_List, p2_List, num_Integer] :=
 					"?"
 				];
 			Cell[ CellGroupData[ {Cell[ TextData[ {
-						Cell[ BoxData[ ToBoxes[ RadioButton[ Dynamic[ $selectedProofStep], id@ps]]]],
-						"  ", translate[ "open proof situation"], 
+						Cell[ BoxData[ ToBoxes[ RadioButton[ Dynamic[ $selectedProofStep], i]]]],
+						"  ", translate[ "open proof situation"],
 						" #" <> ToString[ num] <> " (" <> sym <> ")"
 					}], "Section", ShowGroupOpener -> False],
 					pSitCells[ ps]
-					}, 
-					Dynamic[ If[ $selectedProofStep === id@ps, Open, Closed]]
+					},
+					Dynamic[ If[ $selectedProofStep === i, Open, Closed]]
 				]
 			]
 		]
