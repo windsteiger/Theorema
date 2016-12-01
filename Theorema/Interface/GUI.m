@@ -1469,22 +1469,24 @@ execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, str
 	Module[{po, pv, pt, st},
 		$addProofKB = {};
 		{pv, po, pt} = callProver[ rules, strategy, goal, kb, searchDepth, searchTime];
+		
+		(* Update GUI and proof object w.r.t. knowledge that was added during proof *)
+		$selectedProofKB = DeleteDuplicates[ Join[ kb, $addProofKB]];
+		Scan[ With[ {fkey = key[ #]}, kbSelectProve[ fkey] = True]&, $addProofKB];
+		If[ $addProofKB =!= {}, po = ReplacePart[ po, {1, 3, 1} -> Prepend[ $selectedProofKB, goal]]];
+		
 		(* At this point po is equal to the global $TMAproofObject and $TMAproofTree is the corresponding tree *)
 		{po, st} = simplifyProof[ po, simplification];
 		(* po is the simplified proof object and $TMAproofTree is the corresponding simplified tree, but $TMAproofObject is still the unsimplified object *)
 		$TMAproofObject = po;
-		printProveInfo[ DeleteDuplicates[ Join[ Map[ {key[#], label[#]}&, kb], Map[ {key[#], label[#]}&, $addProofKB]]], pv, pt, st, simplification, repl];
+		printProveInfo[ DeleteDuplicates[ Map[ {key[#], label[#]}&, $selectedProofKB]], pv, pt, st, simplification, repl];
 	]
 execProveCall[ args___] := unexpected[ execProveCall, {args}]
 
 addKnowledgeWhileProving[ new_List] :=
-	Module[ {},
-		(* All of '$selectedProofKB', '$addProofKB' and 'kbSelectProve' are needed for printing the correct proof info
-			and writing the correct settings to the file. *)
-		$selectedProofKB = DeleteDuplicates[ Join[ $selectedProofKB, new]];
+	(
 		$addProofKB = DeleteDuplicates[ Join[ $addProofKB, new]];
-		Scan[ With[ {fkey = key[ #]}, kbSelectProve[ fkey] = True]&, new];
-	]
+	)
 addKnowledgeWhileProving[ args___] := unexpected[ addKnowledgeWhileProving, {args}]
 
 proofNavigation[ po_] :=
@@ -1756,7 +1758,8 @@ summarizeProverSettings[ pTime_, sTime_] :=
 					],
 				translate[ "statistics"] -> Column[{
     					Labeled[ pTime, translate[ "proofFindTime"] <> ":", Left],
-    					Labeled[ sTime, translate[ "proofSimpTime"] <> ":", Left]
+    					Labeled[ sTime, translate[ "proofSimpTime"] <> ":", Left],
+    					Labeled[ DateString[ {"DayName", ", ", "Year", "-", "Month", "-", "Day", ", ", "Hour24", ":", "Minute", ":", "Second"}], translate[ "TimeStamp"] <> ":", Left]
     				}]
 			}, AutoAction -> True, ControlPlacement -> Left]
 	]

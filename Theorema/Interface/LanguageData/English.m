@@ -73,6 +73,7 @@ Theorema 2.0 is a major re-launch mainly developed by Wolfgang Windsteiger.";
 	translate[ "connArgM", lang] = "Connective \"`1`\" applied on `2` arguments; Exactly `3` arguments are expected.";
     translate[ "CONNTooltip", lang] = "e1, \[Ellipsis], en \[Ellipsis] formula";
 
+    translate[ "TimeStamp", lang] = "Time stamp";
     translate[ "Declarations", lang] = "Globals";
     translate[ "DemoMode", lang] = "Demo Mode";
 	translate[ "disproved", lang] = "disproved";

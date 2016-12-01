@@ -75,6 +75,7 @@ Theorema 2.0 ist eine wesentliche Weiterentwicklung, die haupts\[ADoubleDot]chli
 	translate[ "connArgM", lang] = "Junktor \"`1`\" wird auf `2` Argumente angewendet; es werden genau `3` Argumente erwartet.";
     translate[ "CONNTooltip", lang] = "e1, \[Ellipsis], en \[Ellipsis] Aussage";
 
+    translate[ "TimeStamp", lang] = "Zeitpunkt";
     translate[ "Declarations", lang] = "Globale";
     translate[ "DemoMode", lang] = "Demo Modus";
 	translate[ "disproved", lang] = "widerlegt";
