@@ -1585,9 +1585,9 @@ MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
     	(* Special cases, because otherwise And uses && and Or uses || *)
     	Switch[ b,
     		And,
-    		tmaInfixBox[ {arg}, "\[And]"],
+    		tmaInfixBox[ HoldComplete[ arg], "\[And]"],
     		Or,
-    		tmaInfixBox[ {arg}, "\[Or]"],
+    		tmaInfixBox[ HoldComplete[ arg], "\[Or]"],
     		Not,
     		RowBox[{ "\[Not]", parenthesize[ arg]}],
     		Plus,
@@ -1596,10 +1596,11 @@ MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
     		RowBox[ makeSummands[ HoldComplete[ arg], False]],
     		Times|Divide|Power|Subscript|BracketingBar|Slot,	(* If we put "Divide" here, we get a nice-looking FractionBox. *)
     		MakeBoxes[ b[ arg], TheoremaForm],
+    		D,
+    		RowBox[ {"D", "[", tmaInfixBox[ HoldComplete[ arg], ","], "]"}],	(* Otherwise the output is completely wrong. *)
     		_,
     		If[ isTmaOperatorName[ op],
-    			(* This if-branch treats the case where 'op' is a Theorema operator occuring with non-empty
-    				argument list. *)
+    			(* This if-branch treats the case where 'op' is a Theorema operator occuring with non-empty argument list. *)
     			sym = Replace[ SymbolName[ op], $tmaNameToOperator];
     			form = getTmaOperatorForms[ op];
     			If[ Length[ HoldComplete[ arg]] == 1,
@@ -1615,7 +1616,7 @@ MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
 					],
 				(*else*)
 					If[ MemberQ[ form, Infix],
-						tmaInfixBox[ {arg}, sym],
+						tmaInfixBox[ HoldComplete[ arg], sym],
 					(*else*)
 						RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}], "[",
 								RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ arg]]], ","]], "]"}]
@@ -1726,9 +1727,9 @@ MakeBoxes[ s_Symbol, TheoremaForm] :=
 			n
 		]
 	]
-	
-SetAttributes[ tmaInfixBox, HoldFirst];
-tmaInfixBox[ args_List, op_] := RowBox[ Riffle[ Map[ makeTmaBoxes, args], op]]
+
+tmaInfixBox[ args_HoldComplete, op_] :=
+	RowBox[ Riffle[ List @@ (makeTmaBoxes /@ args), op]]
 tmaInfixBox[ args___] := unexpected[ tmaInfixBox, {args}]
 
 initParser[];

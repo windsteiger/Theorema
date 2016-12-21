@@ -310,7 +310,7 @@ MakeBoxes[ aop_Annotated$TM[ a__], TheoremaForm] :=
 		form = getTmaOperatorForms[ opName];
 		Which[
 			MemberQ[ form, Infix],
-			tmaInfixBox[ {a}, sym],
+			tmaInfixBox[ HoldComplete[ a], sym],
 			form =!= {},
 			RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}], "[",
 								RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ a]]], ","]], "]"}],
@@ -354,7 +354,7 @@ MakeBoxes[ (d:(DomainOperation$TM[ dom_, op_]))[ a__], TheoremaForm] :=
 			form = getTmaOperatorForms[ opName];
 			Which[
 				MemberQ[ form, Infix],
-				tmaInfixBox[ {a}, box],
+				tmaInfixBox[ HoldComplete[ a], box],
 				form === {},
 				RowBox[ {box, "[", RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ a]]], ","]], "]"}],
 				True,
