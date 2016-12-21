@@ -231,6 +231,7 @@ With[ {lang = "German"},
 	MessageName[ rules, "usage", lang] = "rules is an option for the constructor makePRFSIT/toBeProved and a selector for the PRFSIT$ datastructure.";
 	MessageName[ ruleTextActive, "usage", lang] = "Specifies, whether the proof text for the rule will be activated. (ruleTextActive)";
 
+	MessageName[ selectableExpressionBox, "usage", lang] = "";
 	MessageName[ $selectedProofStep, "usage", lang] = "$selectedProofStep refers to the id of the proof step that is selected in the current proof notebook.";
 	MessageName[ sequenceFlatten, "usage", lang] = "sequenceFlatten[ expr] flattens all SEQ$-expressions appearing in the given expression, keeping only an all-enclosing outermost SEQ$.";
 	MessageName[ sequenceType, "usage", lang] = "sequenceType[ expr] returns the type of the given expression in terms of whether it is a sequence of expressions or an individual expression.";

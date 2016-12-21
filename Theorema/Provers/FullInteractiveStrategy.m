@@ -310,14 +310,14 @@ SetAttributes[ selectablePSitCells, HoldRest];
 selectablePSitCells[ PRFSIT$[ g_FML$, kb_List, ___], gv_, av_] :=
 	Module[ {gc, ac, lab = makeLabel[ label@g]},
 		gc = {
-				Cell[ BoxData[ RowBox[ {ToBoxes[ Style[ Checkbox[ Dynamic[gv]], Deployed -> True]], ToBoxes[ Spacer[4]], selectableFormulaBox[ g]}]], "Goal"], 
+				Cell[ BoxData[ RowBox[ {ToBoxes[ Style[ Checkbox[ Dynamic[gv]], Deployed -> True]], ToBoxes[ Spacer[4]], selectableExpressionBox[ g]}]], "Goal"],
 				Cell[ lab, "GoalLabel", Deployed -> True]
 			};
-		ac = MapIndexed[ Function[ {k, index}, 
+		ac = MapIndexed[ Function[ {k, index},
 						With[ {i = First[ index]},
 							lab = makeLabel[ label@k];
 							{
-								Cell[ BoxData[ RowBox[ {ToBoxes[ Style[ Checkbox[ Dynamic[ av[[i]]]], Deployed -> True]], ToBoxes[ Spacer[ 4]], selectableFormulaBox[ k]}]], "Assumption"], 
+								Cell[ BoxData[ RowBox[ {ToBoxes[ Style[ Checkbox[ Dynamic[ av[[i]]]], Deployed -> True]], ToBoxes[ Spacer[ 4]], selectableExpressionBox[ k]}]], "Assumption"],
 								Cell[ lab, "AssumptionLabel", Deployed -> True]
 							}
 						],
@@ -326,17 +326,17 @@ selectablePSitCells[ PRFSIT$[ g_FML$, kb_List, ___], gv_, av_] :=
 					kb
 				];
 		{
-			Cell[ translate[ "ps"], "Subsubsection", CellDingbat -> Cell[ BoxData[ ToBoxes[ Checkbox[ Dynamic[ allTrue[ Prepend[ av, gv], Identity], (gv = #; av = Table[ #, {Length[ av]}])&]]]]], Deployed -> True], 
+			Cell[ translate[ "ps"], "Subsubsection", CellDingbat -> Cell[ BoxData[ ToBoxes[ Checkbox[ Dynamic[ allTrue[ Prepend[ av, gv], Identity], (gv = #; av = Table[ #, {Length[ av]}])&]]]]], Deployed -> True],
 			GridBox[ Join[
-						{gc}, 
+						{gc},
 						If[ ac === {},
 							{{
-								Cell[ TextData[ StyleBox[ translate[ "noKnowledge"], Italic, Gray]], "Text", Deployed -> True], 
+								Cell[ TextData[ StyleBox[ translate[ "noKnowledge"], Italic, Gray]], "Text", Deployed -> True],
 								Cell[ RowBox[ {}], Deployed -> True]
 							}},
 							ac
 						]
-					], 
+					],
 					ColumnAlignments -> Left,
 					RowLines -> {True, False}
 				]
@@ -888,49 +888,108 @@ subProofToBoxes[ Theorema`Provers`Common`Private`PRFINFO$[ name_, used_List, gen
 	]
 	
 pSitDifferences[ PRFSIT$[ g1_FML$, k1_List, ___], {g2_, k2_List}] :=
-	Module[ {gc, ac, lab, open = False, h = Theorema`Provers`Private`textCell[ StyleBox[ translate[ "openPS"], Deployed -> True]]}, 
+	Module[ {gc, ac, lab, open = False, h = Theorema`Provers`Private`textCell[ StyleBox[ translate[ "openPS"], Deployed -> True]]},
 		lab = makeLabel[ label@g1];
 		gc = {
-				Cell[ TextData[ If[ formula@g1 === g2, "", "\[FilledRightTriangle]"]], "Text", Deployed -> True], 
-				Cell[ BoxData[ selectableFormulaBox[ g1]], "Goal", Editable -> False],
+				Cell[ TextData[ If[ formula@g1 === g2, "", "\[FilledRightTriangle]"]], "Text", Deployed -> True],
+				Cell[ BoxData[ selectableExpressionBox[ g1]], "Goal", Editable -> False],
 				Cell[ lab, "GoalLabel", Deployed -> True]
 			};
 		ac = Map[ Function[ k,
 						lab = makeLabel[ label@k];
 						{
-							Cell[ TextData[ If[MemberQ[ k2, formula@k], "", "\[FilledRightTriangle]"]], "Text", Deployed -> True], 
-							Cell[ BoxData[ selectableFormulaBox[ k]], "Assumption", Editable -> False], 
+							Cell[ TextData[ If[MemberQ[ k2, formula@k], "", "\[FilledRightTriangle]"]], "Text", Deployed -> True],
+							Cell[ BoxData[ selectableExpressionBox[ k]], "Assumption", Editable -> False],
 							Cell[ lab, "AssumptionLabel", Deployed -> True]
 						}
 					],
 					k1
 				];
 		StyleBox[ PaneSelectorBox[ {
-			False -> GridBox[ {{OpenerBox[ Dynamic[ open]], h}}, GridBoxAlignment -> {"Columns" -> {{Left}}}, BaselinePosition -> {1, 1}], 
+			False -> GridBox[ {{OpenerBox[ Dynamic[ open]], h}}, GridBoxAlignment -> {"Columns" -> {{Left}}}, BaselinePosition -> {1, 1}],
 			True -> GridBox[ {{OpenerBox[ Dynamic[open]], h},
-								{"", GridBox[ Join[ {{Cell[ RowBox[ {}], Deployed -> True], 
-									Theorema`Provers`Private`textCell[ StyleBox[ translate[ "goalText"], Deployed -> True]], 
-									Cell[ RowBox[ {}], Deployed -> True]}, 
+								{"", GridBox[ Join[ {{Cell[ RowBox[ {}], Deployed -> True],
+									Theorema`Provers`Private`textCell[ StyleBox[ translate[ "goalText"], Deployed -> True]],
+									Cell[ RowBox[ {}], Deployed -> True]},
 									gc,
-									{Cell[ RowBox[ {}], Deployed -> True], 
-									If[ ac === {}, 
-										Theorema`Provers`Private`textCell[ StyleBox[ translate[ "kbNoText"], Deployed -> True]], 
+									{Cell[ RowBox[ {}], Deployed -> True],
+									If[ ac === {},
+										Theorema`Provers`Private`textCell[ StyleBox[ translate[ "kbNoText"], Deployed -> True]],
 										Theorema`Provers`Private`textCell[ StyleBox[ translate[ "kbText"], Deployed -> True]]
 									],
 									Cell[ RowBox[ {}], Deployed -> True]}},
 									ac
-								], ColumnAlignments -> Left, Editable -> False]}}, BaselinePosition -> {1, 1}, GridBoxAlignment -> {"Columns" -> {{Left}}}, 
+								], ColumnAlignments -> Left, Editable -> False]}}, BaselinePosition -> {1, 1}, GridBoxAlignment -> {"Columns" -> {{Left}}},
 						Editable -> False]
 			},
 			Dynamic[open], BaselinePosition -> Baseline, ImageSize -> Automatic, DefaultBaseStyle -> "OpenerView"], Deployed -> False
 		]
 	]
 
-selectableFormulaBox[ f_FML$] :=
-	Module[ {orig = getOptionalComponent[ f, "origForm"]},
+selectableExpressionBox[ fml_FML$] :=
+	With[ {orig = getOptionalComponent[ fml, "origForm"], box = selectableExpressionBox[ formula@fml]},
 		If[ orig === {},
-			StyleBox[ theoremaBoxes[ formula@f], Selectable -> True],
-			TooltipBox[ StyleBox[ theoremaBoxes[ formula@f], Selectable -> True], theoremaBoxes[ orig]]
+			StyleBox[ box, Selectable -> True],
+		(*else*)
+			TooltipBox[ box, theoremaBoxes[ orig]]
+		]
+	]
+selectableExpressionBox[ expr_] :=
+	Module[ {fixmap, findex = 0, varmap, vindex = 0, metamap, mindex = 0, v},
+		StyleBox[
+			theoremaBoxes[
+				expr /.
+					{
+						fix_FIX$ :> (fixmap[ ToString[ ++findex]] = fix; IFIX$[ findex]),
+						var_VAR$ :> (varmap[ ToString[ ++vindex]] = var; IVAR$[ vindex]),
+						meta_META$ :> (metamap[ ToString[ ++mindex]] = meta; IMETA$[ mindex])
+					}
+			] /.
+				{
+					RowBox[ {"IFIX$", "[", i_String, "]"}] :>
+						With[ {fix = fixmap[ i]},
+						With[ {fb = ToBoxes[ fix, TheoremaForm]},
+							InterpretationBox[ fb, fix]
+						]],
+					RowBox[ {"IMETA$", "[", i_String, "]"}] :>
+						With[ {meta = metamap[ i]},
+						With[ {mb = ToBoxes[ meta, TheoremaForm]},
+							InterpretationBox[ mb, meta]
+						]],
+					RowBox[ {"IVAR$", "[", i_String, "]"}] :>
+						(
+							v = varmap[ i];
+							With[ {vb = ToBoxes[ v, TheoremaForm]},
+								v = First[ v];
+								v = Switch[ v,
+									SEQ0$[ _Symbol],
+									RowBox[ {dropPrefixSuffix[ SymbolName[ First[ v]]], "..."}],
+									
+									SEQ1$[ _Symbol],
+									RowBox[ {dropPrefixSuffix[ SymbolName[ First[ v]]], ".."}],
+									
+									_Symbol,
+									dropPrefixSuffix[ SymbolName[ v]]
+								];
+								TagBox[ InterpretationBox @@ {vb, v}, "Boxes"]	(* 'TagBox' is needed, because 'v' is a *box* and not an expression *)
+							]
+						)
+				},
+			Selectable -> True
+		]
+	]
+
+dropPrefixSuffix[ s_String] :=
+	With[ {l = StringLength[ s]},
+		If[ l > 4 && StringTake[ s, 4] === "VAR$",
+			If[ l > 7 && StringTake[ s, -3] === "$TM",
+				StringTake[ s, {5, l - 3}],
+				StringDrop[ s, 4]
+			],
+			If[ l > 3 && StringTake[ s, -3] === "$TM",
+				StringDrop[ s, -3],
+				s
+			]
 		]
 	]
 
