@@ -64,36 +64,16 @@ specialBrackets =
 		{"<c>", "\:29fc \:29fd", "\:29fc", "\:29fd", "curveAngleBracketted", "<c>"}
 	};
 
-
-(* $tmaNonStandardOperators is initialized here and gets values added in Expression.m *)
-$tmaNonStandardOperators = {};
-
-(* 
-	Load the expression-specific definition that should be availabale for both
-	"Theorema`Language`" and "Theorema`Computation`Language`" *)
-Clear[ MakeBoxes];
-	
-Block[ {$ContextPath = Append[ $ContextPath, "Theorema`Language`"]},
-	Get[ FileNameJoin[{$TheoremaDirectory, "Theorema", "Language", "Expressions.m"}]];
-]
-Block[ {$ContextPath = Append[ $ContextPath, "Theorema`Computation`Language`"]},
-	Get[ FileNameJoin[{$TheoremaDirectory, "Theorema", "Language", "Expressions.m"}]];
-]
-   
-initParser[]:=
-  Module[{},
-    $parseTheoremaExpressions = False;
-    $parseTheoremaGlobals = False;
-  ]
-initParser[args___] := unexpected[ initParser, {args}]
-
-
-(* ::Section:: *)
-(* Language classification *)
-
 SetAttributes[ isMathematicalConstant, HoldAll];
 isMathematicalConstant[ Indeterminate|True|False|I|Pi|E|Infinity|DirectedInfinity|Complex|Rational|Degree|EulerGamma|GoldenRatio|Catalan|Khinchin|Glaisher] := True
 isMathematicalConstant[ _] := False
+
+
+(* ::Section:: *)
+(* Conversion Theorema <-> Mathematica *)
+
+(* This section must come *before* "Expressions.m" is loaded since some symbols in that file (e.g. 'Part$TM') are
+	moved to "Theorema`Language`"-context here. *)
 
 (* "$symbolTranslator" translates Mma symbols to Tma symbols corresponding to them in a 1-1 way.
 	This, for instance, is not the case for "Wedge", since "Wedge" should only be turned into "And$TM" BUT NOT VICE VERSA! *)
@@ -163,6 +143,36 @@ Theorema`TmaCompToMma = Dispatch[
 				Theorema`Computation`Language`Radical$TM[ x_, y_] :> Power[ x, 1/y]}
 			]
 		   ];
+
+
+(* ::Section:: *)
+(* "Expressions.m" *)
+
+(* $tmaNonStandardOperators is initialized here and gets values added in Expression.m *)
+$tmaNonStandardOperators = {};
+
+(*
+	Load the expression-specific definition that should be availabale for both
+	"Theorema`Language`" and "Theorema`Computation`Language`" *)
+Clear[ MakeBoxes];
+	
+Block[ {$ContextPath = Append[ $ContextPath, "Theorema`Language`"]},
+	Get[ FileNameJoin[{$TheoremaDirectory, "Theorema", "Language", "Expressions.m"}]];
+]
+Block[ {$ContextPath = Append[ $ContextPath, "Theorema`Computation`Language`"]},
+	Get[ FileNameJoin[{$TheoremaDirectory, "Theorema", "Language", "Expressions.m"}]];
+]
+   
+initParser[]:=
+  Module[{},
+    $parseTheoremaExpressions = False;
+    $parseTheoremaGlobals = False;
+  ]
+initParser[args___] := unexpected[ initParser, {args}]
+
+
+(* ::Section:: *)
+(* Language classification *)
 
 $tmaQuantifierNames = {};	(* Contains the names of all registered quantifiers as *strings*, without parameters (e.g. "Forall", "Exists", ...). *)
 $tmaQuantifierToName = {};
@@ -425,23 +435,25 @@ removeVar[ op_String] :=
 		op
 	]
 
-With[ {del = Alternatives @@ specialBrackets[[All, 3]]},
+With[ {spec = Alternatives @@ specialBrackets[[All, 3]],
+		std = Join[
+					{"[", "(", "{", "\[LeftAngleBracket]", "\[LeftBracketingBar]",
+					"\[LeftFloor]", "\[LeftCeiling]", "\[LeftDoubleBracket]",
+					"\[LeftDoubleBracketingBar]", ",", ";"},
+					If[ $VersionNumber >= 10.0, {"\:f113"}, {}]	(* left association character *)
+				]},
 	isLeftDelimiter[ s_] :=
-		MemberQ[
-			{"[", "(", "{", "\[LeftAngleBracket]", "\[LeftBracketingBar]",
-				"\[LeftFloor]", "\[LeftCeiling]", "\[LeftDoubleBracket]",
-				"\[LeftDoubleBracketingBar]", ",", ";"},
-			s
-		] || MatchQ[ s, TagBox[ del, ___]]
+		MemberQ[ std, s] || MatchQ[ s, TagBox[ spec, ___]]
 ]
-With[ {del = Alternatives @@ specialBrackets[[All, 4]]},
+With[ {spec = Alternatives @@ specialBrackets[[All, 4]],
+		std = Join[
+					{"[", "]", ")", "}", "\[RightAngleBracket]", "\[RightBracketingBar]",
+					"\[RightFloor]", "\[RightCeiling]", "\[RightDoubleBracket]",
+					"\[RightDoubleBracketingBar]", ",", ";"},
+					If[ $VersionNumber >= 10.0, {"\:f114"}, {}]	(* right association character *)
+				]},
 	isRightDelimiter[ s_] :=
-		MemberQ[
-			{"[", "]", ")", "}", "\[RightAngleBracket]", "\[RightBracketingBar]",
-				"\[RightFloor]", "\[RightCeiling]", "\[RightDoubleBracket]",
-				"\[RightDoubleBracketingBar]", ",", ";"},
-			s
-		] || MatchQ[ s, TagBox[ del, ___]]
+		MemberQ[ std, s] || MatchQ[ s, TagBox[ spec, ___]]
 ]
 	
 	
@@ -1575,6 +1587,24 @@ MakeBoxes[ (h:(Theorema`Language`TAG$|Theorema`Computation`Language`TAG$))[ op_?
 		MakeBoxes[ h[ b, t][ arg], TheoremaForm]
 	]
 
+If[ $VersionNumber >= 10.0,
+	With[ {sym = Theorema`Language`Association$TM|Theorema`Computation`Language`Association$TM,
+			left = "\:f113", right = "\:f114"},
+		MakeBoxes[ sym[ e___], TheoremaForm] :=
+			RowBox[
+				{left, tmaInfixBox[ HoldComplete[ e], ","], right}
+			];
+		MakeBoxes[ (h:(Theorema`Language`TAG$|Theorema`Computation`Language`TAG$))[ sym, t_][ e___], TheoremaForm] :=
+			RowBox[
+				{
+					tmaTagBox[ Left, left, t, h],
+					tmaInfixBox[ HoldComplete[ e], ","],
+					tmaTagBox[ Right, right, t, h]
+				}
+			]
+	]
+]
+
 (*
 	Parenthesizing of expressions is an issue that may need more attention in an improved implementation.
 	Current solution: 
@@ -1595,7 +1625,11 @@ MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
     		Or,
     		tmaInfixBox[ HoldComplete[ arg], "\[Or]"],
     		Not,
-    		RowBox[ {"\[Not]", parenthesize[ arg]}],	(* TODO: 'arg' could be longer than 1 element. *)
+    		If[ MatchQ[ HoldComplete[ arg], HoldComplete[ _]],	(* 'arg' could consist of more than one element *)
+    			RowBox[ {"\[Not]", parenthesize[ arg]}],
+    		(*else*)
+    			RowBox[ {"Not", "[", tmaInfixBox[ HoldComplete[ arg], ","], "]"}]
+    		],
     		Plus,
     		RowBox[ makeSummands[ HoldComplete[ arg], True]],
     		Subtract,
@@ -1608,7 +1642,7 @@ MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
     		If[ isTmaOperatorName[ op],
     			(* This if-branch treats the case where 'op' is a Theorema operator occuring with non-empty argument list. *)
     			With[ {sym = Replace[ SymbolName[ op], $tmaNameToOperator], form = getTmaOperatorForms[ op]},
-	    			If[ Length[ HoldComplete[ arg]] === 1,
+	    			If[ MatchQ[ HoldComplete[ arg], HoldComplete[ _]],
 	    				Which[
 							MemberQ[ form, Prefix],
 							RowBox[ {sym, MakeBoxes[ arg, TheoremaForm]}],
@@ -1641,7 +1675,11 @@ MakeBoxes[ (h:(Theorema`Language`TAG$|Theorema`Computation`Language`TAG$))[ op_S
     		Or,
     		tmaInfixBox[ HoldComplete[ arg], tmaTagBox[ Infix, "\[Or]", t, h]],
     		Not,
-    		RowBox[ {tmaTagBox[ Prefix, "\[Not]", t, h], parenthesize[ arg]}],
+    		If[ MatchQ[ HoldComplete[ arg], HoldComplete[ _]],
+    			RowBox[ {tmaTagBox[ Prefix, "\[Not]", t, h], parenthesize[ arg]}],
+    		(*else*)
+    			RowBox[ {tmaTagBox[ None, "Not", t, h], "[", tmaInfixBox[ HoldComplete[ arg], ","], "]"}]
+    		],
     		D,
     		RowBox[ {tmaTagBox[ None, "D", t, h], "[", tmaInfixBox[ HoldComplete[ arg], ","], "]"}],
     		_,
@@ -1789,6 +1827,8 @@ MakeBoxes[ s_Symbol, TheoremaForm] :=
 MakeBoxes[ (h:(Theorema`Language`TAG$|Theorema`Computation`Language`TAG$))[ expr_, t_], TheoremaForm] :=
 	tmaTagBox[ None, MakeBoxes[ expr, TheoremaForm], t, h]
 
+tmaInfixBox[ HoldComplete[], ","] :=
+	Sequence[]
 tmaInfixBox[ HoldComplete[ a_], _] :=
 	MakeBoxes[ a, TheoremaForm]
 tmaInfixBox[ args_HoldComplete, op_] :=

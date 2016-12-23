@@ -399,8 +399,9 @@ MakeBoxes[ (d:(DomainOperation$TM[ dom_, op_]))[ a__], TheoremaForm] :=
 	
 	
 (* ::Subsection:: *)
-(* Special brackets *)
+(* Brackets *)
 
+(* special brackets *)
 Scan[
 	With[ {left = #[[3]], right = #[[4]], name = #[[5]]},
 		With[ {sym = If[ StringMatchQ[ name, __ ~~ ("$"|"$TM")], ToExpression[ name], ToExpression[ name <> "$TM"]]},
@@ -408,7 +409,7 @@ Scan[
 				RowBox[
 					{
 						TagBox[ left, Identity, SyntaxForm -> "("],
-						Replace[ tmaInfixBox[ HoldComplete[ e], ","], RowBox[ {}] :> Sequence[]],
+						tmaInfixBox[ HoldComplete[ e], ","],
 						TagBox[ right, Identity, SyntaxForm -> ")"]
 					}
 				];
@@ -416,7 +417,7 @@ Scan[
 				RowBox[
 					{
 						tmaTagBox[ Left, left, t, TAG$],
-						Replace[ tmaInfixBox[ HoldComplete[ e], ","], RowBox[ {}] :> Sequence[]],
+						tmaInfixBox[ HoldComplete[ e], ","],
 						tmaTagBox[ Right, right, t, TAG$]
 					}
 				]
@@ -424,6 +425,44 @@ Scan[
 	]&,
 	specialBrackets
 ]
+
+(* standard brackets; require only rules for pretty-printing *)
+Scan[
+	With[ {sym = First[ #], left = #[[2]], right = #[[3]]},
+		If[ Last[ #],
+			MakeBoxes[ sym[ e___], TheoremaForm] :=
+				RowBox[
+					{left, tmaInfixBox[ HoldComplete[ e], ","], right}	(* no 'TagBox[ ..., SyntaxForm -> "("]' necessary *)
+				]
+		];
+		MakeBoxes[ TAG$[ sym, t_][ e___], TheoremaForm] :=
+			RowBox[
+				{
+					tmaTagBox[ Left, left, t, TAG$],
+					tmaInfixBox[ HoldComplete[ e], ","],
+					tmaTagBox[ Right, right, t, TAG$]
+				}
+			]
+	]&,
+	{
+		{List$TM, "{", "}", False},
+		{AngleBracket$TM, "\[LeftAngleBracket]", "\[RightAngleBracket]", False},
+		{BracketingBar$TM, "\[LeftBracketingBar]", "\[RightBracketingBar]", False},
+		{DoubleBracketingBar$TM, "\[LeftDoubleBracketingBar]", "\[RightDoubleBracketingBar]", False},
+		{Floor$TM, "\[LeftFloor]", "\[RightFloor]", True},
+		{Ceiling$TM, "\[LeftCeiling]", "\[RightCeiling]", True}
+	}
+]
+
+MakeBoxes[ TAG$[ Part$TM, t_][ h_, p___], TheoremaForm] :=
+	RowBox[
+		{
+			MakeBoxes[ h, TheoremaForm],
+			tmaTagBox[ Left, "\[LeftDoubleBracket]", t, TAG$],
+			tmaInfixBox[ HoldComplete[ p], ","],
+			tmaTagBox[ Right, "\[RightDoubleBracket]", t, TAG$]
+		}
+	]
 
 
 (* ::Subsection:: *)
