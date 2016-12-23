@@ -439,7 +439,7 @@ With[ {spec = Alternatives @@ specialBrackets[[All, 3]],
 		std = Join[
 					{"[", "(", "{", "\[LeftAngleBracket]", "\[LeftBracketingBar]",
 					"\[LeftFloor]", "\[LeftCeiling]", "\[LeftDoubleBracket]",
-					"\[LeftDoubleBracketingBar]", ",", ";"},
+					"\[LeftDoubleBracketingBar]", TagBox[ "(", "AutoParentheses"], ",", ";"},
 					If[ $VersionNumber >= 10.0, {"\:f113"}, {}]	(* left association character *)
 				]},
 	isLeftDelimiter[ s_] :=
@@ -449,7 +449,7 @@ With[ {spec = Alternatives @@ specialBrackets[[All, 4]],
 		std = Join[
 					{"[", "]", ")", "}", "\[RightAngleBracket]", "\[RightBracketingBar]",
 					"\[RightFloor]", "\[RightCeiling]", "\[RightDoubleBracket]",
-					"\[RightDoubleBracketingBar]", ",", ";"},
+					"\[RightDoubleBracketingBar]", TagBox[ ")", "AutoParentheses"], ",", ";"},
 					If[ $VersionNumber >= 10.0, {"\:f114"}, {}]	(* right association character *)
 				]},
 	isRightDelimiter[ s_] :=
@@ -1621,9 +1621,9 @@ MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
     	(* Special cases, because otherwise And uses && and Or uses || *)
     	Switch[ b,
     		And,
-    		tmaInfixBox[ HoldComplete[ arg], "\[And]"],
+    		tmaInfixBox[ HoldComplete[ arg], "\[And]", parenthesize],
     		Or,
-    		tmaInfixBox[ HoldComplete[ arg], "\[Or]"],
+    		tmaInfixBox[ HoldComplete[ arg], "\[Or]", parenthesize],
     		Not,
     		If[ MatchQ[ HoldComplete[ arg], HoldComplete[ _]],	(* 'arg' could consist of more than one element *)
     			RowBox[ {"\[Not]", parenthesize[ arg]}],
@@ -1655,7 +1655,7 @@ MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
 						],
 					(*else*)
 						If[ MemberQ[ form, Infix],
-							tmaInfixBox[ HoldComplete[ arg], sym],
+							tmaInfixBox[ HoldComplete[ arg], sym, parenthesize],
 						(*else*)
 							RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}], "[", tmaInfixBox[ HoldComplete[ arg], ","], "]"}]
 						]
@@ -1671,9 +1671,9 @@ MakeBoxes[ (h:(Theorema`Language`TAG$|Theorema`Computation`Language`TAG$))[ op_S
     	(* Special cases, because otherwise And uses && and Or uses || *)
     	Switch[ b,
     		And,
-    		tmaInfixBox[ HoldComplete[ arg], tmaTagBox[ Infix, "\[And]", t, h]],
+    		tmaInfixBox[ HoldComplete[ arg], tmaTagBox[ Infix, "\[And]", t, h], parenthesize],
     		Or,
-    		tmaInfixBox[ HoldComplete[ arg], tmaTagBox[ Infix, "\[Or]", t, h]],
+    		tmaInfixBox[ HoldComplete[ arg], tmaTagBox[ Infix, "\[Or]", t, h], parenthesize],
     		Not,
     		If[ MatchQ[ HoldComplete[ arg], HoldComplete[ _]],
     			RowBox[ {tmaTagBox[ Prefix, "\[Not]", t, h], parenthesize[ arg]}],
@@ -1704,7 +1704,7 @@ MakeBoxes[ (h:(Theorema`Language`TAG$|Theorema`Computation`Language`TAG$))[ op_S
 						
 						_,
 						If[ MemberQ[ form, Infix],
-							tmaInfixBox[ HoldComplete[ arg], tmaTagBox[ Infix, sym, t, h]],
+							tmaInfixBox[ HoldComplete[ arg], tmaTagBox[ Infix, sym, t, h], parenthesize],
 						(*else*)
 							RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], tmaTagBox[ None, sym, t, h], TagBox[ ")", "AutoParentheses"]}], "[", tmaInfixBox[ HoldComplete[ arg], ","], "]"}]
 						]
@@ -1778,15 +1778,18 @@ neg[ (h:(Theorema`Language`Times$TM|Theorema`Computation`Language`Times$TM))[ a_
 neg[ a_] := With[ {a0 = -a}, {HoldComplete[ a0], False}]
 
 
-SetAttributes[ parenthesize, HoldAllComplete]; (* otherwise evaluation might happen *)
-parenthesize[ b_[ arg___]] :=
-    Module[ {res = MakeBoxes[ b[ arg], TheoremaForm]},
-        If[ MatchQ[ res, RowBox[ {_, "[", ___, "]"}]|RowBox[ {_?isLeftDelimiter, ___, _?isRightDelimiter}]],
-            res,
-            RowBox[ {TagBox[ "(", "AutoParentheses"], res, TagBox[ ")", "AutoParentheses"]}]
+(* 'parenthesize' formats the given expression and additionally puts the result inside parentheses, if necessary. *)
+SetAttributes[ parenthesize, HoldAllComplete]
+parenthesize[ expr_] :=
+	With[ {box = MakeBoxes[ expr, TheoremaForm]},
+    With[ {box0 = NestWhile[ First, box, MatchQ[ #, TagBox[ _, _Theorema`Language`TAG$|_Theorema`Language`TAG$, ___]]&]},
+        If[ MatchQ[ box0, RowBox[ {__}]] &&
+        		!MatchQ[ box0, RowBox[ {_, "[", ___, "]"}]|RowBox[ {_, "\[LeftDoubleBracket]", ___, "\[RightDoubleBracket]"}]|RowBox[ {_?isLeftDelimiter, ___, _?isRightDelimiter}]],
+            RowBox[ {TagBox[ "(", "AutoParentheses"], box, TagBox[ ")", "AutoParentheses"]}],
+        (*else*)
+        	box
         ]
-    ]
-parenthesize[ e_] := MakeBoxes[ e, TheoremaForm]
+    ]]
 parenthesize[ args___] := unexpected[ parenthesize, {args}]
 
 (* The following definitions turn "Plus" into "+" if it occurs without arguments or with an empty
@@ -1827,12 +1830,14 @@ MakeBoxes[ s_Symbol, TheoremaForm] :=
 MakeBoxes[ (h:(Theorema`Language`TAG$|Theorema`Computation`Language`TAG$))[ expr_, t_], TheoremaForm] :=
 	tmaTagBox[ None, MakeBoxes[ expr, TheoremaForm], t, h]
 
-tmaInfixBox[ HoldComplete[], ","] :=
+tmaInfixBox[ HoldComplete[], ",", ___] :=
 	Sequence[]
-tmaInfixBox[ HoldComplete[ a_], _] :=
+tmaInfixBox[ HoldComplete[ a_], __] :=
 	MakeBoxes[ a, TheoremaForm]
 tmaInfixBox[ args_HoldComplete, op_] :=
-	RowBox[ Riffle[ List @@ (makeTmaBoxes /@ args), op]]
+	tmaInfixBox[ args, op, makeTmaBoxes]
+tmaInfixBox[ args_HoldComplete, op_, f_] :=
+	RowBox[ Riffle[ List @@ (f /@ args), op]]
 tmaInfixBox[ args___] := unexpected[ tmaInfixBox, {args}]
 
 (* We cannot simply write 'TAG$[ tag]', since 'TAG$' must be in the right context! *)

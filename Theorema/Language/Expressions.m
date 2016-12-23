@@ -592,6 +592,9 @@ metaAnnotations = {"*", "**", "***", "\[Dagger]", "\[DoubleDagger]"};
 MakeBoxes[ META$[ c_, n_Integer, dep_List] /; n<5, TheoremaForm] := StyleBox[ SuperscriptBox[ MakeBoxes@@Append[ removeVar[ c], TheoremaForm], metaAnnotations[[n+1]]], "ExpressionMeta"]
 MakeBoxes[ META$[ c_, n_Integer, dep_List], TheoremaForm] := StyleBox[ SuperscriptBox[ MakeBoxes@@Append[ removeVar[ c], TheoremaForm], RowBox[{"(", MakeBoxes[ n, StandardForm], ")"}]], "ExpressionMeta"]
 
+MakeBoxes[ TAG$[ CompoundExpression$TM, t_][ a_, b__], TheoremaForm] :=
+    tmaInfixBox[ HoldComplete[ a, b], tmaTagBox[ Postfix, ";", t, TAG$], parenthesize]
+
 MakeBoxes[ TAG$[ Piecewise$TM, t_][ Tuple$TM[ c__Tuple$TM]], TheoremaForm] :=
     RowBox[ {tmaTagBox[ Prefix, "\[Piecewise]", t, TAG$], GridBox[ Map[ formatClause, {c}]]}]
 MakeBoxes[ TAG$[ Piecewise$TM, t_][ Tuple$TM[ c__Tuple$TM], d_], TheoremaForm] :=
