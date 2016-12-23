@@ -31,9 +31,9 @@ opDefInDom[ _] := {}
 
 $tmaNonStandardOperators = Join[ $tmaNonStandardOperators,
     {
-     {Iff$TM, DoubleLeftRightArrow},
-     {EqualDef$TM, SetDelayed},
-     {Tuple$TM, AngleBracket}
+     {Iff$TM, DoubleLeftRightArrow$TM},
+     {EqualDef$TM, SetDelayed$TM},
+     {Tuple$TM, AngleBracket$TM}
     }];
     
     
@@ -112,48 +112,61 @@ sequenceType[ expr___] :=
 MakeBoxes[ q_[ rng_RNG$, form_], TheoremaForm] :=
 	MakeBoxes[ q[ rng, True, form], TheoremaForm]
 
+MakeBoxes[ Annotated$TM[ TAG$[ q_, t_], SubScript$TM[ sub_]][ rng_RNG$, cond_, form_], TheoremaForm] :=
+	makeQuantifierBox[ q, rng, form, cond, sub, t, TheoremaForm]
+MakeBoxes[ DomainOperation$TM[ dom_, TAG$[ q_, t_]][ rng_RNG$, cond_, form_], TheoremaForm] :=
+	makeQuantifierBox[ q, rng, form, cond, dom, t, TheoremaForm]
+MakeBoxes[ TAG$[ q_, t_][ rng_RNG$, cond_, form_], TheoremaForm] :=
+	makeQuantifierBox[ q, rng, form, cond, Null, t, TheoremaForm]
 MakeBoxes[ Annotated$TM[ q_, SubScript$TM[ sub_]][ rng_RNG$, cond_, form_], TheoremaForm] :=
-	makeQuantifierBox[ q, rng, form, cond, sub, TheoremaForm]
+	makeQuantifierBox[ q, rng, form, cond, sub, Null, TheoremaForm]
 MakeBoxes[ DomainOperation$TM[ dom_, q_][ rng_RNG$, cond_, form_], TheoremaForm] :=
-	makeQuantifierBox[ q, rng, form, cond, dom, TheoremaForm]
+	makeQuantifierBox[ q, rng, form, cond, dom, Null, TheoremaForm]
 MakeBoxes[ q_[ rng_RNG$, cond_, form_], TheoremaForm] :=
-	makeQuantifierBox[ q, rng, form, cond, Null, TheoremaForm]
-	
-makeQuantifierBox[ q_, rng_RNG$, form_, cond_, sub_, fmt_] :=
+	makeQuantifierBox[ q, rng, form, cond, Null, Null, TheoremaForm]
+
+makeQuantifierBox[ q_, rng_RNG$, form_, cond_, sub_, tag_, fmt_] :=
 	With[ {b0 = Replace[ q, $tmaNameToQuantifier], r = makeRangeBox[ rng, fmt], f = MakeBoxes[ form, fmt]},
-		With[ {b1 = If[ b0 === q || (MatchQ[ b0, {_, _}] && sub =!= Null), MakeBoxes[ q, fmt], b0]},
-			With[ {b = If[ sub === Null, b1, SubscriptBox[ b1, MakeBoxes[ sub, fmt]]]},
-				Which[
-					MatchQ[ b, {_, _}],
-					RowBox[
-						{
-							First[ b],
-							Which[
-								MatchQ[ {rng, form}, {RNG$[ SETRNG$[ v_, _]], v_}],
-								RowBox[ {r, "|", MakeBoxes[ cond, fmt]}],
-								
-								cond === True,
-								RowBox[ {f, UnderscriptBox[ "|", r]}],
-								
-								True,
-								RowBox[ {f, UnderscriptBox[ "|", r], MakeBoxes[ cond, fmt]}]
-							],
-							Last[ b]
-						}
+	With[ {b1 = If[ MatchQ[ b0, {_, _}], If[ sub === Null, Insert[ b0, "|", 2], q], b0]},
+	With[ {b2 = addTagToQuantifierBox[ If[ b1 === q, MakeBoxes[ q, fmt], b1], tag, TAG$]},
+	With[ {b = If[ sub === Null, b2, SubscriptBox[ b2, MakeBoxes[ sub, fmt]]]},
+		Which[
+			MatchQ[ b, {_, _, _}],
+			RowBox[
+				{
+					First[ b],
+					Which[
+						MatchQ[ {rng, form}, {RNG$[ SETRNG$[ v_, _]], v_}],
+						RowBox[ {r, b[[2]], MakeBoxes[ cond, fmt]}],
+						
+						cond === True,
+						RowBox[ {f, UnderscriptBox[ b[[2]], r]}],
+						
+						True,
+						RowBox[ {f, UnderscriptBox[ b[[2]], r], MakeBoxes[ cond, fmt]}]
 					],
-	
-					cond === True,
-					RowBox[ {UnderscriptBox[ b, r], f}],
-					
-					True,
-					RowBox[ {UnderscriptBox[ UnderscriptBox[ b, r], MakeBoxes[ cond, fmt]], f}
-					]
-				]
-			]
+					Last[ b]
+				}
+			],
+
+			cond === True,
+			RowBox[ {UnderscriptBox[ b, r], f}],
+			
+			True,
+			RowBox[ {UnderscriptBox[ UnderscriptBox[ b, r], MakeBoxes[ cond, fmt]], f}]
 		]
-	]
+	]]]]
 makeQuantifierBox[args___] := unexpected[ makeQuantifierBox, {args}]
 
+(* We must explicitly pass 'TAG$' to 'addTagToQuantifierBox', since the definition in "Computation`"-context
+	overwrites the one in "Language`"-context. *)
+addTagToQuantifierBox[ box_, Null, _] := box
+addTagToQuantifierBox[ {left_, middle_, right_}, tag_, h_] :=
+	{tmaTagBox[ Left, left, tag, h], tmaTagBox[ None, middle, tag, h], tmaTagBox[ Right, right, tag, h]}
+addTagToQuantifierBox[ box_, tag_, h_] :=
+	tmaTagBox[ None, box, tag, h]
+
+(* It is not possible to tag a range as a whole. *)
 MakeBoxes[ r_RNG$, TheoremaForm] :=
 	makeRangeBox[ r, TheoremaForm]
 	
@@ -163,6 +176,8 @@ makeRangeBox[ RNG$[ s__SIMPRNG$], fmt_] :=
 	RowBox[ Riffle[ Map[ makeRangeBox[ #, fmt]&, {s}], ","]]
 makeRangeBox[ RNG$[ s__], fmt_] :=
 	GridBox[ Map[ {makeRangeBox[ #, fmt]}&, {s}]]
+makeRangeBox[ TAG$[ rng_, tag_], fmt_] :=
+	tmaTagBox[ None, makeRangeBox[ rng, fmt], tag, TAG$]
 makeRangeBox[ SETRNG$[ v_, s_], fmt_] :=
 	RowBox[ {MakeBoxes[v, fmt], "\[Element]", MakeBoxes[ s, fmt]}]
 makeRangeBox[ PREDRNG$[ v_, p_], fmt_] :=
@@ -247,6 +262,8 @@ MakeBoxes[ \[DoubleStruckCapitalC]P$TM, TheoremaForm] :=
 (* ::Subsubsection:: *)
 (* annotated operators without arguments *)
 
+(* It does not make sense to tag "Annotated$TM", "SubScript$TM" etc. *)
+
 MakeBoxes[ Annotated$TM[ op_, SubScript$TM[ sc__]], TheoremaForm] :=
 	MakeBoxes[ Subscript[ op, sc], TheoremaForm]
 	
@@ -277,106 +294,108 @@ MakeBoxes[ Annotated$TM[ op_, UnderScript$TM[ un__], OverScript$TM[ ov__]], Theo
 (* annotated operators with arguments *)
 
 MakeBoxes[ aop_Annotated$TM[], TheoremaForm] :=
-	Module[ {opName, sym = MakeBoxes[ aop, TheoremaForm]},
-		(
+	With[ {opName = getTmaOperatorName[ aop], sym = MakeBoxes[ aop, TheoremaForm]},
 		If[ getTmaOperatorForms[ opName] === {},
 			RowBox[ {sym, "[", "]"}],
+		(*else*)
 			RowBox[
 				{RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}], "[", "]"}
 			]
-		]
-		) /; (opName = getTmaOperatorName[ aop]) =!= $Failed
+		] /; opName =!= $Failed
 	]
 MakeBoxes[ aop_Annotated$TM[ a_], TheoremaForm] :=
-	Module[ {opName, form, sym = MakeBoxes[ aop, TheoremaForm]},
-		(
-		form = getTmaOperatorForms[ opName];
-		Which[
-			MemberQ[ form, Prefix],
-			RowBox[ {sym, MakeBoxes[ a, TheoremaForm]}],
-			MemberQ[ form, Postfix],
-			RowBox[ {MakeBoxes[ a, TheoremaForm], sym}],
-			form =!= {},
-			RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}],
-				"[", MakeBoxes[ a, TheoremaForm], "]"}],
-			True,
-			RowBox[ {sym, "[", MakeBoxes[ a, TheoremaForm], "]"}]
-		]
-		) /; (opName = getTmaOperatorName[ aop]) =!= $Failed
+	With[ {opName = getTmaOperatorName[ aop], sym = MakeBoxes[ aop, TheoremaForm]},
+		With[ {form = getTmaOperatorForms[ opName]},
+			Which[
+				MemberQ[ form, Prefix],
+				RowBox[ {sym, MakeBoxes[ a, TheoremaForm]}],
+				MemberQ[ form, Postfix],
+				RowBox[ {MakeBoxes[ a, TheoremaForm], sym}],
+				form =!= {},
+				RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}],
+					"[", MakeBoxes[ a, TheoremaForm], "]"}],
+				True,
+				RowBox[ {sym, "[", MakeBoxes[ a, TheoremaForm], "]"}]
+			]
+		] /; opName =!= $Failed
 	]
 MakeBoxes[ aop_Annotated$TM[ a__], TheoremaForm] :=
-	Module[ {opName, form, sym = MakeBoxes[ aop, TheoremaForm]},
-		(
-		form = getTmaOperatorForms[ opName];
-		Which[
-			MemberQ[ form, Infix],
-			tmaInfixBox[ HoldComplete[ a], sym],
-			form =!= {},
-			RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}], "[",
-								RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ a]]], ","]], "]"}],
-			True,
-			RowBox[ {sym, "[",
-								RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ a]]], ","]], "]"}]
-		]
-		) /; (opName = getTmaOperatorName[ aop]) =!= $Failed
+	With[ {opName = getTmaOperatorName[ aop], sym = MakeBoxes[ aop, TheoremaForm]},
+		With[ {form = getTmaOperatorForms[ opName]},
+			Which[
+				MemberQ[ form, Infix],
+				tmaInfixBox[ HoldComplete[ a], sym],
+				form =!= {},
+				RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}], "[",
+									tmaInfixBox[ HoldComplete[ a], ","], "]"}],
+				True,
+				RowBox[ {sym, "[", tmaInfixBox[ HoldComplete[ a], ","], "]"}]
+			]
+		] /; opName =!= $Failed
 	]
 	
 (* ::Subsection:: *)
 (* Domain underscripts *)
-	
-MakeBoxes[ (d:(DomainOperation$TM[ dom_, op_]))[ a_], TheoremaForm] :=
-	Module[ {opName = getTmaOperatorName[ op], form,
-			opBox = MakeBoxes[ d, TheoremaForm],
-			aBox = MakeBoxes[ a, TheoremaForm]},
-		If[ opName === $Failed || op === Element$TM,	(* we don't want to wrap parentheses around the domain-membership predicate *)
-		(* no (annotated) Theorema operator *)
-			RowBox[ {opBox, "[", aBox, "]"}],
-		(* (annotated) Theorema operator *)
-			form = getTmaOperatorForms[ opName];
-			Which[
-				MemberQ[ form, Prefix],
-				RowBox[ {opBox, aBox}],
-				MemberQ[ form, Postfix],
-				RowBox[ {aBox, opBox}],
-				form === {},
-				RowBox[ {opBox, "[", aBox, "]"}],
-				True,
-				RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], opBox, TagBox[ ")", "AutoParentheses"]}], "[", aBox, "]"}]
-			]
-		]
-	]
-MakeBoxes[ (d:(DomainOperation$TM[ dom_, op_]))[ a__], TheoremaForm] :=
-	Module[ {opName = getTmaOperatorName[ op], form, box = MakeBoxes[ d, TheoremaForm]},
-		If[ opName === $Failed,
-		(* no (annotated) Theorema operator *)
-			RowBox[ {box, "[", RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ a]]], ","]], "]"}],
-		(* (annotated) Theorema operator *)
-			form = getTmaOperatorForms[ opName];
-			Which[
-				MemberQ[ form, Infix],
-				tmaInfixBox[ HoldComplete[ a], box],
-				form === {},
-				RowBox[ {box, "[", RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ a]]], ","]], "]"}],
-				True,
-				RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], box, TagBox[ ")", "AutoParentheses"]}], "[",
-					RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ a]]], ","]], "]"}]
-			]
-		]
-	]
+
+(* It does not make sense to tag "DomainOperation$TM". *)
+
+MakeBoxes[ DomainOperation$TM[ dom_, op_], TheoremaForm] :=
+	UnderscriptBox[ MakeBoxes[ op, TheoremaForm], MakeBoxes[ dom, TheoremaForm]]
+
 MakeBoxes[ (d:(DomainOperation$TM[ dom_, op_]))[], TheoremaForm] :=
-	Module[ {opName = getTmaOperatorName[ op], box = MakeBoxes[ d, TheoremaForm]},
+	With[ {opName = getTmaOperatorName[ op], box = MakeBoxes[ d, TheoremaForm]},
 		If[ opName === $Failed,
 		(* no (annotated) Theorema operator *)
 			RowBox[ {box, "[", "]"}],
 		(* (annotated) Theorema operator *)
 			If[ getTmaOperatorForms[ opName] === {},
 				RowBox[ {box, "[", "]"}],
+			(*else*)
 				RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], box, TagBox[ ")", "AutoParentheses"]}], "[", "]"}]
 			]
 		]
 	]
-MakeBoxes[ DomainOperation$TM[ dom_, op_], TheoremaForm] :=
-	UnderscriptBox[ MakeBoxes[ op, TheoremaForm], MakeBoxes[ dom, TheoremaForm]]
+MakeBoxes[ (d:(DomainOperation$TM[ dom_, op_]))[ a_], TheoremaForm] :=
+	With[ {opName = getTmaOperatorName[ op],
+			opBox = MakeBoxes[ d, TheoremaForm],
+			aBox = MakeBoxes[ a, TheoremaForm]},
+		If[ opName === $Failed || op === Element$TM || MatchQ[ op, TAG$[ Element$TM, ___]],	(* we don't want to wrap parentheses around the domain-membership predicate *)
+		(* no (annotated) Theorema operator *)
+			RowBox[ {opBox, "[", aBox, "]"}],
+		(* (annotated) Theorema operator *)
+			With[ {form = getTmaOperatorForms[ opName]},
+				Which[
+					MemberQ[ form, Prefix],
+					RowBox[ {opBox, aBox}],
+					MemberQ[ form, Postfix],
+					RowBox[ {aBox, opBox}],
+					form === {},
+					RowBox[ {opBox, "[", aBox, "]"}],
+					True,
+					RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], opBox, TagBox[ ")", "AutoParentheses"]}], "[", aBox, "]"}]
+				]
+			]
+		]
+	]
+MakeBoxes[ (d:(DomainOperation$TM[ dom_, op_]))[ a__], TheoremaForm] :=
+	With[ {opName = getTmaOperatorName[ op], box = MakeBoxes[ d, TheoremaForm]},
+		If[ opName === $Failed,
+		(* no (annotated) Theorema operator *)
+			RowBox[ {box, "[", RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ a]]], ","]], "]"}],
+		(* (annotated) Theorema operator *)
+			With[ {form = getTmaOperatorForms[ opName]},
+				Which[
+					MemberQ[ form, Infix],
+					tmaInfixBox[ HoldComplete[ a], box],
+					form === {},
+					RowBox[ {box, "[", RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ a]]], ","]], "]"}],
+					True,
+					RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], box, TagBox[ ")", "AutoParentheses"]}], "[",
+						RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ a]]], ","]], "]"}]
+				]
+			]
+		]
+	]
 	
 	
 (* ::Subsection:: *)
@@ -389,8 +408,16 @@ Scan[
 				RowBox[
 					{
 						TagBox[ left, Identity, SyntaxForm -> "("],
-						RowBox[ Riffle[ List @@ Replace[ HoldComplete[ e], x_ :> MakeBoxes[ x, TheoremaForm], {1}], ","]],
+						Replace[ tmaInfixBox[ HoldComplete[ e], ","], RowBox[ {}] :> Sequence[]],
 						TagBox[ right, Identity, SyntaxForm -> ")"]
+					}
+				];
+			MakeBoxes[ TAG$[ sym, t_][ e___], TheoremaForm] :=
+				RowBox[
+					{
+						tmaTagBox[ Left, left, t, TAG$],
+						Replace[ tmaInfixBox[ HoldComplete[ e], ","], RowBox[ {}] :> Sequence[]],
+						tmaTagBox[ Right, right, t, TAG$]
 					}
 				]
 		]
@@ -408,42 +435,79 @@ MakeBoxes[ Radical$TM[ e_, 2], TheoremaForm] :=
 MakeBoxes[ Radical$TM[ e_, r_], TheoremaForm] :=
 	RadicalBox[ MakeBoxes[ e, TheoremaForm], MakeBoxes[ r, TheoremaForm]]
 
-MakeBoxes[ Set$TM[ arg__], TheoremaForm] := MakeBoxes[ {arg}, TheoremaForm]
+MakeBoxes[ TAG$[ Set$TM, t_][ arg__], TheoremaForm] :=
+	RowBox[ {tmaTagBox[ Left, "{", t, TAG$], tmaInfixBox[ HoldComplete[ arg], ","], tmaTagBox[ Right, "}", t, TAG$]}]
+MakeBoxes[ TAG$[ Set$TM, t_][ ], TheoremaForm] := tmaTagBox[ None, "\[EmptySet]", t, TAG$]
+MakeBoxes[ Set$TM[ arg__], TheoremaForm] :=
+	RowBox[ {"{", tmaInfixBox[ HoldComplete[ arg], ","], "}"}]
 MakeBoxes[ Set$TM[ ], TheoremaForm] := "\[EmptySet]"
 
+MakeBoxes[ TAG$[ IffDef$TM, t_][ l_, r_], TheoremaForm] :=
+	RowBox[
+		{
+			MakeBoxes[ l, TheoremaForm],
+			tmaTagBox[ Infix, RowBox[ {":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], t, TAG$, ":="],
+        	MakeBoxes[ r, TheoremaForm]
+        }
+	]
 MakeBoxes[ IffDef$TM[ l_, r_], TheoremaForm] :=
-    RowBox[ {MakeBoxes[ l, TheoremaForm],
-        TagBox[ RowBox[{":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], Identity, SyntaxForm->"a:=b"], 
-        MakeBoxes[ r, TheoremaForm]}]
-        
+	RowBox[
+		{
+			MakeBoxes[ l, TheoremaForm],
+        	TagBox[ RowBox[ {":", "\[NegativeThickSpace]\[NegativeThinSpace]", "\[DoubleLongLeftRightArrow]"}], Identity, SyntaxForm -> "a:=b"], 
+        	MakeBoxes[ r, TheoremaForm]
+        }
+	]
+
+MakeBoxes[ TAG$[ Componentwise$TM, t_][ P_, args___], TheoremaForm] :=
+    RowBox[ {MakeBoxes[ P, TheoremaForm], tmaTagBox[ Infix, "@", t, TAG$], MakeBoxes[ SEQ$[ args], TheoremaForm]}]
 MakeBoxes[ Componentwise$TM[ P_, args___], TheoremaForm] :=
     RowBox[ {MakeBoxes[ P, TheoremaForm], "@", MakeBoxes[ SEQ$[ args], TheoremaForm]}]
-    
+
 MakeBoxes[ OperatorChain$TM[ args___], TheoremaForm] :=
-    RowBox[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ args]]]]
-    
+    RowBox[ List @@ (makeTmaBoxes /@ HoldComplete[ args])]
+
+MakeBoxes[ TAG$[ EmptyUpTriangle$TM, t_][ a_, b_], TheoremaForm] :=
+	RowBox[ {MakeBoxes[ a, TheoremaForm], tmaTagBox[ Infix, "\[EmptyUpTriangle]", t, TAG$, "\[Union]"], MakeBoxes[ b, TheoremaForm]}]
 MakeBoxes[ EmptyUpTriangle$TM[ a_, b_], TheoremaForm] :=
 	RowBox[ {MakeBoxes[ a, TheoremaForm], "\[EmptyUpTriangle]", MakeBoxes[ b, TheoremaForm]}]
-	
+
+MakeBoxes[ TAG$[ Insert$TM, t_][ a_, b_, c_], TheoremaForm] :=
+	SubscriptBox[ MakeBoxes[ a, TheoremaForm], RowBox[ {MakeBoxes[ b, TheoremaForm], tmaTagBox[ Infix, "\[RightArrow]", t, TAG$], MakeBoxes[ c, TheoremaForm]}]]
 MakeBoxes[ Insert$TM[ a_, b_, c_], TheoremaForm] :=
 	SubscriptBox[ MakeBoxes[ a, TheoremaForm], RowBox[ {MakeBoxes[ b, TheoremaForm], "\[RightArrow]", MakeBoxes[ c, TheoremaForm]}]]
 
+MakeBoxes[ TAG$[ DeleteAt$TM, t_][ a_, b_], TheoremaForm] :=
+	SubscriptBox[ MakeBoxes[ a, TheoremaForm], RowBox[ {MakeBoxes[ b, TheoremaForm], tmaTagBox[ Postfix, "\[LeftArrow]", t, TAG$]}]]
 MakeBoxes[ DeleteAt$TM[ a_, b_], TheoremaForm] :=
 	SubscriptBox[ MakeBoxes[ a, TheoremaForm], RowBox[ {MakeBoxes[ b, TheoremaForm], "\[LeftArrow]"}]]
-	
-MakeBoxes[ Delete$TM[ a_, b__], TheoremaForm] :=
-	SubscriptBox[ MakeBoxes[ a, TheoremaForm], RowBox[ Riffle[ Map[ RowBox[ {#, "\[LeftArrowBar]"}]&, Apply[ List, Map[ makeTmaBoxes, HoldComplete[ b]]]], ","]]]
-	(* We have to use two Map operations, because we need the "Hold"-attribute of "makeTmaBoxes" *)
-	
-MakeBoxes[ Replace$TM[ a_, p:Tuple$TM[ _, _]..], TheoremaForm] :=
-	SubscriptBox[ MakeBoxes[ a, TheoremaForm], RowBox[ Riffle[ Apply[ List, Map[ makeReplaceBoxes, HoldComplete[ p]]], ","]]]
-SetAttributes[ makeReplaceBoxes, HoldAllComplete];
-makeReplaceBoxes[ Tuple$TM[ l_, r_]] := RowBox[ {MakeBoxes[ l, TheoremaForm], "\[LeftArrowBar]", MakeBoxes[ r, TheoremaForm]}]
 
+MakeBoxes[ TAG$[ Delete$TM, t_][ a_, b__], TheoremaForm] :=
+	With[ {box = tmaTagBox[ Postfix, "\[LeftArrowBar]", t, TAG$]},
+		SubscriptBox[ MakeBoxes[ a, TheoremaForm], RowBox[ Riffle[ List @@ Replace[ HoldComplete[ b], x_ :> {MakeBoxes[ x, TheoremaForm], box}, {1}], ","]]]
+	]
+MakeBoxes[ Delete$TM[ a_, b__], TheoremaForm] :=
+	SubscriptBox[ MakeBoxes[ a, TheoremaForm], RowBox[ Riffle[ List @@ Replace[ HoldComplete[ b], x_ :> {MakeBoxes[ x, TheoremaForm], "\[LeftArrowBar]"}, {1}], ","]]]
+
+MakeBoxes[ TAG$[ Replace$TM, t_][ a_, p:Tuple$TM[ _, _]..], TheoremaForm] :=
+	SubscriptBox[ MakeBoxes[ a, TheoremaForm], makeTupleOperationBox[ HoldComplete[ p], tmaTagBox[ Infix, "\[LeftArrowBar]", t, TAG$]]]
+MakeBoxes[ Replace$TM[ a_, p:Tuple$TM[ _, _]..], TheoremaForm] :=
+	SubscriptBox[ MakeBoxes[ a, TheoremaForm], makeTupleOperationBox[ HoldComplete[ p], "\[LeftArrowBar]"]]
+
+MakeBoxes[ TAG$[ ReplacePart$TM, t_][ a_, p:Tuple$TM[ _, _]..], TheoremaForm] :=
+	SubscriptBox[ MakeBoxes[ a, TheoremaForm], makeTupleOperationBox[ HoldComplete[ p], tmaTagBox[ Infix, "\[LeftArrow]", t, TAG$]]]
 MakeBoxes[ ReplacePart$TM[ a_, p:Tuple$TM[ _, _]..], TheoremaForm] :=
-	SubscriptBox[ MakeBoxes[ a, TheoremaForm], RowBox[ Riffle[ Apply[ List, Map[ makeReplacePartBoxes, HoldComplete[ p]]], ","]]]
-SetAttributes[ makeReplacePartBoxes, HoldAllComplete];
-makeReplacePartBoxes[ Tuple$TM[ l_, r_]] := RowBox[ {MakeBoxes[ l, TheoremaForm], "\[LeftArrow]", MakeBoxes[ r, TheoremaForm]}]
+	SubscriptBox[ MakeBoxes[ a, TheoremaForm], makeTupleOperationBox[ HoldComplete[ p], "\[LeftArrow]"]]
+
+makeTupleOperationBox[ p_HoldComplete, box_] :=
+	RowBox[
+		Riffle[
+			List @@ Replace[ p, _[ l_, r_] :> RowBox[ {MakeBoxes[ l, TheoremaForm], box, MakeBoxes[ r, TheoremaForm]}], {1}],
+			","
+		]
+	]
+
+(* It does not make sense to tag "SEQ$", "VAR$", etc. *)
 
 MakeBoxes[ SEQ$[], TheoremaForm] :=
 	RowBox[ {TagBox[ "\[VerticalEllipsis]", Identity, SyntaxForm -> "("], TagBox[ "\[VerticalEllipsis]", Identity, SyntaxForm -> ")"]}]
@@ -489,9 +553,13 @@ metaAnnotations = {"*", "**", "***", "\[Dagger]", "\[DoubleDagger]"};
 MakeBoxes[ META$[ c_, n_Integer, dep_List] /; n<5, TheoremaForm] := StyleBox[ SuperscriptBox[ MakeBoxes@@Append[ removeVar[ c], TheoremaForm], metaAnnotations[[n+1]]], "ExpressionMeta"]
 MakeBoxes[ META$[ c_, n_Integer, dep_List], TheoremaForm] := StyleBox[ SuperscriptBox[ MakeBoxes@@Append[ removeVar[ c], TheoremaForm], RowBox[{"(", MakeBoxes[ n, StandardForm], ")"}]], "ExpressionMeta"]
 
+MakeBoxes[ TAG$[ Piecewise$TM, t_][ Tuple$TM[ c__Tuple$TM]], TheoremaForm] :=
+    RowBox[ {tmaTagBox[ Prefix, "\[Piecewise]", t, TAG$], GridBox[ Map[ formatClause, {c}]]}]
+MakeBoxes[ TAG$[ Piecewise$TM, t_][ Tuple$TM[ c__Tuple$TM], d_], TheoremaForm] :=
+    RowBox[ {tmaTagBox[ Prefix, "\[Piecewise]", t, TAG$],
+        GridBox[ Append[ Map[ formatClause, {c}], {MakeBoxes[ d, TheoremaForm], "\[DoubleLeftArrow]", "otherwise"}]]}]
 MakeBoxes[ Piecewise$TM[ Tuple$TM[ c__Tuple$TM]], TheoremaForm] :=
-    RowBox[ {"\[Piecewise]",
-        GridBox[ Map[ formatClause, {c}]]}]
+    RowBox[ {"\[Piecewise]", GridBox[ Map[ formatClause, {c}]]}]
 MakeBoxes[ Piecewise$TM[ Tuple$TM[ c__Tuple$TM], d_], TheoremaForm] :=
     RowBox[ {"\[Piecewise]",
         GridBox[ Append[ Map[ formatClause, {c}], {MakeBoxes[ d, TheoremaForm], "\[DoubleLeftArrow]", "otherwise"}]]}]

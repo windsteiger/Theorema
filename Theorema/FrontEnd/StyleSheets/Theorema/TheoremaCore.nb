@@ -1,19 +1,19 @@
-(* Content-type: application/mathematica *)
+(* Content-type: application/vnd.wolfram.mathematica *)
 
 (*** Wolfram Notebook File ***)
 (* http://www.wolfram.com/nb *)
 
-(* CreatedBy='Mathematica 6.0' *)
+(* CreatedBy='Mathematica 10.4' *)
 
 (*CacheID: 234*)
 (* Internal cache information:
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
-NotebookDataPosition[       145,          7]
-NotebookDataLength[      6936,        203]
-NotebookOptionsPosition[      4857,        152]
-NotebookOutlinePosition[      5320,        172]
-CellTagsIndexPosition[      5277,        169]
+NotebookDataPosition[       158,          7]
+NotebookDataLength[      6979,        203]
+NotebookOptionsPosition[      4911,        152]
+NotebookOutlinePosition[      5376,        172]
+CellTagsIndexPosition[      5333,        169]
 MenuPosition->0
 WindowFrame->Normal*)
 
@@ -38,9 +38,9 @@ The options defined for the style below will be used at the Notebook level.\
 Cell[StyleData["Notebook"],
  CreateCellID->True,
  DefaultNewCellStyle->"Computation",
+ ShowPredictiveInterface->False,
  ShowStringCharacters->True,
- CounterAssignments->{{"TheoremaFormulaCounter" -> 0}},
- ShowPredictiveInterface -> False]
+ CounterAssignments->{{"TheoremaFormulaCounter" -> 0}}]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -94,38 +94,38 @@ Cell[StyleData["CloseEnvironment"],
  CellSize->{Automatic, 9}],
 
 Cell[StyleData["Computation", StyleDefinitions -> StyleData["Input"]],
- CellProlog:>(
-  Theorema`Language`Session`Private`openComputation[]; $Pre = 
+ CellProlog:>($PreRead = 
+   Theorema`Language`Session`Private`openComputation; $Pre = 
    Theorema`Common`processComputation; $PrePrint = 
    Composition[RawBoxes, Theorema`Common`theoremaBoxes]; Null),
  CellEpilog:>(Theorema`Language`Session`Private`closeComputation[]; 
-  Unset[$Pre]; Unset[$PrePrint]),
+  Unset[$Pre]; Unset[$PrePrint]; Unset[$PreRead]),
  GeneratedCellStyles->{"Output"->"ComputationResult",
  "Print"->"ComputationInfo"}],
 
 Cell[StyleData["ComputationInfo"],
  ShowGroupOpener->True,
- PrivateCellOptions->{"DefaultCellGroupOpen"->False},
  CellGroupingRules->"InputGrouping",
- GeneratedCell->True],
+ GeneratedCell->True,
+ PrivateCellOptions -> {"DefaultCellGroupOpen" -> False}],
 
 Cell[StyleData["ComputationInfoBody"],
- PrivateCellOptions->{"DefaultCellGroupOpen"->False},
  CellGroupingRules->"OutputGrouping",
- GeneratedCell->True],
+ GeneratedCell->True,
+ PrivateCellOptions -> {"DefaultCellGroupOpen" -> False}],
 
 Cell[StyleData["ComputationResult", StyleDefinitions -> StyleData["Output"]]],
 
 Cell[StyleData["ProofInfo"],
  ShowGroupOpener->True,
- PrivateCellOptions->{"DefaultCellGroupOpen"->False},
  CellGroupingRules->"InputGrouping",
- GeneratedCell->True],
+ GeneratedCell->True,
+ PrivateCellOptions -> {"DefaultCellGroupOpen" -> False}],
 
 Cell[StyleData["ProofInfoBody"],
- PrivateCellOptions->{"DefaultCellGroupOpen"->False},
  CellGroupingRules->"OutputGrouping",
- GeneratedCell->True],
+ GeneratedCell->True,
+ PrivateCellOptions -> {"DefaultCellGroupOpen" -> False}],
 
 Cell[StyleData["OpenArchive"],
  Evaluatable->True,
@@ -157,7 +157,7 @@ WindowSize->{740, 867},
 WindowMargins->{{258, Automatic}, {32, Automatic}},
 TrackCellChangeTimes->False,
 MenuSortingValue->None,
-FrontEndVersion->"8.0 for Linux x86 (64-bit) (October 10, 2011)",
+FrontEndVersion->"10.4 for Linux x86 (64-bit) (February 25, 2016)",
 StyleDefinitions->"StylesheetFormatting.nb"
 ]
 (* End of Notebook Content *)
@@ -171,42 +171,41 @@ CellTagsIndex->{}
 *)
 (*NotebookFileOutline
 Notebook[{
-Cell[561, 21, 49, 0, 40, 49, 0, "StyleData", "StyleDefinitions", ""],
-Cell[613, 23, 191, 4, 65, "Text"],
+Cell[574, 21, 49, 0, 40, 49, 0, "StyleData", "StyleDefinitions", ""],
+Cell[626, 23, 191, 4, 65, "Text"],
 Cell[CellGroupData[{
-Cell[829, 31, 44, 0, 54, "Section"],
-Cell[876, 33, 99, 2, 46, "Text"],
-Cell[978, 37, 205, 5, 40, 27, 0, "StyleData", "Notebook", "All",
+Cell[842, 31, 44, 0, 54, "Section"],
+Cell[889, 33, 99, 2, 46, "Text"],
+Cell[991, 37, 203, 5, 40, 27, 0, "StyleData", "Notebook", "All",
  CounterAssignments->{{"TheoremaFormulaCounter" -> 0}}]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[1220, 47, 23, 0, 54, "Section"],
-Cell[1246, 49, 126, 1, 46, 73, 0, "StyleData", "EnvironmentText", "All"]
+Cell[1231, 47, 23, 0, 54, "Section"],
+Cell[1257, 49, 126, 1, 47, 73, 0, "StyleData", "EnvironmentText", "All"]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[1409, 55, 27, 0, 54, "Section"],
-Cell[1439, 57, 455, 7, 47, 76, 0, "StyleData", "GlobalDeclaration", "All"],
-Cell[1897, 66, 127, 3, 17, 34, 0, "StyleData", "OpenEnvironment", "All"],
-Cell[2027, 71, 137, 2, 40, 36, 0, "StyleData", "EnvironmentHeader", "All"],
-Cell[2167, 75, 447, 9, 47, 83, 1, "StyleData", "FormalTextInputFormula", \
+Cell[1420, 55, 27, 0, 54, "Section"],
+Cell[1450, 57, 455, 7, 49, 76, 0, "StyleData", "GlobalDeclaration", "All"],
+Cell[1908, 66, 127, 3, 17, 34, 0, "StyleData", "OpenEnvironment", "All"],
+Cell[2038, 71, 137, 2, 40, 36, 0, "StyleData", "EnvironmentHeader", "All"],
+Cell[2178, 75, 447, 9, 49, 83, 1, "StyleData", "FormalTextInputFormula", \
 "All"],
-Cell[2617, 86, 114, 2, 40, 39, 0, "StyleData", "EndEnvironmentMarker", \
+Cell[2628, 86, 114, 2, 40, 39, 0, "StyleData", "EndEnvironmentMarker", \
 "All"],
-Cell[2734, 90, 128, 3, 17, 35, 0, "StyleData", "CloseEnvironment", "All"],
-Cell[2865, 95, 451, 8, 47, 70, 0, "StyleData", "Computation", "All"],
-Cell[3319, 105, 171, 4, 40, 34, 0, "StyleData", "ComputationInfo", "All"],
-Cell[3493, 111, 152, 3, 40, 38, 0, "StyleData", "ComputationInfoBody", \
+Cell[2745, 90, 128, 3, 17, 35, 0, "StyleData", "CloseEnvironment", "All"],
+Cell[2876, 95, 478, 8, 49, 70, 0, "StyleData", "Computation", "All"],
+Cell[3357, 105, 175, 4, 40, 34, 0, "StyleData", "ComputationInfo", "All"],
+Cell[3535, 111, 156, 3, 40, 38, 0, "StyleData", "ComputationInfoBody", \
 "All"],
-Cell[3648, 116, 77, 0, 47, 77, 0, "StyleData", "ComputationResult", "All"],
-Cell[3728, 118, 165, 4, 40, 28, 0, "StyleData", "ProofInfo", "All"],
-Cell[3896, 124, 146, 3, 40, 32, 0, "StyleData", "ProofInfoBody", "All"],
-Cell[4045, 129, 145, 3, 40, 30, 0, "StyleData", "OpenArchive", "All"],
-Cell[4193, 134, 316, 6, 40, 30, 0, "StyleData", "ArchiveInfo", "All"],
-Cell[4512, 142, 155, 3, 40, 31, 0, "StyleData", "CloseArchive", "All"],
-Cell[4670, 147, 171, 2, 47, 73, 0, "StyleData", "IncludeArchive", "All"]
+Cell[3694, 116, 77, 0, 48, 77, 0, "StyleData", "ComputationResult", "All"],
+Cell[3774, 118, 169, 4, 49, 28, 0, "StyleData", "ProofInfo", "All"],
+Cell[3946, 124, 150, 3, 70, 32, 0, "StyleData", "ProofInfoBody", "All"],
+Cell[4099, 129, 145, 3, 70, 30, 0, "StyleData", "OpenArchive", "All"],
+Cell[4247, 134, 316, 6, 70, 30, 0, "StyleData", "ArchiveInfo", "All"],
+Cell[4566, 142, 155, 3, 70, 31, 0, "StyleData", "CloseArchive", "All"],
+Cell[4724, 147, 171, 2, 70, 73, 0, "StyleData", "IncludeArchive", "All"]
 }, Open  ]]
 }
 ]
 *)
 
-(* End of internal cache information *)

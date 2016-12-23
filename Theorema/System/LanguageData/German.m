@@ -213,6 +213,7 @@ With[ {lang = "German"},
 	MessageName[ registerRuleSet, "usage", lang] = "registerRuleSet[ n_, p_, r_] registers prover p under the name n consisting of rules r.";
 	MessageName[ registerStrategy, "usage", lang] = "registerStrategy[ n_, s_] registers strategy s under the name n.";
 	MessageName[ removeEnvironment,"usage", lang] = "removeEnvironment[ nb] removes an entire environment from the notebook nb.";
+	MessageName[ removeRedundantBoxes,"usage", lang] = "removeRedundantBoxes[ expr] removes redundant boxes (e.g. certain TagBoxes) from the given box-expression.";
 	MessageName[ renameBound, "usage", lang] = "renameBound[ expr:(_[ _RNG$, ___]), new] renames the variables bound by the outermost quantifier in 'expr' by 'new'. Other bound variables might be renamed as well, in order to avoid name clashes; this is taken care of by 'substituteFree'.";
 	MessageName[ replaceAllAndTrack, "usage", lang] = "";	
 	MessageName[ replaceAllExcept, "usage", lang] = "replaceAllExcept[ expr, rules, expt] applies rule(s) to all subparts of 'expr' except those contained in the list 'expt'.";

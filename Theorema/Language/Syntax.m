@@ -392,20 +392,21 @@ isNonStandardOperatorName[ f_] := MemberQ[ $tmaNonStandardOperatorNames, f]
 isNonStandardOperatorName[ args___] := unexpected[ isNonStandardOperatorName, {args}]
 
 isStandardOperatorName[ f_Symbol] :=
-    Module[ {n = SymbolName[ f]},
+    With[ {n = SymbolName[ f]},
         StringLength[ n] > 3 && StringTake[ n, -3] === "$TM"
     ]
 isStandardOperatorName[ f_] := False
 isStandardOperatorName[ args___] := unexpected[ isStandardOperatorName, {args}]
 
 tmaToInputOperator[ op_Symbol] :=
-    Module[ {n = SymbolName[ op]},
-        If[ StringTake[ n, -1] == "$",
-            ToExpression[ n],
-            ToExpression[ StringDrop[ n, -3]]
+    With[ {n = SymbolName[ op]},
+        If[ StringTake[ n, -3] == "$TM",
+        	ToExpression[ StringDrop[ n, -3]],
+        (*else*)
+            ToExpression[ n]
         ]
     ]
-tmaToInputOperator[ args___] := unexpected[ tmaToInputOperator, {args}]	
+tmaToInputOperator[ args___] := unexpected[ tmaToInputOperator, {args}]
 
 SetAttributes[ removeVar, HoldAllComplete];
 removeVar[ (h:(Theorema`Language`SEQ0$|Theorema`Language`SEQ1$|Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$))[ op_Symbol]] :=
@@ -614,7 +615,7 @@ isTmaOperatorString[ op_String, False] := MemberQ[ $tmaOperatorNames, op]
 isTmaOperatorString[ op_String, True] := MemberQ[ $tmaOperatorNames, removeVar[ op]]
 
 (* "getTmaOperatorName" returns the string form (without suffix "$TM" and prefix "$VAR") of the Theorema operator name 'op',
-	even if it occurs inside nested "Annotated$TM"-, "DomainOperation$TM"- and "VAR$"-expressions.
+	even if it occurs inside nested "TAG$"-,"Annotated$TM"-, "DomainOperation$TM"- or "VAR$"-expressions.
 	If 'op' is no Theorema operator name, $Failed is returned. *)
 SetAttributes[ getTmaOperatorName, HoldAllComplete];
 getTmaOperatorName[ op_Symbol] := Quiet[ Check[ getTmaOperatorNameFromString[ SymbolName[ op]], $Failed]]
@@ -622,6 +623,7 @@ getTmaOperatorName[ (Theorema`Language`VAR$|Theorema`Computation`Language`VAR$)[
 	Quiet[ Check[ getTmaOperatorNameFromString[ removeVar[ SymbolName[ op]]], $Failed]]
 getTmaOperatorName[ (Theorema`Language`FIX$|Theorema`Computation`Language`FIX$)[ op_Symbol, 0]] :=
 	Quiet[ Check[ getTmaOperatorNameFromString[ removeVar[ SymbolName[ op]]], $Failed]]
+getTmaOperatorName[ (Theorema`Language`TAG$|Theorema`Computation`Language`TAG$)[ op_, ___]] := getTmaOperatorName[ op]
 getTmaOperatorName[ (Theorema`Language`Annotated$TM|Theorema`Computation`Language`Annotated$TM)[ op_, __]] := getTmaOperatorName[ op]
 getTmaOperatorName[ (Theorema`Language`DomainOperation$TM|Theorema`Computation`Language`DomainOperation$TM)[ _, op_]] := getTmaOperatorName[ op]
 getTmaOperatorName[ _] := $Failed
@@ -1565,9 +1567,13 @@ makeTmaBoxes[ b_] := MakeBoxes[ b, TheoremaForm]
 (* DomainOperation$TM- and Annotated$TM-quantifiers are treated in "Expression.m" *)
 
 MakeBoxes[ (op_?isNonStandardOperatorName)[ arg___], TheoremaForm] :=
-    With[ {b = Replace[ op, $tmaNonStandardOperatorToBuiltin]},
-        MakeBoxes[ b[ arg], TheoremaForm]
-    ]
+	With[ {b = Replace[ op, $tmaNonStandardOperatorToBuiltin]},
+		MakeBoxes[ b[ arg], TheoremaForm]
+	]
+MakeBoxes[ (h:(Theorema`Language`TAG$|Theorema`Computation`Language`TAG$))[ op_?isNonStandardOperatorName, t_][ arg___], TheoremaForm] :=
+	With[ {b = Replace[ op, $tmaNonStandardOperatorToBuiltin]},
+		MakeBoxes[ h[ b, t][ arg], TheoremaForm]
+	]
 
 (*
 	Parenthesizing of expressions is an issue that may need more attention in an improved implementation.
@@ -1580,8 +1586,8 @@ MakeBoxes[ (op_?isNonStandardOperatorName)[ arg___], TheoremaForm] :=
 	4) On demand, more exceptions can be implemented at this point.
 *)
 MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
+	(* Testing 'isStandardOperatorName' rules out, for instance, 'TAG$'. *)
 	With[ {b = tmaToInputOperator[ op]},
-    Module[ {form, sym},
     	(* Special cases, because otherwise And uses && and Or uses || *)
     	Switch[ b,
     		And,
@@ -1589,45 +1595,88 @@ MakeBoxes[ (op_?isStandardOperatorName)[ arg__], TheoremaForm] :=
     		Or,
     		tmaInfixBox[ HoldComplete[ arg], "\[Or]"],
     		Not,
-    		RowBox[{ "\[Not]", parenthesize[ arg]}],
+    		RowBox[ {"\[Not]", parenthesize[ arg]}],	(* TODO: 'arg' could be longer than 1 element. *)
     		Plus,
     		RowBox[ makeSummands[ HoldComplete[ arg], True]],
     		Subtract,
     		RowBox[ makeSummands[ HoldComplete[ arg], False]],
-    		Times|Divide|Power|Subscript|BracketingBar|Slot,	(* If we put "Divide" here, we get a nice-looking FractionBox. *)
+    		Times|Divide|Power|Subscript|Slot,	(* If we put "Divide" here, we get a nice-looking FractionBox. *)
     		MakeBoxes[ b[ arg], TheoremaForm],
     		D,
     		RowBox[ {"D", "[", tmaInfixBox[ HoldComplete[ arg], ","], "]"}],	(* Otherwise the output is completely wrong. *)
     		_,
     		If[ isTmaOperatorName[ op],
     			(* This if-branch treats the case where 'op' is a Theorema operator occuring with non-empty argument list. *)
-    			sym = Replace[ SymbolName[ op], $tmaNameToOperator];
-    			form = getTmaOperatorForms[ op];
-    			If[ Length[ HoldComplete[ arg]] == 1,
-    				Which[
-						MemberQ[ form, Prefix],
-						RowBox[ {sym, MakeBoxes[ arg, TheoremaForm]}],
-						MemberQ[ form, Postfix],
-						RowBox[ {MakeBoxes[ arg, TheoremaForm], sym}],
-						form === {},
-						RowBox[ {sym, "[", MakeBoxes[ arg, TheoremaForm], "]"}],
-						True,
-						RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}], "[", MakeBoxes[ arg, TheoremaForm], "]"}]
-					],
-				(*else*)
-					If[ MemberQ[ form, Infix],
-						tmaInfixBox[ HoldComplete[ arg], sym],
+    			With[ {sym = Replace[ SymbolName[ op], $tmaNameToOperator], form = getTmaOperatorForms[ op]},
+	    			If[ Length[ HoldComplete[ arg]] === 1,
+	    				Which[
+							MemberQ[ form, Prefix],
+							RowBox[ {sym, MakeBoxes[ arg, TheoremaForm]}],
+							MemberQ[ form, Postfix],
+							RowBox[ {MakeBoxes[ arg, TheoremaForm], sym}],
+							form === {},
+							RowBox[ {sym, "[", MakeBoxes[ arg, TheoremaForm], "]"}],
+							True,
+							RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}], "[", MakeBoxes[ arg, TheoremaForm], "]"}]
+						],
 					(*else*)
-						RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}], "[",
-								RowBox[ Riffle[ Apply[ List, Map[ makeTmaBoxes, HoldComplete[ arg]]], ","]], "]"}]
-					]
+						If[ MemberQ[ form, Infix],
+							tmaInfixBox[ HoldComplete[ arg], sym],
+						(*else*)
+							RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}], "[", tmaInfixBox[ HoldComplete[ arg], ","], "]"}]
+						]
+	    			]
     			],
     		(*else*)
     			parenthesize[ b[ arg]]
     		]
     	]
     ]
-	]
+MakeBoxes[ (h:(Theorema`Language`TAG$|Theorema`Computation`Language`TAG$))[ op_Symbol, t_][ arg__], TheoremaForm] :=
+	With[ {b = tmaToInputOperator[ op]},
+    	(* Special cases, because otherwise And uses && and Or uses || *)
+    	Switch[ b,
+    		And,
+    		tmaInfixBox[ HoldComplete[ arg], tmaTagBox[ Infix, "\[And]", t, h]],
+    		Or,
+    		tmaInfixBox[ HoldComplete[ arg], tmaTagBox[ Infix, "\[Or]", t, h]],
+    		Not,
+    		RowBox[ {tmaTagBox[ Prefix, "\[Not]", t, h], parenthesize[ arg]}],
+    		D,
+    		RowBox[ {tmaTagBox[ None, "D", t, h], "[", tmaInfixBox[ HoldComplete[ arg], ","], "]"}],
+    		_,
+    		If[ isTmaOperatorName[ op],
+    			(* This if-branch treats the case where 'op' is a Theorema operator occuring with non-empty argument list. *)
+    			With[ {sym = Replace[ SymbolName[ op], $tmaNameToOperator], form = getTmaOperatorForms[ op]},
+	    			Switch[ HoldComplete[ arg],
+	    				HoldComplete[ _],
+	    				Which[
+							MemberQ[ form, Prefix],
+							RowBox[ {tmaTagBox[ Prefix, sym, t, h], MakeBoxes[ arg, TheoremaForm]}],
+						(*else*)
+							MemberQ[ form, Postfix],
+							RowBox[ {MakeBoxes[ arg, TheoremaForm], tmaTagBox[ Postfix, sym, t, h]}],
+						(*else*)
+							form === {},
+							RowBox[ {tmaTagBox[ None, sym, t, h], "[", MakeBoxes[ arg, TheoremaForm], "]"}],
+						(*else*)
+							True,
+							RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], tmaTagBox[ None, sym, t, h], TagBox[ ")", "AutoParentheses"]}], "[", MakeBoxes[ arg, TheoremaForm], "]"}]
+						],
+						
+						_,
+						If[ MemberQ[ form, Infix],
+							tmaInfixBox[ HoldComplete[ arg], tmaTagBox[ Infix, sym, t, h]],
+						(*else*)
+							RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], tmaTagBox[ None, sym, t, h], TagBox[ ")", "AutoParentheses"]}], "[", tmaInfixBox[ HoldComplete[ arg], ","], "]"}]
+						]
+	    			]
+    			],
+    		(*else*)
+    			RowBox[ {tmaTagBox[ None, b, t, h], "[", tmaInfixBox[ HoldComplete[ arg], ","], "]"}]
+    		]
+    	]
+    ]
 	
 makeSummands[ arg:HoldComplete[ a_], True] /; !isIndividual[ arg] :=
 	{"Plus", "[", MakeBoxes[ a, TheoremaForm], "]"}
@@ -1694,7 +1743,7 @@ neg[ a_] := With[ {a0 = -a}, {HoldComplete[ a0], False}]
 SetAttributes[ parenthesize, HoldAllComplete]; (* otherwise evaluation might happen *)
 parenthesize[ b_[ arg___]] :=
     Module[ {res = MakeBoxes[ b[ arg], TheoremaForm]},
-        If[ MatchQ[ res, RowBox[ {ToString[ b], "[", ___}]|RowBox[ {"(", ___, ")"}]],
+        If[ MatchQ[ res, RowBox[ {_, "[", ___, "]"}]|RowBox[ {_?isLeftDelimiter, ___, _?isRightDelimiter}]],
             res,
             RowBox[ {TagBox[ "(", "AutoParentheses"], res, TagBox[ ")", "AutoParentheses"]}]
         ]
@@ -1711,7 +1760,16 @@ MakeBoxes[ (s_?isTmaOperatorName)[], TheoremaForm] :=
 	With[ {sym = Replace[ SymbolName[ s], $tmaNameToOperator]},
 		If[ getTmaOperatorForms[ s] === {},
 			RowBox[ {sym, "[", "]"}],
+		(*else*)
 			RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], sym, TagBox[ ")", "AutoParentheses"]}], "[", "]"}]
+		]
+	]
+MakeBoxes[ (h:(Theorema`Language`TAG$|Theorema`Computation`Language`TAG$))[ s_?isTmaOperatorName, t_][], TheoremaForm] :=
+	With[ {box = tmaTagBox[ None, Replace[ SymbolName[ s], $tmaNameToOperator], t, h]},
+		If[ getTmaOperatorForms[ s] === {},
+			RowBox[ {box, "[", "]"}],
+		(*else*)
+			RowBox[ {RowBox[ {TagBox[ "(", "AutoParentheses"], box, TagBox[ ")", "AutoParentheses"]}], "[", "]"}]
 		]
 	]
     
@@ -1728,9 +1786,23 @@ MakeBoxes[ s_Symbol, TheoremaForm] :=
 		]
 	]
 
+MakeBoxes[ (h:(Theorema`Language`TAG$|Theorema`Computation`Language`TAG$))[ expr_, t_], TheoremaForm] :=
+	tmaTagBox[ None, MakeBoxes[ expr, TheoremaForm], t, h]
+
+tmaInfixBox[ HoldComplete[ a_], _] :=
+	MakeBoxes[ a, TheoremaForm]
 tmaInfixBox[ args_HoldComplete, op_] :=
 	RowBox[ Riffle[ List @@ (makeTmaBoxes /@ args), op]]
 tmaInfixBox[ args___] := unexpected[ tmaInfixBox, {args}]
+
+(* We cannot simply write 'TAG$[ tag]', since 'TAG$' must be in the right context! *)
+tmaTagBox[ syntax:(Infix|Prefix|Postfix), box_, tag_, h_] := tmaTagBox[ syntax, box, tag, h, box]
+tmaTagBox[ Infix, box_, tag_, h_, op_String] := TagBox[ box, h[ tag], SyntaxForm -> "x" <> op <> "y"]
+tmaTagBox[ Prefix, box_, tag_, h_, op_String] := TagBox[ box, h[ tag], SyntaxForm -> op <> "x"]
+tmaTagBox[ Postfix, box_, tag_, h_, op_String] := TagBox[ box, h[ tag], SyntaxForm -> "x" <> op]
+tmaTagBox[ Left, box_, tag_, h_, ___] := TagBox[ box, h[ tag], SyntaxForm -> "("]
+tmaTagBox[ Right, box_, tag_, h_, ___] := TagBox[ box, h[ tag], SyntaxForm -> ")"]
+tmaTagBox[ _, box_, tag_, h_, ___] := TagBox[ box, h[ tag]]
 
 initParser[];
 

@@ -1040,6 +1040,11 @@ getFormulaCounter[nb_NotebookObject] :=
 	]
 getFormulaCounter[args___] := unexpected[ getFormulaCounter, {args}]
 
+removeRedundantBoxes[ expr_] :=
+	With[ {pos = Position[ expr, TagBox[ _, _Theorema`Language`TAG$|_Theorema`Computation`Language`TAG$, ___]]},
+		MapAt[ First, expr, pos]
+	]
+
 (*
 	openEnvironment is assigned to $PreRead, which might be called under certain circumstances.
 	In order not to mess up the contexts, we do some checks.
@@ -1055,7 +1060,7 @@ openEnvironment[ expr_] :=
         $ContextPath = DeleteDuplicates[ Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath]];
         (* Set default context when not in an archive *)
         If[ !inArchive[] && $Context =!= "Theorema`Knowledge`", Begin[ "Theorema`Knowledge`"]];
-        expr
+        removeRedundantBoxes[ expr]
     ]
 openEnvironment[args___] := unexpected[ openEnvironment, {args}]
 
@@ -1487,7 +1492,7 @@ processComputation[ x_] := Module[ { procSynt, res, lhs = Null},
 ]
 processComputation[ args___] := unexcpected[ processComputation, {args}]
 
-openComputation[] := 
+openComputation[ expr_] :=
 	Module[ {fileCache},
 		$evalCellID = CurrentValue[ "CellID"];
 		$cacheComp = True;
@@ -1497,16 +1502,17 @@ openComputation[] :=
 			$cacheComp = setComputationEnvironment[ fileCache];
 		];
 		$parseTheoremaExpressions = True;
-		$ContextPath = Join[ 
-			{"Theorema`Computation`Language`"}, 
-			Map[ StringReplace[ #, "Theorema`Knowledge`" -> "Theorema`Computation`Knowledge`", 1]&, $TheoremaArchives], 
-			$ContextPath]; 
+		$ContextPath = Join[
+			{"Theorema`Computation`Language`"},
+			Map[ StringReplace[ #, "Theorema`Knowledge`" -> "Theorema`Computation`Knowledge`", 1]&, $TheoremaArchives],
+			$ContextPath];
 		Begin[ "Theorema`Computation`Knowledge`"];
+		removeRedundantBoxes[ expr]
 	]
 openComputation[args___] := unexcpected[ openComputation, {args}]
 
 closeComputation[] :=
-    Module[ {},    	
+    Module[ {},
         End[];
 		$ContextPath = Select[ $ContextPath, (!StringMatchQ[ #, "Theorema`Computation`" ~~ __])&];
 		$parseTheoremaExpressions = False;

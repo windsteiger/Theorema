@@ -191,6 +191,7 @@ With[ {lang = "German"},
     MessageName[ Superset$TM, "usage", lang] = "";
 	MessageName[ Switch$TM, "usage", lang] = "";	
 
+	MessageName[ TAG$, "usage", lang] = "";
 	MessageName[ TheArgMax$TM, "usage", lang] = "";
 	MessageName[ TheArgMin$TM, "usage", lang] = "";
 	MessageName[ Times$TM, "usage", lang] = "";
