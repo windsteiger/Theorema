@@ -442,8 +442,16 @@ With[ {spec = Alternatives @@ specialBrackets[[All, 3]],
 					"\[LeftDoubleBracketingBar]", TagBox[ "(", "AutoParentheses"], ",", ";"},
 					If[ $VersionNumber >= 10.0, {"\:f113"}, {}]	(* left association character *)
 				]},
-	isLeftDelimiter[ s_] :=
-		MemberQ[ std, s] || MatchQ[ s, TagBox[ spec, ___]]
+	getLeftDelimiter[ TagBox[ box:spec, ___]] :=
+		box;
+	getLeftDelimiter[ TagBox[ box_, _Theorema`Language`TAG$|_Theorema`Computation`Language`TAG$, ___]] :=
+		getLeftDelimiter[ box];
+	getLeftDelimiter[ box_] :=
+		If[ MemberQ[ std, box],
+			box,
+		(*else*)
+			$Failed
+		]
 ]
 With[ {spec = Alternatives @@ specialBrackets[[All, 4]],
 		std = Join[
@@ -452,11 +460,22 @@ With[ {spec = Alternatives @@ specialBrackets[[All, 4]],
 					"\[RightDoubleBracketingBar]", TagBox[ ")", "AutoParentheses"], ",", ";"},
 					If[ $VersionNumber >= 10.0, {"\:f114"}, {}]	(* right association character *)
 				]},
-	isRightDelimiter[ s_] :=
-		MemberQ[ std, s] || MatchQ[ s, TagBox[ spec, ___]]
+	getRightDelimiter[ TagBox[ box:spec, ___]] :=
+		box;
+	getRightDelimiter[ TagBox[ box_, _Theorema`Language`TAG$|_Theorema`Computation`Language`TAG$, ___]] :=
+		getRightDelimiter[ box];
+	getRightDelimiter[ box_] :=
+		If[ MemberQ[ std, box],
+			box,
+		(*else*)
+			$Failed
+		]
 ]
-	
-	
+
+isLeftDelimiter[ box_] := (getLeftDelimiter[ box] =!= $Failed)
+isRightDelimiter[ box_] := (getRightDelimiter[ box] =!= $Failed)
+
+
 (* In the following list,
 	- the first element of each item is the symbol of the operator,
 	- the second element is a list of possible syntax of the operator according to Mathematica,
@@ -664,6 +683,8 @@ getTmaOperatorForms[ op_String] := First[ Cases[ $tmaOperators, {_, forms_, op} 
 (* MakeExpression *)
 
 
+MakeExpression[ RowBox[ {a_?isLeftDelimiter, TagBox[ op_, Identity, ___], b_?isRightDelimiter}], fmt_] := 
+	MakeExpression[ RowBox[ {a, RowBox[ {op}], b}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 MakeExpression[RowBox[{a:Except[ _?isLeftDelimiter], TagBox[op_, Identity, ___], b_?isRightDelimiter}], fmt_] := 
 	MakeExpression[RowBox[{RowBox[{a, op}], b}], fmt] /; $parseTheoremaExpressions || $parseTheoremaGlobals
 MakeExpression[RowBox[{a_?isLeftDelimiter, TagBox[op_, Identity, ___], b:Except[ _?isRightDelimiter]}], fmt_] := 
@@ -1784,7 +1805,10 @@ parenthesize[ expr_] :=
 	With[ {box = MakeBoxes[ expr, TheoremaForm]},
     With[ {box0 = NestWhile[ First, box, MatchQ[ #, TagBox[ _, _Theorema`Language`TAG$|_Theorema`Language`TAG$, ___]]&]},
         If[ MatchQ[ box0, RowBox[ {__}]] &&
-        		!MatchQ[ box0, RowBox[ {_, "[", ___, "]"}]|RowBox[ {_, "\[LeftDoubleBracket]", ___, "\[RightDoubleBracket]"}]|RowBox[ {_?isLeftDelimiter, ___, _?isRightDelimiter}]],
+        		!MatchQ[ box0,
+        			RowBox[ {_, _?(MemberQ[ {"[", "\[LeftDoubleBracket]"}, getLeftDelimiter[ #]] &), ___, _?(MemberQ[ {"]", "\[RightDoubleBracket]"}, getRightDelimiter[ #]] &)}]|
+        				RowBox[ {_?isLeftDelimiter, ___, _?isRightDelimiter}]
+        		],
             RowBox[ {TagBox[ "(", "AutoParentheses"], box, TagBox[ ")", "AutoParentheses"]}],
         (*else*)
         	box
