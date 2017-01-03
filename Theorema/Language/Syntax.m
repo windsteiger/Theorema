@@ -395,7 +395,7 @@ registerRange[
 *)
 
 (* $tmaNonStandardOperators is defined in Expression.m *)
-$tmaNonStandardOperatorNames = Transpose[ $tmaNonStandardOperators][[1]];
+$tmaNonStandardOperatorNames = First /@ $tmaNonStandardOperators;
 $tmaNonStandardOperatorToBuiltin = Dispatch[ Apply[ Rule, $tmaNonStandardOperators, {1}]];
 
 isNonStandardOperatorName[ f_] := MemberQ[ $tmaNonStandardOperatorNames, f]
@@ -476,16 +476,21 @@ isLeftDelimiter[ box_] := (getLeftDelimiter[ box] =!= $Failed)
 isRightDelimiter[ box_] := (getRightDelimiter[ box] =!= $Failed)
 
 
-(* In the following list,
-	- the first element of each item is the symbol of the operator,
-	- the second element is a list of possible syntax of the operator according to Mathematica,
-	- the third element is the full name of the operator.
-	Note that Infix/Prefix/Postfix are, up to now, only used for correct output but not for parsing -
-	They do not affect parsing in any way!
-	ALSO NOTE THAT THE FIRST AND THE THIRD ELEMENT OF EACH ENTRY MUST BE DISTINCT!
-	*)
+(* In the following list:
+	- The first element of each item is the symbol of the operator; could be "".
+	- The second element is a list of possible syntax of the operator according to Mathematica; used
+		for pretty-printing ONLY.
+	- The third element is the full name of the operator, as it should be parsed; it should
+		always be the name of a Mathematica-built-in symbol, since otherwise symbols might appear
+		in the wrong context (-> renaming the built-in name to another name, e.g. "SetDelayed" to
+		"EqualDef", happens only in 'freshSymbol').
+		Also note that the third element MUST be different from the first element!
+	- The (optional) fourth argument is an alternative full name of the operator,
+		e.g. "Iff" for "DoubleLeftRightArrow"; this ONLY affects pretty-printing and replaces the
+		obsolete '$tmaNonStandardOperators'.
+		If a fourth element is present, the first element MUST be different from ""! *)
 $tmaOperators = {
-	{"", {}, "min"}, {"", {}, "max"},
+	{"", {}, "min"}, {"", {}, "max"},	(*needed for parsing 'min_Greater' as 'Annotated[ min, SubScript[ Greater]]' rather than 'Subscript[ min, Greater]'*)
 	{"@", {Infix}, "Componentwise"}, {"/@", {Infix}, "Map"}, {"//@", {Infix}, "MapAll"},
 	{">>", {Infix}, "Put"}, {">>>", {Infix}, "PutAppend"}, {"<<", {Prefix}, "Get"},
 	{"@@", {Infix}, "Apply"}, {";;", {Infix}, "Span"},
@@ -518,7 +523,7 @@ $tmaOperators = {
 	{"\[RightTeeArrow]", {Infix}, "RightTeeArrow"}, {"\[LeftTeeArrow]", {Infix}, "LeftTeeArrow"},
 	{"\[RightArrowBar]", {Infix}, "RightArrowBar"}, {"\[LeftArrowBar]", {Infix}, "LeftArrowBar"},
 	{"\[DoubleRightArrow]", {Infix}, "DoubleRightArrow"}, {"\[DoubleLeftArrow]", {Infix}, "DoubleLeftArrow"},
-	{"\[DoubleLeftRightArrow]", {Infix}, "DoubleLeftRightArrow"}, {"\[DoubleLongRightArrow]", {Infix}, "DoubleLongRightArrow"},
+	{"\[DoubleLeftRightArrow]", {Infix}, "DoubleLeftRightArrow", "Iff"}, {"\[DoubleLongRightArrow]", {Infix}, "DoubleLongRightArrow"},
 	{"\[DoubleLongLeftArrow]", {Infix}, "DoubleLongLeftArrow"}, {"\[DoubleLongLeftRightArrow]", {Infix}, "DoubleLongLeftRightArrow"},
 	{"\[DownArrow]", {Infix}, "DownArrow"}, {"\[UpArrow]", {Infix}, "UpArrow"}, {"\[UpDownArrow]", {Infix}, "UpDownArrow"},
 	{"\[UpTeeArrow]", {Infix}, "UpTeeArrow"}, {"\[DownTeeArrow]", {Infix}, "DownTeeArrow"},
@@ -589,7 +594,7 @@ $tmaOperators = {
 	{"\[SquareSupersetEqual]", {Infix}, "SquareSupersetEqual"}, {"\[NotSquareSupersetEqual]", {Infix}, "NotSquareSupersetEqual"},
 	{"\[SquareSubset]", {Infix}, "SquareSubset"}, {"\[NotSquareSubset]", {Infix}, "NotSquareSubset"},
 	{"\[SquareSubsetEqual]", {Infix}, "SquareSubsetEqual"}, {"\[NotSquareSubsetEqual]", {Infix}, "NotSquareSubsetEqual"},
-	{"=", {Infix}, "Set"}, {":=", {Infix}, "SetDelayed"},
+	{"=", {Infix}, "Set"}, {":=", {Infix}, "SetDelayed", "EqualDef"},
 	{"\[Equal]", {Infix}, "Equal"}, {"==", {Infix}, "Equal"},
 	{"\[LongEqual]", {Infix}, "Equal"}, {"\[NotEqual]", {Infix}, "Unequal"},
 	{"!=", {Infix}, "Unequal"}, {"===", {Infix}, "SameQ"},
@@ -634,16 +639,26 @@ $tmaBinaryRelations =
 $tmaOperatorSymbols = Map[ First, $tmaOperators];
 (* We must not add contexts (like "Theorema`Language`" etc.) to the operator names, as it is done with quantifiers,
 	because copying each of the more than 200 operator names twice (for the two possible contexts) seems to be a bit too inefficient. *)
-$tmaOperatorNames = Map[ (Last[#] <> "$TM")&, $tmaOperators];
-$tmaOperatorToName = Dispatch[ Map[ Rule[ First[#], Last[#]] &, $tmaOperators]];
-$tmaNameToOperator = Dispatch[ Replace[ Thread[ $tmaOperatorNames -> $tmaOperatorSymbols], (s_ -> "") :> (s -> StringDrop[ s, -3]), {1}]];
+$tmaOperatorToName = Dispatch[ Map[ Rule[ First[ #], #[[3]]] &, $tmaOperators]];
+$tmaNameToOperator =
+	Replace[
+		$tmaOperators,
+		{
+			{"", _, name_String} :> (name <> "$TM" -> name),
+			{sym_, _, name_String} :> (name <> "$TM" -> sym),
+			{sym_, _, name1_String, name2_String} :> Sequence[ name1 <> "$TM" -> sym, name2 <> "$TM" -> sym]
+		},
+		{1}
+	];
+$tmaOperatorNames = First /@ $tmaNameToOperator;
+$tmaNameToOperator = Dispatch[ $tmaNameToOperator];
 
-(* We need this attribute, because otherwise expressions (not only operator symbols!) are evaluated when "MakeBoxes" is called. *)	
+(* We need this attribute, because otherwise expressions (not only operator symbols!) are evaluated when "MakeBoxes" is called. *)
 SetAttributes[ isTmaOperatorName, HoldAllComplete];
 isTmaOperatorName[ op_Symbol] := Quiet[ Check[ isTmaOperatorString[ SymbolName[ op], True], False]]
 
+isTmaOperatorString[ op_String, True] := isTmaOperatorString[ removeVar[ op], False]
 isTmaOperatorString[ op_String, False] := MemberQ[ $tmaOperatorNames, op]
-isTmaOperatorString[ op_String, True] := MemberQ[ $tmaOperatorNames, removeVar[ op]]
 
 (* "getTmaOperatorName" returns the string form (without suffix "$TM" and prefix "$VAR") of the Theorema operator name 'op',
 	even if it occurs inside nested "TAG$"-,"Annotated$TM"-, "DomainOperation$TM"- or "VAR$"-expressions.
@@ -676,8 +691,8 @@ isTmaRelationBox[ (UnderoverscriptBox|SubsuperscriptBox)[ op_, _, _]] := isTmaRe
 isTmaRelationBox[ op_String] := MemberQ[ $tmaBinaryRelations, Replace[ op, $tmaOperatorToName]]
 isTmaRelationBox[ ___] := False
 
-getTmaOperatorForms[ op_Symbol] := First[ Cases[ $tmaOperators, {_, forms_, StringDrop[ SymbolName[ op], -3]} -> forms]]
-getTmaOperatorForms[ op_String] := First[ Cases[ $tmaOperators, {_, forms_, op} -> forms]]
+getTmaOperatorForms[ op_Symbol] := getTmaOperatorForms[ StringDrop[ SymbolName[ op], -3]]
+getTmaOperatorForms[ op_String] := First[ Cases[ $tmaOperators, {_, forms_, ___, op} -> forms]]
 
 (* ::Section:: *)
 (* MakeExpression *)
@@ -1599,6 +1614,7 @@ makeTmaBoxes[ b_] := MakeBoxes[ b, TheoremaForm]
 	
 (* DomainOperation$TM- and Annotated$TM-quantifiers are treated in "Expression.m" *)
 
+(*
 MakeBoxes[ (op_?isNonStandardOperatorName)[ arg___], TheoremaForm] :=
 	With[ {b = Replace[ op, $tmaNonStandardOperatorToBuiltin]},
 		MakeBoxes[ b[ arg], TheoremaForm]
@@ -1607,6 +1623,7 @@ MakeBoxes[ (h:(Theorema`Language`TAG$|Theorema`Computation`Language`TAG$))[ op_?
 	With[ {b = Replace[ op, $tmaNonStandardOperatorToBuiltin]},
 		MakeBoxes[ h[ b, t][ arg], TheoremaForm]
 	]
+*)
 
 If[ $VersionNumber >= 10.0,
 	With[ {sym = Theorema`Language`Association$TM|Theorema`Computation`Language`Association$TM,

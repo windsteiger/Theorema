@@ -29,12 +29,8 @@ opDefInDom[ _] := {}
 (* ::Section:: *)
 (* Language classification *)
 
-$tmaNonStandardOperators = Join[ $tmaNonStandardOperators,
-    {
-     {Iff$TM, DoubleLeftRightArrow$TM},
-     {EqualDef$TM, SetDelayed$TM},
-     {Tuple$TM, AngleBracket$TM}
-    }];
+(* Uncomment the two commented 'MakeBoxes' definitions in "Syntax.m" when adding non-standard operators. *)
+$tmaNonStandardOperators = Join[ $tmaNonStandardOperators, {}];
     
     
 (* ::Section:: *)
@@ -446,9 +442,9 @@ Scan[
 	]&,
 	{
 		{List$TM, "{", "}", False},
-		{AngleBracket$TM, "\[LeftAngleBracket]", "\[RightAngleBracket]", False},
 		{BracketingBar$TM, "\[LeftBracketingBar]", "\[RightBracketingBar]", False},
 		{DoubleBracketingBar$TM, "\[LeftDoubleBracketingBar]", "\[RightDoubleBracketingBar]", False},
+		{Tuple$TM, "\[LeftAngleBracket]", "\[RightAngleBracket]", True},
 		{Floor$TM, "\[LeftFloor]", "\[RightFloor]", True},
 		{Ceiling$TM, "\[LeftCeiling]", "\[RightCeiling]", True}
 	}
