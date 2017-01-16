@@ -81,6 +81,8 @@ freshSymbol[ Hold[ s_Symbol], dropWolf_] :=
             	ToExpression[ "RationalInterval$TM[ -Infinity, Infinity, False, False]"],
             Theorema`Computation`Language`\[DoubleStruckCapitalR]|\[DoubleStruckCapitalR],
             	ToExpression[ "RealInterval$TM[ -Infinity, Infinity, False, False]"],
+            Theorema`Computation`Knowledge`\[EmptySet]|Theorema`Knowledge`\[EmptySet],
+            	ToExpression[ "Set$TM[]"],
             DoubleLongRightArrow|DoubleRightArrow, ToExpression[ "Implies$TM"],
             DoubleLongLeftRightArrow|DoubleLeftRightArrow|Equivalent, ToExpression[ "Iff$TM"],
         	SetDelayed, ToExpression[ "EqualDef$TM"],
@@ -116,6 +118,8 @@ freshSymbolProg[ Hold[ s_Symbol], dropWolf_] :=
             	ToExpression[ "RationalInterval$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]"],
             Theorema`Computation`Language`\[DoubleStruckCapitalR]|\[DoubleStruckCapitalR],
             	ToExpression[ "RealInterval$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]"],
+            Theorema`Computation`Knowledge`\[EmptySet]|Theorema`Knowledge`\[EmptySet],
+            	ToExpression[ "Set$TM[]"],	(* We always interpret '\[EmptySet]' as an empty *set* rather than an empty *list*, even inside a program. *)
         	Set, ToExpression[ "Assign$TM"],
         	makeSet, ToExpression[ "List$TM"],
         	Inequality, ToExpression[ "OperatorChain$TM"],
