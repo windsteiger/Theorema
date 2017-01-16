@@ -34,7 +34,7 @@ Begin["`Private`"]
 	This should in fact only happen in computation-cells but not in formula cells, in order to prevent evaluation.
 	Function 'transferToComputation' takes care of dropping "\[Wolf]" in function definitions that originate from formulas. *)
 freshNames[ expr_Hold, dropWolf_:False] :=
-	Module[ {symPos, repl, progPos, progSymPos},
+	Module[ {symPos, repl, progPos, progSymPos, remSyms},
 		progPos = Position[ expr, (Theorema`Computation`Language`Program|Program)[ _]];
 		(* There are certain expressions, into which we do not want to go deeper for substituting fresh names.
 		   An example is a META$[__] expression representing a meta-variable in a proof, which has a list as
@@ -44,10 +44,15 @@ freshNames[ expr_Hold, dropWolf_:False] :=
 		symPos = DeleteCases[ Position[ expr /. {(h:(Theorema`Computation`Language`META$|META$))[ __] -> h[]}, _Symbol], {0}, {1}, 1];
 		progSymPos = Select[ symPos, isSubPositionOfAny[ #, progPos]&];
 		(* Use 'Replace' instead of 'Map', otherwise there are problems with 'Slot' appearing in the Theorema expression. *)
-		repl = Join[ Replace[ Complement[ symPos, progSymPos], p_ :> (p -> freshSymbol[ Extract[ expr, p, Hold], dropWolf]), {1}],
-					Replace[ progSymPos, p_ :> (p -> freshSymbolProg[ Extract[ expr, p, Hold], dropWolf]), {1}]];
+		(* 'freshSymbol' and 'freshSymbolProg' sow all symbols (wrapped inside 'Hold') which shall be removed later. *)
+		{repl, remSyms} =
+			Reap[ Join[ Replace[ Complement[ symPos, progSymPos], p_ :> (p -> freshSymbol[ Extract[ expr, p, Hold], dropWolf]), {1}],
+					Replace[ progSymPos, p_ :> (p -> freshSymbolProg[ Extract[ expr, p, Hold], dropWolf]), {1}]], "remove"];
 		(* The "FlattenAt" simply replaces every "Program[p]" by "p". *)
-		FlattenAt[ ReplacePart[ expr, repl], progPos]
+		repl = FlattenAt[ ReplacePart[ expr, repl], progPos];
+		(* We remove the symbols in 'remSyms' only *after* they are replaced in 'expr' above. *)
+		Remove @@ Join @@ DeleteDuplicates[ Join @@ remSyms];
+		repl
 	]
 freshNames[ args___] := unexpected[ freshNames, {args}]
 
@@ -65,7 +70,7 @@ Hold (using ToExpression[..., Hold]) and process the resulting expression
 with the expectation that all symbols are wrapped in Hold. (-> markVariables, etc.)
 *)
 
-freshSymbol[ Hold[ s_Symbol], dropWolf_] :=
+freshSymbol[ sym:Hold[ s_Symbol], dropWolf_] :=
     Module[ {name},
         Switch[ Unevaluated[ s],
             (* We use ToExpression in order to have the symbol generated in the right context
@@ -82,7 +87,7 @@ freshSymbol[ Hold[ s_Symbol], dropWolf_] :=
             Theorema`Computation`Language`\[DoubleStruckCapitalR]|\[DoubleStruckCapitalR],
             	ToExpression[ "RealInterval$TM[ -Infinity, Infinity, False, False]"],
             Theorema`Computation`Knowledge`\[EmptySet]|Theorema`Knowledge`\[EmptySet],
-            	ToExpression[ "Set$TM[]"],
+            	Sow[ sym, "remove"]; ToExpression[ "Set$TM[]"],
             DoubleLongRightArrow|DoubleRightArrow, ToExpression[ "Implies$TM"],
             DoubleLongLeftRightArrow|DoubleLeftRightArrow|Equivalent, ToExpression[ "Iff$TM"],
         	SetDelayed, ToExpression[ "EqualDef$TM"],
@@ -97,16 +102,20 @@ freshSymbol[ Hold[ s_Symbol], dropWolf_] :=
         	Which[
     			StringTake[ name, -1] === "$" || (StringLength[ name] >= 3 && StringTake[ name, -3] === "$TM"),
     			s,
+    		(*else*)
     			StringLength[ name] >= 2 && StringTake[ name, 1] === "\[Wolf]" && dropWolf,
+    			Sow[ sym, "remove"];
     			ToExpression[ StringDrop[ name, 1], InputForm, Hold],
+    		(*else*)
     			True,
+    			If[ StringMatchQ[ Context[ Unevaluated[ s]], "Theorema`Knowledge`"|"Theorema`Computation`Knowledge`"], Sow[ sym, "remove"]];
     			ToExpression[ name <> "$TM", InputForm, Hold]
         	]
         ]
     ]
 freshSymbol[ args___] := unexpected[ freshSymbol, {args}]
 
-freshSymbolProg[ Hold[ s_Symbol], dropWolf_] :=
+freshSymbolProg[ sym:Hold[ s_Symbol], dropWolf_] :=
     Module[ {name},
         Switch[ Unevaluated[ s],
             _?isMathematicalConstant, s,
@@ -119,7 +128,7 @@ freshSymbolProg[ Hold[ s_Symbol], dropWolf_] :=
             Theorema`Computation`Language`\[DoubleStruckCapitalR]|\[DoubleStruckCapitalR],
             	ToExpression[ "RealInterval$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]"],
             Theorema`Computation`Knowledge`\[EmptySet]|Theorema`Knowledge`\[EmptySet],
-            	ToExpression[ "Set$TM[]"],	(* We always interpret '\[EmptySet]' as an empty *set* rather than an empty *list*, even inside a program. *)
+            	Sow[ sym, "remove"]; ToExpression[ "Set$TM[]"],	(* We always interpret '\[EmptySet]' as an empty *set* rather than an empty *list*, even inside a program. *)
         	Set, ToExpression[ "Assign$TM"],
         	makeSet, ToExpression[ "List$TM"],
         	Inequality, ToExpression[ "OperatorChain$TM"],
@@ -128,9 +137,13 @@ freshSymbolProg[ Hold[ s_Symbol], dropWolf_] :=
         	Which[
     			StringTake[ name, -1] === "$" || (StringLength[ name] >= 3 && StringTake[ name, -3] === "$TM"),
     			s,
+    		(*else*)
     			StringLength[ name] >= 2 && StringTake[ name, 1] === "\[Wolf]" && dropWolf,
+    			Sow[ sym, "remove"];
     			ToExpression[ StringDrop[ name, 1], InputForm, Hold],
+    		(*else*)
     			True,
+    			If[ StringMatchQ[ Context[ Unevaluated[ s]], "Theorema`Knowledge`"|"Theorema`Computation`Knowledge`"], Sow[ sym, "remove"]];
     			ToExpression[ name <> "$TM", InputForm, Hold]
         	]
         ]
