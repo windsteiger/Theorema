@@ -787,10 +787,10 @@ Componentwise$TM[ P_, args___?isIndividual] /; buiActive["Componentwise"] := And
 SetAttributes[ Abbrev$TM, HoldAll]
 Abbrev$TM[ RNG$[ f_ABBRVRNG$, r__ABBRVRNG$], expr_] /; buiActive["Let"] :=
 	Abbrev$TM[ RNG$[ f], Abbrev$TM[ RNG$[ r], expr]]
-Abbrev$TM[ RNG$[ ABBRVRNG$[ _, r_, _[ pos___]]], expr_?isIndividual] /; buiActive["Let"] :=
+Abbrev$TM[ RNG$[ ABBRVRNG$[ _, r_, _[ pos___]]], expr_] /; buiActive["Let"] && isIndividual[ HoldComplete[ expr]] :=
 	ReleaseHold[ ReplacePart[ Hold[ expr], List@@@{pos} -> r]]	(* The position specification might be a tuple. *)
 (* The following definition of "Abbrev$TM" should not be needed any longer, but still we keep it (just in case). *)
-Abbrev$TM[ RNG$[ ABBRVRNG$[ l_, r_?isIndividual]], expr_?isIndividual] /; buiActive["Let"] :=
+Abbrev$TM[ RNG$[ ABBRVRNG$[ l_, r_]], expr_] /; buiActive["Let"] && isIndividual[ HoldComplete[ r]] && isIndividual[ HoldComplete[ expr]] :=
 	ReleaseHold[ substituteFree[ Hold[ expr], {l -> r}, "checkTypes" -> False, "postprocessing" -> Identity]]
 
 (* Any valid iterator only iterates over individuals, hence we do not need to check sequence-types in any of the calls of 'substituteFree' below. *)
@@ -2789,28 +2789,10 @@ SetAttributes[ Do$TM, HoldAll]
 Do$TM[ body_, l_[v___]] /; buiActive["Do"] := Apply[ Do, Hold[ body, {v}]]
 
 SetAttributes[ Piecewise$TM, HoldAll]
-Piecewise$TM[ Tuple$TM[ Tuple$TM[ expr_?isIndividual, True], ___Tuple$TM]] /; buiActive[ "CaseDistinction"] := expr
-Piecewise$TM[ Tuple$TM[ clauses:(Tuple$TM[ _, _]..)]] /; buiActive[ "CaseDistinction"] :=
-	Module[ {res},
-		Replace[ res, {Hold[ c___] :> Piecewise$TM[ Tuple$TM[ c]]}] /; (res = pw[ Hold[ clauses], Hold[]]; res =!= Hold[ clauses])	
+Piecewise$TM[ Tuple$TM[ Tuple$TM[ expr_, cond_], rest___Tuple$TM]] :=
+	Module[ {c},
+		If[ c, expr, Piecewise$TM[ Tuple$TM[ rest]]] /; (buiActive[ "CaseDistinction"] && (c = cond; (TrueQ[ c] && isIndividual[ HoldComplete[ expr]]) || c === False))
 	]
-	
-pw[ Hold[ Tuple$TM[ expr_, cond_], clauses___Tuple$TM], unknown:Hold[ u___]] :=
-	With[ {c = cond},
-		If[ c,
-			(*True*)
-			If[ isIndividual[ HoldComplete[ expr]],
-				Hold[ u, Tuple$TM[ expr, True]],
-				pw[ Hold[ clauses], Hold[ u, Tuple$TM[ expr, True]]]	(* 'Piecewise' must not return sequence expressions! *)
-			],
-			(*False*)
-			pw[ Hold[ clauses], unknown],
-			(*unknown*)
-			pw[ Hold[ clauses], Hold[ u, Tuple$TM[ expr, c]]]
-		]	
-	]
-pw[ Hold[], unknown_Hold] := unknown
-	
 
 
 (* We assume that all lists not treated by the above constructs should in fact be sets *)
