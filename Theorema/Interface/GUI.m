@@ -1875,6 +1875,17 @@ makeGroupUngroupButton[ ] := Tooltip[
 ]
 makeGroupUngroupButton[ args___] := unexpected[ makeGroupUngroupButton, {args}]
 
+makeQuoteUnquoteButton[ ] := Tooltip[
+	Button[ translate[ "quote/unquote"],
+		If[ CurrentValue[ "ShiftKey"],
+			FrontEndExecute[ {NotebookWrite[ InputNotebook[], Replace[ NotebookRead[ InputNotebook[]], RowBox[ {"\[OpenCurlyQuote]", expr_, "\[CloseCurlyQuote]"}] :> expr], Placeholder]}],
+			(* else *)
+			FrontEndExecute[ {NotebookApply[ InputNotebook[], RowBox[ {"\[OpenCurlyQuote]", "\[SelectionPlaceholder]", "\[CloseCurlyQuote]"}], Placeholder]}]
+		]
+	], translate[ "tooltipButtonQuoteUnquote"], TooltipDelay -> 0.5
+]
+makeGroupUngroupButton[ args___] := unexpected[ makeGroupUngroupButton, {args}]
+
 removeAutoParen[ RowBox[ {TagBox[ "(", "AutoParentheses"], expr_, TagBox[ ")", "AutoParentheses"]}]] := expr
 removeAutoParen[ expr_] := expr
 removeAutoParen[ args___] := unexpected[ removeAutoParen, {args}]
@@ -1961,7 +1972,7 @@ sessionCompose[] :=
     		translate[ "Notebooks"], {{Top, Left}}],
     	Labeled[ Grid[ Partition[ Map[ makeEnvButton, allEnvironments], 4]],
     		translate[ "Environments"], {{Top, Left}}],
-    	Labeled[ Column[ {Row[ {makeFormButton[], makeGroupUngroupButton[]}, Spacer[5]], 
+    	Labeled[ Column[ {Row[ {makeFormButton[], makeGroupUngroupButton[], makeQuoteUnquoteButton[]}, Spacer[5]],
     				Dynamic[ Refresh[ langButtons[], TrackedSymbols :> {$buttonNat, $tcLangButtonSelection}]]}, Left, Spacer[2]],
     		translate[ "Formulae"], {{Top, Left}}],
     	Labeled[ Column[ {makeNewDeclButton[], makeDeclButtons[]}, Left, Spacer[2]],

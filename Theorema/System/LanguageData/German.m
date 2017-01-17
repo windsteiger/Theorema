@@ -172,6 +172,7 @@ With[ {lang = "German"},
 	MessageName[ makeSet, "usage", lang] = "makeSet is an auxiliary symbol needed to create sets and lists in 'freshNames'. It does not do anything by itself.";
 	MessageName[ makeTERMINALNODE, "usage", lang] = "makeTERMINALNODE[ info_, v_] constructs a terminal node with info and value v.";
 	MessageName[ makeTmaExpression, "usage", lang] = "makeTmaExpression[ e] turns e into an expression in Theorema language.";
+	MessageName[ makeTmaExpressionFromBoxes, "usage", lang] = "makeTmaExpressionFromBoxes[ box] turns box into an expression in Theorema language.";
 	MessageName[ markVariables, "usage", lang] = "";	
 	MessageName[ matches, "usage", lang] = "";
 	MessageName[ maximumUnifiers, "usage", lang] = "";
@@ -186,6 +187,7 @@ With[ {lang = "German"},
 
 	MessageName[ $parseTheoremaExpressions, "usage", lang] = "whether to parse expressions with their Theorema meaning ...";
 	MessageName[ $parseTheoremaGlobals, "usage", lang] = "whether to parse expressions with their Theorema meaning in a global declaration ...";
+	MessageName[ $parseTheoremaQuoted, "usage", lang] = "whether to parse quoted expressions with their Theorema meaning ...";
 	MessageName[ pending, "usage", lang] = "pending is a possible proof value.";
 	MessageName[ performProofStep, "usage", lang] = "performProofStep[ prog_] is a wrapper to be used on the rhs of an inference rule, where prog is the actual program that performs the step.";
 	MessageName[ pObjCells, "usage", lang] = "pObjCells[ po] generates a cell representation of the proof object po (default: $TMAproofObject) to be rendered in a notebook.";

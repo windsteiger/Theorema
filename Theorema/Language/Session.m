@@ -285,15 +285,29 @@ getFreePositions[ var_, expr_] :=
 	Replace[ Replace[ var, analyzeVars[ expr, "FreeOnly" -> True, "Pattern" -> var]], var -> {}]
 
 (*
-	makeTmaExpression[ e] is the combination of functions that we export to be used in other places if needed.
+	makeTmaExpression[ e] and makeTmaExpressionFromBoxes[ box] are the combinations of functions that we export to be used in other places if needed.
 *)
-SetAttributes[ makeTmaExpression, HoldAll]
-makeTmaExpression[ e_Hold] := Block[ {$ContextPath},
-	$ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath];
-	ReleaseHold[ addAbbrevPositions[ Replace[ addVarPrefixes[ markVariables[ freshNames[ e]]], Hold[ x_] :> x, Infinity, Heads -> True]]]
-]
-makeTmaExpression[ e_] := makeTmaExpression[ Hold[ e]]
+SetAttributes[ makeTmaExpression, HoldFirst]
+makeTmaExpression[ e_] := makeTmaExpression[ e, True, ReleaseHold]
+makeTmaExpression[ e_, True, post_] :=
+	Block[ {$ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath]},
+		makeTmaExpression[ e, False, post]
+	]
+makeTmaExpression[ e_Hold, False, post_] :=
+	Catch[ post[ addAbbrevPositions[ Replace[ addVarPrefixes[ markVariables[ freshNames[ e]]], Hold[ x_] :> x, Infinity, Heads -> True]]]]
+makeTmaExpression[ e_, False, post_] := makeTmaExpression[ Hold[ e], post]
 makeTmaExpression[ args___] := unexpected[ makeTmaExpression, {args}]
+
+makeTmaExpressionFromBoxes[ box_, pre_:removeRedundantBoxes, post_:ReleaseHold] :=
+	Block[ {$parseTheoremaExpressions = True, $ContextPath = Join[ {"Theorema`Language`"}, $TheoremaArchives, $ContextPath]},
+		If[ !inArchive[] && $Context =!= "Theorema`Knowledge`", Begin[ "Theorema`Knowledge`"]];
+		With[ {tmp = Quiet[ Check[ ToExpression[ pre[ box], StandardForm, Hold], $Failed]]},
+		With[ {out = If[ MatchQ[ tmp, _Hold], makeTmaExpression[ tmp, False, post], $Failed]},
+			If[ !inArchive[] && $Context === "Theorema`Knowledge`", End[]];
+			out
+		]]
+	]
+makeTmaExpressionFromBoxes[ args___] := unexpected[ makeTmaExpressionFromBoxes, {args}]
 
 (* processing Theorema expressions essentially works on Hold-expressions, where symbols inside are again
    wrapped into Hold in order to prevent values to enter the expressions during their processing e.g. in a computation.

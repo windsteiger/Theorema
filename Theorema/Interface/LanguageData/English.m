@@ -197,6 +197,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.", ToString[
 
     translate[ "QUANT1Tooltip", lang] = "rg \[Ellipsis] ranges for the quantified variables\nexpr \[Ellipsis] quantified expression";   	
     translate[ "QUANT2Tooltip", lang] = "rg \[Ellipsis] ranges for the quantified variables\ncond \[Ellipsis] condition on the variables\nexpr \[Ellipsis] quantified expression";
+    translate[ "quote/unquote", lang] = "Quote / Unquote";
 
 	translate[ "replaceExistProof", lang] = "Replace existing proof";
     translate[ "ResetBui", lang] = "Reset built-ins";
@@ -286,7 +287,8 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.", ToString[
     translate[ "Theorema Environment", lang] = "Theorema Environment";
 	translate[ "tooltipButtonGroupUngroup", lang] = "Group selected expression. Press \[ShiftKey] to ungroup selection.";
     translate[ "tooltipButtonNoParen", lang] = "\nKeyboard shortcut";   	
-    translate[ "tooltipButtonParen", lang] = "\nPress \[ShiftKey] to omit parentheses\nKeyboard shortcut";   	
+    translate[ "tooltipButtonParen", lang] = "\nPress \[ShiftKey] to omit parentheses\nKeyboard shortcut";
+    translate[ "tooltipButtonQuoteUnquote", lang] = "Quote selected expression. Press \[ShiftKey] to unquote selection.";
     translate[ "Trace", lang] = "Trace Computation";
     translate[ "traceUserDef", lang] = "Trace user-definitions";
     translate[ "Tuples", lang] = "Tuples";

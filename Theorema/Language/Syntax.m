@@ -694,6 +694,20 @@ isTmaRelationBox[ ___] := False
 getTmaOperatorForms[ op_Symbol] := getTmaOperatorForms[ StringDrop[ SymbolName[ op], -3]]
 getTmaOperatorForms[ op_String] := First[ Cases[ $tmaOperators, {_, forms_, ___, op} -> forms]]
 
+
+(* ::Section:: *)
+(* Quoted Expressions *)
+
+MakeExpression[ RowBox[ {"\[OpenCurlyQuote]", expr_, "\[CloseCurlyQuote]"}], fmt_] :=
+	Block[ {$parseTheoremaQuoted = False},
+	With[ {out = makeTmaExpressionFromBoxes[ expr, removeRedundantBoxes, Identity]},
+		If[ MatchQ[ out, _Hold],
+			HoldComplete @@ out,
+		(*else*)
+			HoldComplete[ $Failed]
+		]
+	]] /; $parseTheoremaQuoted
+
 (* ::Section:: *)
 (* MakeExpression *)
 

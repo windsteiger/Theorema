@@ -200,6 +200,7 @@ falls nicht, siehe <http://www.gnu.org/licenses/>.", ToString[ Date[][[1]]]];
 
     translate[ "QUANT1Tooltip", lang] = "rg \[Ellipsis] Laufbereich der gebundenen Variablen\nexpr \[Ellipsis] Ausdruck";   	
     translate[ "QUANT2Tooltip", lang] = "rg \[Ellipsis] Laufbereich der gebundenen Variablen\ncond \[Ellipsis] Bedingung\nexpr \[Ellipsis] Ausdruck";
+    translate[ "quote/unquote", lang] = "In Anf\[UDoubleDot]hrung setzen / Anf\[UDoubleDot]hrung aufheben";
 
 	translate[ "replaceExistProof", lang] = "Bestehenden Beweis ersetzen";
     translate[ "ResetBui", lang] = "Built-ins zur\[UDoubleDot]cksetzen";
@@ -289,7 +290,8 @@ falls nicht, siehe <http://www.gnu.org/licenses/>.", ToString[ Date[][[1]]]];
     translate[ "Theorema Environment", lang] = "Theorema Umgebung";
 	translate[ "tooltipButtonGroupUngroup", lang] = "Den ausgew\[ADoubleDot]hlten Ausdruck gruppieren. Taste \[ShiftKey] dr\[UDoubleDot]cken, um eine Gruppierugn aufzuheben.";
     translate[ "tooltipButtonNoParen", lang] = "\nTastaturk\[UDoubleDot]rzel";   	
-    translate[ "tooltipButtonParen", lang] = "\nTaste \[ShiftKey] dr\[UDoubleDot]cken, um die Klammern wegzulassen\nTastaturk\[UDoubleDot]rzel";   	
+    translate[ "tooltipButtonParen", lang] = "\nTaste \[ShiftKey] dr\[UDoubleDot]cken, um die Klammern wegzulassen\nTastaturk\[UDoubleDot]rzel";
+    translate[ "tooltipButtonGroupUngroup", lang] = "Den ausgew\[ADoubleDot]hlten Ausdruck in Anf\[UDoubleDot]hrung setzen. Taste \[ShiftKey] dr\[UDoubleDot]cken, um eine Anf\[UDoubleDot]hrung aufzuheben.";
     translate[ "Trace", lang] = "Berechnung verfolgen";
     translate[ "traceUserDef", lang] = "Benutzer-Definitionen verfolgen";
     translate[ "Tuples", lang] = "Tupel";
