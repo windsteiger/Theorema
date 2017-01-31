@@ -1367,25 +1367,29 @@ filterRules[ args___] := unexpected[ filterRules, {args}]
 (* ::Section:: *)
 (* FML$ datastructure *)
 
-Options[ makeFML] = {key :> defKey[], formula -> True, label :> defLabel[], simplify -> True, sequenceFlatten -> True};
+Options[ makeFML] = {key :> defKey[], formula -> True, label :> defLabel[], simplify -> True, preprocess -> sequenceFlatten};
 
 makeFML[ data___?OptionQ] :=
-	Module[{k, f, l, s, flatten, fs},
-		{k, f, l, s, flatten} = {key, formula, label, simplify, sequenceFlatten} /. {data} /. Options[ makeFML];
-		Switch[ s,
-			True,
-			fs = computeInProof[ f],
-			False,
-			fs = f,
-			_,
-			fs = s[ f];
-			If[ Head[ fs] === s, fs = f];	(* Security check: If the head of the new formula is still 's', no simplification happened. *)
-		];
-		fs = If[ TrueQ[ flatten], sequenceFlatten[ fs], fs];
-		If[ isIndividual[ fs],
-			makeTmaFml[ k, fs, l, f],
+	Module[{k, f, l, s, pp, fs},
+		{k, f, l, s, pp} = {key, formula, label, simplify, preprocess} /. {data} /. Options[ makeFML];
+		f = pp[ f];
+		If[ f === $Failed,
+			$Failed,
 		(*else*)
-			$Failed
+			Switch[ s,
+				True,
+				fs = computeInProof[ f],
+				False,
+				fs = f,
+				_,
+				fs = s[ f];
+				If[ Head[ fs] === s, fs = f];	(* Security check: If the head of the new formula is still 's', no simplification happened. *)
+			];
+			If[ isIndividual[ fs],
+				makeTmaFml[ k, fs, l, f],
+			(*else*)
+				$Failed
+			]
 		]
 	]
 makeFML[ args___] := unexpected[ makeFML, {args}]

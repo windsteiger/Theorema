@@ -829,7 +829,7 @@ updateKnowledgeBase[ form_, k_, glob_, l_String, tags_List] :=
 		    If[ newForm === $Failed,
 		    	updateKnowledgeBase[ $Failed, k],
 		    (*else*)
-		    	fml = makeFML[ key -> Rest[ defDef], formula -> newForm,
+		    	fml = makeFML[ key -> Rest[ defDef], formula -> newForm, preprocess -> $tmaFmlPre,
 		    			label -> StringReplace[ ToString[ ReleaseHold[ inDomDef[[1,1]]]], "$TM" -> ""] <> ".defOp", simplify -> False];
 	    		If[ fml === $Failed,
 	    			notification[ translate[ "invalidExpr"]];
@@ -850,7 +850,7 @@ updateKnowledgeBase[ form_, k_, glob_, l_String, tags_List] :=
     		(*no need to show any notification, has already been done in 'markVariables'*)
     		updateKnowledgeBase[ $Failed, k],
     	(*else*)
-	    	fml = makeFML[ key -> k, formula -> newForm, label -> l, simplify -> False];
+	    	fml = makeFML[ key -> k, formula -> newForm, label -> l, simplify -> False, preprocess -> $tmaFmlPre];
 	    	If[ fml === $Failed,
 	    		notification[ translate[ "invalidExpr"]];
 	    		updateKnowledgeBase[ $Failed, k];
@@ -1046,6 +1046,9 @@ initSession[] :=
         $tmaNbUpdateQueue = {};
         $tmaNbEval = {};
         $tmaAllNotebooks = {};
+        $tmaCompPre = sequenceFlatten;
+        $tmaCompPost = sequenceFlatten;
+        $tmaFmlPre = sequenceFlatten;
         $Pre=.;
         $PreRead=.;
     ]
@@ -1508,7 +1511,7 @@ processComputation[ x_] := Module[ { procSynt, res, lhs = Null},
 		lhs = Extract[ procSynt, {1, 1}, Hold];
 		procSynt = Extract[ procSynt, {1, 2}, Hold]
 	];
-	procSynt = sequenceFlatten[ procSynt];
+	procSynt = $tmaCompPre[ procSynt];
 	(* As an initial computation object, we start with the box form of the input cell *)
 	$TmaComputationObject = {ToExpression[ InString[ $Line]]};
 	$TmaCompInsertPos = {2};
@@ -1519,7 +1522,7 @@ processComputation[ x_] := Module[ { procSynt, res, lhs = Null},
 	(* We force the MakeBoxes[ ..., TheoremaForm] to apply by setting $PrePrint in the CellProlog of a computation cell.
 	   Unsetting $PrePrint in the CellEpilog ensures this behaviour only for Theorema computation *)
 	AppendTo[ $TmaComputationObject, res];
-	sequenceFlatten[ renameToStandardContext[ res, lhs]]
+	$tmaCompPost[ renameToStandardContext[ res, lhs]]
 ]
 processComputation[ args___] := unexcpected[ processComputation, {args}]
 
