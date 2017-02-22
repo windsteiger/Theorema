@@ -1373,8 +1373,8 @@ makeFML[ data___?OptionQ] :=
 	Module[{k, f, l, s, pp, fs},
 		{k, f, l, s, pp} = {key, formula, label, simplify, preprocess} /. {data} /. Options[ makeFML];
 		f = pp[ f];
-		If[ f === $Failed,
-			$Failed,
+		If[ f === $Failed || f === Null,
+			f,
 		(*else*)
 			Switch[ s,
 				True,

@@ -831,16 +831,21 @@ updateKnowledgeBase[ form_, k_, glob_, l_String, tags_List] :=
 		    (*else*)
 		    	fml = makeFML[ key -> Rest[ defDef], formula -> newForm, preprocess -> $tmaFmlPre,
 		    			label -> StringReplace[ ToString[ ReleaseHold[ inDomDef[[1,1]]]], "$TM" -> ""] <> ".defOp", simplify -> False];
-	    		If[ fml === $Failed,
-	    			notification[ translate[ "invalidExpr"]];
+		    	Switch[ fml,
+		    		$Failed,
+		    		notification[ translate[ "invalidExpr"]];
 	    			updateKnowledgeBase[ $Failed, k],
 	    		(*else*)
-		    		transferToComputation[ fml];
+	    			Null,
+	    			updateKnowledgeBase[ $Failed, k],
+	    		(*else*)
+	    			_,
+	    			$tmaFmlPost[ fml];
 		    		$tmaEnv = Append[ DeleteCases[ $tmaEnv, _[ First[ fml], ___], {1}, 1], fml];
 		        	If[ inArchive[],
 		            	$tmaArch = Append[ DeleteCases[ $tmaArch, _[ First[ fml], ___], {1}, 1], fml];
 		        	]
-	    		]
+		    	]
 		    ];
     	];
     	(* for the actual formula we proceed in the same way *)
@@ -851,15 +856,20 @@ updateKnowledgeBase[ form_, k_, glob_, l_String, tags_List] :=
     		updateKnowledgeBase[ $Failed, k],
     	(*else*)
 	    	fml = makeFML[ key -> k, formula -> newForm, label -> l, simplify -> False, preprocess -> $tmaFmlPre];
-	    	If[ fml === $Failed,
+	    	Switch[ fml,
+	    		$Failed,
 	    		notification[ translate[ "invalidExpr"]];
-	    		updateKnowledgeBase[ $Failed, k];
-	    		Null,
+	    		updateKnowledgeBase[ $Failed, k],
 	    	(*else*)
-		    	If[ tags =!= {},
+	    		Null,
+	    		(* In this case we do not notify the user. *)
+	    		updateKnowledgeBase[ $Failed, k],
+	    	(*else*)
+	    		_,
+	    		If[ tags =!= {},
 		    		AppendTo[ fml, "tags" -> tags]
 		    	];
-		    	transferToComputation[ fml];
+		    	$tmaFmlPost[ fml];
 		    	(* If new formulae are appended rather than prepended, the old formulae with the same label
 		    		have to be deleted first, because "DeleteDuplicates" would delete the new ones. *)
 				$tmaEnv = Append[ DeleteCases[ $tmaEnv, _[ First[ fml], ___], {1}, 1], fml];
@@ -1049,6 +1059,7 @@ initSession[] :=
         $tmaCompPre = sequenceFlatten;
         $tmaCompPost = sequenceFlatten;
         $tmaFmlPre = sequenceFlatten;
+        $tmaFmlPost = transferToComputation;
         $Pre=.;
         $PreRead=.;
     ]
