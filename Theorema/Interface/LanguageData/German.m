@@ -75,6 +75,7 @@ Theorema 2.0 ist eine wesentliche Weiterentwicklung, die haupts\[ADoubleDot]chli
 	translate[ "connArgM", lang] = "Junktor \"`1`\" wird auf `2` Argumente angewendet; es werden genau `3` Argumente erwartet.";
     translate[ "CONNTooltip", lang] = "e1, \[Ellipsis], en \[Ellipsis] Aussage";
 
+    translate[ "TimeStamp", lang] = "Zeitpunkt";
     translate[ "Declarations", lang] = "Globale";
     translate[ "DemoMode", lang] = "Demo Modus";
 	translate[ "disproved", lang] = "widerlegt";
@@ -134,6 +135,11 @@ falls nicht, siehe <http://www.gnu.org/licenses/>.", ToString[ Date[][[1]]]];
 	translate[ "interactiveInstantiate", lang] = "Quantoren interaktiv instanzieren";
 	translate[ "interactiveNewProofSitFilter", lang] = "Neue Beweissituationen interaktiv instanzieren";
 	translate[ "interactiveProofSitSel", lang] = "N\[ADoubleDot]chste Beweissituation interaktiv w\[ADoubleDot]hlen";
+	translate[ "invalidExpr", lang] = "Der eingegebene Ausdruck ist ung\[UDoubleDot]ltig, da sein Sequence-Typ inkorrekt ist oder nicht bestimmt werden kann.";
+	translate[ "invalidQuCondition", lang] = "Der Quantor \"``\" kann nicht mit einer zus\[ADoubleDot]tzlichen Bedingung verwendet werden.";
+	translate[ "invalidQuRange", lang] = "Der Quantor \"`1`\" kann nicht zusammen mit dem Variablenbereich `2` verwendet werden.";
+	translate[ "invalidQuSubscript", lang] = "Der Quantor \"``\" kann kein Subskript haben.";
+	translate[ "invalidQuVarNum", lang] = "Der Quantor \"``\" kann nicht mit Multi-Variablenbereichen verwendet werden.";
 	translate[ "invalidRange", lang] = "Jede gebundene Variable darf nur einmal unter dem Quantor vorkommen, der sie bindet; Diese Bedingung wird verletzt von ``.";
     
     translate[ "KBcomp", lang] = "In der Berechnung verwendetes Wissen";
@@ -194,6 +200,7 @@ falls nicht, siehe <http://www.gnu.org/licenses/>.", ToString[ Date[][[1]]]];
 
     translate[ "QUANT1Tooltip", lang] = "rg \[Ellipsis] Laufbereich der gebundenen Variablen\nexpr \[Ellipsis] Ausdruck";   	
     translate[ "QUANT2Tooltip", lang] = "rg \[Ellipsis] Laufbereich der gebundenen Variablen\ncond \[Ellipsis] Bedingung\nexpr \[Ellipsis] Ausdruck";
+    translate[ "quote/unquote", lang] = "In Anf\[UDoubleDot]hrung setzen / Anf\[UDoubleDot]hrung aufheben";
 
 	translate[ "replaceExistProof", lang] = "Bestehenden Beweis ersetzen";
     translate[ "ResetBui", lang] = "Built-ins zur\[UDoubleDot]cksetzen";
@@ -283,10 +290,10 @@ falls nicht, siehe <http://www.gnu.org/licenses/>.", ToString[ Date[][[1]]]];
     translate[ "Theorema Environment", lang] = "Theorema Umgebung";
 	translate[ "tooltipButtonGroupUngroup", lang] = "Den ausgew\[ADoubleDot]hlten Ausdruck gruppieren. Taste \[ShiftKey] dr\[UDoubleDot]cken, um eine Gruppierugn aufzuheben.";
     translate[ "tooltipButtonNoParen", lang] = "\nTastaturk\[UDoubleDot]rzel";   	
-    translate[ "tooltipButtonParen", lang] = "\nTaste \[ShiftKey] dr\[UDoubleDot]cken, um die Klammern wegzulassen\nTastaturk\[UDoubleDot]rzel";   	
+    translate[ "tooltipButtonParen", lang] = "\nTaste \[ShiftKey] dr\[UDoubleDot]cken, um die Klammern wegzulassen\nTastaturk\[UDoubleDot]rzel";
+    translate[ "tooltipButtonGroupUngroup", lang] = "Den ausgew\[ADoubleDot]hlten Ausdruck in Anf\[UDoubleDot]hrung setzen. Taste \[ShiftKey] dr\[UDoubleDot]cken, um eine Anf\[UDoubleDot]hrung aufzuheben.";
     translate[ "Trace", lang] = "Berechnung verfolgen";
     translate[ "traceUserDef", lang] = "Benutzer-Definitionen verfolgen";
-    translate[ "tupleOfRange", lang] = "Der Tupel-Quantor kann nur mit Schrittbereichen verwendet werden, nicht mit ``.";
     translate[ "Tuples", lang] = "Tupel";
 
     translate[ "UNDEROVEROP", lang] = "unter- und \[UDoubleDot]berskript-Operator";
@@ -301,12 +308,18 @@ falls nicht, siehe <http://www.gnu.org/licenses/>.", ToString[ Date[][[1]]]];
     translate[ "?", lang] = "?";
 	translate[ "[]", lang] = "eckig geklammerter Ausdruck";
 	translate[ "[[]]", lang] = "doppelt eckig geklammerter Ausdruck";
+	translate[ "[|]", lang] = "schr\[ADoubleDot]g mit Balken geklammerter Ausdruck";
 	translate[ "<>", lang] = "spitz geklammerter Ausdruck";
 	translate[ "<<>>", lang] = "doppelt spitz geklammerter Ausdruck";
+	translate[ "<|>", lang] = "spitz mit Balken geklammerter Ausdruck";
+	translate[ "<.>", lang] = "spitz mit Punkt geklammerter Ausdruck";
+	translate[ "<c>", lang] = "geschwungen-spitz geklammerter Ausdruck";
 	translate[ "{}", lang] = "geschweift geklammerter Ausdruck";
 	translate[ "{{}}", lang] = "doppelt geschweift geklammerter Ausdruck";
 	translate[ "()", lang] = "rund geklammerter Ausdruck";
 	translate[ "(())", lang] = "doppelt rund geklammerter Ausdruck";
+	translate[ "(|)", lang] = "rund mit Balken geklammerter Ausdruck";
+	translate[ "\[VerticalEllipsis]\[VerticalEllipsis]", lang] = "Folge von Ausdr\[UDoubleDot]cken";
 
 (* UNTRANSLATED *)
 

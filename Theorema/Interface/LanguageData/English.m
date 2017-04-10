@@ -73,6 +73,7 @@ Theorema 2.0 is a major re-launch mainly developed by Wolfgang Windsteiger.";
 	translate[ "connArgM", lang] = "Connective \"`1`\" applied on `2` arguments; Exactly `3` arguments are expected.";
     translate[ "CONNTooltip", lang] = "e1, \[Ellipsis], en \[Ellipsis] formula";
 
+    translate[ "TimeStamp", lang] = "Time stamp";
     translate[ "Declarations", lang] = "Globals";
     translate[ "DemoMode", lang] = "Demo Mode";
 	translate[ "disproved", lang] = "disproved";
@@ -131,6 +132,11 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.", ToString[
 	translate[ "interactiveInstantiate", lang] = "Instantiate quantifiers interactively";
 	translate[ "interactiveNewProofSitFilter", lang] = "Filter new proof situations interactively";
 	translate[ "interactiveProofSitSel", lang] = "Select next proof situation interactively";
+	translate[ "invalidExpr", lang] = "The expression is invalid because its sequence-type is incorrect or cannot be determined.";
+	translate[ "invalidQuCondition", lang] = "Quantifier \"``\" cannot have a condition.";
+	translate[ "invalidQuRange", lang] = "Quantifier \"`1`\" cannot be used together with the variable-range `2`.";
+	translate[ "invalidQuSubscript", lang] = "Quantifier \"``\" cannot have a subscript.";
+	translate[ "invalidQuVarNum", lang] = "Quantifier \"``\" cannot have multi-ranges.";
 	translate[ "invalidRange", lang] = "Every variable bound by a quantifier may appear only once in the respective range; This is violated by ``.";
 
     translate[ "KBcomp", lang] = "Knowledge used in computation";
@@ -191,6 +197,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.", ToString[
 
     translate[ "QUANT1Tooltip", lang] = "rg \[Ellipsis] ranges for the quantified variables\nexpr \[Ellipsis] quantified expression";   	
     translate[ "QUANT2Tooltip", lang] = "rg \[Ellipsis] ranges for the quantified variables\ncond \[Ellipsis] condition on the variables\nexpr \[Ellipsis] quantified expression";
+    translate[ "quote/unquote", lang] = "Quote / Unquote";
 
 	translate[ "replaceExistProof", lang] = "Replace existing proof";
     translate[ "ResetBui", lang] = "Reset built-ins";
@@ -280,10 +287,10 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.", ToString[
     translate[ "Theorema Environment", lang] = "Theorema Environment";
 	translate[ "tooltipButtonGroupUngroup", lang] = "Group selected expression. Press \[ShiftKey] to ungroup selection.";
     translate[ "tooltipButtonNoParen", lang] = "\nKeyboard shortcut";   	
-    translate[ "tooltipButtonParen", lang] = "\nPress \[ShiftKey] to omit parentheses\nKeyboard shortcut";   	
+    translate[ "tooltipButtonParen", lang] = "\nPress \[ShiftKey] to omit parentheses\nKeyboard shortcut";
+    translate[ "tooltipButtonQuoteUnquote", lang] = "Quote selected expression. Press \[ShiftKey] to unquote selection.";
     translate[ "Trace", lang] = "Trace Computation";
     translate[ "traceUserDef", lang] = "Trace user-definitions";
-    translate[ "tupleOfRange", lang] = "The tuple quantifier can only be used with step-ranges, not with ``.";
     translate[ "Tuples", lang] = "Tuples";
 
     translate[ "UNDEROVEROP", lang] = "under- and overscripted operator";
@@ -298,11 +305,17 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.", ToString[
     translate[ "?", lang] = "?";
 	translate[ "[]", lang] = "Square bracketted expression";
 	translate[ "[[]]", lang] = "Double square bracketted expression";
+	translate[ "[|]", lang] = "Bar-slant bracketted expression";
 	translate[ "<>", lang] = "Angle bracketted expression";
 	translate[ "<<>>", lang] = "Double angle bracketted expression";
+	translate[ "<|>", lang] = "Bar-angle bracketted expression";
+	translate[ "<.>", lang] = "Dot-angle bracketted expression";
+	translate[ "<c>", lang] = "Curved angle bracketted expression";
 	translate[ "{}", lang] = "Braced expression";
 	translate[ "{{}}", lang] = "Double braced expression";
 	translate[ "()", lang] = "Parenthesized expression";
 	translate[ "(())", lang] = "Double parenthesized expression";
+	translate[ "(|)", lang] = "Bar-parenthesized expression";
+	translate[ "\[VerticalEllipsis]\[VerticalEllipsis]", lang] = "Sequence of expressions";
 
 ]

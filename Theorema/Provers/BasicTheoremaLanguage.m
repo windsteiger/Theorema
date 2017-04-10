@@ -242,38 +242,41 @@ PRFSIT$[ g:FML$[ _, Iff$TM[ P_, Q_], __], k_List, id_, rest___?OptionQ] :> perfo
 (* ::Subsection:: *)
 (* FORALL *)
 
-inferenceRule[ forallGoal] = 
-ps:PRFSIT$[ g:FML$[ _, u:Forall$TM[ rng_, cond_, A_], __], k_List, id_, rest___?OptionQ] :> performProofStep[
+inferenceRule[ forallGoal] =
+ps:PRFSIT$[ g:FML$[ _, u:Forall$TM[ _, _, _], __], k_List, id_, rest___?OptionQ] :> performProofStep[
 	Module[ {faBui, simp, rc, r, c, f, fix, newConds, newGoal, locC},
 		(* we use computation regardless whether it is activated or not ... *)
 		faBui = buiActProve[ "Forall"];
 		buiActProve[ "Forall"] = True;
-		simp = computeInProof[ u];
+		simp = computeInProof[ standardFormQuantifier[ u]];
 		buiActProve[ "Forall"] = faBui;
-		If[ MatchQ[ simp, _Forall$TM],
+		If[ MatchQ[ simp, Forall$TM[ _, _, _]],
 			(* no simplification *)
-			rc = rngToCondition[ rng];
-			If[ !FreeQ[ rc, $Failed], 
-				$Failed,
-				(* else *)
-				{{r, c, f}, fix} = arbitraryButFixed[ {rc, cond, A}, rng, {g, k}];
-				locC = getOptionalComponent[ ps, "constants"];
-				newGoal = makeGoalFML[ formula -> f];
-				newConds = Map[ makeAssumptionFML[ formula -> #]&, DeleteCases[ Append[ r, c], True]];
-				makeANDNODE[ makePRFINFO[ name -> forallGoal, used -> g, "abf" -> rngConstants[ fix]], 
-					toBeProved[ goal -> newGoal, kb -> joinKB[ newConds, k], "constants" -> Prepend[ locC, fix], rest]]
+			(* note: because of 'standardFormQuantifier' we have to extract 'rng', 'cond' and 'A' from 'simp', not from 'u'! *)
+			With[ {rng = First[ simp], cond = simp[[2]], A = Last[ simp]},
+				rc = rngToCondition[ rng];
+				If[ !FreeQ[ rc, $Failed],
+					$Failed,
+					(* else *)
+					{{r, c, f}, fix} = arbitraryButFixed[ {rc, cond, A}, rng, {g, k}];
+					locC = getOptionalComponent[ ps, "constants"];
+					newGoal = makeGoalFML[ formula -> f];
+					newConds = Map[ makeAssumptionFML[ formula -> #]&, DeleteCases[ Append[ r, c], True]];
+					makeANDNODE[ makePRFINFO[ name -> forallGoal, used -> g, "abf" -> rngConstants[ fix]],
+						toBeProved[ goal -> newGoal, kb -> joinKB[ newConds, k], "constants" -> Prepend[ locC, fix], rest]]
+				]
 			],
 			(* else *)
 			simp = makeGoalFML[ formula -> simp];
-			makeANDNODE[ makePRFINFO[ name -> forallGoal, used -> g], 
+			makeANDNODE[ makePRFINFO[ name -> forallGoal, used -> g],
 				toBeProved[ goal -> simp, kb -> k, rest]]
 		]
 	]
 ]
 
-inferenceRule[ forallKB] = 
-ps:PRFSIT$[ g_, K:{___, f:FML$[ _, _Forall$TM, __], ___}, id_, rest___?OptionQ] :> performProofStep[
-	Module[ {faInst, fk = key@f, newConst, oldConst, inst},
+inferenceRule[ forallKB] =
+ps:PRFSIT$[ g_, K:{___, u:FML$[ fk_, f_Forall$TM, r__], ___}, id_, rest___?OptionQ] :> performProofStep[
+	Module[ {faInst, newConst, oldConst, inst},
 	    faInst = getOptionalComponent[ ps, "forallKB"];
 	    If[ MemberQ[ faInst, fk],
                 (* Rule forallKB has already been applied for those forms *)
@@ -281,29 +284,35 @@ ps:PRFSIT$[ g_, K:{___, f:FML$[ _, _Forall$TM, __], ___}, id_, rest___?OptionQ] 
 	    ];
 	    {newConst, oldConst} = constants[ ps];
         (* we instantiate with the "old" constants only, because the new ones will be treated by the 'instantiate'-rule separately *)
-	    inst = instantiateForall[ f, Apply[ RNG$, oldConst]];
-	    makeANDNODE[ makePRFINFO[ name -> forallKB, used -> f, "instantiation" -> inst[[2]]], 
+	    inst = instantiateForall[ FML$[ fk, standardFormQuantifier[ f], r], Apply[ RNG$, oldConst]];
+	    makeANDNODE[ makePRFINFO[ name -> forallKB, used -> u, "instantiation" -> inst[[2]]], 
 	        toBeProved[ goal -> g, kb -> joinKB[ inst[[1]], K], "forallKB" -> Prepend[ faInst, fk], rest]]
 	]
 ]
 
-inferenceRule[ forallKBInteractive] = 
-ps:PRFSIT$[ g_, K:{___, f:FML$[ _, Forall$TM[ rng_, cond_, A_], __], ___}, id_, rest___?OptionQ] :> performProofStep[
-    Module[ {rc, r, c, Ainst, fInst, inst},
-        rc = rngToCondition[ rng];
-        If[ !FreeQ[ rc, $Failed],
-            $Failed,
-            (* else *)
-            {{r, c, Ainst}, inst} = instantiateUnivKnowInteractive[ {rc, cond, A}, rng, {g, K}];
-            If[ inst === $Failed,
-            	(* interactive dialog has been canceled *)
-                $Failed,
-                (* else *)
-                fInst = makeAssumptionFML[ formula -> Implies$TM[ And$TM[ r, c], Ainst]];
-                makeANDNODE[ makePRFINFO[ name -> forallKBInteractive, used -> f, "instantiation" -> inst], 
-                    toBeProved[ goal -> g, kb -> prependKB[ K, fInst], rest]]
-            ]
-        ]
+inferenceRule[ forallKBInteractive] =
+ps:PRFSIT$[ g_, K:{___, f:FML$[ _, Forall$TM[ _, _, _], __], ___}, id_, rest___?OptionQ] :> performProofStep[
+    Module[ {simp = standardFormQuantifier[ f], rc, r, c, Ainst, fInst, inst},
+    	If[ MatchQ[ simp, Forall$TM[ _, _, _]],
+	    	With[ {rng = First[ simp], cond = simp[[2]], A = Last[ simp]},
+		        rc = rngToCondition[ rng];
+		        If[ !FreeQ[ rc, $Failed],
+		            $Failed,
+		            (* else *)
+		            {{r, c, Ainst}, inst} = instantiateUnivKnowInteractive[ {rc, cond, A}, rng, {g, K}];
+		            If[ inst === $Failed,
+		            	(* interactive dialog has been canceled *)
+		                $Failed,
+		                (* else *)
+		                fInst = makeAssumptionFML[ formula -> Implies$TM[ And$TM[ r, c], Ainst]];
+		                makeANDNODE[ makePRFINFO[ name -> forallKBInteractive, used -> f, "instantiation" -> inst],
+		                    toBeProved[ goal -> g, kb -> prependKB[ K, fInst], rest]]
+		            ]
+		        ]
+	    	],
+	    (*else*)
+	    	$Failed
+    	]
     ]
 ]
 
@@ -348,18 +357,34 @@ ps:PRFSIT$[ g:FML$[ _, u:Exists$TM[ rng_, cond_, A_], __], k_List, id_, rest___?
             rc = rngToCondition[ instRng];
             If[ !FreeQ[ rc, $Failed], 
 				$Failed,
-				(* else *)				
-            	newGoal = makeGoalFML[ formula -> makeExist[ thinnedRng, rc, cond, A, subst]];
-            	makeANDNODE[ makePRFINFO[ name -> existsGoalInteractive, used -> g, "instantiation" -> subst], 
-                	toBeProved[ goal -> newGoal, kb -> k, rest]]
+				(* else *)
+				newGoal = makeExist[ thinnedRng, rc, cond, A, subst];
+				If[ newGoal === $Failed,
+					$Failed,
+				(*else*)
+	            	newGoal = makeGoalFML[ formula -> newGoal];
+	            	makeANDNODE[ makePRFINFO[ name -> existsGoalInteractive, used -> g, "instantiation" -> subst], 
+	                	toBeProved[ goal -> newGoal, kb -> k, rest]]
+				]
             ]
         ]
     ]
 ]
 
-makeExist[ RNG$[], cond1_List, cond2_, A_, subst_] := Apply[ And$TM, substituteFree[ DeleteCases[ Join[ cond1, {cond2, A}], True], subst]]
-makeExist[ r:RNG$[__], cond1_List, cond2_, A_, subst_] := 
-	Exists$TM[ r, True, Apply[ And$TM, substituteFree[ DeleteCases[ Join[ cond1, {cond2, A}], True], subst]]]
+makeExist[ RNG$[], cond1_List, cond2_, A_, subst_] :=
+	With[ {res = substituteFree[ DeleteCases[ Join[ cond1, {cond2, A}], True], subst]},
+		If[ res === $Failed,
+			$Failed,
+			And$TM @@ res
+		]
+	]
+makeExist[ r:RNG$[__], cond1_List, cond2_, A_, subst_] :=
+	With[ {res = substituteFree[ DeleteCases[ Join[ cond1, {cond2, A}], True], subst]},
+		If[ res === $Failed,
+			$Failed,
+			Exists$TM[ r, True, And$TM @@ res]
+		]
+	]
 makeExist[ args___] := unexpected[ makeExist, {args}]
 
   
@@ -678,22 +703,24 @@ ps:PRFSIT$[ g_, K_List, id_, rest___?OptionQ] :> performProofStep[
 		implDefPos = Position[ K, _?(!FreeQ[ #, EqualDef$TM[ _, (_Such$TM|_SuchUnique$TM)]]&), {1}];
 		Do[
 			{implDefTerms, checkRule} = getDefInstances[ {g, K}, formula@Extract[ K, implDefPos[[k]]]];
-			If[ implDefTerms === {},
-				(* there are no terms to which this definition could apply, we mark the defintion to be removed from the KB *)
-				AppendTo[ delPos, implDefPos[[k]]],
-				(* else *)
-				{subst, newK} = makeImplDefSubst[ implDefTerms, checkRule, Map[ formula, K]];
-				Which[ 
-					Length[ subst] === 0,
-					(* no subst possible, try next def *)
-					Continue[],
-					Length[ subst] === Length[ implDefTerms],
-					(* all possible terms will be substituted, we can remove the definition.*)
-					AppendTo[ delPos, implDefPos[[k]]]
-					(* otherwise nothing needs to be done, we exit the loop with the Break, but we keep the defintion for possible later substitution *)
-				];
-				usedPos = implDefPos[[k]];
-				Break[]
+			If[ implDefTerms =!= $Failed,
+				If[ implDefTerms === {},
+					(* there are no terms to which this definition could apply, we mark the defintion to be removed from the KB *)
+					AppendTo[ delPos, implDefPos[[k]]],
+					(* else *)
+					{subst, newK} = makeImplDefSubst[ implDefTerms, checkRule, Map[ formula, K]];
+					Which[
+						Length[ subst] === 0,
+						(* no subst possible, try next def *)
+						Continue[],
+						Length[ subst] === Length[ implDefTerms],
+						(* all possible terms will be substituted, we can remove the definition.*)
+						AppendTo[ delPos, implDefPos[[k]]]
+						(* otherwise nothing needs to be done, we exit the loop with the Break, but we keep the defintion for possible later substitution *)
+					];
+					usedPos = implDefPos[[k]];
+					Break[]
+				]
 			],
 			{k, Length[ implDefPos]}
 		];
@@ -782,7 +809,7 @@ ps:PRFSIT$[ g_, K_List, id_, rest___?OptionQ] :> performProofStep[
 			Throw[ $Failed]
 		];
 		univKB = Cases[ K, FML$[ _, _Forall$TM, _]];       
-        instForm = Map[ instantiateForall[ #, newConst]&, univKB];
+        instForm = Replace[ univKB, FML$[ k_, f_, r___] :> instantiateForall[ FML$[ k, standardFormQuantifier[ f], r], newConst], {1}];
         (* for each form in univKB we get a list {forms, inst}, where
             forms is a list of instantiations of form and
             inst is a list of substitutions, such that inst_i applied to form gives forms_i.
@@ -832,8 +859,12 @@ instantiateForall[ f:FML$[ _, Forall$TM[ R1_RNG$, C_, A_], __], R2_RNG$] :=
     	];
         Do[
         	S = Map[ Rule[ #[[1, 1]], #[[2, 1]]]&, possibleInst[[i]]];
-            AppendTo[ inst, makeAssumptionFML[ formula -> substituteFree[ simplifiedForall[ Forall$TM[ DeleteCases[ R1, Apply[ Alternatives, Map[ First, possibleInst[[i]]]]], C, A]], S]]];
-            AppendTo[ subst, S],
+        	With[ {new = substituteFree[ simplifiedForall[ Forall$TM[ DeleteCases[ R1, Apply[ Alternatives, Map[ First, possibleInst[[i]]]]], C, A]], S]},
+        		If[ new =!= $Failed,
+        			AppendTo[ inst, makeAssumptionFML[ formula -> new]];
+        			AppendTo[ subst, S]
+        		]
+        	],
         	{i, Length[ possibleInst]}
         ];
         {inst, subst}
@@ -856,7 +887,7 @@ compatibleRange[ args___] := unexpected[ compatibleRange, {args}]
 inferenceRule[ solveMetaUnification] = 
 ps:(PRFSIT$[ g:FML$[ _, a_And$TM, lab_, ___] /; MemberQ[ a, e_Equal$TM /; !FreeQ[ e, _META$]], K_List, id_, rest___?OptionQ]|
 PRFSIT$[ g:FML$[ _, e_Equal$TM /; !FreeQ[ e, _META$], lab_, ___], K_List, id_, rest___?OptionQ]) :> performProofStep[
-	Module[ {eq, com, inst, newGoalsAlt, l},
+	Module[ {eq, com, inst, newGoalsAlt},
 		If[ Head[ formula@g] === Equal$TM,
 		  eq = {e},
 		  (* else *)
@@ -866,14 +897,19 @@ PRFSIT$[ g:FML$[ _, e_Equal$TM /; !FreeQ[ e, _META$], lab_, ___], K_List, id_, r
 		If[ com === $Failed,
 			Throw[ $Failed]
 		];
-		newGoalsAlt = Map[ makeGoalFML[ formula -> #]&, formula@g /. inst];
-		l = Length[ newGoalsAlt];
-		If[ l == 1,
+		newGoalsAlt = DeleteCases[ Map[ instantiateMeta[ formula@g, #]&, inst], $Failed];	(* 'inst' is a list of instantiations! *)
+		newGoalsAlt = DeleteCases[ Map[ Catch[ makeGoalFML[ formula -> #]]&, newGoalsAlt], $Failed];	(* remove all ill-formed goals *)
+		Switch[ newGoalsAlt,
+			{},
+			$Failed,
+			
+			{_},
 			makeANDNODE[ makePRFINFO[ name -> solveMetaUnification, used -> g, "instantiation" -> inst], 
             	toBeProved[ goal -> newGoalsAlt[[1]], kb -> K, rest]
         	],
-        	(* else *)
-        	makeORNODE[ makePRFINFO[ name -> solveMetaUnification, used -> Table[ {{g}}, l], generated -> Map[ {{#}}&, newGoalsAlt], "instantiation" -> inst], 
+        	
+			_,
+        	makeORNODE[ makePRFINFO[ name -> solveMetaUnification, used -> g, "instantiation" -> inst], 
             	Map[ toBeProved[ goal -> #, kb -> K, rest]&, newGoalsAlt]
         	]
 		]
@@ -888,21 +924,26 @@ simplifiedProofInfo[ pi_, n_Integer] /; name@pi === solveMetaUnification :=
 inferenceRule[ partSolveMetaMatching] = 
 ps:(PRFSIT$[ g:FML$[ _, a:And$TM[ pre___, x_ /; !FreeQ[ x, _META$], post___], lab_, ___], K_List, id_, rest___?OptionQ]|
 PRFSIT$[ g:FML$[ _, a:x_ /; !FreeQ[ x, _META$], lab_, ___], K_List, id_, rest___?OptionQ]) :> performProofStep[
-	Module[ {inst = Map[ instantiation[ x, formula@#]&, K], posInst, newGoalsAlt, l},
+	Module[ {inst = Map[ instantiation[ x, formula@#]&, K], posInst, newGoalsAlt},
 		posInst = Position[ inst, _List, {1}];
 		If[ posInst === {},
 			Throw[ $Failed],
 			(* else *)
 			inst = Extract[ inst, posInst];
 		];
-		newGoalsAlt = Map[ makeGoalFML[ formula -> #]&, a /. inst];
-		l = Length[ newGoalsAlt];
-		If[ l == 1,
+		newGoalsAlt = DeleteCases[ Map[ instantiateMeta[ a, #]&, inst], $Failed];	(* 'inst' is a list of instantiations! *)
+		newGoalsAlt = DeleteCases[ Map[ Catch[ makeGoalFML[ formula -> #]]&, newGoalsAlt], $Failed];	(* remove all ill-formed goals *)
+		Switch[ newGoalsAlt,
+			{},
+			$Failed,
+			
+			{_},
 			makeANDNODE[ makePRFINFO[ name -> partSolveMetaMatching, used -> g, "instantiation" -> inst], 
             	toBeProved[ goal -> newGoalsAlt[[1]], kb -> K, rest]
         	],
-        	(* else *)
-        	makeORNODE[ makePRFINFO[ name -> partSolveMetaMatching, used -> Table[ {{g}}, l], generated -> Map[ {{#}}&, newGoalsAlt], "instantiation" -> inst], 
+        	
+			_,
+        	makeORNODE[ makePRFINFO[ name -> partSolveMetaMultiMatching, used -> g, "instantiation" -> inst], 
             	Map[ toBeProved[ goal -> #, kb -> K, rest]&, newGoalsAlt]
         	]
 		]

@@ -1469,22 +1469,24 @@ execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, str
 	Module[{po, pv, pt, st},
 		$addProofKB = {};
 		{pv, po, pt} = callProver[ rules, strategy, goal, kb, searchDepth, searchTime];
+		
+		(* Update GUI and proof object w.r.t. knowledge that was added during proof *)
+		$selectedProofKB = DeleteDuplicates[ Join[ kb, $addProofKB]];
+		Scan[ With[ {fkey = key[ #]}, kbSelectProve[ fkey] = True]&, $addProofKB];
+		If[ $addProofKB =!= {}, po = ReplacePart[ po, {1, 3, 1} -> Prepend[ $selectedProofKB, goal]]];
+		
 		(* At this point po is equal to the global $TMAproofObject and $TMAproofTree is the corresponding tree *)
 		{po, st} = simplifyProof[ po, simplification];
 		(* po is the simplified proof object and $TMAproofTree is the corresponding simplified tree, but $TMAproofObject is still the unsimplified object *)
 		$TMAproofObject = po;
-		printProveInfo[ DeleteDuplicates[ Join[ Map[ {key[#], label[#]}&, kb], Map[ {key[#], label[#]}&, $addProofKB]]], pv, pt, st, simplification, repl];
+		printProveInfo[ DeleteDuplicates[ Map[ {key[#], label[#]}&, $selectedProofKB]], pv, pt, st, simplification, repl];
 	]
 execProveCall[ args___] := unexpected[ execProveCall, {args}]
 
 addKnowledgeWhileProving[ new_List] :=
-	Module[ {},
-		(* All of '$selectedProofKB', '$addProofKB' and 'kbSelectProve' are needed for printing the correct proof info
-			and writing the correct settings to the file. *)
-		$selectedProofKB = DeleteDuplicates[ Join[ $selectedProofKB, new]];
+	(
 		$addProofKB = DeleteDuplicates[ Join[ $addProofKB, new]];
-		Scan[ With[ {fkey = key[ #]}, kbSelectProve[ fkey] = True]&, new];
-	]
+	)
 addKnowledgeWhileProving[ args___] := unexpected[ addKnowledgeWhileProving, {args}]
 
 proofNavigation[ po_] :=
@@ -1549,7 +1551,7 @@ printComputationInfo[ cellID_Integer, cache_, fn_String, cTime_] :=
 			(* This needs to be done in that complicated way, because saving formatted Theorema expressions to the file would result in syntax errors
 			   when reading in the file later (Theorema MakeExpressions are not applied when reading from a file!).
 			   Therefore, we must write something to the file, which is syntactically OK on the plain Mma-level and format it after reading the file *)
-			CellPrint[ Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ Get[ ToExpression[ fnd]] /. {FORM -> displayFormulaFromKey, RESULT -> theoremaDisplay},
+			CellPrint[ Cell[ BoxData[ ToBoxes[ Dynamic[ Refresh[ Get[ ToExpression[ fnd]] /. FORM -> displayFormulaFromKey,
 				TrackedSymbols :> {$tmaEnv}]]]], "ComputationInfoBody"]]
 		];
 	]
@@ -1597,16 +1599,18 @@ saveComputationCacheDisplay[ cellID_Integer, file_String, cTime_] :=
 saveComputationCacheDisplay[ args___] := unexpected[ saveComputationCacheDisplay, {args}]
 
 summarizeComputationSettings[ cTime_] :=
-	Module[{},
-		TabView[{
+	TabView[
+		{
 			translate[ "input"] -> 	DisplayForm[ $TmaComputationObject[[1]]],
 			(* Out[] is the result of the computation translated to standard context, not anymore Computation`-context.
 			   This ensures that no evaluations will happen even when displaying the result under different built-in settings. *)
-			translate[ "result"] -> RESULT[ Out[]],			
+			translate[ "result"] -> theoremaDisplay[ Out[]],
 			translate[ "statistics"] -> Column[{
     			Labeled[ cTime, translate[ "computationTime"] <> ":", Left]
     			}]
-			}, AutoAction -> True, ControlPlacement -> Left]
+		},
+		AutoAction -> True,
+		ControlPlacement -> Left
 	]
 summarizeComputationSettings[ args___] := unexpected[ summarizeComputationSettings, {args}]
 
@@ -1754,7 +1758,8 @@ summarizeProverSettings[ pTime_, sTime_] :=
 					],
 				translate[ "statistics"] -> Column[{
     					Labeled[ pTime, translate[ "proofFindTime"] <> ":", Left],
-    					Labeled[ sTime, translate[ "proofSimpTime"] <> ":", Left]
+    					Labeled[ sTime, translate[ "proofSimpTime"] <> ":", Left],
+    					Labeled[ DateString[ {"DayName", ", ", "Year", "-", "Month", "-", "Day", ", ", "Hour24", ":", "Minute", ":", "Second"}], translate[ "TimeStamp"] <> ":", Left]
     				}]
 			}, AutoAction -> True, ControlPlacement -> Left]
 	]
@@ -1870,6 +1875,17 @@ makeGroupUngroupButton[ ] := Tooltip[
 ]
 makeGroupUngroupButton[ args___] := unexpected[ makeGroupUngroupButton, {args}]
 
+makeQuoteUnquoteButton[ ] := Tooltip[
+	Button[ translate[ "quote/unquote"],
+		If[ CurrentValue[ "ShiftKey"],
+			FrontEndExecute[ {NotebookWrite[ InputNotebook[], Replace[ NotebookRead[ InputNotebook[]], RowBox[ {"\[OpenCurlyQuote]", expr_, "\[CloseCurlyQuote]"}] :> expr], Placeholder]}],
+			(* else *)
+			FrontEndExecute[ {NotebookApply[ InputNotebook[], RowBox[ {"\[OpenCurlyQuote]", "\[SelectionPlaceholder]", "\[CloseCurlyQuote]"}], Placeholder]}]
+		]
+	], translate[ "tooltipButtonQuoteUnquote"], TooltipDelay -> 0.5
+]
+makeGroupUngroupButton[ args___] := unexpected[ makeGroupUngroupButton, {args}]
+
 removeAutoParen[ RowBox[ {TagBox[ "(", "AutoParentheses"], expr_, TagBox[ ")", "AutoParentheses"]}]] := expr
 removeAutoParen[ expr_] := expr
 removeAutoParen[ args___] := unexpected[ removeAutoParen, {args}]
@@ -1956,7 +1972,7 @@ sessionCompose[] :=
     		translate[ "Notebooks"], {{Top, Left}}],
     	Labeled[ Grid[ Partition[ Map[ makeEnvButton, allEnvironments], 4]],
     		translate[ "Environments"], {{Top, Left}}],
-    	Labeled[ Column[ {Row[ {makeFormButton[], makeGroupUngroupButton[]}, Spacer[5]], 
+    	Labeled[ Column[ {Row[ {makeFormButton[], makeGroupUngroupButton[], makeQuoteUnquoteButton[]}, Spacer[5]],
     				Dynamic[ Refresh[ langButtons[], TrackedSymbols :> {$buttonNat, $tcLangButtonSelection}]]}, Left, Spacer[2]],
     		translate[ "Formulae"], {{Top, Left}}],
     	Labeled[ Column[ {makeNewDeclButton[], makeDeclButtons[]}, Left, Spacer[2]],
@@ -2122,10 +2138,17 @@ makeColoredStylesheet[ type_String, color_:$TheoremaColorScheme] :=
 			Visible -> False];
 		styles = NotebookGet[ tmp];
 		NotebookClose[ tmp];
-		alias = Map[ langButtonData[ #][[4]] -> RowBox[ {autoParenthesis[ "("], langButtonData[ #][[2]], autoParenthesis[ ")"]}]&, 
-			Cases[ Flatten[ Transpose[ allFormulae][[2]]], _String]];
+		alias = Cases[ Flatten[ Transpose[ allFormulae][[2]], 2],
+					{n_String, i_Integer} :>
+						With[ {bd = langButtonData[ n]},
+							If[ i === 1,
+								bd[[4]] -> RowBox[ {autoParenthesis[ "("], bd[[2]], autoParenthesis[ ")"]}],
+								bd[[4]] -> bd[[2]]
+							]
+						]
+				];
 		alias = Join[ alias, {"(" -> autoParenthesis[ "("], ")" -> autoParenthesis[ ")"]}];
-		styles /. Table[Apply[CMYKColor, IntegerDigits[i, 2, 4]] -> TMAcolor[i, color], {i, 0, 15}] 
+		styles /. Table[Apply[CMYKColor, IntegerDigits[i, 2, 4]] -> TMAcolor[i, color], {i, 0, 15}]
 				/. {(InputAliases -> {}) -> (InputAliases -> alias), "DOCKED_HEADER" -> "Theorema " <> If[ type === "Notebook", $TheoremaVersion, translate[ type]]}
 	]
 makeColoredStylesheet[ args___] := unexpected[ makeColoredStylesheet, {args}]
@@ -2494,87 +2517,23 @@ langButtonData[ "ELEMTUP"] :=
 		MessageName[ elemTuple$TM, "usage", $TmaLanguage],
 		"elemT"
 	}
-
-langButtonData[ "[]"] := 
-	{
-		If[ TrueQ[ $buttonNat], 
-			translate[ "[]"], 
-			"[ ]"],
-		RowBox[ {TagBox[ "\:e114", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:e115", Identity, SyntaxForm -> ")"]}],
-		MessageName[ squareBracketted$TM, "usage", $TmaLanguage],
-		"[]"
-	}
-
-langButtonData[ "[[]]"] := 
-	{
-		If[ TrueQ[ $buttonNat], 
-			translate[ "[[]]"], 
-			"[[ ]]"],
-		RowBox[ {TagBox[ "\:27e6", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:27e7", Identity, SyntaxForm -> ")"]}],
-		MessageName[ doubleSquareBracketted$TM, "usage", $TmaLanguage],
-		"[[]]"
-	}
-
-langButtonData[ "<>"] := 
-	{
-		If[ TrueQ[ $buttonNat], 
-			translate[ "<>"], 
-			"\[LeftAngleBracket] \[RightAngleBracket]"],
-		RowBox[ {TagBox[ "\:27e8", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:27e9", Identity, SyntaxForm -> ")"]}],
-		MessageName[ angleBracketted$TM, "usage", $TmaLanguage],
-		"<>"
-	}
-	
-langButtonData[ "<<>>"] := 
-	{
-		If[ TrueQ[ $buttonNat], 
-			translate[ "<<>>"], 
-			"\[LeftAngleBracket]\[LeftAngleBracket] \[RightAngleBracket]\[RightAngleBracket]"],
-		RowBox[ {TagBox[ "\:27ea", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:27eb", Identity, SyntaxForm -> ")"]}],
-		MessageName[ doubleAngleBracketted$TM, "usage", $TmaLanguage],
-		"<<>>"
-	}
-	
-langButtonData[ "{}"] := 
-	{
-		If[ TrueQ[ $buttonNat], 
-			translate[ "{}"], 
-			"{ }"],
-		RowBox[ {TagBox[ "\:e117", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:e118", Identity, SyntaxForm -> ")"]}],
-		MessageName[ braced$TM, "usage", $TmaLanguage],
-		"{}"
-	}
-	
-langButtonData[ "{{}}"] := 
-	{
-		If[ TrueQ[ $buttonNat], 
-			translate[ "{{}}"], 
-			"{{ }}"],
-		RowBox[ {TagBox[ "\:2983", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:2984", Identity, SyntaxForm -> ")"]}],
-		MessageName[ doubleBraced$TM, "usage", $TmaLanguage],
-		"{{}}"
-	}
-	
-langButtonData[ "()"] := 
-	{
-		If[ TrueQ[ $buttonNat], 
-			translate[ "()"], 
-			"( )"],
-		RowBox[ {TagBox[ "\:fd3e", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:fd3f", Identity, SyntaxForm -> ")"]}],
-		MessageName[ parenthesized$TM, "usage", $TmaLanguage],
-		"()"
-	}
-	
-langButtonData[ "(())"] := 
-	{
-		If[ TrueQ[ $buttonNat], 
-			translate[ "(())"], 
-			"(( ))"],
-		RowBox[ {TagBox[ "\:2e28", Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ "\:2e29", Identity, SyntaxForm -> ")"]}],
-		MessageName[ doubleParenthesized$TM, "usage", $TmaLanguage],
-		"(())"
-	}
-	
+Scan[
+	With[ {id = #[[1]], plain = #[[2]], left = #[[3]], right = #[[4]], name = "Theorema`Language`" <> #[[5]], esc = #[[6]]},
+		With[ {sym = If[ StringMatchQ[ name, __ ~~ ("$"|"$TM")], ToExpression[ name], ToExpression[ name <> "$TM"]]},
+			langButtonData[ id] :=
+				{
+					If[ TrueQ[ $buttonNat],
+						translate[ id],
+						plain
+					],
+					RowBox[ {TagBox[ left, Identity, SyntaxForm -> "("], "\[SelectionPlaceholder]", TagBox[ right, Identity, SyntaxForm -> ")"]}],
+					MessageName[ sym, "usage", $TmaLanguage],
+					esc
+				}
+		]
+	]&,
+	specialBrackets
+]
 langButtonData[ args___] := unexpected[ langButtonData, {args}]
 
 (*
@@ -2612,19 +2571,18 @@ autoParenthesis[ c_String] := TagBox[ c, "AutoParentheses"]
 autoParenthesis[ args___] := unexpected[ autoParenthesis, {args}]
 
 allFormulae = {
-			   {"Logic", {{{"AND2", 1}, {"OR2", 1}, {"NOT", 1}, {"IMPL2", 1}}, 
-			   	{{"EQUIV2", 1}, {"EQ", 1}, {"EQUIVDEF", 1}, {"EQDEF", 1}}, 
-			   	{{"AND3", 1}, {"OR3", 1}, {"EQUIV3", 1}, {"CASEDIST", 1}}, 
-			   	{{"FORALL1", 1}, {"EXISTS1", 1}, {"FORALL2", 1}, {"EXISTS2", 1}}, 
+			   {"Logic", {{{"AND2", 1}, {"OR2", 1}, {"NOT", 1}, {"IMPL2", 1}},
+			   	{{"EQUIV2", 1}, {"EQ", 1}, {"EQUIVDEF", 1}, {"EQDEF", 1}},
+			   	{{"AND3", 1}, {"OR3", 1}, {"EQUIV3", 1}, {"CASEDIST", 1}},
+			   	{{"FORALL1", 1}, {"EXISTS1", 1}, {"FORALL2", 1}, {"EXISTS2", 1}},
 			   	{{"LET", 1}}}},
 			   {"Arithmetic", {}},
 			   {"Sets", {}},
 			   {"Tuples", {{{"APPEND", 1}, {"PREPEND", 1}, {"JOIN", 1}, {"ELEMTUP", 1}}}},
-			   {"Operators", {{{"SUBOP", 1}, {"SUPEROP", 1}, {"SUBSUPEROP", 1}}, 
-			   	{{"OVEROP", 1}, {"UNDEROVEROP", 1}, {"OVERSUBOP", 1}}, 
+			   {"Operators", {{{"SUBOP", 1}, {"SUPEROP", 1}, {"SUBSUPEROP", 1}},
+			   	{{"OVEROP", 1}, {"UNDEROVEROP", 1}, {"OVERSUBOP", 1}},
 			   	{{"SINGLEOP", 1}}}},
-			   {"Bracketted", {{{"[]", 2}, {"()", 2}, {"<>", 2}, {"{}", 2}}, 
-			   	{{"[[]]", 2}, {"(())", 2}, {"<<>>", 2}, {"{{}}", 2}}}}
+			   {"Bracketted", Map[ {First[ #], 2}&, With[ {l = Length[ specialBrackets]}, Append[ Partition[ specialBrackets, 7], Take[ specialBrackets, -Mod[ l, 7]]]], {2}]}
 };
 
 makeButtonCategory[ {category_String, buttons_List}, cols_Integer:2] :=

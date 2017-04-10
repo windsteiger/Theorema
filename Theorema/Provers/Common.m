@@ -798,7 +798,8 @@ proofNodeIndicator[ args___] := unexpected[ proofNodeIndicator, {args}]
 (* makeInitialProofObject *)
 
 makeInitialProofObject[ g_FML$, k_List, {r_Hold, act_List, prio_List}, s_] :=
-    Module[ {dummyPO, simpG = computeInProof[ g], simpK = Map[ computeInProof, k], thinnedKB, dr, sr, gr, kr, const},
+    Module[ {dummyPO, simpG = computeInProof[ g], simpK = Map[ With[ {new = computeInProof[ #]}, If[ new === $Failed, #, new]]&, k], thinnedKB, dr, sr, gr, kr, const},
+    	If[ simpG === $Failed, simpG = g];
         dummyPO = PRFOBJ$[
             makePRFINFO[ name -> initialProofSituation, generated -> Prepend[ simpK, simpG], id -> "OriginalPS"],
             PRFSIT$[ simpG, simpK, "InitialPS"],
@@ -854,13 +855,13 @@ displayProof[ file_String] :=
 		cells = proofObjectToCell[ p];
 		tree = poToTree[ p];
 		$TMAproofObject = p;
-		$TMAproofTree = tree; 
 		$TMAproofNotebook = tmaNotebookPut[ Notebook[ cells], "Proof"];
 		$selectedProofStep = "OriginalPS";
 		With[ {nb = $TMAproofNotebook, tr = tree, po = p},
 			SetOptions[ $TMAproofNotebook, NotebookEventActions -> {{"KeyDown", "r"} :> ($TMAproofNotebook = nb; $TMAproofObject = po; $TMAproofTree = tr;),
 				"WindowClose" :> ($TMAproofTree = {};), PassEventsDown -> False}]
-		]
+		];
+		$TMAproofTree = tree;
 	]
 displayProof[ file_String, simp_List] :=
 	Module[ {p, cells, tree, origDock, newDock},

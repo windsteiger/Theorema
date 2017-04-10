@@ -10,10 +10,10 @@
 NotebookFileLineBreakTest
 NotebookFileLineBreakTest
 NotebookDataPosition[       157,          7]
-NotebookDataLength[    104356,       2953]
-NotebookOptionsPosition[     49717,       1634]
-NotebookOutlinePosition[     94085,       2610]
-CellTagsIndexPosition[     93360,       2584]
+NotebookDataLength[    124250,       3608]
+NotebookOptionsPosition[     64328,       2123]
+NotebookOutlinePosition[    110660,       3153]
+CellTagsIndexPosition[    109795,       3123]
 WindowFrame->Normal*)
 
 (* Beginning of Notebook Content *)
@@ -21,12 +21,13 @@ Notebook[{
 
 Cell[CellGroupData[{
 Cell[TextData[{
- "Sequence Variables in ",
+ "Sequence Variables and -Expressions in ",
  StyleBox["Theorema",
   FontSlant->"Italic"],
  " 2"
 }], "Title",
- CellChangeTimes->{{3.599302556413296*^9, 3.599302562219023*^9}},
+ CellChangeTimes->{{3.599302556413296*^9, 3.599302562219023*^9}, {
+  3.679982426085601*^9, 3.6799824295327*^9}},
  TextAlignment->Center,
  CellID->1798432929],
 
@@ -36,9 +37,18 @@ Cell["Overview", "Section",
  CellChangeTimes->{{3.599302618372277*^9, 3.599302619828641*^9}},
  CellID->1536902489],
 
+Cell[CellGroupData[{
+
+Cell["Variables", "Subsection",
+ CellChangeTimes->{{3.679982618581993*^9, 3.67998261985355*^9}},
+ CellID->804148175],
+
 Cell[TextData[{
- "In Theorema 2, sequence variables are denoted by dots at the end of their \
-name, namely by ",
+ "In ",
+ StyleBox["Theorema",
+  FontSlant->"Italic"],
+ " 2, sequence variables are denoted by dots at the end of their name, namely \
+by ",
  Cell[BoxData[
   FormBox[
    RowBox[{"x", ".."}], TraditionalForm]]],
@@ -83,6 +93,70 @@ Cell[TextData[{
 }], "Text",
  CellChangeTimes->{3.604204817716385*^9},
  CellID->1119994416]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["Expressions", "Subsection",
+ CellChangeTimes->{{3.6799826244376583`*^9, 3.679982625957337*^9}},
+ CellID->15539005],
+
+Cell[TextData[{
+ "Sequences of expressions can be typed in using the \
+\[OpenCurlyDoubleQuote]SEQ$\[CloseCurlyDoubleQuote]-button in the ",
+ StyleBox["Theorema",
+  FontSlant->"Italic"],
+ " commander, tab \[OpenCurlyDoubleQuote]PREPARE\[CloseCurlyDoubleQuote] -> \
+\[OpenCurlyDoubleQuote]compose\[CloseCurlyDoubleQuote] -> \
+\[OpenCurlyDoubleQuote]Bracketted\[CloseCurlyDoubleQuote]; they are displayed \
+between two vertical ellipsis (but refrain from entering them by just typing \
+the vertical ellipses manually \[Rule] only use the button in the ",
+ StyleBox["Theorema",
+  FontSlant->"Italic"],
+ " commander!). Internally, such sequences are represented as"
+}], "Text",
+ CellChangeTimes->{{3.679982459149704*^9, 3.67998253902927*^9}, {
+  3.679982671582206*^9, 3.6799827307260857`*^9}},
+ CellID->1635159898],
+
+Cell[BoxData[
+ RowBox[{"Theorema`Language`SEQ$", "[", 
+  RowBox[{"a", ",", "b", ",", "c"}], "]"}]], "Input",
+ CellChangeTimes->{{3.6799825426467237`*^9, 3.679982553535123*^9}},
+ CellID->2001631953],
+
+Cell[TextData[{
+ "However, if a sequence occurs as an argument of a function, it is \
+immediately flattened (similar as in ",
+ StyleBox["Mathematica",
+  FontSlant->"Italic"],
+ "): ",
+ Cell[BoxData[
+  FormBox[
+   RowBox[{"f", "[", 
+    RowBox[{
+     TagBox["\[VerticalEllipsis]",
+      Identity,
+      SyntaxForm->"("], 
+     RowBox[{"1", ",", "2", ",", "3"}], 
+     TagBox["\[VerticalEllipsis]",
+      Identity,
+      SyntaxForm->")"]}], "]"}], TraditionalForm]],
+  FormatType->"TraditionalForm"],
+ " is internally just represented as"
+}], "Text",
+ CellChangeTimes->{{3.6799825600292377`*^9, 3.6799825934455214`*^9}, {
+  3.6799826534620934`*^9, 3.679982661918892*^9}, {3.679982743219858*^9, 
+  3.679982760694374*^9}},
+ CellID->1098748535],
+
+Cell[BoxData[
+ RowBox[{"f", "[", 
+  RowBox[{"1", ",", "2", ",", "3"}], "]"}]], "Input",
+ CellChangeTimes->{{3.6799826461516123`*^9, 3.679982647232544*^9}, {
+  3.679982755839775*^9, 3.6799827564005404`*^9}},
+ CellID->777901851]
+}, Open  ]]
 }, Closed]],
 
 Cell[CellGroupData[{
@@ -91,6 +165,83 @@ Cell["Examples", "Section",
  CellChangeTimes->{{3.599302625163901*^9, 3.599302630702542*^9}, 
    3.599303796761867*^9},
  CellID->499682955],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+Proper Use of Sequence Variables\
+\>", "Subsection",
+ CellChangeTimes->{{3.679983053743977*^9, 3.679983066303486*^9}},
+ CellID->1676284398],
+
+Cell["\<\
+It is perfectly fine if the result of a computation is a sequence of \
+expressions:\
+\>", "Text",
+ CellChangeTimes->{{3.679983225760292*^9, 3.679983239872394*^9}},
+ CellID->878107994],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{
+  TagBox["\[VerticalEllipsis]",
+   Identity,
+   SyntaxForm->"("], 
+  RowBox[{"1", ",", "2", ",", "3"}], 
+  TagBox["\[VerticalEllipsis]",
+   Identity,
+   SyntaxForm->")"]}]], "Computation",
+ CellChangeTimes->{{3.6799832448092337`*^9, 3.679983248193928*^9}},
+ CellID->1110193744],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{
+   TagBox["\[VerticalEllipsis]",
+    Identity,
+    SyntaxForm->"("], 
+   RowBox[{"1", ",", "2", ",", "3"}], 
+   TagBox["\[VerticalEllipsis]",
+    Identity,
+    SyntaxForm->")"]}], TheoremaForm]], "ComputationResult",
+ CellChangeTimes->{3.679983248898034*^9},
+ CellID->2076513021]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["", "ComputationInfo",
+ CellAutoOverwrite->True,
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      ButtonBox[
+      "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
+       Theorema`Interface`GUI`Private`removeGroup[
+         ButtonNotebook[], "c1110193744"]]]]}, {None, None}},
+ CellChangeTimes->{3.6799832492207212`*^9},
+ CellID->180072678],
+
+Cell[BoxData[
+ DynamicBox[ToBoxes[
+   Refresh[
+    ReplaceAll[
+     Get[
+      ToExpression[
+      "FileNameJoin[{CurrentValue[\"NotebookDirectory\"], \
+FileBaseName[CurrentValue[\"NotebookFileName\"]], \
+\"c1110193744-display.m\"}]"]], {
+     Theorema`Interface`GUI`Private`FORM -> 
+      Theorema`Interface`GUI`Private`displayFormulaFromKey, 
+      Theorema`Interface`GUI`Private`RESULT -> 
+      Theorema`Common`theoremaDisplay}], 
+    TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
+ CellAutoOverwrite->True,
+ CellChangeTimes->{3.679983249281723*^9},
+ CellID->78044684]
+}, Closed]],
 
 Cell["", "OpenEnvironment",
  CellID->1935628522],
@@ -202,8 +353,8 @@ Cell[BoxData[
 Cell[BoxData[
  FormBox["3", TheoremaForm]], "ComputationResult",
  CellChangeTimes->{3.604204925746118*^9, 3.61571275267444*^9, 
-  3.615712794749034*^9},
- CellID->831404838]
+  3.615712794749034*^9, 3.679983176718244*^9},
+ CellID->699640707]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -216,27 +367,28 @@ Cell["", "ComputationInfo",
       ButtonBox[
       "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
        Theorema`Interface`GUI`Private`removeGroup[
-         ButtonNotebook[], 
-         "/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c933137124"]]]]}, {None, None}},
- CellChangeTimes->{3.615712795290854*^9},
- CellID->1167105344],
+         ButtonNotebook[], "c933137124"]]]]}, {None, None}},
+ CellChangeTimes->{3.679983177131762*^9},
+ CellID->69044676],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
    Refresh[
     ReplaceAll[
-     Get["/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c933137124-display.m"], {
+     Get[
+      ToExpression[
+      "FileNameJoin[{CurrentValue[\"NotebookDirectory\"], \
+FileBaseName[CurrentValue[\"NotebookFileName\"]], \
+\"c933137124-display.m\"}]"]], {
      Theorema`Interface`GUI`Private`FORM -> 
       Theorema`Interface`GUI`Private`displayFormulaFromKey, 
       Theorema`Interface`GUI`Private`RESULT -> 
       Theorema`Common`theoremaDisplay}], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
-  ImageSizeCache->{516., {25., 31.}}]], "ComputationInfoBody",
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
- CellChangeTimes->{3.61571279535129*^9},
- CellID->55198496]
+ CellChangeTimes->{3.679983177195784*^9},
+ CellID->1008716325]
 }, Closed]],
 
 Cell["", "OpenEnvironment",
@@ -436,8 +588,8 @@ Cell[BoxData[
 Cell[BoxData[
  FormBox["False", TheoremaForm]], "ComputationResult",
  CellChangeTimes->{3.60310296075091*^9, 3.615712768743709*^9, 
-  3.615712803317325*^9},
- CellID->1125582477]
+  3.615712803317325*^9, 3.67998318632828*^9},
+ CellID->286508960]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -450,27 +602,28 @@ Cell["", "ComputationInfo",
       ButtonBox[
       "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
        Theorema`Interface`GUI`Private`removeGroup[
-         ButtonNotebook[], 
-         "/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c1656730105"]]]]}, {None, None}},
- CellChangeTimes->{3.615712803828028*^9},
- CellID->1169107123],
+         ButtonNotebook[], "c1656730105"]]]]}, {None, None}},
+ CellChangeTimes->{3.67998318674347*^9},
+ CellID->131963244],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
    Refresh[
     ReplaceAll[
-     Get["/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c1656730105-display.m"], {
+     Get[
+      ToExpression[
+      "FileNameJoin[{CurrentValue[\"NotebookDirectory\"], \
+FileBaseName[CurrentValue[\"NotebookFileName\"]], \
+\"c1656730105-display.m\"}]"]], {
      Theorema`Interface`GUI`Private`FORM -> 
       Theorema`Interface`GUI`Private`displayFormulaFromKey, 
       Theorema`Interface`GUI`Private`RESULT -> 
       Theorema`Common`theoremaDisplay}], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
-  ImageSizeCache->{516., {25., 31.}}]], "ComputationInfoBody",
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
- CellChangeTimes->{3.615712803891773*^9},
- CellID->1151859690]
+ CellChangeTimes->{3.679983186808257*^9},
+ CellID->1465634009]
 }, Closed]],
 
 Cell[CellGroupData[{
@@ -488,8 +641,8 @@ Cell[BoxData[
 Cell[BoxData[
  FormBox["True", TheoremaForm]], "ComputationResult",
  CellChangeTimes->{3.603102962549499*^9, 3.615712771060279*^9, 
-  3.615712806417572*^9},
- CellID->1497104492]
+  3.615712806417572*^9, 3.679983187714552*^9},
+ CellID->1601490509]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -502,27 +655,28 @@ Cell["", "ComputationInfo",
       ButtonBox[
       "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
        Theorema`Interface`GUI`Private`removeGroup[
-         ButtonNotebook[], 
-         "/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c255419321"]]]]}, {None, None}},
- CellChangeTimes->{3.615712806993465*^9},
- CellID->1732552706],
+         ButtonNotebook[], "c255419321"]]]]}, {None, None}},
+ CellChangeTimes->{3.679983188159464*^9},
+ CellID->1790331840],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
    Refresh[
     ReplaceAll[
-     Get["/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c255419321-display.m"], {
+     Get[
+      ToExpression[
+      "FileNameJoin[{CurrentValue[\"NotebookDirectory\"], \
+FileBaseName[CurrentValue[\"NotebookFileName\"]], \
+\"c255419321-display.m\"}]"]], {
      Theorema`Interface`GUI`Private`FORM -> 
       Theorema`Interface`GUI`Private`displayFormulaFromKey, 
       Theorema`Interface`GUI`Private`RESULT -> 
       Theorema`Common`theoremaDisplay}], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
-  ImageSizeCache->{516., {25., 31.}}]], "ComputationInfoBody",
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
- CellChangeTimes->{3.615712807048852*^9},
- CellID->1489846574]
+ CellChangeTimes->{3.679983188228726*^9},
+ CellID->108928838]
 }, Closed]],
 
 Cell[CellGroupData[{
@@ -539,8 +693,8 @@ Cell[BoxData[
 Cell[BoxData[
  FormBox["True", TheoremaForm]], "ComputationResult",
  CellChangeTimes->{3.603102964945788*^9, 3.615712773092248*^9, 
-  3.615712808670301*^9},
- CellID->1740784410]
+  3.615712808670301*^9, 3.6799831889866533`*^9},
+ CellID->1078773587]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -553,27 +707,28 @@ Cell["", "ComputationInfo",
       ButtonBox[
       "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
        Theorema`Interface`GUI`Private`removeGroup[
-         ButtonNotebook[], 
-         "/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c959058670"]]]]}, {None, None}},
- CellChangeTimes->{3.615712809176306*^9},
- CellID->1015232225],
+         ButtonNotebook[], "c959058670"]]]]}, {None, None}},
+ CellChangeTimes->{3.67998318933814*^9},
+ CellID->1793614085],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
    Refresh[
     ReplaceAll[
-     Get["/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c959058670-display.m"], {
+     Get[
+      ToExpression[
+      "FileNameJoin[{CurrentValue[\"NotebookDirectory\"], \
+FileBaseName[CurrentValue[\"NotebookFileName\"]], \
+\"c959058670-display.m\"}]"]], {
      Theorema`Interface`GUI`Private`FORM -> 
       Theorema`Interface`GUI`Private`displayFormulaFromKey, 
       Theorema`Interface`GUI`Private`RESULT -> 
       Theorema`Common`theoremaDisplay}], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
-  ImageSizeCache->{516., {25., 31.}}]], "ComputationInfoBody",
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
- CellChangeTimes->{3.615712809236908*^9},
- CellID->295627222]
+ CellChangeTimes->{3.679983189405161*^9},
+ CellID->114261808]
 }, Closed]],
 
 Cell[CellGroupData[{
@@ -590,8 +745,8 @@ Cell[BoxData[
 Cell[BoxData[
  FormBox["True", TheoremaForm]], "ComputationResult",
  CellChangeTimes->{3.603102967016407*^9, 3.615712775274111*^9, 
-  3.615712810753059*^9},
- CellID->1947209802]
+  3.615712810753059*^9, 3.679983190687889*^9},
+ CellID->1682226850]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -604,27 +759,28 @@ Cell["", "ComputationInfo",
       ButtonBox[
       "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
        Theorema`Interface`GUI`Private`removeGroup[
-         ButtonNotebook[], 
-         "/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c2059232044"]]]]}, {None, None}},
- CellChangeTimes->{3.615712811276674*^9},
- CellID->296632333],
+         ButtonNotebook[], "c2059232044"]]]]}, {None, None}},
+ CellChangeTimes->{3.679983191051848*^9},
+ CellID->2027317798],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
    Refresh[
     ReplaceAll[
-     Get["/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c2059232044-display.m"], {
+     Get[
+      ToExpression[
+      "FileNameJoin[{CurrentValue[\"NotebookDirectory\"], \
+FileBaseName[CurrentValue[\"NotebookFileName\"]], \
+\"c2059232044-display.m\"}]"]], {
      Theorema`Interface`GUI`Private`FORM -> 
       Theorema`Interface`GUI`Private`displayFormulaFromKey, 
       Theorema`Interface`GUI`Private`RESULT -> 
       Theorema`Common`theoremaDisplay}], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
-  ImageSizeCache->{516., {25., 31.}}]], "ComputationInfoBody",
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
- CellChangeTimes->{3.615712811343357*^9},
- CellID->1416883074]
+ CellChangeTimes->{3.679983191119467*^9},
+ CellID->1025224459]
 }, Closed]],
 
 Cell[CellGroupData[{
@@ -640,8 +796,9 @@ Cell[BoxData[
 
 Cell[BoxData[
  FormBox["True", TheoremaForm]], "ComputationResult",
- CellChangeTimes->{3.603102968747378*^9, 3.615712812829146*^9},
- CellID->1663526396]
+ CellChangeTimes->{3.603102968747378*^9, 3.615712812829146*^9, 
+  3.679983191881217*^9},
+ CellID->469483362]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -654,27 +811,28 @@ Cell["", "ComputationInfo",
       ButtonBox[
       "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
        Theorema`Interface`GUI`Private`removeGroup[
-         ButtonNotebook[], 
-         "/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c1629913276"]]]]}, {None, None}},
- CellChangeTimes->{3.615712813350728*^9},
- CellID->1853765239],
+         ButtonNotebook[], "c1629913276"]]]]}, {None, None}},
+ CellChangeTimes->{3.679983192241658*^9},
+ CellID->1124822059],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
    Refresh[
     ReplaceAll[
-     Get["/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c1629913276-display.m"], {
+     Get[
+      ToExpression[
+      "FileNameJoin[{CurrentValue[\"NotebookDirectory\"], \
+FileBaseName[CurrentValue[\"NotebookFileName\"]], \
+\"c1629913276-display.m\"}]"]], {
      Theorema`Interface`GUI`Private`FORM -> 
       Theorema`Interface`GUI`Private`displayFormulaFromKey, 
       Theorema`Interface`GUI`Private`RESULT -> 
       Theorema`Common`theoremaDisplay}], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
-  ImageSizeCache->{516., {25., 31.}}]], "ComputationInfoBody",
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
- CellChangeTimes->{3.615712813407155*^9},
- CellID->351881462]
+ CellChangeTimes->{3.679983192303742*^9},
+ CellID->1932189406]
 }, Closed]],
 
 Cell[CellGroupData[{
@@ -690,8 +848,9 @@ Cell[BoxData[
 
 Cell[BoxData[
  FormBox["False", TheoremaForm]], "ComputationResult",
- CellChangeTimes->{3.603102970743567*^9, 3.615712815257535*^9},
- CellID->494563360]
+ CellChangeTimes->{3.603102970743567*^9, 3.615712815257535*^9, 
+  3.679983193538946*^9},
+ CellID->1677435008]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -704,27 +863,28 @@ Cell["", "ComputationInfo",
       ButtonBox[
       "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
        Theorema`Interface`GUI`Private`removeGroup[
-         ButtonNotebook[], 
-         "/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c1613881432"]]]]}, {None, None}},
- CellChangeTimes->{3.615712815776961*^9},
- CellID->1631524477],
+         ButtonNotebook[], "c1613881432"]]]]}, {None, None}},
+ CellChangeTimes->{3.6799831939205437`*^9},
+ CellID->1834353362],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
    Refresh[
     ReplaceAll[
-     Get["/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c1613881432-display.m"], {
+     Get[
+      ToExpression[
+      "FileNameJoin[{CurrentValue[\"NotebookDirectory\"], \
+FileBaseName[CurrentValue[\"NotebookFileName\"]], \
+\"c1613881432-display.m\"}]"]], {
      Theorema`Interface`GUI`Private`FORM -> 
       Theorema`Interface`GUI`Private`displayFormulaFromKey, 
       Theorema`Interface`GUI`Private`RESULT -> 
       Theorema`Common`theoremaDisplay}], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
-  ImageSizeCache->{516., {25., 31.}}]], "ComputationInfoBody",
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
- CellChangeTimes->{3.615712815838061*^9},
- CellID->2139211474]
+ CellChangeTimes->{3.679983193988922*^9},
+ CellID->1413976025]
 }, Closed]],
 
 Cell[CellGroupData[{
@@ -741,8 +901,9 @@ Cell[BoxData[
   RowBox[{"IsEmpty", "[", 
    RowBox[{"\[LeftAngleBracket]", "\[RightAngleBracket]"}], "]"}], 
   TheoremaForm]], "ComputationResult",
- CellChangeTimes->{3.603102978781844*^9, 3.615712821577924*^9},
- CellID->1762551635]
+ CellChangeTimes->{3.603102978781844*^9, 3.615712821577924*^9, 
+  3.679983197513905*^9},
+ CellID->23044306]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -755,27 +916,28 @@ Cell["", "ComputationInfo",
       ButtonBox[
       "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
        Theorema`Interface`GUI`Private`removeGroup[
-         ButtonNotebook[], 
-         "/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c1276343409"]]]]}, {None, None}},
- CellChangeTimes->{3.615712822139389*^9},
- CellID->575136022],
+         ButtonNotebook[], "c1276343409"]]]]}, {None, None}},
+ CellChangeTimes->{3.679983197946834*^9},
+ CellID->1645324034],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
    Refresh[
     ReplaceAll[
-     Get["/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c1276343409-display.m"], {
+     Get[
+      ToExpression[
+      "FileNameJoin[{CurrentValue[\"NotebookDirectory\"], \
+FileBaseName[CurrentValue[\"NotebookFileName\"]], \
+\"c1276343409-display.m\"}]"]], {
      Theorema`Interface`GUI`Private`FORM -> 
       Theorema`Interface`GUI`Private`displayFormulaFromKey, 
       Theorema`Interface`GUI`Private`RESULT -> 
       Theorema`Common`theoremaDisplay}], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
-  ImageSizeCache->{516., {25., 31.}}]], "ComputationInfoBody",
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
- CellChangeTimes->{3.615712822209668*^9},
- CellID->858170573]
+ CellChangeTimes->{3.679983198012782*^9},
+ CellID->682679929]
 }, Closed]],
 
 Cell["", "OpenEnvironment",
@@ -896,18 +1058,18 @@ Cell[BoxData[
     Get["/home/amaletzk/Theorema \
 Notebooks/Documentation/Sequence/p514433530-display.m"], None], StandardForm],
   
-  ImageSizeCache->{298., {24., 31.}}]], "ProofInfoBody",
+  ImageSizeCache->{297., {23., 30.}}]], "ProofInfoBody",
  CellID->807726814]
 }, Closed]],
 
 Cell["\<\
 For stating that every expression in the instance-sequence of a sequence \
-variable needs to fulfil a certain property, the \
+variable needs to fulfill a certain property, the \
 \[OpenCurlyDoubleQuote]Componentwise\[CloseCurlyDoubleQuote]-operator (\
 \[OpenCurlyDoubleQuote]@\[CloseCurlyDoubleQuote]) can be used:\
 \>", "Text",
  CellChangeTimes->{{3.599302701758505*^9, 3.599302782746873*^9}, {
-  3.604205027266962*^9, 3.604205050570302*^9}},
+   3.604205027266962*^9, 3.604205050570302*^9}, 3.629710339588311*^9},
  CellID->1086688829],
 
 Cell["", "OpenEnvironment",
@@ -1050,8 +1212,10 @@ Cell[BoxData[
 
 Cell[BoxData[
  FormBox["True", TheoremaForm]], "ComputationResult",
- CellChangeTimes->{3.60310304638314*^9, 3.615712889023638*^9},
- CellID->981092078]
+ CellChangeTimes->{3.60310304638314*^9, 3.615712889023638*^9, 
+  3.6297102534686623`*^9, 3.629715310532357*^9, 3.62971602352605*^9, 
+  3.629719083927457*^9, 3.679983129688801*^9},
+ CellID->1818833074]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -1064,47 +1228,56 @@ Cell["", "ComputationInfo",
       ButtonBox[
       "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
        Theorema`Interface`GUI`Private`removeGroup[
-         ButtonNotebook[], 
-         "/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c1954597986"]]]]}, {None, None}},
- CellChangeTimes->{3.615712889750191*^9},
- CellID->1371856441],
+         ButtonNotebook[], "c1954597986"]]]]}, {None, None}},
+ CellChangeTimes->{3.6799831300626802`*^9},
+ CellID->412133171],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
    Refresh[
     ReplaceAll[
-     Get["/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c1954597986-display.m"], {
+     Get[
+      ToExpression[
+      "FileNameJoin[{CurrentValue[\"NotebookDirectory\"], \
+FileBaseName[CurrentValue[\"NotebookFileName\"]], \
+\"c1954597986-display.m\"}]"]], {
      Theorema`Interface`GUI`Private`FORM -> 
       Theorema`Interface`GUI`Private`displayFormulaFromKey, 
       Theorema`Interface`GUI`Private`RESULT -> 
       Theorema`Common`theoremaDisplay}], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
-  ImageSizeCache->{516., {25., 31.}}]], "ComputationInfoBody",
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
- CellChangeTimes->{3.615712889807198*^9},
- CellID->744258326]
+ CellChangeTimes->{3.679983130130898*^9},
+ CellID->802614210]
 }, Closed]],
 
 Cell[CellGroupData[{
 
 Cell[BoxData[
  RowBox[{"isPair", "@", 
-  RowBox[{"(", 
+  RowBox[{
+   TagBox["\[VerticalEllipsis]",
+    Identity,
+    SyntaxForm->"("], 
    RowBox[{
     RowBox[{"\[LeftAngleBracket]", 
      RowBox[{"1", ",", "2"}], "\[RightAngleBracket]"}], ",", 
     RowBox[{"\[LeftAngleBracket]", 
      RowBox[{"3", ",", "4"}], "\[RightAngleBracket]"}]}], 
-   ")"}]}]], "Computation",
- CellChangeTimes->{{3.599303216410952*^9, 3.599303243054238*^9}},
+   TagBox["\[VerticalEllipsis]",
+    Identity,
+    SyntaxForm->")"]}]}]], "Computation",
+ CellChangeTimes->{{3.599303216410952*^9, 3.599303243054238*^9}, {
+  3.6799831326904287`*^9, 3.6799831391574507`*^9}},
  CellID->189176158],
 
 Cell[BoxData[
  FormBox["True", TheoremaForm]], "ComputationResult",
- CellChangeTimes->{3.603103050556472*^9, 3.615712894443821*^9},
- CellID->341673060]
+ CellChangeTimes->{3.603103050556472*^9, 3.615712894443821*^9, 
+  3.629710255692625*^9, 3.629715312706362*^9, 3.629716025338859*^9, 
+  3.629719085837286*^9, 3.679983141402896*^9},
+ CellID->1265825090]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -1117,27 +1290,28 @@ Cell["", "ComputationInfo",
       ButtonBox[
       "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
        Theorema`Interface`GUI`Private`removeGroup[
-         ButtonNotebook[], 
-         "/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c189176158"]]]]}, {None, None}},
- CellChangeTimes->{3.615712895157759*^9},
- CellID->1318283077],
+         ButtonNotebook[], "c189176158"]]]]}, {None, None}},
+ CellChangeTimes->{3.679983141785997*^9},
+ CellID->873814901],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
    Refresh[
     ReplaceAll[
-     Get["/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c189176158-display.m"], {
+     Get[
+      ToExpression[
+      "FileNameJoin[{CurrentValue[\"NotebookDirectory\"], \
+FileBaseName[CurrentValue[\"NotebookFileName\"]], \
+\"c189176158-display.m\"}]"]], {
      Theorema`Interface`GUI`Private`FORM -> 
       Theorema`Interface`GUI`Private`displayFormulaFromKey, 
       Theorema`Interface`GUI`Private`RESULT -> 
       Theorema`Common`theoremaDisplay}], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
-  ImageSizeCache->{516., {25., 31.}}]], "ComputationInfoBody",
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
- CellChangeTimes->{3.615712895216685*^9},
- CellID->1524775230]
+ CellChangeTimes->{3.679983141861059*^9},
+ CellID->672401876]
 }, Closed]],
 
 Cell[CellGroupData[{
@@ -1156,8 +1330,12 @@ Cell[BoxData[
     RowBox[{"\[LeftAngleBracket]", "\[RightAngleBracket]"}], ",", 
     RowBox[{"\[LeftAngleBracket]", "\[RightAngleBracket]"}]}], 
    "\[RightAngleBracket]"}], TheoremaForm]], "ComputationResult",
- CellChangeTimes->{3.603103055059089*^9, 3.615712896466996*^9},
- CellID->526478926]
+ CellChangeTimes->{
+  3.603103055059089*^9, 3.615712896466996*^9, 3.629710258475541*^9, 
+   3.629710637273316*^9, {3.629711550832465*^9, 3.629711563543804*^9}, 
+   3.6297153023633842`*^9, 3.629716027139085*^9, 3.629719087494524*^9, 
+   3.679983145937533*^9},
+ CellID->255584062]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -1170,27 +1348,28 @@ Cell["", "ComputationInfo",
       ButtonBox[
       "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
        Theorema`Interface`GUI`Private`removeGroup[
-         ButtonNotebook[], 
-         "/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c506370155"]]]]}, {None, None}},
- CellChangeTimes->{3.615712897144524*^9},
- CellID->2204268],
+         ButtonNotebook[], "c506370155"]]]]}, {None, None}},
+ CellChangeTimes->{3.6799831463355627`*^9},
+ CellID->1651997170],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
    Refresh[
     ReplaceAll[
-     Get["/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c506370155-display.m"], {
+     Get[
+      ToExpression[
+      "FileNameJoin[{CurrentValue[\"NotebookDirectory\"], \
+FileBaseName[CurrentValue[\"NotebookFileName\"]], \
+\"c506370155-display.m\"}]"]], {
      Theorema`Interface`GUI`Private`FORM -> 
       Theorema`Interface`GUI`Private`displayFormulaFromKey, 
       Theorema`Interface`GUI`Private`RESULT -> 
       Theorema`Common`theoremaDisplay}], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
-  ImageSizeCache->{516., {25., 31.}}]], "ComputationInfoBody",
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
- CellChangeTimes->{3.615712897231521*^9},
- CellID->544396926]
+ CellChangeTimes->{3.6799831464146137`*^9},
+ CellID->888427249]
 }, Closed]],
 
 Cell[CellGroupData[{
@@ -1216,8 +1395,10 @@ Cell[BoxData[
     RowBox[{"\[LeftAngleBracket]", 
      RowBox[{"2", ",", "4"}], "\[RightAngleBracket]"}]}], 
    "\[RightAngleBracket]"}], TheoremaForm]], "ComputationResult",
- CellChangeTimes->{3.603103059751658*^9, 3.615712899920945*^9},
- CellID->581677422]
+ CellChangeTimes->{3.603103059751658*^9, 3.615712899920945*^9, 
+  3.629710322052272*^9, 3.629711558048423*^9, 3.6297153045959797`*^9, 
+  3.629716029353421*^9, 3.6297190897082376`*^9, 3.6799831482674522`*^9},
+ CellID->1952676156]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -1230,27 +1411,28 @@ Cell["", "ComputationInfo",
       ButtonBox[
       "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
        Theorema`Interface`GUI`Private`removeGroup[
-         ButtonNotebook[], 
-         "/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c1475921762"]]]]}, {None, None}},
- CellChangeTimes->{3.61571290075978*^9},
- CellID->1127786745],
+         ButtonNotebook[], "c1475921762"]]]]}, {None, None}},
+ CellChangeTimes->{3.6799831486574087`*^9},
+ CellID->1588437828],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
    Refresh[
     ReplaceAll[
-     Get["/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c1475921762-display.m"], {
+     Get[
+      ToExpression[
+      "FileNameJoin[{CurrentValue[\"NotebookDirectory\"], \
+FileBaseName[CurrentValue[\"NotebookFileName\"]], \
+\"c1475921762-display.m\"}]"]], {
      Theorema`Interface`GUI`Private`FORM -> 
       Theorema`Interface`GUI`Private`displayFormulaFromKey, 
       Theorema`Interface`GUI`Private`RESULT -> 
       Theorema`Common`theoremaDisplay}], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
-  ImageSizeCache->{516., {25., 31.}}]], "ComputationInfoBody",
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
- CellChangeTimes->{3.615712900856731*^9},
- CellID->1713504049]
+ CellChangeTimes->{3.6799831487321377`*^9},
+ CellID->1112622431]
 }, Closed]],
 
 Cell[CellGroupData[{
@@ -1278,8 +1460,10 @@ Cell[BoxData[
     RowBox[{"\[LeftAngleBracket]", 
      RowBox[{"2", ",", "4", ",", "6"}], "\[RightAngleBracket]"}]}], 
    "\[RightAngleBracket]"}], TheoremaForm]], "ComputationResult",
- CellChangeTimes->{3.603103064512472*^9, 3.61571290254772*^9},
- CellID->1733537113]
+ CellChangeTimes->{3.603103064512472*^9, 3.61571290254772*^9, 
+  3.6297153165791597`*^9, 3.629716031824051*^9, 3.62971909156275*^9, 
+  3.679983150924038*^9},
+ CellID->1753390126]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -1292,27 +1476,28 @@ Cell["", "ComputationInfo",
       ButtonBox[
       "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
        Theorema`Interface`GUI`Private`removeGroup[
-         ButtonNotebook[], 
-         "/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c868134108"]]]]}, {None, None}},
- CellChangeTimes->{3.61571290332513*^9},
- CellID->477407590],
+         ButtonNotebook[], "c868134108"]]]]}, {None, None}},
+ CellChangeTimes->{3.67998315130449*^9},
+ CellID->161902393],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
    Refresh[
     ReplaceAll[
-     Get["/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c868134108-display.m"], {
+     Get[
+      ToExpression[
+      "FileNameJoin[{CurrentValue[\"NotebookDirectory\"], \
+FileBaseName[CurrentValue[\"NotebookFileName\"]], \
+\"c868134108-display.m\"}]"]], {
      Theorema`Interface`GUI`Private`FORM -> 
       Theorema`Interface`GUI`Private`displayFormulaFromKey, 
       Theorema`Interface`GUI`Private`RESULT -> 
       Theorema`Common`theoremaDisplay}], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
-  ImageSizeCache->{516., {25., 31.}}]], "ComputationInfoBody",
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
- CellChangeTimes->{3.615712903396813*^9},
- CellID->1298573108]
+ CellChangeTimes->{3.679983151385096*^9},
+ CellID->519005604]
 }, Closed]],
 
 Cell[CellGroupData[{
@@ -1337,8 +1522,10 @@ Cell[BoxData[
      RowBox[{"\[LeftAngleBracket]", 
       RowBox[{"3", ",", "4"}], "\[RightAngleBracket]"}]}], 
     "\[RightAngleBracket]"}], "]"}], TheoremaForm]], "ComputationResult",
- CellChangeTimes->{3.603103068094441*^9, 3.61571290531962*^9},
- CellID->1075900039]
+ CellChangeTimes->{3.603103068094441*^9, 3.61571290531962*^9, 
+  3.6297153193904943`*^9, 3.629716033902453*^9, 3.629719093319626*^9, 
+  3.679983152971363*^9},
+ CellID->122740322]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -1351,27 +1538,28 @@ Cell["", "ComputationInfo",
       ButtonBox[
       "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
        Theorema`Interface`GUI`Private`removeGroup[
-         ButtonNotebook[], 
-         "/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c2132214555"]]]]}, {None, None}},
- CellChangeTimes->{3.615712906112642*^9},
- CellID->70708352],
+         ButtonNotebook[], "c2132214555"]]]]}, {None, None}},
+ CellChangeTimes->{3.679983153350897*^9},
+ CellID->2143691009],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
    Refresh[
     ReplaceAll[
-     Get["/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c2132214555-display.m"], {
+     Get[
+      ToExpression[
+      "FileNameJoin[{CurrentValue[\"NotebookDirectory\"], \
+FileBaseName[CurrentValue[\"NotebookFileName\"]], \
+\"c2132214555-display.m\"}]"]], {
      Theorema`Interface`GUI`Private`FORM -> 
       Theorema`Interface`GUI`Private`displayFormulaFromKey, 
       Theorema`Interface`GUI`Private`RESULT -> 
       Theorema`Common`theoremaDisplay}], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
-  ImageSizeCache->{516., {25., 31.}}]], "ComputationInfoBody",
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
- CellChangeTimes->{3.615712906172399*^9},
- CellID->166321685]
+ CellChangeTimes->{3.679983153433249*^9},
+ CellID->1113528039]
 }, Closed]],
 
 Cell[TextData[{
@@ -1484,8 +1672,9 @@ Cell[BoxData[
     ",", "0", ",", "0"}], "\[RightAngleBracket]"}], 
   TheoremaForm]], "ComputationResult",
  CellChangeTimes->{3.603103081133625*^9, 3.603103113000072*^9, 
-  3.615712945577811*^9},
- CellID->1371527262]
+  3.615712945577811*^9, 3.629715329656863*^9, 3.629716041270129*^9, 
+  3.629719100573102*^9, 3.679983113448247*^9},
+ CellID->912444347]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -1498,27 +1687,28 @@ Cell["", "ComputationInfo",
       ButtonBox[
       "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
        Theorema`Interface`GUI`Private`removeGroup[
-         ButtonNotebook[], 
-         "/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c1921709458"]]]]}, {None, None}},
- CellChangeTimes->{3.615712947094441*^9},
- CellID->2017918155],
+         ButtonNotebook[], "c1921709458"]]]]}, {None, None}},
+ CellChangeTimes->{3.6799831138567047`*^9},
+ CellID->1664563762],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
    Refresh[
     ReplaceAll[
-     Get["/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c1921709458-display.m"], {
+     Get[
+      ToExpression[
+      "FileNameJoin[{CurrentValue[\"NotebookDirectory\"], \
+FileBaseName[CurrentValue[\"NotebookFileName\"]], \
+\"c1921709458-display.m\"}]"]], {
      Theorema`Interface`GUI`Private`FORM -> 
       Theorema`Interface`GUI`Private`displayFormulaFromKey, 
       Theorema`Interface`GUI`Private`RESULT -> 
       Theorema`Common`theoremaDisplay}], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
-  ImageSizeCache->{516., {25., 31.}}]], "ComputationInfoBody",
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
- CellChangeTimes->{3.615712947176007*^9},
- CellID->462954019]
+ CellChangeTimes->{3.679983113933346*^9},
+ CellID->1059452015]
 }, Closed]],
 
 Cell[CellGroupData[{
@@ -1540,8 +1730,10 @@ Cell[BoxData[
     ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",", "0", ",",
      "0", ",", "0"}], "\[RightAngleBracket]"}], 
   TheoremaForm]], "ComputationResult",
- CellChangeTimes->{3.60310311936351*^9, 3.615712951492264*^9},
- CellID->640926688]
+ CellChangeTimes->{3.60310311936351*^9, 3.615712951492264*^9, 
+  3.629715332425516*^9, 3.629716043063122*^9, 3.629719102466373*^9, 
+  3.679983115386546*^9},
+ CellID->1513306815]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -1554,27 +1746,28 @@ Cell["", "ComputationInfo",
       ButtonBox[
       "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
        Theorema`Interface`GUI`Private`removeGroup[
-         ButtonNotebook[], 
-         "/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c1382083937"]]]]}, {None, None}},
- CellChangeTimes->{3.615712955259412*^9},
- CellID->1533960903],
+         ButtonNotebook[], "c1382083937"]]]]}, {None, None}},
+ CellChangeTimes->{3.679983115768281*^9},
+ CellID->1283394484],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
    Refresh[
     ReplaceAll[
-     Get["/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c1382083937-display.m"], {
+     Get[
+      ToExpression[
+      "FileNameJoin[{CurrentValue[\"NotebookDirectory\"], \
+FileBaseName[CurrentValue[\"NotebookFileName\"]], \
+\"c1382083937-display.m\"}]"]], {
      Theorema`Interface`GUI`Private`FORM -> 
       Theorema`Interface`GUI`Private`displayFormulaFromKey, 
       Theorema`Interface`GUI`Private`RESULT -> 
       Theorema`Common`theoremaDisplay}], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
-  ImageSizeCache->{516., {25., 31.}}]], "ComputationInfoBody",
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
- CellChangeTimes->{3.615712955912388*^9},
- CellID->169235610]
+ CellChangeTimes->{3.679983115850914*^9},
+ CellID->494066940]
 }, Closed]],
 
 Cell[CellGroupData[{
@@ -1593,8 +1786,10 @@ Cell[BoxData[
    RowBox[{
    "1", ",", "2", ",", "3", ",", "4", ",", "5", ",", "6", ",", "7", ",", "8", 
     ",", "9", ",", "10"}], "]"}], TheoremaForm]], "ComputationResult",
- CellChangeTimes->{3.603103132955055*^9, 3.615712958212628*^9},
- CellID->992808150]
+ CellChangeTimes->{3.603103132955055*^9, 3.615712958212628*^9, 
+  3.629715334982587*^9, 3.629716045058427*^9, 3.62971910468292*^9, 
+  3.679983117673366*^9},
+ CellID->1152571130]
 }, Open  ]],
 
 Cell[CellGroupData[{
@@ -1607,36 +1802,330 @@ Cell["", "ComputationInfo",
       ButtonBox[
       "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
        Theorema`Interface`GUI`Private`removeGroup[
-         ButtonNotebook[], 
-         "/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c988984248"]]]]}, {None, None}},
- CellChangeTimes->{3.615712959004089*^9},
- CellID->2028524264],
+         ButtonNotebook[], "c988984248"]]]]}, {None, None}},
+ CellChangeTimes->{3.6799831180373697`*^9},
+ CellID->1125529805],
 
 Cell[BoxData[
  DynamicBox[ToBoxes[
    Refresh[
     ReplaceAll[
-     Get["/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence/c988984248-display.m"], {
+     Get[
+      ToExpression[
+      "FileNameJoin[{CurrentValue[\"NotebookDirectory\"], \
+FileBaseName[CurrentValue[\"NotebookFileName\"]], \
+\"c988984248-display.m\"}]"]], {
      Theorema`Interface`GUI`Private`FORM -> 
       Theorema`Interface`GUI`Private`displayFormulaFromKey, 
       Theorema`Interface`GUI`Private`RESULT -> 
       Theorema`Common`theoremaDisplay}], 
     TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
-  ImageSizeCache->{516., {25., 31.}}]], "ComputationInfoBody",
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
  CellAutoOverwrite->True,
- CellChangeTimes->{3.615712959039475*^9},
- CellID->1800760087]
+ CellChangeTimes->{3.679983118107922*^9},
+ CellID->490254234]
 }, Closed]]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell["\<\
+Improper Use of Sequence Variables\
+\>", "Subsection",
+ CellChangeTimes->{{3.679983085303521*^9, 3.67998309247174*^9}},
+ CellID->954064010],
+
+Cell[TextData[{
+ "A formula must be an individual; if not, it is rejected by ",
+ StyleBox["Theorema",
+  FontSlant->"Italic"],
+ ":"
+}], "Text",
+ CellChangeTimes->{{3.6799833076967173`*^9, 3.679983330560422*^9}},
+ CellID->1741477359],
+
+Cell["", "OpenEnvironment",
+ CellID->1654899015],
+
+Cell[CellGroupData[{
+
+Cell["Example: Sequence Formula", "EnvironmentHeader",
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      ButtonBox[
+      "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
+       Theorema`Common`removeEnvironment[
+         ButtonNotebook[]]]]]}, {None, None}},
+ CellChangeTimes->{{3.679983283064485*^9, 3.679983289056285*^9}, {
+  3.679983343920979*^9, 3.6799833450964737`*^9}},
+ CellID->894067694],
+
+Cell[BoxData[
+ RowBox[{
+  TagBox["\[VerticalEllipsis]",
+   Identity,
+   SyntaxForm->"("], 
+  RowBox[{"a", ",", "b"}], 
+  TagBox["\[VerticalEllipsis]",
+   Identity,
+   SyntaxForm->")"]}]], "FormalTextInputFormula",
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      RowBox[{
+        StyleBox["(sequence)", "FrameLabel"], "  ", 
+        ButtonBox[
+        "\[Times]", Evaluator -> Automatic, Appearance -> None, 
+         ButtonFunction :> 
+         Theorema`Language`Session`Private`removeFormula[{
+           "ID:922197966", 
+            "Source:/home/amaletzk/Theorema \
+Notebooks/Documentation/Sequence.nb"}]]}]]]}, {None, None}},
+ ShowCellTags->False,
+ CellChangeTimes->{{3.679983293045842*^9, 3.6799832945701437`*^9}},
+ CellTags->{
+  "ID:922197966", 
+   "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
+   "sequence"},
+ CellID->922197966],
+
+Cell["\[GraySquare]", "EndEnvironmentMarker",
+ CellID->897098854]
+}, Open  ]],
+
+Cell["", "CloseEnvironment",
+ CellID->388281025],
+
+Cell["\<\
+It is not possible to define a function that returns a non-individual: \
+although the formula below is accepted by Theorema, no simplification \
+involving \[OpenCurlyDoubleQuote]bad\[CloseCurlyDoubleQuote] is possible \
+(neither in computations nor in proofs):\
+\>", "Text",
+ CellChangeTimes->{{3.679982867078627*^9, 3.679982932207161*^9}},
+ CellID->620316363],
+
+Cell["", "OpenEnvironment",
+ CellID->1888424108],
+
+Cell[CellGroupData[{
+
+Cell["Definition: Bad Definition", "EnvironmentHeader",
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      ButtonBox[
+      "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
+       Theorema`Common`removeEnvironment[
+         ButtonNotebook[]]]]]}, {None, None}},
+ CellChangeTimes->{{3.679982940070941*^9, 3.6799829429109077`*^9}, 
+   3.67998327020896*^9, 3.679983351616907*^9},
+ CellID->642538702],
+
+Cell[BoxData[
+ RowBox[{
+  UnderscriptBox["\[ForAll]", 
+   RowBox[{"x", "..."}]], 
+  RowBox[{
+   TagBox["(",
+    "AutoParentheses"], 
+   RowBox[{
+    RowBox[{"bad", "[", 
+     RowBox[{"x", "..."}], "]"}], ":=", 
+    RowBox[{"x", "..."}]}], 
+   TagBox[")",
+    "AutoParentheses"]}]}]], "FormalTextInputFormula",
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      RowBox[{
+        StyleBox["(bad)", "FrameLabel"], "  ", 
+        ButtonBox[
+        "\[Times]", Evaluator -> Automatic, Appearance -> None, 
+         ButtonFunction :> 
+         Theorema`Language`Session`Private`removeFormula[{
+           "ID:1791138636", 
+            "Source:/home/amaletzk/Theorema \
+Notebooks/Documentation/Sequence.nb"}]]}]]]}, {None, None}},
+ ShowCellTags->False,
+ CellChangeTimes->{{3.679982947116378*^9, 3.679982956243053*^9}},
+ CellTags->{
+  "ID:1791138636", 
+   "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
+   "bad"},
+ CellID->1791138636],
+
+Cell["\[GraySquare]", "EndEnvironmentMarker",
+ CellID->1325804858]
+}, Open  ]],
+
+Cell["", "CloseEnvironment",
+ CellID->1080531689],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"bad", "[", 
+  RowBox[{"1", ",", "2", ",", "3"}], "]"}]], "Computation",
+ CellChangeTimes->{{3.679982966767364*^9, 3.67998297044094*^9}},
+ CellID->360925490],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"bad", "[", 
+   RowBox[{"1", ",", "2", ",", "3"}], "]"}], 
+  TheoremaForm]], "ComputationResult",
+ CellChangeTimes->{3.679982980039851*^9},
+ CellID->2057779233]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["", "ComputationInfo",
+ CellAutoOverwrite->True,
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      ButtonBox[
+      "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
+       Theorema`Interface`GUI`Private`removeGroup[
+         ButtonNotebook[], "c360925490"]]]]}, {None, None}},
+ CellChangeTimes->{3.679982980334713*^9},
+ CellID->171890378],
+
+Cell[BoxData[
+ DynamicBox[ToBoxes[
+   Refresh[
+    ReplaceAll[
+     Get[
+      ToExpression[
+      "FileNameJoin[{CurrentValue[\"NotebookDirectory\"], \
+FileBaseName[CurrentValue[\"NotebookFileName\"]], \
+\"c360925490-display.m\"}]"]], {
+     Theorema`Interface`GUI`Private`FORM -> 
+      Theorema`Interface`GUI`Private`displayFormulaFromKey, 
+      Theorema`Interface`GUI`Private`RESULT -> 
+      Theorema`Common`theoremaDisplay}], 
+    TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
+ CellAutoOverwrite->True,
+ CellChangeTimes->{3.679982980383226*^9},
+ CellID->1586896055]
+}, Closed]],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"bad", "[", "]"}]], "Computation",
+ CellChangeTimes->{{3.679983032428072*^9, 3.679983033328887*^9}},
+ CellID->1024054888],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"bad", "[", "]"}], TheoremaForm]], "ComputationResult",
+ CellChangeTimes->{3.6799830341512623`*^9},
+ CellID->1695552660]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["", "ComputationInfo",
+ CellAutoOverwrite->True,
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      ButtonBox[
+      "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
+       Theorema`Interface`GUI`Private`removeGroup[
+         ButtonNotebook[], "c1024054888"]]]]}, {None, None}},
+ CellChangeTimes->{3.6799830344768457`*^9},
+ CellID->1984625445],
+
+Cell[BoxData[
+ DynamicBox[ToBoxes[
+   Refresh[
+    ReplaceAll[
+     Get[
+      ToExpression[
+      "FileNameJoin[{CurrentValue[\"NotebookDirectory\"], \
+FileBaseName[CurrentValue[\"NotebookFileName\"]], \
+\"c1024054888-display.m\"}]"]], {
+     Theorema`Interface`GUI`Private`FORM -> 
+      Theorema`Interface`GUI`Private`displayFormulaFromKey, 
+      Theorema`Interface`GUI`Private`RESULT -> 
+      Theorema`Common`theoremaDisplay}], 
+    TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
+ CellAutoOverwrite->True,
+ CellChangeTimes->{3.6799830345242558`*^9},
+ CellID->845060060]
+}, Closed]],
+
+Cell["\<\
+Even if the result of a concrete call to \[OpenCurlyDoubleQuote]bad\
+\[CloseCurlyDoubleQuote] would be an individual, still no simplification \
+happens:\
+\>", "Text",
+ CellChangeTimes->{{3.679982992639662*^9, 3.679983025975067*^9}},
+ CellID->1258884450],
+
+Cell[CellGroupData[{
+
+Cell[BoxData[
+ RowBox[{"bad", "[", "1", "]"}]], "Computation",
+ CellChangeTimes->{{3.679982983857003*^9, 3.679982985920023*^9}},
+ CellID->1025303800],
+
+Cell[BoxData[
+ FormBox[
+  RowBox[{"bad", "[", "1", "]"}], TheoremaForm]], "ComputationResult",
+ CellChangeTimes->{3.67998298654827*^9},
+ CellID->2013168253]
+}, Open  ]],
+
+Cell[CellGroupData[{
+
+Cell["", "ComputationInfo",
+ CellAutoOverwrite->True,
+ CellFrameLabels->{{None, 
+    Cell[
+     BoxData[
+      ButtonBox[
+      "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> 
+       Theorema`Interface`GUI`Private`removeGroup[
+         ButtonNotebook[], "c1025303800"]]]]}, {None, None}},
+ CellChangeTimes->{3.6799829868244467`*^9},
+ CellID->1205933390],
+
+Cell[BoxData[
+ DynamicBox[ToBoxes[
+   Refresh[
+    ReplaceAll[
+     Get[
+      ToExpression[
+      "FileNameJoin[{CurrentValue[\"NotebookDirectory\"], \
+FileBaseName[CurrentValue[\"NotebookFileName\"]], \
+\"c1025303800-display.m\"}]"]], {
+     Theorema`Interface`GUI`Private`FORM -> 
+      Theorema`Interface`GUI`Private`displayFormulaFromKey, 
+      Theorema`Interface`GUI`Private`RESULT -> 
+      Theorema`Common`theoremaDisplay}], 
+    TrackedSymbols :> {Theorema`Common`$tmaEnv}], StandardForm],
+  ImageSizeCache->{516., {24., 30.}}]], "ComputationInfoBody",
+ CellAutoOverwrite->True,
+ CellChangeTimes->{3.679982986849289*^9},
+ CellID->1918058112]
 }, Closed]]
 }, Open  ]]
+}, Open  ]]
+}, Open  ]]
 },
-WindowSize->{740, 829},
-WindowMargins->{{506, Automatic}, {Automatic, 0}},
+WindowSize->{1037, 840},
+WindowMargins->{{349, Automatic}, {86, Automatic}},
 CounterAssignments->{{"TheoremaFormulaCounter" -> 12}},
 Magnification->1.,
-FrontEndVersion->"9.0 for Linux x86 (32-bit) (February 7, 2013)",
+FrontEndVersion->"9.0 for Linux x86 (64-bit) (February 7, 2013)",
 StyleDefinitions->Notebook[{
    Cell[
     StyleData[
@@ -1688,18 +2177,22 @@ level.", "Text"],
                   RowBox[{
                    ":", "\[NegativeThickSpace]\[NegativeThinSpace]", 
                     "\[DoubleLongLeftRightArrow]"}], Identity, SyntaxForm -> 
-                  "a\[DoubleLongLeftRightArrow]b"], "\[Placeholder]"}], 
+                  "a:=b"], "\[Placeholder]"}], 
                TagBox[")", "AutoParentheses"]}], ":eq" -> RowBox[{
                TagBox["(", "AutoParentheses"], 
                RowBox[{"\[SelectionPlaceholder]", ":=", "\[Placeholder]"}], 
                TagBox[")", "AutoParentheses"]}], "andn" -> RowBox[{
                TagBox["(", "AutoParentheses"], 
                RowBox[{"\[And]", "\[Piecewise]", 
-                 GridBox[{{"\[SelectionPlaceholder]"}, {"\[Placeholder]"}}]}], 
+                 
+                 GridBox[{{"\[SelectionPlaceholder]"}, {"\[Placeholder]"}}, 
+                  ColumnAlignments -> Left]}], 
                TagBox[")", "AutoParentheses"]}], "orn" -> RowBox[{
                TagBox["(", "AutoParentheses"], 
                RowBox[{"\[Or]", "\[Piecewise]", 
-                 GridBox[{{"\[SelectionPlaceholder]"}, {"\[Placeholder]"}}]}], 
+                 
+                 GridBox[{{"\[SelectionPlaceholder]"}, {"\[Placeholder]"}}, 
+                  ColumnAlignments -> Left]}], 
                TagBox[")", "AutoParentheses"]}], "equivn" -> RowBox[{
                TagBox["(", "AutoParentheses"], 
                RowBox[{"\[DoubleLeftRightArrow]", "\[Piecewise]", 
@@ -1834,6 +2327,12 @@ level.", "Text"],
                  TagBox["\:2983", Identity, SyntaxForm -> "("], 
                  "\[SelectionPlaceholder]", 
                  TagBox["\:2984", Identity, SyntaxForm -> ")"]}], 
+               TagBox[")", "AutoParentheses"]}], "seq" -> RowBox[{
+               TagBox["(", "AutoParentheses"], 
+               RowBox[{
+                 TagBox["\[VerticalEllipsis]", Identity, SyntaxForm -> "("], 
+                 "\[SelectionPlaceholder]", 
+                 TagBox["\[VerticalEllipsis]", Identity, SyntaxForm -> ")"]}], 
                TagBox[")", "AutoParentheses"]}], "(" -> 
             TagBox["(", "AutoParentheses"], ")" -> 
             TagBox[")", "AutoParentheses"]}, Background -> 
@@ -2177,11 +2676,11 @@ level.", "Text"],
       Cell["Theorema", "Section"], 
       Cell[
        StyleData["GlobalDeclaration"], CellFrame -> {{0, 2}, {0, 0}}, 
-       ShowCellBracket -> Automatic, CellMargins -> {{76, 10}, {2, 2}}, 
+       ShowCellBracket -> Automatic, CellMargins -> {{76, 3}, {2, 2}}, 
        CellBracketOptions -> {"Color" -> RGBColor[0.73, 0.74, 0.84]}, 
        InitializationCell -> True, CellFrameMargins -> 10, CellFrameColor -> 
-       RGBColor[0.73, 0.65, 0.61], CellFrameLabelMargins -> 33, 
-       ShowAutoStyles -> False, MenuSortingValue -> 1441, MenuCommandKey -> 
+       RGBColor[0.73, 0.65, 0.61], CellFrameLabelMargins -> {{33, 7}, {1, 1}},
+        ShowAutoStyles -> False, MenuSortingValue -> 1441, MenuCommandKey -> 
        "G", FontSize -> 14], 
       Cell[
        StyleData["OpenEnvironment"], Editable -> False, Selectable -> False, 
@@ -2206,9 +2705,9 @@ level.", "Text"],
           CellMargins -> {{96, 10}, {2, 2}}, 
           CellBracketOptions -> {"Color" -> RGBColor[0.73, 0.74, 0.84]}, 
           InitializationCell -> True, CellFrameLabelMargins -> 53, 
-          ShowAutoStyles -> False, MenuSortingValue -> 1470, MenuCommandKey -> 
-          "F", FontWeight -> "Bold", FontColor -> RGBColor[0.25, 0.19, 0.2]], 
-         
+          ShowAutoStyles -> False, LimitsPositioningTokens -> {}, 
+          MenuSortingValue -> 1470, MenuCommandKey -> "F", FontWeight -> 
+          "Bold", FontColor -> RGBColor[0.25, 0.19, 0.2]], 
          Cell[
           StyleData["FormalTextInputFormula", "Layout"], Editable -> False], 
          Cell[
@@ -2233,8 +2732,8 @@ level.", "Text"],
           CellBracketOptions -> {"Color" -> RGBColor[0.23, 0.25, 0.34]}, 
           CellFrameMargins -> {{8, 8}, {3, 4}}, CellFrameColor -> 
           RGBColor[0.486, 0.33, 0.32], ShowAutoStyles -> False, 
-          MenuSortingValue -> 1510, MenuCommandKey -> "C", FontWeight -> 
-          "Bold", FontColor -> RGBColor[0.23, 0.25, 0.34], Background -> 
+          MenuSortingValue -> 1510, FontWeight -> "Bold", FontColor -> 
+          RGBColor[0.23, 0.25, 0.34], Background -> 
           RGBColor[0.88, 0.88, 0.92]], 
          Cell[
           StyleData["Computation", "Layout"], Editable -> False], 
@@ -2322,8 +2821,8 @@ level.", "Text"],
       Cell[
        CellGroupData[{
          Cell[
-          StyleData["AutoParentheses"], SpanMaxSize -> 3, FontOpacity -> 
-          0.15], 
+          StyleData["AutoParentheses"], Editable -> False, SpanMaxSize -> 3, 
+          FontOpacity -> 0.15], 
          Cell[
           StyleData["AutoParentheses", "Layout"], FontOpacity -> 0], 
          Cell[
@@ -2383,7 +2882,7 @@ level.", "Text"],
        FontVariations -> {"StrikeThrough" -> False, "Underline" -> False}, 
        ButtonBoxOptions -> {Appearance -> {Automatic, None}}]}, Open]]}, 
   Visible -> False, FrontEndVersion -> 
-  "9.0 for Linux x86 (32-bit) (February 7, 2013)", StyleDefinitions -> 
+  "9.0 for Linux x86 (64-bit) (February 7, 2013)", StyleDefinitions -> 
   "StylesheetFormatting.nb"]
 ]
 (* End of Notebook Content *)
@@ -2391,569 +2890,725 @@ level.", "Text"],
 (* Internal cache information *)
 (*CellTagsOutline
 CellTagsIndex->{
- "ID:1129737817"->{
-  Cell[28691, 972, 2101, 60, 116, "FormalTextInputFormula",
-   CellTags->{
-    "ID:1129737817", 
-     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
-     "11"},
-   CellID->1129737817]},
- "ID:1207637328"->{
-  Cell[8761, 307, 1215, 41, 39, "FormalTextInputFormula",
-   CellTags->{
-    "ID:1207637328", 
-     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
-     "2"},
-   CellID->1207637328]},
- "ID:1324154882"->{
-  Cell[4306, 154, 890, 28, 21, "FormalTextInputFormula",
-   CellTags->{
-    "ID:1324154882", 
-     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
-     "4"},
-   CellID->1324154882]},
  "ID:1520803150"->{
-  Cell[3006, 110, 1297, 42, 39, "FormalTextInputFormula",
+  Cell[7498, 261, 1297, 42, 39, "FormalTextInputFormula",
    CellTags->{
     "ID:1520803150", 
      "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
      "3"},
    CellID->1520803150]},
- "ID:1712066704"->{
-  Cell[27374, 928, 1314, 42, 38, "FormalTextInputFormula",
-   CellTags->{
-    "ID:1712066704", 
-     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
-     "10"},
-   CellID->1712066704]},
- "ID:2072579713"->{
-  Cell[10576, 373, 1270, 42, 37, "FormalTextInputFormula",
-   CellTags->{
-    "ID:2072579713", 
-     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
-     "6"},
-   CellID->2072579713]},
- "ID:281007089"->{
-  Cell[42492, 1404, 1954, 57, 109, "FormalTextInputFormula",
-   CellTags->{
-    "ID:281007089", 
-     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
-     "12"},
-   CellID->281007089]},
- "ID:514433530"->{
-  Cell[23354, 796, 849, 24, 21, "FormalTextInputFormula",
-   CellTags->{
-    "ID:514433530", 
-     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
-     "5"},
-   CellID->514433530]},
- "ID:683991833"->{
-  Cell[7309, 257, 1449, 48, 38, "FormalTextInputFormula",
-   CellTags->{
-    "ID:683991833", 
-     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
-     "1"},
-   CellID->683991833]},
- "Proof|ID:514433530|Source:/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence.nb"->{
-  Cell[24361, 831, 1863, 59, 29, "ProofInfo",
-   CellTags->
-    "Proof|ID:514433530|Source:/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence.nb",
-   CellID->345957991]},
  "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb"->{
-  Cell[3006, 110, 1297, 42, 39, "FormalTextInputFormula",
+  Cell[7498, 261, 1297, 42, 39, "FormalTextInputFormula",
    CellTags->{
     "ID:1520803150", 
      "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
      "3"},
    CellID->1520803150],
-  Cell[4306, 154, 890, 28, 21, "FormalTextInputFormula",
+  Cell[8798, 305, 890, 28, 21, "FormalTextInputFormula",
    CellTags->{
     "ID:1324154882", 
      "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
      "4"},
    CellID->1324154882],
-  Cell[7309, 257, 1449, 48, 38, "FormalTextInputFormula",
+  Cell[11835, 409, 1449, 48, 38, "FormalTextInputFormula",
    CellTags->{
     "ID:683991833", 
      "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
      "1"},
    CellID->683991833],
-  Cell[8761, 307, 1215, 41, 39, "FormalTextInputFormula",
+  Cell[13287, 459, 1215, 41, 39, "FormalTextInputFormula",
    CellTags->{
     "ID:1207637328", 
      "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
      "2"},
    CellID->1207637328],
-  Cell[10576, 373, 1270, 42, 37, "FormalTextInputFormula",
+  Cell[15102, 525, 1270, 42, 37, "FormalTextInputFormula",
    CellTags->{
     "ID:2072579713", 
      "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
      "6"},
    CellID->2072579713],
-  Cell[23354, 796, 849, 24, 21, "FormalTextInputFormula",
+  Cell[28119, 958, 849, 24, 21, "FormalTextInputFormula",
    CellTags->{
     "ID:514433530", 
      "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
      "5"},
    CellID->514433530],
-  Cell[27374, 928, 1314, 42, 38, "FormalTextInputFormula",
+  Cell[32163, 1090, 1314, 42, 38, "FormalTextInputFormula",
    CellTags->{
     "ID:1712066704", 
      "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
      "10"},
    CellID->1712066704],
-  Cell[28691, 972, 2101, 60, 116, "FormalTextInputFormula",
+  Cell[33480, 1134, 2101, 60, 59, "FormalTextInputFormula",
    CellTags->{
     "ID:1129737817", 
      "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
      "11"},
    CellID->1129737817],
-  Cell[42492, 1404, 1954, 57, 109, "FormalTextInputFormula",
+  Cell[48304, 1592, 1954, 57, 57, "FormalTextInputFormula",
    CellTags->{
     "ID:281007089", 
      "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
      "12"},
-   CellID->281007089]},
- "1"->{
-  Cell[7309, 257, 1449, 48, 38, "FormalTextInputFormula",
+   CellID->281007089],
+  Cell[56745, 1863, 870, 27, 21, "FormalTextInputFormula",
    CellTags->{
-    "ID:683991833", 
+    "ID:922197966", 
      "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
-     "1"},
-   CellID->683991833]},
- "10"->{
-  Cell[27374, 928, 1314, 42, 38, "FormalTextInputFormula",
+     "sequence"},
+   CellID->922197966],
+  Cell[58626, 1925, 957, 31, 30, "FormalTextInputFormula",
    CellTags->{
-    "ID:1712066704", 
+    "ID:1791138636", 
      "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
-     "10"},
-   CellID->1712066704]},
- "11"->{
-  Cell[28691, 972, 2101, 60, 116, "FormalTextInputFormula",
-   CellTags->{
-    "ID:1129737817", 
-     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
-     "11"},
-   CellID->1129737817]},
- "12"->{
-  Cell[42492, 1404, 1954, 57, 109, "FormalTextInputFormula",
-   CellTags->{
-    "ID:281007089", 
-     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
-     "12"},
-   CellID->281007089]},
- "2"->{
-  Cell[8761, 307, 1215, 41, 39, "FormalTextInputFormula",
-   CellTags->{
-    "ID:1207637328", 
-     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
-     "2"},
-   CellID->1207637328]},
+     "bad"},
+   CellID->1791138636]},
  "3"->{
-  Cell[3006, 110, 1297, 42, 39, "FormalTextInputFormula",
+  Cell[7498, 261, 1297, 42, 39, "FormalTextInputFormula",
    CellTags->{
     "ID:1520803150", 
      "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
      "3"},
    CellID->1520803150]},
- "4"->{
-  Cell[4306, 154, 890, 28, 21, "FormalTextInputFormula",
+ "ID:1324154882"->{
+  Cell[8798, 305, 890, 28, 21, "FormalTextInputFormula",
    CellTags->{
     "ID:1324154882", 
      "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
      "4"},
    CellID->1324154882]},
- "5"->{
-  Cell[23354, 796, 849, 24, 21, "FormalTextInputFormula",
+ "4"->{
+  Cell[8798, 305, 890, 28, 21, "FormalTextInputFormula",
+   CellTags->{
+    "ID:1324154882", 
+     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
+     "4"},
+   CellID->1324154882]},
+ "ID:683991833"->{
+  Cell[11835, 409, 1449, 48, 38, "FormalTextInputFormula",
+   CellTags->{
+    "ID:683991833", 
+     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
+     "1"},
+   CellID->683991833]},
+ "1"->{
+  Cell[11835, 409, 1449, 48, 38, "FormalTextInputFormula",
+   CellTags->{
+    "ID:683991833", 
+     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
+     "1"},
+   CellID->683991833]},
+ "ID:1207637328"->{
+  Cell[13287, 459, 1215, 41, 39, "FormalTextInputFormula",
+   CellTags->{
+    "ID:1207637328", 
+     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
+     "2"},
+   CellID->1207637328]},
+ "2"->{
+  Cell[13287, 459, 1215, 41, 39, "FormalTextInputFormula",
+   CellTags->{
+    "ID:1207637328", 
+     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
+     "2"},
+   CellID->1207637328]},
+ "ID:2072579713"->{
+  Cell[15102, 525, 1270, 42, 37, "FormalTextInputFormula",
+   CellTags->{
+    "ID:2072579713", 
+     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
+     "6"},
+   CellID->2072579713]},
+ "6"->{
+  Cell[15102, 525, 1270, 42, 37, "FormalTextInputFormula",
+   CellTags->{
+    "ID:2072579713", 
+     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
+     "6"},
+   CellID->2072579713]},
+ "ID:514433530"->{
+  Cell[28119, 958, 849, 24, 21, "FormalTextInputFormula",
    CellTags->{
     "ID:514433530", 
      "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
      "5"},
    CellID->514433530]},
- "6"->{
-  Cell[10576, 373, 1270, 42, 37, "FormalTextInputFormula",
+ "5"->{
+  Cell[28119, 958, 849, 24, 21, "FormalTextInputFormula",
    CellTags->{
-    "ID:2072579713", 
+    "ID:514433530", 
      "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
-     "6"},
-   CellID->2072579713]}
+     "5"},
+   CellID->514433530]},
+ "Proof|ID:514433530|Source:/home/amaletzk/Theorema \
+Notebooks/Documentation/Sequence.nb"->{
+  Cell[29126, 993, 1863, 59, 28, "ProofInfo",
+   CellTags->
+    "Proof|ID:514433530|Source:/home/amaletzk/Theorema \
+Notebooks/Documentation/Sequence.nb",
+   CellID->345957991]},
+ "ID:1712066704"->{
+  Cell[32163, 1090, 1314, 42, 38, "FormalTextInputFormula",
+   CellTags->{
+    "ID:1712066704", 
+     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
+     "10"},
+   CellID->1712066704]},
+ "10"->{
+  Cell[32163, 1090, 1314, 42, 38, "FormalTextInputFormula",
+   CellTags->{
+    "ID:1712066704", 
+     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
+     "10"},
+   CellID->1712066704]},
+ "ID:1129737817"->{
+  Cell[33480, 1134, 2101, 60, 59, "FormalTextInputFormula",
+   CellTags->{
+    "ID:1129737817", 
+     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
+     "11"},
+   CellID->1129737817]},
+ "11"->{
+  Cell[33480, 1134, 2101, 60, 59, "FormalTextInputFormula",
+   CellTags->{
+    "ID:1129737817", 
+     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
+     "11"},
+   CellID->1129737817]},
+ "ID:281007089"->{
+  Cell[48304, 1592, 1954, 57, 57, "FormalTextInputFormula",
+   CellTags->{
+    "ID:281007089", 
+     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
+     "12"},
+   CellID->281007089]},
+ "12"->{
+  Cell[48304, 1592, 1954, 57, 57, "FormalTextInputFormula",
+   CellTags->{
+    "ID:281007089", 
+     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
+     "12"},
+   CellID->281007089]},
+ "ID:922197966"->{
+  Cell[56745, 1863, 870, 27, 21, "FormalTextInputFormula",
+   CellTags->{
+    "ID:922197966", 
+     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
+     "sequence"},
+   CellID->922197966]},
+ "sequence"->{
+  Cell[56745, 1863, 870, 27, 21, "FormalTextInputFormula",
+   CellTags->{
+    "ID:922197966", 
+     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
+     "sequence"},
+   CellID->922197966]},
+ "ID:1791138636"->{
+  Cell[58626, 1925, 957, 31, 30, "FormalTextInputFormula",
+   CellTags->{
+    "ID:1791138636", 
+     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
+     "bad"},
+   CellID->1791138636]},
+ "bad"->{
+  Cell[58626, 1925, 957, 31, 30, "FormalTextInputFormula",
+   CellTags->{
+    "ID:1791138636", 
+     "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
+     "bad"},
+   CellID->1791138636]}
  }
 *)
 (*CellTagsIndex
 CellTagsIndex->{
- {"ID:1129737817", 87169, 2393},
- {"ID:1207637328", 87399, 2400},
- {"ID:1324154882", 87626, 2407},
- {"ID:1520803150", 87852, 2414},
- {"ID:1712066704", 88079, 2421},
- {"ID:2072579713", 88308, 2428},
- {"ID:281007089", 88535, 2435},
- {"ID:514433530", 88763, 2442},
- {"ID:683991833", 88987, 2449},
- {"Proof|ID:514433530|Source:/home/amaletzk/Theorema \
-Notebooks/Documentation/Sequence.nb", 89286, 2457},
+ {"ID:1520803150", 102267, 2892},
  {"Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", \
-89538, 2463},
- {"1", 91404, 2518},
- {"10", 91618, 2525},
- {"11", 91836, 2532},
- {"12", 92055, 2539},
- {"2", 92272, 2546},
- {"3", 92487, 2553},
- {"4", 92702, 2560},
- {"5", 92916, 2567},
- {"6", 93129, 2574}
+102547, 2899},
+ {"3", 104836, 2966},
+ {"ID:1324154882", 105063, 2973},
+ {"4", 105277, 2980},
+ {"ID:683991833", 105502, 2987},
+ {"1", 105716, 2994},
+ {"ID:1207637328", 105942, 3001},
+ {"2", 106158, 3008},
+ {"ID:2072579713", 106386, 3015},
+ {"6", 106602, 3022},
+ {"ID:514433530", 106829, 3029},
+ {"5", 107042, 3036},
+ {"Proof|ID:514433530|Source:/home/amaletzk/Theorema \
+Notebooks/Documentation/Sequence.nb", 107341, 3044},
+ {"ID:1712066704", 107540, 3050},
+ {"10", 107759, 3057},
+ {"ID:1129737817", 107989, 3064},
+ {"11", 108208, 3071},
+ {"ID:281007089", 108437, 3078},
+ {"12", 108654, 3085},
+ {"ID:922197966", 108881, 3092},
+ {"sequence", 109109, 3099},
+ {"ID:1791138636", 109342, 3106},
+ {"bad", 109562, 3113}
  }
 *)
 (*NotebookFileOutline
 Notebook[{
 Cell[CellGroupData[{
-Cell[579, 22, 218, 8, 85, "Title",
+Cell[579, 22, 282, 9, 85, "Title",
  CellID->1798432929],
 Cell[CellGroupData[{
-Cell[822, 34, 114, 2, 73, "Section",
+Cell[886, 35, 114, 2, 73, "Section",
  CellID->1536902489],
-Cell[939, 38, 409, 13, 24, "Text",
+Cell[CellGroupData[{
+Cell[1025, 41, 116, 2, 38, "Subsection",
+ CellID->804148175],
+Cell[1144, 45, 452, 16, 25, "Text",
  CellID->1916901455],
-Cell[1351, 53, 540, 11, 63, "Text",
+Cell[1599, 63, 540, 11, 44, "Text",
  CellID->133360773],
-Cell[1894, 66, 471, 18, 44, "Text",
+Cell[2142, 76, 471, 18, 25, "Text",
  CellID->1119994416]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[2650, 99, 120, 2, 38, "Subsection",
+ CellID->15539005],
+Cell[2773, 103, 809, 16, 64, "Text",
+ CellID->1635159898],
+Cell[3585, 121, 197, 4, 32, "Input",
+ CellID->2001631953],
+Cell[3785, 127, 738, 23, 44, "Text",
+ CellID->1098748535],
+Cell[4526, 152, 226, 5, 32, "Input",
+ CellID->777901851]
+}, Open  ]]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[2402, 89, 139, 3, 43, "Section",
+Cell[4801, 163, 139, 3, 43, "Section",
  CellID->499682955],
-Cell[2544, 94, 48, 1, 12, "OpenEnvironment",
+Cell[CellGroupData[{
+Cell[4965, 170, 149, 4, 38, "Subsection",
+ CellID->1676284398],
+Cell[5117, 176, 193, 5, 24, "Text",
+ CellID->878107994],
+Cell[CellGroupData[{
+Cell[5335, 185, 301, 10, 31, "Computation",
+ CellID->1110193744],
+Cell[5639, 197, 314, 11, 24, "ComputationResult",
+ CellID->2076513021]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[5990, 213, 379, 10, 28, "ComputationInfo",
+ CellID->180072678],
+Cell[6372, 225, 649, 17, 71, "ComputationInfoBody",
+ CellID->78044684]
+}, Closed]],
+Cell[7036, 245, 48, 1, 12, "OpenEnvironment",
  CellID->1935628522],
 Cell[CellGroupData[{
-Cell[2617, 99, 386, 9, 40, "EnvironmentHeader",
+Cell[7109, 250, 386, 9, 43, "EnvironmentHeader",
  CellID->1300838807],
-Cell[3006, 110, 1297, 42, 39, "FormalTextInputFormula",
+Cell[7498, 261, 1297, 42, 39, "FormalTextInputFormula",
  CellTags->{
   "ID:1520803150", 
    "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", "3"},
  
  CellID->1520803150],
-Cell[4306, 154, 890, 28, 21, "FormalTextInputFormula",
+Cell[8798, 305, 890, 28, 21, "FormalTextInputFormula",
  CellTags->{
   "ID:1324154882", 
    "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", "4"},
  
  CellID->1324154882],
-Cell[5199, 184, 66, 1, 24, "EndEnvironmentMarker",
+Cell[9691, 335, 66, 1, 26, "EndEnvironmentMarker",
  CellID->1196850561]
 }, Open  ]],
-Cell[5280, 188, 49, 1, 16, "CloseEnvironment",
+Cell[9772, 339, 49, 1, 16, "CloseEnvironment",
  CellID->1262707458],
 Cell[CellGroupData[{
-Cell[5354, 193, 245, 6, 31, "Computation",
+Cell[9846, 344, 245, 6, 31, "Computation",
  CellID->933137124],
-Cell[5602, 201, 172, 4, 24, "ComputationResult",
- CellID->831404838]
+Cell[10094, 352, 194, 4, 24, "ComputationResult",
+ CellID->699640707]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[5811, 210, 446, 12, 28, "ComputationInfo",
- CellID->1167105344],
-Cell[6260, 224, 567, 14, 70, "ComputationInfoBody",
- CellID->55198496]
+Cell[10325, 361, 375, 10, 28, "ComputationInfo",
+ CellID->69044676],
+Cell[10703, 373, 650, 17, 71, "ComputationInfoBody",
+ CellID->1008716325]
 }, Closed]],
-Cell[6842, 241, 47, 1, 12, "OpenEnvironment",
+Cell[11368, 393, 47, 1, 12, "OpenEnvironment",
  CellID->895459919],
 Cell[CellGroupData[{
-Cell[6914, 246, 392, 9, 40, "EnvironmentHeader",
+Cell[11440, 398, 392, 9, 43, "EnvironmentHeader",
  CellID->1071626981],
-Cell[7309, 257, 1449, 48, 38, "FormalTextInputFormula",
+Cell[11835, 409, 1449, 48, 38, "FormalTextInputFormula",
  CellTags->{
   "ID:683991833", 
    "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", "1"},
  
  CellID->683991833],
-Cell[8761, 307, 1215, 41, 39, "FormalTextInputFormula",
+Cell[13287, 459, 1215, 41, 39, "FormalTextInputFormula",
  CellTags->{
   "ID:1207637328", 
    "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", "2"},
  
  CellID->1207637328],
-Cell[9979, 350, 65, 1, 24, "EndEnvironmentMarker",
+Cell[14505, 502, 65, 1, 26, "EndEnvironmentMarker",
  CellID->734249627]
 }, Open  ]],
-Cell[10059, 354, 48, 1, 16, "CloseEnvironment",
+Cell[14585, 506, 48, 1, 16, "CloseEnvironment",
  CellID->748773727],
-Cell[10110, 357, 48, 1, 12, "OpenEnvironment",
+Cell[14636, 509, 48, 1, 12, "OpenEnvironment",
  CellID->1264240320],
 Cell[CellGroupData[{
-Cell[10183, 362, 390, 9, 40, "EnvironmentHeader",
+Cell[14709, 514, 390, 9, 43, "EnvironmentHeader",
  CellID->816766265],
-Cell[10576, 373, 1270, 42, 37, "FormalTextInputFormula",
+Cell[15102, 525, 1270, 42, 37, "FormalTextInputFormula",
  CellTags->{
   "ID:2072579713", 
    "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", "6"},
  
  CellID->2072579713],
-Cell[11849, 417, 65, 1, 24, "EndEnvironmentMarker",
+Cell[16375, 569, 65, 1, 26, "EndEnvironmentMarker",
  CellID->550610118]
 }, Open  ]],
-Cell[11929, 421, 48, 1, 16, "CloseEnvironment",
+Cell[16455, 573, 48, 1, 16, "CloseEnvironment",
  CellID->791201165],
 Cell[CellGroupData[{
-Cell[12002, 426, 287, 7, 31, "Computation",
+Cell[16528, 578, 287, 7, 31, "Computation",
  CellID->1656730105],
-Cell[12292, 435, 177, 4, 24, "ComputationResult",
- CellID->1125582477]
+Cell[16818, 587, 197, 4, 24, "ComputationResult",
+ CellID->286508960]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[12506, 444, 447, 12, 28, "ComputationInfo",
- CellID->1169107123],
-Cell[12956, 458, 571, 14, 73, "ComputationInfoBody",
- CellID->1151859690]
+Cell[17052, 596, 376, 10, 28, "ComputationInfo",
+ CellID->131963244],
+Cell[17431, 608, 651, 17, 71, "ComputationInfoBody",
+ CellID->1465634009]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[13564, 477, 335, 8, 28, "Computation",
+Cell[18119, 630, 335, 8, 28, "Computation",
  CellID->255419321],
-Cell[13902, 487, 177, 4, 24, "ComputationResult",
- CellID->1497104492]
+Cell[18457, 640, 199, 4, 24, "ComputationResult",
+ CellID->1601490509]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[14116, 496, 446, 12, 28, "ComputationInfo",
- CellID->1732552706],
-Cell[14565, 510, 570, 14, 73, "ComputationInfoBody",
- CellID->1489846574]
+Cell[18693, 649, 377, 10, 28, "ComputationInfo",
+ CellID->1790331840],
+Cell[19073, 661, 649, 17, 71, "ComputationInfoBody",
+ CellID->108928838]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[15172, 529, 286, 7, 28, "Computation",
+Cell[19759, 683, 286, 7, 28, "Computation",
  CellID->959058670],
-Cell[15461, 538, 177, 4, 24, "ComputationResult",
- CellID->1740784410]
+Cell[20048, 692, 201, 4, 24, "ComputationResult",
+ CellID->1078773587]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[15675, 547, 446, 12, 28, "ComputationInfo",
- CellID->1015232225],
-Cell[16124, 561, 569, 14, 73, "ComputationInfoBody",
- CellID->295627222]
+Cell[20286, 701, 376, 10, 28, "ComputationInfo",
+ CellID->1793614085],
+Cell[20665, 713, 649, 17, 71, "ComputationInfoBody",
+ CellID->114261808]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[16730, 580, 287, 7, 28, "Computation",
+Cell[21351, 735, 287, 7, 28, "Computation",
  CellID->2059232044],
-Cell[17020, 589, 177, 4, 24, "ComputationResult",
- CellID->1947209802]
+Cell[21641, 744, 199, 4, 24, "ComputationResult",
+ CellID->1682226850]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[17234, 598, 446, 12, 28, "ComputationInfo",
- CellID->296632333],
-Cell[17683, 612, 571, 14, 73, "ComputationInfoBody",
- CellID->1416883074]
+Cell[21877, 753, 378, 10, 28, "ComputationInfo",
+ CellID->2027317798],
+Cell[22258, 765, 651, 17, 71, "ComputationInfoBody",
+ CellID->1025224459]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[18291, 631, 287, 7, 28, "Computation",
+Cell[22946, 787, 287, 7, 28, "Computation",
  CellID->1629913276],
-Cell[18581, 640, 152, 3, 24, "ComputationResult",
- CellID->1663526396]
+Cell[23236, 796, 176, 4, 24, "ComputationResult",
+ CellID->469483362]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[18770, 648, 447, 12, 28, "ComputationInfo",
- CellID->1853765239],
-Cell[19220, 662, 570, 14, 73, "ComputationInfoBody",
- CellID->351881462]
+Cell[23449, 805, 378, 10, 28, "ComputationInfo",
+ CellID->1124822059],
+Cell[23830, 817, 651, 17, 71, "ComputationInfoBody",
+ CellID->1932189406]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[19827, 681, 287, 7, 28, "Computation",
+Cell[24518, 839, 287, 7, 28, "Computation",
  CellID->1613881432],
-Cell[20117, 690, 152, 3, 24, "ComputationResult",
- CellID->494563360]
+Cell[24808, 848, 178, 4, 24, "ComputationResult",
+ CellID->1677435008]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[20306, 698, 447, 12, 28, "ComputationInfo",
- CellID->1631524477],
-Cell[20756, 712, 571, 14, 70, "ComputationInfoBody",
- CellID->2139211474]
+Cell[25023, 857, 380, 10, 28, "ComputationInfo",
+ CellID->1834353362],
+Cell[25406, 869, 651, 17, 71, "ComputationInfoBody",
+ CellID->1413976025]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[21364, 731, 211, 5, 28, "Computation",
+Cell[26094, 891, 211, 5, 28, "Computation",
  CellID->1276343409],
-Cell[21578, 738, 242, 6, 24, "ComputationResult",
- CellID->1762551635]
+Cell[26308, 898, 265, 7, 24, "ComputationResult",
+ CellID->23044306]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[21857, 749, 446, 12, 28, "ComputationInfo",
- CellID->575136022],
-Cell[22306, 763, 570, 14, 70, "ComputationInfoBody",
- CellID->858170573]
+Cell[26610, 910, 378, 10, 28, "ComputationInfo",
+ CellID->1645324034],
+Cell[26991, 922, 650, 17, 71, "ComputationInfoBody",
+ CellID->682679929]
 }, Closed]],
-Cell[22891, 780, 47, 1, 12, "OpenEnvironment",
+Cell[27656, 942, 47, 1, 12, "OpenEnvironment",
  CellID->472093504],
 Cell[CellGroupData[{
-Cell[22963, 785, 388, 9, 40, "EnvironmentHeader",
+Cell[27728, 947, 388, 9, 43, "EnvironmentHeader",
  CellID->1500614048],
-Cell[23354, 796, 849, 24, 21, "FormalTextInputFormula",
+Cell[28119, 958, 849, 24, 21, "FormalTextInputFormula",
  CellTags->{
   "ID:514433530", 
    "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", "5"},
  
  CellID->514433530],
-Cell[24206, 822, 66, 1, 24, "EndEnvironmentMarker",
+Cell[28971, 984, 66, 1, 26, "EndEnvironmentMarker",
  CellID->1529663339]
 }, Open  ]],
-Cell[24287, 826, 49, 1, 16, "CloseEnvironment",
+Cell[29052, 988, 49, 1, 16, "CloseEnvironment",
  CellID->1986805045],
 Cell[CellGroupData[{
-Cell[24361, 831, 1863, 59, 29, "ProofInfo",
+Cell[29126, 993, 1863, 59, 28, "ProofInfo",
  CellTags->
   "Proof|ID:514433530|Source:/home/amaletzk/Theorema \
 Notebooks/Documentation/Sequence.nb",
  CellID->345957991],
-Cell[26227, 892, 240, 7, 57, "ProofInfoBody",
+Cell[30992, 1054, 240, 7, 57, "ProofInfoBody",
  CellID->807726814]
 }, Closed]],
-Cell[26482, 902, 421, 8, 43, "Text",
+Cell[31247, 1064, 445, 8, 43, "Text",
  CellID->1086688829],
-Cell[26906, 912, 47, 1, 12, "OpenEnvironment",
+Cell[31695, 1074, 47, 1, 12, "OpenEnvironment",
  CellID->646505442],
 Cell[CellGroupData[{
-Cell[26978, 917, 393, 9, 40, "EnvironmentHeader",
+Cell[31767, 1079, 393, 9, 43, "EnvironmentHeader",
  CellID->1280631388],
-Cell[27374, 928, 1314, 42, 38, "FormalTextInputFormula",
+Cell[32163, 1090, 1314, 42, 38, "FormalTextInputFormula",
  CellTags->{
   "ID:1712066704", 
    "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", "10"},
  CellID->1712066704],
-Cell[28691, 972, 2101, 60, 116, "FormalTextInputFormula",
+Cell[33480, 1134, 2101, 60, 59, "FormalTextInputFormula",
  CellTags->{
   "ID:1129737817", 
    "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", "11"},
  CellID->1129737817],
-Cell[30795, 1034, 65, 1, 24, "EndEnvironmentMarker",
+Cell[35584, 1196, 65, 1, 26, "EndEnvironmentMarker",
  CellID->154042773]
 }, Open  ]],
-Cell[30875, 1038, 49, 1, 16, "CloseEnvironment",
+Cell[35664, 1200, 49, 1, 16, "CloseEnvironment",
  CellID->1453800142],
 Cell[CellGroupData[{
-Cell[30949, 1043, 236, 5, 31, "Computation",
+Cell[35738, 1205, 236, 5, 31, "Computation",
  CellID->1954597986],
-Cell[31188, 1050, 150, 3, 24, "ComputationResult",
- CellID->981092078]
+Cell[35977, 1212, 268, 5, 24, "ComputationResult",
+ CellID->1818833074]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[31375, 1058, 447, 12, 28, "ComputationInfo",
- CellID->1371856441],
-Cell[31825, 1072, 570, 14, 70, "ComputationInfoBody",
- CellID->744258326]
+Cell[36282, 1222, 379, 10, 28, "ComputationInfo",
+ CellID->412133171],
+Cell[36664, 1234, 650, 17, 71, "ComputationInfoBody",
+ CellID->802614210]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[32432, 1091, 373, 10, 28, "Computation",
+Cell[37351, 1256, 552, 16, 28, "Computation",
  CellID->189176158],
-Cell[32808, 1103, 151, 3, 24, "ComputationResult",
- CellID->341673060]
+Cell[37906, 1274, 268, 5, 24, "ComputationResult",
+ CellID->1265825090]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[32996, 1111, 446, 12, 28, "ComputationInfo",
- CellID->1318283077],
-Cell[33445, 1125, 570, 14, 73, "ComputationInfoBody",
- CellID->1524775230]
+Cell[38211, 1284, 376, 10, 28, "ComputationInfo",
+ CellID->873814901],
+Cell[38590, 1296, 649, 17, 71, "ComputationInfoBody",
+ CellID->672401876]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[34052, 1144, 212, 5, 28, "Computation",
+Cell[39276, 1318, 212, 5, 28, "Computation",
  CellID->506370155],
-Cell[34267, 1151, 350, 8, 24, "ComputationResult",
- CellID->526478926]
+Cell[39491, 1325, 545, 12, 24, "ComputationResult",
+ CellID->255584062]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[34654, 1164, 443, 12, 28, "ComputationInfo",
- CellID->2204268],
-Cell[35100, 1178, 569, 14, 73, "ComputationInfoBody",
- CellID->544396926]
+Cell[40073, 1342, 379, 10, 28, "ComputationInfo",
+ CellID->1651997170],
+Cell[40455, 1354, 651, 17, 71, "ComputationInfoBody",
+ CellID->888427249]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[35706, 1197, 419, 10, 28, "Computation",
+Cell[41143, 1376, 419, 10, 28, "Computation",
  CellID->1475921762],
-Cell[36128, 1209, 412, 10, 24, "ComputationResult",
- CellID->581677422]
+Cell[41565, 1388, 557, 12, 24, "ComputationResult",
+ CellID->1952676156]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[36577, 1224, 446, 12, 28, "ComputationInfo",
- CellID->1127786745],
-Cell[37026, 1238, 571, 14, 73, "ComputationInfoBody",
- CellID->1713504049]
+Cell[42159, 1405, 380, 10, 28, "ComputationInfo",
+ CellID->1588437828],
+Cell[42542, 1417, 653, 17, 71, "ComputationInfoBody",
+ CellID->1112622431]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[37634, 1257, 516, 12, 28, "Computation",
+Cell[43232, 1439, 516, 12, 28, "Computation",
  CellID->868134108],
-Cell[38153, 1271, 432, 10, 24, "ComputationResult",
- CellID->1733537113]
+Cell[43751, 1453, 527, 12, 24, "ComputationResult",
+ CellID->1753390126]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[38622, 1286, 444, 12, 28, "ComputationInfo",
- CellID->477407590],
-Cell[39069, 1300, 570, 14, 73, "ComputationInfoBody",
- CellID->1298573108]
+Cell[44315, 1470, 375, 10, 28, "ComputationInfo",
+ CellID->161902393],
+Cell[44693, 1482, 649, 17, 71, "ComputationInfoBody",
+ CellID->519005604]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[39676, 1319, 393, 9, 28, "Computation",
+Cell[45379, 1504, 393, 9, 28, "Computation",
  CellID->2132214555],
-Cell[40072, 1330, 428, 10, 24, "ComputationResult",
- CellID->1075900039]
+Cell[45775, 1515, 523, 12, 24, "ComputationResult",
+ CellID->122740322]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[40537, 1345, 445, 12, 28, "ComputationInfo",
- CellID->70708352],
-Cell[40985, 1359, 570, 14, 73, "ComputationInfoBody",
- CellID->166321685]
+Cell[46335, 1532, 378, 10, 28, "ComputationInfo",
+ CellID->2143691009],
+Cell[46716, 1544, 651, 17, 71, "ComputationInfoBody",
+ CellID->1113528039]
 }, Closed]],
-Cell[41570, 1376, 375, 9, 44, "Text",
+Cell[47382, 1564, 375, 9, 44, "Text",
  CellID->2093452402],
-Cell[41948, 1387, 48, 1, 12, "OpenEnvironment",
+Cell[47760, 1575, 48, 1, 12, "OpenEnvironment",
  CellID->1713907510],
 Cell[CellGroupData[{
-Cell[42021, 1392, 468, 10, 40, "EnvironmentHeader",
+Cell[47833, 1580, 468, 10, 43, "EnvironmentHeader",
  CellID->810757233],
-Cell[42492, 1404, 1954, 57, 109, "FormalTextInputFormula",
+Cell[48304, 1592, 1954, 57, 57, "FormalTextInputFormula",
  CellTags->{
   "ID:281007089", 
    "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", "12"},
  CellID->281007089],
-Cell[44449, 1463, 65, 1, 24, "EndEnvironmentMarker",
+Cell[50261, 1651, 65, 1, 26, "EndEnvironmentMarker",
  CellID->282724972]
 }, Open  ]],
-Cell[44529, 1467, 49, 1, 16, "CloseEnvironment",
+Cell[50341, 1655, 49, 1, 16, "CloseEnvironment",
  CellID->1301683811],
 Cell[CellGroupData[{
-Cell[44603, 1472, 202, 4, 31, "Computation",
+Cell[50415, 1660, 202, 4, 31, "Computation",
  CellID->1921709458],
-Cell[44808, 1478, 350, 9, 24, "ComputationResult",
- CellID->1371527262]
+Cell[50620, 1666, 440, 10, 24, "ComputationResult",
+ CellID->912444347]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[45195, 1492, 447, 12, 28, "ComputationInfo",
- CellID->2017918155],
-Cell[45645, 1506, 570, 14, 70, "ComputationInfoBody",
- CellID->462954019]
+Cell[51097, 1681, 380, 10, 28, "ComputationInfo",
+ CellID->1664563762],
+Cell[51480, 1693, 651, 17, 71, "ComputationInfoBody",
+ CellID->1059452015]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[46252, 1525, 266, 6, 28, "Computation",
+Cell[52168, 1715, 266, 6, 28, "Computation",
  CellID->1382083937],
-Cell[46521, 1533, 432, 10, 24, "ComputationResult",
- CellID->640926688]
+Cell[52437, 1723, 527, 12, 24, "ComputationResult",
+ CellID->1513306815]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[46990, 1548, 447, 12, 28, "ComputationInfo",
- CellID->1533960903],
-Cell[47440, 1562, 570, 14, 73, "ComputationInfoBody",
- CellID->169235610]
+Cell[53001, 1740, 378, 10, 28, "ComputationInfo",
+ CellID->1283394484],
+Cell[53382, 1752, 650, 17, 71, "ComputationInfoBody",
+ CellID->494066940]
 }, Closed]],
 Cell[CellGroupData[{
-Cell[48047, 1581, 269, 6, 28, "Computation",
+Cell[54069, 1774, 269, 6, 28, "Computation",
  CellID->988984248],
-Cell[48319, 1589, 302, 7, 24, "ComputationResult",
- CellID->992808150]
+Cell[54341, 1782, 396, 9, 24, "ComputationResult",
+ CellID->1152571130]
 }, Open  ]],
 Cell[CellGroupData[{
-Cell[48658, 1601, 446, 12, 28, "ComputationInfo",
- CellID->2028524264],
-Cell[49107, 1615, 570, 14, 70, "ComputationInfoBody",
- CellID->1800760087]
+Cell[54774, 1796, 379, 10, 28, "ComputationInfo",
+ CellID->1125529805],
+Cell[55156, 1808, 649, 17, 71, "ComputationInfoBody",
+ CellID->490254234]
 }, Closed]]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[55854, 1831, 149, 4, 30, "Subsection",
+ CellID->954064010],
+Cell[56006, 1837, 231, 7, 25, "Text",
+ CellID->1741477359],
+Cell[56240, 1846, 48, 1, 12, "OpenEnvironment",
+ CellID->1654899015],
+Cell[CellGroupData[{
+Cell[56313, 1851, 429, 10, 43, "EnvironmentHeader",
+ CellID->894067694],
+Cell[56745, 1863, 870, 27, 21, "FormalTextInputFormula",
+ CellTags->{
+  "ID:922197966", 
+   "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
+   "sequence"},
+ CellID->922197966],
+Cell[57618, 1892, 65, 1, 26, "EndEnvironmentMarker",
+ CellID->897098854]
+}, Open  ]],
+Cell[57698, 1896, 48, 1, 16, "CloseEnvironment",
+ CellID->388281025],
+Cell[57749, 1899, 370, 7, 43, "Text",
+ CellID->620316363],
+Cell[58122, 1908, 48, 1, 12, "OpenEnvironment",
+ CellID->1888424108],
+Cell[CellGroupData[{
+Cell[58195, 1913, 428, 10, 43, "EnvironmentHeader",
+ CellID->642538702],
+Cell[58626, 1925, 957, 31, 30, "FormalTextInputFormula",
+ CellTags->{
+  "ID:1791138636", 
+   "Source:/home/amaletzk/Theorema Notebooks/Documentation/Sequence.nb", 
+   "bad"},
+ CellID->1791138636],
+Cell[59586, 1958, 66, 1, 26, "EndEnvironmentMarker",
+ CellID->1325804858]
+}, Open  ]],
+Cell[59667, 1962, 49, 1, 16, "CloseEnvironment",
+ CellID->1080531689],
+Cell[CellGroupData[{
+Cell[59741, 1967, 180, 4, 31, "Computation",
+ CellID->360925490],
+Cell[59924, 1973, 194, 6, 24, "ComputationResult",
+ CellID->2057779233]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[60155, 1984, 376, 10, 28, "ComputationInfo",
+ CellID->171890378],
+Cell[60534, 1996, 650, 17, 70, "ComputationInfoBody",
+ CellID->1586896055]
+}, Closed]],
+Cell[CellGroupData[{
+Cell[61221, 2018, 144, 3, 28, "Computation",
+ CellID->1024054888],
+Cell[61368, 2023, 154, 4, 24, "ComputationResult",
+ CellID->1695552660]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[61559, 2032, 380, 10, 28, "ComputationInfo",
+ CellID->1984625445],
+Cell[61942, 2044, 652, 17, 71, "ComputationInfoBody",
+ CellID->845060060]
+}, Closed]],
+Cell[62609, 2064, 263, 6, 24, "Text",
+ CellID->1258884450],
+Cell[CellGroupData[{
+Cell[62897, 2074, 149, 3, 31, "Computation",
+ CellID->1025303800],
+Cell[63049, 2079, 156, 4, 24, "ComputationResult",
+ CellID->2013168253]
+}, Open  ]],
+Cell[CellGroupData[{
+Cell[63242, 2088, 380, 10, 28, "ComputationInfo",
+ CellID->1205933390],
+Cell[63625, 2100, 651, 17, 70, "ComputationInfoBody",
+ CellID->1918058112]
 }, Closed]]
+}, Open  ]]
+}, Open  ]]
 }, Open  ]]
 }
 ]
