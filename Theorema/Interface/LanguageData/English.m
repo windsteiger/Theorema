@@ -75,6 +75,7 @@ Theorema 2.0 is a major re-launch mainly developed by Wolfgang Windsteiger.";
 
     translate[ "Declarations", lang] = "Globals";
     translate[ "DemoMode", lang] = "Demo Mode";
+	translate[ "Display with new settings", lang] = "Display with new settings";
 	translate[ "disproved", lang] = "disproved";
     translate[ "Domains", lang] = "Domains and Data Types";
 
@@ -214,6 +215,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.", ToString[
     translate[ "Sets", lang] = "Sets";
 	translate[ "ShowAll", lang] = "Show all";
     translate[ "ShowComputation", lang] = "Show computation";
+    translate[ "ShowFullProof", lang] = "Show full proof";
     translate[ "ShowProof", lang] = "Show proof";
     translate[ "showProofProgress", lang] = "Show the proof progress so far";
     translate[ "ShowSimplifiedProof", lang] = "Show simplified proof";

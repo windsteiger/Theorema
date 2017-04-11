@@ -77,6 +77,7 @@ Theorema 2.0 ist eine wesentliche Weiterentwicklung, die haupts\[ADoubleDot]chli
 
     translate[ "Declarations", lang] = "Globale";
     translate[ "DemoMode", lang] = "Demo Modus";
+	translate[ "Display with new settings", lang] = "Mit neuen Einstellungen anzeigen";
 	translate[ "disproved", lang] = "widerlegt";
     translate[ "Domains", lang] = "Bereiche und Datenstrukturen";
 
@@ -217,6 +218,7 @@ falls nicht, siehe <http://www.gnu.org/licenses/>.", ToString[ Date[][[1]]]];
     translate[ "Sets", lang] = "Mengen";
 	translate[ "ShowAll", lang] = "Alles anzeigen";
     translate[ "ShowComputation", lang] = "Berechnung anzeigen";
+    translate[ "ShowFullProof", lang] = "Vollst\[ADoubleDot]ndigen Beweis anzeigen";
     translate[ "ShowProof", lang] = "Beweis anzeigen";
     translate[ "showProofProgress", lang] = "Bisherigen Beweis anzeigen";
     translate[ "ShowSimplifiedProof", lang] = "Vereinfachten Beweis anzeigen";

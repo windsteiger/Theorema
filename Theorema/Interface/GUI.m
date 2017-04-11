@@ -1695,12 +1695,21 @@ printProveInfo[ kbKeysLabels_, pVal_, pTime_, sTime_, simplification_List, {subs
 printProveInfo[args___] := unexcpected[ printProveInfo, {args}]
 
 displayProofButtons[ fn_String] :=
-	Module[ {simpFile = Last[ FileNames[ fn <> "-po-*.m"]]},
-		With[ {sl = IntegerDigits[ ToExpression[ First[ StringCases[ simpFile, __ ~~ "-po-" ~~ x_ ~~ ".m" -> x, 1]]], 2] /. {1 -> True, 0 -> False}},
-		    Row[ {Button[ Style[ translate["ShowProof"], FontVariations -> {"Underline" -> True}], 
+	Module[ {simpFile = FileNames[ fn <> "-po-*.m"]},
+		If[ simpFile === {},
+			(* there are no stored simplified proofs *)
+			Button[ Style[ translate["ShowProof"], FontVariations -> {"Underline" -> True}], 
 					displayProof[ fn, {False, False, False}], ImageSize -> Automatic, Appearance -> None, Method -> "Queued"],
-			      Button[ Style[ translate["ShowSimplifiedProof"], FontVariations -> {"Underline" -> True}], 
-					displayProof[ fn, sl], ImageSize -> Automatic, Appearance -> None, Method -> "Queued"]}, Spacer[3]]
+			(* else: there are stored simplified proofs, offer a button for opening the most simplified version available *)
+			If[ FileExistsQ[ fn <> "-po-fav.m"],
+				simpFile = {fn <> "-po-" <> ToString[ Get[ fn <> "-po-fav.m"]] <> ".m"}
+			];
+			With[ {sl = IntegerDigits[ ToExpression[ First[ StringCases[ Last[ simpFile], __ ~~ "-po-" ~~ x_ ~~ ".m" -> x, 1]]], 2] /. {1 -> True, 0 -> False}},
+		    	Row[ {Button[ Style[ translate["ShowSimplifiedProof"], FontVariations -> {"Underline" -> True}], 
+					displayProof[ fn, sl], ImageSize -> Automatic, Appearance -> None, Method -> "Queued"],
+			      Button[ Style[ translate["ShowFullProof"], FontVariations -> {"Underline" -> True}], 
+					displayProof[ fn, {False, False, False}], ImageSize -> Automatic, Appearance -> None, Method -> "Queued"]}, Spacer[3]]
+			]
 		]  
 	]
 displayProofButtons[ args___] := unexpected[ displayProofButtons, {args}]

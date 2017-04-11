@@ -300,9 +300,10 @@ isOptComponent[ args___] := unexpected[ isOptComponent, {args}]
 (* Proof simplification *)
 
 (*
-	simplifyProof[ PRFOBJ$[ pi_, sub_, proved], simp_List] simplifies the proof object according to the settings given in simp.
+	simplifyProof[ PRFOBJ$[ pi_, sub_, proved], simp_List] simplifies the proof object according to the settings given in simp
+	   and saves the respective proof object in a file.
 *)
-simplifyProof[ PRFOBJ$[ pi_, sub_, pv_], simp_List /; Apply[ Or, simp], file_String, tmp_String:""] := 
+simplifyProof[ PRFOBJ$[ pi_, sub_, pv_], simp_List /; Apply[ Or, simp], file_String] := 
 (*	
 	We call the function only if at least one of the simplification settings is True
 *)
@@ -315,25 +316,19 @@ simplifyProof[ PRFOBJ$[ pi_, sub_, pv_], simp_List /; Apply[ Or, simp], file_Str
 			(* else *)
 			simpPo = PRFOBJ$[ pi, sn, pv]
 		];		
-		Put[ simpPo, simpPoFilename[ file, simp, tmp]];
+		Put[ simpPo, simpPoFilename[ file, simp]];
 		{simpPo, SessionTime[] - startTime}
 	]
-simplifyProof[ po_PRFOBJ$, simp_List, file_String, tmp_String:""] := {po, 0.}
+simplifyProof[ po_PRFOBJ$, simp_List, file_String] := {po, 0.}
 simplifyProof[ args___] := unexpected[ simplifyProof, {args}]
 
-simpPoFilename[ file_String, simp_List, tmp_String:""] :=
-	Module[{sExt, suff},
+simpPoFilename[ file_String, simp_List] :=
+	Module[{sExt},
 		sExt = FromDigits[ simp /. {True -> 1, False -> 0}, 2];
-		If[ sExt === 0,
-			suff = "",
-			(* else *)
-			suff = "-" <> ToString[ sExt];
-			If[ tmp =!= "",
-				suff = suff <> "-" <> tmp
-			];			 
-		];
-		file <> "-po" <> suff <> ".m"
+		simpPoFilename[ file, sExt]
 	]
+simpPoFilename[ file_String, 0] := file <> "-po" <> ".m"
+simpPoFilename[ file_String, sExt_Integer?Positive] := file <> "-po-" <> ToString[ sExt] <> ".m"
 simpPoFilename[ args___] := unexpected[ simpPoFilename, {args}]
 
 
@@ -897,54 +892,60 @@ displayProof[ file_String] :=
 		]
 	]
 displayProof[ file_String, simp_List] :=
-	Module[ {fspo, p, cells, tree, origDock, newDock},
-		If[ FileExistsQ[ fspo = simpPoFilename[ file, simp, "temp"]],
+	Module[ {fspo, p, cells, tree, newDock, tmp},
+		If[ !ValueQ[ origDock],
+			origDock = DockedCells /. Options[ tmp = NotebookPut[ Notebook[ {}], StyleDefinitions -> makeColoredStylesheet[ "Proof"], Visible -> False], DockedCells];
+			NotebookClose[ tmp];
+		];
+		If[ FileExistsQ[ fspo = simpPoFilename[ file, simp]],
 			p = Get[ fspo],
 			(* else *)
-			p = Get[ simpPoFilename[ file, simp]];			
+			p = Get[ simpPoFilename[ file, 0]];			
 		];
 		cells = proofObjectToCell[ p];
 		tree = poToTree[ p];
 		$TMAproofObject = p;
 		$TMAproofTree = tree; 
-		$TMAproofNotebook = tmaNotebookPut[ Notebook[ cells], "Proof"];
-		origDock = DockedCells /. Options[ $TMAproofNotebook, DockedCells];
 		{$eliminateBranches, $eliminateSteps, $eliminateFormulae} = simp;
 		newDock = {origDock, 
   			Cell[ BoxData[ ToBoxes[ OpenerView[ {Style[ translate[ "pSimp"], "Subsubsection"], 
-       			Row[ {Grid[{
-    				{Checkbox[ Dynamic[ $eliminateBranches]], Style[ translate[ "elimBranches"], "Text"]},
-    				{Checkbox[ Dynamic[ $eliminateSteps]], Style[ translate[ "elimSteps"], "Text"]},
-    				{Checkbox[ Dynamic[ $eliminateFormulae]], Style[ translate[ "elimForm"], "Text"]}
+       			Column[ {Grid[{
+    				{Checkbox[ Dynamic[ $eliminateBranches]], Style[ translate[ "elimBranches"] <> If[ simp[[1]], " \[Checkmark]", ""], "Text"]},
+    				{Checkbox[ Dynamic[ $eliminateSteps]], Style[ translate[ "elimSteps"] <> If[ simp[[2]], " \[Checkmark]", ""], "Text"]},
+    				{Checkbox[ Dynamic[ $eliminateFormulae]], Style[ translate[ "elimForm"] <> If[ simp[[3]], " \[Checkmark]", ""], "Text"]}
     				}, Alignment -> {Left}], 
-    				Button[ "Simplify", displaySimplified[ file, {$eliminateBranches, $eliminateSteps, $eliminateFormulae}]]}, Spacer[15]]},
-    			Spacings -> {0.8, Automatic}]]], "Text", TextAlignment -> Right]};
+    				Button[ translate[ "Display with new settings"], 
+    					displaySimplified[ file, {$eliminateBranches, $eliminateSteps, $eliminateFormulae}, ButtonNotebook[]], Method -> "Queued"]}]},
+    			Spacings -> {0.8, Automatic}]]], "SimplificationDock", Background -> TMAcolor[ 8, $TheoremaColorScheme]]};
 		$selectedProofStep = "OriginalPS";
-		With[ {nb = $TMAproofNotebook, tr = tree, po = p},
-			SetOptions[ $TMAproofNotebook, NotebookEventActions -> {{"KeyDown", "r"} :> ($TMAproofNotebook = nb; $TMAproofObject = po; $TMAproofTree = tr;),
-				"WindowClose" :> cleanupProofObjectCache[ file, simp], PassEventsDown -> False}, DockedCells -> newDock]
+		(* If[ ValueQ[ oldNb], NotebookClose[ oldNb]];*)
+		With[ {tr = tree, po = p},
+		    $TMAproofNotebook = tmaNotebookPut[ Notebook[ cells], "Proof",
+		    	NotebookEventActions -> {{"KeyDown", "r"} :> ($TMAproofNotebook = SelectedNotebook[]; $TMAproofObject = po; $TMAproofTree = tr;),
+										  PassEventsDown -> False, "WindowClose" :> ($TMAproofTree = {};)},
+				DockedCells -> newDock]
 		]
 	]
 displayProof[ args___] := unexpected[ displayProof, {args}]
 
-displaySimplified[ file_String, simp_List] :=
+displaySimplified[ file_String, simp_List, origNb_NotebookObject] /; Apply[ Or, simp]:=
 	Module[{fpo = file <> "-po.m", fspo = simpPoFilename[ file, simp], po, st},
-		If[ !FileExistsQ[ fspo] || AbsoluteTime[ FileDate[ fspo]] < AbsoluteTime[ FileDate[ fpo]],
+		If[!FileExistsQ[ fspo] || AbsoluteTime[ FileDate[ fspo]] < AbsoluteTime[ FileDate[ fpo]],
 			(* if a simplified proof does not yet exist or the full proof object is newer than the existing simplified one: simplify *)
 			po = Get[ fpo];
-			{po, st} = simplifyProof[ po, simp, file, "temp"]
+			{po, st} = simplifyProof[ po, simp, file]
 		];
-		NotebookClose[ $TMAproofNotebook];
+		NotebookClose[ origNb];
+		displayProof[ file, simp]
+	]
+	
+displaySimplified[ file_String, simp_List, origNb_NotebookObject] :=
+	Module[{},
+		DeleteFile[ FileNames[ file <> "-po-*.m"]];
+		NotebookClose[ origNb];
 		displayProof[ file, simp]
 	]
 displaySimplified[ args___] := unexpected[ displaySimplified, {args}]
-
-cleanupProofObjectCache[ file_String, simp_List] :=
-	Module[ {},
-		$TMAproofTree = {};
-		Quiet[ DeleteFile[ simpPoFilename[ file, simp, "temp"]]]
-	]
-cleanupProofObjectCache[ args___] := unexpected[ cleanupProofObjectCache, {args}]
 
 
 (* ::Subsubsection:: *)
