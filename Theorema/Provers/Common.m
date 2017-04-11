@@ -892,7 +892,7 @@ displayProof[ file_String] :=
 		]
 	]
 displayProof[ file_String, simp_List] :=
-	Module[ {fspo, p, cells, tree, newDock, tmp},
+	Module[ {fspo, p, cells, tree, newDock, tmp, favIcon},
 		If[ !ValueQ[ origDock],
 			origDock = DockedCells /. Options[ tmp = NotebookPut[ Notebook[ {}], StyleDefinitions -> makeColoredStylesheet[ "Proof"], Visible -> False], DockedCells];
 			NotebookClose[ tmp];
@@ -907,8 +907,14 @@ displayProof[ file_String, simp_List] :=
 		$TMAproofObject = p;
 		$TMAproofTree = tree; 
 		{$eliminateBranches, $eliminateSteps, $eliminateFormulae} = simp;
+		If[ Apply[ Or, simp],
+			favIcon = MouseAppearance[ EventHandler[ Dynamic[ Refresh[ showFavIcon[ file, simp], UpdateInterval -> 1]], 
+								{"MouseClicked" :> toggleFavIcon[ file, simp]}],
+							"Arrow"],
+			favIcon = ""
+		];
 		newDock = {origDock, 
-  			Cell[ BoxData[ ToBoxes[ OpenerView[ {Style[ translate[ "pSimp"], "Subsubsection"], 
+  			Cell[ BoxData[ ToBoxes[ OpenerView[ {Row[ {Style[ translate[ "pSimp"], "Subsubsection"], favIcon}, Spacer[25]], 
        			Column[ {Grid[{
     				{Checkbox[ Dynamic[ $eliminateBranches]], Style[ translate[ "elimBranches"] <> If[ simp[[1]], " \[Checkmark]", ""], "Text"]},
     				{Checkbox[ Dynamic[ $eliminateSteps]], Style[ translate[ "elimSteps"] <> If[ simp[[2]], " \[Checkmark]", ""], "Text"]},
@@ -947,6 +953,23 @@ displaySimplified[ file_String, simp_List, origNb_NotebookObject] :=
 	]
 displaySimplified[ args___] := unexpected[ displaySimplified, {args}]
 
+showFavIcon[ file_, simp_] := 
+	Module[{}, 
+		If[ FileExistsQ[ file <> "-po-fav.m"] && FromDigits[ simp /. {True -> 1, False -> 0}, 2] === Get[ file <> "-po-fav.m"], 
+			Style[ "\[FivePointedStar]", FontSize -> 20, FontColor -> Yellow], 
+			Style[ "\:2606", FontSize -> 20, FontColor -> TMAcolor[ 13, $TheoremaColorScheme]]
+		]
+	]
+showFavIcon[ args___] := unexpected[ showFavIcon, {args}]
+
+toggleFavIcon[ file_, simp_] :=
+	Module[{}, 
+		If[ FileExistsQ[ file <> "-po-fav.m"] && FromDigits[ simp /. {True -> 1, False -> 0}, 2] === Get[ file <> "-po-fav.m"], 
+			DeleteFile[ file <> "-po-fav.m"], 
+			Put[ FromDigits[ simp /. {True -> 1, False -> 0}, 2], file <> "-po-fav.m"]
+		]
+	]
+toggleFavIcon[ args___] := unexpected[ toggleFavIcon, {args}]
 
 (* ::Subsubsection:: *)
 (* proofObjectToCell *)
