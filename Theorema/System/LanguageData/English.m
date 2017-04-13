@@ -246,6 +246,7 @@ With[ {lang = "English"},
 	MessageName[ simplifiedForall, "usage", lang] = "";	
 	MessageName[ simplifiedImplies, "usage", lang] = "";	
 	MessageName[ simplifiedOr, "usage", lang] = "";	
+	MessageName[ simplifiedProofInfo, "usage", lang] = "";	
 	MessageName[ simplifyProof, "usage", lang] = "simplifyProof[ proof_, {branches_, steps_, formulae_}] simplifies 'proof' according to the specified settings.";
 	MessageName[ simplify, "usage", lang] = "simplify is an option for the formula constructor makeFML deciding whether the constructed formula should be simplified by computation immediately.";
 	MessageName[ sourceFile, "usage", lang] = "sourceFile is a selector for the FML$ datastructure.";

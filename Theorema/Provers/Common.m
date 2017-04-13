@@ -300,9 +300,10 @@ isOptComponent[ args___] := unexpected[ isOptComponent, {args}]
 (* Proof simplification *)
 
 (*
-	simplifyProof[ PRFOBJ$[ pi_, sub_, proved], simp_List] simplifies the proof object according to the settings given in simp.
+	simplifyProof[ PRFOBJ$[ pi_, sub_, proved], simp_List] simplifies the proof object according to the settings given in simp
+	   and saves the respective proof object in a file.
 *)
-simplifyProof[ PRFOBJ$[ pi_, sub_, pv_], simp_List /; Apply[ Or, simp]] := 
+simplifyProof[ PRFOBJ$[ pi_, sub_, pv_], simp_List /; Apply[ Or, simp], file_String] := 
 (*	
 	We call the function only if at least one of the simplification settings is True
 *)
@@ -315,19 +316,39 @@ simplifyProof[ PRFOBJ$[ pi_, sub_, pv_], simp_List /; Apply[ Or, simp]] :=
 			(* else *)
 			simpPo = PRFOBJ$[ pi, sn, pv]
 		];		
-		$TMAproofTree = poToTree[ simpPo];
+		Put[ simpPo, simpPoFilename[ file, simp]];
 		{simpPo, SessionTime[] - startTime}
 	]
-simplifyProof[ po_PRFOBJ$, simp_List] := {po, 0.}
+simplifyProof[ po_PRFOBJ$, simp_List, file_String] := {po, 0.}
 simplifyProof[ args___] := unexpected[ simplifyProof, {args}]
+
+simpPoFilename[ file_String, simp_List] :=
+	Module[{sExt},
+		sExt = FromDigits[ simp /. {True -> 1, False -> 0}, 2];
+		simpPoFilename[ file, sExt]
+	]
+simpPoFilename[ file_String, 0] := file <> "-po" <> ".m"
+simpPoFilename[ file_String, sExt_Integer?Positive] := file <> "-po-" <> ToString[ sExt] <> ".m"
+simpPoFilename[ args___] := unexpected[ simpPoFilename, {args}]
+
 
 (*
 	simpNodes[ tree] computes {simpTree, used}, where
 		simpTree is the simplified proof tree and
 		used is a list of formula keys that are used within the simplified tree
 *)
-simpNodes[ ORNODE$[ pi_, ___, p_ /; proofValue@p === proved, ___, proved], simp:{True, _, _}] :=
+
+(* 
+    ORNODEs originating from alternative proof rules to be applied should be removed completely.
+*)
+simpNodes[ ORNODE$[ pi_ /; name@pi === proofAlternatives, ___, p_ /; proofValue@p === proved, ___, proved], simp:{True, _, _}] :=
 	simpNodes[ p, simp]
+(* 
+    ORNODEs originating from a proof rule, which introduced an OR-alternative explicitly typically simplify to an ANDNODE containing
+    the successful branch from the ORNODE. Typically, there will be only one successful branch, in any case, we take the first one.
+*)
+simpNodes[ ORNODE$[ pi_, pre___, p_ /; proofValue@p === proved, ___, proved], simp:{True, _, _}] :=
+	simpNodes[ ANDNODE$[ simplifiedProofInfo[ pi, Length[{pre}] + 1], p, proved], simp]
 simpNodes[ ORNODE$[ pi_, a___, p_ /; proofValue@p === proved, b___, proved], simp:{False, _, _}] :=
 	Module[{sn, used},
 		{sn, used} = simpNodes[ p, simp];
@@ -518,8 +539,14 @@ checkProofSuccess[ args___] := unexpected[ checkProofSuccess, {args}]
 	The consturctor understands options name->, used->, generated->, id->, and "key"-> (for an
   	arbitrary string "key").
 
-  	used and generated are list of lists {u_1,...,u_n} and {g_1,...,g_n} such that the formulae
-  	in u_i are those used to generate those in g_i
+    Inside an ANDNODE:
+  	used and generated are list of lists {u_1,...,u_n} and {g_1,...,g_n} such that the formulas
+  	in u_i are those used to generate those in g_i.
+  	
+  	Inside an ORNODE:
+  	used and generated are lists {u_1,...,u_n} and {g_1,...,g_n} such that u_i and g_i
+  	are the used and generated lists for the i-th child of the node. The structure of the
+  	u_i and g_i is as described for ANDNODEs.
 *)
 
 Options[ makePRFINFO] = {name -> "???", used -> {}, generated :> $generated, id -> ""};
@@ -565,10 +592,12 @@ id[ args___] := unexpected[ id, {args}]
 name[ node_?isProofNode] := name[ First[ node]]
 name[ args___] := unexpected[ name, {args}]
 
-used[ node_] := Apply[ Join, Map[ used, Cases[ node, _PRFINFO$, 2]]]
+SetAttributes[ used, Listable]
+used[ node_?isProofNode] := used@node[[1]]
 used[ args___] := unexpected[ used, {args}]
 
-generated[ node_] := Apply[ Join, Map[ generated, Cases[ node, _PRFINFO$, 2]]]
+SetAttributes[ generated, Listable]
+generated[ node_?isProofNode] := generated@node[[1]]
 generated[ args___] := unexpected[ generated, {args}]
 
 proofValue[ node_?isProofNode] := Last[ node]
@@ -864,53 +893,84 @@ displayProof[ file_String] :=
 		$TMAproofTree = tree;
 	]
 displayProof[ file_String, simp_List] :=
-	Module[ {p, cells, tree, origDock, newDock},
-		p = Get[ simpPoFilename[ file, simp]];
+	Module[ {fspo, p, cells, tree, newDock, tmp, favIcon},
+		If[ !ValueQ[ origDock],
+			origDock = DockedCells /. Options[ tmp = NotebookPut[ Notebook[ {}], StyleDefinitions -> makeColoredStylesheet[ "Proof"], Visible -> False], DockedCells];
+			NotebookClose[ tmp];
+		];
+		If[ FileExistsQ[ fspo = simpPoFilename[ file, simp]],
+			p = Get[ fspo],
+			(* else *)
+			p = Get[ simpPoFilename[ file, 0]];			
+		];
 		cells = proofObjectToCell[ p];
 		tree = poToTree[ p];
 		$TMAproofObject = p;
 		$TMAproofTree = tree; 
-		$TMAproofNotebook = tmaNotebookPut[ Notebook[ cells], "Proof"];
-		origDock = DockedCells /. Options[ $TMAproofNotebook, DockedCells];
 		{$eliminateBranches, $eliminateSteps, $eliminateFormulae} = simp;
+		If[ Apply[ Or, simp],
+			favIcon = MouseAppearance[ EventHandler[ Dynamic[ Refresh[ showFavIcon[ file, simp], UpdateInterval -> 1]], 
+								{"MouseClicked" :> toggleFavIcon[ file, simp]}],
+							"Arrow"],
+			favIcon = ""
+		];
 		newDock = {origDock, 
-  			Cell[ BoxData[ ToBoxes[ OpenerView[ {Style[ translate[ "pSimp"], "Subsubsection"], 
-       			Row[ {Grid[{
-    				{Checkbox[ Dynamic[ $eliminateBranches]], Style[ translate[ "elimBranches"], "Text"]},
-    				{Checkbox[ Dynamic[ $eliminateSteps]], Style[ translate[ "elimSteps"], "Text"]},
-    				{Checkbox[ Dynamic[ $eliminateFormulae]], Style[ translate[ "elimForm"], "Text"]}
-    				}, Alignment -> {Left}], Button["Simplify", displaySimplified[ file, {$eliminateBranches, $eliminateSteps, $eliminateFormulae}]], Spacer[5]}]}]]], "Text", 
-   				TextAlignment -> Right]};
+  			Cell[ BoxData[ ToBoxes[ OpenerView[ {Row[ {Style[ translate[ "pSimp"], "Subsubsection"], favIcon}, Spacer[25]], 
+       			Column[ {Grid[{
+    				{Checkbox[ Dynamic[ $eliminateBranches]], Style[ translate[ "elimBranches"] <> If[ simp[[1]], " \[Checkmark]", ""], "Text"]},
+    				{Checkbox[ Dynamic[ $eliminateSteps]], Style[ translate[ "elimSteps"] <> If[ simp[[2]], " \[Checkmark]", ""], "Text"]},
+    				{Checkbox[ Dynamic[ $eliminateFormulae]], Style[ translate[ "elimForm"] <> If[ simp[[3]], " \[Checkmark]", ""], "Text"]}
+    				}, Alignment -> {Left}], 
+    				Button[ translate[ "Display with new settings"], 
+    					displaySimplified[ file, {$eliminateBranches, $eliminateSteps, $eliminateFormulae}, ButtonNotebook[]], Method -> "Queued"]}]},
+    			Spacings -> {0.8, Automatic}]]], "SimplificationDock", Background -> TMAcolor[ 8, $TheoremaColorScheme]]};
 		$selectedProofStep = "OriginalPS";
-		With[ {nb = $TMAproofNotebook, tr = tree, po = p},
-			SetOptions[ $TMAproofNotebook, NotebookEventActions -> {{"KeyDown", "r"} :> ($TMAproofNotebook = nb; $TMAproofObject = po; $TMAproofTree = tr;),
-				"WindowClose" :> ($TMAproofTree = {};), PassEventsDown -> False}, DockedCells -> newDock]
+		(* If[ ValueQ[ oldNb], NotebookClose[ oldNb]];*)
+		With[ {tr = tree, po = p},
+		    $TMAproofNotebook = tmaNotebookPut[ Notebook[ cells], "Proof",
+		    	NotebookEventActions -> {{"KeyDown", "r"} :> ($TMAproofNotebook = SelectedNotebook[]; $TMAproofObject = po; $TMAproofTree = tr;),
+										  PassEventsDown -> False, "WindowClose" :> ($TMAproofTree = {};)},
+				DockedCells -> newDock]
 		]
 	]
 displayProof[ args___] := unexpected[ displayProof, {args}]
 
-displaySimplified[ file_String, simp_List] :=
-	Module[{po, st, fn},
-		po = Get[ file <> "-po.m"];
-		{po, st} = simplifyProof[ po, simp];
-		fn = simpPoFilename[ file, simp];
-		Put[ po, fn];
-		NotebookClose[ $TMAproofNotebook];
+displaySimplified[ file_String, simp_List, origNb_NotebookObject] /; Apply[ Or, simp]:=
+	Module[{fpo = file <> "-po.m", fspo = simpPoFilename[ file, simp], po, st},
+		If[!FileExistsQ[ fspo] || AbsoluteTime[ FileDate[ fspo]] < AbsoluteTime[ FileDate[ fpo]],
+			(* if a simplified proof does not yet exist or the full proof object is newer than the existing simplified one: simplify *)
+			po = Get[ fpo];
+			{po, st} = simplifyProof[ po, simp, file]
+		];
+		NotebookClose[ origNb];
+		displayProof[ file, simp]
+	]
+	
+displaySimplified[ file_String, simp_List, origNb_NotebookObject] :=
+	Module[{},
+		DeleteFile[ FileNames[ file <> "-po-*.m"]];
+		NotebookClose[ origNb];
 		displayProof[ file, simp]
 	]
 displaySimplified[ args___] := unexpected[ displaySimplified, {args}]
 
-simpPoFilename[ file_String, simp_List] :=
-	Module[{sExt, suff},
-		sExt = FromDigits[ simp /. {True -> 1, False -> 0}, 2];
-		If[ sExt === 0,
-			suff = "",
-			suff = "-" <> ToString[ sExt] 
-		];
-		file <> "-po" <> suff <> ".m"
+showFavIcon[ file_, simp_] := 
+	Module[{}, 
+		If[ FileExistsQ[ file <> "-po-fav.m"] && FromDigits[ simp /. {True -> 1, False -> 0}, 2] === Get[ file <> "-po-fav.m"], 
+			Style[ "\[FivePointedStar]", FontSize -> 20, FontColor -> Yellow], 
+			Style[ "\:2606", FontSize -> 20, FontColor -> TMAcolor[ 13, $TheoremaColorScheme]]
+		]
 	]
-simpPoFilename[ args___] := unexpected[ simpPoFilename, {args}]
+showFavIcon[ args___] := unexpected[ showFavIcon, {args}]
 
+toggleFavIcon[ file_, simp_] :=
+	Module[{}, 
+		If[ FileExistsQ[ file <> "-po-fav.m"] && FromDigits[ simp /. {True -> 1, False -> 0}, 2] === Get[ file <> "-po-fav.m"], 
+			DeleteFile[ file <> "-po-fav.m"], 
+			Put[ FromDigits[ simp /. {True -> 1, False -> 0}, 2], file <> "-po-fav.m"]
+		]
+	]
+toggleFavIcon[ args___] := unexpected[ toggleFavIcon, {args}]
 
 (* ::Subsubsection:: *)
 (* proofObjectToCell *)
