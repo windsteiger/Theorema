@@ -1465,9 +1465,9 @@ submitProveTask[ ] :=
 submitProveTask[ args___] := unexpected[ submitProveTask, {args}]
 
 execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, strategy_, searchDepth_, searchTime_, simplification_List, repl_Integer] :=
-	Module[{po, pv, pt, subsP, fileID, file, st},
+	Module[{po, pv, pt, pTree, subsP, fileID, file, st},
 		$addProofKB = {};
-		{pv, po, pt} = callProver[ rules, strategy, goal, kb, searchDepth, searchTime];
+		{pv, po, pTree, pt} = callProver[ rules, strategy, goal, kb, searchDepth, searchTime];
 		
 		(* Update GUI and proof object w.r.t. knowledge that was added during proof *)
 		$selectedProofKB = DeleteDuplicates[ Join[ kb, $addProofKB]];
@@ -1475,15 +1475,16 @@ execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, str
 		If[ $addProofKB =!= {}, po = ReplacePart[ po, {1, 3, 1} -> Prepend[ $selectedProofKB, goal]]];
 		
 		(* At this point po is equal to the global $TMAproofObject and $TMAproofTree is the corresponding tree *)
-		{subsP, fileID, file} = saveProofObject[ po, goal, repl];
-		{po, st} = simplifyProof[ po, simplification, file];
+		{subsP, fileID, file} = saveProofObject[ po, pTree, goal, repl];
+		{po, pTree, st} = simplifyProof[ po, pTree, simplification, file];
 		(* po is the simplified proof object and $TMAproofTree is the corresponding simplified tree, but $TMAproofObject is still the unsimplified object *)
 		$TMAproofObject = po;
+		$TMAproofTree = pTree;
 		printProveInfo[ DeleteDuplicates[ Map[ {key[#], label[#]}&, $selectedProofKB]], pv, pt, st, simplification, {subsP, fileID, file}];
 	]
 execProveCall[ args___] := unexpected[ execProveCall, {args}]
 
-saveProofObject[ po_, goal_FML$, repl_Integer] :=
+saveProofObject[ po_, pt_, goal_FML$, repl_Integer] :=
 	Module[{cellID, nbDir, subsP = repl, fileID, file},
 		cellID = getCellIDFromKey[ key@goal];
 		nbDir = createPerNotebookDirectory[ CurrentValue[ $proofInitNotebook, "NotebookFullFileName"]];
@@ -1493,7 +1494,9 @@ saveProofObject[ po_, goal_FML$, repl_Integer] :=
 		];
 		fileID = "p" <> cellID <> "-" <> ToString[ subsP];
 		file = FileNameJoin[ {nbDir, fileID}];
-		Put[ po, file <> "-po.m"];		
+		(* cleanup all proof object files from previous runs *)
+		DeleteFile[ FileNames[ file <> "-po-*.m"]];
+		Put[ {po, pt}, file <> "-po.m"];		
 		{subsP, fileID, file}
 	]
 saveProofObject[ args___] := unexpected[ saveProofObject, {args}]
