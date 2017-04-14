@@ -443,7 +443,7 @@ SetAttributes[ processEnvironment, HoldAll];
 processEnvironment[ Theorema`Language`nE] := Null
 
 processEnvironment[ x_] :=
-    Module[ {nb = EvaluationNotebook[], nbFile, nbExpr, key, tags, globDec, pos},
+    Module[ {nb = EvaluationNotebook[], nbFile, nbExpr, key, tags, globDec, pos, cellpos},
     	(* select current cell: we need to refer to this selection when we set the cell options *)
 		SelectionMove[ nb, All, EvaluationCell];
     	{key, tags} = adjustFormulaLabel[ nb];
@@ -467,10 +467,11 @@ processEnvironment[ x_] :=
         	nbExpr = First[ Cases[ $TMAcurrentEvalNB, {nbFile, e_} -> e, {1}, 1]]
 		];
 		(* extract the global declarations that are applicable in the current evaluation *)
-		globDec = applicableGlobalDeclarations[ nb, nbExpr, evaluationPosition[ nb, nbExpr]];
-		(* process the expression according the Theorema syntax rules and add it to the KB 
+		cellpos = evaluationPosition[ nb, nbExpr];
+		globDec = applicableGlobalDeclarations[ nb, nbExpr, cellpos];
+		(* process the expression according the Theorema syntax rules and add it to the KB
 		   ReleaseHold will remove the outer Hold but leave the Holds around fresh symbols *)
-        updateKnowledgeBase[ Catch[ ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]]], key, globDec, cellTagsToString[ tags], cellTagsToFmlTags[ tags]];
+        updateKnowledgeBase[ Catch[ ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]]], key, globDec, cellTagsToString[ tags], cellTagsToFmlTags[ tags], cellpos];
         (* Positions of abbreviations are added in "updateKnowledgeBase". *)
         SelectionMove[ nb, After, Cell];
     ]
@@ -821,6 +822,8 @@ updateKnowledgeBase[ $Failed, k_, ___] :=
 updateKnowledgeBase[ form_, k_, glob_, l_String] :=
 	updateKnowledgeBase[ form, k, glob, l, {}]
 updateKnowledgeBase[ form_, k_, glob_, l_String, tags_List] :=
+	updateKnowledgeBase[ form, k, glob, l, tags, Null]
+updateKnowledgeBase[ form_, k_, glob_, l_String, tags_List, cellPos_] :=
     Module[ {newForm, fml, inDomDef = Cases[ glob, Hold[ domainConstruct$TM][_,_], {1}, 1], defDef},
     	If[ inDomDef =!= {} && (defDef = $tmaDefaultDomainDef[ inDomDef[[1]]]) =!= {},
     		(* we are in a domain definition and there is a pending default for this domain *)
@@ -830,7 +833,8 @@ updateKnowledgeBase[ form_, k_, glob_, l_String, tags_List] :=
 		    	updateKnowledgeBase[ $Failed, k],
 		    (*else*)
 		    	fml = makeFML[ key -> Rest[ defDef], formula -> newForm, preprocess -> $tmaFmlPre,
-		    			label -> StringReplace[ ToString[ ReleaseHold[ inDomDef[[1,1]]]], "$TM" -> ""] <> ".defOp", simplify -> False];
+		    			label -> StringReplace[ ToString[ ReleaseHold[ inDomDef[[1,1]]]], "$TM" -> ""] <> ".defOp", simplify -> False,
+		    			formulaTags -> tags, cellPosition -> cellPos];
 		    	Switch[ fml,
 		    		$Failed,
 		    		notification[ translate[ "invalidExpr"]];
@@ -855,7 +859,8 @@ updateKnowledgeBase[ form_, k_, glob_, l_String, tags_List] :=
     		(*no need to show any notification, has already been done in 'markVariables'*)
     		updateKnowledgeBase[ $Failed, k],
     	(*else*)
-	    	fml = makeFML[ key -> k, formula -> newForm, label -> l, simplify -> False, preprocess -> $tmaFmlPre];
+	    	fml = makeFML[ key -> k, formula -> newForm, label -> l, simplify -> False, preprocess -> $tmaFmlPre,
+	    					formulaTags -> tags, cellPosition -> cellPos];
 	    	Switch[ fml,
 	    		$Failed,
 	    		notification[ translate[ "invalidExpr"]];
@@ -866,9 +871,6 @@ updateKnowledgeBase[ form_, k_, glob_, l_String, tags_List] :=
 	    		updateKnowledgeBase[ $Failed, k],
 	    	(*else*)
 	    		_,
-	    		If[ tags =!= {},
-		    		AppendTo[ fml, "tags" -> tags]
-		    	];
 		    	$tmaFmlPost[ fml];
 		    	(* If new formulae are appended rather than prepended, the old formulae with the same label
 		    		have to be deleted first, because "DeleteDuplicates" would delete the new ones. *)
@@ -1058,7 +1060,7 @@ initSession[] :=
         $tmaAllNotebooks = {};
         $tmaCompPre = sequenceFlatten;
         $tmaCompPost = sequenceFlatten;
-        $tmaFmlPre = sequenceFlatten;
+        $tmaFmlPre = defaultFmlPre;	(* takes 6 arguments 'form', 'lbl', 'simp', 'tags', 'key', 'pos', and returns 4-tuple '{newForm, newLbl, newSimp, newTags}' *)
         $tmaFmlPost = transferToComputation;
         $Pre=.;
         $PreRead=.;
