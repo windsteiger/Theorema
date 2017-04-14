@@ -1164,10 +1164,10 @@ structViewRules[ {category_String, r__}, tags_, open_:False] :=
 
 (*Responsible for groupe name of rules. 
 	If no rules in group, returns empty Sequense *)
-structViewRules[{category_String}, tags_, open_]:=Sequence[];
+structViewRules[ {category_String}, tags_, open_] := Sequence[];
 
 structViewRules[ Hold[ rs_]] := 
-	Module[{list = {}},
+	Module[ {list = {}},
 		If[ StringLength[ $ruleFilterKW] > 2,		
 			list = DeleteCases[ rs, {r_Symbol /; testNoMatch[ MessageName[ r, "usage", $TmaLanguage], "*" <> $ruleFilterKW <> "*"], t_, text_, p_Integer ,___}, Infinity];
 			structViewRules[ list, {}, True],
@@ -1181,10 +1181,10 @@ testNoMatch[ s_, p_] := True
 
 displaySelectedRules[ Hold[ rs_]] := 
 	Module[ {actRules},
-		(* Select checked list_ from allRules_ *)  
-		actRules = Cases[ rs, {r_Symbol?ruleActive, _, _, _Integer, ___} -> r, Infinity];
-		(*Sort list_ by priority_*)
-		actRules = Sort[ actRules, rulePriority[#1] < rulePriority[#2]&];
+		(* Select rule defaults *)  
+		actRules = Cases[ rs, {r_Symbol, _, _, _Integer, ___}, Infinity];
+		(* Sort list by priority *)
+		actRules = Sort[ actRules, rulePriority[ #1[[1]]] < rulePriority[ #2[[1]]]&];
 		Pane[		
 			Column[ Map[ makeRuleRow, actRules]],
 			ImageSize -> {360,200},
@@ -1192,11 +1192,21 @@ displaySelectedRules[ Hold[ rs_]] :=
 		]	
 	]
 
-makeRuleRow[r_Symbol] := 
+makeRuleRow[ {r_Symbol, False, rta_, prio_, ___}] /; !ruleActive[ r] := Sequence[]
+
+makeRuleRow[ {r_Symbol, ra_, rta_, prio_, ___}] := 
 	Module[ {}, 
 		Style[ 
-			Row[{ "(" <> ToString[ rulePriority[ r]] <> ")", Spacer[2],
-				Tooltip[ showProofTextPic[ ruleTextActive[ r]], MessageName[ ruleTextActive, "usage", $TmaLanguage]], Spacer[5], MessageName[ r, "usage", $TmaLanguage]}],
+			Row[{Style[ "(" <> ToString[ rulePriority[ r]] <> ")", FontWeight -> If[ prio === rulePriority[ r], "Plain", "Bold"]], Spacer[2],
+				Tooltip[ Style[ showProofTextPic[ ruleTextActive[ r]], FontWeight -> If[ rta === ruleTextActive[ r], "Plain", "Bold"]], 
+					MessageName[ ruleTextActive, "usage", $TmaLanguage]], Spacer[5], 
+				Style[ MessageName[ r, "usage", $TmaLanguage], 
+					Which[ ruleActive[ r] && !ra, 
+						FontWeight -> "Bold", 
+						   !ruleActive[ r] && ra, 
+						FontVariations -> {"StrikeThrough" -> True}, 
+						   True, 
+						FontWeight -> "Plain"]]}],
 			LineBreakWithin -> False]
 	]
 

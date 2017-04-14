@@ -31,8 +31,8 @@ BeginPackage["Theorema`"];
 $TheoremaVersion = "2.0";
 $TheoremaRelease = "0";
 
-Which[!ValueQ[$TheoremaDirectory],
-	$TheoremaDirectory = With[ {`priv`possibleDirs = Select[ $Path, (FileType[FileNameJoin[{#,"Theorema","Kernel","init.m"}]] === File)&]},
+Which[ !ValueQ[ $TheoremaDirectory],
+	$TheoremaDirectory = With[ {`priv`possibleDirs = Select[ $Path, (FileType[ FileNameJoin[ {#, "Theorema", "Kernel", "init.m"}]] === File)&]},
 		If[ `priv`possibleDirs === {},
 			Print[ "The Theorema Directory is not installed properly.\nPlease consult the installation guide."];
 			Exit[],
@@ -115,7 +115,7 @@ showWelcomeScreen[] /; !ValueQ[`priv`welcomeScreen] && !TrueQ[ $suppressWelcomeS
     ];
     Pause[5];
 ]
-   		
+  		
 If[ TrueQ[$Notebooks],
     showWelcomeScreen[],
     Print[ "Theorema Version " <> StringJoin[ Riffle[ {$TheoremaVersion, $TheoremaRelease}, "."]] <> " (C) 2010-" <> 
@@ -123,34 +123,33 @@ If[ TrueQ[$Notebooks],
     This program comes with ABSOLUTELY NO WARRANTY;\n\n    This is free software, and you are welcome to\n    redistribute it under the conditions of the\n    GNU General Public License, see <http://www.gnu.org/licenses/>."]
 ];
 
-Get["Theorema`Common`"]
-Get["Theorema`System`"]
+Get[ "Theorema`Common`"]
+Get[ "Theorema`System`"]
 
 (* The package "Theorema`Computation`Language`" introduces the same names as "Theorema`Language`".
    Therefore, we load them from different Theorema`-contexts in order to avoid "shadowing" messages during startup.
    It is important to load "Theorema`Computation`Language`" BEFORE "Theorema`Language`", because in 
    "Theorema`Language`Syntax`" the symbols in the Computation-context must already exist.
    *)
-Get["Theorema`Computation`Language`"]
+Get[ "Theorema`Computation`Language`"]
 
 EndPackage[]
 
-BeginPackage["Theorema`"]
+BeginPackage[ "Theorema`"]
 
-Get["Theorema`Language`"]
-Get["Theorema`Computation`"]
-Get["Theorema`Provers`"]
-Get["Theorema`Interface`GUI`"]
+Get[ "Theorema`Language`"]
+Get[ "Theorema`Computation`"]
+Get[ "Theorema`Provers`"]
+Get[ "Theorema`Interface`GUI`"]
 
 EndPackage[]
 	
-
-If[ $Notebooks && MemberQ[Notebooks[], Theorema`priv`welcomeScreen],
+If[ $Notebooks && MemberQ[ Notebooks[], Theorema`priv`welcomeScreen],
 	NotebookClose[ Theorema`priv`welcomeScreen];
 	Clear[ Theorema`priv`welcomeScreen]];
 
 (* For documentation generation with Workbench include the following packages,
    so that their symbols appear without context *)
 (*   
-Needs["Theorema`Common`"]
+Needs[ "Theorema`Common`"]
 *)
