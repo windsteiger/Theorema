@@ -304,7 +304,7 @@ isOptComponent[ args___] := unexpected[ isOptComponent, {args}]
 	   the corresponding tree representation according to the settings given in simp
 	   and saves the respective proof object and the corresponding tree representation in a file.
 *)
-simplifyProof[ PRFOBJ$[ pi_, sub_, pv_], proofTree_, simp_List /; Apply[ Or, simp], file_String] := 
+simplifyProof[ PRFOBJ$[ pi_, sub_, pv_], pt_, simp_List /; Apply[ Or, simp], file_String] := 
 (*	
 	We call the function only if at least one of the simplification settings is True
 *)
@@ -320,8 +320,8 @@ simplifyProof[ PRFOBJ$[ pi_, sub_, pv_], proofTree_, simp_List /; Apply[ Or, sim
 		endTime = SessionTime[];
 		(* Time for simplification does not include time for generating visual tree representation and time for file output *)
 		simpPt = poToTree[ simpPo];
-		Put[ {simpPo, simpPt}, simpPoFilename[ file, simp]];
-		{simpPo, simpPt, endTime - startTime}
+		Put[ {simpPo, simpPt, endTime-startTime}, simpPoFilename[ file, simp]];
+		{simpPo, simpPt}
 	]
 simplifyProof[ po_PRFOBJ$, pt_, simp_List, file_String] := {po, pt, 0.}
 simplifyProof[ args___] := unexpected[ simplifyProof, {args}]
@@ -884,8 +884,8 @@ makeInitialProofTree[ args___] := unexpected[ makeInitialProofTree, {args}]
 (* displayProof *)
 
 displayProof[ file_String] :=
-	Module[ {po, pt, cells},
-		{po, pt} = getProofObjectTree[ file];
+	Module[ {po, pt, st, cells},
+		{po, pt, st} = getProofObjectTreeTime[ file];
 		cells = proofObjectToCell[ po];
 		$TMAproofObject = po;
 		$TMAproofTree = pt; 
@@ -898,15 +898,15 @@ displayProof[ file_String] :=
 		$TMAproofTree = tree;
 	]
 displayProof[ file_String, simp_List] :=
-	Module[ {fspo, po, pt, cells, newDock, tmp, favIcon},
+	Module[ {fspo, po, pt, st, cells, newDock, tmp, favIcon},
 		If[ !ValueQ[ origDock],
 			origDock = DockedCells /. Options[ tmp = NotebookPut[ Notebook[ {}], StyleDefinitions -> makeColoredStylesheet[ "Proof"], Visible -> False], DockedCells];
 			NotebookClose[ tmp];
 		];
 		If[ FileExistsQ[ fspo = simpPoFilename[ file, simp]],
-			{po, pt} = getProofObjectTree[ fspo],
+			{po, pt, st} = getProofObjectTreeTime[ fspo],
 			(* else *)
-			{po, pt} = getProofObjectTree[ simpPoFilename[ file, 0]];			
+			{po, pt, st} = getProofObjectTreeTime[ simpPoFilename[ file, 0]];			
 		];
 		cells = proofObjectToCell[ po];
 		$TMAproofObject = po;
@@ -919,7 +919,12 @@ displayProof[ file_String, simp_List] :=
 			favIcon = ""
 		];
 		newDock = {origDock, 
-  			Cell[ BoxData[ ToBoxes[ OpenerView[ {Row[ {Style[ translate[ "pSimp"], "Subsubsection"], favIcon}, Spacer[25]], 
+  			Cell[ BoxData[ ToBoxes[ OpenerView[ {Grid[ {{Item[ Style[ translate[ "pSimp"], "Subsubsection"], ItemSize -> Scaled[0.46], Alignment -> Left],
+  				Item[ Tooltip[ favIcon, translate[ "Mark favourite"], PassEventsDown -> True], ItemSize -> Scaled[0.08], Alignment -> Center], 
+  				Item[ If[ st > 0, 
+  					     Style[ translate[ "proofSimpTime"] <> ": " <> If[ Negative[ st], "\[LongDash]", ToString[ st]] <> "s", "SmallText"],
+  					     (* else *)
+  					     ""], ItemSize -> Scaled[0.46], Alignment -> Right]}}], 
        			Column[ {Grid[{
     				{Checkbox[ Dynamic[ $eliminateBranches]], Style[ translate[ "elimBranches"] <> If[ simp[[1]], " \[Checkmark]", ""], "Text"]},
     				{Checkbox[ Dynamic[ $eliminateSteps]], Style[ translate[ "elimSteps"] <> If[ simp[[2]], " \[Checkmark]", ""], "Text"]},
@@ -940,11 +945,11 @@ displayProof[ file_String, simp_List] :=
 displayProof[ args___] := unexpected[ displayProof, {args}]
 
 displaySimplified[ file_String, simp_List, origNb_NotebookObject] /; Apply[ Or, simp]:=
-	Module[ {fpo = file <> "-po.m", fspo = simpPoFilename[ file, simp], po, st, pt},
+	Module[ {fpo = file <> "-po.m", fspo = simpPoFilename[ file, simp], po, pt, st},
 		If[!FileExistsQ[ fspo] || AbsoluteTime[ FileDate[ fspo]] < AbsoluteTime[ FileDate[ fpo]],
 			(* if a simplified proof does not yet exist or the full proof object is newer than the existing simplified one: simplify *)
-			{po, pt} = getProofObjectTree[ fpo];
-			{po, pt, st} = simplifyProof[ po, pt, simp, file]
+			{po, pt, st} = getProofObjectTreeTime[ fpo];
+			{po, pt} = simplifyProof[ po, pt, simp, file]
 		];
 		NotebookClose[ origNb];
 		displayProof[ file, simp]
@@ -961,7 +966,7 @@ displaySimplified[ args___] := unexpected[ displaySimplified, {args}]
 showFavIcon[ file_, simp_] := 
 	Module[{}, 
 		If[ FileExistsQ[ file <> "-po-fav.m"] && FromDigits[ simp /. {True -> 1, False -> 0}, 2] === Get[ file <> "-po-fav.m"], 
-			Style[ "\[FivePointedStar]", FontSize -> 20, FontColor -> Yellow], 
+			Style[ "\[FivePointedStar]", FontSize -> 20, FontColor -> TMAcolor[ 7, $TheoremaColorScheme]], 
 			Style[ "\:2606", FontSize -> 20, FontColor -> TMAcolor[ 13, $TheoremaColorScheme]]
 		]
 	]
@@ -976,8 +981,8 @@ toggleFavIcon[ file_, simp_] :=
 	]
 toggleFavIcon[ args___] := unexpected[ toggleFavIcon, {args}]
 
-getProofObjectTree[ file_String] :=
-	Module[ {fileContent, po, pt},
+getProofObjectTreeTime[ file_String] :=
+	Module[ {fileContent, po, pt, st=-1},
 		fileContent = Get[ file];
 		Switch[ fileContent,
 			_PRFOBJ$,
@@ -987,11 +992,14 @@ getProofObjectTree[ file_String] :=
 			Put[ {po, pt}, file],
 			{_PRFOBJ$, _},
 			(* version 2: file contains a list containing the proof object and the corresponding tree *)
-			{po, pt} = fileContent;
+			{po, pt} = fileContent,
+			{_PRFOBJ$, _, _},
+			(* file contains a list containing the proof object, the corresponding tree, and simplification time *)
+			{po, pt, st} = fileContent;
 		];
-		{po, pt}
+		{po, pt, st}
 	]
-getProofObjectTree[ args___] := unexpected[ getProofObjectTree, {args}]
+getProofObjectTreeTime[ args___] := unexpected[ getProofObjectTreeTime, {args}]
 
 
 (* ::Subsubsection:: *)

@@ -151,6 +151,7 @@ falls nicht, siehe <http://www.gnu.org/licenses/>.", ToString[ Date[][[1]]]];
     translate[ "LETTooltip", lang] = "a \[Ellipsis] Variable als Abk\[UDoubleDot]rzung\nx \[Ellipsis] abgek\[UDoubleDot]rzter Ausdruck\nA \[Ellipsis] Ausdruck mit a anstelle von x";   	
     translate[ "Logic", lang] = "Logik";
 
+    translate[ "Mark favourite", lang] := "Als Favorit markieren.\nDieser Beweis wird beim Anklicken von \"" <> translate[ "ShowSimplifiedProof", lang] <> "\" angezeigt";
     translate[ "more", lang] = "mehr \[Ellipsis]";
 
 	translate[ "nA", lang] = "nicht verf\[UDoubleDot]gbar";

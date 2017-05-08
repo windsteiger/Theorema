@@ -148,6 +148,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.", ToString[
     translate[ "LETTooltip", lang] = "a \[Ellipsis] variable used as abbreviation\nx \[Ellipsis] abbreviated expression\nexpr \[Ellipsis] expression where a abbreviates x";   	
     translate[ "Logic", lang] = "Logic";
 
+    translate[ "Mark favourite", lang] := "Mark as favourite simplified proof.\nThis proof will be displayed when clicking \"" <> translate[ "ShowSimplifiedProof", lang] <> "\"";
     translate[ "more", lang] = "more \[Ellipsis]";
 
 	translate[ "nA", lang] = "not available";

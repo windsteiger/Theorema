@@ -1475,7 +1475,7 @@ submitProveTask[ ] :=
 submitProveTask[ args___] := unexpected[ submitProveTask, {args}]
 
 execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, strategy_, searchDepth_, searchTime_, simplification_List, repl_Integer] :=
-	Module[{po, pv, pt, pTree, subsP, fileID, file, st},
+	Module[{po, pv, pt, pTree, subsP, fileID, file},
 		$addProofKB = {};
 		{pv, po, pTree, pt} = callProver[ rules, strategy, goal, kb, searchDepth, searchTime];
 		
@@ -1486,11 +1486,11 @@ execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, str
 		
 		(* At this point po is equal to the global $TMAproofObject and $TMAproofTree is the corresponding tree *)
 		{subsP, fileID, file} = saveProofObject[ po, pTree, goal, repl];
-		{po, pTree, st} = simplifyProof[ po, pTree, simplification, file];
+		{po, pTree} = simplifyProof[ po, pTree, simplification, file];
 		(* po is the simplified proof object and $TMAproofTree is the corresponding simplified tree, but $TMAproofObject is still the unsimplified object *)
 		$TMAproofObject = po;
 		$TMAproofTree = pTree;
-		printProveInfo[ DeleteDuplicates[ Map[ {key[#], label[#]}&, $selectedProofKB]], pv, pt, st, simplification, {subsP, fileID, file}];
+		printProveInfo[ DeleteDuplicates[ Map[ {key[#], label[#]}&, $selectedProofKB]], pv, pt, simplification, {subsP, fileID, file}];
 	]
 execProveCall[ args___] := unexpected[ execProveCall, {args}]
 
@@ -1679,9 +1679,9 @@ makeRelFilename[ args___] := unexpected[ makeRelFilename, {args}]
 (* printProofInfo *)
 
 
-printProveInfo[ kbKeysLabels_, pVal_, pTime_, sTime_, simplification_List, {subsP_Integer, fileID_String, file_String}] := 
+printProveInfo[ kbKeysLabels_, pVal_, pTime_, simplification_List, {subsP_Integer, fileID_String, file_String}] := 
 	Module[ {},
-		saveProveCacheDisplay[ kbKeysLabels, pTime, sTime, file];
+		saveProveCacheDisplay[ kbKeysLabels, pTime, file];
         If[ NotebookFind[ $proofInitNotebook, makeProofIDTag[ $selectedProofGoal] <> "-" <> ToString[ subsP], All, CellTags] === $Failed,
         	(* no replacement of existing proof -> new proof *)
         	If[ NotebookFind[ $proofInitNotebook, makeProofIDTag[ $selectedProofGoal] <> "-" <> ToString[ subsP-1], All, CellTags] === $Failed,
@@ -1752,7 +1752,7 @@ setProveEnv[ args___] := unexpected[ setProveEnv, {args}]
 makeProofIDTag[ f_FML$] := "Proof|" <> id@f
 makeProofIDTag[ args___] := unexpected[ makeProofIDTag, {args}]
 
-saveProveCacheDisplay[ kbKeysLabels_, pTime_, sTime_, file_String] :=
+saveProveCacheDisplay[ kbKeysLabels_, pTime_, file_String] :=
 	With[ {fn = file <> ".m"},
 		(* Generate cache only in plain .m format, since this allows sharing notebooks with users on different platforms.
 			Also, loading a .m-file allows dynamic objects to react to new settings, whereas loading a .mx-file has no effect on dynamics.
@@ -1763,7 +1763,7 @@ saveProveCacheDisplay[ kbKeysLabels_, pTime_, sTime_, file_String] :=
 			TabView[ {
 				translate[ "tcProveTabKBTabLabel"] -> Pane[ Row[ Map[ FORM, kbKeysLabels], ", "], 500],
         		translate[ "tcProveTabBuiltinTabLabel"] -> summarizeBuiltins[ "prove"],
-        		translate[ "tcProveTabProverTabLabel"] -> summarizeProverSettings[ pTime, sTime],
+        		translate[ "tcProveTabProverTabLabel"] -> summarizeProverSettings[ pTime],
         		translate[ "RestoreSettings"] -> Row[ {translate[ "RestoreSettingsLong"], Button[ translate[ "OK"], setProveEnv[ fn]]}, Spacer[5]]
 				},
 				ImageSize -> Automatic
@@ -1772,7 +1772,7 @@ saveProveCacheDisplay[ kbKeysLabels_, pTime_, sTime_, file_String] :=
 	]
 saveProveCacheDisplay[ args___] := unexpected[ saveProveCacheDisplay, {args}]
 
-summarizeProverSettings[ pTime_, sTime_] :=
+summarizeProverSettings[ pTime_] :=
 	Module[{},
 		TabView[{				
 				translate[ "selectedRules"] -> displaySelectedRules[ $selectedRuleSet],
@@ -1798,7 +1798,6 @@ summarizeProverSettings[ pTime_, sTime_] :=
 					],
 				translate[ "statistics"] -> Column[{
     					Labeled[ pTime, translate[ "proofFindTime"] <> ":", Left],
-    					Labeled[ sTime, translate[ "proofSimpTime"] <> ":", Left],
     					Labeled[ DateString[ {"DayName", ", ", "Year", "-", "Month", "-", "Day", ", ", "Hour24", ":", "Minute", ":", "Second"}], translate[ "TimeStamp"] <> ":", Left]
     				}]
 			}, AutoAction -> True, ControlPlacement -> Left]
