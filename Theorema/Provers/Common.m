@@ -323,7 +323,7 @@ simplifyProof[ PRFOBJ$[ pi_, sub_, pv_], pt_, simp_List /; Apply[ Or, simp], fil
 		Put[ {simpPo, simpPt, endTime-startTime}, simpPoFilename[ file, simp]];
 		{simpPo, simpPt}
 	]
-simplifyProof[ po_PRFOBJ$, pt_, simp_List, file_String] := {po, pt, 0.}
+simplifyProof[ po_PRFOBJ$, pt_, simp_List, file_String] := {po, pt}
 simplifyProof[ args___] := unexpected[ simplifyProof, {args}]
 
 simpPoFilename[ file_String, simp_List] :=
