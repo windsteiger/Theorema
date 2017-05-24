@@ -17,6 +17,15 @@
 
 BeginPackage[ "Theorema`System`"]
 
+Scan[
+	Function[ file,
+		If[ TrueQ[ $VersionNumber < ToExpression[ StringReplace[ StringDrop[ FileBaseName[ file], 21], "-" -> "."]]],
+			Get[ file];
+		]
+	],
+	FileNames[ "MathematicaFunctions-" ~~ __ ~~ ".m", FileNameJoin[ {Theorema`$TheoremaDirectory, "Theorema", "System", "Versions"}]]
+]
+
 Get[ "Theorema`System`Utilities`"]
 
 EndPackage[]

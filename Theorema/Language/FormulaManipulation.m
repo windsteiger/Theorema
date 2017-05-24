@@ -1367,29 +1367,36 @@ filterRules[ args___] := unexpected[ filterRules, {args}]
 (* ::Section:: *)
 (* FML$ datastructure *)
 
-Options[ makeFML] = {key :> defKey[], formula -> True, label :> defLabel[], simplify -> True, preprocess -> sequenceFlatten};
+defaultFmlPre[ form_, lbl_, simp_, tags_List, _, _] :=
+	{sequenceFlatten[ form], lbl, simp, If[ tags === {}, {}, {"tags" -> tags}]}
+defaultFmlPre[ args___] := unexpected[ defaultFmlPre, {args}]
+
+Options[ makeFML] = {key :> defKey[], formula -> True, label :> defLabel[], simplify -> True, preprocess -> defaultFmlPre, cellPosition -> Null, formulaTags -> {}};
 
 makeFML[ data___?OptionQ] :=
-	Module[{k, f, l, s, pp, fs},
-		{k, f, l, s, pp} = {key, formula, label, simplify, preprocess} /. {data} /. Options[ makeFML];
-		f = pp[ f];
-		If[ f === $Failed || f === Null,
-			f,
-		(*else*)
-			Switch[ s,
-				True,
-				fs = computeInProof[ f],
-				False,
-				fs = f,
-				_,
-				fs = s[ f];
-				If[ Head[ fs] === s, fs = f];	(* Security check: If the head of the new formula is still 's', no simplification happened. *)
-			];
-			If[ isIndividual[ fs],
-				makeTmaFml[ k, fs, l, f],
-			(*else*)
-				$Failed
-			]
+	Module[{k, forig, lorig, sorig, pp, fs, cp, torig},
+		{k, forig, lorig, sorig, pp, cp, torig} = {key, formula, label, simplify, preprocess, cellPosition, formulaTags} /. {data} /. Options[ makeFML];
+		Replace[ pp[ forig, lorig, sorig, torig, k, cp],
+			{
+				{f:Except[ $Failed], l_String, s_, t:{(Except[ "origForm", _String] -> _)...}} :>
+					(
+						Switch[ s,
+							True,
+							fs = computeInProof[ f],
+							False,
+							fs = f,
+							_,
+							fs = s[ f];
+							If[ Head[ fs] === s, fs = f];	(* Security check: If the head of the new formula is still 's', no simplification happened. *)
+						];
+						If[ isIndividual[ fs],
+							Join[ makeTmaFml[ k, fs, l, f], FML$ @@ t],
+						(*else*)
+							$Failed
+						]
+					),
+				Except[ Null] -> $Failed
+			}
 		]
 	]
 makeFML[ args___] := unexpected[ makeFML, {args}]
