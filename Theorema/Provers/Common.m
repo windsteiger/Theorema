@@ -895,7 +895,6 @@ displayProof[ file_String] :=
 			SetOptions[ $TMAproofNotebook, NotebookEventActions -> {{"KeyDown", "r"} :> ($TMAproofNotebook = nb; $TMAproofObject = obj; $TMAproofTree = tr;),
 				"WindowClose" :> ($TMAproofTree = {};), PassEventsDown -> False}]
 		];
-		$TMAproofTree = tree;
 	]
 displayProof[ file_String, simp_List] :=
 	Module[ {fspo, po, pt, st, cells, newDock, tmp, favIcon},
