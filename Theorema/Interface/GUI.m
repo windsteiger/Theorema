@@ -1475,27 +1475,41 @@ submitProveTask[ ] :=
 submitProveTask[ args___] := unexpected[ submitProveTask, {args}]
 
 execProveCall[ goal_FML$, kb_, rules:{ruleSet_, active_List, priority_List}, strategy_, searchDepth_, searchTime_, simplification_List, repl_Integer] :=
-	Module[{po, pv, pt, pTree, subsP, fileID, file},
-		$addProofKB = {};
-		{pv, po, pTree, pt} = callProver[ rules, strategy, goal, kb, searchDepth, searchTime];
+	Module[ {po, pv, pt, pTree, subsP, fileID, file, log},
+		{subsP, fileID, file, log} = openLog[ goal, repl];
+		Block[ {$TMALogFile = log},
+			writeLog[ "Proof run initiated from GUI"];
+			$addProofKB = {};
+			{pv, po, pTree, pt} = callProver[ rules, strategy, goal, kb, searchDepth, searchTime];
 		
-		(* Update GUI and proof object w.r.t. knowledge that was added during proof *)
-		$selectedProofKB = DeleteDuplicates[ Join[ kb, $addProofKB]];
-		Scan[ With[ {fkey = key[ #]}, kbSelectProve[ fkey] = True]&, $addProofKB];
-		If[ $addProofKB =!= {}, po = ReplacePart[ po, {1, 3, 1} -> Prepend[ $selectedProofKB, goal]]];
+			(* Update GUI and proof object w.r.t. knowledge that was added during proof *)
+			$selectedProofKB = DeleteDuplicates[ Join[ kb, $addProofKB]];
+			Scan[ With[ {fkey = key[ #]}, kbSelectProve[ fkey] = True]&, $addProofKB];
+			If[ $addProofKB =!= {}, po = ReplacePart[ po, {1, 3, 1} -> Prepend[ $selectedProofKB, goal]]];
 		
-		(* At this point po is equal to the global $TMAproofObject and $TMAproofTree is the corresponding tree *)
-		{subsP, fileID, file} = saveProofObject[ po, pTree, goal, repl];
-		{po, pTree} = simplifyProof[ po, pTree, simplification, file];
-		(* po is the simplified proof object and $TMAproofTree is the corresponding simplified tree, but $TMAproofObject is still the unsimplified object *)
-		$TMAproofObject = po;
-		$TMAproofTree = pTree;
-		printProveInfo[ DeleteDuplicates[ Map[ {key[#], label[#]}&, $selectedProofKB]], pv, pt, simplification, {subsP, fileID, file}];
+			(* At this point po is equal to the global $TMAproofObject and $TMAproofTree is the corresponding tree *)
+			saveProofObject[ po, pTree, file];
+			{po, pTree} = simplifyProof[ po, pTree, simplification, file];
+			(* po is the simplified proof object and $TMAproofTree is the corresponding simplified tree, but $TMAproofObject is still the unsimplified object *)
+			$TMAproofObject = po;
+			$TMAproofTree = pTree;
+			printProveInfo[ DeleteDuplicates[ Map[ {key[#], label[#]}&, $selectedProofKB]], pv, pt, simplification, {subsP, fileID, file}];
+			writeLog[ StringForm[ "Proof info written to ``.\nProof run finished.", CurrentValue[ $proofInitNotebook, "NotebookFullFileName"]]];
+		];
+		closeLog[ log];
 	]
 execProveCall[ args___] := unexpected[ execProveCall, {args}]
 
-saveProofObject[ po_, pt_, goal_FML$, repl_Integer] :=
-	Module[{cellID, nbDir, subsP = repl, fileID, file},
+saveProofObject[ po_, pt_, file_String] :=
+	Module[{},
+		(* cleanup all proof object files from previous runs *)
+		DeleteFile[ FileNames[ file <> "-po-*.m"]];
+		Put[ {po, pt}, file <> "-po.m"];		
+	]
+saveProofObject[ args___] := unexpected[ saveProofObject, {args}]
+
+openLog[ goal_FML$, repl_Integer] :=
+	Module[{cellID, nbDir, subsP = repl, fileID, file, log},
 		cellID = getCellIDFromKey[ key@goal];
 		nbDir = createPerNotebookDirectory[ CurrentValue[ $proofInitNotebook, "NotebookFullFileName"]];
 		If[ subsP === 0,
@@ -1504,12 +1518,16 @@ saveProofObject[ po_, pt_, goal_FML$, repl_Integer] :=
 		];
 		fileID = "p" <> cellID <> "-" <> ToString[ subsP];
 		file = FileNameJoin[ {nbDir, fileID}];
-		(* cleanup all proof object files from previous runs *)
-		DeleteFile[ FileNames[ file <> "-po-*.m"]];
-		Put[ {po, pt}, file <> "-po.m"];		
-		{subsP, fileID, file}
+		log = OpenWrite[ file <> ".log"];
+		{subsP, fileID, file, log}		
 	]
-saveProofObject[ args___] := unexpected[ saveProofObject, {args}]
+openLog[ args___] := unexpected[ openLog, {args}]
+
+closeLog[ file_OutputStream] :=
+	Module[{},
+		Close[ file]
+	]	
+closeLog[ args___] := unexpected[ closeLog, {args}]
 
 
 addKnowledgeWhileProving[ new_List] :=
@@ -1736,6 +1754,7 @@ removeGroup[ nb_NotebookObject, base_String] :=
 		(* remove all .m-files. 
 		   Could be specified more precisely using string patterns or regexp, but this crashes under Linux (at least in Mma 8) *)
 		DeleteFile[ FileNames[ FileNameJoin[ {CurrentValue[ nb, "NotebookDirectory"], FileBaseName[ CurrentValue[ nb, "NotebookFileName"]], base <> "*.m"}]]];
+		DeleteFile[ FileNameJoin[ {CurrentValue[ nb, "NotebookDirectory"], FileBaseName[ CurrentValue[ nb, "NotebookFileName"]], base <> ".log"}]];
 		SelectionMove[ nb, All, ButtonCell];
 		SelectionMove[ nb, All, CellGroup];
 		NotebookDelete[ nb];

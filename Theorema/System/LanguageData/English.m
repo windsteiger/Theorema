@@ -282,6 +282,7 @@ With[ {lang = "English"},
 	MessageName[ $tmaFmlPost, "usage", lang] = "$TmaFmlPost is a function that is applied to a FML$-structure before it is stored in '$tmaEnv'.";
 	MessageName[ $tmaFmlPre, "usage", lang] = "$tmaFmlPre is a function that is applied to a formula entered into a formula cell before it is turned into a FML$-structure.";
 	MessageName[ $TmaLanguage, "usage", lang] = "The language used in the Theorema interface.";
+	MessageName[ $TMALogFile, "usage", lang] = "The currently active log-file.";
 	MessageName[ $tmaNbUpdateQueue, "usage", lang] = "The notebook update queue contains a list of timestamps when a notebook was last evaluated.";
 	MessageName[ tmaNotebookPut, "usage", lang] = "Theorema version of Mathematica's NotebookPut.";
 	MessageName[ $TMAproofNotebook, "usage", lang] = "$TMAproofNotebook is the notebook object containing the current proof.";
@@ -303,4 +304,6 @@ With[ {lang = "English"},
 	MessageName[ unification, "usage", lang] = "";
 	MessageName[ updateKBBrowser, "usage", lang] = "";
 	MessageName[ used, "usage", lang] = "used is an option for the constructor makePRFINFO and a selector for the PRFINFO$ datastructure.";
+
+	MessageName[ writeLog, "usage", lang] = "writeLog[ expr__] writes expr to the currently active log-file.";
 ]

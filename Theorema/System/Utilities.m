@@ -103,6 +103,18 @@ getOptionalComponent[ ds_[ ___, (Rule|RuleDelayed)[ key_String, val_], ___], key
 getOptionalComponent[ ds_, key_String] := {}
 getOptionalComponent[ args___] := unexpected[ getOptionalComponent, {args}]
 
+
+(* ::Subsubsection:: *)
+(* Log output to file *)
+
+(* We expect the global variable $TMALogFile to be an open output stream *)
+
+writeLog[ expr__] :=
+	If[ MatchQ[ $TMALogFile, _OutputStream],
+		WriteString[ $TMALogFile, DateString[], " ", expr, "\n"];
+	]
+writeLog[ args___] := unexpected[ writeLog, {args}]
+
 End[]
 
 EndPackage[]

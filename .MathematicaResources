@@ -6,9 +6,8 @@ Resources[
     StyleSheets[
         Directory["Theorema/FrontEnd/StyleSheets"]
     ],
-    ExecutionBuildCommand["<<Theorema`"],
+    ExecutionBuildCommand["Needs[\"Theorema`\"]"],
     Paclet[
-        DocumentationFolder["Theorema/Documentation"],
         FunctionPaclet[False]
     ]
 ]
