@@ -1062,6 +1062,10 @@ initSession[] :=
         $tmaCompPost = sequenceFlatten;
         $tmaFmlPre = defaultFmlPre;	(* takes 6 arguments 'form', 'lbl', 'simp', 'tags', 'key', 'pos', and returns 4-tuple '{newForm, newLbl, newSimp, newTags}' *)
         $tmaFmlPost = transferToComputation;
+        $codeProlog := (Theorema`Common`$parseTheoremaQuoted = True;);
+        $codeEpilog := (Theorema`Common`$parseTheoremaQuoted = False;);
+        $inputProlog := (Theorema`Common`$parseTheoremaQuoted = True;);
+        $inputEpilog := (Theorema`Common`$parseTheoremaQuoted = False;);
         $Pre=.;
         $PreRead=.;
     ]
