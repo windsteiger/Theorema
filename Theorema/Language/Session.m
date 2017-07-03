@@ -426,8 +426,8 @@ processGlobalDeclaration[ x_] :=
 			Cell[ BoxData[
 				ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeGlobal[ fid]]]]
 		];
-		SetOptions[ NotebookSelection[ nb], 
-			CellTags -> {cellIDLabel[ id], sourceLabel[ file]}, ShowCellTags -> False,
+		SetOptions[ NotebookSelection[ nb],
+			CellTags -> {cellIDLabel[ id]}, ShowCellTags -> False,
 			CellFrameLabels -> {{None, newFrameLabel}, {None, None}}];
 		nbExpr = NotebookGet[ nb];
 		decl = ReleaseHold[ Catch[ markVariables[ freshNames[ Hold[ x]]]]];
@@ -443,15 +443,24 @@ SetAttributes[ processEnvironment, HoldAll];
 processEnvironment[ Theorema`Language`nE] := Null
 
 processEnvironment[ x_] :=
-    Module[ {nb = EvaluationNotebook[], nbFile, nbExpr, key, tags, globDec, pos, cellpos},
+    Module[ {nb = EvaluationNotebook[], nbFile, nbExpr, key, tags, globDec, pos, cellpos, origName},
     	(* select current cell: we need to refer to this selection when we set the cell options *)
 		SelectionMove[ nb, All, EvaluationCell];
     	{key, tags} = adjustFormulaLabel[ nb];
 		(* Perform necessary actions on the whole notebook *)
 		nbFile = CurrentValue[ nb, "NotebookFullFileName"];
+		(* Check whether the file name of the notebook changed and the original file does not exist any more *)
+        origName = updateNotebookFileName[ nb, nbFile];
+		If[ nbFile =!= origName && !FileExistsQ[ origName],
+			(* If yes, this indicates that probably some formulae are stored in the environment with an outdated key
+				-> update the keys
+				-> remove outdated tab from KBbrowser
+			*)
+        	updateSingleKey[ sourceLabel[ nbFile], sourceLabel[ origName]]
+		];
 		If[ $refreshBrowser,
 			(* $refreshBrowser is set in openEnvironment, it basically depends on how long ago the last evaluation has been.
-			   If browser need not refresh then this indicates that we are in a multi-cell evaluation. In this case we do not get a fresh 
+			   If browser need not refresh then this indicates that we are in a multi-cell evaluation. In this case we do not get a fresh
 			   nbExpr, otherwise yes, because nb might have changed (been edited) *)
         	nbExpr = NotebookGet[ nb];
         	(* For the outside, we also store the filename *)
@@ -514,13 +523,20 @@ adjustFormulaLabel[ args___] := unexpected[ adjustFormulaLabel, {args}]
 
 (* getCleanCellTags returns all CellTags except the generated tags used for formula identification, i.e. ID<sep>... and Source<sep>...*)
 getCleanCellTags[ cellTags_List] :=
-    Select[ cellTags, !StringMatchQ[ #, (("ID" <> $cellTagKeySeparator | "Source" <> $cellTagKeySeparator | "Proof|ID" <> $cellTagKeySeparator) ~~ __) | $initLabel]&]
+	With[ {prefixes = ("ID" <> $cellTagKeySeparator | "Source" <> $cellTagKeySeparator | "Proof|ID" <> $cellTagKeySeparator)},
+		(* Although "Source:..." tags are not generated automatically any more, we still remove them in 'getCleanCellTags' to handle older
+			notebooks properly, too. *)
+    	Select[ cellTags, !StringMatchQ[ #, (prefixes ~~ __) | $initLabel]&]
+	]
 getCleanCellTags[ cellTag_String] := getCleanCellTags[ {cellTag}]
-getCleanCellTags[ args___] := unexpected[ getCleanCellTags,{args}]
+getCleanCellTags[ args___] := unexpected[ getCleanCellTags, {args}]
 
-getKeyTags[ cellTags_List] :=
-    Select[ cellTags, StringMatchQ[ #, ("ID" <> $cellTagKeySeparator | "Source" <> $cellTagKeySeparator) ~~ __]&]
-getKeyTags[ cellTag_String] := getKeyTags[ {cellTag}]
+getKeyTags[ cellTags_List, file_String] :=
+	With[ {prefix = "ID" <> $cellTagKeySeparator},
+		(* We completely ignore existing "Source:..." tags stemming from old notebooks, but use 'file' instead. *)
+    	Append[ Select[ cellTags, StringMatchQ[ #, prefix ~~ __]&], sourceLabel[ file]]
+	]
+getKeyTags[ cellTag_String, file_String] := getKeyTags[ {cellTag}, file]
 getKeyTags[ args___] := unexpected[ getKeyTags, {args}]
 
 getCellLabel[ cellTags_List, key_String] :=
@@ -542,9 +558,6 @@ getCellIDFromKey[ k_List] :=
 		Part[ StringSplit[ lab, $cellTagKeySeparator], 2]
 	]
 getCellIDFromKey[ args___] := unexpected[ getCellIDFromKey, {args}]
-
-getCellSourceLabel[ cellTags_] := getCellLabel[ cellTags, "Source"]
-getCellSourceLabel[ args___] := unexpected[ getCellSourceLabel, {args}]
 
 (*
  cellTagsToString[ tags] extracts the formula label from a list of cell tags. It does so by first
@@ -571,19 +584,19 @@ makeLabel[ s_String] := "(" <> s <> ")"
 makeLabel[ args___] := unexpected[ makeLabel, {args}]
 
 relabelCell[ nb_NotebookObject, cellTags_List, cellID_Integer] :=
-	Module[{ newFrameLabel, newCellTags, autoTags},
+	Module[ {newFrameLabel, newCellTags, idTag = cellIDLabel[ cellID]},
+	With[ {key = {idTag, sourceLabel[ nb]}},
 		(* Keep cleaned CellTags and add identification (ID) *)
-		autoTags = {cellIDLabel[ cellID], sourceLabel[ nb]};
-		newCellTags = Join[ autoTags, cellTags];
+		newCellTags = Prepend[ cellTags, idTag];
 		(* Join list of CellTags, use $labelSeparator *)
-		newFrameLabel = With[ {key = autoTags}, 
+		newFrameLabel =
 			Cell[ BoxData[ RowBox[{
 				StyleBox[ makeLabel[ cellTagsToString[ cellTags]], "FrameLabel"], "  ",
-				ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeFormula[ key]]}]]]];
+				ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeFormula[ key]]}]]];
 		SetOptions[ NotebookSelection[ nb], CellFrameLabels -> {{None, newFrameLabel}, {None, None}}, CellTags -> newCellTags, ShowCellTags -> False];
 		(* return autoTags to be used as key for formula in KB *)
-		autoTags
-	]
+		key
+	]]
 relabelCell[ args___] := unexpected[ relabelCell, {args}]
 
 removeEnvironment[ nb_NotebookObject] :=
@@ -604,7 +617,7 @@ removeEnvironment[ nb_NotebookObject] :=
 	]
 removeEnvironment[ args___] := unexpected[ removeEnvironment, {args}]
 
-removeFromSession[ file_, Cell[ _, "FormalTextInputFormula", ___, CellTags -> t_, ___]] := removeFromEnv[ getKeyTags[ t]]
+removeFromSession[ file_, Cell[ _, "FormalTextInputFormula", ___, CellTags -> t_, ___]] := removeFromEnv[ getKeyTags[ t, file]]
 removeFromSession[ file_, Cell[ _, "GlobalDeclaration", ___, CellID -> id_, ___]] := removeFromGlobals[ {file, id}]
 removeFromSession[ args___] := unexpected[ removeFromSession, {args}]
 
@@ -677,23 +690,14 @@ cellLabel[ args___] := unexpected[ cellLabel, {args}]
 cellIDLabel[ cellID_] := cellLabel[ cellID, "ID"]
 cellIDLabel[ args___] := unexpected[ cellIDLabel, {args}]
 
+(* TODO: Maybe archives and ordinary notebooks should not be treated differently here. *)
 sourceLabel[ nb_NotebookObject] /; inArchive[] := cellLabel[ currentArchiveName[], "Source"]
 sourceLabel[ nb_NotebookObject] := cellLabel[ CurrentValue[ nb, "NotebookFullFileName"], "Source"]
 sourceLabel[ file_String] := cellLabel[ file, "Source"]
 sourceLabel[ args___] := unexpected[ sourceLabel, {args}]
 
-sourceLabelPattern[ ] := StringExpression[ "Source", $cellTagKeySeparator, __]
-sourceLabelPattern[ args___] := unexpected[ sourceLabelPattern, {args}]
 
-
-ensureNotebookIntegrity[ file_] := 
-	Module[ {nbExpr},
-		nbExpr = Cases[ $TMAcurrentEvalNB, {file, e_} -> e, {1}, 1];
-		Assert[ Length[ nbExpr] == 1];
-		ensureNotebookIntegrity[ file, nbExpr]
-	]
-
-ensureNotebookIntegrity[ file_, {nbExpr_Notebook}] := 
+ensureNotebookIntegrity[ file_] :=
 	Module[ {nb},
 		nb = Select[ Notebooks[], CurrentValue[ #, "NotebookFullFileName"] === file &, 1];
 		If[ nb === {},
@@ -701,55 +705,26 @@ ensureNotebookIntegrity[ file_, {nbExpr_Notebook}] :=
 			(* else *)
 			nb = First[ nb]
 		];
-		ensureNotebookIntegrity[ nb, nbExpr]
+		ensureNotebookIntegrity[ nb]
 	]
-	
-ensureNotebookIntegrity[ nb_NotebookObject, rawNotebook_Notebook] :=
-    Module[ {allCellTags, duplicateCellTags, srcTags, sl, outdPos, updNb, notif, nbFile},
-    	nbFile = CurrentValue[ nb, "NotebookFullFileName"];
-    	sl = sourceLabel[ nbFile];
-        (* Collect all CellTags from document. *)
-        allCellTags = Flatten[ Cases[ rawNotebook, Cell[ ___, CellTags -> tags_, ___] -> tags, Infinity]];
-        (* Check if CellTags are unique in current Notebook. Check only the clean tags, neglect the generated ones *)
-        duplicateCellTags = Select[ Tally[ getCleanCellTags[ allCellTags]], duplicateLabel];
-        If[ duplicateCellTags =!= {} && duplicateCellTags =!= $lastDuplicateCellTags,
-            (* If not, give an appropriate warning *)
-            $lastDuplicateCellTags = duplicateCellTags;
-            notification[ translate[ "notUniqueLabel"], nbFile, Map[ First, duplicateCellTags]]
-        ];
-        (* Check if we have cell tags Source<sep>src with src != current notebook filename *)
-        srcTags = DeleteDuplicates[ Select[ allCellTags, (StringMatchQ[ #, sourceLabelPattern[ ]] && # =!= sl)&]];
-        If[ srcTags =!= {},
-        	(* If yes, this indicates that the filename has changed and probably some formulae 
-        	are stored in the environment with an outdated key 
-        	-> update the key
-        	-> update the cell tags
-        	-> remove outdated tab from KBbrowser
-        	 *)
-        	notif = CreateWindow[ DocumentNotebook[ {ToString[ StringForm[ translate[ "Updating tags"], nbFile]]}], WindowSize -> All, WindowElements -> {}, WindowFrame -> "Frameless", WindowFloating -> True];
-        	updateKeys[ sl, srcTags];
-        	outdPos = Position[ rawNotebook, CellTags | CellFrameLabels -> _];
-        	updNb = MapAt[ updateSourceTags[ #, sl]&, rawNotebook, outdPos];
-        	NotebookPut[ updNb, nb];
-        	$TMAcurrentEvalNB = ReplacePart[ $TMAcurrentEvalNB, Position[ $TMAcurrentEvalNB, {nbFile, _}, {1}, 1] -> {nbFile, updNb}];
-        	NotebookClose[ notif];
-        ]
-    ]
+ensureNotebookIntegrity[ nb_NotebookObject] :=
+	Module[ {allLabels, duplicateLabels, sl, nbFile = CurrentValue[ nb, "NotebookFullFileName"]},
+		sl = sourceLabel[ nbFile];
+		(* Collect labels of all formulas whose source is 'nb'. *)
+		allLabels = label /@ Select[ $tmaEnv, source[ #] === sl &];
+		(* Check whether labels are unique. *)
+		duplicateLabels = Select[ Tally[ allLabels], duplicateLabel];
+		If[ duplicateLabels =!= {} && duplicateLabels =!= $lastDuplicateFormulaLabels,
+			(* If not, give an appropriate warning. *)
+			$lastDuplicateFormulaLabels = duplicateLabels;
+			notification[ translate[ "notUniqueLabel"], nbFile, Map[ First, duplicateLabels]]
+		];
+	]
 ensureNotebookIntegrity[ args___] := unexpected[ ensureNotebookIntegrity, {args}]
-
-updateSourceTags[ o_ -> l_, new_] :=
-	Module[ {strPos},
-		strPos = Position[ l, s_String /; StringMatchQ[ s, sourceLabelPattern[ ]]];
-		o -> ReplacePart[ l, strPos -> new]
-	]
-updateSourceTags[ args___] := unexpected[ updateSourceTags, {args}]
 
 
 duplicateLabel[ {_, occurences_Integer}] := occurences > 1
 duplicateLabel[ args___] := unexpected[ duplicateLabel, {args}]
-
-updateKeys[ new_String, srcTags_List] := Fold[ updateSingleKey, new, srcTags]
-updateKeys[ args___] := unexpected[ updateKeys, {args}]
 
 updateSingleKey[ new_String, old_String] :=
     Module[ {},
@@ -762,15 +737,12 @@ updateSingleKey[ new_String, old_String] :=
 updateSingleKey[args___] := unexpected[ updateSingleKey, {args}]
 
 
-automatedFormulaLabel[nb_NotebookObject] := 
-	Module[{formulaCounter, newCellTags},
-		incrementFormulaCounter[nb];
-		(* Find highest value of any automatically counted formula. *)
-		formulaCounter = getFormulaCounter[nb];
+automatedFormulaLabel[ nb_NotebookObject] :=
+	With[ {formulaCounter = incrementFormulaCounter[ nb]},
 		(* Construct new CellTags with value of the incremented formulaCounter as a list. *)
-		newCellTags = {"Label" <> $cellTagKeySeparator <> ToString[formulaCounter]}
+		{"Label" <> $cellTagKeySeparator <> ToString[ formulaCounter]}
 	]
-automatedFormulaLabel[args___] := unexpected[ automatedFormulaLabel, {args}]
+automatedFormulaLabel[ args___] := unexpected[ automatedFormulaLabel, {args}]
 
 applicableGlobalDeclarations[ nb_NotebookObject, raw_Notebook, pos_List] :=
 	Module[{ file = CurrentValue[ nb, "NotebookFullFileName"]},
@@ -883,11 +855,11 @@ updateKnowledgeBase[ form_, k_, glob_, l_String, tags_List, cellPos_] :=
     ]
 updateKnowledgeBase[ args___] := unexpected[ updateKnowledgeBase, {args}]
 
-findSelectedFormula[ Cell[ _, ___, CellTags -> t_, ___]] :=
-	Module[ { key = getKeyTags[ t]},
+findSelectedFormula[ Cell[ _, ___, CellTags -> t_, ___], file_String] :=
+	Module[ { key = getKeyTags[ t, file]},
 		Cases[ $tmaEnv, FML$[ key, _, __], {1}, 1]
-	]	
-findSelectedFormula[ sel_] := {}
+	]
+findSelectedFormula[ sel_, _] := {}
 findSelectedFormula[ args___] := unexpected[ findSelectedFormula, {args}]
 
 (*
@@ -1054,6 +1026,7 @@ initSession[] :=
         $globalDeclarations = {};
         $tmaArchNeeds = {};
         $formulaCounterName = "TheoremaFormulaCounter";
+        $nbFileNameCounterName = "NotebookFileName";
         $TMAcurrentEvalNB = {};
         $tmaNbUpdateQueue = {};
         $tmaNbEval = {};
@@ -1069,27 +1042,41 @@ initSession[] :=
         $Pre=.;
         $PreRead=.;
     ]
-initSession[args___] := unexpected[ initSession, {args}]
+initSession[ args___] := unexpected[ initSession, {args}]
 
-incrementFormulaCounter[nb_NotebookObject] :=
-	Module[{formulaCounter},
-		formulaCounter = getFormulaCounter[nb];
-		formulaCounter++;
+incrementFormulaCounter[ nb_NotebookObject] :=
+	With[ {counters = getCounterAssignments[ nb]},
+	With[ {formulaCounter = getFormulaCounter[ counters] + 1},
 		(* Save Incremented formulaCounter to the notebook options. *)
-		SetOptions[nb, CounterAssignments -> {{$formulaCounterName -> formulaCounter}}]
-	]
-incrementFormulaCounter[args___] := unexpected[ incrementFormulaCounter, {args}]
+		SetOptions[ nb, CounterAssignments -> updateCounterAssignments[ counters, $formulaCounterName -> formulaCounter]];
+		formulaCounter
+	]]
+incrementFormulaCounter[ args___] := unexpected[ incrementFormulaCounter, {args}]
 
-getFormulaCounter[nb_NotebookObject] :=
-	Module[{formulaCounter},
-		(* Extract theoremaFormulaCounter from the options of the notebook. *)
-		formulaCounter = 
-			$formulaCounterName /. Flatten[
-				(* Extract CounerAssignments from the options of the notebook. *)
-				{CounterAssignments } /. Options[nb, CounterAssignments]
-			]
-	]
-getFormulaCounter[args___] := unexpected[ getFormulaCounter, {args}]
+getFormulaCounter[ nb_NotebookObject] :=
+	getFormulaCounter[ getCounterAssignments[ nb]]
+getFormulaCounter[ counters_List] :=
+	Replace[ Replace[ $formulaCounterName, Flatten[ counters]], $formulaCounterName -> 0]
+getFormulaCounter[ args___] := unexpected[ getFormulaCounter, {args}]
+
+(* updateNotebookFileName changes the counter assignment for $nbFileNameCounterName and returns its original value. *)
+updateNotebookFileName[ nb_NotebookObject, new_String] :=
+	With[ {counters = getCounterAssignments[ nb]},
+	With[ {orig = Replace[ $nbFileNameCounterName, Flatten[ counters]]},
+		If[ new =!= orig,
+			SetOptions[ nb, CounterAssignments -> updateCounterAssignments[ counters, $nbFileNameCounterName -> new]]
+		];
+		orig
+	]]
+updateNotebookFileName[ args___] := unexpected[ updateNotebookFileName, {args}]
+
+getCounterAssignments[ nb_NotebookObject] :=
+	Replace[ Replace[ CounterAssignments, Options[ nb, CounterAssignments]], CounterAssignments -> {}]
+getCounterAssignments[ args___] := unexpected[ getCounterAssignments, {args}]
+
+updateCounterAssignments[ counters_, k_ -> v_] :=
+	Append[ DeleteCases[ counters, {k -> _}], {k -> v}]
+updateCounterAssignments[ args___] := unexpected[ updateCounterAssignments, {args}]
 
 removeRedundantBoxes[ expr_] :=
 	With[ {pos = Position[ expr, TagBox[ _, _Theorema`Language`TAG$|_Theorema`Computation`Language`TAG$, ___]]},
@@ -1652,6 +1639,7 @@ createNbRememberLocation[ opts___?OptionQ] :=
 			fpMode = Replace[ Global`FileChangeProtection, Options[ $FrontEnd, Global`FileChangeProtection]];
 			SetOptions[ $FrontEnd, Global`FileChangeProtection -> None];
 			nb = CreateDocument[ {}, opts, StyleDefinitions -> makeColoredStylesheet[ "Notebook"]];
+			SetOptions[ nb, CounterAssignments -> {{$formulaCounterName -> 0}, {$nbFileNameCounterName -> file}}];
 			NotebookSave[ nb, file];
 			SetOptions[ $FrontEnd, Global`FileChangeProtection -> fpMode];
 			putToUpdateQueue[ file];

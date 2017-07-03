@@ -104,9 +104,9 @@ With[ {lang = "English"},
 	MessageName[ getCellIDFromKey, "usage", lang] = "getCellIDFromKey[ key] extracts the cellID from the formula key.";
 	MessageName[ getCellIDLabel, "usage", lang] = "getCellIDLabel[ cellTags] finds the cellID label in cellTags.";
 	MessageName[ getCleanCellTags,"usage", lang] = "getCleanCellTags[cellTags] returns all CellTags except tags used as cell/formula keys in cell/formula identification.";
-	MessageName[ getDefInstances, "usage", lang] = "";	
+	MessageName[ getDefInstances, "usage", lang] = "";
 	MessageName[ getExistGoalInstanceDialog, "usage", lang] = "The dialog window asking for an instantiation.";
-	MessageName[ getKeyTags,"usage", lang] = "getKeyTags[cellTags] returns all CellTags used as cell/formula keys in cell/formula identification.";
+	MessageName[ getKeyTags,"usage", lang] = "getKeyTags[cellTags,file] returns all CellTags used as cell/formula keys in cell/formula identification.";
 	MessageName[ getOptionalComponent, "usage", lang] = "getOptionalComponent[ ds, key] is a generic accessor function for optional components in a datastructure.";
 	MessageName[ getTheoremaCommander, "usage", lang] = "getTheoremaCommander[] returns the Theorema commander notebook.";
 	MessageName[ $goalActivated, lang, "usage"] = "Indicates whether the goal of the current proof situation is activated in an interactive proof.";
@@ -183,6 +183,7 @@ With[ {lang = "English"},
 	MessageName[ maximumWidth, "usage", lang] = "";
 
 	MessageName[ name, "usage", lang] = "name is an option for the constructor makePRFINFO and a selector for the PRFINFO$ datastructure.";
+	MessageName[ $nbFileNameCounterName,"usage", lang] = "Name of notebook-filename counter in the notebook options in CounterAssignments parameter.";
 	MessageName[ nextProofSitDialog, "usage", lang] = "The dialog window for choosing the next proof situation.";
 	MessageName[ notification, "usage", lang] = "notification[text] displays 'text' as a user notification.";
 

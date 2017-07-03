@@ -495,7 +495,7 @@ displaySelectedGoal[ ] :=
     Module[ { sel, goal},
     	$proofInitNotebook = InputNotebook[];
     	sel = NotebookRead[ $proofInitNotebook];
-    	goal = findSelectedFormula[ sel];
+    	goal = findSelectedFormula[ sel, CurrentValue[ $proofInitNotebook, "NotebookFullFileName"]];
         If[ goal === {},
             translate["noGoal"],
             With[ {selGoal = goal[[1]]},
@@ -753,7 +753,7 @@ structView[ file_, Cell[ content_, "FormalTextInputFormula", a___, CellTags -> c
         	Return[ {}]
         ];
         (* keyTags are those cell tags that are used to uniquely identify the formula in the KB *)
-        keyTags = getKeyTags[ cellTags];
+        keyTags = getKeyTags[ cellTags, file];
         (* check whether cell has been evaluated -> formula is in KB? *)
         formPos = Position[ {$tmaEnv, $tmaArch}, FML$[ keyTags, _, __], {2}, 1];
         isEval = formPos =!= {};
@@ -897,9 +897,8 @@ updateKBBrowser[ file_] :=
         	(* the corresponding notebook has not been evaluated yet *)
         	Return[]
         ];
-        (* This is a good place to check for well-formedness of the notebook (multiple labels, etc.).
-           We can be sure that nbExpr is a singleton list. *)
-        ensureNotebookIntegrity[ file, nbExpr];
+        (* This is a good place to check for well-formedness of the notebook (multiple labels, etc.). *)
+        ensureNotebookIntegrity[ file];
         $tmaNbUpdateQueue = DeleteCases[ $tmaNbUpdateQueue, {file, _}, {1}, 1];
         new = With[ {nb = First[ nbExpr]},
                           extractKBStruct[ nb] /. l_?VectorQ :> (Extract[ nb, l] /. {c:Cell[ _, _, ___] :> DeleteCases[ c, Except[ CellTags|CellID] -> _]})
