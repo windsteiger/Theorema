@@ -443,21 +443,13 @@ SetAttributes[ processEnvironment, HoldAll];
 processEnvironment[ Theorema`Language`nE] := Null
 
 processEnvironment[ x_] :=
-    Module[ {nb = EvaluationNotebook[], nbFile, nbExpr, key, tags, globDec, pos, cellpos, origName},
+    Module[ {nb = EvaluationNotebook[], nbFile, nbExpr, key, tags, globDec, pos, cellpos},
     	(* select current cell: we need to refer to this selection when we set the cell options *)
 		SelectionMove[ nb, All, EvaluationCell];
     	{key, tags} = adjustFormulaLabel[ nb];
 		(* Perform necessary actions on the whole notebook *)
 		nbFile = CurrentValue[ nb, "NotebookFullFileName"];
-		(* Check whether the file name of the notebook changed and the original file does not exist any more *)
-        origName = updateNotebookFileName[ nb, nbFile];
-		If[ nbFile =!= origName && !FileExistsQ[ origName],
-			(* If yes, this indicates that probably some formulae are stored in the environment with an outdated key
-				-> update the keys
-				-> remove outdated tab from KBbrowser
-			*)
-        	updateSingleKey[ sourceLabel[ nbFile], sourceLabel[ origName]]
-		];
+		adjustEnvironment[ nb, nbFile];
 		If[ $refreshBrowser,
 			(* $refreshBrowser is set in openEnvironment, it basically depends on how long ago the last evaluation has been.
 			   If browser need not refresh then this indicates that we are in a multi-cell evaluation. In this case we do not get a fresh
@@ -484,7 +476,24 @@ processEnvironment[ x_] :=
         (* Positions of abbreviations are added in "updateKnowledgeBase". *)
         SelectionMove[ nb, After, Cell];
     ]
-processEnvironment[args___] := unexcpected[ processEnvironment, {args}]
+processEnvironment[ args___] := unexpected[ processEnvironment, {args}]
+
+(* adjustEnvironment checks whether the filename of the given notebook changed, and if so, updates the Theorema
+	environment accordingly. *)
+adjustEnvironment[ nb_NotebookObject] :=
+	adjustEnvironment[ nb, CurrentValue[ nb, "NotebookFullFileName"]]
+adjustEnvironment[ nb_NotebookObject, nbFile_String] :=
+	With[ {origName = updateNotebookFileName[ nb, nbFile]},
+		(* Check whether the file name of the notebook changed and the original file does not exist any more *)
+		If[ nbFile =!= origName && !FileExistsQ[ origName],
+			(* If yes, this indicates that probably some formulae are stored in the environment with an outdated key
+				-> update the keys
+				-> remove outdated tab from KBbrowser
+			*)
+        	updateSingleKey[ sourceLabel[ nbFile], sourceLabel[ origName]]
+		]
+	]
+adjustEnvironment[ args___] := unexpected[ adjustEnvironment, {args}]
 
 evaluationPosition[ nb_NotebookObject, raw_Notebook] :=
 	Module[ {id, pos},
@@ -584,18 +593,18 @@ makeLabel[ s_String] := "(" <> s <> ")"
 makeLabel[ args___] := unexpected[ makeLabel, {args}]
 
 relabelCell[ nb_NotebookObject, cellTags_List, cellID_Integer] :=
-	Module[ {newFrameLabel, newCellTags, idTag = cellIDLabel[ cellID]},
-	With[ {key = {idTag, sourceLabel[ nb]}},
+	Module[ {newFrameLabel, newCellTags},
+	With[ {idTag = cellIDLabel[ cellID]},
 		(* Keep cleaned CellTags and add identification (ID) *)
 		newCellTags = Prepend[ cellTags, idTag];
 		(* Join list of CellTags, use $labelSeparator *)
 		newFrameLabel =
 			Cell[ BoxData[ RowBox[{
 				StyleBox[ makeLabel[ cellTagsToString[ cellTags]], "FrameLabel"], "  ",
-				ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeFormula[ key]]}]]];
+				ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeFormula[ idTag]]}]]];
 		SetOptions[ NotebookSelection[ nb], CellFrameLabels -> {{None, newFrameLabel}, {None, None}}, CellTags -> newCellTags, ShowCellTags -> False];
 		(* return autoTags to be used as key for formula in KB *)
-		key
+		{idTag, sourceLabel[ nb]}
 	]]
 relabelCell[ args___] := unexpected[ relabelCell, {args}]
 
@@ -622,24 +631,33 @@ removeFromSession[ file_, Cell[ _, "GlobalDeclaration", ___, CellID -> id_, ___]
 removeFromSession[ args___] := unexpected[ removeFromSession, {args}]
 
 removeFromEnv[ key_List] :=
-	Module[{p},
+	Module[ {p},
 		$tmaEnv = DeleteCases[ $tmaEnv, FML$[ key, ___]];
 		p = Position[ DownValues[ kbSelectProve], key];
-		If[ p =!= {},
-			Unset[ kbSelectProve[ key]]];
+		If[ p =!= {}, Unset[ kbSelectProve[ key]]];
 		p = Position[ DownValues[ kbSelectCompute], key];
-		If[ p =!= {},
-			Unset[ kbSelectCompute[ key]]];			
+		If[ p =!= {}, Unset[ kbSelectCompute[ key]]];
 	]
 removeFromEnv[ args___] := unexpected[ removeFromEnv, {args}]
 
+removeFormula[ id_String] :=
+	With[ {nb = ButtonNotebook[]},
+	With[ {nbFile = CurrentValue[ nb, "NotebookFullFileName"]},
+		adjustEnvironment[ nb, nbFile];		(* otherwise the formula might not get removed *)
+		removeFormula[ {id, sourceLabel[ nbFile]}, nb, nbFile];
+	]]
 removeFormula[ key_List] :=
-	Module[ {},
-		SelectionMove[ ButtonNotebook[], All, ButtonCell];
-		NotebookDelete[ ButtonNotebook[]];
-		removeFromEnv[ key];
-		updateKBBrowser[ CurrentValue[ ButtonNotebook[], "NotebookFullFileName"]];
+	(* for compatibility *)
+	With[ {nb = ButtonNotebook[]},
+		removeFormula[ key, nb, CurrentValue[ nb, "NotebookFullFileName"]];
 	]
+removeFormula[ key_List, nb_NotebookObject, nbFile_String] :=
+	(
+		SelectionMove[ nb, All, ButtonCell];
+		NotebookDelete[ nb];
+		removeFromEnv[ key];
+		updateKBBrowser[ nbFile];
+	)
 removeFormula[ args___] := unexpected[ removeFormula, {args}]
 
 removeGlobal[ {file_, id_}] :=
