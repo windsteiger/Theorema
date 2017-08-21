@@ -79,6 +79,7 @@ Theorema 2.0 is a major re-launch mainly developed by Wolfgang Windsteiger.";
 	translate[ "Display with new settings", lang] = "Display with new settings";
 	translate[ "disproved", lang] = "disproved";
     translate[ "Domains", lang] = "Domains and Data Types";
+    translate[ "duringEval", lang] = "During evaluation of In[`1`]:";
 
 	translate[ "elimBranches", lang] = "Eliminate failing/pending branches";
 	translate[ "elimForm", lang] = "Eliminate unused formulae";

@@ -91,9 +91,26 @@ joinHold[ Hold[ a___], Hold[ b___]] := Hold[ a, b];
 (* ::Subsubsection:: *)
 (* notification *)
 
-notification[ msg__] /; $Notebooks := MessageDialog[ StringForm[ msg]]
-notification[ msg__] := Message[ StringForm[ msg]]
+notification[ msg__] :=
+	If[ TrueQ[ $Notebooks],
+		printToConsole[
+			Cell[ BoxData[ ToBoxes[ StringForm[ msg]]], "Print", CellLabel -> ToString[ StringForm[ translate[ "duringEval"], $Line]], ShowCellLabel -> True]
+		],
+	(*else*)
+		Message[ StringForm[ msg]]
+	]
 notification[ args___] := unexpected[ notification, {args}]
+
+printToConsole[ {}] :=
+	Null
+printToConsole[ content_List] :=
+	With[ {msgNB = MessagesNotebook[]},
+		SelectionMove[ msgNB, After, Notebook];
+		NotebookWrite[ msgNB, content];
+		SetOptions[ msgNB, Visible -> True]
+	]
+printToConsole[ content_] :=
+	printToConsole[ {content}]
 
 
 (* ::Subsubsection:: *)

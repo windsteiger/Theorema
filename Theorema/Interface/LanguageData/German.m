@@ -81,6 +81,7 @@ Theorema 2.0 ist eine wesentliche Weiterentwicklung, die haupts\[ADoubleDot]chli
 	translate[ "Display with new settings", lang] = "Mit neuen Einstellungen anzeigen";
 	translate[ "disproved", lang] = "widerlegt";
     translate[ "Domains", lang] = "Bereiche und Datenstrukturen";
+    translate[ "duringEval", lang] = "W\[ADoubleDot]hrend der Berechnung von In[`1`]:";
 
 	translate[ "elimBranches", lang] = "Erfolglose bzw. unerledigte Zweige eliminieren";
 	translate[ "elimForm", lang] = "Nicht verwendete Aussagen eliminieren";

@@ -208,6 +208,7 @@ With[ {lang = "German"},
 	MessageName[ PRFOBJ$, "usage", lang] = "PRFOBJ$[ ...] represents a Theorema proof object.";
 	MessageName[ PRFSIT$, "usage", lang] = "PRFSIT$[ ...] represents a Theorema proof situation.";
 	MessageName[ printComputationInfo, "usage", lang] = "Print info about global knowledge used inside a computation";
+	MessageName[ printToConsole, "usage", lang] = "printToConsole writes its argument into the messages notebook.";
 	MessageName[ processComputation, "usage", lang] = "processComputation[ expr] ...";
 	MessageName[ processEnvironment, "usage", lang] = "processEnvironment[ expr] ...";
 	MessageName[ $proofAborted, "usage", lang] = "$proofAborted is a flag that is checked whether the user tried to abort the running proof.";
