@@ -5,6 +5,8 @@ BeginPackage[ "System`"]
 (*Lists*)
 MessageName[ AllTrue, "usage"] = "";
 MessageName[ AnyTrue, "usage"] = "";
+MessageName[ CountDistinct, "usage"] = "";
+MessageName[ CountDistinctBy, "usage"] = "";
 MessageName[ DeleteDuplicatesBy, "usage"] = "";
 MessageName[ DuplicateFreeQ, "usage"] = "";
 MessageName[ FirstCase, "usage"] = "";
@@ -13,10 +15,15 @@ MessageName[ NoneTrue, "usage"] = "";
 MessageName[ SelectFirst, "usage"] = "";
 
 (*Associations*)
+MessageName[ AssociateTo, "usage"] = "";
 MessageName[ Association, "usage"] = "";
 MessageName[ AssociationMap, "usage"] = "";
+MessageName[ Counts, "usage"] = "";
+MessageName[ CountsBy, "usage"] = "";
+MessageName[ GroupBy, "usage"] = "";
 MessageName[ Key, "usage"] = "";
 MessageName[ KeyDrop, "usage"] = "";
+MessageName[ KeyDropFrom, "usage"] = "";
 MessageName[ KeyExistsQ, "usage"] = "";
 MessageName[ KeyMap, "usage"] = "";
 MessageName[ Keys, "usage"] = "";
@@ -24,6 +31,7 @@ MessageName[ KeySelect, "usage"] = "";
 MessageName[ KeyTake, "usage"] = "";
 MessageName[ KeyValueMap, "usage"] = "";
 MessageName[ Lookup, "usage"] = "";
+MessageName[ Merge, "usage"] = "";
 MessageName[ Values, "usage"] = "";
 
 Begin["`Private`"]
@@ -121,6 +129,14 @@ FirstPosition[ expr_, patt_, def_, level_, opts___?OptionQ] :=
 		}
 	]
 
+CountDistinct[ l_] :=
+	Length[ DeleteDuplicates[ l]]
+
+CountDistinctBy[ f_][ l_] :=
+	CountDistinctBy[ l, f]
+CountDistinctBy[ l_, f_] :=
+	Length[ DeleteDuplicates[ f /@ l]]
+
 
 (* ::Section:: *)
 (*Associations*)
@@ -142,8 +158,17 @@ AssociationMap[ fun_, assoc_Association] :=
 assoc_Association[ k_] :=
 	Lookup[ assoc, k]
 
+Key[ k_][ assoc_Association] :=
+	Lookup[ assoc, k]
+
 Association /: Part[ assoc_Association, k:(_String|_Key), rest___] :=
 	Lookup[ assoc, k][[rest]]
+
+Association /: First[ Association[ (Rule|RuleDelayed)[ _, v_], ___]] :=
+	v
+
+Association /: Last[ Association[ ___, (Rule|RuleDelayed)[ _, v_]]] :=
+	v
 
 KeyDrop[ k_][ assoc_] :=
 	KeyDrop[ assoc, k]
@@ -157,6 +182,10 @@ KeyDrop[ l:{(_Rule|_RuleDelayed)..}, k_] :=
 	KeyDrop[ Association @@ thinRuleList[ l], k]
 KeyDrop[ assocs_List, k_] :=
 	Map[ KeyDrop[ k], assocs]
+
+SetAttributes[ KeyDropFrom, HoldFirst];
+KeyDropFrom[ a_, k_] :=
+	(a = KeyDrop[ a, k])
 
 KeyTake[ k_][ assoc_] :=
 	KeyTake[ assoc, k]
@@ -200,6 +229,10 @@ Association /: Append[ a_Association, b_Association] :=
 	Join[ a, b]
 Association /: Append[ a_Association, b:({(_Rule|_RuleDelayed)...}|_Rule|_RuleDelayed)] :=
 	Join[ a, Association[ b]]
+
+SetAttributes[ AssociateTo, HoldFirst];
+AssociateTo[ a_, new_] :=
+	(a = Append[ a, new])
 
 (* For associations, 'Prepend' seems to do exactly the same as 'Append' in version 10 ... *)
 Association /: Prepend[ a_Association, b_Association] :=
@@ -269,6 +302,34 @@ Association /: MemberQ[ assoc_Association, patt_, args___] :=
 Association /: Position[ assoc_Association, patt_, args___] :=
 	Replace[ Position[ Values[ assoc], patt, args], {i_Integer?Positive, rest___} :> {Key[ Extract[ assoc, {i, 1}]], rest}, {1}]
 
+Merge[ f_][ l_List] :=
+	Merge[ l, f]
+Merge[ l0_List, f_] :=
+	With[ {l = Flatten[ Replace[ Flatten[ l0], a_Association :> (List @@ a), {1}], 1]},
+		Association @@ Replace[ GatherBy[ l, First], all:{h_[ k_, _], ___} :> With[ {v = all[[All, 2]]}, h[ k, f[ v]]], {1}]
+	]
+
+Counts[ l_List] :=
+	Association @@ Replace[ Gather[ l], all:{x_, ___} :> (x -> Length[ all]), {1}]
+
+CountsBy[ f_][ l_List] :=
+	CountsBy[ l, f]
+CountsBy[ l_List, f_] :=
+	Counts[ f /@ l]
+
+GroupBy[ spec_][ expr_] :=
+	GroupBy[ expr, spec]
+GroupBy[ expr_, spec_] :=
+	GroupBy[ expr, spec, Identity]
+GroupBy[ expr_, {}, _] :=
+	expr
+GroupBy[ assoc_Association, f_List, red_] :=
+	groupBy[ List @@ assoc, Replace[ f, {(fk_ -> fv_) :> (Composition[ fk, Last] -> (MapAt[ fv, #, 2]&)), fk_ :> Composition[ fk, Last]}, {1}], red, True]
+GroupBy[ l_List, f_List, red_] :=
+	groupBy[ l, f, red, False]
+GroupBy[ expr_, f_, red_] :=
+	GroupBy[ expr, {f}, red]
+
 
 (* ::Subsection:: *)
 (*Auxiliary Functions*)
@@ -285,6 +346,21 @@ lookup[ assoc_Association, k_, def_] :=
 	Replace[ k, Append[ List @@ assoc, _ :> def]]
 lookup[ {rules:((_Rule|_RuleDelayed)..)}, k_, def_] :=
 	Replace[ k, {rules, _ :> def}]
+
+groupBy[ f_, red_, isAssoc_][ expr_] :=
+	groupBy[ expr, f, red, isAssoc]
+groupBy[ _[], _, _, _] :=
+	Association[]
+groupBy[ expr_, {fk_ -> fv_}, red_, isAssoc_] :=
+	Association @@ Replace[
+		GatherBy[ expr, fk],
+		all:{x_, ___} :> With[ {aux = fv /@ all}, fk[ x] -> red[ If[ TrueQ[ isAssoc], Association @@ aux, aux]]],
+		{1}
+	]
+groupBy[ expr_, {f_}, red_, isAssoc_] :=
+	groupBy[ expr, {f -> Identity}, red, isAssoc]
+groupBy[ expr_, {f_, r__}, red_, isAssoc_] :=
+	Association @@ MapAt[ groupBy[ {r}, red, isAssoc], List @@ groupBy[ expr, {f}, Identity, False], {All, 2}]
 
 End[]
 
