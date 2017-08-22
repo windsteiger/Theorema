@@ -592,17 +592,28 @@ cellTagsToFmlTags[ args___] := unexpected[ cellTagsToFmlTags, {args}]
 makeLabel[ s_String] := "(" <> s <> ")"
 makeLabel[ args___] := unexpected[ makeLabel, {args}]
 
+makeCellFrameLabel[ idTag_String, tags_, True] :=
+	{{None, makeCellFrameLabel[ idTag, tags, False]}, {None, None}}
+makeCellFrameLabel[ idTag_String, tags_, False] :=
+	Cell[ BoxData[ RowBox[
+		{
+			StyleBox[ makeLabel[ cellTagsToString[ tags]], "FrameLabel"],
+			"  ",
+			ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeFormula[ idTag]]
+		}
+	]]]
+makeCellFrameLabel[ args___] := unexpected[ makeCellFrameLabel, {args}]
+
 relabelCell[ nb_NotebookObject, cellTags_List, cellID_Integer] :=
-	Module[ {newFrameLabel, newCellTags},
+	Module[ {newCellTags},
 	With[ {idTag = cellIDLabel[ cellID]},
 		(* Keep cleaned CellTags and add identification (ID) *)
 		newCellTags = Prepend[ cellTags, idTag];
-		(* Join list of CellTags, use $labelSeparator *)
-		newFrameLabel =
-			Cell[ BoxData[ RowBox[{
-				StyleBox[ makeLabel[ cellTagsToString[ cellTags]], "FrameLabel"], "  ",
-				ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeFormula[ idTag]]}]]];
-		SetOptions[ NotebookSelection[ nb], CellFrameLabels -> {{None, newFrameLabel}, {None, None}}, CellTags -> newCellTags, ShowCellTags -> False];
+		SetOptions[ NotebookSelection[ nb],
+			CellFrameLabels -> makeCellFrameLabel[ idTag, newCellTags, True],
+			CellTags -> newCellTags,
+			ShowCellTags -> False
+		];
 		(* return autoTags to be used as key for formula in KB *)
 		{idTag, sourceLabel[ nb]}
 	]]

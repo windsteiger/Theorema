@@ -1827,15 +1827,22 @@ summarizeProverSettings[ args___] := unexpected[ summarizeProverSettings, {args}
 (* Palettes *)
 
 
-insertNewEnv[ type_String] :=
-    Module[ {nb = InputNotebook[]},
-        NotebookWrite[
-         nb, {newOpenEnvCell[],
-          newEnvHeaderCell[ type],
-          newFormulaCell[ type],
-          newEndEnvCell[],
-          newCloseEnvCell[]}];
-    ]
+insertNewEnv[ bname_String] :=
+	With[ {type = envName[ bname]},
+		insertNewEnv[ bname, InputNotebook[], "\[Ellipsis]", {newFormulaCell[ type]}, type]
+	]
+insertNewEnv[ bname_String, nb_NotebookObject, capt_String, cells_List] :=
+	insertNewEnv[ bname, nb, capt, cells, envName[ bname]]
+insertNewEnv[ _String, nb_NotebookObject, capt_String, cells_List, type_String] :=
+	(
+		NotebookWrite[ nb,
+			Join[
+				{newOpenEnvCell[], newEnvHeaderCell[ type, capt]},
+				cells,
+				{newEndEnvCell[], newCloseEnvCell[]}
+			]
+		];
+	)
 insertNewEnv[ args___] :=
     unexpected[ insertNewEnv, {args}]
 
@@ -1871,8 +1878,10 @@ newFormulaCell[ args___] := unexpected[ newFormulaCell, {args}]
 newOpenEnvCell[] := Cell[ "", "OpenEnvironment"]
 newOpenEnvCell[ args___] := unexpected[ newOpenEnvCell, {args}]
 
-newEnvHeaderCell[ type_String] := Cell[ type <> " (\[Ellipsis])", "EnvironmentHeader",
-	CellFrameLabels -> {{None, 
+newEnvHeaderCell[ type_String] :=
+	newEnvHeaderCell[ type, "\[Ellipsis]"]
+newEnvHeaderCell[ type_String, capt_String] := Cell[ type <> " (" <> capt <> ")", "EnvironmentHeader",
+	CellFrameLabels -> {{None,
     	Cell[ BoxData[ ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None,
     		ButtonFunction :> removeEnvironment[ ButtonNotebook[]]]]]}, {None, None}}]
 newEnvHeaderCell[ args___] := unexpected[ newEnvHeaderCell, {args}]
@@ -1900,22 +1909,21 @@ makeNbOpenButton[ ] :=
 		Method -> "Queued"
 	]
 makeNbOpenButton[ args___] := unexpected[ makeNbOpenButton, {args}]
-		
 
-envButtonData[ "DEF"] := "tcSessTabEnvTabButtonDefLabel";
-envButtonData[ "THM"] := "tcSessTabEnvTabButtonThmLabel";
-envButtonData[ "LMA"] := "tcSessTabEnvTabButtonLmaLabel";
-envButtonData[ "PRP"] := "tcSessTabEnvTabButtonPrpLabel";
-envButtonData[ "COR"] := "tcSessTabEnvTabButtonCorLabel";
-envButtonData[ "ALG"] := "tcSessTabEnvTabButtonAlgLabel";
-envButtonData[ "EXM"] := "tcSessTabEnvTabButtonExmLabel";
-envButtonData[ args___] := unexpected[envButtonData, {args}]
+
+envName[ "DEF"] := translate[ "tcSessTabEnvTabButtonDefLabel"];
+envName[ "THM"] := translate[ "tcSessTabEnvTabButtonThmLabel"];
+envName[ "LMA"] := translate[ "tcSessTabEnvTabButtonLmaLabel"];
+envName[ "PRP"] := translate[ "tcSessTabEnvTabButtonPrpLabel"];
+envName[ "COR"] := translate[ "tcSessTabEnvTabButtonCorLabel"];
+envName[ "ALG"] := translate[ "tcSessTabEnvTabButtonAlgLabel"];
+envName[ "EXM"] := translate[ "tcSessTabEnvTabButtonExmLabel"];
+envName[ "?"] = "?";
+envName[ args___] := unexpected[ envName, {args}]
 
 makeEnvButton[ bname_String] :=
-    With[ { bd = If[ bname === "?", "?", translate[ envButtonData[ bname]]]},
-		Button[ bd, insertNewEnv[ bd], Alignment -> Center]
-    ]
-makeEnvButton[args___] := unexpected[makeEnvButton, {args}]
+	Button[ envName[ bname], insertNewEnv[ bname], Alignment -> Center]
+makeEnvButton[ args___] := unexpected[ makeEnvButton, {args}]
 
 makeFormButton[] := Button[ translate[ "New"], insertNewFormulaCell[ "Env"], Alignment -> {Left, Top}, ImageSize -> Automatic]
 makeFormButton[args___] := unexpected[ makeFormButton, {args}]
