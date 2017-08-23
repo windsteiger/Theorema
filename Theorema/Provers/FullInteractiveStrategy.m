@@ -353,6 +353,7 @@ actionRow[ filename_String, Hold[ ruleNames_], Hold[ ma_], Hold[ av_]] :=
 			Tooltip[ Button[ "Show Proof",
 						(
 							$TMAproofNotebook = tmaNotebookPut[ Notebook[ pObjCells[]], "Proof"];
+							(* In proof notebooks we can still use 'NotebookLocate'. *)
 							NotebookLocate[ {CurrentValue[ $TMAproofNotebook, "NotebookFileName"], i}]
 						),
 						Appearance -> "Frameless"

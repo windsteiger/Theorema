@@ -260,10 +260,10 @@ createCellMargin[ args___] := unexpected[ createCellMargin, {args}]
 formulaLabelRef[ f_FML$] :=
 	Module[{lab, fmlDisp = theoremaDisplay[ formula@f]},
 		lab = makeLabel[ label@f];
-		With[ {file = sourceFile@f, tag = id@f},
+		With[ {file = sourceFile@f, cid = extractCellID@f},
 			Cell[ BoxData[ ToBoxes[
             	Button[ Tooltip[ Mouseover[ Style[ lab, "FormReference"], Style[ lab, "FormReferenceHover"]], fmlDisp],
-               		NotebookLocate[ {file, tag}], Appearance -> None]
+               		selectCells[ file, cid], Appearance -> None]
         	]]]
 		]
 	]

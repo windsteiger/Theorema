@@ -533,40 +533,43 @@ adjustFormulaLabel[ args___] := unexpected[ adjustFormulaLabel, {args}]
 (* getCleanCellTags returns all CellTags except the generated tags used for formula identification, i.e. ID<sep>... and Source<sep>...*)
 getCleanCellTags[ cellTags_List] :=
 	With[ {prefixes = ("ID" <> $cellTagKeySeparator | "Source" <> $cellTagKeySeparator | "Proof|ID" <> $cellTagKeySeparator)},
-		(* Although "Source:..." tags are not generated automatically any more, we still remove them in 'getCleanCellTags' to handle older
-			notebooks properly, too. *)
+		(* Although "ID:..."- and "Source:..." tags are not generated automatically any more, we still remove them in 'getCleanCellTags'
+			to handle older notebooks properly, too. *)
     	Select[ cellTags, !StringMatchQ[ #, (prefixes ~~ __) | $initLabel]&]
 	]
 getCleanCellTags[ cellTag_String] := getCleanCellTags[ {cellTag}]
 getCleanCellTags[ args___] := unexpected[ getCleanCellTags, {args}]
 
-getKeyTags[ cellTags_List, file_String] :=
-	With[ {prefix = "ID" <> $cellTagKeySeparator},
-		(* We completely ignore existing "Source:..." tags stemming from old notebooks, but use 'file' instead. *)
-    	Append[ Select[ cellTags, StringMatchQ[ #, prefix ~~ __]&], sourceLabel[ file]]
-	]
-getKeyTags[ cellTag_String, file_String] := getKeyTags[ {cellTag}, file]
-getKeyTags[ args___] := unexpected[ getKeyTags, {args}]
+makeFmlKey[ cid_] :=
+	makeFmlKey[ cid, "none"]
+makeFmlKey[ cid_, src_] :=
+	{cellIDLabel[ cid], sourceLabel[ src]}
+makeFmlKey[ args___] := unexpected[ makeFmlKey, {args}]
 
-getCellLabel[ cellTags_List, key_String] :=
-	Module[{id = Select[ cellTags, StringMatchQ[ #, key ~~ $cellTagKeySeparator ~~ __]&]},
-		If[ id === {},
-			cellLabel[ $initLabel, key],
-			id[[1]]
-		]
+(* 'extractCellID' returns the cell ID of the given input as a *string* of digit characters.
+	Note that formula IDs may contain non-digit characters. *)
+extractCellID[ FML$[ k_, __]] :=
+	extractCellID[ k]
+extractCellID[ {id_String, _}] :=
+	extractCellID[ id]
+extractCellID[ id_String] :=
+	Replace[ StringPosition[ id, DigitCharacter, 1],
+		{
+			{{i_Integer, _}} :>
+				With[ {id1 = StringDrop[ id, i - 1]},
+					Replace[ StringPosition[ id1, Except[ DigitCharacter], 1],
+						{
+							{{j_Integer, _}} :> StringTake[ id1, j - 1],
+							_ -> id1
+						}
+					]
+				],
+			_ -> ""
+		}
 	]
-getCellLabel[ args___] := unexpected[ getCellLabel, {args}]
-
-getCellIDLabel[ cellTags_] := getCellLabel[ cellTags, "ID"]
-getCellIDLabel[ args___] := unexpected[ getCellIDLabel, {args}]
-
-(* Extract the CellID from the formula key *)
-getCellIDFromKey[ k_List] :=
-	Module[{lab},
-		lab = getCellIDLabel[ k];
-		Part[ StringSplit[ lab, $cellTagKeySeparator], 2]
-	]
-getCellIDFromKey[ args___] := unexpected[ getCellIDFromKey, {args}]
+extractCellID[ _] :=
+	$Failed
+extractCellID[ args___] := unexpected[ extractCellID, {args}]
 
 (*
  cellTagsToString[ tags] extracts the formula label from a list of cell tags. It does so by first
@@ -592,31 +595,27 @@ cellTagsToFmlTags[ args___] := unexpected[ cellTagsToFmlTags, {args}]
 makeLabel[ s_String] := "(" <> s <> ")"
 makeLabel[ args___] := unexpected[ makeLabel, {args}]
 
-makeCellFrameLabel[ idTag_String, tags_, True] :=
-	{{None, makeCellFrameLabel[ idTag, tags, False]}, {None, None}}
-makeCellFrameLabel[ idTag_String, tags_, False] :=
+makeCellFrameLabel[ tags_, True] :=
+	{{None, makeCellFrameLabel[ tags, False]}, {None, None}}
+makeCellFrameLabel[ tags_, False] :=
 	Cell[ BoxData[ RowBox[
 		{
 			StyleBox[ makeLabel[ cellTagsToString[ tags]], "FrameLabel"],
 			"  ",
-			ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeFormula[ idTag]]
+			ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeFormula[]]
 		}
 	]]]
 makeCellFrameLabel[ args___] := unexpected[ makeCellFrameLabel, {args}]
 
 relabelCell[ nb_NotebookObject, cellTags_List, cellID_Integer] :=
-	Module[ {newCellTags},
-	With[ {idTag = cellIDLabel[ cellID]},
-		(* Keep cleaned CellTags and add identification (ID) *)
-		newCellTags = Prepend[ cellTags, idTag];
+	(
 		SetOptions[ NotebookSelection[ nb],
-			CellFrameLabels -> makeCellFrameLabel[ idTag, newCellTags, True],
-			CellTags -> newCellTags,
+			CellFrameLabels -> makeCellFrameLabel[ cellTags, True],
+			CellTags -> cellTags,
 			ShowCellTags -> False
 		];
-		(* return autoTags to be used as key for formula in KB *)
-		{idTag, sourceLabel[ nb]}
-	]]
+		makeFmlKey[ cellID, nb]
+	)
 relabelCell[ args___] := unexpected[ relabelCell, {args}]
 
 removeEnvironment[ nb_NotebookObject] :=
@@ -637,7 +636,7 @@ removeEnvironment[ nb_NotebookObject] :=
 	]
 removeEnvironment[ args___] := unexpected[ removeEnvironment, {args}]
 
-removeFromSession[ file_, Cell[ _, "FormalTextInputFormula", ___, CellTags -> t_, ___]] := removeFromEnv[ getKeyTags[ t, file]]
+removeFromSession[ file_, Cell[ _, "FormalTextInputFormula", ___, CellID -> cid_, ___]] := removeFromEnv[ makeFmlKey[ cid, file]]
 removeFromSession[ file_, Cell[ _, "GlobalDeclaration", ___, CellID -> id_, ___]] := removeFromGlobals[ {file, id}]
 removeFromSession[ args___] := unexpected[ removeFromSession, {args}]
 
@@ -651,6 +650,18 @@ removeFromEnv[ key_List] :=
 	]
 removeFromEnv[ args___] := unexpected[ removeFromEnv, {args}]
 
+removeFormula[] :=
+	With[ {nb = ButtonNotebook[]},
+	With[ {nbFile = NotebookFileName[ nb]},
+		SelectionMove[ nb, All, ButtonCell];
+		With[ {id = Replace[ NotebookRead[ nb], {Cell[ _, __, CellID -> i_, ___] :> cellIDLabel[ i], _ :> Return[ Null]}]},
+			adjustEnvironment[ nb, nbFile];		(* otherwise the formula might not get removed *)
+			NotebookDelete[ nb];
+			removeFromEnv[ {id, sourceLabel[ nbFile]}];
+			updateKBBrowser[ nbFile];
+		];
+	]]
+(* The following three definitions of 'removeFormula' are only kept for backward compatibility. *)
 removeFormula[ id_String] :=
 	With[ {nb = ButtonNotebook[]},
 	With[ {nbFile = CurrentValue[ nb, "NotebookFullFileName"]},
@@ -658,7 +669,6 @@ removeFormula[ id_String] :=
 		removeFormula[ {id, sourceLabel[ nbFile]}, nb, nbFile];
 	]]
 removeFormula[ key_List] :=
-	(* for compatibility *)
 	With[ {nb = ButtonNotebook[]},
 		removeFormula[ key, nb, CurrentValue[ nb, "NotebookFullFileName"]];
 	]
@@ -713,13 +723,18 @@ removeFromGlobals[ {file_, id_}] :=
 removeFromGlobals[ args___] := unexpected[ removeFromGlobals, {args}]
 
 
-cellLabel[ l_, key_String] := key <> $cellTagKeySeparator <> ToString[l]
+cellLabel[ l_, key_String] := key <> $cellTagKeySeparator <> ToString[ l]
 cellLabel[ args___] := unexpected[ cellLabel, {args}]
 
+cellIDLabel[] :=
+	cellIDLabel[ "none"]
+cellIDLabel[ l_List] :=
+	cellIDLabel[ StringJoin[ Riffle[ ToString /@ l, "."]]]
 cellIDLabel[ cellID_] := cellLabel[ cellID, "ID"]
 cellIDLabel[ args___] := unexpected[ cellIDLabel, {args}]
 
 (* TODO: Maybe archives and ordinary notebooks should not be treated differently here. *)
+sourceLabel[] := sourceLabel[ "none"]
 sourceLabel[ nb_NotebookObject] /; inArchive[] := cellLabel[ currentArchiveName[], "Source"]
 sourceLabel[ nb_NotebookObject] := cellLabel[ CurrentValue[ nb, "NotebookFullFileName"], "Source"]
 sourceLabel[ file_String] := cellLabel[ file, "Source"]
@@ -884,8 +899,8 @@ updateKnowledgeBase[ form_, k_, glob_, l_String, tags_List, cellPos_] :=
     ]
 updateKnowledgeBase[ args___] := unexpected[ updateKnowledgeBase, {args}]
 
-findSelectedFormula[ Cell[ _, ___, CellTags -> t_, ___], file_String] :=
-	Module[ { key = getKeyTags[ t, file]},
+findSelectedFormula[ Cell[ _, ___, CellID -> cid_, ___], file_String] :=
+	Module[ { key = makeFmlKey[ cid, file]},
 		Cases[ $tmaEnv, FML$[ key, _, __], {1}, 1]
 	]
 findSelectedFormula[ sel_, _] := {}

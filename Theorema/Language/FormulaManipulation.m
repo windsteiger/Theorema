@@ -1405,7 +1405,7 @@ makeTmaFml[ key_List, fml_, label_String, fml_] := FML$[ key, fml, label]
 makeTmaFml[ key_List, fmlSimp_, label_String, fml_] := FML$[ key, fmlSimp, label, "origForm" -> fml]
 makeTmaFml[ args___] := unexpected[ makeTmaFml, {args}]
 
-defKey[ ] := {"ID" <> $cellTagKeySeparator <> ToString[ Unique[ "formula"]], "Source" <> $cellTagKeySeparator <> "none"}
+defKey[ ] := makeFmlKey[ ToString[ Unique[ "formula"]]]
 defKey[ args___] := unexpected[ defKey, {args}]
 
 defLabel[ ] := ToString[ $formulaLabel++]
@@ -1429,15 +1429,23 @@ id[ FML$[ k_, _, __]] := k[[1]]
 source[ FML$[ k_, _, __]] := k[[2]]
 source[ args___] := unexpected[ source, {args}]
 
-sourceFile[ FML$[ k_, _, __]] := StringReplace[ k[[2]], StartOfString ~~ "Source" ~~ $cellTagKeySeparator  -> ""]
+sourceFile[ FML$[ k_, __]] :=
+	sourceFile[ k]
+sourceFile[ {_, src_String}] :=
+	sourceFile[ src]
+sourceFile[ src_String] :=
+	StringReplace[ src, StartOfString ~~ "Source" ~~ $cellTagKeySeparator -> ""]
+sourceFile[ _] :=
+	$Failed
 sourceFile[ args___] := unexpected[ sourceFile, {args}]
 
 
 formulaReference[ fml_FML$] :=
-    With[ { tag = id@fml, labelDisp = makeLabel[ label@fml], fmlDisp = theoremaDisplay[ formula@fml]},
+    With[ {cid = extractCellID@fml, tag = id@fml, labelDisp = makeLabel[ label@fml], fmlDisp = theoremaDisplay[ formula@fml]},
         Cell[ BoxData[ ToBoxes[
             Button[ Tooltip[ Mouseover[ Style[ labelDisp, "FormReference"], Style[ labelDisp, "FormReferenceHover"]], fmlDisp],
-               NotebookLocate[ tag], Appearance -> None]
+            	(* 'formulaReference' is used both for content notebooks and proof notebooks, hence we also search 'CellTags'. *)
+               If[ selectCells[ cid, CellID] === $Failed, selectCells[ tag, CellTags]], Appearance -> None]
         ]]]
        ]
 formulaReference[ args___] := unexpected[ formulaReference, {args}]

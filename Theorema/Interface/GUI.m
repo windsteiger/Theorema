@@ -515,7 +515,7 @@ displaySelectedGoal[ goal_] :=
     ]
 displaySelectedGoal[args___] := unexpected[ displaySelectedGoal, {args}]
 
-displayLabeledFormula[ f:FML$[ key_, form_, lab_, ___], {i_Integer}] := 
+displayLabeledFormula[ f:FML$[ key_, form_, lab_, ___], {i_Integer}] :=
 	Module[ {src, nb, labDisp = makeLabel[ lab], orig = getOptionalComponent[ f, "origForm"],
 		formDisp = Style[ theoremaDisplay[ form], "DisplayFormula", LineBreakWithin -> False]},
 		src = StringReplace[ key[[2]], "Source" <> $cellTagKeySeparator -> "", 1];
@@ -523,12 +523,12 @@ displayLabeledFormula[ f:FML$[ key_, form_, lab_, ___], {i_Integer}] :=
 		If[ orig =!= {},
             formDisp = Tooltip[ formDisp, theoremaDisplay[ orig]]
     	];
-		Labeled[ 
-			Panel[ formDisp, 
+		Labeled[
+			Panel[ formDisp,
 				FrameMargins -> 1, ImageSize -> {{360, 1000}, Automatic},
 				Background -> Append[ TMAcolor[13], If[ OddQ[ i], 0.05, 0.15]]],
 			If[ nb =!= $Failed,
-				Hyperlink[ Style[ labDisp, "FormulaLabel"], {nb, key[[1]]}],
+				fmlHyperlink[ Style[ labDisp, "FormulaLabel"], nb, extractCellID[ key[[1]]]],
 				Tooltip[ Style[ labDisp, "FormulaLabel"], translate[ "noNB"] <> " :" <> src]],
 			{{Top, Left}},
 			Spacings -> {Automatic, 0}
@@ -745,24 +745,24 @@ structView[ file_, item_List, tags_, headers_List, task_] :=
     ]
 
 (* input cell with cell tags *)
-structView[ file_, Cell[ content_, "FormalTextInputFormula", a___, CellTags -> cellTags_, b___], tags_, headers_List, task_] :=
-    Module[ { isEval, formPos, cleanCellTags, keyTags, formulaLabel, idLabel, nbAvail},
+structView[ file_, Cell[ content_, "FormalTextInputFormula", opts___], tags_, headers_List, task_] :=
+	With[ {cellTags = Replace[ CellTags, {opts, _ -> {}}],
+			cellID = Replace[ CellID, {opts, _ :> Return[ {}]}]},	(* ignore cells without ID *)
+    Module[ {isEval, formPos, cleanCellTags, keyTags, formulaLabel, nbAvail},
         cleanCellTags = getCleanCellTags[ cellTags];
         (* If keyword does not match, return {} -> ignore *)
         If[ StringLength[ $kbFilterKW] > 2 && testNoMatch[ Apply[ StringJoin, Riffle[ Join[ headers, cleanCellTags], ":"]], "*" <> $kbFilterKW <> "*"],
         	Return[ {}]
         ];
-        (* keyTags are those cell tags that are used to uniquely identify the formula in the KB *)
-        keyTags = getKeyTags[ cellTags, file];
+        keyTags = makeFmlKey[ cellID, file];
         (* check whether cell has been evaluated -> formula is in KB? *)
         formPos = Position[ {$tmaEnv, $tmaArch}, FML$[ keyTags, _, __], {2}, 1];
         isEval = formPos =!= {};
         (* Join list of CellTags, use $labelSeparator. *)
         If[ cleanCellTags === {},
-            formulaLabel = cellTagsToString[ cellTags];
-			idLabel = formulaLabel,
-            formulaLabel = cellTagsToString[ cleanCellTags];
-			idLabel = getCellIDLabel[ keyTags];
+            formulaLabel = cellTagsToString[ cellTags],
+		(*else*)
+            formulaLabel = cellTagsToString[ cleanCellTags]
         ];
         (*
         If we load an archive without corresponding notebook available, then $kbStruct contains the archive name instead of the notebook name.
@@ -771,68 +771,33 @@ structView[ file_, Cell[ content_, "FormalTextInputFormula", a___, CellTags -> c
         nbAvail = FileExistsQ[ file] && FileExtension[ file] === "nb";
         (* generate a checkbox and display the label
            checkbox sets the value of the global function kbSelectProve[labels] (kbSelectCompute[labels] resp. for the compute tab),
-           enabled only if the formula has been evaluated 
+           enabled only if the formula has been evaluated
            label is a hyperlink to the notebook or a button that opens a new window displaying the formula *)
-        {Switch[ task,
-            "prove",
-            Row[ {Checkbox[ Dynamic[ kbSelectProve[ "KEY"]], Enabled -> isEval] /. "KEY" -> keyTags, 
-                Tooltip[ Hyperlink[ Style[ formulaLabel, If[ isEval,
-                                                       "FormalTextInputFormula",
-                                                       "FormalTextInputFormulaUneval"
-                                                   ]], {file, idLabel}, Enabled -> nbAvail, ActiveStyle -> If[ nbAvail, "HyperlinkActive", None]],
-                             If[ isEval,
-                             	theoremaDisplay[ Extract[ {$tmaEnv, $tmaArch}, Append[ formPos[[1]], 2]]],
-                             	displayCellContent[ content]]
-                    ],
-                    If[ isEval, 
-                    	"", 
-                    	(* else: unevaluated -> put remoteEval button *)
-                    	With[ {tag = idLabel}, 
-                    		Button[ Style[ "\[ReturnIndicator]", "FormalTextInputFormulaUneval", FontSlant -> "Plain"], remoteEvalFormula[ file, tag], Appearance -> None]
-                    	]
-                    ]},
-                Spacer[10]],
-            "compute",
-            Row[ {Checkbox[ Dynamic[ kbSelectCompute["KEY"]], Enabled -> isEval] /. "KEY" -> keyTags,
-                Tooltip[ Hyperlink[ Style[ formulaLabel, If[ isEval,
-                                                       "FormalTextInputFormula",
-                                                       "FormalTextInputFormulaUneval"
-                                                   ]], {file, idLabel}, Enabled -> nbAvail, ActiveStyle -> If[ nbAvail, "HyperlinkActive", None]],
-                             If[ isEval,
-                             	theoremaDisplay[ Extract[ {$tmaEnv, $tmaArch}, Append[ formPos[[1]], 2]]],
-                             	displayCellContent[ content]]
-                    ],
-                    If[ isEval, 
-                    	"", 
-                    	(* else: unevaluated -> put remoteEval button *)
-                    	With[ {tag = idLabel}, 
-                    		Button[ Style[ "\[ReturnIndicator]", "FormalTextInputFormulaUneval", FontSlant -> "Plain"], remoteEvalFormula[ file, tag], Appearance -> None]
-                    	]
-                    ]},
-                Spacer[10]],
-            "solve",
-            Row[ {Checkbox[ Dynamic[ kbSelectSolve[ "KEY"]], Enabled -> isEval] /. "KEY" -> keyTags, 
-                Tooltip[ Hyperlink[ Style[ formulaLabel, If[ isEval,
-                                                       "FormalTextInputFormula",
-                                                       "FormalTextInputFormulaUneval"
-                                                   ]], {file, idLabel}, Enabled -> nbAvail, ActiveStyle -> If[ nbAvail, "HyperlinkActive", None]],
-                             If[ isEval,
-                             	theoremaDisplay[ Extract[ {$tmaEnv, $tmaArch}, Append[ formPos[[1]], 2]]],
-                             	displayCellContent[ content]]
-                    ],
-                    If[ isEval, 
-                    	"", 
-                    	(* else: unevaluated -> put remoteEval button *)
-                    	With[ {tag = idLabel}, 
-                    		Button[ Style[ "\[ReturnIndicator]", "FormalTextInputFormulaUneval", FontSlant -> "Plain"], remoteEvalFormula[ file, tag], Appearance -> None]
-                    	]
-                    ]},
-                Spacer[10]]    
-            ], {keyTags}}
-    ]
-
-(* input cell without cell tags -> ignore *)
-structView[ file_, Cell[ content_, "FormalTextInputFormula", ___], tags_, headers_List, task_] := {}
+        {
+        	With[ {act = Switch[ task, "compute", kbSelectCompute, "solve", kbSelectSolve, _, kbSelectProve]},
+        		Row[ {Checkbox[ Dynamic[ act[ "KEY"]], Enabled -> isEval] /. "KEY" -> keyTags,
+	                Tooltip[ fmlHyperlink[ Style[ formulaLabel, If[ isEval,
+	                                                       "FormalTextInputFormula",
+	                                                       "FormalTextInputFormulaUneval"
+	                                                   ]], file, cellID, Enabled -> nbAvail, ActiveStyle -> If[ nbAvail, "HyperlinkActive", None]],
+	                             If[ isEval,
+	                             	theoremaDisplay[ Extract[ {$tmaEnv, $tmaArch}, Append[ formPos[[1]], 2]]],
+	                             	displayCellContent[ content]]
+	                    ],
+	                    If[ isEval,
+	                    	"",
+	                    	(* else: unevaluated -> put remoteEval button *)
+                    		Button[
+                    			Style[ "\[ReturnIndicator]", "FormalTextInputFormulaUneval", FontSlant -> "Plain"],
+                    			remoteEvalFormula[ file, cellID],
+                    			Appearance -> None
+                    		]
+	                    ]},
+                Spacer[ 10]]
+        	],
+        	{keyTags}
+        }
+    ]]
 
 structView[ args___] := unexpected[ structView, {args}]
 
@@ -843,16 +808,10 @@ headerView[ file_, Cell[ content_String, style_, ___], tags_, task_] :=
    checkbox does not have an associated variable whose value the box represents
    instead, the checkbox is checked if all tags containd in the group are checked,
    checking the box calls function setAll in order to set/unset all tags contained in the group *)
-Module[ {trim = StringReplace[ content, "\n"|"\t" -> " "]},
-   	Switch[ task,
-    	"prove",
-        Row[ {Checkbox[ Dynamic[ allTrue[ tags, kbSelectProve], setAll[ tags, kbSelectProve, #] &]], Style[ trim, style]}, Spacer[10]],
-        "compute",
-        Row[ {Checkbox[ Dynamic[ allTrue[ tags, kbSelectCompute], setAll[ tags, kbSelectCompute, #] &]], Style[ trim, style]}, Spacer[10]],
-        "solve",
-        Row[ {Checkbox[ Dynamic[ allTrue[ tags, kbSelectSolve], setAll[ tags, kbSelectSolve, #] &]], Style[ trim, style]}, Spacer[10]]        
-    ]
-]
+	With[ {trim = StringReplace[ content, "\n"|"\t" -> " "],
+			act = Switch[ task, "compute", kbSelectCompute, "solve", kbSelectSolve, _, kbSelectProve]},
+		Row[ {Checkbox[ Dynamic[ allTrue[ tags, act], setAll[ tags, act, #] &]], Style[ trim, style]}, Spacer[10]]
+	]
 headerView[ file_, Cell[ content_TextData, style_, ___], tags_, task_] := headerView[ file, Cell[ formattedCellToString[ content], style], tags, task]
 headerView[ args___] := unexpected[ headerView, {args}]
 
@@ -870,13 +829,69 @@ textDataToString[ Cell[ BoxData[ b_], ___]] := "\!\(" <> ToString[ InputForm[ b]
 textDataToString[ _] := "\[DownQuestion]?"
 textDataToString[ args___] := unexpected[ textDataToString, {args}]
 
-remoteEvalFormula[ file_, tag_] :=
-	Module[{nb},
-		NotebookLocate[ {file, tag}];
-		nb = Select[ Notebooks[], CurrentValue[ #, "NotebookFullFileName"] === file &, 1];
-		Scan[ SelectionEvaluate, nb]
-	]
+remoteEvalFormula[ file_, spec_, target___] :=
+	(
+		selectCells[ file, spec, target];
+		Scan[ SelectionEvaluate, Select[ Notebooks[], CurrentValue[ #, "NotebookFullFileName"] === file &, 1]]
+	)
 remoteEvalFormula[ args___] := unexpected[ remoteEvalFormula, {args}]
+
+
+(* ::Subsubsection:: *)
+(* fmlHyperlink *)
+
+(* In the current setup, linking to formula cells in content notebooks is only possible via 'fmlHyperlink', since
+	such cells do not have any unique cell tags any more (only a cell ID). Linking to cells in proof notebooks, on
+	the other hand, can/must still be done with built-in 'Hyperlink', since they do get specific tags for uniquely
+	identifying them. That approach obviously is not very uniform, and hence may be changed at some point. *)
+fmlHyperlink[ FML$[ k_, _, l_String, ___], opts___] :=
+	fmlHyperlink[ Style[ makeLabel[ l], "FormulaLabel"], k, opts]
+fmlHyperlink[ l:Except[ _FML$], {id_String, src_String}, CellTags, opts___] :=
+	fmlHyperlink[ l, sourceFile[ src], id, CellTags, opts]
+fmlHyperlink[ l:Except[ _FML$], {id_String, src_String}, opts___] :=
+	fmlHyperlink[ l, sourceFile[ src], extractCellID[ id], opts]
+fmlHyperlink[ l:Except[ _FML$], Except[ _List|_String], ___] :=
+	l
+fmlHyperlink[ l:Except[ _FML$], plainSrc_String, spec_, target:(CellTags|CellID), opts___] :=
+	With[ {as = Replace[ ActiveStyle, {opts, _ -> "HyperlinkActive"}]},
+		StatusArea[
+			Button[
+				Mouseover[ l, Style[ l, as]],
+				(selectCells[ plainSrc, spec, target]; Null),
+				Sequence @@ DeleteCases[ {opts}, ActiveStyle -> _],
+				Appearance -> None,
+				FrameMargins -> 0,
+				ImageSize -> Automatic,
+				BaseStyle -> "Hyperlink"
+			],
+			plainSrc <> ", " <> ToString[ spec]
+		]
+	]
+fmlHyperlink[ l:Except[ _FML$], plainSrc_String, spec_, opts___] :=
+	fmlHyperlink[ l, plainSrc, spec, CellID, opts]
+fmlHyperlink[ args___] := unexpected[ fmlHyperlink, {args}]
+
+(* 'selectCells' also works with cell IDs, in contrast to 'NotebookLocate'.
+	The last argument of 'selectCells' must be 'CellID' or 'CellTags'.
+	With 'CellID', only cell IDs are searched (using 'NotebookFind').
+	With 'CellTags', only cell tags are searched (using 'NotebookLocate' or 'NotebookFind'). *)
+selectCells[ spec_] :=
+	selectCells[ InputNotebook[], spec, CellID]
+selectCells[ src_, spec:(_String|_Integer)] :=
+	selectCells[ src, spec, CellID]
+selectCells[ spec_, CellTags] :=
+	NotebookLocate[ spec]
+selectCells[ spec_, CellID] :=
+	selectCells[ InputNotebook[], spec, CellID]
+selectCells[ src_String, spec_String, CellTags] :=
+	NotebookLocate[ {src, spec}]
+selectCells[ nb_NotebookObject, spec_, CellTags] :=
+	NotebookFind[ nb, spec, All, CellTags]
+selectCells[ src_String, spec_, CellID] :=
+	selectCells[ NotebookOpen[ src], spec, CellID]
+selectCells[ nb_NotebookObject, spec_, CellID] :=
+	NotebookFind[ nb, spec, All, CellID]
+selectCells[ args___] := unexpected[ selectCells, {args}]
 
 
 (* ::Subsubsection:: *)
@@ -1509,7 +1524,7 @@ saveProofObject[ args___] := unexpected[ saveProofObject, {args}]
 
 openLog[ goal_FML$, repl_Integer] :=
 	Module[{cellID, nbDir, subsP = repl, fileID, file, log},
-		cellID = getCellIDFromKey[ key@goal];
+		cellID = extractCellID[ goal];
 		nbDir = createPerNotebookDirectory[ CurrentValue[ $proofInitNotebook, "NotebookFullFileName"]];
 		If[ subsP === 0,
 			(* This may occur if the prover tab has been skipped and $replexistProof still has init val 0 *)
