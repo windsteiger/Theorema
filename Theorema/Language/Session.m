@@ -600,7 +600,14 @@ makeCellFrameLabel[ tags_, True] :=
 makeCellFrameLabel[ tags_, False] :=
 	Cell[ BoxData[ RowBox[
 		{
-			StyleBox[ makeLabel[ cellTagsToString[ tags]], "FrameLabel"],
+			With[ {lblBox = StyleBox[ makeLabel[ cellTagsToString[ tags]], "FrameLabel"],
+					fmlTags = cellTagsToFmlTags[ tags]},
+				If[ fmlTags === {},
+					lblBox,
+				(*else*)
+					TooltipBox[ lblBox, StringJoin[ Riffle[ fmlTags, ", "]]]
+				]
+			],
 			"  ",
 			ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeFormula[]]
 		}

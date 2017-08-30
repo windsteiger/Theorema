@@ -888,7 +888,12 @@ selectCells[ src_String, spec_String, CellTags] :=
 selectCells[ nb_NotebookObject, spec_, CellTags] :=
 	NotebookFind[ nb, spec, All, CellTags]
 selectCells[ src_String, spec_, CellID] :=
-	selectCells[ NotebookOpen[ src], spec, CellID]
+	Replace[ NotebookOpen[ src],
+		{
+			nb_NotebookObject :> selectCells[ nb, spec, CellID],
+			_ -> $Failed
+		}
+	]
 selectCells[ nb_NotebookObject, spec_, CellID] :=
 	NotebookFind[ nb, spec, All, CellID]
 selectCells[ args___] := unexpected[ selectCells, {args}]
