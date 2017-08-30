@@ -163,12 +163,37 @@ Key[ k_][ assoc_Association] :=
 
 Association /: Part[ assoc_Association, k:(_String|_Key), rest___] :=
 	Lookup[ assoc, k][[rest]]
+Association /: Part[ assoc_Association, i_Integer, rest___] :=
+	(Association @@ ((List @@ assoc)[[i, 2]]))[[rest]]
+Association /: Part[ assoc_Association, All, rest___] :=
+	Map[ #[[rest]] &, assoc]
+Association /: Part[ assoc_Association, sp_Span, rest___] :=
+	(Association @@ (List @@ assoc)[[sp]])[[All, rest]]
 
-Association /: First[ Association[ (Rule|RuleDelayed)[ _, v_], ___]] :=
-	v
+Association /: First[ assoc_Association] :=
+	Last[ First[ assoc]]
 
-Association /: Last[ Association[ ___, (Rule|RuleDelayed)[ _, v_]]] :=
-	v
+Association /: Last[ assoc_Association] :=
+	Last[ Last[ assoc]]
+
+Association /: Extract[ assoc_Association, p:{___List}] :=
+	Map[ Extract[ assoc, #]&, p]
+Association /: Extract[ assoc_Association, p_List] :=
+	assoc[[Sequence @@ p]]
+
+(* It is only possible to delete one element at a time. *)
+Association /: Delete[ assoc_Association, {}] :=
+	assoc
+Association /: Delete[ assoc_Association, {i_}] :=
+	Delete[ assoc, i]
+Association /: Delete[ assoc_Association, {i_, rest__}] :=
+	ReplacePart[ assoc, {i, 2} -> Delete[ assoc[[i]], {rest}]]
+Association /: Delete[ assoc_Association, k_String] :=
+	KeyDrop[ assoc, k]
+Association /: Delete[ assoc_Association, Key[ k_]] :=
+	KeyDrop[ assoc, k]
+Association /: Delete[ assoc_Association, i_Integer] :=
+	Association @@ Delete[ List @@ assoc, i]
 
 KeyDrop[ k_][ assoc_] :=
 	KeyDrop[ assoc, k]
@@ -261,13 +286,13 @@ Lookup[ assocs_List, k_, def___] :=
 
 SetAttributes[ Keys, Listable];
 Keys[ assoc_Association] :=
-	List @@ assoc[[All, 1]]
+	(List @@ assoc)[[All, 1]]
 Keys[ (Rule|RuleDelayed)[ k_, _]] :=
 	k
 
 SetAttributes[ Values, Listable];
 Values[ assoc_Association] :=
-	List @@ assoc[[All, 2]]
+	(List @@ assoc)[[All, 2]]
 Values[ (Rule|RuleDelayed)[ _, v_]] :=
 	v
 
@@ -300,7 +325,7 @@ Association /: MemberQ[ assoc_Association, patt_, args___] :=
 	MemberQ[ Values[ assoc], patt, args]
 
 Association /: Position[ assoc_Association, patt_, args___] :=
-	Replace[ Position[ Values[ assoc], patt, args], {i_Integer?Positive, rest___} :> {Key[ Extract[ assoc, {i, 1}]], rest}, {1}]
+	Replace[ Position[ Values[ assoc], patt, args], {i_Integer?Positive, rest___} :> {Key[ Extract[ List @@ assoc, {i, 1}]], rest}, {1}]
 
 Merge[ f_][ l_List] :=
 	Merge[ l, f]
