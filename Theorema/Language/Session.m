@@ -641,12 +641,11 @@ removeFromSession[ file_, Cell[ _, "GlobalDeclaration", ___, CellID -> id_, ___]
 removeFromSession[ args___] := unexpected[ removeFromSession, {args}]
 
 removeFromEnv[ key_List] :=
-	Module[ {p},
+	If[ TrueQ[ $removeFromEnvTest[ key]],
 		$tmaEnv = DeleteCases[ $tmaEnv, FML$[ key, ___]];
-		p = Position[ DownValues[ kbSelectProve], key];
-		If[ p =!= {}, Unset[ kbSelectProve[ key]]];
-		p = Position[ DownValues[ kbSelectCompute], key];
-		If[ p =!= {}, Unset[ kbSelectCompute[ key]]];
+		If[ MemberQ[ DownValues[ kbSelectProve], key, {0, Infinity}, Heads -> True], Unset[ kbSelectProve[ key]]];
+		If[ MemberQ[ DownValues[ kbSelectCompute], key, {0, Infinity}, Heads -> True], Unset[ kbSelectCompute[ key]]];
+		If[ MemberQ[ DownValues[ kbSelectSolve], key, {0, Infinity}, Heads -> True], Unset[ kbSelectSolve[ key]]];
 	]
 removeFromEnv[ args___] := unexpected[ removeFromEnv, {args}]
 
@@ -1085,6 +1084,7 @@ initSession[] :=
         $inputEvaluationFunction = ToExpression;
         $inputProlog := (Theorema`Common`$parseTheoremaQuoted = True;);
         $inputEpilog := (Theorema`Common`$parseTheoremaQuoted = False;);
+        $removeFromEnvTest = (True&);
         $Pre=.;
         $PreRead=.;
     ]
