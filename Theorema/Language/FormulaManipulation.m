@@ -1440,14 +1440,16 @@ sourceFile[ _] :=
 sourceFile[ args___] := unexpected[ sourceFile, {args}]
 
 
-formulaReference[ fml_FML$] :=
-    With[ {cid = extractCellID@fml, tag = id@fml, labelDisp = makeLabel[ label@fml], fmlDisp = theoremaDisplay[ formula@fml]},
-        Cell[ BoxData[ ToBoxes[
-            Button[ Tooltip[ Mouseover[ Style[ labelDisp, "FormReference"], Style[ labelDisp, "FormReferenceHover"]], fmlDisp],
-            	(* 'formulaReference' is used both for content notebooks and proof notebooks, hence we also search 'CellTags'. *)
-               If[ selectCells[ cid, CellID] === $Failed, selectCells[ tag, CellTags]], Appearance -> None]
-        ]]]
-       ]
+Options[ formulaReference] = {Tooltip -> True};
+formulaReference[ fml_FML$, opts___?OptionQ] :=
+	With[ {tt = Replace[ Replace[ Tooltip, {opts}], Options[ formulaReference]]},
+	With[ {cid = extractCellID@fml, tag = id@fml, labelDisp = makeLabel[ label@fml], fmlDisp = If[ TrueQ[ tt], theoremaDisplay[ formula@fml], tt]},
+		Cell[ BoxData[ ToBoxes[
+			Button[ If[ tt === False, #1&, Tooltip][ Mouseover[ Style[ labelDisp, "FormReference"], Style[ labelDisp, "FormReferenceHover"]], fmlDisp],
+				(* 'formulaReference' is used both for content notebooks and proof notebooks, hence we also search 'CellTags'. *)
+				If[ selectCells[ cid, CellID] === $Failed, selectCells[ tag, CellTags]], Appearance -> None]
+		]]]
+	]]
 formulaReference[ args___] := unexpected[ formulaReference, {args}]
 
 (*

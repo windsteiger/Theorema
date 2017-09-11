@@ -1696,7 +1696,7 @@ evalFormulaFromKey[ k_List] :=
 		nb = NotebookOpen[ file];
 		NotebookFind[ nb, "GlobalDeclaration", All, CellStyle];
 		FrontEndTokenExecute[ "EvaluateCells"];
-        NotebookFind[ nb, k[[1]], All, CellTags];
+        NotebookFind[ nb, extractCellID[ k], All, CellID];
         FrontEndTokenExecute[ "EvaluateCells"];
        ]
 evalFormulaFromKey[ args___] := unexpected[ evalFormulaFromKey, {args}]
@@ -1723,7 +1723,7 @@ printProveInfo[ kbKeysLabels_, pVal_, pTime_, simplification_List, {subsP_Intege
         	(* no replacement of existing proof -> new proof *)
         	If[ NotebookFind[ $proofInitNotebook, makeProofIDTag[ $selectedProofGoal] <> "-" <> ToString[ subsP-1], All, CellTags] === $Failed,
         		(* there are no proofs for this goal -> put after env *)
-				NotebookFind[ $proofInitNotebook, id@$selectedProofGoal, All, CellTags];
+				NotebookFind[ $proofInitNotebook, extractCellID[ $selectedProofGoal], All, CellID];
 				NotebookFind[ $proofInitNotebook, "CloseEnvironment", Next, CellStyle];
 				SelectionMove[ $proofInitNotebook, After, CellGroup],
 				(* there are already proofs for this goal *)
