@@ -86,8 +86,6 @@ freshSymbol[ sym:Hold[ s_Symbol], dropWolf_] :=
             	ToExpression[ "RationalInterval$TM[ -Infinity, Infinity, False, False]"],
             Theorema`Computation`Language`\[DoubleStruckCapitalR]|\[DoubleStruckCapitalR],
             	ToExpression[ "RealInterval$TM[ -Infinity, Infinity, False, False]"],
-            Theorema`Computation`Knowledge`\[EmptySet]|Theorema`Knowledge`\[EmptySet],
-            	Sow[ sym, "remove"]; ToExpression[ "Set$TM[]"],
             DoubleLongRightArrow|DoubleRightArrow, ToExpression[ "Implies$TM"],
             DoubleLongLeftRightArrow|DoubleLeftRightArrow|Equivalent, ToExpression[ "Iff$TM"],
         	SetDelayed, ToExpression[ "EqualDef$TM"],
@@ -100,6 +98,10 @@ freshSymbol[ sym:Hold[ s_Symbol], dropWolf_] :=
         	_,
         	name = ToString[ Unevaluated[ s]];
         	Which[
+        		name === "\[EmptySet]" || name === "Theorema`Knowledge`\[EmptySet]" || name === "Theorema`Computation`Knowledge`\[EmptySet]",
+        		Sow[ sym, "remove"];
+        		ToExpression[ "Set$TM[]"],
+        	(*else*)
     			StringTake[ name, -1] === "$" || (StringLength[ name] >= 3 && StringTake[ name, -3] === "$TM"),
     			s,
     		(*else*)
@@ -127,14 +129,17 @@ freshSymbolProg[ sym:Hold[ s_Symbol], dropWolf_] :=
             	ToExpression[ "RationalInterval$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]"],
             Theorema`Computation`Language`\[DoubleStruckCapitalR]|\[DoubleStruckCapitalR],
             	ToExpression[ "RealInterval$TM[DirectedInfinity[-1], DirectedInfinity[1], False, False]"],
-            Theorema`Computation`Knowledge`\[EmptySet]|Theorema`Knowledge`\[EmptySet],
-            	Sow[ sym, "remove"]; ToExpression[ "Set$TM[]"],	(* We always interpret '\[EmptySet]' as an empty *set* rather than an empty *list*, even inside a program. *)
         	Set, ToExpression[ "Assign$TM"],
         	makeSet, ToExpression[ "List$TM"],
         	Inequality, ToExpression[ "OperatorChain$TM"],
         	_,
         	name = ToString[ Unevaluated[ s]];
         	Which[
+        		name === "\[EmptySet]" || name === "Theorema`Knowledge`\[EmptySet]" || name === "Theorema`Computation`Knowledge`\[EmptySet]",
+        		Sow[ sym, "remove"];
+        		(* We always interpret '\[EmptySet]' as an empty *set* rather than an empty *list*, even inside a program. *)
+        		ToExpression[ "Set$TM[]"],
+        	(*else*)
     			StringTake[ name, -1] === "$" || (StringLength[ name] >= 3 && StringTake[ name, -3] === "$TM"),
     			s,
     		(*else*)
