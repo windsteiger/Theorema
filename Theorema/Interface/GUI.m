@@ -759,11 +759,7 @@ structView[ file_, Cell[ content_, "FormalTextInputFormula", opts___], tags_, he
         formPos = Position[ {$tmaEnv, $tmaArch}, FML$[ keyTags, _, __], {2}, 1];
         isEval = formPos =!= {};
         (* Join list of CellTags, use $labelSeparator. *)
-        If[ cleanCellTags === {},
-            formulaLabel = cellTagsToString[ cellTags],
-		(*else*)
-            formulaLabel = cellTagsToString[ cleanCellTags]
-        ];
+        formulaLabel = cellTagsToString[ cleanCellTags];
         (*
         If we load an archive without corresponding notebook available, then $kbStruct contains the archive name instead of the notebook name.
         Hence, 'file' will then be the archive instead of the notebook.

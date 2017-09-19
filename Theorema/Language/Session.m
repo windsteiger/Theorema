@@ -448,10 +448,10 @@ SetAttributes[ processEnvironment, HoldAll];
 processEnvironment[ Theorema`Language`nE] := Null
 
 processEnvironment[ x_] :=
-    Module[ {nb = EvaluationNotebook[], nbFile, nbExpr, key, tags, globDec, pos, cellpos},
+    Module[ {nb = EvaluationNotebook[], nbFile, nbExpr, key, lbl, fmlTags, globDec, pos, cellpos},
     	(* select current cell: we need to refer to this selection when we set the cell options *)
 		SelectionMove[ nb, All, EvaluationCell];
-    	{key, tags} = adjustFormulaLabel[ nb];
+    	{key, lbl, fmlTags} = adjustFormulaLabel[ nb];
 		(* Perform necessary actions on the whole notebook *)
 		nbFile = CurrentValue[ nb, "NotebookFullFileName"];
 		adjustEnvironment[ nb, nbFile];
@@ -477,7 +477,7 @@ processEnvironment[ x_] :=
 		globDec = applicableGlobalDeclarations[ nb, nbExpr, cellpos];
 		(* process the expression according the Theorema syntax rules and add it to the KB
 		   ReleaseHold will remove the outer Hold but leave the Holds around fresh symbols *)
-        updateKnowledgeBase[ Catch[ ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]]], key, globDec, cellTagsToString[ tags], cellTagsToFmlTags[ tags], cellpos];
+        updateKnowledgeBase[ Catch[ ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]]], key, globDec, lbl, fmlTags, cellpos];
         (* Positions of abbreviations are added in "updateKnowledgeBase". *)
         SelectionMove[ nb, After, Cell];
     ]
@@ -518,20 +518,24 @@ evaluationPosition[ nb_NotebookObject, id_Integer] := evaluationPosition[ nb, No
 
 evaluationPosition[ args___] := unexpected[ evaluationPosition, {args}]
 
-adjustFormulaLabel[ nb_NotebookObject] := 
-	Module[ {cellTags, cellID, cleanCellTags, key},
+adjustFormulaLabel[ nb_NotebookObject] :=
+	Module[ {cellTags, cellID, cleanCellTags, key, lbl, fmlTags},
 		{cellTags, cellID} = {CellTags, CellID} /. Options[ NotebookSelection[ nb], {CellTags, CellID}];
 		(* Make sure we have a list of CellTags (could also be a plain string) *)
 		cellTags = Flatten[ {cellTags}];
 		(* Remove any automated labels (begins with "ID<sep>" or "Source<sep>"). Remove initLabel *)
 		cleanCellTags = getCleanCellTags[ cellTags];
-        (* Replace unlabeled formula with counter *)
-         If[ cleanCellTags === {},
-         	cleanCellTags = automatedFormulaLabel[ nb]
-         ];
-        (* Relabel Cell and hide CellTags *)
-        key = relabelCell[ nb, cleanCellTags, cellID];
-        {key, cleanCellTags}
+		(* Extract label and formula tags *)
+		lbl = cellTagsToString[ cleanCellTags];
+		fmlTags = cellTagsToFmlTags[ cleanCellTags];
+		(* Replace unlabeled formula with counter *)
+		If[ lbl === $initLabel,
+			lbl = automatedFormulaLabel[ nb];
+			cleanCellTags = lblTagsToCellTags[ lbl, fmlTags]
+		];
+		(* Relabel Cell and hide CellTags *)
+		key = relabelCell[ nb, cleanCellTags, cellID];
+		{key, lbl, fmlTags}
 	]
 adjustFormulaLabel[ args___] := unexpected[ adjustFormulaLabel, {args}]
 
@@ -540,7 +544,7 @@ getCleanCellTags[ cellTags_List] :=
 	With[ {prefixes = ("ID" <> $cellTagKeySeparator | "Source" <> $cellTagKeySeparator | "Proof|ID" <> $cellTagKeySeparator)},
 		(* Although "ID:..."- and "Source:..." tags are not generated automatically any more, we still remove them in 'getCleanCellTags'
 			to handle older notebooks properly, too. *)
-    	Select[ cellTags, !StringMatchQ[ #, (prefixes ~~ __) | $initLabel]&]
+    	Select[ cellTags, !StringMatchQ[ #, prefixes ~~ __]&]
 	]
 getCleanCellTags[ cellTag_String] := getCleanCellTags[ {cellTag}]
 getCleanCellTags[ args___] := unexpected[ getCleanCellTags, {args}]
@@ -585,6 +589,7 @@ cellTagsToString[ {___, l_String?(StringMatchQ[ #, ("Label" <> $cellTagKeySepara
 	StringDrop[ l, 5 + StringLength[ $cellTagKeySeparator]]
 cellTagsToString[ {l_String, ___}] := l
 cellTagsToString[ ct_String] := ct
+cellTagsToString[ {}] := $initLabel
 cellTagsToString[ args___] := unexpected[ cellTagsToString, {args}]
 
 (*
@@ -794,8 +799,8 @@ updateSingleKey[args___] := unexpected[ updateSingleKey, {args}]
 
 automatedFormulaLabel[ nb_NotebookObject] :=
 	With[ {formulaCounter = incrementFormulaCounter[ nb]},
-		(* Construct new CellTags with value of the incremented formulaCounter as a list. *)
-		{"Label" <> $cellTagKeySeparator <> ToString[ formulaCounter]}
+		(* Construct new CellTags with value of the incremented formulaCounter. *)
+		ToString[ formulaCounter]
 	]
 automatedFormulaLabel[ args___] := unexpected[ automatedFormulaLabel, {args}]
 
