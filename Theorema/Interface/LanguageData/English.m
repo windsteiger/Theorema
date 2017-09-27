@@ -63,9 +63,10 @@ Theorema 2.0 is a major re-launch mainly developed by Wolfgang Windsteiger.";
     translate[ "BuiComp", lang] = "Builtins used in computation";
     translate[ "BuiProve", lang] = "Builtins used in proof";
 
+	translate[ "Cancel", lang] = "Cancel";
     translate[ "cantCreateDir", lang] = "Cannot create directory ``";
     translate[ "CASEDIST", lang] = "distinguish cases \!\(\*FormBox[FrameBox[\"c1\"], Placeholder]\) \[Ellipsis] \!\(\*FormBox[FrameBox[\"cn\"], Placeholder]\)";
-    translate[ "CASEDISTTooltip", lang] = "e1, \[Ellipsis], en \[Ellipsis] expressions\nc1, \[Ellipsis], cn \[Ellipsis] conditions";   	
+    translate[ "CASEDISTTooltip", lang] = "e1, \[Ellipsis], en \[Ellipsis] expressions\nc1, \[Ellipsis], cn \[Ellipsis] conditions";
 	translate[ "closed", lang] = "all closed";
     translate[ "Computation", lang] = "Computation";
 	translate[ "computationTime", lang] = "Computation time";
@@ -81,6 +82,7 @@ Theorema 2.0 is a major re-launch mainly developed by Wolfgang Windsteiger.";
     translate[ "Domains", lang] = "Domains and Data Types";
     translate[ "duringEval", lang] = "During evaluation of In[`1`]:";
 
+	translate[ "editLblTags", lang] = "Edit Formula Label and Tags";
 	translate[ "elimBranches", lang] = "Eliminate failing/pending branches";
 	translate[ "elimForm", lang] = "Eliminate unused formulae";
 	translate[ "elimSteps", lang] = "Eliminate superfluous steps";
@@ -103,12 +105,14 @@ Theorema 2.0 is a major re-launch mainly developed by Wolfgang Windsteiger.";
 	translate[ "Filter", lang] = "Filter";
 	translate[ "FilterRulesWindow", lang] = "Filter by keyword";
     translate[ "fit into window", lang] = "fit into window";
-    translate[ "FORALL1", lang] = "for all \!\(\*FormBox[FrameBox[\"rg\"], Placeholder]\): \!\(\*FormBox[FrameBox[\"expr\"], SelectionPlaceholder]\)";   	
-    translate[ "FORALL2", lang] = "for all \!\(\*FormBox[FrameBox[\"rg\"], Placeholder]\) satisfying \!\(\*FormBox[FrameBox[\"cond\"], Placeholder]\): \!\(\*FormBox[FrameBox[\"expr\"], SelectionPlaceholder]\)";   	
+    translate[ "fmlLabel", lang] = "Formula label";
+    translate[ "fmlTagsRem", lang] = "Formula tags (double-click to remove)";
+    translate[ "FORALL1", lang] = "for all \!\(\*FormBox[FrameBox[\"rg\"], Placeholder]\): \!\(\*FormBox[FrameBox[\"expr\"], SelectionPlaceholder]\)";
+    translate[ "FORALL2", lang] = "for all \!\(\*FormBox[FrameBox[\"rg\"], Placeholder]\) satisfying \!\(\*FormBox[FrameBox[\"cond\"], Placeholder]\): \!\(\*FormBox[FrameBox[\"expr\"], SelectionPlaceholder]\)";
     translate[ "Formulae", lang] = "Formulas";
 
-    translate[ "GABBREVTooltip", lang] = "Global abbreviation";   	
-    translate[ "GCONDTooltip", lang] = "Global condition";   	
+    translate[ "GABBREVTooltip", lang] = "Global abbreviation";
+    translate[ "GCONDTooltip", lang] = "Global condition";
     translate[ "Global Declarations", lang] = "Globals valid at this cell";
     translate[ "GNULicense", lang] = StringForm[ "Copyright (\[Copyright]) 1995-`` The Theorema Group\n\n\
 Theorema 2.0 is free software: you can redistribute it and/or modify it under the terms of the GNU General \

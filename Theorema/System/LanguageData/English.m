@@ -62,6 +62,8 @@ With[ {lang = "English"},
 	MessageName[ cellIDLabel, "usage", lang] = "cellIDLabel[cellID_Integer] returns string label for the given integer CellID value.";
 	MessageName[ cellPosition, "usage", lang] = "cellPosition is an option for the formula constructor, specifying the position of the respective cell in the notebook (or Null if unknown).";
 	MessageName[ $cellTagKeySeparator, "usage", lang] = "Separator between key and value in a cellTag.";
+	MessageName[ cellTagsDialog, "usage", lang] = "";
+	MessageName[ cellTagsToFmlTags,"usage", lang] = "cellTagsToFmlTags[cellTags] extracts formula tags from the given cell tags.";
 	MessageName[ cellTagsToString,"usage", lang] = "cellTagsToString[cellTags] converts a list of cell tags into a single string.";
 	MessageName[ checkAllConds, "usage", lang] = "";
 	MessageName[ cleanupComputation, "usage", lang] = "cleanupComputation[ ] removes all user defined function from computation context.";
@@ -82,6 +84,7 @@ With[ {lang = "English"},
 	MessageName[ displayProof, "usage", lang] = "displayProof[ proofObject_] displays proofObject.";
 	MessageName[ disproved, "usage", lang] = "disproved is a possible proof value.";
 
+	MessageName[ editCellTags, "usage", lang] = "editCellTags[] sets up an interactive dialog where the user can specify the label and further tags of the currently selected formula cells.";
 	MessageName[ ensureNotebookIntegrity, "usage", lang] = "ensureNotebookIntegrity[ file] runs some consistency checks on the notebook file.";
 	MessageName[ extractCellID, "usage", lang] = "";
 

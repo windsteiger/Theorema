@@ -1886,9 +1886,15 @@ closeEnv[] :=
 closeEnv[ args___] :=
     unexpected[ closeEnv, {args}]
 
-newFormulaCell[ "COMPUTE"] = Cell[ BoxData[ "\[SelectionPlaceholder]"], "Computation"]	
-newFormulaCell[ "DECLARATION"] = Cell[ BoxData[ "\[SelectionPlaceholder]"], "GlobalDeclaration"]	
-newFormulaCell[ style_, label_:$initLabel] = Cell[ BoxData[ "\[SelectionPlaceholder]"], "FormalTextInputFormula", CellTags -> {label}]	
+newFormulaCell[ "COMPUTE"] = Cell[ BoxData[ "\[SelectionPlaceholder]"], "Computation"]
+newFormulaCell[ "DECLARATION"] = Cell[ BoxData[ "\[SelectionPlaceholder]"], "GlobalDeclaration"]
+newFormulaCell[ style_, label_:$initLabel] :=
+	Cell[
+		BoxData[ "\[SelectionPlaceholder]"],
+		"FormalTextInputFormula",
+		CellTags -> {label},
+		CellFrameLabels -> {{None, ButtonBox[ "[\[Ellipsis]]", ButtonFunction :> editCellTags[], Evaluator -> Automatic, Appearance -> None]}, {None, None}}
+	]
 newFormulaCell[ args___] := unexpected[ newFormulaCell, {args}]
 
 newOpenEnvCell[] := Cell[ "", "OpenEnvironment"]
@@ -2796,6 +2802,119 @@ proofSitChoiceButtons[ ps_PRFSIT$, {num_Integer}] :=
 			pSitCells[ ps]}, Dynamic[ If[ $selectedProofStep === id@ps, Open, Closed]]]]
 	]
 proofSitChoiceButtons[ args___] := unexpected[ proofSitChoiceButtons, {args}]
+
+listView[ {}, _, _, opts___?OptionQ] :=
+	Framed[ Pane[ "", opts], FrameMargins -> 0]
+listView[ l:{__}, clickAction_, doubleClickAction_, opts___?OptionQ] :=
+	DynamicModule[ {sel = {}},
+	Module[ {prevIndex = -1, clickTime = 0},
+		EventHandler[
+			ListPicker[ Dynamic[ sel], MapIndexed[ Rule[ First[ #2], #1]&, l], Multiselection -> False, opts],
+			{
+				"MouseClicked" :>
+					If[ sel =!= {},
+						With[ {i = First[ sel]},
+							If[ prevIndex === i && SessionTime[] - clickTime < 0.5,
+								prevIndex = -1;
+								doubleClickAction[ i],
+							(*else*)
+								prevIndex = i;
+								clickTime = SessionTime[];
+								clickAction[ i]
+							]
+						]
+					]
+			},
+			PassEventsDown -> True
+		]
+	]]
+
+(* 'cellTagsDialog' can handle an arbitrary number of cells, although at the moment it is only called on singleton lists. *)
+cellTagsDialog[ {}] :=
+	{Null, {}, {}}
+cellTagsDialog[ cells_List] :=
+	With[ {allTags = getCleanCellTags /@ CurrentValue[ cells, CellTags]},
+	With[ {tags0 = cellTagsToFmlTags /@ allTags},
+	With[ {tags = If[ MatchQ[ tags0, {_}], First[ tags0], Intersection @@ tags0]},
+		Module[ {tag = "", newTags = tags, lbl = If[ MatchQ[ allTags, {_}], cellTagsToString[ First[ allTags]], ""]},
+		With[ {okAction =
+			If[ MatchQ[ cells, {_}],
+				Hold[
+					If[ lbl === "",
+						DialogReturn[ {Null, DeleteDuplicates[ newTags]}],
+					(*else*)
+						DialogReturn[ {lbl, DeleteDuplicates[ newTags]}]
+					]
+				],
+			(*else*)
+				Hold[
+					DialogReturn[ {Null, Complement[ tags, newTags], Complement[ newTags, tags]}]
+				]
+			]},
+		DialogInput[
+			Notebook[
+				{
+					Cell[
+						BoxData[
+							ToBoxes[
+								Column[
+									{
+										Labeled[
+											InputField[ Dynamic[ lbl], String, ImageSize -> 300, Enabled -> (Length[ cells] === 1)],
+											Text[ translate[ "fmlLabel"]],
+											{{Top, Left}}
+										],
+										Labeled[
+											Row[
+												{
+													InputField[
+														Dynamic[ tag],
+														String,
+														ImageSize -> 265
+													],
+													Button[ "+", AppendTo[ newTags, tag], ImageSize -> {25, 20}]
+												},
+												Spacer[ 1]
+											],
+											Text[ translate[ "fmlTagsRem"]],
+											{{Top, Left}}
+										],
+										Dynamic[
+											Refresh[
+												listView[
+													newTags,
+													Function[ i, tag = newTags[[i]]],
+													Function[ i, newTags = Delete[ newTags, i]],
+													ImageSize -> {300, 200}
+												],
+												TrackedSymbols :> {newTags}
+											]
+										],
+										Row[
+											{
+												Button[ translate[ "OK"], ReleaseHold[ okAction], ImageSize -> {90, 30}],
+												Button[ translate[ "Cancel"], DialogReturn[ $Canceled], ImageSize -> {90, 30}]
+											},
+											Spacer[ 4]
+										]
+									},
+									Alignment -> Right
+								]
+							]
+						],
+						ShowStringCharacters -> False
+					]
+				},
+				Deployed -> True,
+				ShowCellBracket -> False,
+				WindowSize -> All,
+				WindowTitle -> translate[ "editLblTags"],
+				Magnification -> CurrentValue[ getTheoremaCommander[], Magnification]
+			],
+			NotebookEventActions -> {"EscapeKeyDown" :> Paste[ "\[AliasDelimiter]"], "ReturnKeyDown" :> ReleaseHold[ okAction], "WindowClose" :> DialogReturn[ $Canceled]}
+		]
+		]]
+	]]]
 
 
 (* ::Section:: *)

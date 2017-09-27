@@ -610,7 +610,7 @@ makeCellFrameLabel[ tags_, True] :=
 makeCellFrameLabel[ tags_, False] :=
 	Cell[ BoxData[ RowBox[
 		{
-			With[ {lblBox = StyleBox[ makeLabel[ cellTagsToString[ tags]], "FrameLabel"],
+			With[ {lblBox = ButtonBox[ StyleBox[ makeLabel[ cellTagsToString[ tags]], "FrameLabel"], Evaluator -> Automatic, Appearance -> None, ButtonFunction :> editCellTags[]],
 					fmlTags = cellTagsToFmlTags[ tags]},
 				If[ fmlTags === {},
 					lblBox,
@@ -665,6 +665,65 @@ removeFromEnv[ key_List] :=
 		If[ MemberQ[ DownValues[ kbSelectSolve], key, {0, Infinity}, Heads -> True], Unset[ kbSelectSolve[ key]]];
 	]
 removeFromEnv[ args___] := unexpected[ removeFromEnv, {args}]
+
+(* 'editCellTags' can handle an arbitrary number of cells, although at the moment it is only called on singleton lists. *)
+editCellTags[] :=
+	With[ {nb = ButtonNotebook[]},
+		SelectionMove[ nb, All, ButtonCell];
+		editCellTags[ SelectedCells[ nb]]
+	]
+editCellTags[ cells_List] :=
+	(
+		Replace[ cellTagsDialog[ cells],
+			{
+				{lbl_, tags_List} :>
+					If[ StringQ[ lbl],
+						With[ {cTags = lblTagsToCellTags[ lbl, tags]},
+							Scan[
+								SetOptions[ #, CellTags -> cTags]&,
+								cells
+							]
+						],
+					(*else*)
+						Scan[
+							SetOptions[ #, CellTags -> lblTagsToCellTags[ cellTagsToString[ getCleanCellTags[ CurrentValue[ #, CellTags]]], tags]]&,
+							cells
+						]
+					],
+				{lbl_, rem_List, add_List} /; (rem =!= {} || add =!= {}) :>
+					If[ StringQ[ lbl],
+						Scan[
+							Function[ c,
+								With[ {tags = DeleteCases[ cellTagsToFmlTags[ getCleanCellTags[ CurrentValue[ c, CellTags]]], rem]},
+									SetOptions[ c, CellTags -> lblTagsToCellTags[ lbl, Join[ tags, Select[ add, (!MemberQ[ tags, #])&]]]]
+								]
+							],
+							cells
+						],
+					(*else*)
+						Scan[
+							Function[ c,
+								With[ {cleanTags = getCleanCellTags[ CurrentValue[ c, CellTags]]},
+								With[ {tags = DeleteCases[ cellTagsToFmlTags[ cleanTags], rem], l = cellTagsToString[ cleanTags]},
+									SetOptions[ c, CellTags -> lblTagsToCellTags[ l, Join[ tags, Select[ add, (!MemberQ[ tags, #])&]]]]
+								]]
+							],
+							cells
+						]
+					]
+			}
+		];
+	)
+editCellTags[ args___] := unexpected[ editCellTags, {args}]
+
+lblTagsToCellTags[ lbl_String, tags_List] :=
+	If[ !StringMatchQ[ lbl, ("Label" <> $cellTagKeySeparator) ~~ __] &&
+			MemberQ[ tags, _String?(StringMatchQ[ #, ("Label" <> $cellTagKeySeparator) ~~ __]&)],
+		Prepend[ tags, "Label" <> $cellTagKeySeparator <> lbl],
+	(*else*)
+		Prepend[ tags, lbl]
+	]
+lblTagsToCellTags[ args___] := unexpected[ lblTagsToCellTags, {args}]
 
 removeFormula[] :=
 	With[ {nb = ButtonNotebook[]},

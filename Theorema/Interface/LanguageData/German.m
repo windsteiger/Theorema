@@ -65,9 +65,10 @@ Theorema 2.0 ist eine wesentliche Weiterentwicklung, die haupts\[ADoubleDot]chli
     translate[ "BuiComp", lang] = "In der Berechnung verwendete Builtins";
     translate[ "BuiProve", lang] = "Im Beweis verwendete Builtins";
 
+	translate[ "Cancel", lang] = "Abbrechen";
     translate[ "cantCreateDir", lang] = "Das Verzeichnis `` kann nicht erstellt werden";
     translate[ "CASEDIST", lang] = "Unterscheide die F\[ADoubleDot]lle \!\(\*FormBox[FrameBox[\"c1\"], Placeholder]\) \[Ellipsis] \!\(\*FormBox[FrameBox[\"cn\"], Placeholder]\)";
-    translate[ "CASEDISTTooltip", lang] = "e1, \[Ellipsis], en \[Ellipsis] Ausdr\[UDoubleDot]cke \nc1, \[Ellipsis], cn \[Ellipsis] Bedingungen";   	
+    translate[ "CASEDISTTooltip", lang] = "e1, \[Ellipsis], en \[Ellipsis] Ausdr\[UDoubleDot]cke \nc1, \[Ellipsis], cn \[Ellipsis] Bedingungen";
 	translate[ "closed", lang] = "alle geschlossen";
     translate[ "Computation", lang] = "Berechnung";
 	translate[ "computationTime", lang] = "Rechenzeit";
@@ -83,6 +84,7 @@ Theorema 2.0 ist eine wesentliche Weiterentwicklung, die haupts\[ADoubleDot]chli
     translate[ "Domains", lang] = "Bereiche und Datenstrukturen";
     translate[ "duringEval", lang] = "W\[ADoubleDot]hrend der Berechnung von In[`1`]:";
 
+	translate[ "editLblTags", lang] = "Label und Tags Bearbeiten";
 	translate[ "elimBranches", lang] = "Erfolglose bzw. unerledigte Zweige eliminieren";
 	translate[ "elimForm", lang] = "Nicht verwendete Aussagen eliminieren";
 	translate[ "elimSteps", lang] = "\[CapitalUDoubleDot]berfl\[UDoubleDot]ssige Schritte eliminieren";
@@ -105,12 +107,14 @@ Theorema 2.0 ist eine wesentliche Weiterentwicklung, die haupts\[ADoubleDot]chli
 	translate[ "Filter", lang] = "Filtern";
 	translate[ "FilterRulesWindow", lang] = "Durch Schl\[UDoubleDot]sselwort filtern";
     translate[ "fit into window", lang] = "In das Fenster einpassen";
-    translate[ "FORALL1", lang] = "f\[UDoubleDot]r alle \!\(\*FormBox[FrameBox[\"Ber\"], Placeholder]\) gilt \!\(\*FormBox[FrameBox[\"Auss\"], SelectionPlaceholder]\)";   	
-    translate[ "FORALL2", lang] = "f\[UDoubleDot]r alle \!\(\*FormBox[FrameBox[\"Ber\"], Placeholder]\) mit \!\(\*FormBox[FrameBox[\"Bed\"], Placeholder]\) gilt \!\(\*FormBox[FrameBox[\"A\"], SelectionPlaceholder]\)";   	
+    translate[ "fmlLabel", lang] = "Label der Formel";
+    translate[ "fmlTagsRem", lang] = "Tags der Formel (zum Entfernen doppelklicken)";
+    translate[ "FORALL1", lang] = "f\[UDoubleDot]r alle \!\(\*FormBox[FrameBox[\"Ber\"], Placeholder]\) gilt \!\(\*FormBox[FrameBox[\"Auss\"], SelectionPlaceholder]\)";
+    translate[ "FORALL2", lang] = "f\[UDoubleDot]r alle \!\(\*FormBox[FrameBox[\"Ber\"], Placeholder]\) mit \!\(\*FormBox[FrameBox[\"Bed\"], Placeholder]\) gilt \!\(\*FormBox[FrameBox[\"A\"], SelectionPlaceholder]\)";	
     translate[ "Formulae", lang] = "Aussagen";
 
-    translate[ "GABBREVTooltip", lang] = "Globale Abk\[UDoubleDot]rzung";   	
-    translate[ "GCONDTooltip", lang] = "Globale Bedingung";   	
+    translate[ "GABBREVTooltip", lang] = "Globale Abk\[UDoubleDot]rzung";
+    translate[ "GCONDTooltip", lang] = "Globale Bedingung";
     translate[ "Global Declarations", lang] = "In dieser Zelle g\[UDoubleDot]ltige Globale";
     translate[ "GNULicense", lang] = StringForm[ "Copyright (\[Copyright]) 1995-`` Die Theorema-Gruppe\n\n\
 Theorema 2.0 ist freie Software: es darf unter Einhaltung der Bedingungen der GNU General \
