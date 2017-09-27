@@ -157,6 +157,7 @@ falls nicht, siehe <http://www.gnu.org/licenses/>.", ToString[ Date[][[1]]]];
     translate[ "Logic", lang] = "Logik";
 
     translate[ "Mark favourite", lang] := "Als Favorit markieren.\nDieser Beweis wird beim Anklicken von \"" <> translate[ "ShowSimplifiedProof", lang] <> "\" angezeigt";
+    translate[ "memory consumed", lang] = "Speicherverbrauch von Mathematica";
     translate[ "more", lang] = "mehr \[Ellipsis]";
 
 	translate[ "nA", lang] = "nicht verf\[UDoubleDot]gbar";

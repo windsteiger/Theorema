@@ -154,6 +154,7 @@ along with this program. If not, see <http://www.gnu.org/licenses/>.", ToString[
     translate[ "Logic", lang] = "Logic";
 
     translate[ "Mark favourite", lang] := "Mark as favourite simplified proof.\nThis proof will be displayed when clicking \"" <> translate[ "ShowSimplifiedProof", lang] <> "\"";
+    translate[ "memory consumed", lang] = "Memory consumed by Mathematica";
     translate[ "more", lang] = "more \[Ellipsis]";
 
 	translate[ "nA", lang] = "not available";

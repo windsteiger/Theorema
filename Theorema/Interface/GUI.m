@@ -259,7 +259,9 @@ openTheoremaCommander[ ] /; $Notebooks :=
         	StyleDefinitions -> makeColoredStylesheet[ "GUI"],
         	WindowTitle -> translate["Theorema Commander"],
         	WindowFloating -> Automatic,
-        	WindowElements -> {"StatusArea", "MagnificationPopUp"}]
+        	WindowElements -> {"StatusArea", "MagnificationPopUp"},
+        	WindowStatusArea -> Dynamic[ Refresh[ translate[ "memory consumed"] <> ":   " <> ToString[ N[ Quotient[ MemoryInUse[], 100000] / 10]] <> " MB", UpdateInterval -> 1.]]
+        ]
     ]
 openTheoremaCommander[ args___] := unexpected[ openTheoremaCommander, {args}]
 
