@@ -422,16 +422,23 @@ $tmaDefaultDomainDef[_] := {}
 SetAttributes[ notContainedIn, HoldAll];
 	
 SetAttributes[ processGlobalDeclaration, HoldAll];
-processGlobalDeclaration[ x_] := 
-	Module[ {nb = EvaluationNotebook[], id, file, nbExpr, newFrameLabel, decl},
-		SelectionMove[ nb, All, EvaluationCell];
+processGlobalDeclaration[ x_] :=
+	With[ {nb = EvaluationNotebook[]},
+		SelectionMove[ nb, All, EvaluationCell, AutoScroll -> False];
+		Replace[ SelectedCells[ nb],
+			{cell_CellObject} :> processGlobalDeclaration[ nb, cell, x]
+		];
+		SelectionMove[ nb, After, Cell, AutoScroll -> False];
+	]
+processGlobalDeclaration[ nb_NotebookObject, cell_CellObject, x_] :=
+	Module[ {id, file, nbExpr, newFrameLabel, decl},
 		id = CurrentValue[ "CellID"];
 		file = CurrentValue[ nb, "NotebookFullFileName"];
 		newFrameLabel = With[ {fid = {file, id}},
 			Cell[ BoxData[
 				ButtonBox[ "\[Times]", Evaluator -> Automatic, Appearance -> None, ButtonFunction :> removeGlobal[ fid]]]]
 		];
-		SetOptions[ NotebookSelection[ nb],
+		SetOptions[ cell,
 			CellTags -> {cellIDLabel[ id]}, ShowCellTags -> False,
 			CellFrameLabels -> {{None, newFrameLabel}, {None, None}}];
 		nbExpr = NotebookGet[ nb];
@@ -440,18 +447,24 @@ processGlobalDeclaration[ x_] :=
 			putGlobalDeclaration[ file, id, evaluationPosition[ nb, nbExpr, id], nbExpr, decl];
 		];
 		(* "Abbrev" cannot appear in global declarations, hence no need to call "addAbbrevPositions". *)
-		SelectionMove[ nb, After, Cell];
 	]
 processGlobalDeclaration[ args___] := unexpected[ processGlobalDeclaration, {args}]
 
 SetAttributes[ processEnvironment, HoldAll];
-processEnvironment[ Theorema`Language`nE] := Null
+processEnvironment[ ___, Theorema`Language`nE] := Null
 
 processEnvironment[ x_] :=
-    Module[ {nb = EvaluationNotebook[], nbFile, nbExpr, key, lbl, fmlTags, globDec, pos, cellpos},
-    	(* select current cell: we need to refer to this selection when we set the cell options *)
-		SelectionMove[ nb, All, EvaluationCell];
-    	{key, lbl, fmlTags} = adjustFormulaLabel[ nb];
+	With[ {nb = EvaluationNotebook[]},
+		SelectionMove[ nb, All, EvaluationCell, AutoScroll -> False];
+		Replace[ SelectedCells[ nb],
+			{cell_CellObject} :> processEnvironment[ nb, cell, x]
+		];
+		SelectionMove[ nb, After, Cell, AutoScroll -> False];
+	]
+processEnvironment[ nb_NotebookObject, cell_CellObject, x_] :=
+    Module[ {nbFile, nbExpr, key, lbl, fmlTags, globDec, pos, cellpos},
+    	(* current cell has been selected already (we need to refer to this selection when we set the cell options) *)
+    	{key, lbl, fmlTags} = adjustFormulaLabel[ nb, cell];
 		(* Perform necessary actions on the whole notebook *)
 		nbFile = CurrentValue[ nb, "NotebookFullFileName"];
 		adjustEnvironment[ nb, nbFile];
@@ -473,13 +486,12 @@ processEnvironment[ x_] :=
         	nbExpr = First[ Cases[ $TMAcurrentEvalNB, {nbFile, e_} -> e, {1}, 1]]
 		];
 		(* extract the global declarations that are applicable in the current evaluation *)
-		cellpos = evaluationPosition[ nb, nbExpr];
+		cellpos = evaluationPosition[ nb, nbExpr, CurrentValue[ cell, CellID]];
 		globDec = applicableGlobalDeclarations[ nb, nbExpr, cellpos];
 		(* process the expression according the Theorema syntax rules and add it to the KB
 		   ReleaseHold will remove the outer Hold but leave the Holds around fresh symbols *)
-        updateKnowledgeBase[ Catch[ ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]]], key, globDec, lbl, fmlTags, cellpos];
+        updateKnowledgeBase[ nb, cell, Catch[ ReleaseHold[ markVariables[ freshNames[ Hold[ x]]]]], key, globDec, lbl, fmlTags, cellpos];
         (* Positions of abbreviations are added in "updateKnowledgeBase". *)
-        SelectionMove[ nb, After, Cell];
     ]
 processEnvironment[ args___] := unexpected[ processEnvironment, {args}]
 
@@ -518,11 +530,10 @@ evaluationPosition[ nb_NotebookObject, id_Integer] := evaluationPosition[ nb, No
 
 evaluationPosition[ args___] := unexpected[ evaluationPosition, {args}]
 
-adjustFormulaLabel[ nb_NotebookObject] :=
-	Module[ {cellTags, cellID, cleanCellTags, key, lbl, fmlTags},
-		{cellTags, cellID} = {CellTags, CellID} /. Options[ NotebookSelection[ nb], {CellTags, CellID}];
+adjustFormulaLabel[ nb_NotebookObject, cell_CellObject] :=
+	Module[ {cellTags, cleanCellTags, key, lbl, fmlTags},
 		(* Make sure we have a list of CellTags (could also be a plain string) *)
-		cellTags = Flatten[ {cellTags}];
+		cellTags = Flatten[ {CurrentValue[ cell, CellTags]}];
 		(* Remove any automated labels (begins with "ID<sep>" or "Source<sep>"). Remove initLabel *)
 		cleanCellTags = getCleanCellTags[ cellTags];
 		(* Extract label and formula tags *)
@@ -534,7 +545,7 @@ adjustFormulaLabel[ nb_NotebookObject] :=
 			cleanCellTags = lblTagsToCellTags[ lbl, fmlTags]
 		];
 		(* Relabel Cell and hide CellTags *)
-		key = relabelCell[ nb, cleanCellTags, cellID];
+		key = relabelCell[ nb, cell, cleanCellTags, CurrentValue[ cell, CellID]];
 		{key, lbl, fmlTags}
 	]
 adjustFormulaLabel[ args___] := unexpected[ adjustFormulaLabel, {args}]
@@ -624,9 +635,9 @@ makeCellFrameLabel[ tags_, False] :=
 	]]]
 makeCellFrameLabel[ args___] := unexpected[ makeCellFrameLabel, {args}]
 
-relabelCell[ nb_NotebookObject, cellTags_List, cellID_Integer] :=
+relabelCell[ nb_NotebookObject, cell_CellObject, cellTags_List, cellID_Integer] :=
 	(
-		SetOptions[ NotebookSelection[ nb],
+		SetOptions[ cell,
 			CellFrameLabels -> makeCellFrameLabel[ cellTags, True],
 			CellTags -> cellTags,
 			ShowCellTags -> False
@@ -900,39 +911,39 @@ occursBelow[ {a___, p_}, {a___, q_, ___}] /; q > p := True
 occursBelow[ x_, y_] := False
 occursBelow[ args___] := unexpected[ occursBelow, {args}]
 
-updateKnowledgeBase[ $Failed, k_, ___] :=
+updateKnowledgeBase[ _, _, $Failed, k_, ___] :=
 	(
 		$tmaEnv = DeleteCases[ $tmaEnv, _[ k, ___], {1}, 1];
 		If[ inArchive[],
 	        $tmaArch = DeleteCases[ $tmaArch, _[ k, ___], {1}, 1]
 	    ];
 	)
-(* 
+(*
 	form and glob still carry Holds around fresh symbols. After globals have been applied, ReleaseHold will remove them.
 *)
-updateKnowledgeBase[ form_, k_, glob_, l_String] :=
-	updateKnowledgeBase[ form, k, glob, l, {}]
-updateKnowledgeBase[ form_, k_, glob_, l_String, tags_List] :=
-	updateKnowledgeBase[ form, k, glob, l, tags, Null]
-updateKnowledgeBase[ form_, k_, glob_, l_String, tags_List, cellPos_] :=
+updateKnowledgeBase[ nb_, cell_, form_, k_, glob_, l_String] :=
+	updateKnowledgeBase[ nb, cell, form, k, glob, l, {}]
+updateKnowledgeBase[ nb_, cell_, form_, k_, glob_, l_String, tags_List] :=
+	updateKnowledgeBase[ nb, cell, form, k, glob, l, tags, Null]
+updateKnowledgeBase[ nb_, cell_, form_, k_, glob_, l_String, tags_List, cellPos_] :=
     Module[ {newForm, fml, inDomDef = Cases[ glob, Hold[ domainConstruct$TM][_,_], {1}, 1], defDef},
     	If[ inDomDef =!= {} && (defDef = $tmaDefaultDomainDef[ inDomDef[[1]]]) =!= {},
     		(* we are in a domain definition and there is a pending default for this domain *)
     		$tmaDefaultDomainDef[ inDomDef[[1]]] = {};
     		newForm = Catch[ addAbbrevPositions[ ReleaseHold[ addVarPrefixes[ applyGlobalDeclaration[ defDef[[1]], glob]]]]];
 		    If[ newForm === $Failed,
-		    	updateKnowledgeBase[ $Failed, k],
+		    	updateKnowledgeBase[ nb, cell, $Failed, k],
 		    (*else*)
-		    	fml = makeFML[ key -> Rest[ defDef], formula -> newForm, preprocess -> $tmaFmlPre,
+		    	fml = makeFML[ key -> Rest[ defDef], formula -> newForm, preprocess -> $tmaFmlPre[ nb, cell],
 		    			label -> StringReplace[ ToString[ ReleaseHold[ inDomDef[[1,1]]]], "$TM" -> ""] <> ".defOp", simplify -> False,
 		    			formulaTags -> tags, cellPosition -> cellPos];
 		    	Switch[ fml,
 		    		$Failed,
 		    		notification[ translate[ "invalidExpr"]];
-	    			updateKnowledgeBase[ $Failed, k],
+	    			updateKnowledgeBase[ nb, cell, $Failed, k],
 	    		(*else*)
 	    			Null,
-	    			updateKnowledgeBase[ $Failed, k],
+	    			updateKnowledgeBase[ nb, cell, $Failed, k],
 	    		(*else*)
 	    			_,
 	    			$tmaFmlPost[ fml];
@@ -948,18 +959,18 @@ updateKnowledgeBase[ form_, k_, glob_, l_String, tags_List, cellPos_] :=
     	newForm = Catch[ addAbbrevPositions[ ReleaseHold[ addVarPrefixes[ applyGlobalDeclaration[ form, glob]]]]];
     	If[ newForm === $Failed,
     		(*no need to show any notification, has already been done in 'markVariables'*)
-    		updateKnowledgeBase[ $Failed, k],
+    		updateKnowledgeBase[ nb, cell, $Failed, k],
     	(*else*)
-	    	fml = makeFML[ key -> k, formula -> newForm, label -> l, simplify -> False, preprocess -> $tmaFmlPre,
+	    	fml = makeFML[ key -> k, formula -> newForm, label -> l, simplify -> False, preprocess -> $tmaFmlPre[ nb, cell],
 	    					formulaTags -> tags, cellPosition -> cellPos];
 	    	Switch[ fml,
 	    		$Failed,
 	    		notification[ translate[ "invalidExpr"]];
-	    		updateKnowledgeBase[ $Failed, k],
+	    		updateKnowledgeBase[ nb, cell, $Failed, k],
 	    	(*else*)
 	    		Null,
 	    		(* In this case we do not notify the user. *)
-	    		updateKnowledgeBase[ $Failed, k],
+	    		updateKnowledgeBase[ nb, cell, $Failed, k],
 	    	(*else*)
 	    		_,
 		    	$tmaFmlPost[ fml];
@@ -1152,7 +1163,9 @@ initSession[] :=
         $tmaAllNotebooks = {};
         $tmaCompPre = sequenceFlatten;
         $tmaCompPost = sequenceFlatten;
-        $tmaFmlPre = defaultFmlPre;	(* takes 6 arguments 'form', 'lbl', 'simp', 'tags', 'key', 'pos', and returns 4-tuple '{newForm, newLbl, newSimp, newTags}' *)
+        (* '$tmaFmlPre' is parametrized over 'notebook' and 'cell', and takes 6 main arguments 'form', 'lbl', 'simp', 'tags', 'key', 'pos'.
+        	It is expected to return a 4-tuple '{newForm, newLbl, newSimp, newTags}'. *)
+        $tmaFmlPre = defaultFmlPre&;
         $tmaFmlPost = transferToComputation;
         $codeEvaluationFunction = ToExpression;
         $codeProlog := (Theorema`Common`$parseTheoremaQuoted = True;);
@@ -1208,9 +1221,11 @@ removeRedundantBoxes[ expr_] :=
 (*
 	openEnvironment is assigned to $PreRead, which might be called under certain circumstances.
 	In order not to mess up the contexts, we do some checks.
-*) 
+*)
 openEnvironment[ expr_] :=
-    Module[ {t = lastEvalTimeAgo[ CurrentValue[ EvaluationNotebook[], "NotebookFullFileName"]]},
+	openEnvironment[ EvaluationNotebook[], expr]
+openEnvironment[ nb_NotebookObject, expr_] :=
+    Module[ {t = lastEvalTimeAgo[ CurrentValue[ nb, "NotebookFullFileName"]]},
     	If[ t > 1.5,
     		$refreshBrowser = True,
     		(* else *)
@@ -1224,8 +1239,10 @@ openEnvironment[ expr_] :=
     ]
 openEnvironment[args___] := unexpected[ openEnvironment, {args}]
 
-closeEnvironment[] := 
-	Module[ {file = CurrentValue[ EvaluationNotebook[], "NotebookFullFileName"]},
+closeEnvironment[] :=
+	closeEnvironment[ EvaluationNotebook[]]
+closeEnvironment[ nb_NotebookObject] :=
+	Module[ {file = CurrentValue[ nb, "NotebookFullFileName"]},
 		(* Leave "Theorema`Knowledge`" context when not in an archive *)
 		If[ !inArchive[] && $Context === "Theorema`Knowledge`", End[]];
 		(* Restore context path that has been modified in openEnvironment *)
@@ -1300,7 +1317,9 @@ getArchiveNotebookPath[arch_String] := StringReplacePart[ getArchivePath[ arch],
 getArchiveNotebookPath[args___] := unexpected[ getArchiveNotebookPath, {args}]
 
 openArchive[ name_String] :=
-    Module[ {nb = EvaluationNotebook[], nbFile, archiveNotebookPath, posBrowser},
+	openArchive[ EvaluationNotebook[], name]
+openArchive[ nb_NotebookObject, name_String] :=
+    Module[ {nbFile, archiveNotebookPath, posBrowser},
         archiveNotebookPath = getArchiveNotebookPath[ name];
         nbFile = CurrentValue[ nb, "NotebookFullFileName"];
         (* Create the directory for an archive if does not exist. *)
@@ -1374,8 +1393,10 @@ processArchiveInfo[ a_] :=
 	]
 processArchiveInfo[ args___] := unexpected[ processArchiveInfo, {args}]
 
-closeArchive[ _String] :=
-    Module[ {nb = EvaluationNotebook[], currNB, archName, archFile, archivePath},
+closeArchive[ arg_String] :=
+	closeArchive[ EvaluationNotebook[], arg]
+closeArchive[ nb_NotebookObject, _String] :=
+    Module[ {currNB, archName, archFile, archivePath},
     	If[ inArchive[],
         	End[],
         	(* The contexts do not fit, leave the function without action *)
@@ -1437,9 +1458,9 @@ loadArchive[ name_String, globalDecl_:{}] :=
             (* after reading and evaluating the archive $tmaArch has a value, namely the actual KB contained in the archive
                this is why we use the Block in order not
                to overwrite $tmaArch when loading an archive from within another one ... *)
-            (* we use updateKnowledgeBase: this applies global declarations appropriately and 
+            (* we use updateKnowledgeBase: this applies global declarations appropriately and
                translates to computational form ... *)
-            Scan[ updateKnowledgeBase[ #[[2]], #[[1]], globalDecl, #[[3]], Flatten[ Cases[ #, ("tags" -> t_List) :> t, {1}, 1], 1]]&, $tmaArch]
+            Scan[ updateKnowledgeBase[ None, None, #[[2]], #[[1]], globalDecl, #[[3]], Flatten[ Cases[ #, ("tags" -> t_List) :> t, {1}, 1], 1]]&, $tmaArch]
         ];
         $TheoremaArchives = DeleteDuplicates[ Prepend[ $TheoremaArchives, cxt]];
         If[ !FileExistsQ[ archiveNotebookPath = getArchiveNotebookPath[ name]],
@@ -1454,14 +1475,15 @@ loadArchive[ name_String, globalDecl_:{}] :=
 loadArchive[ l_List, globalDecl_:{}] := Scan[ loadArchive[ #, globalDecl]&, l]
 loadArchive[ args___] := unexpected[ loadArchive, {args}]
 
-includeArchive[ name_String] :=
-	Module[ {nb = EvaluationNotebook[], raw},
-		raw = NotebookGet[ nb]; 
+includeArchive[ arg_] :=
+	includeArchive[ EvaluationNotebook[], arg]
+includeArchive[ nb_NotebookObject, name_String] :=
+	Module[ {raw = NotebookGet[ nb]},
 		loadArchive[ name, applicableGlobalDeclarations[ nb, raw, evaluationPosition[ nb, raw]]];
 		SelectionMove[ nb, After, Cell];
 	]
 (* we don't use Listable because we want no output *)
-includeArchive[ l_List] := Scan[ includeArchive, l]
+includeArchive[ nb_NotebookObject, l_List] := Scan[ includeArchive[ nb, #]&, l]
 includeArchive[ args___] := unexpected[ includeArchive, {args}]
 
 archiveName[ f_String] :=
@@ -1653,12 +1675,14 @@ processComputation[ x_] := Module[ { procSynt, res, lhs = Null},
 processComputation[ args___] := unexcpected[ processComputation, {args}]
 
 openComputation[ expr_] :=
+	openComputation[ EvaluationNotebook[], expr]
+openComputation[ nb_NotebookObject, expr_] :=
 	Module[ {fileCache},
 		$evalCellID = CurrentValue[ "CellID"];
 		$cacheComp = True;
-		$fileEvalNb = CurrentValue[ EvaluationNotebook[], "NotebookFullFileName"];
+		$fileEvalNb = CurrentValue[ nb, "NotebookFullFileName"];
 		If[ TrueQ[ $TMAcomputationDemoMode],
-			fileCache = FileNameJoin[ {DirectoryName[ $fileEvalNb], FileBaseName[ fileEvalNb], "c" <> ToString[ $evalCellID]}];
+			fileCache = FileNameJoin[ {DirectoryName[ $fileEvalNb], FileBaseName[ $fileEvalNb], "c" <> ToString[ $evalCellID]}];
 			$cacheComp = setComputationEnvironment[ fileCache];
 		];
 		$parseTheoremaExpressions = True;
