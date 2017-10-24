@@ -13,6 +13,7 @@ MessageName[ FirstCase, "usage"] = "";
 MessageName[ FirstPosition, "usage"] = "";
 MessageName[ NoneTrue, "usage"] = "";
 MessageName[ SelectFirst, "usage"] = "";
+MessageName[ SubsetQ, "usage"] = "";
 
 (*Associations*)
 MessageName[ AssociateTo, "usage"] = "";
@@ -137,11 +138,18 @@ CountDistinctBy[ f_][ l_] :=
 CountDistinctBy[ l_, f_] :=
 	Length[ DeleteDuplicates[ f /@ l]]
 
+SubsetQ[ super_List, sub_List] :=
+	AllTrue[ sub, MemberQ[ super, #]&]
+SubsetQ[ super_Association, sub_Association] :=
+	AllTrue[ sub, MemberQ[ super, _ -> Last[ #]]&]
+
 
 (* ::Section:: *)
 (*Associations*)
 
 (* Attention! Do not rely on any particular order of the elements in an association! *)
+
+SetAttributes[ Association, HoldAllComplete];
 
 (* If associations are constructed directly, e.g. 'Association[ 1 -> 2, 1 -> 0]', duplicate keys are *not* removed!
 	Hence, use lists for constructing associations from data that could possibly contain duplicate keys. *)
@@ -153,7 +161,7 @@ AssociationMap[ fun_][ assoc_] :=
 AssociationMap[ fun_, keys_List] :=
 	Association @@ Map[ (# -> fun[ #])&, Reverse[ DeleteDuplicates[ Reverse[ keys]]]]
 AssociationMap[ fun_, assoc_Association] :=
-	Association[ Map[ fun, List @@ assoc]]
+	Association @@ {Map[ fun, List @@ assoc]}
 
 assoc_Association[ k_] :=
 	Lookup[ assoc, k]
@@ -232,6 +240,8 @@ KeySelect[ assoc_Association, crit_] :=
 KeySelect[ l:{(_Rule|_RuleDelayed)..}, crit_] :=
 	Association @@ Select[ l, Composition[ crit, First]]
 
+KeyMap[ fun_][ assoc_Association] :=
+	KeyMap[ fun, assoc]
 KeyMap[ fun_, assoc_Association] :=
 	Association @@ thinRuleList[ Replace[ List @@ assoc, ((h:(Rule|RuleDelayed))[ k_, v_]) :> h[ fun[ k], v], {1}]]
 
