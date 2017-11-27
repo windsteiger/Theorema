@@ -232,6 +232,7 @@ With[ {lang = "English"},
 	MessageName[ $removeFromEnvTest, "usage", lang] = "$removeFromEnvTest is called before a formula is removed from the current environment.";
 	MessageName[ removeRedundantBoxes,"usage", lang] = "removeRedundantBoxes[ expr] removes redundant boxes (e.g. certain TagBoxes) from the given box-expression.";
 	MessageName[ renameBound, "usage", lang] = "renameBound[ expr:(_[ _RNG$, ___]), new] renames the variables bound by the outermost quantifier in 'expr' by 'new'. Other bound variables might be renamed as well, in order to avoid name clashes; this is taken care of by 'substituteFree'.";
+	MessageName[ renameVar, "usage", lang] = "";
 	MessageName[ replaceAllAndTrack, "usage", lang] = "";
 	MessageName[ replaceAllExcept, "usage", lang] = "replaceAllExcept[ expr, rules, expt] applies rule(s) to all subparts of 'expr' except those contained in the list 'expt'.";
 	MessageName[ replaceAndTrack, "usage", lang] = "";
@@ -320,6 +321,8 @@ With[ {lang = "English"},
 	MessageName[ unification, "usage", lang] = "";
 	MessageName[ updateKBBrowser, "usage", lang] = "";
 	MessageName[ used, "usage", lang] = "used is an option for the constructor makePRFINFO and a selector for the PRFINFO$ datastructure.";
+	
+	MessageName[ varName, "usage", lang] = "";
 
 	MessageName[ writeLog, "usage", lang] = "writeLog[ expr__] writes expr to the currently active log-file.";
 ]

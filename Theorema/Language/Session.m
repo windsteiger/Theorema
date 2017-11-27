@@ -41,7 +41,7 @@ freshNames[ expr_Hold, dropWolf_:False] :=
 		   its 3rd parameter. Going into it would turn the list into a Set$TM ...
 		   If other cases occur in the future, just add a suitable transformation here BEFORE the replaceable
 		   positions are computed. *)
-		symPos = DeleteCases[ Position[ expr /. {(h:(Theorema`Computation`Language`META$|META$))[ __] -> h[]}, _Symbol], {0}, {1}, 1];
+		symPos = DeleteCases[ Position[ expr /. {(h:(Theorema`Computation`Language`META$|META$))[ x_, __] :> h[ x]}, _Symbol], {0}, {1}, 1];
 		progSymPos = Select[ symPos, isSubPositionOfAny[ #, progPos]&];
 		(* Use 'Replace' instead of 'Map', otherwise there are problems with 'Slot' appearing in the Theorema expression. *)
 		(* 'freshSymbol' and 'freshSymbolProg' sow all symbols (wrapped inside 'Hold') which shall be removed later. *)
@@ -156,7 +156,25 @@ freshSymbolProg[ sym:Hold[ s_Symbol], dropWolf_] :=
 freshSymbolProg[ args___] := unexpected[ freshSymbolProg, {args}]
 
 markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
-    Module[ {s, seq, vars, violating, out},
+    markVariablesAux[ r, Hold[ expr], {SEQ0$, SEQ1$, VAR$, FIX$}]
+markVariables[ Hold[ Theorema`Computation`Language`QU$[ r_Theorema`Computation`Language`RNG$, expr_]]] :=
+	markVariablesAux[ r, Hold[ expr], {Theorema`Computation`Language`SEQ0$, Theorema`Computation`Language`SEQ1$, Theorema`Computation`Language`VAR$, Theorema`Computation`Language`FIX$}]
+markVariables[ Hold[ h_[ e___]]] :=
+	applyHold[
+  		markVariables[ Hold[ h]],
+  		markVariables[ Hold[ e]]
+  	]
+markVariables[ Hold[ f_, t__]] :=
+	joinHold[
+  		markVariables[ Hold[ f]],
+  		markVariables[ Hold[ t]]
+  	]
+markVariables[ Hold[]] := Hold[]
+markVariables[ Hold[e_]] := Hold[ e]
+markVariables[ args___] := unexpected[ markVariables, {args}]
+
+markVariablesAux[ r_, expr_Hold, heads:{SEQ0_, SEQ1_, VAR_, _}] :=
+	Module[ {seq, vars},
         (* all symbols sym specified as variables in r are translated into VAR$[sym]
            we substitute all symbols with matching "base name" (neglecting the context!) so that also
            symbols in different context get substituted. This is important when processing archives, because
@@ -165,104 +183,78 @@ markVariables[ Hold[ QU$[ r_RNG$, expr_]]] :=
            a VAR$[loading`sym] *)
            
         (* We have to keep the distinction between sequence variables and individual variables,
-           because "SymbolName[]" would give an error if applied to compound expressions.
-        *)
+           because "SymbolName[]" would give an error if applied to compound expressions. *)
         vars = specifiedVariables[ r];
-        seq = Cases[vars, (SEQ0$|SEQ1$)[ _]];
-        vars = Complement[ vars, seq];
-        violating = checkForValidRange[ seq, vars, Hold[ r], SEQ0$|SEQ1$];
-        If[ violating =!= {},
-        	(* If this function is called in 'processEnvironment', 'updateKnowledgeBase' will remove the old version of the formula from '$tmaEnv'. *)
-        	notification[ translate[ "invalidRange"], DisplayForm[ ToBoxes[ violating /. Hold -> HoldForm, TheoremaForm]]];
-			Throw[ $Failed]
+        seq = Cases[ vars, (SEQ0|SEQ1)[ _]];
+        vars = Map[ {symbolNameHold[ #], VAR[ addSinglePrefix[ Hold[ #]]]}&, Complement[ vars, seq]];
+        seq = Map[ {symbolNameHold[ First[ #]], VAR[ addSinglePrefix[ Hold[ #]]], Head[ #]}&, seq];
+        
+        With[ {violating = checkForValidRange[ seq, vars, Hold[ r], SEQ0|SEQ1]},
+	        If[ violating =!= {},
+	        	(* If this function is called in 'processEnvironment', 'updateKnowledgeBase' will remove the old version of the formula from '$tmaEnv'. *)
+	        	notification[ translate[ "invalidRange"], DisplayForm[ ToBoxes[ violating /. Hold -> HoldForm, TheoremaForm]]];
+				Throw[ $Failed]
+	        ]
         ];
-        s = Join[ Map[ (h:(SEQ0$|SEQ1$))[ Hold[ sym_Symbol]] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> VAR$[ h[ #]]&, seq[[All, 1]]],
-        		  Map[ Hold[ sym_Symbol] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> VAR$[ #]&, vars]];
-        out = markVariables[ Hold[ expr]];
-        Switch[ out,
-        	Hold[ _[ ___]],
-        	(* We must NOT replace in the head! Otherwise, funny things would happen if a variable bound by a quantifier has the same name as the quantifier ... *)
-        	applyHold[ Extract[ out, {1, 0}, Hold], replaceAllExcept[ Delete[ out, {1, 0}], s, {}, Heads -> {SEQ0$, SEQ1$, VAR$, FIX$}]],
-        	_,
-        	replaceAllExcept[ out, s, {}, Heads -> {SEQ0$, SEQ1$, VAR$, FIX$}]
+        
+        With[ {s = Join[
+	        		Replace[ seq,
+	        			{n_String, v_, h_} :> (h[ sym:Hold[ _Symbol]] /; symbolNameHold[ sym] === n -> v),
+	        			{1}
+	        		],
+	        		Replace[ vars,
+	        			{n_String, v_} :> (sym:Hold[ _Symbol] /; symbolNameHold[ sym] === n -> v),
+	        			{1}
+	        		]
+	        	]},
+	        Replace[ markVariables[ expr],
+	        	{
+		        	Hold[ q_[ args___]] :>
+			        	(* We must NOT replace in the head! Otherwise, funny things would happen if a bound variable has the same name as the binder ... *)
+			        	applyHold[ Hold[ q], replaceAllExcept[ Hold[ args], s, {}, Heads -> heads]],
+		        	out_ :>
+		        		replaceAllExcept[ out, s, {}, Heads -> heads]
+	        	}
+	        ]
         ]
     ]
-
-markVariables[ Hold[ Theorema`Computation`Language`QU$[ r_Theorema`Computation`Language`RNG$, expr_]]] :=
-    Module[ {s, seq, vars, violating, out},
-    	vars = specifiedVariables[ Hold[ r]];
-        seq = Cases[vars, (Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$)[ _]];
-        vars = Complement[ vars, seq];
-        violating = checkForValidRange[ seq, vars, Hold[ r], Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$];
-        If[ violating =!= {},
-        	(* If this function is called in 'processEnvironment', 'updateKnowledgeBase' will remove the old version of the formula from '$tmaEnv'. *)
-        	notification[ translate[ "invalidRange"], DisplayForm[ ToBoxes[ violating /. Hold -> HoldForm, TheoremaForm]]];
-			Throw[ $Failed]
-        ];
-        s = Join[ Map[ (h:(Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$))[ Hold[ sym_Symbol]] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> Theorema`Computation`Language`VAR$[ h[ #]]&, seq[[All, 1]]],
-        		  Map[ Hold[ sym_Symbol] /; SymbolName[ Unevaluated[ sym]] === symbolNameHold[ #] -> Theorema`Computation`Language`VAR$[ #]&, vars]];
-       	out = markVariables[ Hold[ expr]];
-       	Switch[ out,
-        	Hold[ _[ ___]],
-        	applyHold[
-        		Extract[ out, {1, 0}, Hold],
-        		replaceAllExcept[ Delete[ out, {1, 0}], s, {}, Heads -> {Theorema`Computation`Language`SEQ0$, Theorema`Computation`Language`SEQ1$, Theorema`Computation`Language`VAR$, Theorema`Computation`Language`FIX$}]
-        	],
-        	_,
-        	replaceAllExcept[ out, s, {}, Heads -> {Theorema`Computation`Language`SEQ0$, Theorema`Computation`Language`SEQ1$, Theorema`Computation`Language`VAR$, Theorema`Computation`Language`FIX$}]
-        ]
-    ]
-    
-markVariables[ Hold[ h_[ e___]]] := applyHold[
-  		markVariables[ Hold[ h]],
-  		markVariables[ Hold[ e]]]
-
-markVariables[ Hold[ f_, t__]] := joinHold[
-  		markVariables[ Hold[ f]],
-  		markVariables[ Hold[ t]]]
-
-markVariables[ Hold[]] := Hold[]
-
-markVariables[ Hold[e_]] := Hold[ e]
-
-markVariables[ args___] := unexpected[ markVariables, {args}]
 
 (* "checkForValidRange[ seq, vars, r, patt ]" collects all variables which appear more than once in the range "r". If there are any, the range is invalid. *)
 checkForValidRange[ seq_List, vars_List, r_Hold, patt_] :=
-	Module[ {out = {}, tmp},
-        Scan[ With[ {h = Head[ #], name = symbolNameHold[ First[ #]]},
-        		If[ Count[ r, h[ Hold[ sym_Symbol]] /; SymbolName[ Unevaluated[ sym]] === name, {0, Infinity}, Heads -> True] > 1,
-        			AppendTo[ out, #]
-        		]
-        	]&,
-        	seq
-        ];
-        tmp = r /. (h:patt)[ _] :> h; (* Sequence variables are different from individual variables, even if they have the same name. *)
-        Scan[ With[ {name = symbolNameHold[ #]},
-        		If[ Count[ tmp, Hold[ sym_Symbol] /; SymbolName[ Unevaluated[ sym]] === name, {0, Infinity}, Heads -> True] > 1,
-        			AppendTo[ out, #]
-        		]
-        	]&,
-        	vars
-        ];
-        out
+	With[ {tmp = r /. (h:patt)[ _] :> h},	(* Sequence variables are different from individual variables, even if they have the same name. *)
+		Join[
+			Select[
+				seq,
+				With[ {h = Last[ #], n = First[ #]},
+	        		Count[ r, h[ sym:Hold[ _Symbol]] /; symbolNameHold[ sym] === n, {0, Infinity}, Heads -> True] > 1
+	        	]&
+			],
+			Select[
+				vars,
+				With[ {n = First[ #]},
+	        		Count[ tmp, sym:Hold[ _Symbol] /; symbolNameHold[ sym] === n, {0, Infinity}, Heads -> True] > 1
+	        	]&
+			]
+		]
 	]
-	
+
+(* Normally, 'addVarPrefixes' should not be needed any more, since 'markVariables' takes care of adding prefix "VAR$"
+	already. However, to be on the safe side, we still keep it. *)
 addVarPrefixes[ expr_] :=
-	Module[ {vp = Position[ expr, (VAR$|Theorema`Computation`Language`VAR$)[ _]], repl},
-		repl = MapThread[ (#1 -> addSinglePrefix[ #2])&, {vp, Extract[ expr, vp, Hold]}];
-		ReplacePart[ expr, repl]
-	]
+	expr /. v:((VAR$|Theorema`Computation`Language`VAR$)[ _]) :> With[ {new = addSinglePrefix[ Hold[ v]]}, new /; True]
+
 addSinglePrefix[ Hold[ sym_Symbol]] :=
 	Module[ {n = SymbolName[ Unevaluated[ sym]]},
 		If[ StringLength[ n] < 5 || StringTake[ n, 4] =!= "VAR$",
-			ToExpression[ "VAR$" <> n, InputForm, Hold],
-			Hold[ sym]
+			ToExpression[ "VAR$" <> n],
+		(*else*)
+			sym
 		]
 	]
 addSinglePrefix[ Hold[ (h:(VAR$|SEQ0$|SEQ1$|Theorema`Computation`Language`VAR$|Theorema`Computation`Language`SEQ0$|Theorema`Computation`Language`SEQ1$))[ x_]]] :=
 	h[ addSinglePrefix[ Hold[ x]]]
-addSinglePrefix[ Hold[ x_Hold]] := addSinglePrefix[ x]
+addSinglePrefix[ Hold[ x_Hold]] :=
+	addSinglePrefix[ x]
 
 (* "addAbbrevPositions[ expr ]" adds the positions of the free occurrences of all ABBREV-variables in 'expr' to their respective ABBRVRNG$-ranges.
 	Note that multiranges are temporarily split into individual ranges, and that an invisible 'Hold' is assumed to be wrapped around the quantified expressions,
@@ -323,7 +315,10 @@ removeHold[ expr_Hold] :=
 	ReleaseHold[ Replace[ expr, Hold[ x_] -> x, Infinity, Heads -> True]]
 removeHold[ args___] := unexpected[ removeHold, {args}]
 
-symbolNameHold[ Hold[ s_Symbol]] := SymbolName[ Unevaluated[ s]]
+symbolNameHold[ Hold[ s_Symbol]] :=
+	StringReplace[ SymbolName[ Unevaluated[ s]], StartOfString ~~ "VAR$" -> ""]
+symbolNameHold[ s_Symbol] :=
+	StringReplace[ SymbolName[ s], StartOfString ~~ "VAR$" -> ""]
 symbolNameHold[ args___] := unexpected[ symbolNameHold, {args}]
 
 

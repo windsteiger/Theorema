@@ -40,7 +40,7 @@ With[ {lang = "German"},
 
 (* TRANSLATED *)
 
-(* UNTRANSLATED *)	
+(* UNTRANSLATED *)
 	MessageName[ addKnowledgeWhileProving, "usage", lang] = "addKnowledgeWhileProving[ new_List] adds all formulas in new to the list of formulas to be written in the proof info/file of the current proof.";
 	MessageName[ allTmaNotebooks, "usage", lang] = "allTmaNotebooks[] returns a list of all Theorema Notebooks in the current session.";
 	MessageName[ allTrue, "usage", lang] = "allTrue[ l, f] checks whether f always yields True when applied to the elements of list l.";
@@ -235,6 +235,7 @@ With[ {lang = "German"},
 	MessageName[ $removeFromEnvTest, "usage", lang] = "$removeFromEnvTest is called before a formula is removed from the current environment.";
 	MessageName[ removeRedundantBoxes,"usage", lang] = "removeRedundantBoxes[ expr] removes redundant boxes (e.g. certain TagBoxes) from the given box-expression.";
 	MessageName[ renameBound, "usage", lang] = "renameBound[ expr:(_[ _RNG$, ___]), new] renames the variables bound by the outermost quantifier in 'expr' by 'new'. Other bound variables might be renamed as well, in order to avoid name clashes; this is taken care of by 'substituteFree'.";
+	MessageName[ renameVar, "usage", lang] = "";
 	MessageName[ replaceAllAndTrack, "usage", lang] = "";
 	MessageName[ replaceAllExcept, "usage", lang] = "replaceAllExcept[ expr, rules, expt] applies rule(s) to all subparts of 'expr' except those contained in the list 'expt'.";
 	MessageName[ replaceAndTrack, "usage", lang] = "";
@@ -323,6 +324,8 @@ With[ {lang = "German"},
 	MessageName[ unification, "usage", lang] = "";
 	MessageName[ updateKBBrowser, "usage", lang] = "";
 	MessageName[ used, "usage", lang] = "used is an option for the constructor makePRFINFO and a selector for the PRFINFO$ datastructure.";
+	
+	MessageName[ varName, "usage", lang] = "";
 
 	MessageName[ writeLog, "usage", lang] = "writeLog[ expr__] writes expr to the currently active log-file.";
 ]
