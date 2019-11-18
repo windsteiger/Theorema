@@ -225,18 +225,18 @@ proofStepText[ expandDef, lang, u_List, g_List, ___, "defCond" -> False, "usedDe
 		If[ u[[1]] =!= g[[1]],
 			repl = defs[[1]];
 			suffix = If[ Length[ repl] == 1, "", "s"];
-			stepText = { textCell[ "In order to prove ", formulaReference[ u[[1, 1]]], ", using definition" <> suffix <> " ", 
+			stepText = {cellGroup[ {textCell[ "In order to prove ", formulaReference[ u[[1, 1]]], ", using definition" <> suffix <> " ", 
 				formulaReferenceSequence[ repl, lang], ", we now show"],
-				goalCell[ g[[1, 1]], "."]}
+				goalCell[ g[[1, 1]], "."]}]}
 		];
 		PrependTo[ stepText, textCell[ "We expand definitions:"]];
 		(* Each of the remaining is an expansion in the KB. Produce a line of text for each of them *)
 		Do[
 			repl = defs[[j]];
 			suffix = If[ Length[ repl] == 1, "", "s"];
-			stepText = Join[ stepText, 
-				{textCell[ "From ", formulaReference[ u[[j, 1]]], " we know, by definition" <> suffix <> " ", formulaReferenceSequence[ repl, lang], ","], 
-				assumptionCell[ g[[j, 1]]]}],
+			stepText = Append[ stepText, 
+				cellGroup[ {textCell[ "From ", formulaReference[ u[[j, 1]]], " we know, by definition" <> suffix <> " ", formulaReferenceSequence[ repl, lang], ","], 
+				assumptionCell[ g[[j, 1]]]}]],
 			{j, 2, Length[ g]}
 		];
 		stepText
@@ -250,17 +250,17 @@ subProofHeader[ expandDef, lang, u_, g_, ___, "defCond" -> True, "usedDefs" -> d
 		If[ u[[1]] =!= g[[1]],
 			repl = defs[[1]];
 			suffix = If[ Length[ repl] == 1, "", "s"];
-			stepText = {textCell[ "In order to prove ", formulaReference[ u[[1, 1]]], ", using definition" <> suffix <> " ", 
+			stepText = {cellGroup[ {textCell[ "In order to prove ", formulaReference[ u[[1, 1]]], ", using definition" <> suffix <> " ", 
 				formulaReferenceSequence[ repl, lang], ", we now show"],
-				goalCell[ g[[1, 1]], "."]}
+				goalCell[ g[[1, 1]], "."]}]}
 		];
 		(* Each of the remaining is an expansion in the KB. Produce a line of text for each of them *)
 		Do[
 			repl = defs[[j]];
 			suffix = If[ Length[ repl] == 1, "", "s"];
-			stepText = Join[ stepText, 
-				{textCell[ "From ", formulaReference[ u[[j, 1]]], " we know, by definition" <> suffix <> " ", formulaReferenceSequence[ repl, lang], ","], 
-				assumptionCell[ g[[j, 1]]]}],
+			stepText = Append[ stepText, 
+				cellGroup[ {textCell[ "From ", formulaReference[ u[[j, 1]]], " we know, by definition" <> suffix <> " ", formulaReferenceSequence[ repl, lang], ","], 
+				assumptionCell[ g[[j, 1]]]}]],
 			{j, 2, Length[ g] - 1} (* the last is the new goal for a condition in the rewrite -> we go only to Length-1 *)
 		];
 		stepText
