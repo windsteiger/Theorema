@@ -89,6 +89,7 @@ With[ {lang = "English"},
 	MessageName[ orKB, "usage", lang] = "Case distinction based on a disjunction in the knowledge base";
 
 	MessageName[ partSolveMetaMatching, "usage", lang] = "Instantiate meta-variables by matching";
+	MessageName[ partSolveMetaMultiMatching, "usage", lang] = "Instantiate meta-variables by matching (multiple matching)";
 
 	MessageName[ quantifierRules, "usage", lang] = "Rules for quantifiers";
 
@@ -461,11 +462,34 @@ subProofHeader[ orKB, lang, _, {generated_List}, ___, pVal_, {p_}] := {textCell[
 (* ::Subsection:: *)
 (* P *)
 
+proofStepText[ partSolveMetaMatching, lang, {{u_, inst_}}, {{g_}}, ___] := {
+	textCell[ "Let now ", inlineTheoremaExpressionSeq[ Apply[ List, formula@inst], lang], ". In order to prove ", formulaReference[ u], " it suffices to show"],
+	goalCell[ g, "."]
+	};
+
+proofStepText[ partSolveMetaMatching, lang, u_List, g_List, ___] := {
+	textCell[ "We have several choices."]
+	};
+
+subProofHeader[ partSolveMetaMatching, lang, u_List, g_List, ___, pVal_, {p_}] := {
+	textCell[ "Let now ", inlineTheoremaExpressionSeq[ Apply[ List, formula@u[[p,2]]], lang], ". In order to prove ", formulaReference[ u[[p,1]]], " it suffices to show"],
+	goalCell[ g[[p,1]], "."]
+	};
+
+(* The remaining functions are for old proof objects with instantiation -> ..., which are superseded by the new format above since Nov. 2019 *)
 proofStepText[ partSolveMetaMatching, lang, {{u_}}, {{g_}}, ___, "instantiation" -> inst_List, ___] := {
 	textCell[ "Let now ", inlineTheoremaExpressionSeq[ inst[[1]], lang], ". In order to prove ", formulaReference[ u], " it suffices to show"],
 	goalCell[ g, "."]
 	};
 
+proofStepText[ partSolveMetaMultiMatching, lang, {{u_}}, {{g__}}, ___, "instantiation" -> inst_List, ___] := {
+	textCell[ "We have several choices."]
+	};
+
+subProofHeader[ partSolveMetaMultiMatching, lang, {{u_}}, {g_List}, ___, "instantiation" -> inst_List, ___, pVal_, {p_}] := {
+	textCell[ "Let now ", inlineTheoremaExpressionSeq[ inst[[p]], lang], ". In order to prove ", formulaReference[ u], " it suffices to show"],
+	goalCell[ g[[p]], "."]
+	};
 proofStepText[ partSolveMetaMatching, lang, {{{_}}, {{_}}..}, {{{_}}, {{_}}..}, ___, "instantiation" -> inst_List, ___] := {
 	textCell[ "We have several choices."]
 	};
@@ -474,6 +498,7 @@ subProofHeader[ partSolveMetaMatching, lang, {{{u_}}, {{u_}}..}, g_List, ___, "i
 	textCell[ "Let now ", inlineTheoremaExpressionSeq[ inst[[i]], lang], ". In order to prove ", formulaReference[ u], " it suffices to show"],
 	goalCell[ g[[i, 1, 1]], "."]
 	};
+
 
 (* ::Subsection:: *)
 (* S *)

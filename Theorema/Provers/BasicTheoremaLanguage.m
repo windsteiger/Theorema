@@ -466,6 +466,9 @@ this:PRFSIT$[ g:FML$[ _, _?isLiteralExpression, __], k_List, id_, rest___?Option
 	]
 ]
 
+simplifiedProofInfo[ pi_, n_Integer] /; name@pi === multipleGoalRewriting := 
+	makePRFINFO[ name -> goalRewriting, used -> (used@pi)[[n]], generated -> (generated@pi)[[n]]]
+
 (* ::Section:: *)
 (* Knowledge Rewriting *)
 (*
@@ -923,38 +926,57 @@ simplifiedProofInfo[ pi_, n_Integer] /; name@pi === solveMetaUnification :=
 	
 inferenceRule[ partSolveMetaMatching] = 
 ps:(PRFSIT$[ g:FML$[ _, a:And$TM[ pre___, x_ /; !FreeQ[ x, _META$], post___], lab_, ___], K_List, id_, rest___?OptionQ]|
-PRFSIT$[ g:FML$[ _, a:x_ /; !FreeQ[ x, _META$], lab_, ___], K_List, id_, rest___?OptionQ]) :> performProofStep[
-	Module[ {inst = Map[ instantiation[ x, formula@#]&, K], posInst, newGoalsAlt},
+PRFSIT$[ g:FML$[ _, a:x_ /; !FreeQ[ x, _META$], lab_, ___], K_List, id_, rest___?OptionQ]) :> Catch[ 
+  Block[ {$rewriteRules = {}, $generated = {}, inst = Map[ instantiation[ x, formula@#]&, K], posInst, newGoals = {}, usedForms = {}, goalInst, i},
 		posInst = Position[ inst, _List, {1}];
 		If[ posInst === {},
 			Throw[ $Failed],
 			(* else *)
 			inst = Extract[ inst, posInst];
 		];
-		newGoalsAlt = DeleteCases[ Map[ instantiateMeta[ a, #]&, inst], $Failed];	(* 'inst' is a list of instantiations! *)
+		(*newGoalsAlt = DeleteCases[ Map[ instantiateMeta[ a, #]&, inst], $Failed];	(* 'inst' is a list of instantiations! *)
 		newGoalsAlt = DeleteCases[ Map[ Catch[ makeGoalFML[ formula -> #]]&, newGoalsAlt], $Failed];	(* remove all ill-formed goals *)
-		Switch[ newGoalsAlt,
+		*)
+		Do[
+			goalInst = instantiateMeta[ a, inst[[i]]];
+			If[ goalInst === $Failed, 
+				Continue[],
+				(* else: instantiation works *)
+				goalInst = Catch[ makeGoalFML[ formula -> goalInst]];
+				If[ goalInst === $Failed,
+					Continue[],
+					(* else: valid formula *)
+					AppendTo[ usedForms, {g, Catch[ makeAssumptionFML[ formula -> inst[[i]]]]}];
+					AppendTo[ newGoals, {goalInst}]
+				]
+			],
+			{i, Length[ inst]} 
+		];
+		Switch[ newGoals,
 			{},
 			$Failed,
 			
 			{_},
-			makeANDNODE[ makePRFINFO[ name -> partSolveMetaMatching, used -> g, "instantiation" -> inst], 
-            	toBeProved[ goal -> newGoalsAlt[[1]], kb -> K, rest]
+			makeANDNODE[ makePRFINFO[ name -> partSolveMetaMatching, used -> usedForms, generated -> newGoals], 
+            	toBeProved[ goal -> newGoals[[1,1]], kb -> K, rest]
         	],
         	
 			_,
-        	makeORNODE[ makePRFINFO[ name -> partSolveMetaMultiMatching, used -> g, "instantiation" -> inst], 
-            	Map[ toBeProved[ goal -> #, kb -> K, rest]&, newGoalsAlt]
+        	makeORNODE[ makePRFINFO[ name -> partSolveMetaMatching, used -> usedForms, generated -> newGoals], 
+            	Map[ toBeProved[ goal -> #[[1]], kb -> K, rest]&, newGoals]
         	]
 		]
 	]
 ]
 
-simplifiedProofInfo[ pi_, n_Integer] /; name@pi === partSolveMetaMatching := 
-	Module[ {p = Position[ pi, "instantiation" -> _]},
-		MapAt[ {#[[n]]}&, MapAt[ #[[n]]&, pi, {{2}, {3}}], Insert[ p, 2, {1, 2}]]
+(*simplifiedProofInfo[ pi_, n_Integer] /; name@pi === partSolveMetaMultiMatching := 
+	Module[ {inst = Extract[ Cases[ pi, HoldPattern[ "instantiation" -> i_] -> i], {{1, n}}]},
+		makePRFINFO[ name -> partSolveMetaMatching, used -> used@pi, generated -> (generated@pi)[[1,n]], "instantiation" -> inst]
 	]
-	
+	*)
+simplifiedProofInfo[ pi_, n_Integer] /; name@pi === partSolveMetaMultiMatching := 
+	makePRFINFO[ name -> partSolveMetaMatching, used -> (used@pi)[[n]], generated -> (generated@pi)[[n]]]
+
 
 inferenceRule[ maxTuples1] = 
 ps:PRFSIT$[ g:FML$[ _, GreaterEqual$TM[ Subtract$TM[ 

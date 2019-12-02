@@ -399,6 +399,14 @@ simpNodes[ node:PRFSIT$[ g_, kb_, ___], simp_List] := {node, Map[ key, Prepend[ 
 simpNodes[ args___] := unexpected[ simpNodes, {args}]
 
 (*
+	simplifiedProofInfo[ pi_PRFINFO$, n_Integer] is the default method to simplify the proof info of a rule-generated
+	ORNODE. The n-th child is the successful one, so we take 'used' and 'generated' as just the n-th part of the
+	original proof info. 
+*)
+simplifiedProofInfo[ pi_PRFINFO$, n_Integer] :=
+	makePRFINFO[ name -> name@pi, used -> (used@pi)[[n]], generated -> (generated@pi)[[n]]]
+	
+(*
 	propagateUsed[ pi_PRFINFO$, u_List] computes a list of keys, which are used to generate all the keys in u.
 	This is used in the proof simplification of a node having prfinfo pi: u are the keys used in the subproofs.
 	We check, which of them are generated in the current step and collect the keys used to generate these.
