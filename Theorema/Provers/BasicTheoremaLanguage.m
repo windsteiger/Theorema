@@ -39,8 +39,10 @@ PRFSIT$[ goal:FML$[ _, g_, __], {___, k:FML$[ _, g_, __], ___}, ___] :> performP
 ]
 
 inferenceRule[ contradictionKB] = 
-PRFSIT$[ goal_FML$, {___, k:FML$[ _, phi_, __], ___, c:FML$[ _, Not$TM[ phi_], __], ___} | {___, k:FML$[ _, Not$TM[ phi_], __], ___, c:FML$[ _, phi_, __], ___}, ___] :> performProofStep[
+PRFSIT$[ goal_FML$, {___, k:FML$[ _, phi_, __], ___, c:FML$[ _, Not$TM[ phi_], __], ___} | {___, k:FML$[ _, Not$TM[ phi_], __], ___, c:FML$[ _, phi_, __], ___}, ___] :> Catch[
+Block[{$rewriteRules = {}, $generated = {}},
 	makeTERMINALNODE[ makePRFINFO[ name -> contradictionKB, used -> {k, c}], proved]
+	]
 ]
 
 inferenceRule[ falseInKB] =
@@ -103,32 +105,37 @@ PRFSIT$[ g:FML$[ _, a_, __] /; !TrueQ[ !a] && FreeQ[ g, _META$], k_List, id_, re
 ]
 
 inferenceRule[ deMorganKB] = 
-PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
-	Module[ {newKB, changed},
-		newKB = Map[ applyDeMorgan[ #1, makeAssumptionFML]&, k];
-		changed = Cases[ newKB, {new_, False, orig_} -> {new, orig}];
-		If[ changed === {},
+PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> Catch[
+Block[{$rewriteRules = {}, $generated = {}},
+	Module[ {dmKB, newKB = {}, origFml = {}, newFml = {}},
+		dmKB = Map[ applyDeMorgan[ #1, makeAssumptionFML]&, k];
+		Scan[ Switch[ #, 
+			{_, _}, (* rewritten with de'Morgan *)
+			AppendTo[ origFml, {#[[2]]}]; AppendTo[ newFml, {#[[1]]}]; AppendTo[ newKB, #[[1]]], 
+			{_}, AppendTo[ newKB, #[[1]]]]&, dmKB];
+		If[ newFml === {},
 			Throw[ $Failed]
 		];
-		makeANDNODE[ makePRFINFO[ name -> deMorganKB, used -> Map[ Drop[ #, 1]&, changed],
-			generated -> Map[ Drop[ #, -1]&, changed]], 
-			toBeProved[ goal -> g, kb -> Map[ Part[ #, 1]&, newKB], rest]
+		makeANDNODE[ makePRFINFO[ name -> deMorganKB, used -> origFml, generated -> newFml], 
+			toBeProved[ goal -> g, kb -> newKB, rest]
 		]
 	]
-]
+]]
 
 applyDeMorgan[ orig:FML$[ _, fml_, __], mkFml_] :=
-Module[
-	{
-		deMorgan = {Not$TM[ And$TM[ x_, y__]] :> Map[ Not$TM, Or$TM[ x, y]],
-		Not$TM[ Or$TM[ x_, y__]] :> Map[ Not$TM, And$TM[ x, y]],
-		Not$TM[ Implies$TM[ x_, y_]] :> And$TM[ x, Not$TM[y]],
-		Not$TM[ Iff$TM[ x_, y_]] :> Or$TM[ And$TM[ x, Not$TM[y]], And$TM[ y, Not$TM[x]]],
-		Not$TM[ Forall$TM[ r_, c_, f_]] :> Exists$TM[ r, c, Not$TM[f]],
-		Not$TM[ Exists$TM[ r_, c_, f_]] :> Forall$TM[ r, c, Not$TM[f]]}
+Module[ {dm, rulesApplied, deMorgan = 
+			{Not$TM[ And$TM[ x_, y__]] :> (Sow[ 1]; Map[ Not$TM, Or$TM[ x, y]]),
+			 Not$TM[ Or$TM[ x_, y__]] :> (Sow[ 1]; Map[ Not$TM, And$TM[ x, y]]),
+			 Not$TM[ Implies$TM[ x_, y_]] :> (Sow[ 1]; And$TM[ x, Not$TM[y]]),
+			 Not$TM[ Iff$TM[ x_, y_]] :> (Sow[ 1]; Or$TM[ And$TM[ x, Not$TM[y]], And$TM[ y, Not$TM[x]]]),
+			 Not$TM[ Forall$TM[ r_, c_, f_]] :> (Sow[ 1]; Exists$TM[ r, c, Not$TM[f]]),
+			 Not$TM[ Exists$TM[ r_, c_, f_]] :> (Sow[ 1]; Forall$TM[ r, c, Not$TM[f]])}
 	},
-	With[ {dm = fml //. deMorgan},
-		{mkFml[ formula -> dm], fml === dm, orig}
+	{dm, rulesApplied} = Reap[ fml //. deMorgan];
+	If[ rulesApplied =!= {},
+		{mkFml[ formula -> dm], orig},
+		(* else *)
+		{orig}
 	]
 ]
 	
@@ -613,8 +620,9 @@ this:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
 (* Expand Definitions *)
 
 inferenceRule[ expandDef] = 
-this:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
-	Module[ {rules, auxKB, usedDefs, cond, new, newG, newForm, newK = {}, defExpand = False, defCond = {}, usedInCond = {}, j, usedForms, genForms, replBy = {}, newGoals},
+this:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> Catch[ Block[ {$rewriteRules = {}, $generated = {}}, 
+	Module[ {rules, auxKB, usedDefs, cond, new, newG, newForm, newK = {}, 
+		    defExpand = False, defCond = {}, usedInCond = {}, j, usedForms, genForms, newGoals},
 		rules = defRules@this;
 		auxKB = getOptionalComponent[ this, "AuxiliaryKB"];
 		If[ rules === {},
@@ -624,7 +632,7 @@ this:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
 			{new, usedDefs, cond} = replaceAllAndTrack[ formula@g, filterRules[ rules, None]];
 			If[ usedDefs =!= {} && freeVariables[ cond] === {},
 				(* rewrite applied *)
-				(* in this case, the result is of the form {newForm, cond}, where cond are conditions to be fulfilled in order to allow the rewrite *)
+				(* in this case, the result is of the form {new, usedDefs, cond}, where cond are conditions to be fulfilled in order to allow the rewrite *)
 				newG = makeGoalFML[ formula -> new];
 				If[ !TrueQ[ cond],
 					AppendTo[ defCond, cond];
@@ -638,7 +646,6 @@ this:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
 			genForms = {{newG}};
 			With[ {defs = Union[ usedDefs]},
 				usedForms = {Prepend[ defs, g]};
-				AppendTo[ replBy, defs]
 			];
 			Do[
                 {new, usedDefs, cond} = replaceAllAndTrack[ formula@k[[j]], filterRules[ rules, None]];
@@ -653,7 +660,6 @@ this:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
                     AppendTo[ genForms, {newForm}];
                     With[ {defs = Union[ usedDefs]},
                     	AppendTo[ usedForms, Prepend[ defs, k[[j]]]];
-						AppendTo[ replBy, defs]
                     ];
                     defExpand = True,
                     (* else: no def expansion in this formula *)
@@ -681,13 +687,13 @@ this:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
             		We pass an optional "defCond" -> True/False such that the proof text can be generated accordingly.
             	*)
             	(* We have to explicitly specify generated-> because we need the proper nesting *)
-            	makeANDNODE[ makePRFINFO[ name -> expandDef, used -> usedForms, generated -> genForms, "defCond" -> (defCond =!= {}), "usedDefs" -> replBy], 
+            	makeANDNODE[ makePRFINFO[ name -> expandDef, used -> usedForms, generated -> genForms, "defCond" -> (defCond =!= {})], 
 					newGoals],
 				$Failed
             ]
 		]
 	]
-]
+]]
 
 setRuleActivity[ l_List, o1___, ruleActivity -> a_, o2___] := 
 	Module[ {new},

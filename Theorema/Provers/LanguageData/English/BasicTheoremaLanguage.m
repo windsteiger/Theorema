@@ -150,9 +150,9 @@ proofStepText[ contradictionUniv2, lang, {{u_, c_}}, {}, ___, "instantiation" ->
 (* ::Subsection:: *)
 (* D *)
 
-proofStepText[ deMorganKB, lang, used_, generated_, ___, pVal_] := {textCell[ "Using de'Morgan's law, the formulas ", 
+proofStepText[ deMorganKB, lang, used_, generated_, ___, pVal_] := {textCell[ "Using de'Morgan's law, we can rewrite ", 
 	formulaReferenceSequence[ Flatten[ used], lang],
-	" can be transformed into"],
+	" to "],
 	assumptionListCells[ Flatten[ generated], ",", "."]
     };
 
@@ -214,6 +214,48 @@ proofStepText[ existsKB, lang, {{g_}}, {{simpG_}}, ___] := {textCell[ "The unive
 	goalCell[ simpG, "."]
 	};
 
+proofStepText[ expandDef, lang, u_List, g_List, ___, "defCond" -> False, ___] := 
+	(* u, g, and defs have same length.
+	   u is a list of singleton lists, u[[i,1]] are the formulas that are rewritten
+	   g is a list of singleton lists, g[[i,1]] are the new formulas
+	   defs is an auxliliary list containing lists of definition formulas, namely defs[[i]] are the definitions used when rewriting u[[i,1]] to g[[i,1]].
+	   According to the "defCond" -> False, this is the case, where NO CONDITIONS need to be checked.
+	*)
+	Module[ {stepText = {}, j, numUsed, suffix},
+		(* If u[[1]] has length 1 (and is the same as g[[1]]), then the goal has not been rewritten *)
+		numUsed = Length[ u[[1]]];
+		If[ numUsed > 1,
+			suffix = If[ numUsed == 2, "", "s"];
+			stepText = {cellGroup[ {textCell[ "In order to prove ", formulaReference[ u[[1, 1]]], ", using definition" <> suffix <> " ", 
+				formulaReferenceSequence[ Rest[ u[[1]]], lang], ", we now show"],
+				goalCell[ g[[1, 1]], "."]}]}
+		];
+		PrependTo[ stepText, textCell[ "We expand definitions:"]];
+		(* Each of the remaining is an expansion in the KB. Produce a line of text for each of them *)
+		Do[
+			numUsed = Length[ u[[j]]];
+			suffix = If[ numUsed == 2, "", "s"];
+			stepText = Append[ stepText, 
+				cellGroup[ {textCell[ "From ", formulaReference[ u[[j, 1]]], " we know, by definition" <> suffix <> " ", formulaReferenceSequence[ Rest[ u[[j]]], lang], ","], 
+				assumptionCell[ g[[j, 1]]]}]],
+			{j, 2, Length[ g]}
+		];
+		stepText
+	];
+
+proofStepText[ expandDef, lang, u_, g_, ___, "defCond" -> True, ___] := {textCell[ "We expand definitions:"]};
+
+subProofHeader[ expandDef, lang, u_, g_, ___, "defCond" -> True, ___, {1}] := 
+	Module[ {stepText = proofStepText[ expandDef, lang, Most[ u], Most[ g], "defCond" -> False] (* remove last because these correspond to the condition *)},
+		Rest[ stepText] (* drop first because that is the intro text, which we already have in the proofStepText *)
+	];
+
+subProofHeader[ expandDef, lang, u_, {___, {cond_}}, ___, "defCond" -> True, ___, {2}] := {
+	textCell[ "In order to validate the expansion of the definitions above, we have to check"],
+	goalCell[ cond, "."]
+	};	
+
+(* The remaining functions are for old proof objects with usedDefs -> ..., which are superseded by the new format above since Dec. 2019 *)
 proofStepText[ expandDef, lang, u_List, g_List, ___, "defCond" -> False, "usedDefs" -> defs_List, ___] := 
 	(* u, g, and defs have same length.
 	   u is a list of singleton lists, u[[i,1]] are the formulas that are rewritten

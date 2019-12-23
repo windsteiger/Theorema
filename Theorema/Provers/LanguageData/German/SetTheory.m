@@ -40,6 +40,7 @@
 (* ::Section:: *)
 (* Public Declaration Part: executes in Theorema`Provers` *)
 
+
 With[ {lang = "German"},
 
 	MessageName[ andGoal, "usage", lang] = "Split a conjunction in the goal";
