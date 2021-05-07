@@ -28,7 +28,7 @@ On[ Assert]
 
 BeginPackage["Theorema`"];
 
-$TheoremaVersion = "2.0";
+$TheoremaVersion = "2.1";
 $TheoremaRelease = "0";
 
 Which[ !ValueQ[ $TheoremaDirectory],
@@ -50,13 +50,17 @@ If[ FreeQ[ $BoxForms, System`TheoremaForm],
 
 Map[ Get, FileNames[ "*.m", FileNameJoin[{$TheoremaDirectory, "Theorema", "Kernel", "LanguageData"}]]];
 
-Protect[ $TheoremaDirectory]; 
+Protect[ $TheoremaDirectory];
 
 Get[ "Theorema`Interface`ColorSchemes`"];
 
+If[ Count[ $LoadedFiles, _?(StringContainsQ[#, "plugins/com.wolfram.eclipse"] &)] > 0,
+	$workbenchMode = True,
+	$workbenchMode = False
+]
+
 Map[ Get, FileNames[ "TheoremaPreferences.m", {
-  FileNameJoin[ {$TheoremaDirectory, "Theorema", "Kernel"}],
-  FileNameJoin[ {$UserBaseDirectory, "Applications", "Theorema", "Kernel"}]}]];   
+  FileNameJoin[ {$TheoremaDirectory, "Theorema", "Kernel"}]}]];   
     
 $TheoremaArchivePath = {$TheoremaArchiveDirectory, $HomeDirectory};
 
@@ -115,15 +119,18 @@ showWelcomeScreen[] /; !ValueQ[`priv`welcomeScreen] && !TrueQ[ $suppressWelcomeS
     ];
     Pause[5];
 ]
-  		
-If[ TrueQ[$Notebooks],
-    showWelcomeScreen[],
-    Print[ "Theorema Version " <> StringJoin[ Riffle[ {$TheoremaVersion, $TheoremaRelease}, "."]] <> " (C) 2010-" <> 
+
+If[ !$workbenchMode,
+	If[ TrueQ[$Notebooks],
+    	showWelcomeScreen[],
+    	(* else *)
+    	Print[ "Theorema Version " <> StringJoin[ Riffle[ {$TheoremaVersion, $TheoremaRelease}, "."]] <> " (C) 2010-" <> 
      ToString[ Date[][[1]]] <> " The Theorema Group.\n
     This program comes with ABSOLUTELY NO WARRANTY;\n\n    This is free software, and you are welcome to\n    redistribute it under the conditions of the\n    GNU General Public License, see <http://www.gnu.org/licenses/>."]
+	]
 ];
 
-Get[ "Theorema`Common`"]
+Get[ "Theorema`Common`"] 
 Get[ "Theorema`System`"]
 
 (* The package "Theorema`Computation`Language`" introduces the same names as "Theorema`Language`".
@@ -144,12 +151,12 @@ Get[ "Theorema`Interface`GUI`"]
 
 EndPackage[]
 	
-If[ $Notebooks && MemberQ[ Notebooks[], Theorema`priv`welcomeScreen],
+If[ !$workbenchMode && $Notebooks && MemberQ[ Notebooks[], Theorema`priv`welcomeScreen],
 	NotebookClose[ Theorema`priv`welcomeScreen];
 	Clear[ Theorema`priv`welcomeScreen]];
 
 (* For documentation generation with Workbench include the following packages,
    so that their symbols appear without context *)
-(*   
+(* 
 Needs[ "Theorema`Common`"]
 *)

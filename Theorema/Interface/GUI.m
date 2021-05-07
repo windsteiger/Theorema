@@ -26,11 +26,9 @@ Needs[ "Theorema`Interface`Language`"]
 
 Begin[ "`Private`"]
 
-closeTheoremaCommander[];
 
 (* ::Section:: *)
 (* initGUI *)
-
 
 initGUI[] := 
 	Module[{},
@@ -219,8 +217,12 @@ openTheoremaGUI[ args___] := unexpected[ openTheoremaGUI, {args}]
 	Hyperlink[ ..., Active->False] work. Deployed->True would force all links and buttons to be active.
 	We have to keep an eye on that whether Deployed->False has other negative effects on the window's behaviour.
 *)
-openTheoremaCommander[ ] /; $Notebooks :=
+openTheoremaCommander[ ] :=
     Module[ {},
+    	If[ !TrueQ[ $Notebooks], Return[ Null]];
+    	If[ MemberQ[ Notebooks[], $TMAcommander],
+    		NotebookClose[ $TMAcommander]
+    	];
         $TMAcommander = CreatePalette[ Dynamic[
         	Refresh[
         	activitiesView[
@@ -2934,9 +2936,9 @@ aboutTab[ args___] := unexpected[ aboutTab, {args}]
 (* ::Section:: *)
 (* end of package *)
 
-If[ $Notebooks,
-	openTheoremaCommander[]
-];
+If[ !Theorema`$workbenchMode && TrueQ[ $Notebooks],
+      openTheoremaCommander[]
+]
 
 End[];
 EndPackage[];
