@@ -1774,15 +1774,22 @@ createNbRememberLocation[ opts___?OptionQ] :=
 		If[ StringQ[ file] && !FileExistsQ[ file],
 			$dirLastOpened = DirectoryName[ file];
 			trustNotebookDirectory[ $dirLastOpened];
-			(* Fiddling in the FrontEnd options is a workaround caused by a Mma bug (under Linux?), 
-			   which causes an error message when saving a notebook and other notebooks are open
-			   at the same time. Once this bug is corrected, we can just NotebookSave[ NotebookCreate[ ...]]. *)
-			fpMode = Replace[ Global`FileChangeProtection, Options[ $FrontEnd, Global`FileChangeProtection]];
-			SetOptions[ $FrontEnd, Global`FileChangeProtection -> None];
-			nb = CreateDocument[ {}, opts, StyleDefinitions -> makeColoredStylesheet[ "Notebook"]];
-			SetOptions[ nb, CounterAssignments -> {{$formulaCounterName -> 0}, {$nbFileNameCounterName -> file}}];
-			NotebookSave[ nb, file];
-			SetOptions[ $FrontEnd, Global`FileChangeProtection -> fpMode];
+			If[ $VersionNumber >= 12.0,
+				nb = CreateDocument[ {}, opts, CounterAssignments -> {{$formulaCounterName -> 0}, {$nbFileNameCounterName -> file}},
+					StyleDefinitions -> makeColoredStylesheet[ "Notebook"]];
+				NotebookSave[ nb, file],
+				(* else *)
+				
+				(* Fiddling in the FrontEnd options is a workaround caused by a Mma bug (under Linux?), 
+			   	which causes an error message when saving a notebook and other notebooks are open
+			   	at the same time. Once this bug is corrected, we can just NotebookSave[ NotebookCreate[ ...]]. *)
+				{fpMode} = Cases[ Options[ $FrontEnd], (Global`FileChangeProtection -> fcp_) -> fcp];
+				SetOptions[ $FrontEnd, Global`FileChangeProtection -> None];
+				nb = CreateDocument[ {}, opts, StyleDefinitions -> makeColoredStylesheet[ "Notebook"]];
+				SetOptions[ nb, CounterAssignments -> {{$formulaCounterName -> 0}, {$nbFileNameCounterName -> file}}];
+				NotebookSave[ nb, file];
+				SetOptions[ $FrontEnd, Global`FileChangeProtection -> fpMode]
+			];
 			putToUpdateQueue[ file];
 			$TMAcurrentEvalNB = DeleteDuplicates[ Prepend[ $TMAcurrentEvalNB, {file, NotebookGet[ nb]}],
 					#1[[1]] === #2[[1]]&];
