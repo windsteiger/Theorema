@@ -216,29 +216,32 @@ proofStepText[ existsKB, lang, {{g_}}, {{simpG_}}, ___] := {textCell[ "The unive
 
 proofStepText[ expandDef, lang, u_List, g_List, ___, "defCond" -> False, ___] := 
 	(* u, g, and defs have same length.
-	   u is a list of singleton lists, u[[i,1]] are the formulas that are rewritten
+	   u is a list of lists, u[[i,1]] are the formulas that are rewritten, u[[i,j]] are the definitions used.
 	   g is a list of singleton lists, g[[i,1]] are the new formulas
-	   defs is an auxliliary list containing lists of definition formulas, namely defs[[i]] are the definitions used when rewriting u[[i,1]] to g[[i,1]].
 	   According to the "defCond" -> False, this is the case, where NO CONDITIONS need to be checked.
 	*)
-	Module[ {stepText = {}, j, numUsed, suffix},
+	Module[ {stepText = {textCell[ "We expand definitions:"]}, j, suffix},
 		(* If u[[1]] has length 1 (and is the same as g[[1]]), then the goal has not been rewritten *)
-		numUsed = Length[ u[[1]]];
-		If[ numUsed > 1,
-			suffix = If[ numUsed == 2, "", "s"];
+		If[ isGoal[ u[[1, 1]]],
+			suffix = If[ Length[ u[[1]]] == 2, "", "s"];
 			stepText = {cellGroup[ {textCell[ "In order to prove ", formulaReference[ u[[1, 1]]], ", using definition" <> suffix <> " ", 
 				formulaReferenceSequence[ Rest[ u[[1]]], lang], ", we now show"],
 				goalCell[ g[[1, 1]], "."]}]}
 		];
-		PrependTo[ stepText, textCell[ "We expand definitions:"]];
-		(* Each of the remaining is an expansion in the KB. Produce a line of text for each of them *)
 		Do[
-			numUsed = Length[ u[[j]]];
-			suffix = If[ numUsed == 2, "", "s"];
-			stepText = Append[ stepText, 
-				cellGroup[ {textCell[ "From ", formulaReference[ u[[j, 1]]], " we know, by definition" <> suffix <> " ", formulaReferenceSequence[ Rest[ u[[j]]], lang], ","], 
-				assumptionCell[ g[[j, 1]]]}]],
-			{j, 2, Length[ g]}
+			suffix = If[ Length[ u[[j]]] == 2, "", "s"];
+			If[ j==1 && isGoal[ u[[j, 1]]],
+				AppendTo[ stepText, 
+					cellGroup[ {textCell[ "In order to prove ", formulaReference[ u[[1, 1]]], ", using definition" <> suffix <> " ", 
+						formulaReferenceSequence[ Rest[ u[[1]]], lang], ", we now show"],
+						goalCell[ g[[1, 1]], "."]}]
+				],
+				AppendTo[ stepText, 
+					cellGroup[ {textCell[ "From ", formulaReference[ u[[j, 1]]], " we know, by definition" <> suffix <> " ", 
+						formulaReferenceSequence[ Rest[ u[[j]]], lang], ","], 
+						assumptionCell[ g[[j, 1]]]}]]
+			],
+			{j, 1, Length[ g]}
 		];
 		stepText
 	];
@@ -387,6 +390,16 @@ proofStepText[ implGoalDirect, lang, {{g_}}, {{l_, r_}}, ___] := {textCell[ "In 
 	goalCell[ r, "."]
 	};
 
+proofStepText[ implGoalDirect, lang, {{g_}}, {{r_?isGoal}}, ___] := {textCell[ "In order to prove the implication ", formulaReference[ g], 
+	" we assume the left-hand side (which will not be used in the remaining proof) and then prove"],
+	goalCell[ r, "."]
+	};
+
+proofStepText[ implGoalDirect, lang, {{g_}}, {{l_}}, ___] := {textCell[ "In order to prove ", formulaReference[ g], " we assume"],
+	assumptionCell[ l],
+	textCell[ "and derive a contradiction."]
+	};
+
 proofStepText[ implicitDef, lang, {}, {}, ___] := {};
 
 proofStepText[ implicitDef, lang, u_, g_, ___, "introConstFor" -> termConst_List, ___] := 
@@ -489,10 +502,19 @@ proofStepText[ notGoal|contradiction, lang, {{g_}}, {{opp_}}, ___] := {textCell[
 (* ::Subsection:: *)
 (* O *)
 
-proofStepText[ orGoal, lang, {{g_}}, {{negAssum__, newG_}}, ___] := {textCell[ "For proving the disjunction ", formulaReference[ g], " we assume"],
+proofStepText[ orGoal, lang, {{g_}}, {{negAssum__, newG_?isGoal}}, ___] := {textCell[ "For proving the disjunction ", formulaReference[ g], " we assume"],
 	assumptionListCells[ {negAssum}, ",", ""],
 	textCell[ "and show"],
 	goalCell[ newG, "."]
+	};
+
+proofStepText[ orGoal, lang, {{g_}}, {{newG_?isGoal}}, ___] := {textCell[ "For proving the disjunction ", formulaReference[ g], " we prove"],
+	goalCell[ newG, "."]
+	};
+
+proofStepText[ orGoal, lang, {{g_}}, {{negAssum__}}, ___] := {textCell[ "For proving the disjunction ", formulaReference[ g], " we assume"],
+	assumptionListCells[ {negAssum}, ",", ""],
+	textCell[ "and derive a contradiction."]
 	};
 
 proofStepText[ orKB, lang, {{g_}}, {generated_List}, ___] := {textCell[ "Based on the assumption ", formulaReference[ g], " we distinguish several cases:"]};

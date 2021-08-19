@@ -98,7 +98,7 @@ With[ {lang = "English"},
 	MessageName[ getTheoremaCommander, "usage", lang] = "getTheoremaCommander[] returns the Theorema commander notebook.";
 	MessageName[ $goalActivated, lang, "usage"] = "Indicates whether the goal of the current proof situation is activated in an interactive proof.";
 	MessageName[ goalRules, "usage", lang] = "goalRules is an option for the constructor makePRFSIT/toBeProved and a selector for the PRFSIT$ datastructure.";
-	MessageName[ goal, "usage", lang] = "goal is an option for the constructors makePRFSIT/toBeProved and a selector for the PRFSIT$ datastructure.";
+	MessageName[ goal, "usage", lang] = "goal is an option for the constructors makeFML/makePRFSIT/toBeProved and a selector for the PRFSIT$ datastructure.";
 
 	MessageName[ id, "usage", lang] = "id is an option for the constructors makePRFINFO/makePRFSIT/toBeProved and a selector for the FML$/PRFINFO$/PRFSIT$ datastructures.";
 	MessageName[ inArchive,"usage",lang] = "inArchive[] returns True when we are currently processing an archive.";
@@ -120,6 +120,7 @@ With[ {lang = "English"},
 	MessageName[ isAtomicTerm, "usage", lang] = "isAtomicTerm[ t] is true iff t is a variable or a constant.";
 	MessageName[ isConnectiveFormula, "usage", lang] = "isConnectiveFormula[ e] is true iff e is built up by a logical connective.";
 	MessageName[ isFree, "usage", lang] = "isFree[ var, expr] returns True iff 'var' appears free in 'expr'.";
+	MessageName[ isGoal, "usage", lang] = "isGoal[ f] returns True iff 'f' is used as a goal formula (as opposed to a formula in the knowledge base).";
 	MessageName[ isGround, "usage", lang] = "";
 	MessageName[ isIndividual, "usage", lang] = "";
 	MessageName[ isLiteralExpression, "usage", lang] = "isLiteralExpression[ e] is true iff e is an atomic or a negated atomic expression.";

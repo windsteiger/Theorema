@@ -1371,11 +1371,12 @@ defaultFmlPre[ form_, lbl_, simp_, tags_List, _, _] :=
 	{sequenceFlatten[ form], lbl, simp, If[ tags === {}, {}, {"tags" -> tags}]}
 defaultFmlPre[ args___] := unexpected[ defaultFmlPre, {args}]
 
-Options[ makeFML] = {key :> defKey[], formula -> True, label :> defLabel[], simplify -> True, preprocess -> defaultFmlPre, cellPosition -> Null, formulaTags -> {}};
+Options[ makeFML] = {key :> defKey[], formula -> True, label :> defLabel[], simplify -> True, preprocess -> defaultFmlPre, 
+	cellPosition -> Null, formulaTags -> {}, goal -> None};
 
 makeFML[ data___?OptionQ] :=
-	Module[{k, forig, lorig, sorig, pp, fs, cp, torig},
-		{k, forig, lorig, sorig, pp, cp, torig} = {key, formula, label, simplify, preprocess, cellPosition, formulaTags} /. {data} /. Options[ makeFML];
+	Module[{k, forig, lorig, sorig, pp, fs, cp, torig, isG},
+		{k, forig, lorig, sorig, pp, cp, torig, isG} = {key, formula, label, simplify, preprocess, cellPosition, formulaTags, goal} /. {data} /. Options[ makeFML];
 		Replace[ pp[ forig, lorig, sorig, torig, k, cp],
 			{
 				{f:Except[ $Failed], l_String, s_, t:{(Except[ "origForm", _String] -> _)...}} :>
@@ -1390,7 +1391,7 @@ makeFML[ data___?OptionQ] :=
 							If[ Head[ fs] === s, fs = f];	(* Security check: If the head of the new formula is still 's', no simplification happened. *)
 						];
 						If[ isIndividual[ fs],
-							Join[ makeTmaFml[ k, fs, l, f], FML$ @@ t],
+							Join[ makeTmaFml[ k, fs, l, f], FML$ @@ Join[ t, Switch[ isG, True|False, {"goal" -> isG}, _, {}]]],
 						(*else*)
 							$Failed
 						]
@@ -1439,6 +1440,10 @@ sourceFile[ _] :=
 	$Failed
 sourceFile[ args___] := unexpected[ sourceFile, {args}]
 
+isGoal[ FML$[ _, _, _, __, "goal" -> v_]] := v
+isGoal[ _FML$] := None
+isGoal[ args___] := unexpected[ isGoal, {args}]
+
 
 Options[ formulaReference] = {Tooltip -> True};
 formulaReference[ fml_FML$, opts___?OptionQ] :=
@@ -1464,7 +1469,7 @@ makeGoalFML[ data___?OptionQ] :=
 			(* else: add goal marker *) 
 			With[ {sep = If[ StringMatchQ[ l, NumberString], "\[NumberSign]", "\[SpaceIndicator]"]}, "G" <> sep <> l]
 		];
-		form = makeFML[ label -> newLabel, data];
+		form = makeFML[ label -> newLabel, goal -> True, data];
 		(* 'makeGoalFML' and 'makeAssumptionFML' are used only in inference rules, i.e. inside 'performProofStep' ==>
 			if the formula is not well-formed, we simply throw '$Failed', which is caught in 'performProofStep'.
 			Only make sure that these constructors are not called inside another 'Catch'! *)
@@ -1486,7 +1491,7 @@ makeAssumptionFML[ data___?OptionQ] :=
 			(* else: add assumption marker *) 
 			With[ {sep = If[ StringMatchQ[ l, NumberString], "\[NumberSign]", "\[SpaceIndicator]"]}, "A" <> sep <> l]
 		];		
-		form = makeFML[ label -> newLabel, data];
+		form = makeFML[ label -> newLabel, goal -> False, data];
 		If[ form === $Failed,
 			Throw[ $Failed],
 		(*else*)

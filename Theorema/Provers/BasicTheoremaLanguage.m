@@ -124,7 +124,8 @@ Block[{$rewriteRules = {}, $generated = {}},
 
 applyDeMorgan[ orig:FML$[ _, fml_, __], mkFml_] :=
 Module[ {dm, rulesApplied, deMorgan = 
-			{Not$TM[ And$TM[ x_, y__]] :> (Sow[ 1]; Map[ Not$TM, Or$TM[ x, y]]),
+			{Not$TM[ Not$TM[ x_]] :> (Sow[ 1]; x),
+			 Not$TM[ And$TM[ x_, y__]] :> (Sow[ 1]; Map[ Not$TM, Or$TM[ x, y]]),
 			 Not$TM[ Or$TM[ x_, y__]] :> (Sow[ 1]; Map[ Not$TM, And$TM[ x, y]]),
 			 Not$TM[ Implies$TM[ x_, y_]] :> (Sow[ 1]; And$TM[ x, Not$TM[y]]),
 			 Not$TM[ Iff$TM[ x_, y_]] :> (Sow[ 1]; Or$TM[ And$TM[ x, Not$TM[y]], And$TM[ y, Not$TM[x]]]),
@@ -622,7 +623,7 @@ this:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> performProofStep[
 inferenceRule[ expandDef] = 
 this:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> Catch[ Block[ {$rewriteRules = {}, $generated = {}}, 
 	Module[ {rules, auxKB, usedDefs, cond, new, newG, newForm, newK = {}, 
-		    defExpand = False, defCond = {}, usedInCond = {}, j, usedForms, genForms, newGoals},
+		    defExpand = False, defCond = {}, usedInCond = {}, j, usedForms = {}, genForms = {}, newGoals},
 		rules = defRules@this;
 		auxKB = getOptionalComponent[ this, "AuxiliaryKB"];
 		If[ rules === {},
@@ -638,14 +639,13 @@ this:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> Catch[ Block[ {$rewriteRules 
 					AppendTo[ defCond, cond];
 					AppendTo[ usedInCond, g]
 				];
+				genForms = {{newG}};
+				With[ {defs = Union[ usedDefs]},
+					usedForms = {Prepend[ defs, g]};
+				];
 				defExpand = True,
 				(* else: no def expansion in goal *)
 				newG = g
-			];
-			(* The first used and generated are old/new goal. If they are identical, then the proof header won't print any text for the goal part *)
-			genForms = {{newG}};
-			With[ {defs = Union[ usedDefs]},
-				usedForms = {Prepend[ defs, g]};
 			];
 			Do[
                 {new, usedDefs, cond} = replaceAllAndTrack[ formula@k[[j]], filterRules[ rules, None]];
@@ -671,7 +671,7 @@ this:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> Catch[ Block[ {$rewriteRules 
             	newGoals = {toBeProved[ goal -> newG, kb -> newK, "AuxiliaryKB" -> Join[ auxKB, Flatten[ usedForms]], rest]};
             	If[ defCond =!= {},
             		(* conditions generated *)
-            		(* To be done: When we are in a proof by contradiction we have to take care. Verifying conditions should not be done on the basis of a contradictiong KB.
+            		(* To be done: When we are in a proof by contradiction we have to take care. Verifying conditions should not be done on the basis of a contradicting KB.
             		   At the moment: no contradiction proof and the only termination rule active is goalInKB, maybe this is good enough. *)
             		newForm = makeGoalFML[ formula -> makeConjunction[ defCond, And$TM]];
             		AppendTo[ newGoals, 
@@ -1029,7 +1029,7 @@ terminationRules = {"Termination Rules",
 	};
 
 connectiveRules = {"Connectives Rules", 
-	{notGoal, True, True, 30},
+	{notGoal, True, True, 15},
 	{deMorganKB, True, True, 5},
 	{andGoal, True, True, 6},
 	{andKB, True, False, 5},
@@ -1037,7 +1037,7 @@ connectiveRules = {"Connectives Rules",
 	{orKB, True, True, 19},
 	{implGoalDirect, True, True, 5},
 	{implGoalCP, False, False, 10},
-	{implKBCases, True, True, 22},
+	{implKBCases, True, True, 90},
 	{equivGoal, True, True, 10}};
 
 equalityRules = {"Equality Rules", 
@@ -1057,7 +1057,7 @@ registerRuleSet[ "Quantifier Rules", quantifierRules, {
 	{forallKB, True, True, 40, "levelSat1"},
 	{forallKBInteractive, False, True, 42},
 	{instantiate, True, True, 35},
-	{existsGoal, True, True, 10},
+	{existsGoal, True, True, 90},
 	{existsGoalInteractive, False, True, 12},
 	{existsKB, True, True, 11},
 	{partSolveMetaMatching, True, True, 8},
@@ -1067,7 +1067,7 @@ registerRuleSet[ "Quantifier Rules", quantifierRules, {
 registerRuleSet[ "Special Arithmetic", specialArithmeticRules, {
 	{inequality1, True, True, 2, "term"},
 	{maxTuples1, True, True, 2, "term"},
-	{memberCases, True, True, 30}
+	{memberCases, False, True, 30}
 	}]
 
 registerRuleSet[ "Basic Theorema Language Rules", basicTheoremaLanguageRules, {

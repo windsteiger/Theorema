@@ -28,7 +28,7 @@ On[ Assert]
 
 BeginPackage["Theorema`"];
 
-$TheoremaVersion = "2.1";
+$TheoremaVersion = "2.0";
 $TheoremaRelease = "0";
 
 Which[ !ValueQ[ $TheoremaDirectory],
