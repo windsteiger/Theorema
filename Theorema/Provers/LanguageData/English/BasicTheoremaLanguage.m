@@ -221,13 +221,7 @@ proofStepText[ expandDef, lang, u_List, g_List, ___, "defCond" -> False, ___] :=
 	   According to the "defCond" -> False, this is the case, where NO CONDITIONS need to be checked.
 	*)
 	Module[ {stepText = {textCell[ "We expand definitions:"]}, j, suffix},
-		(* If u[[1]] has length 1 (and is the same as g[[1]]), then the goal has not been rewritten *)
-		If[ isGoal[ u[[1, 1]]],
-			suffix = If[ Length[ u[[1]]] == 2, "", "s"];
-			stepText = {cellGroup[ {textCell[ "In order to prove ", formulaReference[ u[[1, 1]]], ", using definition" <> suffix <> " ", 
-				formulaReferenceSequence[ Rest[ u[[1]]], lang], ", we now show"],
-				goalCell[ g[[1, 1]], "."]}]}
-		];
+		(* If u[[1,1]] is a goal formula, then the goal has been rewritten, otherwise definitions have been applied in the KB only *)
 		Do[
 			suffix = If[ Length[ u[[j]]] == 2, "", "s"];
 			If[ j==1 && isGoal[ u[[j, 1]]],

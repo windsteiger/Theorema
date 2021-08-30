@@ -1440,7 +1440,7 @@ sourceFile[ _] :=
 	$Failed
 sourceFile[ args___] := unexpected[ sourceFile, {args}]
 
-isGoal[ FML$[ _, _, _, __, "goal" -> v_]] := v
+isGoal[ FML$[ _, _, _, ___, "goal" -> v_, ___]] := v
 isGoal[ _FML$] := None
 isGoal[ args___] := unexpected[ isGoal, {args}]
 
