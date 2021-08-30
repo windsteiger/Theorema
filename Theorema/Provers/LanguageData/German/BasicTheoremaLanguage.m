@@ -88,6 +88,7 @@ With[ {lang = "German"},
 	MessageName[ orKB, "usage", lang] = "Fallunterscheidung basierend auf Disjunktion in der Wissensbasis";
 
 	MessageName[ partSolveMetaMatching, "usage", lang] = "Instanzieren von Meta-Variablen durch Matching";
+	MessageName[ partSolveMetaMultiMatching, "usage", lang] = "Instantiate meta-variables by matching (multiple matching)";
 
 	MessageName[ quantifierRules, "usage", lang] = "Regeln f\[UDoubleDot]r Quantoren";
 
@@ -219,6 +220,51 @@ proofStepText[ existsKB, lang, {{g_}}, {{simpG_}}, ___] := {textCell[ "Die zu be
 	goalCell[ simpG, "."]
 	};
 
+proofStepText[ expandDef, lang, u_List, g_List, ___, "defCond" -> False, ___] := 
+	(* u, g, and defs have same length.
+	   u is a list of lists, u[[i,1]] are the formulas that are rewritten, u[[i,j]] are the definitions used.
+	   g is a list of singleton lists, g[[i,1]] are the new formulas
+	   According to the "defCond" -> False, this is the case, where NO CONDITIONS need to be checked.
+	*)
+	Module[ {stepText = {textCell[ "Wir expandieren Definitionen:"]}, j, suffix},
+		(* If u[[1]] has length 1 (and is the same as g[[1]]), then the goal has not been rewritten *)
+		If[ isGoal[ u[[1, 1]]],
+			suffix = If[ Length[ u[[1]]] == 2, "", "en"];
+			stepText = {cellGroup[ {textCell[ "Um ", formulaReference[ u[[1, 1]]], " zu beweisen, reicht es aufgrund der Definition" <> suffix <> " ", 
+				formulaReferenceSequence[ Rest[ u[[1]]], lang], " aus zu zeigen"],
+				goalCell[ g[[1, 1]], "."]}]}
+		];
+		Do[
+			suffix = If[ Length[ u[[j]]] == 2, "", "en"];
+			If[ j==1 && isGoal[ u[[j, 1]]],
+				AppendTo[ stepText, 
+					cellGroup[ {textCell[ "Um ", formulaReference[ u[[1, 1]]], "zu beweisen, reicht es aufgrund der Definition" <> suffix <> " ", 
+						formulaReferenceSequence[ Rest[ u[[1]]], lang], " aus zu zeigen"],
+						goalCell[ g[[1, 1]], "."]}]
+				],
+				AppendTo[ stepText, 
+					cellGroup[ {textCell[ "Aus ", formulaReference[ u[[j, 1]]], " folgt aufgrund der Definition" <> suffix <> " ", 
+						formulaReferenceSequence[ Rest[ u[[j]]], lang], ","], 
+						assumptionCell[ g[[j, 1]]]}]]
+			],
+			{j, 1, Length[ g]}
+		];
+		stepText
+	];
+
+proofStepText[ expandDef, lang, u_, g_, ___, "defCond" -> True, ___] := {textCell[ "Wir expandieren Definitionen:"]};
+
+subProofHeader[ expandDef, lang, u_, g_, ___, "defCond" -> True, ___, {1}] := 
+	Module[ {stepText = proofStepText[ expandDef, lang, Most[ u], Most[ g], "defCond" -> False] (* remove last because these correspond to the condition *)},
+		Rest[ stepText] (* drop first because that is the intro text, which we already have in the proofStepText *)
+	];
+
+subProofHeader[ expandDef, lang, u_, {___, {cond_}}, ___, "defCond" -> True, ___, {2}] := {
+	textCell[ "Um obige Definitionen anwenden zu k\[ODoubleDot]nnen, muss gepr\[UDoubleDot]ft werden"],
+	goalCell[ cond, "."]
+	};	
+
+(* The remaining functions are for old proof objects with usedDefs -> ..., which are superseded by the new format above since Dec. 2019 *)
 proofStepText[ expandDef, lang, u_List, g_List, ___, "defCond" -> False, "usedDefs" -> defs_List, ___] := 
 	(* u, g, and defs have same length.
 	   u is a list of singleton lists, u[[i,1]] are the formulae that are rewritten
@@ -351,6 +397,16 @@ proofStepText[ implGoalDirect, lang, {{g_}}, {{l_, r_}}, ___] := {textCell[ "Um 
 	goalCell[ r, "."]
 	};
 
+proofStepText[ implGoalDirect, lang, {{g_}}, {{r_?isGoal}}, ___] := {textCell[ "Um die Implikation ", formulaReference[ g], 
+	" zu beweisen, nehmen wir die linke Seite an (wir werden diese in weiterer Folge nicht ben\[ODoubleDot]tigen) und zeigen die rechte Seite"],
+	goalCell[ r, "."]
+	};
+
+proofStepText[ implGoalDirect, lang, {{g_}}, {{l_}}, ___] := {textCell[ "Um ", formulaReference[ g], " zu beweisen, nehmen wir an"],
+	assumptionCell[ l],
+	textCell[ "und leiten einen Widerspruch her."]
+	};
+
 proofStepText[ implicitDef, lang, {}, {}, ___] := {};
 
 proofStepText[ implicitDef, lang, u_, g_, ___, "introConstFor" -> termConst_List, ___] := 
@@ -447,10 +503,19 @@ proofStepText[ notGoal|contradiction, lang, {{g_}}, {{opp_}}, ___] := {textCell[
 (* ::Subsection:: *)
 (* O *)
 
-proofStepText[ orGoal, lang, {{g_}}, {{negAssum__, newG_}}, ___] := {textCell[ "Um die Disjunktion ", formulaReference[ g], " zu beweisen, nehmen wir an"],
+proofStepText[ orGoal, lang, {{g_}}, {{negAssum__, newG_?isGoal}}, ___] := {textCell[ "Um die Disjunktion ", formulaReference[ g], " zu beweisen, nehmen wir an"],
 	assumptionListCells[ {negAssum}, ",", ""],
 	textCell[ "und zeigen schlussendlich"],
 	goalCell[ newG, "."]
+	};
+
+proofStepText[ orGoal, lang, {{g_}}, {{newG_?isGoal}}, ___] := {textCell[ "Um die Disjunktion ", formulaReference[ g], " zu beweisen, zeigen wir"],
+	goalCell[ newG, "."]
+	};
+
+proofStepText[ orGoal, lang, {{g_}}, {{negAssum__}}, ___] := {textCell[ "Um die Disjunktion ", formulaReference[ g], " zu beweisen, nehmen wir an"],
+	assumptionListCells[ {negAssum}, ",", ""],
+	textCell[ "und leiten einen Widerspruch her."]
 	};
 
 proofStepText[ orKB, lang, {{g_}}, {generated_List}, ___] := {textCell[ "Aufgrund von ", formulaReference[ g], " kann eine Fallunterscheidung gemacht werden:"]};
@@ -462,9 +527,40 @@ subProofHeader[ orKB, lang, _, {generated_List}, ___, pVal_, {p_}] := {textCell[
 (* ::Subsection:: *)
 (* P *)
 
+proofStepText[ partSolveMetaMatching, lang, {{u_, inst_}}, {{g_}}, ___] := {
+	textCell[ "Sei nun ", inlineTheoremaExpressionSeq[ Apply[ List, formula@inst], lang], ". Um ", formulaReference[ u], " zu beweisen, reicht es zu zeigen"],
+	goalCell[ g, "."]
+	};
+
+proofStepText[ partSolveMetaMatching, lang, u_List, g_List, ___] := {
+	textCell[ "Wir haben mehrere M\[ODoubleDot]glichkeiten."]
+	};
+
+subProofHeader[ partSolveMetaMatching, lang, u_List, g_List, ___, pVal_, {p_}] := {
+	textCell[ "Sei nun ", inlineTheoremaExpressionSeq[ Apply[ List, formula@u[[p,2]]], lang], ". Um ", formulaReference[ u[[p,1]]], " zu beweisen, reicht es zu zeigen"],
+	goalCell[ g[[p,1]], "."]
+	};
+
+(* The remaining functions are for old proof objects with instantiation -> ..., which are superseded by the new format above since Nov. 2019 *)
 proofStepText[ partSolveMetaMatching, lang, {{u_}}, {{g_}}, ___, "instantiation" -> inst_List, ___] := {
 	textCell[ "Sei nun ", inlineTheoremaExpressionSeq[ inst[[ 1]], lang], ". Um die Aussage ", formulaReference[ u], " zu beweisen, zeigen wir nun"],
 	goalCell[ g, "."]
+	};
+proofStepText[ partSolveMetaMultiMatching, lang, {{u_}}, {{g__}}, ___, "instantiation" -> inst_List, ___] := {
+	textCell[ "Wir haben mehrere M\[ODoubleDot]glichkeiten."]
+	};
+
+subProofHeader[ partSolveMetaMultiMatching, lang, {{u_}}, {g_List}, ___, "instantiation" -> inst_List, ___, pVal_, {p_}] := {
+	textCell[ "Sei nun ", inlineTheoremaExpressionSeq[ inst[[p]], lang], ". Um ", formulaReference[ u], " zu beweisen, reicht es zu zeigen"],
+	goalCell[ g[[p]], "."]
+	};
+proofStepText[ partSolveMetaMatching, lang, {{{_}}, {{_}}..}, {{{_}}, {{_}}..}, ___, "instantiation" -> inst_List, ___] := {
+	textCell[ "Wir haben mehrere M\[ODoubleDot]glichkeiten."]
+	};
+
+subProofHeader[ partSolveMetaMatching, lang, {{{u_}}, {{u_}}..}, g_List, ___, "instantiation" -> inst_List, ___, pVal_, {i_}] := {
+	textCell[ "Sei nun ", inlineTheoremaExpressionSeq[ inst[[i]], lang], ". Um ", formulaReference[ u], " zu beweisen, reicht es zu zeigen"],
+	goalCell[ g[[i, 1, 1]], "."]
 	};
 
 (* ::Subsection:: *)
