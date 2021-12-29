@@ -657,6 +657,7 @@ this:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> Catch[ Block[ {$rewriteRules 
 						AppendTo[ usedInCond, k[[j]]]
 					];
                     appendToKB[ newK, newForm];
+                    AppendTo[ auxKB, k[[j]]];
                     AppendTo[ genForms, {newForm}];
                     With[ {defs = Union[ usedDefs]},
                     	AppendTo[ usedForms, Prepend[ defs, k[[j]]]];
@@ -668,14 +669,14 @@ this:PRFSIT$[ g_, k_List, id_, rest___?OptionQ] :> Catch[ Block[ {$rewriteRules 
                 {j, Length[ k]}
             ];
             If[ defExpand,
-            	newGoals = {toBeProved[ goal -> newG, kb -> newK, "AuxiliaryKB" -> Join[ auxKB, Flatten[ usedForms]], rest]};
+            	newGoals = {toBeProved[ goal -> newG, kb -> newK, "AuxiliaryKB" -> auxKB, rest]};
             	If[ defCond =!= {},
             		(* conditions generated *)
             		(* To be done: When we are in a proof by contradiction we have to take care. Verifying conditions should not be done on the basis of a contradicting KB.
             		   At the moment: no contradiction proof and the only termination rule active is goalInKB, maybe this is good enough. *)
             		newForm = makeGoalFML[ formula -> makeConjunction[ defCond, And$TM]];
             		AppendTo[ newGoals, 
-            			Apply[ toBeProved[ goal -> newForm, kb -> newK, "AuxiliaryKB" -> Join[ auxKB, Flatten[ usedForms]], ##]&, 
+            			Apply[ toBeProved[ goal -> newForm, kb -> newK, "AuxiliaryKB" -> auxKB, ##]&, 
             				setRuleActivity[ {contradiction -> False, contradictionKB -> False, contradictionUniv1 -> False, contradictionUniv2 -> False, falseInKB -> False}, rest]]];
             		AppendTo[ usedForms, usedInCond];
             		AppendTo[ genForms, {newForm}];
