@@ -294,8 +294,9 @@ activitiesView[ activitiesLab:{__String}, actionLabs:{{___String}..}, views:{{__
                 Button[ Mouseover[ Style[ #1, "TabLabel1"], Style[ #1, "TabLabel1Over"]], ($tcActionView = 1; $tcActivitiesView = #2[[1]]),
                 	Background -> If[ $tcActivitiesView === #2[[1]], TMAcolor[0], TMAcolor[5]]] &,
                 activitiesLab], Center, Spacings -> {0, {0, {2 -> 1, -2 -> 5}}}],
+                (* Pane needs explicit Background, because it inherits from notebook even if the stylesheet sets a value (since v.12) *)
                 Pane[ views[[$tcActivitiesView, $tcActionView]], {400, 600}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic,
-                    ImageMargins -> 0, FrameMargins -> 10]}},
+                    ImageMargins -> 0, FrameMargins -> 10, BaseStyle -> {Background -> TMAcolor[0]}]}},
             Alignment -> {{Center, Left}, {Center, Top}}, Spacings -> {0, 0}, Background -> TMAcolor[1]]
         ]
 activitiesView[ args___] := unexpected[ activitiesView, {args}]
@@ -721,8 +722,11 @@ structView[ file_, {head:Cell[ sec_, style:"Title"|"Section"|"Subsection"|"Subsu
            		a global symbol with unique name is generated, whose value stores the state of the opener.
            		The default for Title/Section/Subsection groups is "open", deeper levels are closed by default. *)
         	structControl = "Theorema`Interface`GUI`Private`$kbStructState$" <> ToString[ Hash[ FileBaseName[ file]]] <> "$" <> ToString[ CellID /. {opts}];
-        	If[ MemberQ[ {"Title", "Section", "Subsection"}, style] && MatchQ[ ToExpression[ structControl], _Symbol],
-        		ToExpression[ structControl <> "=True"]
+        	If[ !ValueQ[ ToExpression[ structControl]],
+        		If[ MemberQ[ {"Title", "Section", "Subsection"}, style],
+        			ToExpression[ structControl <> "=True"],
+        			ToExpression[ structControl <> "=False"]
+        		]
         	];
         	{OpenerView[ {headerView[ file, head, compTags, task], Column[ views]}, 
         		ToExpression[ StringReplace[ "Dynamic[NEWSYM]", "NEWSYM" -> structControl]]], 
@@ -1173,8 +1177,8 @@ structViewRules[ {category_String, r__}, tags_, open_:False] :=
         sub = Transpose[ sub];
         compTags = Apply[ Union, sub[[2]]];
         structControl = "Theorema`Interface`GUI`Private`$ruleStructState$" <> ToString[ Hash[ category]];
-        If[ open && MatchQ[ ToExpression[ structControl], _Symbol],
-        	ToExpression[ structControl <> "=True"]
+        If[ MatchQ[ ToExpression[ structControl], _Symbol],
+        	ToExpression[ structControl <> "=" <> ToString[ open]]
         ];
         {OpenerView[ {structViewRules[ category, compTags], Column[ sub[[1]]]}, 
         	ToExpression[ StringReplace[ "Dynamic[NEWSYM]", "NEWSYM" -> structControl]]], 
