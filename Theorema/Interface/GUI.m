@@ -142,12 +142,27 @@ initGUI[] :=
         		{"Switch", RowBox[{"Switch","[","\[Ellipsis]","]"}], False, True, False}
         	}
         };
+        $tmaAllFormulae = {
+			   {"Logic", {{{"AND2", 1}, {"OR2", 1}, {"NOT", 1}, {"IMPL2", 1}},
+			   	{{"EQUIV2", 1}, {"EQ", 1}, {"EQUIVDEF", 1}, {"EQDEF", 1}},
+			   	{{"AND3", 1}, {"OR3", 1}, {"EQUIV3", 1}, {"CASEDIST", 1}},
+			   	{{"FORALL1", 1}, {"EXISTS1", 1}, {"FORALL2", 1}, {"EXISTS2", 1}},
+			   	{{"LET", 1}}}},
+			   {"Arithmetic", {}},
+			   {"Sets", {}},
+			   {"Tuples", {{{"APPEND", 1}, {"PREPEND", 1}, {"JOIN", 1}, {"ELEMTUP", 1}}}},
+			   {"Operators", {{{"SUBOP", 1}, {"SUPEROP", 1}, {"SUBSUPEROP", 1}},
+			   	{{"OVEROP", 1}, {"UNDEROVEROP", 1}, {"OVERSUBOP", 1}},
+			   	{{"SINGLEOP", 1}}}},
+			   {"Bracketted", Map[ {First[ #], 2}&, With[ {l = Length[ specialBrackets]}, Append[ Partition[ specialBrackets, 7], Take[ specialBrackets, -Mod[ l, 7]]]], {2}]}
+		};
         (* Init views in commander *)
         $tcActivitiesView = 1;
         $tcActionView = 1;
         (* Init status of opener views *)
         Scan[ ToExpression, Map[ "$builtinStructState$" <> # <> "=True"&, Map[ First, $tmaBuiltins]]];
-        (*Scan[ ToExpression, Map[ "$tcSessMathOpener$" <> # <> "=True"&, Map[ First, allFormulae]]];*)
+        (*Scan[ ToExpression, Map[ "$tcSessMathOpener$" <> # <> "=True"&, Map[ First, $tmaAllFormulae]]];*)
+        $tcLangButtonSelection = $tmaAllFormulae[[1,1]];
 		$kbStruct = {};
 		$ruleFilterKW = "";
 		$kbFilterKW = "";
@@ -722,7 +737,9 @@ structView[ file_, {head:Cell[ sec_, style:"Title"|"Section"|"Subsection"|"Subsu
            		a global symbol with unique name is generated, whose value stores the state of the opener.
            		The default for Title/Section/Subsection groups is "open", deeper levels are closed by default. *)
         	structControl = "Theorema`Interface`GUI`Private`$kbStructState$" <> ToString[ Hash[ FileBaseName[ file]]] <> "$" <> ToString[ CellID /. {opts}];
-        	If[ !ValueQ[ ToExpression[ structControl]],
+        	If[ !MatchQ[ ToExpression[structControl], True|False],
+        		(* Value will be set to True|False if it was not yet set before. Otherwise, the opener control is an unevaluated symbol
+        		   and the opener will not display *)
         		If[ MemberQ[ {"Title", "Section", "Subsection"}, style],
         			ToExpression[ structControl <> "=True"],
         			ToExpression[ structControl <> "=False"]
@@ -1170,14 +1187,14 @@ Clear[displaySelectedRules];
 structViewRules[ {category_String},___] := Sequence[];
 
 (*Responsible for group name of rules *)
-structViewRules[ {category_String, r__}, tags_, open_:False] :=
+structViewRules[ {category_String, r__}, tags_, open:(True|False):False] :=
     Module[ {sub, compTags, structControl},
 		sub = Map[ structViewRules[ #, tags] &, {r}];
 		If[ sub === {}, Return[ {{}, {}}]];
         sub = Transpose[ sub];
         compTags = Apply[ Union, sub[[2]]];
         structControl = "Theorema`Interface`GUI`Private`$ruleStructState$" <> ToString[ Hash[ category]];
-        If[ MatchQ[ ToExpression[ structControl], _Symbol],
+        If[ !MatchQ[ ToExpression[structControl], True|False],
         	ToExpression[ structControl <> "=" <> ToString[ open]]
         ];
         {OpenerView[ {structViewRules[ category, compTags], Column[ sub[[1]]]}, 
@@ -2233,7 +2250,7 @@ makeColoredStylesheet[ type_String, color_:$TheoremaColorScheme] :=
 			Visible -> False];
 		styles = NotebookGet[ tmp];
 		NotebookClose[ tmp];
-		alias = Cases[ Flatten[ Transpose[ allFormulae][[2]], 2],
+		alias = Cases[ Flatten[ Transpose[ $tmaAllFormulae][[2]], 2],
 					{n_String, i_Integer} :>
 						With[ {bd = langButtonData[ n]},
 							If[ i === 1,
@@ -2665,21 +2682,6 @@ makeLangButton[ args___] := unexpected[ makeLangButton, {args}]
 autoParenthesis[ c_String] := TagBox[ c, "AutoParentheses"]
 autoParenthesis[ args___] := unexpected[ autoParenthesis, {args}]
 
-allFormulae = {
-			   {"Logic", {{{"AND2", 1}, {"OR2", 1}, {"NOT", 1}, {"IMPL2", 1}},
-			   	{{"EQUIV2", 1}, {"EQ", 1}, {"EQUIVDEF", 1}, {"EQDEF", 1}},
-			   	{{"AND3", 1}, {"OR3", 1}, {"EQUIV3", 1}, {"CASEDIST", 1}},
-			   	{{"FORALL1", 1}, {"EXISTS1", 1}, {"FORALL2", 1}, {"EXISTS2", 1}},
-			   	{{"LET", 1}}}},
-			   {"Arithmetic", {}},
-			   {"Sets", {}},
-			   {"Tuples", {{{"APPEND", 1}, {"PREPEND", 1}, {"JOIN", 1}, {"ELEMTUP", 1}}}},
-			   {"Operators", {{{"SUBOP", 1}, {"SUPEROP", 1}, {"SUBSUPEROP", 1}},
-			   	{{"OVEROP", 1}, {"UNDEROVEROP", 1}, {"OVERSUBOP", 1}},
-			   	{{"SINGLEOP", 1}}}},
-			   {"Bracketted", Map[ {First[ #], 2}&, With[ {l = Length[ specialBrackets]}, Append[ Partition[ specialBrackets, 7], Take[ specialBrackets, -Mod[ l, 7]]]], {2}]}
-};
-
 makeButtonCategory[ {category_String, buttons_List}, cols_Integer:2] :=
 	category -> Column[ Map[ Row[ Map[ makeLangButton, #], Spacer[2]]&, buttons]
 	]
@@ -2693,12 +2695,14 @@ makeButtonCategory[ {category_String, buttons_List}, cols_Integer:2] :=
 
 makeButtonCategory[ args___] := unexpected[ makeButtonCategory, {args}]
 
+(*
 langButtons[] :=
     Pane[
-    	TabView[ Map[ makeButtonCategory, allFormulae]],
+    	TabView[ Map[ makeButtonCategory, $tmaAllFormulae]],
     	{350, 275}, ImageSizeAction -> "Scrollable", Scrollbars -> Automatic]
+*)
 langButtons[] :=
-	Module[ {display = Map[ makeButtonCategory, allFormulae]},
+	Module[ {display = Map[ makeButtonCategory, $tmaAllFormulae]},
 		Column[ {
 			Row[ Map[ Button[ Style[ #, FontColor -> If[ $tcLangButtonSelection === #, TMAcolor[4], TMAcolor[13]]], $tcLangButtonSelection = #, 
 				Background -> If[ $tcLangButtonSelection === #, TMAcolor[6], TMAcolor[0]], FrameMargins -> 2, ImageMargins -> 0]&, Map[ First, display]]],
