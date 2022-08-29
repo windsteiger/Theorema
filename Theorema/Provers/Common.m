@@ -54,7 +54,7 @@ callProver[ ruleSetup:{_Hold, _List, _List}, strategy_, goal_FML$, kb_List, sear
 		$TMAproofTree = makeInitialProofTree[ ];
 		$TMAproofObject = makeInitialProofObject[ goal, kb, ruleSetup, strategy];
 		$TMAcheckSuccess = True;
-		Clear[ $TMAproofNotebook];
+		$TMAproofNotebook = InputNotebook[];
 		initFormulaLabel[];
 		$lastChoice = {};
 		timeElapsed = proofSearch[ searchDepth, searchTime];
@@ -470,19 +470,20 @@ eliminateUnusedInit[ args___] := unexpected[ eliminateUnusedInit, {args}]
 *)
 
 Options[ makePRFSIT] = {goal :> makeFML[], kb -> {}, id :> ToString[ Unique[ "PRFSIT$"]], rules -> Hold[], ruleActivity -> {}, rulePriority -> {}, strategy -> Identity,
-	kbRules -> {}, goalRules -> {}, substRules -> {}, defRules -> {}};
+	kbRules -> {}, goalRules -> {}, substRules -> {}, defRules -> {}, implicitDefinitions -> {}};
 makePRFSIT[ data___?OptionQ] :=
-	Module[{g, k, i, r, a, p, s, kr, gr, sr, dr},
-		{g, k, i, r, a, p, s, kr, gr, sr, dr} = 
-			{goal, kb, id, rules, ruleActivity, rulePriority, strategy, kbRules, goalRules, substRules, defRules} /. {data} /. Options[ makePRFSIT];
+	Module[{g, k, i, r, a, p, s, kr, gr, sr, dr, implD},
+		{g, k, i, r, a, p, s, kr, gr, sr, dr, implD} = 
+			{goal, kb, id, rules, ruleActivity, rulePriority, strategy, kbRules, goalRules, substRules, defRules, implicitDefinitions} /. {data} /. Options[ makePRFSIT];
 		If[ TrueQ[ $autoGenerateRules],
 			(* We consider $rewriteRules only if automatic generation of rewrite rules is activated. 
 				Otherwise $rewriteRules would be {} and the Join operation below would be void, thus we save this useless computation. *)
 			Assert[ MatchQ[ $rewriteRules, _List]];
 			{kr, gr, sr, dr} = MapThread[ Join, Append[ $rewriteRules, {kr, gr, sr, dr}]]
 		];
+		Assert[ FreeQ[ {g, k}, _Theorema`Language`Such$TM|_Theorema`Language`SuchUnique$TM]];
 		PRFSIT$[ g, k, i, rules -> r, ruleActivity -> a, rulePriority -> p, strategy -> s,
-			kbRules -> kr, goalRules -> gr, substRules -> sr, defRules -> dr,
+			kbRules -> kr, goalRules -> gr, substRules -> sr, defRules -> dr, implicitDefinitions -> implD,
 			optComponents[ data]]
 	]
 makePRFSIT[ args___] := unexpected[ makePRFSIT, {args}]
@@ -523,6 +524,9 @@ substRules[ args___] := unexpected[ substRules, {args}]
 defRules[ PRFSIT$[ _, _, _, ___, (Rule|RuleDelayed)[ defRules, val_], ___]] := val
 defRules[ args___] := unexpected[ defRules, {args}]
 
+implicitDefinitions[ PRFSIT$[ _, _, _, ___, (Rule|RuleDelayed)[ implicitDefinitions, val_], ___]] := val
+implicitDefinitions[ args___] := unexpected[ implicitDefinitions, {args}]
+
 proofValue[ _PRFSIT$] := pending
 (* default rule follows below, because we have proofValue also for other datastructures *)
 
@@ -539,7 +543,6 @@ checkProofSuccess[ ps_PRFSIT$] /; $TMAcheckSuccess :=
 	]
 checkProofSuccess[ ps_PRFSIT$] := ps
 checkProofSuccess[ args___] := unexpected[ checkProofSuccess, {args}]
-
 
 
 (* ::Subsection:: *)
@@ -839,7 +842,9 @@ proofNodeIndicator[ args___] := unexpected[ proofNodeIndicator, {args}]
 (* makeInitialProofObject *)
 
 makeInitialProofObject[ g_FML$, k_List, {r_Hold, act_List, prio_List}, s_] :=
-    Module[ {dummyPO, simpG = computeInProof[ g], simpK = Map[ With[ {new = computeInProof[ #]}, If[ new === $Failed, #, new]]&, k], thinnedKB, dr, sr, gr, kr, const},
+    Module[ {dummyPO, simpG = computeInProof[ g], 
+    		simpK = Map[ With[ {new = computeInProof[ #]}, If[ new === $Failed, #, new]]&, k], 
+    		thinnedKB, dr, sr, gr, kr, implD, const},
     	If[ simpG === $Failed, simpG = g];
         dummyPO = PRFOBJ$[
             makePRFINFO[ name -> initialProofSituation, generated -> Prepend[ simpK, simpG], id -> "OriginalPS"],
@@ -852,20 +857,25 @@ makeInitialProofObject[ g_FML$, k_List, {r_Hold, act_List, prio_List}, s_] :=
         	"definitions", i.e. equalities or equivalences that normally do introduce quantifiers on the rhs,
         	"goal rewriting",
         	"kb rewriting".
-           We put the generated rules into the respective components in the proof object. We don't put the original formulae corresponding to definitions and
-           elementary substitutions into the KB then *)
+           We put the generated rules into the respective components in the proof object. We don't put the original
+           formulas corresponding to explicit definitions into the KB then.
+           Implicit definitions are removed from KB and put into an optional argument for later processing.
+           The option implicitDefinitions consists of {implDefUnique, implDef}, where 
+             implDefUnique are the unique implicit definitions and
+             implDef are the non-unique implicit definitions. *)
         (* We try to figure out all constants available in the formulas *)
         const = guessConstants[ Append[ simpK, simpG]];
         If[ const =!= {},
         	(* Mark the constants as new *)
         	const = {Map[ SIMPRNG$, Apply[ RNG$, const]]}
         ];        	
-        {thinnedKB, kr, gr, sr, dr} = trimKBforRewriting[ simpK];
+        {thinnedKB, kr, gr, sr, dr, implD} = trimKBforRewriting[ simpK];
         propagateProofValues[ 
             replaceProofSit[ dummyPO,
             	{2} -> toBeProved[ goal -> simpG, kb -> thinnedKB, id -> "InitialPS",
                 		rules -> r, ruleActivity -> act, rulePriority -> prio, strategy -> s,
-                		substRules -> sr, defRules -> dr, kbRules -> kr, goalRules -> gr, "constants" -> const]
+                		substRules -> sr, defRules -> dr, kbRules -> kr, goalRules -> gr, implicitDefinitions -> implD,
+                		"constants" -> const]
             ]
         ]
     ]
@@ -901,7 +911,7 @@ displayProof[ file_String] :=
 		$selectedProofStep = "OriginalPS";
 		With[ {nb = $TMAproofNotebook, tr = pt, obj = po},
 			SetOptions[ $TMAproofNotebook, NotebookEventActions -> {{"KeyDown", "r"} :> ($TMAproofNotebook = nb; $TMAproofObject = obj; $TMAproofTree = tr;),
-				"WindowClose" :> ($TMAproofTree = {};), PassEventsDown -> False}]
+				"WindowClose" :> ($TMAproofTree = {};), PassEventsDown -> False}, WindowToolbars -> {}]
 		];
 	]
 displayProof[ file_String, simp_List] :=
@@ -946,7 +956,7 @@ displayProof[ file_String, simp_List] :=
 		    $TMAproofNotebook = tmaNotebookPut[ Notebook[ cells], "Proof",
 		    	NotebookEventActions -> {{"KeyDown", "r"} :> ($TMAproofNotebook = SelectedNotebook[]; $TMAproofObject = obj; $TMAproofTree = tr;),
 										  PassEventsDown -> False, "WindowClose" :> ($TMAproofTree = {};)},
-				DockedCells -> newDock]
+				DockedCells -> newDock, WindowToolbars -> {}]
 		]
 	]
 displayProof[ args___] := unexpected[ displayProof, {args}]
