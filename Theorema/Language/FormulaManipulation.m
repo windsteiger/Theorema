@@ -816,7 +816,7 @@ isGround[ args___] := unexpected[ isGround, {args}]
 getDefInstances[ expr_, def_] :=
 	Module[{strip, mmaPatt, defRule, l},
 		strip = stripUniversalQuantifiers[ def];
-		{mmaPatt, defRule} = makePatternRule[ strip];
+		{mmaPatt, defRule} = processDefRule[ strip];
 		If[ mmaPatt =!= $Failed && defRule =!= $Failed,
 			l = Select[ Cases[ expr, mmaPatt, Infinity], freeVariables[#] === {}&];
 			{l, defRule},
@@ -826,28 +826,89 @@ getDefInstances[ expr_, def_] :=
 	]
 getDefInstances[ args___] := unexpected[ getDefInstances, {args}]
 
-(* makePatternRule[ ...] returns a list {l, r}, where
-	l is a Mma pattern for the Left side of the definition
-	r is a rule of the form {l, dummyTMAKB$_} :> ..., 
-	which can be applied to {instance of l, K} and returns
-	{} if the required conditions of the implicit definition are not satisfied by the instance of l or
-	{rng, body, pos} where 
-		rng is the range of the such-quantifier,
-		body is the instanciated body of the definition, and
-		pos is a list of positions, where the conditions of the implicit definition occur in K
+(* processDefRule is similar to makePatternRule below. The rule produced here generates the pieces 
+   that we need when using an implicit def in the general case.
+   processDefRule[ ...] returns a list {l, r}, where
+	l is a Mma pattern for the left side of the definition
+	r is a rule of the form {l, K} :> ... that can be applied to
+		an instance of the defined term and a knowledge base K. The rule returns
+			{} if the conditions of the impl. def are not fulfilled for the concrete instance or
+			{rng, eq, body, wit} where
+				rng is the range of the such-quantifier,
+				eq is an equality representing the substitution of the defined term
+				body is the instanciated body of the definition, and
+				wit are witnesses (from K) for the truth of the conditions.
 *)
-makePatternRule[ {Theorema`Language`EqualDef$TM[ l_, (Theorema`Language`Such$TM|Theorema`Language`SuchUnique$TM)[ rng_, cond_, body_]], c_List, var_List}] :=
-    With[ {left = execLeft[ Hold[l], var],
+processDefRule[ {Theorema`Language`EqualDef$TM[ l_, (h:Theorema`Language`Such$TM|Theorema`Language`SuchUnique$TM)[ rng_, cond_, body_]], c_List, var_List}] :=
+    With[ {left = execLeft[ Hold[l], var], v = Apply[ Theorema`Language`VAR$ , specifiedVariables[ rng]],
            newBody = simplifiedAnd[ makeConjunction[ Join[ rngToCondition[ rng], {cond, body}], Theorema`Language`And$TM]]},
+        Assert[ Length[v] == 1]; (* the such-quantifier should only bind ONE variable, otherwise it's unclear how it should be treated *)
 		If[ left =!= $Failed,
-	        {ToExpression[ left],
-	        ToExpression[
-	            "RuleDelayed[{" <> left <> ", dummyTMAKB$_}," <>
-	            "Module[ {pos}, If[ (pos=Theorema`Common`checkAllConds[" <> execRight[ Hold[ c], var] <> ", dummyTMAKB$])=!=False, {" <>
-	            ToString[ rng] <> "," <>  execRight[ Hold[ newBody], var] <> ",pos}, {}]]]"
+	        {ToExpression[ left], ToExpression[ "RuleDelayed[{" <> left <> 
+	        	", dummyKB$_}, Module[ {pos}, If[ (pos=Theorema`Common`checkAllConds[" <> execRight[ Hold[ c], var] <> 
+	        	", dummyKB$])=!=False, {" <> ToString[ rng] <> "," <> 
+	            "Theorema`Language`Equal$TM[" <> execRight[ Hold[ l], var] <> "," <> ToString[ v] <> "]," <>
+	            execRight[ Hold[ newBody], var] <> ", Extract[ dummyKB$, pos]}, {}]]]"
 	        ]},
 	    (*else*)
 	    	{$Failed, $Failed}
+		]
+    ]
+processDefRule[ args___] := unexpected[ processDefRule, {args}]
+
+implicitEqualGoal[ Theorema`Language`Equal$TM[ l_, r_], def_, K_] :=
+	Module[{strip, defRule, body, newG},
+		strip = stripUniversalQuantifiers[ def];
+		defRule = makePatternRule[ strip];
+		If[ defRule =!= $Failed,
+			body = Replace[ {l, K}, defRule];
+			If[ Length[ body] > 2,
+				(* defRule applied and returned list of length 3 *)
+				newG = substituteFree[ body[[2]], Map[ Theorema`Language`VAR$[#] -> r&, specifiedVariables[ body[[1]]]],
+					"checkTypes" -> False, "postprocessing" -> Identity],
+				(* else: defRule did not apply to l. Try r. *)
+				body = Replace[ {r, K}, defRule];
+				If[ Length[ body] > 2,
+					(* defRule applied and returned list of length 3 *)
+					newG = substituteFree[ body[[2]], Map[ Theorema`Language`VAR$[#] -> l&, specifiedVariables[ body[[1]]]],
+						"checkTypes" -> False, "postprocessing" -> Identity]
+				]
+			];
+			If[ ValueQ[ newG],
+				(* we have a new goal formula, return it together with the witnesses for conditions *)
+				{newG, body[[3]]},
+				(* else: equality does not have the right form *)
+				{$Failed, $Failed}
+			],
+		(*else*)
+			{$Failed, $Failed}
+		]
+	]
+implicitEqualGoal[ g_, def_, K_] := {$Failed, $Failed}
+implicitEqualGoal[ args___] := unexpected[ implicitEqualGoal, {args}]
+
+(* makePatternRule is similar to processDefRule above. The rule produced here generates the pieces 
+   that we need when using an implicit def for an equality in the goal.
+   makePatternRule[ ...] returns 
+   		a rule that can be applied to an instance of the defined term. 
+   		The rule applies if the conditions of the implicit definition are fulfilled and it returns
+		{rng, body, wit} where
+			rng is the range of the such-quantifier,
+			body is the instanciated body of the definition, and
+			wit are witnesses (from the knowledge base) for the truth of the conditions.
+*)
+makePatternRule[ {Theorema`Language`EqualDef$TM[ l_, (h:Theorema`Language`Such$TM|Theorema`Language`SuchUnique$TM)[ rng_, cond_, body_]], c_List, var_List}] :=
+    With[ {left = execLeft[ Hold[l], var],
+           newBody = simplifiedAnd[ makeConjunction[ Join[ rngToCondition[ rng], {cond, body}], Theorema`Language`And$TM]]},
+		If[ left =!= $Failed,
+	        ToExpression[ "RuleDelayed[" <> left <> "," <>
+	            "Module[ {chkC}, {" <>
+	            ToString[ rng] <> "," <>  
+	            execRight[ Hold[ newBody], var] <> 
+	            ", chkC[[2]]} /; (chkC=Theorema`Common`quickCheck[" <> execRight[ Hold[ c], var] <> "];chkC[[1]])]]"
+	        ],
+	    (*else*)
+	    	$Failed
 		]
     ]
 makePatternRule[ args___] := unexpected[ makePatternRule, {args}]
@@ -858,14 +919,99 @@ makePatternRule[ args___] := unexpected[ makePatternRule, {args}]
 	False if at least one of the c_i is not in K 
 	*)
 checkAllConds[ c_List, K_List] :=
-	Module[{pos},
-		pos = Map[ Position[ K, #, {1}]&, c];
+	Module[ {pos, formK = Map[ formula, K]},
+		pos = Map[ Position[ formK, #, {1}]&, c];
 		If[ MemberQ[ pos, {}],
 			False,
 			Apply[ Join, pos]
 		]
 	]
 checkAllConds[ args___] := unexpected[ checkAllConds, {args}]
+
+(* quickCheck[...] 
+   checks whether form is true w.r.t. a given knowledge base. The KB is either given explicitly or 
+   it is referred to as global $tmaQuickCheckKB.
+   If given a list, it checks whether all forms in the list are true.
+   IF the KB is not given explicitly, quickCheck should run inside a Block that sets $tmaQuickCheckKB to 
+   the appropriate knowledge base.
+   Returns a list {t, u}, where
+      t is True/False and
+      u is a list containing all witnesses from the knowledge base, from which t can be derived.
+      
+   quickCheckQ is a variant that returns only the boolean value t and communicates u via the 
+   global variable $tmaQuickCheckUsedK.
+   Hence, quickCheckQ should run inside a Block that sets $tmaQuickCheckKB to the appropriate knowledge base and 
+   localizes $tmaQuickCheckUsedK.
+	*)
+
+quickCheckQ[ args__] := 
+	Module[ {t},
+		{t, $tmaQuickCheckUsedK} = quickCheck[ args];
+		t
+	]
+	
+initQuickCheck[ KB_:{}] := Module[ {},
+
+Clear[ quickCheck, $tmaQuickCheckKB];
+
+(* The form with a list at pos 1 has 3 arguments *)
+
+quickCheck[ listForm_List, K_:$tmaQuickCheckKB] := quickCheck[ listForm, K, {}];
+
+quickCheck[ listForm_List, K_List, used_List, addForms_List] := quickCheck[ Union[ listForm, addForms], K, used];
+	
+quickCheck[ listForm_List /; Length[ freeVariables[ listForm]] == 0, K_, used_List] := 
+	Catch[
+		Block[ {allUsed = used, $tmaQuickCheckUsedK, i},
+			Do[
+				If[ TrueQ[ quickCheckQ[ listForm[[i]], K, used, {}]],
+					allUsed = Union[ allUsed, $tmaQuickCheckUsedK],
+					(* else *)
+					Throw[ {False, {}}]
+				],
+				{i, Length[ listForm]}
+			];
+			{True, allUsed}
+		]
+	];
+
+quickCheck[ listForm:{a___, f_, b___}, K_, used_List] := 
+	Module[ {fv = freeVariables[ f]},
+		{True, $tmaQuickCheckUsedK} /; Length[ fv] > 0 && fv === freeVariables[ listForm] && quickCheckQ[ f, K, used, {a, b}]
+	];
+
+quickCheck[ _List, _List, _List] := {False, {}};
+
+(* The form with a formula at pos 1 has 4 arguments. Arg 4 are additional formulas in case of variables present
+   in arg 1. These variables must be instantiated in such a way, that the additional formulas are true as well *)
+	
+quickCheck[ form_, K_:$tmaQuickCheckKB] := quickCheck[ form, K, {}, {}];
+quickCheck[ form_, K_, used_List] := quickCheck[ form, K, used, {}];
+
+quickCheck[ f_, {___, k:Theorema`Common`FML$[ _, f_, __], ___}, used_List, {}] := {True, Union[ used, {k}]};
+quickCheck[ f_, {___, k:Theorema`Common`FML$[ _, (Theorema`Language`And$TM|Theorema`Computation`Language`And$TM)[ ___, f_, ___], __], ___}, used_List, {}] := {True, Union[ used, {k}]};
+
+(* The form with non-empty addForms is only called from the list-case above, where form contains all free variables
+   occurring in addForms. Hence, inst instantiates all free variables in addForms and the recursive quichCheckQ-call 
+   should contain no free variables anymore. Could be that we miss some cases, but it would not be a simple 'quich check'
+   anymore. *)
+quickCheck[ form_, K:{___, k:Theorema`Common`FML$[ _, f_, __], ___}, used_List, addForms_List] := 
+	Module[ {inst},
+		{True, Union[ $tmaQuickCheckUsedK, {k}]} /; (inst = instantiation[ form, f]; inst =!= $Failed && quickCheckQ[ addForms /. inst, K, used, {}])  
+	];
+
+quickCheck[ form_, K:{___, k:Theorema`Common`FML$[ _, (Theorema`Language`And$TM|Theorema`Computation`Language`And$TM)[ ___, f_, ___], __], ___}, used_List, addForms_List] := 
+	Module[ {inst},
+		{True, Union[ $tmaQuickCheckUsedK, {k}]} /; (inst = instantiation[ form, f]; inst =!= $Failed && quickCheckQ[ addForms /. inst, K, used, {}])  
+	];
+
+quickCheck[ form_, _List, _List, _List] := {False, {}};
+	
+quickCheck[ args___] := unexpected[ quickCheck, {args}];
+
+$tmaQuickCheckKB = KB;
+
+] (* initQuickCheck *)
 
 (* ::Subsubsection:: *)
 (* transferToComputation *)
@@ -1672,34 +1818,39 @@ prependToKB[ kb_, fml_FML$] := (kb = prependKB[ kb, fml])
 prependToKB[ args___] := unexpected[ prependToKB, {args}]
 
 trimKBforRewriting[ k_List] :=
-	Module[{sRules = {}, dRules = {}, kbRules = {}, goalRules = {}, thinnedKB = {}},
+	Module[{sRules = {}, dRules = {}, kbRules = {}, goalRules = {}, thinnedKB = {}, implDef = {}, implDefUnique = {}},
 		Do[
-        	{thinnedKB, kbRules, goalRules, sRules, dRules} = 
-        		MapThread[ Join, {{thinnedKB, kbRules, goalRules, sRules, dRules}, trimFormulaForRewriting[ k[[i]]]}];
-        	,
+			Switch[ k[[i]],
+				(* implicit Definitions: put to separate list *)
+				FML$[ _, _?(!FreeQ[ #, Theorema`Language`EqualDef$TM[ _, _Theorema`Language`Such$TM]]&), __],
+            	AppendTo[ implDef, k[[i]]],            	
+				FML$[ _, _?(!FreeQ[ #, Theorema`Language`EqualDef$TM[ _, _Theorema`Language`SuchUnique$TM]]&), __],
+            	AppendTo[ implDefUnique, k[[i]]],            	
+            	_,
+        		{thinnedKB, kbRules, goalRules, sRules, dRules} = 
+        			MapThread[ Join, {{thinnedKB, kbRules, goalRules, sRules, dRules}, trimFormulaForRewriting[ k[[i]]]}];
+			],
         	{i, Length[k]}
         ];
-        {thinnedKB, kbRules, goalRules, sRules, dRules}
+        {thinnedKB, kbRules, goalRules, sRules, dRules, {implDefUnique, implDef}}
 	]
 trimKBforRewriting[ args___] := unexpected[ trimKBforRewriting, {args}]
 
 
 trimFormulaForRewriting[ form_FML$] :=
     Module[ {sRules = {}, dRules = {}, kbRules = {}, goalRules = {}, kbForm = {}},
+    	defQuickCheckRules[ form];
         Switch[ form,
-            FML$[ _, (Theorema`Language`EqualDef$TM|Theorema`Language`Equal$TM)[ lhs_, rhs_], __]|FML$[ _, (Theorema`Language`IffDef$TM|Theorema`Language`Iff$TM)[ lhs_?isLogQuantifierFree, rhs_?isLogQuantifierFree], __],
+            FML$[ _, _Theorema`Language`EqualDef$TM|_Theorema`Language`Equal$TM, __]|FML$[ _, (Theorema`Language`IffDef$TM|Theorema`Language`Iff$TM)[ lhs_?isLogQuantifierFree, rhs_?isLogQuantifierFree], __],
             (* these are substitutions that we want to perform immediately -> elemSubstRules 
                subst coming from equalities are in pos 3, equivalences produce identical forward and backward rules, hence we take only the forward in pos 1
                and join them *)
             sRules = Apply[ Join, Delete[ formulaToRules[ form], 2]];
             AppendTo[ kbForm, form],
             (* explicit definitions -> rewrite rules *)
-            FML$[ _, _?(!FreeQ[ #, _Theorema`Language`IffDef$TM|Theorema`Language`EqualDef$TM[ _, Except[ _Theorema`Language`Such$TM|_Theorema`Language`SuchUnique$TM]]]&), __],
+            FML$[ _, _?(!FreeQ[ #, _Theorema`Language`IffDef$TM|_Theorema`Language`EqualDef$TM]&), __],
             (* definition rules come in pos 3 *)
             dRules = formulaToRules[ form][[3]],
-            (* implicit definitions -> stay untouched *)
-            FML$[ _, _?(!FreeQ[ #, Theorema`Language`EqualDef$TM[ _, _Theorema`Language`Such$TM|_Theorema`Language`SuchUnique$TM]]&), __],
-            AppendTo[ kbForm, form],
             _,
             {kbRules, goalRules, sRules} = formulaToRules[ form];
             AppendTo[ kbForm, form]
@@ -1708,6 +1859,55 @@ trimFormulaForRewriting[ form_FML$] :=
     ]
 trimFormulaForRewriting[ args___] := unexpected[ trimFormulaForRewriting, {args}]
 
+
+defQuickCheckRules[ orig:FML$[ _, form_, __]] :=
+	Module[ {stripUniv},
+		stripUniv = stripUniversalQuantifiers[ form];
+		defQuickCheck[ stripUniv, orig]
+	]
+defQuickCheckRules[ args___] := unexpected[ makeQuickCheckRules, {args}]
+
+defQuickCheck[ {Theorema`Language`IffDef$TM[ l_, r_], c_List, var_List}, ref_] := 
+	defSingleQuickCheck[ {r, l, c, var}, ref]
+
+defQuickCheck[ {Theorema`Language`Iff$TM[ l_?isAtomicExpression, r_Theorema`Language`And$TM], c_List, var_List}, ref_] := 
+	defSingleQuickCheck[ {r, l, c, var}, ref]
+
+defQuickCheck[ {Theorema`Language`Iff$TM[ l_Theorema`Language`And$TM, r_?isAtomicExpression], c_List, var_List}, ref_] := 
+	defSingleQuickCheck[ {l, r, c, var}, ref]
+
+(*
+   stripUniversalQuantifiers decomposes implications l=>r and puts l into the conditions c, i.e., an implication
+   leads to r with non-empty c.
+*)
+defQuickCheck[ {r_Theorema`Language`And$TM | r_?isAtomicExpression, c_List /; Length[c] > 0, var_List}, ref_] :=
+	defSingleQuickCheck[ {r, c, {}, var}, ref]
+
+defSingleQuickCheck[ {l_?isAtomicExpression, r_, c_List, var_List}, ref_] :=
+    With[ {left = execLeft[ Hold[l], var], right = execRight[ Hold[ r], freeVariables[ l]], 
+    	   cond = execRight[ Hold[ c], freeVariables[ l]]},
+            If[ left =!= $Failed && right =!= $Failed && cond =!= $Failed,
+	            ToExpression[
+	            	"SetDelayed[ Theorema`Common`quickCheck[" <> left <> ", K_List, used_List, addForms_List]," <>
+	            	   "{True, Theorema`Common`$tmaQuickCheckUsedK} /; Theorema`Common`quickCheckQ[ " <>
+	            	   right <> ", K, Union[ {" <> ToString[ ref, InputForm] <> "}, used], Union[ addForms, " <> cond <> "]]]"
+	            ] (* ToExpression *),
+	        (*else*)
+	        	$Failed
+            ]
+        ]
+
+defSingleQuickCheck[ {l_Theorema`Language`And$TM, r_, c_List, var_List}, ref_] :=
+	Scan[ defSingleQuickCheck[ {#, r, c, var}, ref]&, l]
+
+(*
+quickCheck[ isMon[ A_, plus_, n_], K_List, used_List] := Module[ {chk},
+	{True, Union[ used, chk[[2]]]} /; (chk = quickCheck[ isGrp[ A, plus, n, _], K]; chk[[1]])
+]	
+quickCheck[ isAlg[ A_, plus_], K_List, used_List] := Module[ {chk},
+	{True, Union[ used, chk[[2]]]} /; (chk = quickCheck[ {isCl[ A, plus], isAssoc[ A, plus]}, K]; chk[[1]])
+]	
+*)    
 
 End[]
 

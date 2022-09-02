@@ -43,6 +43,7 @@ initProver[] :=
 		$rewriteRules = {};
 		$generated = {};
 		$autoGenerateRules = True;
+		initQuickCheck[];
 	]
 
 callProver[ ruleSetup:{_Hold, _List, _List}, strategy_, goal_FML$, kb_List, searchDepth_Integer, searchTime:(_Integer|Infinity)] :=
@@ -51,10 +52,11 @@ callProver[ ruleSetup:{_Hold, _List, _List}, strategy_, goal_FML$, kb_List, sear
 		$generated = {};
 		$TMAproofSearchRunning = True;
 		$TMAcurrentDepth = 2;
+		$TMAproofNotebook = InputNotebook[];
+		initQuickCheck[ kb];
 		$TMAproofTree = makeInitialProofTree[ ];
 		$TMAproofObject = makeInitialProofObject[ goal, kb, ruleSetup, strategy];
 		$TMAcheckSuccess = True;
-		$TMAproofNotebook = InputNotebook[];
 		initFormulaLabel[];
 		$lastChoice = {};
 		timeElapsed = proofSearch[ searchDepth, searchTime];

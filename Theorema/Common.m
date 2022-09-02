@@ -101,11 +101,14 @@ With[ {lang = "English"},
 	MessageName[ goal, "usage", lang] = "goal is an option for the constructors makeFML/makePRFSIT/toBeProved and a selector for the PRFSIT$ datastructure.";
 
 	MessageName[ id, "usage", lang] = "id is an option for the constructors makePRFINFO/makePRFSIT/toBeProved and a selector for the FML$/PRFINFO$/PRFSIT$ datastructures.";
+	MessageName[ implicitDefinitions, "usage", lang] = "implicitDefinitions is an option for the constructor makePRFSIT/toBeProved and a selector for the PRFSIT$ datastructure.";
+	MessageName[ implicitEqualGoal, "usage", lang] = "";
 	MessageName[ inArchive,"usage",lang] = "inArchive[] returns True when we are currently processing an archive.";
 	MessageName[ inEnvironment,"usage",lang] = "inEnvironment[] returns True when we are currently processing an environment.";
 	MessageName[ inferenceRule, "usage", lang] = "inferenceRule[ name] stores the inference rule named name.";
 	MessageName[ initFormulaLabel, "usage", lang] = "initFormulaLabel[ ] initializes the formula labels used in a proof.";
 	MessageName[ $initLabel, "usage", lang] = "Initial label of each formula. Serves as a hint for user to provide system with her own label.";
+	MessageName[ initQuickCheck, "usage", lang] = "Initializes environment for quichCkeck utility.";
 	MessageName[ $inputEpilog, "usage", lang] = "$inputEpilog is evaluated after evaluating Theorema input cells.";
 	MessageName[ $inputEvaluationFunction, "usage", lang] = "$inputEvaluationFunction is the 'CellEvaluationFunction' of Theorema input cells.";
 	MessageName[ $inputProlog, "usage", lang] = "$inputProlog is evaluated before evaluating Theorema input cells.";
@@ -207,6 +210,9 @@ With[ {lang = "English"},
 	MessageName[ proved, "usage", lang] = "proved is a possible proof value.";
 	MessageName[ pSitCells, "usage", lang] = "pSitCells[ ps] generates a cell representation of the proof situation ps to be rendered in a notebook.";
 
+	MessageName[ quickCheck, "usage", lang] = "quickCheck[ form] checks whether form is true w.r.t. a global knowledge base in the background";
+	MessageName[ quickCheckQ, "usage", lang] = "quickCheckQ[ form] checks whether form is true w.r.t. a global knowledge base in the background";
+
 	MessageName[ $registeredRuleSets, "usage", lang] = "$registeredRuleSets is a list of available provers in the Theorema system.";
 	MessageName[ $registeredStrategies, "usage", lang] = "$registeredStrategies is a list of available strategies in the Theorema system.";
 	MessageName[ registerQuantifier, "usage", lang] = "registerQuantifier is a function used to register a new quantifier for parsing and pretty-printing.";
@@ -291,6 +297,8 @@ With[ {lang = "English"},
 	MessageName[ $TMAproofObject, "usage", lang] = "$TMAproofObject is the global proof object.";
 	MessageName[ $TMAproofSearchRunning, "usage", lang] = "$TMAproofSearchRunning indicates (by True/False) whether a proof search is currently running.";
 	MessageName[ $TMAproofTree, "usage", lang] = "$TMAproofTree is the global proof tree for visualization.";
+	MessageName[ $tmaQuickCheckKB, "usage", lang] = "$tmaQuickCheckKB is the global  knowledge base used in the quickCheck utility.";
+	MessageName[ $tmaQuickCheckUsedK, "usage", lang] = "$tmaQuickCheckUsedK contains the used knowledge from the last quickCheck-call.";
 	MessageName[ $tmaUserRangeToCondition, "usage", lang] = "$tmaUserRangeToCondition is a list of rules that transform user-defined ranges into lists of conditions.";
 	MessageName[ toBeProved, "usage", lang] = "toBeProved[ ...] constructs a new proof situation and checks for proof success immediately.";
 	MessageName[ $traceUserDef, "usage", lang] = "Global variable. If True, then user definitions are traced and appear in the computation object.";
