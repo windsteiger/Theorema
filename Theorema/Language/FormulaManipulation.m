@@ -861,16 +861,20 @@ implicitEqualGoal[ Theorema`Language`Equal$TM[ l_, r_], def_, K_] :=
 		strip = stripUniversalQuantifiers[ def];
 		defRule = makePatternRule[ strip];
 		If[ defRule =!= $Failed,
-			body = Replace[ {l, K}, defRule];
-			If[ Length[ body] > 2,
+			Block[ {$tmaQuickCheckKB = K, $tmaQuickCheckUsedK},
+				body = Replace[ l, defRule]
+			];
+			If[ body =!= l,
 				(* defRule applied and returned list of length 3 *)
-				newG = substituteFree[ body[[2]], Map[ Theorema`Language`VAR$[#] -> r&, specifiedVariables[ body[[1]]]],
+				newG = substituteFree[ body[[2]], Map[ # -> r&, rngVariables[ body[[1]]]],
 					"checkTypes" -> False, "postprocessing" -> Identity],
 				(* else: defRule did not apply to l. Try r. *)
-				body = Replace[ {r, K}, defRule];
-				If[ Length[ body] > 2,
+				Block[ {$tmaQuickCheckKB = K, $tmaQuickCheckUsedK},
+					body = Replace[ r, defRule]
+				];
+				If[ body =!= r,
 					(* defRule applied and returned list of length 3 *)
-					newG = substituteFree[ body[[2]], Map[ Theorema`Language`VAR$[#] -> l&, specifiedVariables[ body[[1]]]],
+					newG = substituteFree[ body[[2]], Map[ # -> l&, rngVariables[ body[[1]]]],
 						"checkTypes" -> False, "postprocessing" -> Identity]
 				]
 			];
@@ -898,18 +902,20 @@ implicitEqualGoal[ args___] := unexpected[ implicitEqualGoal, {args}]
 			wit are witnesses (from the knowledge base) for the truth of the conditions.
 *)
 makePatternRule[ {Theorema`Language`EqualDef$TM[ l_, (h:Theorema`Language`Such$TM|Theorema`Language`SuchUnique$TM)[ rng_, cond_, body_]], c_List, var_List}] :=
-    With[ {left = execLeft[ Hold[l], var],
-           newBody = simplifiedAnd[ makeConjunction[ Join[ rngToCondition[ rng], {cond, body}], Theorema`Language`And$TM]]},
-		If[ left =!= $Failed,
-	        ToExpression[ "RuleDelayed[" <> left <> "," <>
-	            "Module[ {chkC}, {" <>
-	            ToString[ rng] <> "," <>  
-	            execRight[ Hold[ newBody], var] <> 
-	            ", chkC[[2]]} /; (chkC=Theorema`Common`quickCheck[" <> execRight[ Hold[ c], var] <> "];chkC[[1]])]]"
-	        ],
-	    (*else*)
-	    	$Failed
-		]
+    Module[ {v = freeVariables[ l]},
+    	With[ {left = execLeft[ Hold[l], v],
+           	newBody = simplifiedAnd[ makeConjunction[ Join[ rngToCondition[ rng], {cond, body}], Theorema`Language`And$TM]]},
+			If[ left =!= $Failed,
+	        	ToExpression[ "RuleDelayed[" <> left <> ", {" <>
+	            	ToString[ rng] <> "," <>  
+	            	execRight[ Hold[ newBody], v] <> 
+	            	", Theorema`Common`$tmaQuickCheckUsedK} /; Theorema`Common`quickCheckQ[" <> 
+	            	execRight[ Hold[ c], v] <> "]]"
+	        	],
+	    	(*else*)
+	    		$Failed
+			]
+    	]
     ]
 makePatternRule[ args___] := unexpected[ makePatternRule, {args}]
 
@@ -959,6 +965,11 @@ Clear[ quickCheck, $tmaQuickCheckKB];
 quickCheck[ listForm_List, K_:$tmaQuickCheckKB] := quickCheck[ listForm, K, {}];
 
 quickCheck[ listForm_List, K_List, used_List, addForms_List] := quickCheck[ Union[ listForm, addForms], K, used];
+
+(*
+quickCheck[ listForm_List, K:{___Theorema`Common`FML$}, used_List] := 
+	quickCheck[ listForm, makeQuickCheckTable[ K], used];
+*)
 	
 quickCheck[ listForm_List /; Length[ freeVariables[ listForm]] == 0, K_, used_List] := 
 	Catch[

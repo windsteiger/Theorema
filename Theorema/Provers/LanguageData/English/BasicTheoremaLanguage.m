@@ -73,6 +73,7 @@ With[ {lang = "English"},
 	MessageName[ implGoalCP, "usage", lang] = "Prove implication using contraposition";
 	MessageName[ implGoalDirect, "usage", lang] = "Prove implication directly";
 	MessageName[ implicitDef, "usage", lang] = "Handle implicit function definitions";
+	MessageName[ implicitDefEqGoal, "usage", lang] = "Handle implicit function definitions in an equality in the goal";
 	MessageName[ implKBCases, "usage", lang] = "Case distinction based on an implication in the knowledge base";
 	MessageName[ inequality1, "usage", lang] = "Inequality rules";
 	MessageName[ instantiate, "usage", lang] = "Instantiate universally quantified knowledge with new constants";
@@ -396,27 +397,21 @@ proofStepText[ implGoalDirect, lang, {{g_}}, {{l_}}, ___] := {textCell[ "In orde
 
 proofStepText[ implicitDef, lang, {}, {}, ___] := {};
 
-proofStepText[ implicitDef, lang, u_, g_, ___, "introConstFor" -> termConst_List, ___] := 
+proofStepText[ implicitDef, lang, u_, g_, ___] /; Length[u] == Length[g]:= 
 	Module[ {stepText, j},
-		stepText = {textCell[ "For the implicitly defined function ", formulaReference[ u[[1, 1]]], " we introduce new constants ", 
-			inlineTheoremaExpressionSeq[ Apply[ EqualDef$TM, termConst, {1}], lang], " such that"],
-			assumptionListCells[ g[[1]], ",", "."]};
-		(* g[[2]] is the new goal. {} if no rewrite happened in the goal *)
-		If[ g[[2]] =!= {},
-			stepText = Join[ stepText,
-				{textCell[ "For proving ", formulaReference[ u[[2, 1]]], ", due to ", formulaReferenceSequence[ Rest[ u[[2]]], lang], ", it suffices now to prove"],
-				goalCell[ g[[2, 1]], "."]}
-			]
-		];
-		(* Each of the remaining is an expansion in the KB. Produce a line of text for each of them *)
+		stepText = {textCell[ "Based on the definition ", formulaReference[ u[[1, 1]]], " we introduce new constants."]};
 		Do[
 			stepText = Join[ stepText, 
-				{textCell[ "The assumption ", formulaReference[ u[[j, 1]]], " becomes (due to ", formulaReferenceSequence[ Rest[ u[[j]]], lang], ")"], 
-				assumptionCell[ g[[j, 1]]]}],
-			{j, 3, Length[g]}
+				{textCell[ "Due to ", formulaReferenceSequence[ Rest[ u[[j]]], lang], " we may assume"], 
+				assumptionListCells[ g[[j]], ",", "."]}],
+			{j, Length[g]}
 		];
 		stepText
 	];
+
+proofStepText[ implicitDefEqGoal, lang, u_, {{g_?isGoal}}, ___] := 
+	{textCell[ "For proving ", formulaReference[ u[[1, 1]]], ", due to ", 
+		formulaReferenceSequence[ Rest[ u[[1]]], lang], ", it suffices to prove"], goalCell[ g, "."]};
 
 proofStepText[ implKBCases, lang, {{g_}}, {{_, _}}, ___] := {textCell[ "Based on the assumption ", formulaReference[ g], " we distinguish several cases:"]};
 

@@ -73,6 +73,7 @@ With[ {lang = "German"},
 	MessageName[ implGoalCP, "usage", lang] = "Beweise Implikation mittels Kontraposition";
 	MessageName[ implGoalDirect, "usage", lang] = "Beweise Implikation direkt";
 	MessageName[ implicitDef, "usage", lang] = "Behandle implizite Funktionsdefinitionen";
+	MessageName[ implicitDefEqGoal, "usage", lang] = "Behandle implizite Funktionsdefinitionen in einer Gleichheit im Beweisziel";
 	MessageName[ implKBCases, "usage", lang] = "Fallunterscheidung basierend auf Implikation in der Wissensbasis";
 	MessageName[ inequality1, "usage", lang] = "Ungleichungsregeln";
 	MessageName[ instantiate, "usage", lang] = "Instanzieren Allaussagen in der Wissensbasis mit neuen Konstanten";
@@ -424,6 +425,10 @@ proofStepText[ implicitDef, lang, u_, g_, ___, "introConstFor" -> termConst_List
 		];
 		stepText
 	];
+
+proofStepText[ implicitDefEqGoal, lang, u_, {{g_?isGoal}}, ___] := 
+	{textCell[ "Um ", formulaReference[ u[[1, 1]]], " zu zeigen, müssen wir aufgrund von ", 
+		formulaReferenceSequence[ Rest[ u[[1]]], lang], " beweisen, dass"], goalCell[ g, "."]};
 
 proofStepText[ implKBCases, lang, {{g_}}, {{_, _}}, ___] := {textCell[ "Basierend auf der Annahme ", formulaReference[ g], " unterscheiden wir zwei F\[ADoubleDot]lle:"]};
 

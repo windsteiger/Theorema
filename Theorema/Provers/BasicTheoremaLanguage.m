@@ -707,98 +707,178 @@ setRuleActivity[ args___] := unexpected[ setRuleActivity, {args}]
 (* ::Section:: *)
 (* Implicit Definitions *)
 
+inferenceRule[ implicitDefEqGoal] = 
+this:PRFSIT$[ g:FML$[ _, _Equal$TM, __], K_List, id_, rest___?OptionQ] :> Catch[ Block[ {$rewriteRules = {}, $generated = {}}, 
+	Module[ {implDu, implD, k, newG, usedCond, allUsed, allGenerated, auxKB},
+		(* implicitDefinitions is {d,s}, where d is a list of definitions and s is a list of substitutions
+		   that have already been
+		   applied in earlier applications of this rule. These are special in the sense that they can
+		   still be applied, but they don't introduce a new abf constant and, hence, no new knowledge about
+		   the new constant. See at the end, we join the applicable subst to the implicitDefinitions-value
+		   in the resulting proof situation. *)
+		{implDu, implD} = implicitDefinitions@this;
+		auxKB = getOptionalComponent[ this, "AuxiliaryKB"];
+		(* First try whether the goal to prove is f[x]=..., where f is defined by a unique implicit definition *)
+		Do[	
+			{newG, usedCond} = implicitEqualGoal[ formula@g, formula@implDu[[k]], Join[ K, auxKB]];
+			If[ newG === $Failed,
+				Continue[],
+				allUsed = {Join[ {g, implDu[[ k]]}, usedCond]};
+				newG = makeGoalFML[ formula -> newG];
+				allGenerated = {{newG}};
+				Throw[ makeANDNODE[ 
+        			makePRFINFO[ name -> implicitDefEqGoal, used -> allUsed, generated -> allGenerated], 
+            		toBeProved[ goal -> newG, kb -> K, rest]
+        			]
+        		]
+			],
+			{k, Length[ implDu]}
+		];
+		$Failed
+	]
+]]
+
 inferenceRule[ implicitDef] = 
-ps:PRFSIT$[ g_, K_List, id_, rest___?OptionQ] :> performProofStep[
-	Module[ {implDefPos, implDefTerms, k, checkRule, delPos = {}, subst = {}, newK, usedPos, newG, usedCond, allUsed, allGenerated, substKB = K, newForm}, 
-		implDefPos = Position[ K, _?(!FreeQ[ #, EqualDef$TM[ _, (_Such$TM|_SuchUnique$TM)]]&), {1}];
+this:PRFSIT$[ g_, K_List, id_, rest___?OptionQ] :> Catch[ Block[ {$rewriteRules = {}, $generated = {}}, 
+	Module[ {implDu, implD, allImplDefs, implDefTerms, k, defRule, newK, usedPos, usedCond, 
+		allUsed, allGenerated, auxKB, newConst},
+		(* implicitDefinitions is {d,s}, where d is a list of definitions and s is a list of substitutions
+		   that have already been
+		   applied in earlier applications of this rule. These are special in the sense that they can
+		   still be applied, but they don't introduce a new abf constant and, hence, no new knowledge about
+		   the new constant. See at the end, we join the applicable subst to the implicitDefinitions-value
+		   in the resulting proof situation. *)
+		{implDu, implD} = implicitDefinitions@this;
+		auxKB = getOptionalComponent[ this, "AuxiliaryKB"];
+		allImplDefs = Join[ implDu, implD];
 		Do[
-			{implDefTerms, checkRule} = getDefInstances[ {g, K}, formula@Extract[ K, implDefPos[[k]]]];
+			{implDefTerms, defRule} = getDefInstances[ {g, K}, formula@allImplDefs[[k]]];
+			If[ implDefTerms === $Failed || implDefTerms === {},
+				(* there are no terms to which this definition could apply, proceed to next def *)
+				Continue[],
+				(* else *)
+				{newK, usedCond, newConst} = makeImplDefSubst[ implDefTerms, defRule, Join[ K, auxKB], formula@g];
+				(* subst are those that apply and whose conditions are satisfied *)
+				If[ Length[ newK] > 0,
+					(* some subst possible *)
+					usedPos = k;
+					Break[]
+				];
+			],
+			{k, Length[ allImplDefs]}
+		];
+		If[ Length[ newK] === 0,
+			(* no def applicable *)
+			$Failed,
+			(* add the characteristic properties to the KB and register them as newly generated *)
+			allUsed = Map[ Prepend[ #, allImplDefs[[ usedPos]]]&, usedCond];
+			allGenerated = Map[ makeAssumptionFML[ formula -> #]&, newK, {2}];
+			Block[ {$autoGenerateRules = False}, newK = joinKB[ K, Flatten[ allGenerated]]];
+        	makeANDNODE[ 
+        		makePRFINFO[ name -> implicitDef, used -> allUsed, generated -> allGenerated], 
+            	toBeProved[ goal -> g, kb -> newK, 
+            		"constants" -> Join[ getOptionalComponent[ this, "constants"], newConst], rest]
+        	]
+		]
+	]
+]]
+
+(* old version 4.1.2022
+
+inferenceRule[ implicitDef] = 
+this:PRFSIT$[ g_, K_List, id_, rest___?OptionQ] :> Catch[ Block[ {$rewriteRules = {}, $generated = {}}, 
+	Module[ {implD, prevSubst, implDefTerms, k, checkRule, subst = {}, newK, usedPos, newG, usedCond, 
+		unique, allUsed, allGenerated, substKB = K, newForm, auxKB, auxInfo},
+		(* implicitDefinitions is {d,s}, where d is a list of definitions and s is a list of substitutions
+		   that have already been
+		   applied in earlier applications of this rule. These are special in the sense that they can
+		   still be applied, but they don't introduce a new abf constant and, hence, no new knowledge about
+		   the new constant. See at the end, we join the applicable subst to the implicitDefinitions-value
+		   in the resulting proof situation. *)
+		{implD, prevSubst} = implicitDefinitions@this;
+		auxKB = getOptionalComponent[ this, "AuxiliaryKB"];
+		Do[
+			{implDefTerms, checkRule} = getDefInstances[ {g, K}, formula@implD[[k]]];
 			If[ implDefTerms =!= $Failed,
 				If[ implDefTerms === {},
-					(* there are no terms to which this definition could apply, we mark the defintion to be removed from the KB *)
-					AppendTo[ delPos, implDefPos[[k]]],
+					(* there are no terms to which this definition could apply, proceed to next def *)
+					Continue[],
 					(* else *)
-					{subst, newK} = makeImplDefSubst[ implDefTerms, checkRule, Map[ formula, K]];
-					Which[
-						Length[ subst] === 0,
-						(* no subst possible, try next def *)
-						Continue[],
-						Length[ subst] === Length[ implDefTerms],
-						(* all possible terms will be substituted, we can remove the definition.*)
-						AppendTo[ delPos, implDefPos[[k]]]
-						(* otherwise nothing needs to be done, we exit the loop with the Break, but we keep the defintion for possible later substitution *)
+					{subst, newK} = makeImplDefSubst[ implDefTerms, checkRule, Join[ K, auxKB], formula@g];
+					(* subst are those that apply and whose conditions are satisfied *)
+					If[ Length[ subst] > 0,
+						(* some subst possible *)
+						usedPos = k;
+						Break[]
 					];
-					usedPos = implDefPos[[k]];
-					Break[]
 				]
 			],
-			{k, Length[ implDefPos]}
+			{k, Length[ implD]}
 		];
 		If[ Length[ subst] === 0,
-			If[ delPos === {},
-				(* new def applicable, no def removable *)
-				$Failed,
-				(* some defs can be removed from the KB *)
-				makeANDNODE[ makePRFINFO[ name -> implicitDef, used -> {}], 
-            		toBeProved[ goal -> g, kb -> Delete[ K, delPos], rest]
-				]
-			],
+			(* no def applicable *)
+			$Failed,
 			(* else: do the substitutions *)
-			{newG, usedCond} = Reap[ formula@g /. subst];
+			{newG, {usedCond, unique}} = Reap[ formula@g /. subst];
 			If[ usedCond === {},
 				(* no subst in goal *)
 				newG = g;
 				allUsed = {{}};
 				allGenerated = {{}},
 				(* new goal by substitution *)
-				(* Reap gives a list with only one list (all Sows without tag) of positions. We take this one list and form the union of positions *)
-				allUsed = {Join[ {g, Extract[ K, usedPos]}, Extract[ K, Apply[ Union, usedCond[[1]]]]]};
+				(* Reap gives a list with only one list (all Sows without tag) of witnesses. 
+				   We take this one list and form the union of positions *)
+				allUsed = {Join[ {g, implD[[ usedPos]]}, Apply[ Union, usedCond]]};
 				newG = makeGoalFML[ formula -> newG];
 				allGenerated = {{newG}}
 			];
 			(* Do the same like for goal for all in KB *)
 			Do[
-				If[ {k} === usedPos, Continue[]]; (* don't rewrite the def itself *)
-				{newForm, usedCond} = Reap[ formula@K[[k]] /. subst];
+				{newForm, {usedCond, unique}} = Reap[ formula@K[[k]] /. subst];
 				If[ usedCond === {},
 					Continue[],
-					AppendTo[ allUsed, Join[ {K[[k]], Extract[ K, usedPos]}, Extract[ K, Apply[ Union, usedCond[[1]]]]]];
+					AppendTo[ allUsed, Join[ {K[[k]], implD[[ usedPos]]}, Apply[ Union, usedCond]]];
 					newForm = makeAssumptionFML[ formula -> newForm];
 					AppendTo[ allGenerated, {newForm}];
-					(* we don't generate rewrite rules for the subst form, because it will not become a rewrite formula if it wasn't one before *)
+					(* we don't generate rewrite rules for the subst form, because it will not become a rewrite formula
+					   if it wasn't one before.
+					   Should the orig formula be kept in AuxiliaryKB? No! The substitution takes place everywhere,
+					   so the orig formula cannot be of any use anymore. *)
 					substKB = ReplacePart[ substKB, k -> newForm];
 				],
 				{k, Length[ K]}
 			];
-			(* Eventually delete superfluous defs. Don't do this earlier, because otherwise positions of used assumptions might get mixed up *)
-			substKB = Delete[ substKB, delPos];
 			(* add the characteristic properties to the KB and register them as newly generated *)
-			PrependTo[ allUsed, {Extract[ K, usedPos]}];
+			PrependTo[ allUsed, {implD[[ usedPos]]}];
 			PrependTo[ allGenerated, Map[ makeAssumptionFML[ formula -> #]&, newK]];
-        	makeANDNODE[ makePRFINFO[ name -> implicitDef, used -> allUsed, generated -> allGenerated,
-        								"introConstFor" -> Map[ Extract[ #, {{2, 2}, {1}}]&, subst]], 
-            	toBeProved[ goal -> newG, kb -> joinKB[ allGenerated[[1]], substKB], rest]
+        	makeANDNODE[ 
+        		makePRFINFO[ name -> implicitDef, used -> allUsed, generated -> allGenerated,
+        			"introConstFor" -> Map[ Extract[ #, {{2, 2}, {1}}]&, subst]], 
+            	toBeProved[ goal -> newG, kb -> joinKB[ allGenerated[[1]], substKB], 
+            		implicitDefinitions -> {implD, Join[ prevSubst, subst]}, rest]
         	]
 		]
 	]
-]
+]]
+*)
 
-makeImplDefSubst[ terms_List, def_RuleDelayed, K_List] :=
-	Module[ {k, newBody, abf, fix, allSubst = {}, newK = {}},
+makeImplDefSubst[ terms_List, def_RuleDelayed, K_List, g_] :=
+	Module[ {k, kForms = Map[ formula, K], newBody, abf, fix, used = {}, newK = {}, const = {}},
 		Do[
 			newBody = Replace[ {terms[[k]], K}, def];
 			If[ newBody === {},
 				(* condition of the implicit definition is not fulfilled for this term *)
 				Continue[],
 				(* else *)
-				{abf, fix} = arbitraryButFixed[ newBody[[2]], newBody[[1]], {K, newK}];
+				{abf, fix} = arbitraryButFixed[ newBody[[2;;3]], newBody[[1]], {kForms, newK, g}];
 				(* newBody can only have the ONE variable from the such-quantifier as free variable, hence there is only ONE constant in fix *)
-				AppendTo[ allSubst, With[ {pos = newBody[[3]], const = rngConstants[ fix][[1]]}, terms[[k]] :> (Sow[ pos]; const)]];
 				AppendTo[ newK, abf];
+				AppendTo[ used, newBody[[4]]];
+				AppendTo[ const, fix[[1]]]
 			],
 			{k, Length[ terms]}
 		];
-		{allSubst, newK}
+		{newK, used, const}
 	]
 makeImplDefSubst[ args___] := unexpected[ makeImplDefSubst, {args}]
 
@@ -1050,7 +1130,7 @@ rewritingRules = {"Rewriting Rules",
 	{knowledgeRewriting, True, True, 25},
 	{elementarySubstitution, True, True, 8},
 	{expandDef, True, True, 80},
-	{implicitDef, True, True, 80}
+	{implicitDefEqGoal, True, True, 10}
 };
 
 registerRuleSet[ "Quantifier Rules", quantifierRules, {
