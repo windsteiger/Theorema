@@ -94,7 +94,10 @@ With[ {lang = "English"},
 
 	MessageName[ quantifierRules, "usage", lang] = "Rules for quantifiers";
 
+	MessageName[ reduceMetaUnification, "usage", lang] = "Reduce a proof goal containing meta variables by unification using implications in the knowledge base";
+
 	MessageName[ solveMetaUnification, "usage", lang] = "Instantiate meta-variables by unification";
+	MessageName[ solvingRules, "usage", lang] = "Rules for solving";
 	MessageName[ specialArithmeticRules, "usage", lang] = "Rules for special arithmetic constructs";
 
 	MessageName[ trueGoal, "usage", lang] = "The proof goal is True";
@@ -115,6 +118,7 @@ With[ {lang = "English"},
 	translate[ "Equality Rules", lang] = "Rules for Equality";
 	translate[ "Quantifier Rules", lang] = "Quantifier Rules";
 	translate[ "Rewriting Rules", lang] = "Rules based on Rewriting";
+	translate[ "Solving Rules", lang] = "Rules for Finding Terms";
 	translate[ "Special Arithmetic", lang] = "Special Arithmetic";
 	translate[ "Termination Rules", lang] = "Rules for Proof Termination";
 
@@ -552,6 +556,25 @@ subProofHeader[ partSolveMetaMatching, lang, {{{u_}}, {{u_}}..}, g_List, ___, "i
 	goalCell[ g[[i, 1, 1]], "."]
 	};
 
+(* ::Subsection:: *)
+(* R *)
+
+proofStepText[ reduceMetaUnification, lang, {{g_, u_}}, {{newG_}}, ___, "instantiation" -> inst_List, "subgoal" -> s_, "impliedBy" -> f_, ___] := 
+	Module[{metaSol = Union[ Cases[ Map[ #[[2]]&, inst], _META$, Infinity]], intro},
+		Which[
+			metaSol === {},
+			intro = textCell[ "Inspired by ", formulaReference[ u], " we now choose ", inlineTheoremaExpressionSeq[ inst, lang], ". With this choice the subgoal ", 
+				inlineTheoremaExpression[ s], " of ", formulaReference[ g], " reduces to ", inlineTheoremaExpression[ f], ". Hence, in order to prove ",
+				formulaReference[ g], " we still have to show"],
+				
+			True,
+			intro = textCell[ "Inspired by ", formulaReference[ u], " we now take ", inlineTheoremaExpressionSeq[ inst, lang], " for some yet to be determined ",
+				inlineTheoremaExpressionSeq[ metaSol, lang], ". Then, the subgoal ", 
+				inlineTheoremaExpression[ s], " of ", formulaReference[ g], " reduces to ", inlineTheoremaExpression[ f], ". Hence, in order to prove ",
+				formulaReference[ g], " we have to find ", inlineTheoremaExpressionSeq[ metaSol, lang], ", such that we can prove"]
+		];
+		{intro, goalCell[ newG, "."]}
+	];
 
 (* ::Subsection:: *)
 (* S *)

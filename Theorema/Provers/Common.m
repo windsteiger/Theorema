@@ -746,10 +746,10 @@ showProofNavigation[ p:{__Rule}, scale_, maxDepth_, mode_] :=
     		(* else *)
     		geometry = {Max[ Count[ p, _ -> {__, TERMINALNODE$|PRFSIT$, _}]*20, 350], Max[ $TMAcurrentDepth*15, 500]}*scale
     	];
-    	font = 18-Ceiling[ Apply[ Times, geometry]/(350*500)];
+    	font = 12-Ceiling[ Apply[ Times, geometry]/(350*500)];
         If[ root === {},
             translate[ "noRoot"],
-            TreePlot[ edges, Automatic, First[ root], VertexRenderingFunction -> (proofStepNode[ #1, #2, font]&),
+            TreePlot[ edges, Automatic, First[ root], VertexShapeFunction -> (proofStepNode[ #1, #2, #3, font]&),
             EdgeRenderingFunction -> ({Dashed, GrayLevel[0.5], Line[#1]}&), ImageSize -> geometry, 
             AspectRatio -> If[ MatchQ[ edges, {___, a_ -> _, a_ -> _, ___}], (* branching tree *) 1/Apply[ Divide, geometry], (* non-branching chain *) Automatic],
             Frame -> framed, FrameStyle -> Dotted]
@@ -770,17 +770,22 @@ parentNode[ id_, {___, {p_, __} -> {id_, __}, ___}] := p
 parentNode[ id_, T_] := id
 parentNode[ args___] := unexpected[ parentNode, {args}]
 
-proofStepNode[ pos_List, node:{ id_String, status_, type_, name_}, font_] := 
-	Module[{opacity = If[ TrueQ[ ruleTextActive[ name]], 1, 0.3], selectionMarker},
+proofStepNode[ pos_List, node:{ id_String, status_, type_, name_}, {w_, h_}, font_] := 
+	Module[{opacity = If[ TrueQ[ ruleTextActive[ name]], 1, 0.3], selectionMarker, scale = 2.5},
 		If[ id === $selectedProofStep,
 			selectionMarker = {Text[ "\[LeftPointer]", pos + {0.1,0}, {-1,0}]},
 			selectionMarker = {}
 		];
-		Join[ selectionMarker,
+		Join[ {} (*selectionMarker*),
 			{
-			If[ id === $lastVisitedNode,
+			Which[ 
+				id === $lastVisitedNode,
 				Yellow,
-				(* else *)
+				
+				id === $selectedProofStep,
+				RGBColor[0.000, 0.373, 0.416] (* petrol *),
+				
+				True,
 				Switch[ status,
 					pending, RGBColor[0.360784, 0.67451, 0.933333, opacity] (* steelblue *),
 					failed, RGBColor[1, 0.270588, 0, opacity] (* orangered *),
@@ -788,11 +793,11 @@ proofStepNode[ pos_List, node:{ id_String, status_, type_, name_}, font_] :=
 					_, Black]
 			],
 			Switch[ type,
-				PRFSIT$|PRFOBJ$, Disk[ pos, 0.1],
-				TERMINALNODE$, Map[ (pos + 0.1*#)&, Rectangle[ {-Sqrt[Pi]/2, -Sqrt[Pi]/2}, {Sqrt[Pi]/2, Sqrt[Pi]/2}]],
-				ANDNODE$, Polygon[ Map[ (pos + 0.125*#)&, {{0,1}, {Cos[7*Pi/6], Sin[7*Pi/6]}, {Cos[11*Pi/6], Sin[11*Pi/6]}}]],
-				ORNODE$, Polygon[ Map[ (pos + 0.125*#)&, {{0,-1}, {Cos[Pi/6], Sin[Pi/6]}, {Cos[5*Pi/6], Sin[5*Pi/6]}}]],
-				_, Map[ (pos + 0.1*#)&, Rectangle[ {-Sqrt[Pi]/2, -Sqrt[Pi]/2}, {Sqrt[Pi]/2, Sqrt[Pi]/2}]]],
+				PRFSIT$|PRFOBJ$, Disk[ pos, scale*w/2],
+				TERMINALNODE$, Map[ (pos + scale*#)&, Rectangle[ {-w/2, -h/2}, {w/2, h/2}]],
+				ANDNODE$, Polygon[ Map[ (pos + scale*#)&, {{0, h/2}, {-w/2, -h/2}, {w/2, -h/2}}]],
+				ORNODE$, Polygon[ Map[ (pos + scale*#)&, {{0, -h/2}, {-w/2, h/2}, {w/2, h/2}}]],
+				_, Map[ (pos + scale*#)&, Rectangle[ {-w/2, -h/2}, {w/2, h/2}]]],
 			{Black, Dynamic[ Text[ EventHandler[
 				Hyperlink[
 					Switch[ type, 
@@ -801,7 +806,7 @@ proofStepNode[ pos_List, node:{ id_String, status_, type_, name_}, font_] :=
        					_, proofNodeIndicator[ status, type, name]], 
 					{$TMAproofNotebook, id},
 					BaseStyle -> {FontSize -> font}, Active -> ValueQ[ $TMAproofNotebook] && ruleTextActive[ name]],
-					{"MouseClicked" :> If[ !TrueQ[ $interactiveProofSitSel] || type === PRFSIT$, $selectedProofStep = id]}, PassEventsDown -> True], pos]]}
+					{"MouseClicked" :> If[ !TrueQ[ $interactiveProofSitSel] || type === PRFSIT$, Theorema`Common`$selectedProofStep = id]}, PassEventsDown -> True], pos]]}
 			}
 		]
 	]
@@ -831,9 +836,9 @@ proofStatusIndicator[ args___] := unexpected[ proofStatusIndicator, {args}]
 proofNodeIndicator[ status_, type_, name_] :=
 	Module[ {label, description},
 		{label, description} = Switch[ type,
-			PRFSIT$, {"\[Paragraph]", translate[ "open proof situation"]},
-        	ANDNODE$, {"\[Wedge]", MessageName[ name, "usage", $TmaLanguage]},
-        	ORNODE$, {"\[Vee]", MessageName[ name, "usage", $TmaLanguage]},
+			PRFSIT$, {"  " (*"\[Paragraph]"*), translate[ "open proof situation"]},
+        	ANDNODE$, {"  " (*"\[Wedge]"*), MessageName[ name, "usage", $TmaLanguage]},
+        	ORNODE$, {"  " (*"\[Vee]"*), MessageName[ name, "usage", $TmaLanguage]},
         	_, {"\[DownQuestion]", translate[ "unknown proof node"]}
 		];
 		Tooltip[ Style[ label, ShowStringCharacters -> False], description <> " (" <> translate[ SymbolName[ status]] <> ")"]

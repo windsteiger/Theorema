@@ -2944,7 +2944,7 @@ aboutTab[ args___] := unexpected[ aboutTab, {args}]
 (* ::Section:: *)
 (* end of package *)
 
-If[ !Theorema`$workbenchMode && TrueQ[ $Notebooks],
+If[ TrueQ[ $Notebooks],
       openTheoremaCommander[]
 ]
 

@@ -93,7 +93,10 @@ With[ {lang = "German"},
 
 	MessageName[ quantifierRules, "usage", lang] = "Regeln f\[UDoubleDot]r Quantoren";
 
+	MessageName[ reduceMetaUnification, "usage", lang] = "Reduzieren von Beweiszielen mit Meta-Variablen mit Hilfe von Implikationen in der Wissensbasis durch Unifikation";
+
 	MessageName[ solveMetaUnification, "usage", lang] = "Instanzieren von Meta-Variablen durch Unifikation";
+	MessageName[ solvingRules, "usage", lang] = "Regeln f\[UDoubleDot]r das L\[ODoubleDot]sen";
 	MessageName[ specialArithmeticRules, "usage", lang] = "Regeln f\[UDoubleDot]r spezielle arithmetische Konstrukte";
 
 	MessageName[ trueGoal, "usage", lang] = "Das Beweisziel ist True";
@@ -115,6 +118,7 @@ With[ {lang = "German"},
 	translate[ "Equality Rules", lang] = "Gleichheitsregeln";
 	translate[ "Quantifier Rules", lang] = "Quantorenregeln";
 	translate[ "Rewriting Rules", lang] = "Umformungsregeln";
+	translate[ "Solving Rules", lang] = "Regeln zum Finden von Termen";
 	translate[ "Special Arithmetic", lang] = "Spezielle Arithmetik";
 	translate[ "Termination Rules", lang] = "Regeln, die den Beweis beenden";
 (* UNTRANSLATED *)
@@ -427,7 +431,7 @@ proofStepText[ implicitDef, lang, u_, g_, ___, "introConstFor" -> termConst_List
 	];
 
 proofStepText[ implicitDefEqGoal, lang, u_, {{g_?isGoal}}, ___] := 
-	{textCell[ "Um ", formulaReference[ u[[1, 1]]], " zu zeigen, müssen wir aufgrund von ", 
+	{textCell[ "Um ", formulaReference[ u[[1, 1]]], " zu zeigen, m\[UDoubleDot]ssen wir aufgrund von ", 
 		formulaReferenceSequence[ Rest[ u[[1]]], lang], " beweisen, dass"], goalCell[ g, "."]};
 
 proofStepText[ implKBCases, lang, {{g_}}, {{_, _}}, ___] := {textCell[ "Basierend auf der Annahme ", formulaReference[ g], " unterscheiden wir zwei F\[ADoubleDot]lle:"]};
@@ -561,6 +565,28 @@ subProofHeader[ partSolveMetaMatching, lang, {{{u_}}, {{u_}}..}, g_List, ___, "i
 	textCell[ "Sei nun ", inlineTheoremaExpressionSeq[ inst[[i]], lang], ". Um ", formulaReference[ u], " zu beweisen, reicht es zu zeigen"],
 	goalCell[ g[[i, 1, 1]], "."]
 	};
+
+(* ::Subsection:: *)
+(* R *)
+
+proofStepText[ reduceMetaUnification, lang, {{g_, u_}}, {{newG_}}, ___, "instantiation" -> inst_List, "subgoal" -> s_, "impliedBy" -> f_, ___] := 
+	Module[{metaSol = Union[ Cases[ Map[ #[[2]]&, inst], _META$, Infinity]], intro},
+		Which[
+			metaSol === {},
+			intro = textCell[ "In Anlehnung an ", formulaReference[ u], " w\[ADoubleDot]hlen wir nun ", inlineTheoremaExpressionSeq[ inst, lang], 
+				". Mit dieser Wahl l\[ADoubleDot]sst sich das Teilziel ", 
+				inlineTheoremaExpression[ s], " von ", formulaReference[ g], " auf ", inlineTheoremaExpression[ f], 
+				" zur\[UDoubleDot]ckf\[UDoubleDot]hren, sodass es von nun an ausreicht zu zeigen"],
+				
+			True,
+			intro = textCell[ "In Anlehnung an ", formulaReference[ u], " w\[ADoubleDot]hlen wir nun ", inlineTheoremaExpressionSeq[ inst, lang], 
+				" f\[UDoubleDot]r (ein) noch zu bestimmende(s) ",
+				inlineTheoremaExpressionSeq[ metaSol, lang], ". Das Teilziel ", 
+				inlineTheoremaExpression[ s], " von ", formulaReference[ g], " l\[ADoubleDot]sst sich so reduzieren zu ", inlineTheoremaExpression[ f], 
+				", sodass nun ", inlineTheoremaExpressionSeq[ metaSol, lang], " zu finden verbleiben, um zu beweisen, dass"]
+		];
+		{intro, goalCell[ newG, "."]}
+	];
 
 (* ::Subsection:: *)
 (* S *)

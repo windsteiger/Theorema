@@ -1064,6 +1064,40 @@ PRFSIT$[ g:FML$[ _, a:x_ /; !FreeQ[ x, _META$], lab_, ___], K_List, id_, rest___
 simplifiedProofInfo[ pi_, n_Integer] /; name@pi === partSolveMetaMultiMatching := 
 	makePRFINFO[ name -> partSolveMetaMatching, used -> (used@pi)[[n]], generated -> (generated@pi)[[n]]]
 
+inferenceRule[ reduceMetaUnification] = 
+ps:PRFSIT$[ g:FML$[ _, h_[ e__] /; !FreeQ[ {e}, _META$], labg_, ___], 
+			 K:{a___, u:FML$[ _, Forall$TM[ rng_, cond_, Implies$TM[ l_, h_[ f__]]], labk_, ___], b___}, id_, rest___?OptionQ] :> performProofStep[
+	Module[ {com, inst, substVar, substMeta, newSubGoals, newMeta, remSubGoals, newGoal},
+		{com, inst} = unification[ h[e], h[f]];
+		If[ com === $Failed,
+			Throw[ $Failed]
+		];
+		Do[
+			If[ !FreeQ[ inst[[i]], _META$ -> _],
+				substMeta = Cases[ inst[[i]], HoldPattern[ _META$ -> _]];
+				substVar = Cases[ inst[[i]], HoldPattern[ _VAR$ -> _]];
+				remSubGoals = {} (* instantiateMeta[{c, d}, substMeta]*);
+				{newSubGoals, newMeta} = introduceMeta[ 
+					substituteFree[ {Join[ rngToCondition[ rng], {cond, l}], remSubGoals, {substMeta}}, substVar, "checkTypes" -> False, "postprocessing" -> Identity],
+					rng, {g, K}];
+				newGoal = makeGoalFML[ formula -> simplifiedAnd[ makeConjunction[ Apply[ Join, Drop[ newSubGoals, -1]], Theorema`Language`And$TM]]];
+				Break[];
+			],
+			{i, Length[ inst]}
+		];
+		If[ 
+			!ValueQ[ substMeta],
+			$Failed,
+			(* else *)
+			makeANDNODE[ makePRFINFO[ name -> reduceMetaUnification, used -> {g,u}, 
+					"instantiation" -> Last[ newSubGoals][[1]], "subgoal" -> h[e], "impliedBy" -> simplifiedAnd[ makeConjunction[ newSubGoals[[1]], Theorema`Language`And$TM]]], 
+            	toBeProved[ goal -> newGoal, kb -> K, rest]
+        	]
+		]
+	]
+]
+
+
 
 inferenceRule[ maxTuples1] = 
 ps:PRFSIT$[ g:FML$[ _, GreaterEqual$TM[ Subtract$TM[ 
@@ -1140,9 +1174,13 @@ registerRuleSet[ "Quantifier Rules", quantifierRules, {
 	{instantiate, True, True, 35},
 	{existsGoal, True, True, 90},
 	{existsGoalInteractive, False, True, 12},
-	{existsKB, True, True, 11},
+	{existsKB, True, True, 11}
+	}]
+
+registerRuleSet[ "Solving Rules", solvingRules, {
 	{partSolveMetaMatching, True, True, 8},
-	{solveMetaUnification, True, True, 9}
+	{solveMetaUnification, True, True, 9},
+	{reduceMetaUnification, True, True, 10}
 	}]
 
 registerRuleSet[ "Special Arithmetic", specialArithmeticRules, {
@@ -1157,6 +1195,7 @@ registerRuleSet[ "Basic Theorema Language Rules", basicTheoremaLanguageRules, {
 	connectiveRules, 
 	equalityRules,
 	rewritingRules,
+	solvingRules,
 	specialArithmeticRules,
 	{contradiction, False, True, 100}
 	}]
