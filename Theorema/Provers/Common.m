@@ -55,7 +55,7 @@ callProver[ ruleSetup:{_Hold, _List, _List}, strategy_, goal_FML$, kb_List, sear
 		$TMAproofNotebook = InputNotebook[];
 		initQuickCheck[ kb];
 		$TMAproofTree = makeInitialProofTree[ ];
-		$TMAproofObject = makeInitialProofObject[ goal, kb, ruleSetup, strategy];
+		$TMAproofObject = makeInitialProofObject[ Append[ goal, "goal" -> True], kb, ruleSetup, strategy];
 		$TMAcheckSuccess = True;
 		initFormulaLabel[];
 		$lastChoice = {};
